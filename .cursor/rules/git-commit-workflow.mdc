@@ -1,0 +1,10 @@
+---
+description: Commit after every meaningful change
+alwaysApply: true
+---
+
+# Git commit discipline
+
+- After each **meaningful** change to the system (features, fixes, config, docs that matter), **create a git commit** with a clear, imperative message summarizing the change.
+- Prefer **small, focused commits** (one logical change per commit when practical).
+- Do not leave substantial work uncommitted at the end of a task unless the user asks to batch or skip commits.
