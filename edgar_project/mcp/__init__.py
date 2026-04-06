@@ -1,7 +1,9 @@
 """
-MCP server layer for the EDGAR pipeline (Phase 2 scaffolding).
+MCP server layer for the EDGAR pipeline (Phase 2).
 
-Run (once implemented): ``python -m edgar_project.mcp.server`` from the repository root.
+Run::
+
+    python -m edgar_project.mcp.server
+
+Import submodules explicitly, e.g. ``from edgar_project.mcp import schemas`` or ``from edgar_project.mcp import server``.
 """
-
-__all__: list[str] = ["schemas", "adapters", "tools", "server"]

@@ -31,16 +31,21 @@ _WWW_SESSION.headers.update(
 )
 
 _TICKER_CACHE: dict[str, int] | None = None
+_RAW_COMPANY_TICKERS: dict[str, Any] | None = None
 
 
 def _cik_to_10digit(cik: int | str) -> str:
     return f"{int(cik):010d}"
 
 
-def _load_ticker_map() -> dict[str, int]:
-    global _TICKER_CACHE
-    if _TICKER_CACHE is not None:
-        return _TICKER_CACHE
+def _load_raw_company_tickers() -> dict[str, Any]:
+    """
+    Load SEC ``company_tickers.json`` (cached under data/raw/).
+    Used for CIK resolution and issuer title (``title`` field).
+    """
+    global _RAW_COMPANY_TICKERS
+    if _RAW_COMPANY_TICKERS is not None:
+        return _RAW_COMPANY_TICKERS
     path = config.DATA_RAW / "company_tickers.json"
     if path.exists():
         with open(path, encoding="utf-8") as f:
@@ -53,7 +58,15 @@ def _load_ticker_map() -> dict[str, int]:
         with open(path, "w", encoding="utf-8") as f:
             json.dump(data, f)
         time.sleep(0.15)
+    _RAW_COMPANY_TICKERS = data
+    return data
 
+
+def _load_ticker_map() -> dict[str, int]:
+    global _TICKER_CACHE
+    if _TICKER_CACHE is not None:
+        return _TICKER_CACHE
+    data = _load_raw_company_tickers()
     # company_tickers.json: {"0": {"cik_str": ..., "ticker": "AAPL", ...}, ...}
     m: dict[str, int] = {}
     for _k, v in data.items():
@@ -65,6 +78,34 @@ def _load_ticker_map() -> dict[str, int]:
             m[str(t).upper()] = int(c)
     _TICKER_CACHE = m
     return m
+
+
+def resolve_company(ticker: str) -> dict[str, Any]:
+    """
+    Resolve ticker to CIK and company name (SEC ``title`` field) when present.
+
+    Returns
+    -------
+    dict
+        Keys: ``ticker`` (uppercase), ``cik`` (int), ``company_name`` (str | None).
+    """
+    data = _load_raw_company_tickers()
+    t = ticker.strip().upper()
+    for _k, v in data.items():
+        if not isinstance(v, dict):
+            continue
+        if str(v.get("ticker", "")).upper() != t:
+            continue
+        c = v.get("cik_str")
+        if c is None:
+            break
+        name = v.get("title")
+        return {
+            "ticker": t,
+            "cik": int(c),
+            "company_name": str(name) if name is not None else None,
+        }
+    raise ValueError(f"Unknown ticker: {ticker!r} (not in SEC company_tickers.json)")
 
 
 def resolve_ticker_to_cik(ticker: str) -> int:
