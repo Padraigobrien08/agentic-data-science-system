@@ -18,8 +18,10 @@ from src.pipeline_runner import run_pipeline_computation, write_all_phase1_artif
 
 def main() -> None:
     tickers = config.DEFAULT_TICKERS[:5]
-    panel, feats, anom, report_md, dq_df, excl_df = run_pipeline_computation(tickers, refresh=False)
-    write_all_phase1_artifacts(panel, feats, anom, report_md, data_quality=dq_df, exclusions=excl_df)
+    panel, feats, anom, report_md, dq_df, excl_df, peer_df = run_pipeline_computation(tickers, refresh=False)
+    write_all_phase1_artifacts(
+        panel, feats, anom, report_md, data_quality=dq_df, exclusions=excl_df, peer_signals=peer_df
+    )
 
     print("\n=== Panel (head) ===\n")
     print(panel.head(12).to_string(index=False))
@@ -35,6 +37,7 @@ def main() -> None:
     print(f"Wrote: {config.DATA_ARTIFACTS / 'report.md'}")
     print(f"Wrote: {config.DATA_ARTIFACTS / 'data_quality_summary.csv'}")
     print(f"Wrote: {config.DATA_ARTIFACTS / 'exclusions_summary.csv'}")
+    print(f"Wrote: {config.DATA_ARTIFACTS / 'peer_signals.csv'}")
 
 
 if __name__ == "__main__":

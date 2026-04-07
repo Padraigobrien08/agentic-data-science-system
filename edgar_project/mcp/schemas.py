@@ -57,6 +57,9 @@ class ToolResponseEnvelope(BaseModel):
     ``resolved_ciks`` (``{ticker, cik}`` rows), ``ciks`` (distinct ints),
     ``primary_artifact`` / ``artifacts_detail`` (path, ``updated_at``, row/column shape),
     and for anomalies ``zscore_window``, ``zscore_threshold``, ``metrics_analyzed``.
+    After ``run_pipeline`` / ``generate_report`` (default paths), optional paths may appear:
+    ``data_quality_summary_path``, ``exclusions_summary_path``, ``peer_signals_path``,
+    ``manual_validation_path`` (only when the file exists).
     """
 
     status: ToolStatus
@@ -173,13 +176,16 @@ class ArtifactSummary(BaseModel):
     size_bytes: int | None = None
 
 
-# Phase 1 artifact key names (for ``artifacts`` dict)
+# Phase 1 artifact key names (for ``artifacts`` dict). Keys are stable logical roles; on-disk
+# basenames may differ (e.g. ``data_quality_csv`` → ``data_quality_summary.csv``).
 ARTIFACT_KEY_PANEL = "panel_csv"
 ARTIFACT_KEY_FEATURES = "features_csv"
 ARTIFACT_KEY_ANOMALIES = "anomalies_csv"
 ARTIFACT_KEY_REPORT = "report_md"
 ARTIFACT_KEY_DATA_QUALITY = "data_quality_csv"
 ARTIFACT_KEY_EXCLUSIONS = "exclusions_csv"
+ARTIFACT_KEY_PEER_SIGNALS = "peer_signals_csv"
+ARTIFACT_KEY_MANUAL_VALIDATION = "manual_validation_csv"
 ARTIFACT_KEY_CACHE_SUBMISSIONS = "cache_submissions_json"
 ARTIFACT_KEY_CACHE_COMPANYFACTS = "cache_companyfacts_json"
 

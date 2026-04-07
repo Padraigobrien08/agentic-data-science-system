@@ -6,7 +6,8 @@ over long prose; use :class:`OrchestrationError` / :class:`OrchestrationWarning`
 small summaries instead of opaque report text blobs.
 
 MCP Phase 2 artifact role keys (for ``artifact_paths``) align with
-``edgar_project.mcp.schemas`` (``panel_csv``, ``features_csv``, etc.).
+``edgar_project.mcp.schemas`` (e.g. ``panel_csv``, ``features_csv``, ``data_quality_csv``,
+``peer_signals_csv``, ``manual_validation_csv``).
 """
 
 from __future__ import annotations

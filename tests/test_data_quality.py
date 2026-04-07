@@ -46,6 +46,23 @@ def test_missingness_by_metric_present() -> None:
             assert m in set(mm["name"])
 
 
+def test_stage_count_names_include_pipeline_stages() -> None:
+    """Long-format summary rows use stable ``name`` values for each pipeline stage."""
+    long_frames = [
+        pd.DataFrame(
+            [
+                {"cik": 1, "period": "2023-Q1", "metric": "revenue", "value": 100.0},
+                {"cik": 1, "period": "2023-Q1", "metric": "net_income", "value": 10.0},
+            ]
+        )
+    ]
+    panel = build_panel(long_frames)
+    dq = compute_data_quality_summary(long_frames, panel, panel, pd.DataFrame())
+    st = dq[dq["category"] == "stage_count"]
+    names = set(st["name"].astype(str))
+    assert {"long_metric_rows", "feature_rows", "anomaly_rows", "panel_rows_after_revenue_required"} <= names
+
+
 def test_markdown_section_non_empty() -> None:
     dq = pd.DataFrame(
         [

@@ -14,6 +14,7 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
+    ARTIFACT_KEY_PEER_SIGNALS,
     ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_REPORT,
@@ -101,6 +102,9 @@ def test_run_pipeline_mocked_artifact_keys(
             }
         ]
     )
+    peer_df = pd.DataFrame(
+        [{"cik": 1, "period": "2021-Q1", "metric": "revenue", "peer_alert": "none"}]
+    )
     prov = [
         {"ticker": "AAPL", "cik": 320193},
     ]
@@ -109,7 +113,7 @@ def test_run_pipeline_mocked_artifact_keys(
         with patch.object(
             mcp_tools.ad,
             "run_full_pipeline",
-            return_value=(sample_panel_row, feats, anom, md, dq_df, ex_df),
+            return_value=(sample_panel_row, feats, anom, md, dq_df, ex_df, peer_df),
         ):
             with patch.object(
                 mcp_tools.ad,
@@ -117,9 +121,10 @@ def test_run_pipeline_mocked_artifact_keys(
                 return_value=tmp_artifact_paths,
             ):
                 with patch.object(mcp_tools.ad, "anomaly_detection_params", return_value={}):
-                    env = mcp_tools.run_pipeline_tool(
-                        RunPipelineInput(tickers=["AAPL"], refresh=False)
-                    )
+                    with patch.object(mcp_tools.ad, "peer_signal_params", return_value={}):
+                        env = mcp_tools.run_pipeline_tool(
+                            RunPipelineInput(tickers=["AAPL"], refresh=False)
+                        )
 
     assert_envelope_shape(env)
     assert env.status == ToolStatus.success
@@ -130,6 +135,7 @@ def test_run_pipeline_mocked_artifact_keys(
     assert ARTIFACT_KEY_REPORT in art
     assert ARTIFACT_KEY_DATA_QUALITY in art
     assert ARTIFACT_KEY_EXCLUSIONS in art
+    assert ARTIFACT_KEY_PEER_SIGNALS in art
     assert str(tmp_artifact_paths["panel"]) in art[ARTIFACT_KEY_PANEL]
     assert "artifacts_detail" in env.data
 
@@ -157,7 +163,7 @@ def test_run_pipeline_no_data_empty_panel_distinct_from_error(
         with patch.object(
             mcp_tools.ad,
             "run_full_pipeline",
-            return_value=(empty, empty, empty, "", pd.DataFrame(), pd.DataFrame()),
+            return_value=(empty, empty, empty, "", pd.DataFrame(), pd.DataFrame(), pd.DataFrame()),
         ):
             with patch.object(mcp_tools.ad, "anomaly_detection_params", return_value={}):
                 nd = mcp_tools.run_pipeline_tool(

@@ -237,26 +237,44 @@ def compute_features_dataframe(panel: pd.DataFrame) -> pd.DataFrame:
 
 
 def detect_anomalies_dataframe(features: pd.DataFrame) -> pd.DataFrame:
-    """Delegate to :func:`src.anomaly.detect_anomalies`."""
+    """Delegate to :func:`src.anomaly.detect_anomalies` with peer_signals precomputed."""
     ensure_sys_path()
     from src.anomaly import detect_anomalies
+    from src.peer_signals import compute_peer_signals
 
-    return detect_anomalies(features)
+    ps = compute_peer_signals(features)
+    return detect_anomalies(features, peer_signals=ps)
 
 
-def generate_report_markdown(anomalies: pd.DataFrame, features: pd.DataFrame) -> str:
+def generate_report_markdown(
+    anomalies: pd.DataFrame,
+    features: pd.DataFrame,
+    *,
+    peer_signals: pd.DataFrame | None = None,
+    data_quality: pd.DataFrame | None = None,
+    exclusions: pd.DataFrame | None = None,
+    manual_validation_path: Path | None = None,
+) -> str:
     """Delegate to :func:`src.report.generate_report`."""
     ensure_sys_path()
     from src.report import generate_report
 
-    return generate_report(anomalies, features, top_n=5)
+    return generate_report(
+        anomalies,
+        features,
+        peer_signals=peer_signals,
+        data_quality=data_quality,
+        exclusions=exclusions,
+        manual_validation_path=manual_validation_path,
+        top_n=5,
+    )
 
 
 def run_full_pipeline(
     tickers: list[str],
     *,
     refresh: bool,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Delegate to :func:`src.pipeline_runner.run_pipeline_computation`."""
     ensure_sys_path()
     from src.pipeline_runner import run_pipeline_computation
@@ -296,6 +314,7 @@ def write_all_phase1_artifacts(
     *,
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
+    peer_signals: pd.DataFrame | None = None,
 ) -> dict[str, Path]:
     from src.pipeline_runner import write_all_phase1_artifacts as _w
 
@@ -306,6 +325,7 @@ def write_all_phase1_artifacts(
         report_markdown,
         data_quality=data_quality,
         exclusions=exclusions,
+        peer_signals=peer_signals,
     )
 
 
@@ -325,6 +345,35 @@ def read_anomalies_csv(path: Path) -> pd.DataFrame:
     if not path.is_file():
         raise FileNotFoundError(str(path))
     return pd.read_csv(path)
+
+
+def read_peer_signals_csv(path: Path) -> pd.DataFrame:
+    if not path.is_file():
+        raise FileNotFoundError(str(path))
+    return pd.read_csv(path)
+
+
+def peer_signal_params() -> dict[str, Any]:
+    """Thresholds and metric list for :func:`src.peer_signals.compute_peer_signals`."""
+    ensure_sys_path()
+    from src.peer_signals import (
+        PEER_MIN_FOR_RANK,
+        PEER_MIN_FOR_Z,
+        PEER_PCT_HIGH,
+        PEER_PCT_LOW,
+        PEER_SIGNAL_METRICS,
+        PEER_Z_ALERT_THRESHOLD,
+    )
+
+    return {
+        "metrics": list(PEER_SIGNAL_METRICS),
+        "min_peers_for_rank": int(PEER_MIN_FOR_RANK),
+        "min_peers_for_z": int(PEER_MIN_FOR_Z),
+        "pct_high": float(PEER_PCT_HIGH),
+        "pct_low": float(PEER_PCT_LOW),
+        "z_alert_threshold": float(PEER_Z_ALERT_THRESHOLD),
+        "peer_z_definition": "cross_section_includes_focal",
+    }
 
 
 def iso_mtime_utc(path: Path | str) -> str | None:
@@ -374,12 +423,13 @@ def anomaly_detection_params() -> dict[str, Any]:
     """Rolling z-score settings and feature columns (see ``src.anomaly`` / ``config``)."""
     ensure_sys_path()
     import config
-    from src.anomaly import FEATURE_COLS
+    from src.anomaly import FEATURE_COLS, MIN_PEER_GROUP
 
     return {
         "zscore_window": int(config.ZSCORE_WINDOW),
         "zscore_threshold": float(config.ZSCORE_THRESHOLD),
         "metrics_analyzed": list(FEATURE_COLS),
+        "peer_min_group_size": int(MIN_PEER_GROUP),
     }
 
 

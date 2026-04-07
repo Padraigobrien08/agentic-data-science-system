@@ -9,6 +9,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+import pandas as pd
 import requests
 
 from edgar_project.mcp import adapters as ad
@@ -20,6 +21,8 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
+    ARTIFACT_KEY_PEER_SIGNALS,
+    ARTIFACT_KEY_MANUAL_VALIDATION,
     ARTIFACT_KEY_REPORT,
     BuildPanelInput,
     CODE_EMPTY_INPUT,
@@ -313,11 +316,26 @@ def detect_anomalies_tool(inp: DetectAnomaliesInput) -> ToolResponseEnvelope:
 
 def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
     try:
+        import config
+
+        peer_sig: pd.DataFrame | None = None
+        dq_df: pd.DataFrame | None = None
+        excl_df: pd.DataFrame | None = None
         if inp.use_default_artifact_paths:
             ap = ad.phase1_paths()
             feats = ad.read_features_csv(ap["features"])
             anom = ad.read_anomalies_csv(ap["anomalies"])
             art = _phase1_artifact_dict(ap)
+            psp = ap.get("peer_signals")
+            if psp is not None and psp.is_file():
+                peer_sig = ad.read_peer_signals_csv(psp)
+                art = {**art, ARTIFACT_KEY_PEER_SIGNALS: str(psp)}
+            dq_p = ap.get("data_quality")
+            if dq_p is not None and dq_p.is_file():
+                dq_df = pd.read_csv(dq_p)
+            ex_p = ap.get("exclusions")
+            if ex_p is not None and ex_p.is_file():
+                excl_df = pd.read_csv(ex_p)
         else:
             assert inp.features_csv_path and inp.anomalies_csv_path
             fp = Path(inp.features_csv_path).expanduser().resolve()
@@ -337,13 +355,21 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 },
                 artifacts=art,
             )
-        md = ad.generate_report_markdown(anom, feats)
+        mv_path = config.PROJECT_ROOT / "validation" / "manual_validation.csv"
+        md = ad.generate_report_markdown(
+            anom,
+            feats,
+            peer_signals=peer_sig,
+            data_quality=dq_df,
+            exclusions=excl_df,
+            manual_validation_path=mv_path,
+        )
         path = ad.write_report_md(md)
         src_paths = {
             ARTIFACT_KEY_FEATURES: str(art[ARTIFACT_KEY_FEATURES]),
             ARTIFACT_KEY_ANOMALIES: str(art[ARTIFACT_KEY_ANOMALIES]),
         }
-        sources_detail = {
+        sources_detail: dict[str, Any] = {
             ARTIFACT_KEY_FEATURES: ad.artifact_info(
                 src_paths[ARTIFACT_KEY_FEATURES],
                 row_count=len(feats),
@@ -355,6 +381,43 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 columns=[str(c) for c in anom.columns],
             ),
         }
+        dq_path_data: str | None = None
+        ex_path_data: str | None = None
+        peer_path_data: str | None = None
+        if inp.use_default_artifact_paths:
+            ap = ad.phase1_paths()
+            dq_p = ap.get("data_quality")
+            if dq_p is not None and dq_p.is_file() and dq_df is not None:
+                src_paths[ARTIFACT_KEY_DATA_QUALITY] = str(dq_p)
+                dq_path_data = str(dq_p)
+                sources_detail[ARTIFACT_KEY_DATA_QUALITY] = ad.artifact_info(
+                    dq_p, row_count=len(dq_df), columns=[str(c) for c in dq_df.columns]
+                )
+            ex_p = ap.get("exclusions")
+            if ex_p is not None and ex_p.is_file() and excl_df is not None:
+                src_paths[ARTIFACT_KEY_EXCLUSIONS] = str(ex_p)
+                ex_path_data = str(ex_p)
+                sources_detail[ARTIFACT_KEY_EXCLUSIONS] = ad.artifact_info(
+                    ex_p, row_count=len(excl_df), columns=[str(c) for c in excl_df.columns]
+                )
+            psp = ap.get("peer_signals")
+            if psp is not None and psp.is_file() and peer_sig is not None:
+                src_paths[ARTIFACT_KEY_PEER_SIGNALS] = str(psp)
+                peer_path_data = str(psp)
+                sources_detail[ARTIFACT_KEY_PEER_SIGNALS] = ad.artifact_info(
+                    psp, row_count=len(peer_sig), columns=[str(c) for c in peer_sig.columns]
+                )
+        art_out = {**art, ARTIFACT_KEY_REPORT: str(path)}
+        if mv_path.is_file():
+            art_out[ARTIFACT_KEY_MANUAL_VALIDATION] = str(mv_path.resolve())
+            try:
+                mv_df = pd.read_csv(mv_path)
+                sources_detail[ARTIFACT_KEY_MANUAL_VALIDATION] = ad.artifact_info(
+                    mv_path.resolve(), row_count=len(mv_df), columns=[str(c) for c in mv_df.columns]
+                )
+            except Exception:
+                sources_detail[ARTIFACT_KEY_MANUAL_VALIDATION] = ad.artifact_info(mv_path.resolve())
+
         return ad.envelope_success(
             message="Report written.",
             data={
@@ -365,8 +428,12 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 "report": ad.artifact_info(path),
                 "sources": src_paths,
                 "sources_detail": sources_detail,
+                "data_quality_summary_path": dq_path_data,
+                "exclusions_summary_path": ex_path_data,
+                "peer_signals_path": peer_path_data,
+                "manual_validation_path": str(mv_path.resolve()) if mv_path.is_file() else None,
             },
-            artifacts={**art, ARTIFACT_KEY_REPORT: str(path)},
+            artifacts=art_out,
         )
     except FileNotFoundError as e:
         return ad.envelope_error(
@@ -392,9 +459,10 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
 
         tickers = list(config.DEFAULT_TICKERS[:5])
     try:
-        panel, feats, anom, md, dq_df, ex_df = ad.run_full_pipeline(tickers, refresh=inp.refresh)
+        panel, feats, anom, md, dq_df, ex_df, peer_df = ad.run_full_pipeline(tickers, refresh=inp.refresh)
         prov = _provenance_tickers(tickers)
         an_meta = ad.anomaly_detection_params()
+        peer_meta = ad.peer_signal_params()
         if panel.empty:
             return ad.envelope_no_data(
                 "Pipeline produced an empty panel (no rows after extraction/normalization).",
@@ -405,17 +473,19 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                     "feature_rows": int(len(feats)),
                     "anomaly_rows": int(len(anom)),
                     **an_meta,
+                    **peer_meta,
                 },
                 artifacts={},
             )
         paths = ad.write_all_phase1_artifacts(
-            panel, feats, anom, md, data_quality=dq_df, exclusions=ex_df
+            panel, feats, anom, md, data_quality=dq_df, exclusions=ex_df, peer_signals=peer_df
         )
         pcols = [str(c) for c in panel.columns]
         fcols = [str(c) for c in feats.columns]
         acols = [str(c) for c in anom.columns]
         dq_path = paths.get("data_quality")
         ex_path = paths.get("exclusions")
+        peer_path = paths.get("peer_signals")
         artifacts_detail = {
             ARTIFACT_KEY_PANEL: ad.artifact_info(
                 paths["panel"], row_count=len(panel), columns=pcols
@@ -438,6 +508,27 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
             artifacts_detail[ARTIFACT_KEY_EXCLUSIONS] = ad.artifact_info(
                 ex_path, row_count=len(ex_df), columns=xcols
             )
+        if peer_path is not None:
+            pscols = [str(c) for c in peer_df.columns]
+            artifacts_detail[ARTIFACT_KEY_PEER_SIGNALS] = ad.artifact_info(
+                peer_path, row_count=len(peer_df), columns=pscols
+            )
+        import config
+
+        mv_path = (config.PROJECT_ROOT / "validation" / "manual_validation.csv").resolve()
+        mv_in_artifacts: dict[str, str] = {}
+        manual_path_data: str | None = None
+        if mv_path.is_file():
+            manual_path_data = str(mv_path)
+            mv_in_artifacts[ARTIFACT_KEY_MANUAL_VALIDATION] = manual_path_data
+            try:
+                mv_df = pd.read_csv(mv_path)
+                artifacts_detail[ARTIFACT_KEY_MANUAL_VALIDATION] = ad.artifact_info(
+                    mv_path, row_count=len(mv_df), columns=[str(c) for c in mv_df.columns]
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_MANUAL_VALIDATION] = ad.artifact_info(mv_path)
+
         return ad.envelope_success(
             message="Full pipeline completed; artifacts written.",
             data={
@@ -449,7 +540,10 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "report_chars": len(md),
                 "data_quality_summary_path": str(dq_path) if dq_path is not None else None,
                 "exclusions_summary_path": str(ex_path) if ex_path is not None else None,
+                "peer_signals_path": str(peer_path) if peer_path is not None else None,
+                "manual_validation_path": manual_path_data,
                 **an_meta,
+                **peer_meta,
                 "artifacts_detail": artifacts_detail,
             },
             artifacts={
@@ -467,6 +561,12 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                     if ex_path is not None
                     else {}
                 ),
+                **(
+                    {ARTIFACT_KEY_PEER_SIGNALS: str(peer_path)}
+                    if peer_path is not None
+                    else {}
+                ),
+                **mv_in_artifacts,
             },
         )
     except ValueError as e:

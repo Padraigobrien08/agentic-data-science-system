@@ -14,7 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 import config
-from src.exclusions import build_exclusions_dataframe, format_exclusions_report_line
+from src.exclusions import build_exclusions_dataframe
 
 _log = logging.getLogger(__name__)
 
@@ -56,20 +56,20 @@ def run_pipeline_computation(
     tickers: list[str],
     *,
     refresh: bool = False,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """
-    Full in-memory pipeline: panel → features → anomalies → markdown report + summaries.
+    Full in-memory pipeline: panel → features → anomalies → peer signals → markdown report + summaries.
 
     Returns
     -------
-    panel, features, anomalies, report_markdown, data_quality_summary, exclusions_summary
-        ``data_quality_summary`` → ``data_quality_summary.csv``;
-        ``exclusions_summary`` → ``exclusions_summary.csv`` (structured exclusion counts).
+    panel, features, anomalies, report_markdown, data_quality_summary, exclusions_summary, peer_signals
+        ``peer_signals`` → ``peer_signals.csv`` (cross-sectional rank/z by period; additive layer).
     """
     from src.anomaly import detect_anomalies
-    from src.data_quality import compute_data_quality_summary, format_data_quality_markdown
+    from src.data_quality import compute_data_quality_summary
     from src.features import compute_features
     from src.normalization import build_panel
+    from src.peer_signals import compute_peer_signals
     from src.report import generate_report
 
     long_frames, extraction_counts = extract_long_frames(tickers, refresh=refresh)
@@ -84,16 +84,18 @@ def run_pipeline_computation(
         )
 
     feats = compute_features(panel)
-    anom = detect_anomalies(feats)
+    peer_signals_df = compute_peer_signals(feats)
+    anom = detect_anomalies(feats, peer_signals=peer_signals_df)
     dq_df = compute_data_quality_summary(long_frames, panel, feats, anom)
-    base_report = generate_report(anom, feats, top_n=5)
-    md = (
-        base_report
-        + "\n"
-        + format_data_quality_markdown(dq_df)
-        + format_exclusions_report_line(exclusions_df)
+    md = generate_report(
+        anom,
+        feats,
+        peer_signals=peer_signals_df,
+        data_quality=dq_df,
+        exclusions=exclusions_df,
+        top_n=5,
     )
-    return panel, feats, anom, md, dq_df, exclusions_df
+    return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df
 
 
 def write_panel_csv(panel: pd.DataFrame) -> Path:
@@ -144,6 +146,14 @@ def write_exclusions_csv(exclusions: pd.DataFrame) -> Path:
     return p.resolve()
 
 
+def write_peer_signals_csv(peer_signals: pd.DataFrame) -> Path:
+    """Write ``data/artifacts/peer_signals.csv``."""
+    p = config.DATA_ARTIFACTS / "peer_signals.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    peer_signals.to_csv(p, index=False)
+    return p.resolve()
+
+
 def write_all_phase1_artifacts(
     panel: pd.DataFrame,
     features: pd.DataFrame,
@@ -152,6 +162,7 @@ def write_all_phase1_artifacts(
     *,
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
+    peer_signals: pd.DataFrame | None = None,
 ) -> dict[str, Path]:
     """Write Phase 1 artifacts (panel, features, anomalies, report, optional CSV summaries)."""
     out: dict[str, Path] = {
@@ -164,6 +175,8 @@ def write_all_phase1_artifacts(
         out["data_quality"] = write_data_quality_csv(data_quality)
     if exclusions is not None:
         out["exclusions"] = write_exclusions_csv(exclusions)
+    if peer_signals is not None:
+        out["peer_signals"] = write_peer_signals_csv(peer_signals)
     return out
 
 
@@ -176,4 +189,6 @@ def phase1_paths() -> dict[str, Path]:
         "report": (config.DATA_ARTIFACTS / "report.md").resolve(),
         "data_quality": (config.DATA_ARTIFACTS / "data_quality_summary.csv").resolve(),
         "exclusions": (config.DATA_ARTIFACTS / "exclusions_summary.csv").resolve(),
+        "peer_signals": (config.DATA_ARTIFACTS / "peer_signals.csv").resolve(),
+        "manual_validation": (config.PROJECT_ROOT / "validation" / "manual_validation.csv").resolve(),
     }

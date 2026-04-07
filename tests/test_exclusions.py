@@ -104,6 +104,15 @@ def test_non_numeric_coercion_in_wide() -> None:
     assert counts.get(NON_NUMERIC_COERCION, 0) >= 1
 
 
+def test_exclusions_partitioned_by_pipeline_stage() -> None:
+    """Rows are tagged ``metric_extraction`` vs ``normalization`` for downstream classification."""
+    df = build_exclusions_dataframe({"unsupported_unit": 1, "duplicate_resolved": 1}, {MISSING_REQUIRED_METRIC: 2})
+    assert not df.empty
+    assert set(df["stage"]) == {"metric_extraction", "normalization"}
+    assert (df["stage"] == "metric_extraction").sum() == 2
+    assert (df["stage"] == "normalization").sum() == 1
+
+
 def test_exclusions_summary_columns_stable() -> None:
     df = build_exclusions_dataframe({"unsupported_unit": 2}, {MISSING_REQUIRED_METRIC: 1})
     assert list(df.columns) == [
