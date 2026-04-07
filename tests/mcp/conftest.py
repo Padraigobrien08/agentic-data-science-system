@@ -23,12 +23,14 @@ def sample_panel_row() -> pd.DataFrame:
 
 @pytest.fixture
 def tmp_artifact_paths(tmp_path: Path) -> dict[str, Path]:
-    """Four Phase-1-like paths with files present (for ``artifact_info`` mtime)."""
+    """Phase-1-like paths with files present (for ``artifact_info`` mtime)."""
     paths = {
         "panel": tmp_path / "panel.csv",
         "features": tmp_path / "features.csv",
         "anomalies": tmp_path / "anomalies.csv",
         "report": tmp_path / "report.md",
+        "data_quality": tmp_path / "data_quality_summary.csv",
+        "exclusions": tmp_path / "exclusions_summary.csv",
     }
     for p in paths.values():
         p.write_text("x", encoding="utf-8")

@@ -18,6 +18,8 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_CACHE_SUBMISSIONS,
     ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_PANEL,
+    ARTIFACT_KEY_DATA_QUALITY,
+    ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_REPORT,
     BuildPanelInput,
     CODE_EMPTY_INPUT,
@@ -390,7 +392,7 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
 
         tickers = list(config.DEFAULT_TICKERS[:5])
     try:
-        panel, feats, anom, md = ad.run_full_pipeline(tickers, refresh=inp.refresh)
+        panel, feats, anom, md, dq_df, ex_df = ad.run_full_pipeline(tickers, refresh=inp.refresh)
         prov = _provenance_tickers(tickers)
         an_meta = ad.anomaly_detection_params()
         if panel.empty:
@@ -406,10 +408,14 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 },
                 artifacts={},
             )
-        paths = ad.write_all_phase1_artifacts(panel, feats, anom, md)
+        paths = ad.write_all_phase1_artifacts(
+            panel, feats, anom, md, data_quality=dq_df, exclusions=ex_df
+        )
         pcols = [str(c) for c in panel.columns]
         fcols = [str(c) for c in feats.columns]
         acols = [str(c) for c in anom.columns]
+        dq_path = paths.get("data_quality")
+        ex_path = paths.get("exclusions")
         artifacts_detail = {
             ARTIFACT_KEY_PANEL: ad.artifact_info(
                 paths["panel"], row_count=len(panel), columns=pcols
@@ -422,6 +428,16 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
             ),
             ARTIFACT_KEY_REPORT: ad.artifact_info(paths["report"]),
         }
+        if dq_path is not None:
+            dcols = [str(c) for c in dq_df.columns]
+            artifacts_detail[ARTIFACT_KEY_DATA_QUALITY] = ad.artifact_info(
+                dq_path, row_count=len(dq_df), columns=dcols
+            )
+        if ex_path is not None:
+            xcols = [str(c) for c in ex_df.columns]
+            artifacts_detail[ARTIFACT_KEY_EXCLUSIONS] = ad.artifact_info(
+                ex_path, row_count=len(ex_df), columns=xcols
+            )
         return ad.envelope_success(
             message="Full pipeline completed; artifacts written.",
             data={
@@ -431,6 +447,8 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "feature_rows": len(feats),
                 "anomaly_rows": len(anom),
                 "report_chars": len(md),
+                "data_quality_summary_path": str(dq_path) if dq_path is not None else None,
+                "exclusions_summary_path": str(ex_path) if ex_path is not None else None,
                 **an_meta,
                 "artifacts_detail": artifacts_detail,
             },
@@ -439,6 +457,16 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 ARTIFACT_KEY_FEATURES: str(paths["features"]),
                 ARTIFACT_KEY_ANOMALIES: str(paths["anomalies"]),
                 ARTIFACT_KEY_REPORT: str(paths["report"]),
+                **(
+                    {ARTIFACT_KEY_DATA_QUALITY: str(dq_path)}
+                    if dq_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_EXCLUSIONS: str(ex_path)}
+                    if ex_path is not None
+                    else {}
+                ),
             },
         )
     except ValueError as e:

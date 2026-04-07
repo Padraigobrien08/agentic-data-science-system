@@ -256,7 +256,7 @@ def run_full_pipeline(
     tickers: list[str],
     *,
     refresh: bool,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str]:
+) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame]:
     """Delegate to :func:`src.pipeline_runner.run_pipeline_computation`."""
     ensure_sys_path()
     from src.pipeline_runner import run_pipeline_computation
@@ -293,10 +293,20 @@ def write_all_phase1_artifacts(
     features: pd.DataFrame,
     anomalies: pd.DataFrame,
     report_markdown: str,
+    *,
+    data_quality: pd.DataFrame | None = None,
+    exclusions: pd.DataFrame | None = None,
 ) -> dict[str, Path]:
     from src.pipeline_runner import write_all_phase1_artifacts as _w
 
-    return _w(panel, features, anomalies, report_markdown)
+    return _w(
+        panel,
+        features,
+        anomalies,
+        report_markdown,
+        data_quality=data_quality,
+        exclusions=exclusions,
+    )
 
 
 def read_panel_csv(path: Path) -> pd.DataFrame:

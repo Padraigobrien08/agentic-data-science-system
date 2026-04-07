@@ -12,6 +12,8 @@ import requests
 from edgar_project.mcp import tools as mcp_tools
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
+    ARTIFACT_KEY_DATA_QUALITY,
+    ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_REPORT,
@@ -82,6 +84,23 @@ def test_run_pipeline_mocked_artifact_keys(
         }
     )
     md = "# report\n"
+    dq_df = pd.DataFrame(
+        [{"category": "stage_count", "name": "panel_rows_after_revenue_required", "value": 1, "unit": "rows", "notes": ""}]
+    )
+    ex_df = pd.DataFrame(
+        [
+            {
+                "stage": "metric_extraction",
+                "reason_code": "unsupported_unit",
+                "count": 1,
+                "cik": "",
+                "period": "",
+                "metric": "",
+                "tag": "",
+                "detail": "",
+            }
+        ]
+    )
     prov = [
         {"ticker": "AAPL", "cik": 320193},
     ]
@@ -90,7 +109,7 @@ def test_run_pipeline_mocked_artifact_keys(
         with patch.object(
             mcp_tools.ad,
             "run_full_pipeline",
-            return_value=(sample_panel_row, feats, anom, md),
+            return_value=(sample_panel_row, feats, anom, md, dq_df, ex_df),
         ):
             with patch.object(
                 mcp_tools.ad,
@@ -109,6 +128,8 @@ def test_run_pipeline_mocked_artifact_keys(
     assert ARTIFACT_KEY_FEATURES in art
     assert ARTIFACT_KEY_ANOMALIES in art
     assert ARTIFACT_KEY_REPORT in art
+    assert ARTIFACT_KEY_DATA_QUALITY in art
+    assert ARTIFACT_KEY_EXCLUSIONS in art
     assert str(tmp_artifact_paths["panel"]) in art[ARTIFACT_KEY_PANEL]
     assert "artifacts_detail" in env.data
 
@@ -136,7 +157,7 @@ def test_run_pipeline_no_data_empty_panel_distinct_from_error(
         with patch.object(
             mcp_tools.ad,
             "run_full_pipeline",
-            return_value=(empty, empty, empty, ""),
+            return_value=(empty, empty, empty, "", pd.DataFrame(), pd.DataFrame()),
         ):
             with patch.object(mcp_tools.ad, "anomaly_detection_params", return_value={}):
                 nd = mcp_tools.run_pipeline_tool(

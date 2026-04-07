@@ -178,6 +178,8 @@ ARTIFACT_KEY_PANEL = "panel_csv"
 ARTIFACT_KEY_FEATURES = "features_csv"
 ARTIFACT_KEY_ANOMALIES = "anomalies_csv"
 ARTIFACT_KEY_REPORT = "report_md"
+ARTIFACT_KEY_DATA_QUALITY = "data_quality_csv"
+ARTIFACT_KEY_EXCLUSIONS = "exclusions_csv"
 ARTIFACT_KEY_CACHE_SUBMISSIONS = "cache_submissions_json"
 ARTIFACT_KEY_CACHE_COMPANYFACTS = "cache_companyfacts_json"
 
