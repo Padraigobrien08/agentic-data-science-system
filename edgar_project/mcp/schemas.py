@@ -1,10 +1,17 @@
 """
-Pydantic input/output models and a consistent MCP tool response envelope.
+MCP tool inputs and the unified response contract.
 
-Status values:
-  * ``success`` — operation completed; tool-specific fields are populated.
-  * ``no_data`` — valid request but nothing to return (e.g. empty panel).
-  * ``error`` — failure; :class:`ErrorInfo` is populated.
+Every tool returns :class:`ToolResponseEnvelope` (serialized with ``model_dump(mode="json")``).
+
+Shape::
+
+    {
+      "status": "success" | "no_data" | "error",
+      "message": str,
+      "data": { ... },       # tool-specific; empty {} when nothing to add
+      "artifacts": { ... },  # paths or artifact hints; empty {} when none
+      "errors": [ ... ]      # empty on success/no_data; one+ items on error
+    }
 """
 
 from __future__ import annotations
@@ -16,89 +23,73 @@ from pydantic import BaseModel, Field, model_validator
 
 
 class ToolStatus(str, Enum):
-    """Unified tool outcome discriminator."""
-
     success = "success"
     no_data = "no_data"
     error = "error"
 
 
 class ErrorInfo(BaseModel):
-    """Non-silent failure details for clients and logs."""
+    """Single error entry (machine-friendly; optional debug fields)."""
 
-    code: str = Field(description="Stable machine-readable code, e.g. UNKNOWN_TICKER")
+    code: str = Field(description="Stable code, e.g. UNKNOWN_TICKER, SEC_FETCH_ERROR")
     message: str
-    detail: str | None = None
+    detail: str | None = Field(default=None, description="Longer text, stack context, or JSON")
+    http_status: int | None = Field(
+        default=None,
+        description="Set when the failure is an HTTP response (e.g. SEC 403)",
+    )
+    exc_type: str | None = Field(
+        default=None,
+        description="Python exception type name for unexpected errors",
+    )
 
 
-# --- Phase 1 artifact filenames (relative to repo / config paths) ------------
+class ToolResponseEnvelope(BaseModel):
+    """
+    Stable contract for all MCP tool responses.
 
-PHASE1_PANEL_CSV = "panel.csv"
-PHASE1_FEATURES_CSV = "features.csv"
-PHASE1_ANOMALIES_CSV = "anomalies.csv"
-PHASE1_REPORT_MD = "report.md"
+    Rules:
+      * ``errors`` — empty list for ``success`` and ``no_data``; non-empty for ``error``.
+      * ``data`` — tool-specific payload; use ``{}`` if nothing to return.
+      * ``artifacts`` — paths (strings) keyed by role, e.g. ``panel_csv``; use ``{}`` if none.
+
+    ``data`` often includes provenance helpers (when applicable): ``input_tickers``,
+    ``resolved_ciks`` (``{ticker, cik}`` rows), ``ciks`` (distinct ints),
+    ``primary_artifact`` / ``artifacts_detail`` (path, ``updated_at``, row/column shape),
+    and for anomalies ``zscore_window``, ``zscore_threshold``, ``metrics_analyzed``.
+    """
+
+    status: ToolStatus
+    message: str = ""
+    data: dict[str, Any] = Field(default_factory=dict)
+    artifacts: dict[str, Any] = Field(default_factory=dict)
+    errors: list[ErrorInfo] = Field(default_factory=list)
+
+    @model_validator(mode="after")
+    def _errors_match_status(self) -> ToolResponseEnvelope:
+        if self.status == ToolStatus.error:
+            if not self.errors:
+                raise ValueError("status=error requires at least one entry in errors")
+        elif self.errors:
+            raise ValueError("status success/no_data must have errors=[]")
+        return self
 
 
-class ArtifactPaths(BaseModel):
-    """Canonical Phase 1 outputs (absolute or normalized paths as strings)."""
-
-    panel_csv: str
-    features_csv: str
-    anomalies_csv: str
-    report_md: str
-
-
-# --- resolve_company ----------------------------------------------------------
+# --- Inputs (unchanged semantics) --------------------------------------------
 
 class ResolveCompanyInput(BaseModel):
     ticker: str = Field(min_length=1, description="US equity symbol, e.g. AAPL")
 
-
-class ResolveCompanyOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    ticker: str | None = None
-    cik: int | None = None
-    company_name: str | None = None
-
-
-# --- fetch_company_data -------------------------------------------------------
 
 class FetchCompanyDataInput(BaseModel):
     ticker: str = Field(min_length=1)
     refresh: bool = Field(default=False, description="Bypass cache and refetch SEC JSON")
 
 
-class FetchCompanyDataOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    ticker: str | None = None
-    cik: int | None = None
-    cache_paths: dict[str, str] | None = Field(
-        default=None,
-        description="e.g. submissions, companyfacts → absolute paths",
-    )
-
-
-# --- build_panel --------------------------------------------------------------
-
 class BuildPanelInput(BaseModel):
     tickers: list[str] = Field(min_length=1, max_length=5)
     refresh: bool = False
 
-
-class BuildPanelOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    panel_csv_path: str | None = None
-    row_count: int | None = None
-    columns: list[str] | None = None
-
-
-# --- compute_features ---------------------------------------------------------
 
 class ComputeFeaturesInput(BaseModel):
     tickers: list[str] | None = Field(default=None, description="Build panel from these symbols")
@@ -115,17 +106,6 @@ class ComputeFeaturesInput(BaseModel):
         return self
 
 
-class ComputeFeaturesOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    features_csv_path: str | None = None
-    row_count: int | None = None
-    columns: list[str] | None = None
-
-
-# --- detect_anomalies ---------------------------------------------------------
-
 class DetectAnomaliesInput(BaseModel):
     tickers: list[str] | None = Field(default=None)
     features_csv_path: str | None = Field(default=None)
@@ -140,16 +120,6 @@ class DetectAnomaliesInput(BaseModel):
             raise ValueError("At most 5 tickers")
         return self
 
-
-class DetectAnomaliesOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    anomalies_csv_path: str | None = None
-    anomaly_count: int | None = None
-
-
-# --- generate_report ----------------------------------------------------------
 
 class GenerateReportInput(BaseModel):
     anomalies_csv_path: str | None = None
@@ -172,15 +142,6 @@ class GenerateReportInput(BaseModel):
         return self
 
 
-class GenerateReportOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    report_md_path: str | None = None
-
-
-# --- run_pipeline -------------------------------------------------------------
-
 class RunPipelineInput(BaseModel):
     tickers: list[str] | None = Field(
         default=None,
@@ -197,21 +158,7 @@ class RunPipelineInput(BaseModel):
         return self
 
 
-class PipelineSummaryCounts(BaseModel):
-    panel_rows: int = 0
-    feature_rows: int = 0
-    anomaly_rows: int = 0
-
-
-class RunPipelineOutput(BaseModel):
-    status: ToolStatus
-    message: str | None = None
-    error: ErrorInfo | None = None
-    artifacts: ArtifactPaths | None = None
-    counts: PipelineSummaryCounts | None = None
-
-
-# --- Legacy / adapter previews (optional use) --------------------------------
+# --- Legacy helpers (adapters / previews) ------------------------------------
 
 class TabularPreview(BaseModel):
     columns: list[str]
@@ -224,3 +171,20 @@ class ArtifactSummary(BaseModel):
     path: str
     exists: bool = False
     size_bytes: int | None = None
+
+
+# Phase 1 artifact key names (for ``artifacts`` dict)
+ARTIFACT_KEY_PANEL = "panel_csv"
+ARTIFACT_KEY_FEATURES = "features_csv"
+ARTIFACT_KEY_ANOMALIES = "anomalies_csv"
+ARTIFACT_KEY_REPORT = "report_md"
+ARTIFACT_KEY_CACHE_SUBMISSIONS = "cache_submissions_json"
+ARTIFACT_KEY_CACHE_COMPANYFACTS = "cache_companyfacts_json"
+
+# Stable error codes (use in ``errors[].code``)
+CODE_UNKNOWN_TICKER = "UNKNOWN_TICKER"
+CODE_SEC_FETCH = "SEC_FETCH_ERROR"
+CODE_VALIDATION = "VALIDATION_ERROR"
+CODE_EMPTY_INPUT = "EMPTY_INPUT"
+CODE_FILE_NOT_FOUND = "FILE_NOT_FOUND"
+CODE_INTERNAL = "INTERNAL_ERROR"

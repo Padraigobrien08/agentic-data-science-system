@@ -1,6 +1,7 @@
 """
-EDGAR Anomaly Detector — Phase 2 integration namespace.
+EDGAR Anomaly Detector — ``edgar_project`` package.
 
-Pipeline implementation lives at the repository root (`src/`, `config.py`, `main.py`).
-This package holds MCP server scaffolding only.
+- Phase 1 pipeline: repository root (`src/`, `config.py`, `main.py`).
+- Phase 2 MCP: ``edgar_project.mcp``.
+- Phase 3 orchestration: ``edgar_project.orchestration`` (separate from MCP).
 """

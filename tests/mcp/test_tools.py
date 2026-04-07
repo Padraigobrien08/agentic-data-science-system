@@ -1,0 +1,213 @@
+"""MCP tool functions: envelopes, mocks, error vs no_data."""
+
+from __future__ import annotations
+
+from pathlib import Path
+from unittest.mock import MagicMock, patch
+
+import pandas as pd
+import pytest
+import requests
+
+from edgar_project.mcp import tools as mcp_tools
+from edgar_project.mcp.schemas import (
+    ARTIFACT_KEY_ANOMALIES,
+    ARTIFACT_KEY_FEATURES,
+    ARTIFACT_KEY_PANEL,
+    ARTIFACT_KEY_REPORT,
+    BuildPanelInput,
+    CODE_SEC_FETCH,
+    CODE_UNKNOWN_TICKER,
+    ComputeFeaturesInput,
+    FetchCompanyDataInput,
+    ResolveCompanyInput,
+    RunPipelineInput,
+    ToolResponseEnvelope,
+    ToolStatus,
+)
+
+
+def assert_envelope_shape(env: ToolResponseEnvelope) -> None:
+    d = env.model_dump(mode="json")
+    assert d["status"] in ("success", "no_data", "error")
+    assert "message" in d
+    assert isinstance(d["data"], dict)
+    assert isinstance(d["artifacts"], dict)
+    assert isinstance(d["errors"], list)
+    if d["status"] == "error":
+        assert len(d["errors"]) >= 1
+        assert all("code" in e and "message" in e for e in d["errors"])
+    else:
+        assert d["errors"] == []
+
+
+def test_resolve_company_mocked_known_ticker() -> None:
+    fake = {
+        "ticker": "AAPL",
+        "cik": 320193,
+        "company_name": "Apple Inc.",
+    }
+    with patch.object(mcp_tools.ad, "resolve_company_dict", return_value=fake):
+        env = mcp_tools.resolve_company_tool(ResolveCompanyInput(ticker="AAPL"))
+    assert_envelope_shape(env)
+    assert env.status == ToolStatus.success
+    assert env.data["cik"] == 320193
+    assert env.data["provenance"]["ciks"] == [320193]
+
+
+def test_resolve_company_unknown_ticker_error() -> None:
+    with patch.object(
+        mcp_tools.ad,
+        "resolve_company_dict",
+        side_effect=ValueError("unknown ticker"),
+    ):
+        env = mcp_tools.resolve_company_tool(ResolveCompanyInput(ticker="ZZZZ"))
+    assert env.status == ToolStatus.error
+    assert env.errors[0].code == CODE_UNKNOWN_TICKER
+    assert_envelope_shape(env)
+
+
+def test_run_pipeline_mocked_artifact_keys(
+    sample_panel_row: pd.DataFrame,
+    tmp_artifact_paths: dict[str, Path],
+) -> None:
+    feats = sample_panel_row.copy()
+    anom = pd.DataFrame(
+        {
+            "cik": [320193],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "value": [1.0],
+            "zscore": [3.0],
+        }
+    )
+    md = "# report\n"
+    prov = [
+        {"ticker": "AAPL", "cik": 320193},
+    ]
+
+    with patch.object(mcp_tools.ad, "ticker_cik_pairs", return_value=prov):
+        with patch.object(
+            mcp_tools.ad,
+            "run_full_pipeline",
+            return_value=(sample_panel_row, feats, anom, md),
+        ):
+            with patch.object(
+                mcp_tools.ad,
+                "write_all_phase1_artifacts",
+                return_value=tmp_artifact_paths,
+            ):
+                with patch.object(mcp_tools.ad, "anomaly_detection_params", return_value={}):
+                    env = mcp_tools.run_pipeline_tool(
+                        RunPipelineInput(tickers=["AAPL"], refresh=False)
+                    )
+
+    assert_envelope_shape(env)
+    assert env.status == ToolStatus.success
+    art = env.artifacts
+    assert ARTIFACT_KEY_PANEL in art
+    assert ARTIFACT_KEY_FEATURES in art
+    assert ARTIFACT_KEY_ANOMALIES in art
+    assert ARTIFACT_KEY_REPORT in art
+    assert str(tmp_artifact_paths["panel"]) in art[ARTIFACT_KEY_PANEL]
+    assert "artifacts_detail" in env.data
+
+
+def test_build_panel_no_data_empty_panel() -> None:
+    empty = pd.DataFrame()
+    prov = [{"ticker": "AAPL", "cik": 320193}]
+    with patch.object(mcp_tools.ad, "build_panel_dataframe", return_value=empty):
+        with patch.object(mcp_tools.ad, "ticker_cik_pairs", return_value=prov):
+            env = mcp_tools.build_panel_tool(
+                BuildPanelInput(tickers=["AAPL"], refresh=False)
+            )
+    assert env.status == ToolStatus.no_data
+    assert env.errors == []
+    assert_envelope_shape(env)
+
+
+def test_run_pipeline_no_data_empty_panel_distinct_from_error(
+    sample_panel_row: pd.DataFrame,
+) -> None:
+    """no_data: empty panel, no exception. error: ValueError from pipeline."""
+    empty = pd.DataFrame()
+    prov = [{"ticker": "AAPL", "cik": 320193}]
+    with patch.object(mcp_tools.ad, "ticker_cik_pairs", return_value=prov):
+        with patch.object(
+            mcp_tools.ad,
+            "run_full_pipeline",
+            return_value=(empty, empty, empty, ""),
+        ):
+            with patch.object(mcp_tools.ad, "anomaly_detection_params", return_value={}):
+                nd = mcp_tools.run_pipeline_tool(
+                    RunPipelineInput(tickers=["AAPL"], refresh=False)
+                )
+    assert nd.status == ToolStatus.no_data
+    assert nd.errors == []
+
+    with patch.object(
+        mcp_tools.ad,
+        "run_full_pipeline",
+        side_effect=ValueError("bad ticker"),
+    ):
+        err = mcp_tools.run_pipeline_tool(
+            RunPipelineInput(tickers=["AAPL"], refresh=False)
+        )
+    assert err.status == ToolStatus.error
+    assert err.errors[0].code == CODE_UNKNOWN_TICKER
+    assert nd.status != err.status
+
+
+def test_fetch_company_data_connection_error_uses_sec_code() -> None:
+    with patch.object(
+        mcp_tools.ad,
+        "fetch_company_data_dict",
+        side_effect=requests.ConnectionError("refused"),
+    ):
+        env = mcp_tools.fetch_company_data_tool(
+            FetchCompanyDataInput(ticker="AAPL", refresh=True)
+        )
+    assert env.status == ToolStatus.error
+    assert env.errors[0].code == CODE_SEC_FETCH
+    assert env.errors[0].http_status is None
+    assert_envelope_shape(env)
+
+
+def test_fetch_company_data_http_error_structured() -> None:
+    resp = MagicMock()
+    resp.status_code = 403
+    http_exc = requests.HTTPError("403", response=resp)
+    with patch.object(
+        mcp_tools.ad,
+        "fetch_company_data_dict",
+        side_effect=http_exc,
+    ):
+        env = mcp_tools.fetch_company_data_tool(
+            FetchCompanyDataInput(ticker="AAPL", refresh=True)
+        )
+    assert env.status == ToolStatus.error
+    assert env.errors[0].http_status == 403
+    assert_envelope_shape(env)
+
+
+def test_compute_features_value_error_from_panel_build_is_unknown_ticker() -> None:
+    """Phase 1 raises ValueError for unknown ticker; align with build_panel."""
+    with patch.object(
+        mcp_tools.ad,
+        "build_panel_dataframe",
+        side_effect=ValueError("unknown ticker ZZZZ"),
+    ):
+        env = mcp_tools.compute_features_tool(
+            ComputeFeaturesInput(tickers=["ZZZZ"], panel_csv_path=None)
+        )
+    assert env.status == ToolStatus.error
+    assert env.errors[0].code == CODE_UNKNOWN_TICKER
+
+
+def test_to_json_dict_serializes_envelope() -> None:
+    fake = {"ticker": "AAPL", "cik": 320193, "company_name": "Apple Inc."}
+    with patch.object(mcp_tools.ad, "resolve_company_dict", return_value=fake):
+        env = mcp_tools.resolve_company_tool(ResolveCompanyInput(ticker="AAPL"))
+    out = mcp_tools.to_json_dict(env)
+    assert out["status"] == "success"
+    assert "data" in out and "errors" in out

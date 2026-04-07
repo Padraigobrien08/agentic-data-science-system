@@ -8,12 +8,25 @@ Thin adapters between MCP tools and Phase 1 code.
 
 from __future__ import annotations
 
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
 import pandas as pd
 
-from .schemas import ArtifactSummary, TabularPreview
+import requests
+
+from .schemas import (
+    ARTIFACT_KEY_CACHE_COMPANYFACTS,
+    ARTIFACT_KEY_CACHE_SUBMISSIONS,
+    ArtifactSummary,
+    CODE_SEC_FETCH,
+    CODE_VALIDATION,
+    ErrorInfo,
+    TabularPreview,
+    ToolResponseEnvelope,
+    ToolStatus,
+)
 
 
 def repo_root() -> Path:
@@ -46,7 +59,7 @@ def cache_paths_from_fetch_result(payload: dict[str, Any]) -> dict[str, str]:
     """
     Stable JSON cache paths for a ``get_company_data`` return dict.
 
-    Must stay aligned with :func:`src.data_fetch.get_company_data` filenames.
+    Keys match :mod:`edgar_project.mcp.schemas` artifact constants.
     """
     ensure_sys_path()
     import config
@@ -57,8 +70,137 @@ def cache_paths_from_fetch_result(payload: dict[str, Any]) -> dict[str, str]:
     sub = tdir / f"CIK{cik10}_submissions.json"
     fac = tdir / f"CIK{cik10}_companyfacts.json"
     return {
-        "submissions": str(sub.resolve()),
-        "companyfacts": str(fac.resolve()),
+        ARTIFACT_KEY_CACHE_SUBMISSIONS: str(sub.resolve()),
+        ARTIFACT_KEY_CACHE_COMPANYFACTS: str(fac.resolve()),
+    }
+
+
+def envelope_success(
+    *,
+    message: str = "",
+    data: dict[str, Any] | None = None,
+    artifacts: dict[str, Any] | None = None,
+) -> ToolResponseEnvelope:
+    """``status=success`` with ``errors=[]``."""
+    return ToolResponseEnvelope(
+        status=ToolStatus.success,
+        message=message,
+        data=dict(data or {}),
+        artifacts=dict(artifacts or {}),
+        errors=[],
+    )
+
+
+def envelope_no_data(
+    message: str,
+    *,
+    data: dict[str, Any] | None = None,
+    artifacts: dict[str, Any] | None = None,
+) -> ToolResponseEnvelope:
+    """``status=no_data`` — e.g. no extractable metrics for requested companies/periods."""
+    return ToolResponseEnvelope(
+        status=ToolStatus.no_data,
+        message=message,
+        data=dict(data or {}),
+        artifacts=dict(artifacts or {}),
+        errors=[],
+    )
+
+
+def envelope_error(
+    message: str,
+    errors: list[ErrorInfo],
+    *,
+    data: dict[str, Any] | None = None,
+    artifacts: dict[str, Any] | None = None,
+) -> ToolResponseEnvelope:
+    """``status=error`` with non-empty ``errors``."""
+    if not errors:
+        raise ValueError("envelope_error requires at least one ErrorInfo")
+    return ToolResponseEnvelope(
+        status=ToolStatus.error,
+        message=message,
+        data=dict(data or {}),
+        artifacts=dict(artifacts or {}),
+        errors=errors,
+    )
+
+
+def err_one(
+    code: str,
+    message: str,
+    *,
+    detail: str | None = None,
+    http_status: int | None = None,
+    exc_type: str | None = None,
+) -> list[ErrorInfo]:
+    """Build a one-element error list."""
+    return [
+        ErrorInfo(
+            code=code,
+            message=message,
+            detail=detail,
+            http_status=http_status,
+            exc_type=exc_type,
+        )
+    ]
+
+
+def err_from_http(exc: requests.HTTPError, *, code: str = CODE_SEC_FETCH) -> list[ErrorInfo]:
+    st = exc.response.status_code if exc.response is not None else None
+    return [
+        ErrorInfo(
+            code=code,
+            message=f"SEC HTTP request failed ({st})" if st else "SEC HTTP request failed",
+            detail=str(exc),
+            http_status=st,
+            exc_type=type(exc).__name__,
+        )
+    ]
+
+
+def err_from_exception(exc: Exception, *, code: str, message: str | None = None) -> list[ErrorInfo]:
+    return [
+        ErrorInfo(
+            code=code,
+            message=message or type(exc).__name__,
+            detail=str(exc),
+            exc_type=type(exc).__name__,
+        )
+    ]
+
+
+def envelope_from_validation(exc: Any) -> ToolResponseEnvelope:
+    """Pydantic :class:`ValidationError` → error envelope (import lazily)."""
+    from pydantic import ValidationError
+
+    if not isinstance(exc, ValidationError):
+        raise TypeError("expected ValidationError")
+    return envelope_error(
+        "Input validation failed",
+        [
+            ErrorInfo(
+                code=CODE_VALIDATION,
+                message="Invalid tool arguments",
+                detail=exc.json(),
+                exc_type="ValidationError",
+            )
+        ],
+    )
+
+
+def provenance_from_resolve(r: dict[str, Any]) -> dict[str, Any]:
+    """
+    Provenance block for a single ``resolve_company`` / ``get_company_data`` payload.
+
+    Matches the shape produced by :func:`ticker_cik_pairs` for one ticker.
+    """
+    t = str(r["ticker"]).upper()
+    c = int(r["cik"])
+    return {
+        "input_tickers": [t],
+        "resolved_ciks": [{"ticker": t, "cik": c}],
+        "ciks": [c],
     }
 
 
@@ -173,6 +315,62 @@ def read_anomalies_csv(path: Path) -> pd.DataFrame:
     if not path.is_file():
         raise FileNotFoundError(str(path))
     return pd.read_csv(path)
+
+
+def iso_mtime_utc(path: Path | str) -> str | None:
+    """File mtime as ISO-8601 UTC, or None if missing."""
+    p = Path(path).resolve()
+    if not p.is_file():
+        return None
+    return datetime.fromtimestamp(p.stat().st_mtime, tz=timezone.utc).isoformat()
+
+
+def artifact_info(
+    path: Path | str,
+    *,
+    row_count: int | None = None,
+    columns: list[str] | None = None,
+) -> dict[str, Any]:
+    """Compact metadata for one written artifact (path, mtime, optional shape)."""
+    p = Path(path).resolve()
+    out: dict[str, Any] = {"path": str(p)}
+    ts = iso_mtime_utc(p)
+    if ts:
+        out["updated_at"] = ts
+    if row_count is not None:
+        out["row_count"] = row_count
+    if columns is not None:
+        out["columns"] = columns
+    return out
+
+
+def ticker_cik_pairs(tickers: list[str]) -> list[dict[str, Any]]:
+    """Per-input ticker → CIK rows for provenance (uses SEC ticker map)."""
+    out: list[dict[str, Any]] = []
+    for t in tickers:
+        d = resolve_company_dict(t)
+        out.append({"ticker": d["ticker"], "cik": int(d["cik"])})
+    return out
+
+
+def sorted_unique_ciks(df: pd.DataFrame) -> list[int]:
+    """Distinct CIKs from a panel/features frame."""
+    if df.empty or "cik" not in df.columns:
+        return []
+    return sorted({int(x) for x in df["cik"].dropna().unique()})
+
+
+def anomaly_detection_params() -> dict[str, Any]:
+    """Rolling z-score settings and feature columns (see ``src.anomaly`` / ``config``)."""
+    ensure_sys_path()
+    import config
+    from src.anomaly import FEATURE_COLS
+
+    return {
+        "zscore_window": int(config.ZSCORE_WINDOW),
+        "zscore_threshold": float(config.ZSCORE_THRESHOLD),
+        "metrics_analyzed": list(FEATURE_COLS),
+    }
 
 
 def dataframe_to_preview(
