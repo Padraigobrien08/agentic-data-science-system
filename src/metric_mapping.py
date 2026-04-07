@@ -5,6 +5,9 @@ Canonical EDGAR metric → XBRL (us-gaap) tag mapping for :mod:`src.metric_extra
   - tag priority per pipeline metric
   - documentation artifacts under ``docs/`` and ``validation/``
 
+:data:`METRIC_COLUMN_ORDER` here must match :data:`src.normalization.METRIC_COLUMNS`
+(locked by tests).
+
 Regenerate those files after editing :data:`METRIC_SPECS`::
 
     python -m src.metric_mapping

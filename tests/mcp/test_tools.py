@@ -15,6 +15,8 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_PEER_SIGNALS,
+    ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION,
+    ARTIFACT_KEY_METRIC_CAVEATS_PANEL,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
     ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
@@ -26,6 +28,7 @@ from edgar_project.mcp.schemas import (
     CODE_UNKNOWN_TICKER,
     ComputeFeaturesInput,
     FetchCompanyDataInput,
+    GenerateReportInput,
     ResolveCompanyInput,
     RunPipelineInput,
     ToolResponseEnvelope,
@@ -142,8 +145,11 @@ def test_run_pipeline_mocked_artifact_keys(
     assert ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY in art
     assert ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY in art
     assert ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD in art
+    assert ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION in art
+    assert ARTIFACT_KEY_METRIC_CAVEATS_PANEL in art
     assert str(tmp_artifact_paths["panel"]) in art[ARTIFACT_KEY_PANEL]
     assert "artifacts_detail" in env.data
+    assert "trustworthiness_artifact_paths" in env.data
 
 
 def test_build_panel_no_data_empty_panel() -> None:
@@ -235,6 +241,42 @@ def test_compute_features_value_error_from_panel_build_is_unknown_ticker() -> No
         )
     assert env.status == ToolStatus.error
     assert env.errors[0].code == CODE_UNKNOWN_TICKER
+
+
+def test_generate_report_default_paths_includes_trustworthiness(
+    sample_panel_row: pd.DataFrame,
+    tmp_artifact_paths: dict[str, Path],
+) -> None:
+    anom = pd.DataFrame(
+        {
+            "cik": [320193],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "value": [1.0],
+            "zscore": [3.0],
+        }
+    )
+    out_report = tmp_artifact_paths["report"].parent / "written_report.md"
+    peer_df = pd.DataFrame(
+        [{"cik": 1, "period": "2021-Q1", "metric": "revenue", "peer_alert": "none"}]
+    )
+    with patch.object(mcp_tools.ad, "phase1_paths", return_value=tmp_artifact_paths):
+        with patch.object(mcp_tools.ad, "read_features_csv", return_value=sample_panel_row):
+            with patch.object(mcp_tools.ad, "read_anomalies_csv", return_value=anom):
+                with patch.object(mcp_tools.ad, "read_peer_signals_csv", return_value=peer_df):
+                    with patch.object(mcp_tools.ad, "generate_report_markdown", return_value="# r\n"):
+                        with patch.object(mcp_tools.ad, "write_report_md", return_value=out_report):
+                            with patch.object(mcp_tools.ad, "sorted_unique_ciks", return_value=[320193]):
+                                env = mcp_tools.generate_report_tool(
+                                    GenerateReportInput(use_default_artifact_paths=True)
+                                )
+    assert_envelope_shape(env)
+    assert env.status == ToolStatus.success
+    assert ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY in env.artifacts
+    assert ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION in env.artifacts
+    assert ARTIFACT_KEY_METRIC_CAVEATS_PANEL in env.artifacts
+    assert ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY in env.data["trustworthiness_artifact_paths"]
+    assert "trustworthiness_summary" in env.data
 
 
 def test_to_json_dict_serializes_envelope() -> None:

@@ -7,7 +7,8 @@ small summaries instead of opaque report text blobs.
 
 MCP Phase 2 artifact role keys (for ``artifact_paths``) align with
 ``edgar_project.mcp.schemas`` (e.g. ``panel_csv``, ``features_csv``, ``data_quality_csv``,
-``peer_signals_csv``, ``manual_validation_csv``).
+``peer_signals_csv``, ``metric_coverage_*_csv``, ``metric_caveats_*_csv``,
+``manual_validation_csv``).
 """
 
 from __future__ import annotations

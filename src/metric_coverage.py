@@ -129,6 +129,7 @@ def compute_metric_coverage_by_period(panel: pd.DataFrame) -> pd.DataFrame:
     if out.empty:
         return out
     out = out.copy()
+    # Fiscal order (not lexical string order); tie-break by metric_name for stable diffs.
     out["_pk"] = sort_period_key(out["period"].astype(str))
     out = out.sort_values(["_pk", "metric_name"]).drop(columns=["_pk"]).reset_index(drop=True)
     return out

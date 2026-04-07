@@ -3,6 +3,18 @@ Map SEC XBRL (us-gaap) company facts to a long tidy table:
 cik | period | metric | value
 
 Tag priority and metric definitions live in :mod:`src.metric_mapping` (:data:`~src.metric_mapping.METRIC_TAGS`).
+
+**Period and context (assumptions, not full XBRL semantics)**
+
+- Rows are keyed by SEC **fiscal** labels ``fy`` + ``fp`` (Q1–Q4) from each fact. That is the
+  issuer’s fiscal calendar, not necessarily calendar quarters.
+- Only **10-K** and **10-Q** facts with ``fp`` in ``{Q1,Q2,Q3,Q4}`` are kept; annual-only frames
+  (e.g. ``fp`` = FY) and non-quarter periods are excluded elsewhere via ``INVALID_PERIOD``.
+- **Consolidated facts:** entries with non-empty ``segments`` (dimensional / breakout) are skipped
+  so we do not mix segment lines with consolidated totals.
+- **Duplicate candidates** for the same ``(metric tag family, fy, fp)``: tag priority wins first;
+  if the same tag still has multiple rows (e.g. amended filings), **later ``filed`` date** wins, then
+  **higher ``accn``** (accession string) as a deterministic tie-break.
 """
 
 from __future__ import annotations
@@ -24,6 +36,20 @@ QUARTER_FPS = frozenset({"Q1", "Q2", "Q3", "Q4"})
 
 def _year_cutoff(years: int) -> int:
     return datetime.now(timezone.utc).year - years
+
+
+def _entry_has_segment_dimensions(entry: dict[str, Any]) -> bool:
+    """True if SEC fact carries dimensional context (non-consolidated / segment breakout)."""
+    seg = entry.get("segments")
+    if seg is None:
+        seg = entry.get("segment")
+    if seg is None:
+        return False
+    if isinstance(seg, list):
+        return len(seg) > 0
+    if isinstance(seg, dict):
+        return len(seg) > 0
+    return bool(seg)
 
 
 def _gather_tag_rows(
@@ -59,6 +85,9 @@ def _gather_tag_rows(
         for e in entries:
             if not isinstance(e, dict):
                 ex.bump(exclusion_counts, ex.INVALID_ENTRY_SHAPE, 1)
+                continue
+            if _entry_has_segment_dimensions(e):
+                ex.bump(exclusion_counts, ex.SEGMENTED_CONTEXT_EXCLUDED, 1)
                 continue
             form = e.get("form")
             fp = e.get("fp")
@@ -99,6 +128,7 @@ def _gather_tag_rows(
                     "tag": tag,
                     "value": v,
                     "filed": e.get("filed") or "",
+                    "accn": e.get("accn") or "",
                     "form": form,
                     "multi_unit_variation": multi_unit_variation,
                 }
@@ -139,7 +169,12 @@ def _build_extraction_caveat_rows(
 
 
 def _pick_best_per_period(rows: list[dict[str, Any]], tag_order: list[str]) -> dict[tuple[str, int, str], dict[str, Any]]:
-    """(metric, fy, fp) -> row; prefer earlier tag in tag_order, then later filed."""
+    """
+    (metric, fy, fp) -> row.
+
+    Order: lower tag index in ``tag_order`` wins; if tie, later ``filed`` (ISO date string);
+    if still tie, higher ``accn`` lexicographically (deterministic surrogate for latest filing).
+    """
     priority = {t: i for i, t in enumerate(tag_order)}
     best: dict[tuple[str, int, str], dict[str, Any]] = {}
     for r in rows:
@@ -154,8 +189,15 @@ def _pick_best_per_period(rows: list[dict[str, Any]], tag_order: list[str]) -> d
         if pr < cur_pr:
             best[key] = r
         elif pr == cur_pr:
-            if (r.get("filed") or "") > (cur.get("filed") or ""):
+            f_r = r.get("filed") or ""
+            f_c = cur.get("filed") or ""
+            if f_r > f_c:
                 best[key] = r
+            elif f_r == f_c:
+                a_r = r.get("accn") or ""
+                a_c = cur.get("accn") or ""
+                if a_r > a_c:
+                    best[key] = r
     return best
 
 

@@ -1,0 +1,2 @@
+ticker,cik,period,metric,extracted_value,expected_value,source_reference,checked_by,checked_date,validation_status,notes
+EXAMPLE,0,2099-Q9,revenue,999.0,,not applicable — illustration row only,,,unverified_placeholder,"Synthetic row for CSV structure; period 2099-Q9 is not real. Delete this row when adding real records."

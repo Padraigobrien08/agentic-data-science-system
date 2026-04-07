@@ -1,0 +1,9 @@
+ticker,cik,period,metric,extracted_value,expected_value,source_reference,checked_by,checked_date,validation_status,notes
+AAPL,320193,2021-Q1,net_income,22236000000.0,,,,,,
+AAPL,320193,2021-Q1,revenue,91819000000.0,,,,,,
+AAPL,320193,2021-Q2,net_income,33485000000.0,,,,,,
+AAPL,320193,2021-Q2,revenue,150132000000.0,,,,,,
+AAPL,320193,2021-Q3,net_income,44738000000.0,,,,,,
+AAPL,320193,2021-Q3,revenue,209817000000.0,,,,,,
+AAPL,320193,2022-Q1,net_income,28755000000.0,,,,,,
+AAPL,320193,2022-Q1,revenue,111439000000.0,,,,,,

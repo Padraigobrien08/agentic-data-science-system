@@ -1,5 +1,9 @@
 """
 Combine per-company metric tables into one panel (wide) aligned by fiscal quarter.
+
+**Pivot alignment:** The wide table is built with ``pivot_table(..., aggfunc="first")``. The long
+table is sorted by ``(cik, fiscal period, metric)`` before pivot so the choice of ``"first"`` is
+deterministic if duplicate ``(cik, period, metric)`` keys ever appear after concatenation.
 """
 
 from __future__ import annotations
@@ -44,6 +48,10 @@ def wide_panel_before_revenue_filter(
     long_df = pd.concat(long_frames, ignore_index=True)
     if long_df.empty:
         return pd.DataFrame(columns=["cik", "period"] + METRIC_COLUMNS)
+
+    long_df = long_df.copy()
+    long_df["_pk"] = sort_period_key(long_df["period"].astype(str))
+    long_df = long_df.sort_values(["cik", "_pk", "metric"]).drop(columns=["_pk"]).reset_index(drop=True)
 
     wide = long_df.pivot_table(
         index=["cik", "period"],

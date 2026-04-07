@@ -60,7 +60,8 @@ def compute_panel_metric_caveats(panel: pd.DataFrame) -> pd.DataFrame:
     * ``missing_prior_period`` — the immediately preceding fiscal quarter is absent for this CIK
       in the panel (gap or window edge).
     * ``sparse_history`` — fewer than :data:`config.ZSCORE_WINDOW` prior fiscal quarters exist
-      for this CIK in the panel before the current period (rolling self-baseline may be thin).
+      for this CIK in the panel before the current period (by fiscal order in this panel;
+      rolling self-baseline may be thin; not a statement about filing quality).
     * ``limited_peer_coverage`` — fewer than ``MIN_PEER_GROUP`` distinct CIKs share this period
       (peer cross-section rules may not apply).
     """

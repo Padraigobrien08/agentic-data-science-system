@@ -32,16 +32,157 @@ def _df_to_md(df: pd.DataFrame, max_rows: int = 30) -> str:
     return show.to_markdown(index=False) + "\n"
 
 
+def _try_read_artifact_csv(basename: str) -> pd.DataFrame | None:
+    """
+    Load ``<DATA_ARTIFACTS>/<basename>`` if present (for MCP report-from-disk).
+
+    Returns ``None`` if the file is missing or cannot be parsed (callers treat both like
+    “no coverage table” unless they pass explicit frames).
+    """
+    p = config.DATA_ARTIFACTS / basename
+    if not p.is_file():
+        return None
+    try:
+        return pd.read_csv(p)
+    except Exception:
+        return None
+
+
+def _repo_rel_for_footer(path: Path, root: Path) -> str:
+    """Stable repo-relative path for markdown (falls back if ``path`` is outside ``root``)."""
+    try:
+        return path.resolve().relative_to(root.resolve()).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def _rollup_caveat_codes(series: pd.Series) -> dict[str, int]:
+    """Count semicolon-separated caveat codes across rows (non-empty segments only)."""
+    counts: dict[str, int] = {}
+    for raw in series.dropna().astype(str):
+        s = str(raw).strip()
+        if not s or s == "none":
+            continue
+        for part in s.split(";"):
+            code = part.strip()
+            if code:
+                counts[code] = counts.get(code, 0) + 1
+    return dict(sorted(counts.items(), key=lambda x: (-x[1], x[0])))
+
+
+def _format_code_counts_md(counts: dict[str, int], *, max_codes: int = 8) -> str:
+    if not counts:
+        return "_None in this slice._\n"
+    lines: list[str] = []
+    for i, (k, v) in enumerate(counts.items()):
+        if i >= max_codes:
+            lines.append(f"- _…and {len(counts) - max_codes} more (see CSV)._ \n")
+            break
+        lines.append(f"- `{k}`: **{v}** caveat row(s)\n")
+    return "".join(lines)
+
+
+# Exclusion reason codes that most directly affect interpretation of extracted vs normalized values.
+_TRUST_EXCLUSION_REASONS = frozenset(
+    {
+        "segmented_context_excluded",
+        "duplicate_resolved",
+        "unsupported_unit",
+        "missing_required_metric",
+        "non_numeric_coercion",
+        "drop_duplicate_row",
+    }
+)
+
+
+def _trust_metric_coverage_compact(mc: pd.DataFrame | None) -> str:
+    """Compact table: metric, coverage_ratio, n_slots."""
+    if mc is None or mc.empty:
+        return "_No metric coverage summary (run pipeline or provide `metric_coverage_summary.csv`)._\n\n"
+    if "metric_name" not in mc.columns:
+        return (
+            "_Coverage summary has rows but no `metric_name` column (not the pipeline export schema); "
+            "preview below._\n\n" + _df_to_md(mc.head(8), max_rows=8)
+        )
+    show = mc.rename(
+        columns={
+            "metric_name": "metric",
+            "n_slots": "slots",
+            "coverage_ratio": "coverage",
+            "available_count": "present",
+            "missing_count": "missing",
+        }
+    )
+    cols = [c for c in ("metric", "coverage", "slots", "present", "missing") if c in show.columns]
+    if not cols:
+        return _df_to_md(mc.head(8), max_rows=8)
+    return _df_to_md(show[cols].head(12), max_rows=12)
+
+
+def _trust_caveat_rollups(
+    extraction_caveats: pd.DataFrame | None,
+    panel_caveats: pd.DataFrame | None,
+) -> str:
+    lines: list[str] = []
+    lines.append("**Extraction caveat codes** (per metric cell; from tag/unit resolution):\n\n")
+    if extraction_caveats is None or extraction_caveats.empty:
+        lines.append("_No extraction caveat rows._\n\n")
+    elif "caveat_codes" in extraction_caveats.columns:
+        rc = _rollup_caveat_codes(extraction_caveats["caveat_codes"])
+        lines.append(_format_code_counts_md(rc))
+        lines.append("\n")
+    else:
+        lines.append("_No `caveat_codes` column._\n\n")
+
+    lines.append("**Panel context caveat codes** (per CIK × period):\n\n")
+    if panel_caveats is None or panel_caveats.empty:
+        lines.append("_No panel caveat rows._\n\n")
+    elif "caveat_codes" in panel_caveats.columns:
+        rc = _rollup_caveat_codes(panel_caveats["caveat_codes"])
+        lines.append(_format_code_counts_md(rc))
+        lines.append("\n")
+    else:
+        lines.append("_No `caveat_codes` column._\n\n")
+    return "".join(lines)
+
+
+def _trust_pipeline_interpretation_notes(excl: pd.DataFrame | None) -> str:
+    """Counts from exclusions that matter for trusting extracted/normalized numbers."""
+    if excl is None or excl.empty:
+        return "_No exclusion summary._\n\n"
+    need = {"stage", "reason_code", "count"}
+    if not need.issubset(set(excl.columns)):
+        return _df_to_md(excl.head(8), max_rows=8)
+    sub = excl[excl["reason_code"].isin(_TRUST_EXCLUSION_REASONS)].copy()
+    if sub.empty:
+        return "_No trust-flagged exclusion reasons in the filtered set (see full exclusions below)._ \n\n"
+    sub = sub.sort_values("count", ascending=False)
+    lines: list[str] = []
+    for _, r in sub.iterrows():
+        lines.append(f"- **{r['stage']}** / `{r['reason_code']}`: **{int(r['count'])}**\n")
+    lines.append("\n")
+    return "".join(lines)
+
+
 def _artifact_paths_footer() -> str:
+    root = Path(config.PROJECT_ROOT)
+    art = _repo_rel_for_footer(Path(config.DATA_ARTIFACTS), root)
+    val = _repo_rel_for_footer(root / "validation", root)
+
+    def ap(name: str) -> str:
+        return f"`{art}/{name}`"
+
     return (
-        "_Artifact paths: `data/artifacts/data_quality_summary.csv`, "
-        "`data/artifacts/exclusions_summary.csv`, `data/artifacts/peer_signals.csv`, "
-        "`data/artifacts/metric_coverage_summary.csv`, "
-        "`data/artifacts/metric_coverage_by_company.csv`, "
-        "`data/artifacts/metric_coverage_by_period.csv`, "
-        "`data/artifacts/metric_caveats_extraction.csv`, "
-        "`data/artifacts/metric_caveats_panel.csv`, "
-        "`validation/manual_validation.csv`._\n"
+        "_Artifact paths (relative to project root): "
+        f"{ap('data_quality_summary.csv')}, "
+        f"{ap('exclusions_summary.csv')}, "
+        f"{ap('peer_signals.csv')}, "
+        f"{ap('metric_coverage_summary.csv')}, "
+        f"{ap('metric_coverage_by_company.csv')}, "
+        f"{ap('metric_coverage_by_period.csv')}, "
+        f"{ap('metric_caveats_extraction.csv')}, "
+        f"{ap('metric_caveats_panel.csv')}, "
+        f"`{val}/manual_validation.csv`._\n"
     )
 
 
@@ -76,7 +217,7 @@ def _credibility_exclusions_compact(excl: pd.DataFrame) -> str:
     return _df_to_md(top, max_rows=12)
 
 
-def _credibility_manual_validation(path: Path | None) -> str:
+def _credibility_manual_validation(path: Path | None, *, preview_rows: int = 8) -> str:
     """Status from ``validation/manual_validation.csv`` when the file has data rows."""
     if path is None or not path.is_file():
         return "_Manual validation: file not found at `validation/manual_validation.csv`._ \n\n"
@@ -95,9 +236,22 @@ def _credibility_manual_validation(path: Path | None) -> str:
         if not d.empty:
             lines.append(f"- **Latest checked_date**: {d.max()}\n")
     lines.append("\n")
-    show = [c for c in ("ticker", "cik", "period", "metric", "validation_status", "checked_date") if c in mv.columns]
+    show = [
+        c
+        for c in (
+            "ticker",
+            "cik",
+            "period",
+            "metric",
+            "extracted_value",
+            "expected_value",
+            "validation_status",
+            "checked_date",
+        )
+        if c in mv.columns
+    ]
     if show:
-        lines.append(_df_to_md(mv[show].head(8), max_rows=8))
+        lines.append(_df_to_md(mv[show].head(preview_rows), max_rows=preview_rows))
     return "".join(lines)
 
 
@@ -120,6 +274,27 @@ def _credibility_peer_summary(peer_signals: pd.DataFrame | None, anomalies: pd.D
     return "".join(lines)
 
 
+def _trustworthiness_snapshot(
+    *,
+    metric_coverage_summary: pd.DataFrame | None,
+    extraction_caveats: pd.DataFrame | None,
+    panel_caveats: pd.DataFrame | None,
+    exclusions: pd.DataFrame | None,
+    manual_validation_path: Path | None,
+) -> str:
+    """Single readable block: coverage, caveats, pipeline notes, manual validation preview."""
+    parts: list[str] = ["### Trustworthiness snapshot\n"]
+    parts.append("#### Metric coverage (panel)\n\n")
+    parts.append(_trust_metric_coverage_compact(metric_coverage_summary))
+    parts.append("#### Caveat flags (roll-ups)\n\n")
+    parts.append(_trust_caveat_rollups(extraction_caveats, panel_caveats))
+    parts.append("#### Pipeline effects on interpretation\n\n")
+    parts.append(_trust_pipeline_interpretation_notes(exclusions))
+    parts.append("#### Manual validation\n\n")
+    parts.append(_credibility_manual_validation(manual_validation_path, preview_rows=6))
+    return "".join(parts)
+
+
 def _credibility_section(
     *,
     data_quality: pd.DataFrame | None,
@@ -127,14 +302,24 @@ def _credibility_section(
     peer_signals: pd.DataFrame | None,
     anomalies: pd.DataFrame,
     manual_validation_path: Path | None,
+    metric_coverage_summary: pd.DataFrame | None,
+    extraction_caveats: pd.DataFrame | None,
+    panel_caveats: pd.DataFrame | None,
 ) -> str:
     parts: list[str] = ["## Credibility & coverage\n"]
+    parts.append(
+        _trustworthiness_snapshot(
+            metric_coverage_summary=metric_coverage_summary,
+            extraction_caveats=extraction_caveats,
+            panel_caveats=panel_caveats,
+            exclusions=exclusions,
+            manual_validation_path=manual_validation_path,
+        )
+    )
     parts.append("### Data quality summary\n")
     parts.append(_credibility_data_quality_compact(data_quality if data_quality is not None else pd.DataFrame()))
     parts.append("### Exclusions (pipeline)\n")
     parts.append(_credibility_exclusions_compact(exclusions))
-    parts.append("### Manual validation status\n")
-    parts.append(_credibility_manual_validation(manual_validation_path))
     parts.append("### Peer-relative findings summary\n")
     parts.append(_credibility_peer_summary(peer_signals, anomalies))
     parts.append(_artifact_paths_footer())
@@ -178,12 +363,23 @@ def generate_report(
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     manual_validation_path: Path | None = None,
+    metric_coverage_summary: pd.DataFrame | None = None,
+    extraction_caveats: pd.DataFrame | None = None,
+    panel_caveats: pd.DataFrame | None = None,
     top_n: int = 5,
 ) -> str:
     if manual_validation_path is None:
         from src.manual_validation import VALIDATION_CSV_PATH
 
         manual_validation_path = VALIDATION_CSV_PATH
+
+    # Prefer in-memory frames from the caller; else artifacts on disk (e.g. MCP report-only run).
+    if metric_coverage_summary is None:
+        metric_coverage_summary = _try_read_artifact_csv("metric_coverage_summary.csv")
+    if extraction_caveats is None:
+        extraction_caveats = _try_read_artifact_csv("metric_caveats_extraction.csv")
+    if panel_caveats is None:
+        panel_caveats = _try_read_artifact_csv("metric_caveats_panel.csv")
 
     lines: list[str] = []
     lines.append("# EDGAR Anomaly Report (V1)\n")
@@ -194,6 +390,9 @@ def generate_report(
             peer_signals=peer_signals,
             anomalies=anomalies,
             manual_validation_path=manual_validation_path,
+            metric_coverage_summary=metric_coverage_summary,
+            extraction_caveats=extraction_caveats,
+            panel_caveats=panel_caveats,
         )
     )
     lines.append("## Normalized quarterly panel (sample)\n")

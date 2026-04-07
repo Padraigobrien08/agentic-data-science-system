@@ -8,6 +8,7 @@ from src.exclusions import (
     DUPLICATE_RESOLVED,
     MISSING_REQUIRED_METRIC,
     NON_NUMERIC_COERCION,
+    SEGMENTED_CONTEXT_EXCLUDED,
     UNSUPPORTED_UNIT,
     build_exclusions_dataframe,
 )
@@ -143,3 +144,71 @@ def test_all_metric_columns_present_after_pivot() -> None:
     wide = wide_panel_before_revenue_filter(long_frames)
     for c in METRIC_COLUMNS:
         assert c in wide.columns
+
+
+def test_segmented_fact_excluded_from_extraction() -> None:
+    """Facts with non-empty ``segments`` are consolidated-line only — skip dimensional rows."""
+    facts = _minimal_us_gaap(
+        "Revenues",
+        {
+            "USD": [
+                {
+                    "form": "10-K",
+                    "fp": "Q1",
+                    "fy": 2023,
+                    "val": 100.0,
+                    "filed": "2023-03-15",
+                    "segments": [{"explicitMember": "foo"}],
+                },
+            ]
+        },
+    )
+    counts: dict[str, int] = {}
+    df = extract_metrics(facts, cik=1, years=5, exclusion_counts=counts)
+    assert df.empty
+    assert counts.get(SEGMENTED_CONTEXT_EXCLUDED, 0) >= 1
+
+
+def test_same_tag_same_filed_prefers_higher_accn() -> None:
+    """When tag and ``filed`` tie, later accession string wins (amendment / restatement ordering)."""
+    facts = {
+        "facts": {
+            "us-gaap": {
+                "Revenues": {
+                    "units": {
+                        "USD": [
+                            {
+                                "form": "10-K",
+                                "fp": "Q1",
+                                "fy": 2023,
+                                "val": 100.0,
+                                "filed": "2023-03-15",
+                                "accn": "0000320193-23-000010",
+                            },
+                            {
+                                "form": "10-K",
+                                "fp": "Q1",
+                                "fy": 2023,
+                                "val": 200.0,
+                                "filed": "2023-03-15",
+                                "accn": "0000320193-23-000099",
+                            },
+                        ]
+                    }
+                }
+            }
+        }
+    }
+    df = extract_metrics(facts, cik=1, years=5)
+    assert len(df) == 1
+    assert float(df["value"].iloc[0]) == 200.0
+
+
+def test_wide_pivot_first_follows_concat_order_after_sort() -> None:
+    """Duplicate (cik, period, metric): ``aggfunc=first`` uses first row after stable sort (concat order)."""
+    long_frames = [
+        pd.DataFrame([{"cik": 1, "period": "2020-Q1", "metric": "revenue", "value": 2.0}]),
+        pd.DataFrame([{"cik": 1, "period": "2020-Q1", "metric": "revenue", "value": 1.0}]),
+    ]
+    wide = wide_panel_before_revenue_filter(long_frames)
+    assert float(wide["revenue"].iloc[0]) == 2.0

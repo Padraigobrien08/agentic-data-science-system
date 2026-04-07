@@ -89,6 +89,8 @@ def run_pipeline_computation(
     from src.features import compute_features
     from src.normalization import build_panel
     from src.peer_signals import compute_peer_signals
+    from src.metric_caveats import compute_panel_metric_caveats, filter_extraction_caveats_to_panel
+    from src.metric_coverage import compute_metric_coverage_summary
     from src.report import generate_report
 
     long_frames, extraction_caveats_long, extraction_counts = extract_long_frames(tickers, refresh=refresh)
@@ -106,12 +108,18 @@ def run_pipeline_computation(
     peer_signals_df = compute_peer_signals(feats)
     anom = detect_anomalies(feats, peer_signals=peer_signals_df)
     dq_df = compute_data_quality_summary(long_frames, panel, feats, anom)
+    metric_cov_summary = compute_metric_coverage_summary(panel)
+    extraction_caveats_for_report = filter_extraction_caveats_to_panel(extraction_caveats_long, panel)
+    panel_caveats_df = compute_panel_metric_caveats(panel)
     md = generate_report(
         anom,
         feats,
         peer_signals=peer_signals_df,
         data_quality=dq_df,
         exclusions=exclusions_df,
+        metric_coverage_summary=metric_cov_summary,
+        extraction_caveats=extraction_caveats_for_report,
+        panel_caveats=panel_caveats_df,
         top_n=5,
     )
     return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df, extraction_caveats_long

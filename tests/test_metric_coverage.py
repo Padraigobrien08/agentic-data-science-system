@@ -1,7 +1,9 @@
 """Metric coverage tables from the normalized wide panel."""
 
 import pandas as pd
+import pytest
 
+import config
 from src.metric_coverage import (
     compute_metric_coverage_by_company,
     compute_metric_coverage_by_period,
@@ -79,3 +81,16 @@ def test_empty_panel() -> None:
     assert (s["n_slots"] == 0).all()
     assert compute_metric_coverage_by_company(panel).empty
     assert compute_metric_coverage_by_period(panel).empty
+
+
+def test_write_metric_coverage_artifacts_matches_compute_tables(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    """Pipeline writer emits the same frames as :func:`compute_metric_coverage_tables` (no SEC)."""
+    from src.pipeline_runner import write_metric_coverage_artifacts
+
+    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    panel = _minimal_panel()
+    expected = compute_metric_coverage_tables(panel)
+    paths = write_metric_coverage_artifacts(panel)
+    pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_summary"]), expected["summary"])
+    pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_by_company"]), expected["by_company"])
+    pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_by_period"]), expected["by_period"])

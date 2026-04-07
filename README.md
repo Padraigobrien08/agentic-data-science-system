@@ -6,6 +6,9 @@ Phase 1 ingests SEC XBRL company facts, builds a quarterly panel, computes featu
 
 To record that extracted metrics were checked against SEC sources, use **`validation/README.md`**, append rows to **`validation/manual_validation.csv`**, and optionally keep notes in **`validation/manual_validation.md`**.
 
+- **Templates & guide:** `validation/template/` (`manual_validation_template.csv`, `HOW_TO_FILL.md`)
+- **Unverified candidates** (from current `panel.csv`): `validation/examples/candidates_from_artifacts_unverified.csv` — not SEC-confirmed until you fill `expected_value` and status.
+
 Print candidate rows and companyfacts URLs:
 
 ```bash

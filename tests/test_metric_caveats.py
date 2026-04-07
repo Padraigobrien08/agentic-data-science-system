@@ -1,14 +1,33 @@
 """Panel and extraction caveat helpers."""
 
+from pathlib import Path
+
 import pandas as pd
+import pytest
 
 import config
 from src.metric_caveats import (
     compute_panel_metric_caveats,
     filter_extraction_caveats_to_panel,
     prior_fiscal_period,
+    write_metric_caveats_artifacts,
 )
 from src.anomaly import MIN_PEER_GROUP
+
+
+def _wide_row(cik: int, period: str) -> dict:
+    """Minimal wide-panel row with all pipeline metric columns."""
+    return {
+        "cik": cik,
+        "period": period,
+        "revenue": 1.0,
+        "net_income": 0.1,
+        "total_assets": 10.0,
+        "total_liabilities": 5.0,
+        "operating_cash_flow": 0.5,
+        "current_assets": 2.0,
+        "current_liabilities": 1.0,
+    }
 
 
 def test_prior_fiscal_period() -> None:
@@ -77,6 +96,48 @@ def test_low_period_count_threshold() -> None:
     panel = pd.DataFrame(rows)
     pc = compute_panel_metric_caveats(panel)
     assert "low_period_count" not in pc["caveat_codes"].iloc[0]
+
+
+def test_missing_prior_period_when_quarter_gap() -> None:
+    """``2020-Q2`` without ``2020-Q1`` for the same CIK emits ``missing_prior_period``."""
+    panel = pd.DataFrame(
+        [
+            _wide_row(1, "2019-Q4"),
+            _wide_row(1, "2020-Q2"),
+        ]
+    )
+    pc = compute_panel_metric_caveats(panel)
+    row = pc[(pc["cik"] == 1) & (pc["period"] == "2020-Q2")].iloc[0]
+    assert "missing_prior_period" in row["caveat_codes"]
+
+
+def test_panel_caveats_period_order_is_fiscal_not_lexical() -> None:
+    """Rows are sorted by fiscal quarter order (not string sort of ``period``)."""
+    panel = pd.DataFrame(
+        [
+            _wide_row(1, "2021-Q1"),
+            _wide_row(1, "2020-Q4"),
+        ]
+    )
+    pc = compute_panel_metric_caveats(panel)
+    sub = pc[pc["cik"] == 1]["period"].tolist()
+    assert sub == ["2020-Q4", "2021-Q1"]
+
+
+def test_write_metric_caveats_artifacts_matches_in_memory_panel_table(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    """Written ``metric_caveats_panel.csv`` matches :func:`compute_panel_metric_caveats`."""
+    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    panel = pd.DataFrame([_wide_row(1, "2021-Q1"), _wide_row(2, "2021-Q1"), _wide_row(3, "2021-Q1")])
+    paths = write_metric_caveats_artifacts(panel, None)
+    on_disk = pd.read_csv(paths["metric_caveats_panel"])
+    direct = compute_panel_metric_caveats(panel)
+    pd.testing.assert_frame_equal(
+        on_disk.reset_index(drop=True),
+        direct.reset_index(drop=True),
+        check_dtype=False,
+    )
 
 
 def test_limited_peer_coverage_when_small_cross_section() -> None:

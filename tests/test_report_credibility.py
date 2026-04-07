@@ -6,7 +6,9 @@ from pathlib import Path
 
 import pandas as pd
 
-from src.report import generate_report
+from src.report import _artifact_paths_footer, generate_report
+
+import config
 
 
 def _minimal_features() -> pd.DataFrame:
@@ -101,6 +103,7 @@ def test_report_includes_credibility_blocks_when_inputs_non_empty(tmp_path: Path
     mv.write_text("ticker,cik,period,metric,validation_status,checked_date\nX,1,2021-Q1,revenue,ok,2026-01-01\n", encoding="utf-8")
 
     feats = _minimal_features()
+    empty_cov = pd.DataFrame()
     md = generate_report(
         anomalies,
         feats,
@@ -108,17 +111,21 @@ def test_report_includes_credibility_blocks_when_inputs_non_empty(tmp_path: Path
         data_quality=dq,
         exclusions=excl,
         manual_validation_path=mv,
+        metric_coverage_summary=empty_cov,
+        extraction_caveats=empty_cov,
+        panel_caveats=empty_cov,
         top_n=1,
     )
 
     assert "# EDGAR Anomaly Report" in md
     assert "## Credibility & coverage" in md
+    assert "### Trustworthiness snapshot" in md
+    assert "#### Manual validation" in md
     assert "### Data quality summary" in md
     assert "feature_rows" in md
     assert "rows_removed_missing_revenue" in md
     assert "### Exclusions (pipeline)" in md
     assert "normalization" in md
-    assert "### Manual validation status" in md
     assert "### Peer-relative findings summary" in md
     assert "Unified anomaly rows by category" in md
     assert "data_quality_summary.csv" in md
@@ -138,9 +145,137 @@ def test_report_normalized_panel_section_tolerates_missing_balance_sheet_columns
             "net_margin": [0.1],
         }
     )
-    md = generate_report(pd.DataFrame(), feats, peer_signals=None, data_quality=None, exclusions=None)
+    md = generate_report(
+        pd.DataFrame(),
+        feats,
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+        metric_coverage_summary=pd.DataFrame(),
+        extraction_caveats=pd.DataFrame(),
+        panel_caveats=pd.DataFrame(),
+    )
     assert "## Normalized quarterly panel (sample)" in md
     assert "100.0" in md or "100" in md
+
+
+def test_report_loads_trustworthiness_csvs_from_artifacts_dir_when_frames_omitted(
+    monkeypatch, tmp_path: Path
+) -> None:
+    """MCP-style run: ``generate_report`` fills coverage/caveats from ``DATA_ARTIFACTS`` (no SEC)."""
+    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    cov = pd.DataFrame(
+        [
+            {
+                "metric_name": "revenue",
+                "n_slots": 4,
+                "available_count": 4,
+                "missing_count": 0,
+                "coverage_ratio": 1.0,
+            }
+        ]
+    )
+    cov.to_csv(tmp_path / "metric_coverage_summary.csv", index=False)
+    pd.DataFrame(
+        {
+            "cik": [1],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "source_tag": ["Revenues"],
+            "n_candidates": [1],
+            "caveat_codes": ["tag_resolution_fallback"],
+        }
+    ).to_csv(tmp_path / "metric_caveats_extraction.csv", index=False)
+    pd.DataFrame(
+        {"cik": [1], "period": ["2021-Q1"], "caveat_codes": ["limited_peer_coverage"]}
+    ).to_csv(tmp_path / "metric_caveats_panel.csv", index=False)
+    mv = tmp_path / "manual_validation.csv"
+    mv.write_text(
+        "ticker,cik,period,metric,validation_status,checked_date\nX,1,2021-Q1,revenue,ok,2026-01-01\n",
+        encoding="utf-8",
+    )
+    md = generate_report(
+        pd.DataFrame(),
+        _minimal_features(),
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+        manual_validation_path=mv,
+        metric_coverage_summary=None,
+        extraction_caveats=None,
+        panel_caveats=None,
+    )
+    assert "### Trustworthiness snapshot" in md
+    assert "revenue" in md
+    assert "tag_resolution_fallback" in md
+    assert "limited_peer_coverage" in md
+
+
+def test_credibility_footer_lists_stable_trust_artifact_paths() -> None:
+    foot = _artifact_paths_footer()
+    assert "relative to project root" in foot
+    for needle in (
+        "metric_coverage_summary.csv",
+        "metric_coverage_by_company.csv",
+        "metric_coverage_by_period.csv",
+        "metric_caveats_extraction.csv",
+        "metric_caveats_panel.csv",
+        "manual_validation.csv",
+    ):
+        assert needle in foot
+
+
+def test_trust_metric_coverage_warns_when_metric_name_column_missing(tmp_path: Path) -> None:
+    bad = pd.DataFrame([{"wrong_col": 1}])
+    md = generate_report(
+        pd.DataFrame(),
+        _minimal_features(),
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+        manual_validation_path=tmp_path / "missing_manual.csv",
+        metric_coverage_summary=bad,
+        extraction_caveats=pd.DataFrame(),
+        panel_caveats=pd.DataFrame(),
+    )
+    assert "no `metric_name` column" in md
+
+
+def test_trustworthiness_snapshot_includes_metric_coverage_and_caveat_rollups() -> None:
+    cov = pd.DataFrame(
+        [
+            {"metric_name": "revenue", "n_slots": 10, "available_count": 10, "missing_count": 0, "coverage_ratio": 1.0},
+            {"metric_name": "net_income", "n_slots": 10, "available_count": 9, "missing_count": 1, "coverage_ratio": 0.9},
+        ]
+    )
+    ext = pd.DataFrame(
+        {
+            "cik": [1],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "caveat_codes": ["duplicate_candidates_resolved;fallback_tag_used"],
+        }
+    )
+    pan = pd.DataFrame(
+        {
+            "cik": [1],
+            "period": ["2021-Q1"],
+            "caveat_codes": ["limited_peer_coverage"],
+        }
+    )
+    md = generate_report(
+        pd.DataFrame(),
+        _minimal_features(),
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+        metric_coverage_summary=cov,
+        extraction_caveats=ext,
+        panel_caveats=pan,
+    )
+    assert "`duplicate_candidates_resolved`" in md or "duplicate_candidates_resolved" in md
+    assert "limited_peer_coverage" in md
+    assert "net_income" in md or "0.9" in md
 
 
 def test_credibility_section_emits_all_drop_rule_rows() -> None:
@@ -168,6 +303,9 @@ def test_credibility_section_emits_all_drop_rule_rows() -> None:
         peer_signals=None,
         data_quality=dq,
         exclusions=None,
+        metric_coverage_summary=pd.DataFrame(),
+        extraction_caveats=pd.DataFrame(),
+        panel_caveats=pd.DataFrame(),
     )
     assert "hypothetical_second_rule" in md
     assert "note-b" in md

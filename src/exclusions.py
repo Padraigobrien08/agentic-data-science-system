@@ -18,6 +18,7 @@ YEAR_OUT_OF_RANGE = "year_out_of_range"
 NULL_FACT_VALUE = "null_fact_value"
 NON_NUMERIC = "non_numeric"  # fact value not parseable as float
 INVALID_ENTRY_SHAPE = "invalid_entry_shape"
+SEGMENTED_CONTEXT_EXCLUDED = "segmented_context_excluded"  # dimensional / non-consolidated fact
 DUPLICATE_RESOLVED = "duplicate_resolved"
 DROP_DUPLICATE_ROW = "drop_duplicate_row"
 NON_NUMERIC_COERCION = "non_numeric_coercion"  # wide cell failed pd.to_numeric
@@ -33,6 +34,7 @@ ALL_REASON_CODES: frozenset[str] = frozenset(
         NULL_FACT_VALUE,
         NON_NUMERIC,
         INVALID_ENTRY_SHAPE,
+        SEGMENTED_CONTEXT_EXCLUDED,
         DUPLICATE_RESOLVED,
         DROP_DUPLICATE_ROW,
         NON_NUMERIC_COERCION,

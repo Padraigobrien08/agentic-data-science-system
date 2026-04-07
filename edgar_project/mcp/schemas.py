@@ -59,7 +59,8 @@ class ToolResponseEnvelope(BaseModel):
     and for anomalies ``zscore_window``, ``zscore_threshold``, ``metrics_analyzed``.
     After ``run_pipeline`` / ``generate_report`` (default paths), optional paths may appear:
     ``data_quality_summary_path``, ``exclusions_summary_path``, ``peer_signals_path``,
-    ``manual_validation_path`` (only when the file exists).
+    ``manual_validation_path``, metric coverage paths, caveat CSV paths (see artifact keys),
+    and ``trustworthiness_artifact_paths`` (non-empty role → path map).
     """
 
     status: ToolStatus
@@ -188,6 +189,8 @@ ARTIFACT_KEY_PEER_SIGNALS = "peer_signals_csv"
 ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY = "metric_coverage_summary_csv"
 ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY = "metric_coverage_by_company_csv"
 ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD = "metric_coverage_by_period_csv"
+ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION = "metric_caveats_extraction_csv"
+ARTIFACT_KEY_METRIC_CAVEATS_PANEL = "metric_caveats_panel_csv"
 ARTIFACT_KEY_MANUAL_VALIDATION = "manual_validation_csv"
 ARTIFACT_KEY_CACHE_SUBMISSIONS = "cache_submissions_json"
 ARTIFACT_KEY_CACHE_COMPANYFACTS = "cache_companyfacts_json"

@@ -25,6 +25,8 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
+    ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION,
+    ARTIFACT_KEY_METRIC_CAVEATS_PANEL,
     ARTIFACT_KEY_MANUAL_VALIDATION,
     ARTIFACT_KEY_REPORT,
     BuildPanelInput,
@@ -61,6 +63,18 @@ def _envelope_sec_request_failed(exc: requests.RequestException) -> ToolResponse
 
 def to_json_dict(env: ToolResponseEnvelope) -> dict[str, Any]:
     return env.model_dump(mode="json")
+
+
+def _trustworthiness_artifact_path_map(**role_to_path: object) -> dict[str, str]:
+    """Stable role key → filesystem path; omit missing or empty (downstream convenience map)."""
+    out: dict[str, str] = {}
+    for role, p in role_to_path.items():
+        if p is None:
+            continue
+        s = str(p).strip()
+        if s:
+            out[role] = s
+    return out
 
 
 def _phase1_artifact_dict(ap: dict[str, Path]) -> dict[str, str]:
@@ -324,19 +338,20 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
         peer_sig: pd.DataFrame | None = None
         dq_df: pd.DataFrame | None = None
         excl_df: pd.DataFrame | None = None
+        phase1_ap: dict[str, Path] | None = None
         if inp.use_default_artifact_paths:
-            ap = ad.phase1_paths()
-            feats = ad.read_features_csv(ap["features"])
-            anom = ad.read_anomalies_csv(ap["anomalies"])
-            art = _phase1_artifact_dict(ap)
-            psp = ap.get("peer_signals")
+            phase1_ap = ad.phase1_paths()
+            feats = ad.read_features_csv(phase1_ap["features"])
+            anom = ad.read_anomalies_csv(phase1_ap["anomalies"])
+            art = _phase1_artifact_dict(phase1_ap)
+            psp = phase1_ap.get("peer_signals")
             if psp is not None and psp.is_file():
                 peer_sig = ad.read_peer_signals_csv(psp)
                 art = {**art, ARTIFACT_KEY_PEER_SIGNALS: str(psp)}
-            dq_p = ap.get("data_quality")
+            dq_p = phase1_ap.get("data_quality")
             if dq_p is not None and dq_p.is_file():
                 dq_df = pd.read_csv(dq_p)
-            ex_p = ap.get("exclusions")
+            ex_p = phase1_ap.get("exclusions")
             if ex_p is not None and ex_p.is_file():
                 excl_df = pd.read_csv(ex_p)
         else:
@@ -387,29 +402,108 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
         dq_path_data: str | None = None
         ex_path_data: str | None = None
         peer_path_data: str | None = None
-        if inp.use_default_artifact_paths:
-            ap = ad.phase1_paths()
-            dq_p = ap.get("data_quality")
+        mc_sum_p = mc_co_p = mc_pe_p = None
+        cave_ext_path_data = cave_pan_path_data = None
+        cov_sum_for_tw = cov_co_for_tw = cov_pe_for_tw = None
+        cave_ext_for_tw = cave_pan_for_tw = None
+        extraction_caveat_rows_for_summary: int | None = None
+        panel_caveat_rows_for_summary: int | None = None
+        if phase1_ap is not None:
+            dq_p = phase1_ap.get("data_quality")
             if dq_p is not None and dq_p.is_file() and dq_df is not None:
                 src_paths[ARTIFACT_KEY_DATA_QUALITY] = str(dq_p)
                 dq_path_data = str(dq_p)
                 sources_detail[ARTIFACT_KEY_DATA_QUALITY] = ad.artifact_info(
                     dq_p, row_count=len(dq_df), columns=[str(c) for c in dq_df.columns]
                 )
-            ex_p = ap.get("exclusions")
+            ex_p = phase1_ap.get("exclusions")
             if ex_p is not None and ex_p.is_file() and excl_df is not None:
                 src_paths[ARTIFACT_KEY_EXCLUSIONS] = str(ex_p)
                 ex_path_data = str(ex_p)
                 sources_detail[ARTIFACT_KEY_EXCLUSIONS] = ad.artifact_info(
                     ex_p, row_count=len(excl_df), columns=[str(c) for c in excl_df.columns]
                 )
-            psp = ap.get("peer_signals")
+            psp = phase1_ap.get("peer_signals")
             if psp is not None and psp.is_file() and peer_sig is not None:
                 src_paths[ARTIFACT_KEY_PEER_SIGNALS] = str(psp)
                 peer_path_data = str(psp)
                 sources_detail[ARTIFACT_KEY_PEER_SIGNALS] = ad.artifact_info(
                     psp, row_count=len(peer_sig), columns=[str(c) for c in peer_sig.columns]
                 )
+            cov_sum_for_tw = phase1_ap.get("metric_coverage_summary")
+            cov_co_for_tw = phase1_ap.get("metric_coverage_by_company")
+            cov_pe_for_tw = phase1_ap.get("metric_coverage_by_period")
+            cave_ext_for_tw = phase1_ap.get("metric_caveats_extraction")
+            cave_pan_for_tw = phase1_ap.get("metric_caveats_panel")
+            cs_p = cov_sum_for_tw
+            if cs_p is not None and cs_p.is_file():
+                try:
+                    cs_df = pd.read_csv(cs_p)
+                    mc_sum_p = str(cs_p)
+                    src_paths[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = mc_sum_p
+                    sources_detail[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = ad.artifact_info(
+                        cs_p, row_count=len(cs_df), columns=[str(c) for c in cs_df.columns]
+                    )
+                except Exception:
+                    mc_sum_p = str(cs_p)
+                    src_paths[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = mc_sum_p
+                    sources_detail[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = ad.artifact_info(cs_p)
+            cc_p = cov_co_for_tw
+            if cc_p is not None and cc_p.is_file():
+                try:
+                    cc_df = pd.read_csv(cc_p)
+                    mc_co_p = str(cc_p)
+                    src_paths[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = mc_co_p
+                    sources_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = ad.artifact_info(
+                        cc_p, row_count=len(cc_df), columns=[str(c) for c in cc_df.columns]
+                    )
+                except Exception:
+                    mc_co_p = str(cc_p)
+                    src_paths[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = mc_co_p
+                    sources_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = ad.artifact_info(cc_p)
+            cpe_p = cov_pe_for_tw
+            if cpe_p is not None and cpe_p.is_file():
+                try:
+                    cpe_df = pd.read_csv(cpe_p)
+                    mc_pe_p = str(cpe_p)
+                    src_paths[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = mc_pe_p
+                    sources_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = ad.artifact_info(
+                        cpe_p, row_count=len(cpe_df), columns=[str(c) for c in cpe_df.columns]
+                    )
+                except Exception:
+                    mc_pe_p = str(cpe_p)
+                    src_paths[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = mc_pe_p
+                    sources_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = ad.artifact_info(cpe_p)
+            ce_p = cave_ext_for_tw
+            if ce_p is not None and ce_p.is_file():
+                try:
+                    ced = pd.read_csv(ce_p)
+                    extraction_caveat_rows_for_summary = len(ced)
+                    cave_ext_path_data = str(ce_p)
+                    src_paths[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = cave_ext_path_data
+                    sources_detail[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = ad.artifact_info(
+                        ce_p, row_count=len(ced), columns=[str(c) for c in ced.columns]
+                    )
+                except Exception:
+                    extraction_caveat_rows_for_summary = None
+                    cave_ext_path_data = str(ce_p)
+                    src_paths[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = cave_ext_path_data
+                    sources_detail[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = ad.artifact_info(ce_p)
+            cp_p = cave_pan_for_tw
+            if cp_p is not None and cp_p.is_file():
+                try:
+                    cpd = pd.read_csv(cp_p)
+                    panel_caveat_rows_for_summary = len(cpd)
+                    cave_pan_path_data = str(cp_p)
+                    src_paths[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = cave_pan_path_data
+                    sources_detail[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = ad.artifact_info(
+                        cp_p, row_count=len(cpd), columns=[str(c) for c in cpd.columns]
+                    )
+                except Exception:
+                    panel_caveat_rows_for_summary = None
+                    cave_pan_path_data = str(cp_p)
+                    src_paths[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = cave_pan_path_data
+                    sources_detail[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = ad.artifact_info(cp_p)
         art_out = {**art, ARTIFACT_KEY_REPORT: str(path)}
         if mv_path.is_file():
             art_out[ARTIFACT_KEY_MANUAL_VALIDATION] = str(mv_path.resolve())
@@ -420,6 +514,35 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 )
             except Exception:
                 sources_detail[ARTIFACT_KEY_MANUAL_VALIDATION] = ad.artifact_info(mv_path.resolve())
+
+        manual_str = str(mv_path.resolve()) if mv_path.is_file() else None
+        if mc_sum_p:
+            art_out[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = mc_sum_p
+        if mc_co_p:
+            art_out[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = mc_co_p
+        if mc_pe_p:
+            art_out[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = mc_pe_p
+        if cave_ext_path_data:
+            art_out[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = cave_ext_path_data
+        if cave_pan_path_data:
+            art_out[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = cave_pan_path_data
+
+        tw_summary: dict[str, int | None] = {}
+        if cave_ext_for_tw is not None and cave_ext_for_tw.is_file():
+            tw_summary["extraction_caveat_rows"] = extraction_caveat_rows_for_summary
+        if cave_pan_for_tw is not None and cave_pan_for_tw.is_file():
+            tw_summary["panel_caveat_rows"] = panel_caveat_rows_for_summary
+
+        tw_paths = _trustworthiness_artifact_path_map(
+            **{
+                ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY: cov_sum_for_tw,
+                ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY: cov_co_for_tw,
+                ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD: cov_pe_for_tw,
+                ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION: cave_ext_for_tw,
+                ARTIFACT_KEY_METRIC_CAVEATS_PANEL: cave_pan_for_tw,
+                ARTIFACT_KEY_MANUAL_VALIDATION: manual_str,
+            }
+        )
 
         return ad.envelope_success(
             message="Report written.",
@@ -434,7 +557,14 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 "data_quality_summary_path": dq_path_data,
                 "exclusions_summary_path": ex_path_data,
                 "peer_signals_path": peer_path_data,
-                "manual_validation_path": str(mv_path.resolve()) if mv_path.is_file() else None,
+                "metric_coverage_summary_path": mc_sum_p,
+                "metric_coverage_by_company_path": mc_co_p,
+                "metric_coverage_by_period_path": mc_pe_p,
+                "metric_caveats_extraction_path": cave_ext_path_data,
+                "metric_caveats_panel_path": cave_pan_path_data,
+                "manual_validation_path": manual_str,
+                "trustworthiness_artifact_paths": tw_paths,
+                "trustworthiness_summary": tw_summary,
             },
             artifacts=art_out,
         )
@@ -501,6 +631,10 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
         cov_sum_path = paths.get("metric_coverage_summary")
         cov_co_path = paths.get("metric_coverage_by_company")
         cov_pe_path = paths.get("metric_coverage_by_period")
+        cave_ext_path = paths.get("metric_caveats_extraction")
+        cave_pan_path = paths.get("metric_caveats_panel")
+        extraction_caveat_rows_for_summary: int | None = None
+        panel_caveat_rows_for_summary: int | None = None
         artifacts_detail = {
             ARTIFACT_KEY_PANEL: ad.artifact_info(
                 paths["panel"], row_count=len(panel), columns=pcols
@@ -558,6 +692,30 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 )
             except Exception:
                 artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = ad.artifact_info(cov_pe_path)
+        if cave_ext_path is not None and cave_ext_path.is_file():
+            try:
+                ced = pd.read_csv(cave_ext_path)
+                extraction_caveat_rows_for_summary = len(ced)
+                artifacts_detail[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = ad.artifact_info(
+                    cave_ext_path,
+                    row_count=len(ced),
+                    columns=[str(c) for c in ced.columns],
+                )
+            except Exception:
+                extraction_caveat_rows_for_summary = None
+                artifacts_detail[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = ad.artifact_info(cave_ext_path)
+        if cave_pan_path is not None and cave_pan_path.is_file():
+            try:
+                cpd = pd.read_csv(cave_pan_path)
+                panel_caveat_rows_for_summary = len(cpd)
+                artifacts_detail[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = ad.artifact_info(
+                    cave_pan_path,
+                    row_count=len(cpd),
+                    columns=[str(c) for c in cpd.columns],
+                )
+            except Exception:
+                panel_caveat_rows_for_summary = None
+                artifacts_detail[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = ad.artifact_info(cave_pan_path)
         import config
 
         mv_path = (config.PROJECT_ROOT / "validation" / "manual_validation.csv").resolve()
@@ -574,6 +732,22 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
             except Exception:
                 artifacts_detail[ARTIFACT_KEY_MANUAL_VALIDATION] = ad.artifact_info(mv_path)
 
+        tw_paths = _trustworthiness_artifact_path_map(
+            **{
+                ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY: cov_sum_path,
+                ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY: cov_co_path,
+                ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD: cov_pe_path,
+                ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION: cave_ext_path,
+                ARTIFACT_KEY_METRIC_CAVEATS_PANEL: cave_pan_path,
+                ARTIFACT_KEY_MANUAL_VALIDATION: manual_path_data,
+            }
+        )
+        tw_summary: dict[str, int | None] = {}
+        if cave_ext_path is not None and cave_ext_path.is_file():
+            tw_summary["extraction_caveat_rows"] = extraction_caveat_rows_for_summary
+        if cave_pan_path is not None and cave_pan_path.is_file():
+            tw_summary["panel_caveat_rows"] = panel_caveat_rows_for_summary
+
         return ad.envelope_success(
             message="Full pipeline completed; artifacts written.",
             data={
@@ -589,7 +763,11 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "metric_coverage_summary_path": str(cov_sum_path) if cov_sum_path is not None else None,
                 "metric_coverage_by_company_path": str(cov_co_path) if cov_co_path is not None else None,
                 "metric_coverage_by_period_path": str(cov_pe_path) if cov_pe_path is not None else None,
+                "metric_caveats_extraction_path": str(cave_ext_path) if cave_ext_path is not None else None,
+                "metric_caveats_panel_path": str(cave_pan_path) if cave_pan_path is not None else None,
                 "manual_validation_path": manual_path_data,
+                "trustworthiness_artifact_paths": tw_paths,
+                "trustworthiness_summary": tw_summary,
                 **an_meta,
                 **peer_meta,
                 "artifacts_detail": artifacts_detail,
@@ -627,6 +805,16 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 **(
                     {ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD: str(cov_pe_path)}
                     if cov_pe_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION: str(cave_ext_path)}
+                    if cave_ext_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_METRIC_CAVEATS_PANEL: str(cave_pan_path)}
+                    if cave_pan_path is not None
                     else {}
                 ),
                 **mv_in_artifacts,

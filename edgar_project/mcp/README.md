@@ -55,7 +55,7 @@ python -m edgar_project.mcp cli -q resolve-company AAPL
 
 ## Phase 1 artifact keys
 
-Tool responses use `artifacts` (and optional `data` fields such as `data_quality_summary_path`, `exclusions_summary_path`, `peer_signals_path`, `manual_validation_path`) with role keys from `edgar_project.mcp.schemas`: `panel_csv`, `features_csv`, `anomalies_csv`, `report_md`, `data_quality_csv`, `exclusions_csv`, `peer_signals_csv`, and `manual_validation_csv` when `validation/manual_validation.csv` is present. Orchestration merges `artifacts` into `artifact_paths` unchanged.
+Tool responses use `artifacts` (and optional `data` fields such as `data_quality_summary_path`, `exclusions_summary_path`, `peer_signals_path`, metric coverage paths, `metric_caveats_extraction_path` / `metric_caveats_panel_path`, `manual_validation_path`) with role keys from `edgar_project.mcp.schemas`: `panel_csv`, `features_csv`, `anomalies_csv`, `report_md`, `data_quality_csv`, `exclusions_csv`, `peer_signals_csv`, `metric_coverage_summary_csv`, `metric_coverage_by_company_csv`, `metric_coverage_by_period_csv`, `metric_caveats_extraction_csv`, `metric_caveats_panel_csv`, and `manual_validation_csv` when `validation/manual_validation.csv` is present. After `run_pipeline` or `generate_report` with default Phase 1 paths, `data` may also include `trustworthiness_artifact_paths` (role → path) and `trustworthiness_summary` (e.g. caveat row counts). Orchestration merges `artifacts` into `artifact_paths` unchanged.
 
 ## Tests
 

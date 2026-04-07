@@ -1,6 +1,14 @@
 """Canonical metric mapping stays aligned with panel columns and extraction."""
 
-from src.metric_mapping import METRIC_COLUMN_ORDER, METRIC_SPECS, METRIC_TAGS, metric_mapping_csv_rows
+from pathlib import Path
+
+from src.metric_mapping import (
+    METRIC_COLUMN_ORDER,
+    METRIC_SPECS,
+    METRIC_TAGS,
+    metric_mapping_csv_rows,
+    write_metric_mapping_md,
+)
 from src.normalization import METRIC_COLUMNS
 
 
@@ -20,3 +28,13 @@ def test_csv_rows_roundtrip_count() -> None:
     for r in rows:
         assert r["taxonomy"] == "us-gaap"
         assert "USD" in r["accepted_units"]
+
+
+def test_generated_metric_mapping_md_lists_each_canonical_metric(tmp_path: Path) -> None:
+    """Docs generation stays aligned with METRIC_SPECS / METRIC_COLUMN_ORDER (single source of truth)."""
+    md = tmp_path / "metric_mapping.md"
+    write_metric_mapping_md(md)
+    text = md.read_text(encoding="utf-8")
+    for name in METRIC_COLUMN_ORDER:
+        assert f"### `{name}`" in text
+    assert "Single source of truth: `src/metric_mapping.py`" in text
