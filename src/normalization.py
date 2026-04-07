@@ -10,18 +10,12 @@ import pandas as pd
 
 from . import exclusions as ex
 from .metric_extraction import sort_period_key
+from .metric_mapping import METRIC_COLUMN_ORDER
 
 _log = logging.getLogger(__name__)
 
-METRIC_COLUMNS = [
-    "revenue",
-    "net_income",
-    "total_assets",
-    "total_liabilities",
-    "operating_cash_flow",
-    "current_assets",
-    "current_liabilities",
-]
+# Panel metric columns — order matches :data:`src.metric_mapping.METRIC_COLUMN_ORDER`.
+METRIC_COLUMNS = list(METRIC_COLUMN_ORDER)
 
 
 def _numeric_coercion_losses(series: pd.Series) -> int:

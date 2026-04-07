@@ -19,36 +19,45 @@ from src.exclusions import build_exclusions_dataframe
 _log = logging.getLogger(__name__)
 
 
-def extract_long_frames(tickers: list[str], *, refresh: bool) -> tuple[list[pd.DataFrame], dict[str, int]]:
-    """Fetch SEC data and run :func:`src.metric_extraction.extract_metrics` per ticker."""
+def extract_long_frames(
+    tickers: list[str], *, refresh: bool
+) -> tuple[list[pd.DataFrame], pd.DataFrame, dict[str, int]]:
+    """Fetch SEC data and run extraction per ticker.
+
+    Returns long metric frames, concatenated **extraction caveat** rows (tag/unit resolution), and
+    aggregated exclusion counts. Caveats are filtered to the final panel when writing artifacts
+    (see :mod:`src.metric_caveats`).
+    """
     from src.data_fetch import get_company_data
-    from src.metric_extraction import extract_metrics
+    from src.metric_extraction import extract_metrics_with_extraction_caveats
 
     agg: dict[str, int] = {}
     out: list[pd.DataFrame] = []
+    caveat_parts: list[pd.DataFrame] = []
     for t in tickers:
         data = get_company_data(t, refresh=refresh)
         per: dict[str, int] = {}
-        out.append(
-            extract_metrics(
-                data["facts"],
-                int(data["cik"]),
-                years=config.YEARS_LOOKBACK,
-                exclusion_counts=per,
-            )
+        vals, cave = extract_metrics_with_extraction_caveats(
+            data["facts"],
+            int(data["cik"]),
+            years=config.YEARS_LOOKBACK,
+            exclusion_counts=per,
         )
+        out.append(vals)
+        caveat_parts.append(cave)
         for k, v in per.items():
             agg[k] = agg.get(k, 0) + v
     if agg:
         _log.info("metric_extraction totals (all tickers): %s", dict(sorted(agg.items())))
-    return out, agg
+    cave_long = pd.concat(caveat_parts, ignore_index=True) if caveat_parts else pd.DataFrame()
+    return out, cave_long, agg
 
 
 def build_panel_from_tickers(tickers: list[str], *, refresh: bool) -> pd.DataFrame:
     """Long metrics → wide panel via :func:`src.normalization.build_panel`."""
     from src.normalization import build_panel
 
-    long_frames, _ = extract_long_frames(tickers, refresh=refresh)
+    long_frames, _cave, _ = extract_long_frames(tickers, refresh=refresh)
     return build_panel(long_frames)
 
 
@@ -56,14 +65,24 @@ def run_pipeline_computation(
     tickers: list[str],
     *,
     refresh: bool = False,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    str,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+]:
     """
     Full in-memory pipeline: panel → features → anomalies → peer signals → markdown report + summaries.
 
     Returns
     -------
-    panel, features, anomalies, report_markdown, data_quality_summary, exclusions_summary, peer_signals
+    panel, features, anomalies, report_markdown, data_quality_summary, exclusions_summary, peer_signals, extraction_caveats_long
         ``peer_signals`` → ``peer_signals.csv`` (cross-sectional rank/z by period; additive layer).
+        ``extraction_caveats_long`` → per-(cik, period, metric) extraction caveat rows (see :mod:`src.metric_caveats`).
     """
     from src.anomaly import detect_anomalies
     from src.data_quality import compute_data_quality_summary
@@ -72,7 +91,7 @@ def run_pipeline_computation(
     from src.peer_signals import compute_peer_signals
     from src.report import generate_report
 
-    long_frames, extraction_counts = extract_long_frames(tickers, refresh=refresh)
+    long_frames, extraction_caveats_long, extraction_counts = extract_long_frames(tickers, refresh=refresh)
     normalization_counts: dict[str, int] = {}
     panel = build_panel(long_frames, exclusion_counts=normalization_counts)
     exclusions_df = build_exclusions_dataframe(extraction_counts, normalization_counts)
@@ -95,7 +114,7 @@ def run_pipeline_computation(
         exclusions=exclusions_df,
         top_n=5,
     )
-    return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df
+    return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df, extraction_caveats_long
 
 
 def write_panel_csv(panel: pd.DataFrame) -> Path:
@@ -154,6 +173,28 @@ def write_peer_signals_csv(peer_signals: pd.DataFrame) -> Path:
     return p.resolve()
 
 
+def write_metric_coverage_artifacts(panel: pd.DataFrame) -> dict[str, Path]:
+    """
+    Write metric coverage CSVs derived from the **final wide panel** (post revenue filter).
+
+    See :mod:`src.metric_coverage` for definitions. Called alongside other Phase 1 artifacts
+    so coverage stays aligned with ``panel.csv``.
+    """
+    from src.metric_coverage import compute_metric_coverage_tables
+
+    config.DATA_ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    tables = compute_metric_coverage_tables(panel)
+    paths = {
+        "metric_coverage_summary": config.DATA_ARTIFACTS / "metric_coverage_summary.csv",
+        "metric_coverage_by_company": config.DATA_ARTIFACTS / "metric_coverage_by_company.csv",
+        "metric_coverage_by_period": config.DATA_ARTIFACTS / "metric_coverage_by_period.csv",
+    }
+    tables["summary"].to_csv(paths["metric_coverage_summary"], index=False)
+    tables["by_company"].to_csv(paths["metric_coverage_by_company"], index=False)
+    tables["by_period"].to_csv(paths["metric_coverage_by_period"], index=False)
+    return {k: v.resolve() for k, v in paths.items()}
+
+
 def write_all_phase1_artifacts(
     panel: pd.DataFrame,
     features: pd.DataFrame,
@@ -163,14 +204,19 @@ def write_all_phase1_artifacts(
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     peer_signals: pd.DataFrame | None = None,
+    extraction_caveats_long: pd.DataFrame | None = None,
 ) -> dict[str, Path]:
     """Write Phase 1 artifacts (panel, features, anomalies, report, optional CSV summaries)."""
+    from src.metric_caveats import write_metric_caveats_artifacts
+
     out: dict[str, Path] = {
         "panel": write_panel_csv(panel),
         "features": write_features_csv(features),
         "anomalies": write_anomalies_csv(anomalies),
         "report": write_report_md(report_markdown),
     }
+    out.update(write_metric_caveats_artifacts(panel, extraction_caveats_long))
+    out.update(write_metric_coverage_artifacts(panel))
     if data_quality is not None:
         out["data_quality"] = write_data_quality_csv(data_quality)
     if exclusions is not None:
@@ -182,13 +228,19 @@ def write_all_phase1_artifacts(
 
 def phase1_paths() -> dict[str, Path]:
     """Expected artifact paths (may or may not exist on disk yet)."""
+    art = config.DATA_ARTIFACTS
     return {
         "panel": (config.DATA_PROCESSED / "panel.csv").resolve(),
         "features": (config.DATA_PROCESSED / "features.csv").resolve(),
-        "anomalies": (config.DATA_ARTIFACTS / "anomalies.csv").resolve(),
-        "report": (config.DATA_ARTIFACTS / "report.md").resolve(),
-        "data_quality": (config.DATA_ARTIFACTS / "data_quality_summary.csv").resolve(),
-        "exclusions": (config.DATA_ARTIFACTS / "exclusions_summary.csv").resolve(),
-        "peer_signals": (config.DATA_ARTIFACTS / "peer_signals.csv").resolve(),
+        "anomalies": (art / "anomalies.csv").resolve(),
+        "report": (art / "report.md").resolve(),
+        "data_quality": (art / "data_quality_summary.csv").resolve(),
+        "exclusions": (art / "exclusions_summary.csv").resolve(),
+        "peer_signals": (art / "peer_signals.csv").resolve(),
+        "metric_coverage_summary": (art / "metric_coverage_summary.csv").resolve(),
+        "metric_coverage_by_company": (art / "metric_coverage_by_company.csv").resolve(),
+        "metric_coverage_by_period": (art / "metric_coverage_by_period.csv").resolve(),
+        "metric_caveats_extraction": (art / "metric_caveats_extraction.csv").resolve(),
+        "metric_caveats_panel": (art / "metric_caveats_panel.csv").resolve(),
         "manual_validation": (config.PROJECT_ROOT / "validation" / "manual_validation.csv").resolve(),
     }

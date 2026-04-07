@@ -3,6 +3,9 @@ Deterministic data-quality summaries for the EDGAR panel pipeline.
 
 Produces a tidy CSV (and optional markdown section) for missingness, stage counts,
 and rows dropped by the revenue requirement — no LLM, no heuristics beyond stated rules.
+
+Per-metric coverage slices (by company / period / overall) are emitted separately by
+:mod:`src.metric_coverage` as ``metric_coverage_*.csv``; see that module for definitions.
 """
 
 from __future__ import annotations

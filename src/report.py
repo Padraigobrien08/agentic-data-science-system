@@ -36,6 +36,11 @@ def _artifact_paths_footer() -> str:
     return (
         "_Artifact paths: `data/artifacts/data_quality_summary.csv`, "
         "`data/artifacts/exclusions_summary.csv`, `data/artifacts/peer_signals.csv`, "
+        "`data/artifacts/metric_coverage_summary.csv`, "
+        "`data/artifacts/metric_coverage_by_company.csv`, "
+        "`data/artifacts/metric_coverage_by_period.csv`, "
+        "`data/artifacts/metric_caveats_extraction.csv`, "
+        "`data/artifacts/metric_caveats_panel.csv`, "
         "`validation/manual_validation.csv`._\n"
     )
 

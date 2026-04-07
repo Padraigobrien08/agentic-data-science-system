@@ -8,6 +8,7 @@ Lightweight, developer-facing workflow to record that specific extracted metrics
 |------|---------|
 | `manual_validation.csv` | One row per validation record; **append** new rows over time. |
 | `manual_validation.md` | Optional session notes / checklist (structured data stays in the CSV). |
+| `metric_mapping.csv` | Canonical metric names, XBRL tags in priority order, units (generated from code). |
 
 ### Record schema (`manual_validation.csv`)
 
@@ -39,9 +40,19 @@ Lightweight, developer-facing workflow to record that specific extracted metrics
    python -m src.manual_validation --metrics revenue,net_income --max-rows 15
    ```
 
-3. **Open SEC data** for each CIK shown in the output. Use the printed `companyfacts` URL, or your cached JSON under `data/raw/` if you already fetched it. Find the relevant **us-gaap** tag and **USD** unit entry matching **form** (10-K / 10-Q), **fp** (Q1–Q4), and **fy** (fiscal year). Tag priority for each metric is defined in `src/metric_extraction.py` (`METRIC_TAGS`).
+3. **Open SEC data** for each CIK shown in the output. Use the printed `companyfacts` URL, or your cached JSON under `data/raw/` if you already fetched it. Find the relevant **us-gaap** tag and **USD** unit entry matching **form** (10-K / 10-Q), **fp** (Q1–Q4), and **fy** (fiscal year). Tag priority for each metric is defined in `src/metric_mapping.py` (see `docs/metric_mapping.md` or `metric_mapping.csv`).
 4. **Compare** the fact `val` (and period metadata) to `extracted_value`. Small float differences can occur from rounding; document in `notes` if material.
 5. **Append a row** to `manual_validation.csv` with your conclusion.
+
+## Metric → tag mapping (authoritative)
+
+| Location | Purpose |
+|----------|---------|
+| `src/metric_mapping.py` | **Single source of truth** — `METRIC_SPECS` defines canonical names, tag priority, and notes. |
+| `validation/metric_mapping.csv` | Machine-readable rows (one per tag); regenerate with `python -m src.metric_mapping`. |
+| `docs/metric_mapping.md` | Human-readable tables; same command regenerates from code. |
+
+If documentation and code disagree, trust `metric_mapping.py` and re-run the generator.
 
 ## Scope
 

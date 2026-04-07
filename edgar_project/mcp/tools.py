@@ -22,6 +22,9 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_PEER_SIGNALS,
+    ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
+    ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
+    ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
     ARTIFACT_KEY_MANUAL_VALIDATION,
     ARTIFACT_KEY_REPORT,
     BuildPanelInput,
@@ -459,7 +462,9 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
 
         tickers = list(config.DEFAULT_TICKERS[:5])
     try:
-        panel, feats, anom, md, dq_df, ex_df, peer_df = ad.run_full_pipeline(tickers, refresh=inp.refresh)
+        panel, feats, anom, md, dq_df, ex_df, peer_df, cave_long = ad.run_full_pipeline(
+            tickers, refresh=inp.refresh
+        )
         prov = _provenance_tickers(tickers)
         an_meta = ad.anomaly_detection_params()
         peer_meta = ad.peer_signal_params()
@@ -478,7 +483,14 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 artifacts={},
             )
         paths = ad.write_all_phase1_artifacts(
-            panel, feats, anom, md, data_quality=dq_df, exclusions=ex_df, peer_signals=peer_df
+            panel,
+            feats,
+            anom,
+            md,
+            data_quality=dq_df,
+            exclusions=ex_df,
+            peer_signals=peer_df,
+            extraction_caveats_long=cave_long,
         )
         pcols = [str(c) for c in panel.columns]
         fcols = [str(c) for c in feats.columns]
@@ -486,6 +498,9 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
         dq_path = paths.get("data_quality")
         ex_path = paths.get("exclusions")
         peer_path = paths.get("peer_signals")
+        cov_sum_path = paths.get("metric_coverage_summary")
+        cov_co_path = paths.get("metric_coverage_by_company")
+        cov_pe_path = paths.get("metric_coverage_by_period")
         artifacts_detail = {
             ARTIFACT_KEY_PANEL: ad.artifact_info(
                 paths["panel"], row_count=len(panel), columns=pcols
@@ -513,6 +528,36 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
             artifacts_detail[ARTIFACT_KEY_PEER_SIGNALS] = ad.artifact_info(
                 peer_path, row_count=len(peer_df), columns=pscols
             )
+        if cov_sum_path is not None and cov_sum_path.is_file():
+            try:
+                cov_sum_df = pd.read_csv(cov_sum_path)
+                artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = ad.artifact_info(
+                    cov_sum_path,
+                    row_count=len(cov_sum_df),
+                    columns=[str(c) for c in cov_sum_df.columns],
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY] = ad.artifact_info(cov_sum_path)
+        if cov_co_path is not None and cov_co_path.is_file():
+            try:
+                cov_co_df = pd.read_csv(cov_co_path)
+                artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = ad.artifact_info(
+                    cov_co_path,
+                    row_count=len(cov_co_df),
+                    columns=[str(c) for c in cov_co_df.columns],
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY] = ad.artifact_info(cov_co_path)
+        if cov_pe_path is not None and cov_pe_path.is_file():
+            try:
+                cov_pe_df = pd.read_csv(cov_pe_path)
+                artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = ad.artifact_info(
+                    cov_pe_path,
+                    row_count=len(cov_pe_df),
+                    columns=[str(c) for c in cov_pe_df.columns],
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD] = ad.artifact_info(cov_pe_path)
         import config
 
         mv_path = (config.PROJECT_ROOT / "validation" / "manual_validation.csv").resolve()
@@ -541,6 +586,9 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "data_quality_summary_path": str(dq_path) if dq_path is not None else None,
                 "exclusions_summary_path": str(ex_path) if ex_path is not None else None,
                 "peer_signals_path": str(peer_path) if peer_path is not None else None,
+                "metric_coverage_summary_path": str(cov_sum_path) if cov_sum_path is not None else None,
+                "metric_coverage_by_company_path": str(cov_co_path) if cov_co_path is not None else None,
+                "metric_coverage_by_period_path": str(cov_pe_path) if cov_pe_path is not None else None,
                 "manual_validation_path": manual_path_data,
                 **an_meta,
                 **peer_meta,
@@ -564,6 +612,21 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 **(
                     {ARTIFACT_KEY_PEER_SIGNALS: str(peer_path)}
                     if peer_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY: str(cov_sum_path)}
+                    if cov_sum_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY: str(cov_co_path)}
+                    if cov_co_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD: str(cov_pe_path)}
+                    if cov_pe_path is not None
                     else {}
                 ),
                 **mv_in_artifacts,

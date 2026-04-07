@@ -274,7 +274,16 @@ def run_full_pipeline(
     tickers: list[str],
     *,
     refresh: bool,
-) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame, str, pd.DataFrame, pd.DataFrame, pd.DataFrame]:
+) -> tuple[
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    str,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+    pd.DataFrame,
+]:
     """Delegate to :func:`src.pipeline_runner.run_pipeline_computation`."""
     ensure_sys_path()
     from src.pipeline_runner import run_pipeline_computation
@@ -315,6 +324,7 @@ def write_all_phase1_artifacts(
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     peer_signals: pd.DataFrame | None = None,
+    extraction_caveats_long: pd.DataFrame | None = None,
 ) -> dict[str, Path]:
     from src.pipeline_runner import write_all_phase1_artifacts as _w
 
@@ -326,6 +336,7 @@ def write_all_phase1_artifacts(
         data_quality=data_quality,
         exclusions=exclusions,
         peer_signals=peer_signals,
+        extraction_caveats_long=extraction_caveats_long,
     )
 
 

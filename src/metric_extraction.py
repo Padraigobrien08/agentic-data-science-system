@@ -1,6 +1,8 @@
 """
 Map SEC XBRL (us-gaap) company facts to a long tidy table:
 cik | period | metric | value
+
+Tag priority and metric definitions live in :mod:`src.metric_mapping` (:data:`~src.metric_mapping.METRIC_TAGS`).
 """
 
 from __future__ import annotations
@@ -12,29 +14,9 @@ from typing import Any
 import pandas as pd
 
 from . import exclusions as ex
+from .metric_mapping import METRIC_TAGS
 
 _log = logging.getLogger(__name__)
-
-# Tag priority (first match wins for a given fiscal period).
-METRIC_TAGS: dict[str, list[str]] = {
-    "revenue": [
-        "Revenues",
-        "RevenueFromContractWithCustomerExcludingAssessedTax",
-        "SalesRevenueNet",
-        "RevenueFromContractWithCustomerIncludingAssessedTax",
-    ],
-    "net_income": [
-        "NetIncomeLoss",
-        "ProfitLoss",
-    ],
-    "total_assets": ["Assets"],
-    "total_liabilities": ["Liabilities"],
-    "operating_cash_flow": [
-        "NetCashProvidedByUsedInOperatingActivities",
-    ],
-    "current_assets": ["AssetsCurrent"],
-    "current_liabilities": ["LiabilitiesCurrent"],
-}
 
 ALLOWED_FORMS = frozenset({"10-K", "10-Q"})
 QUARTER_FPS = frozenset({"Q1", "Q2", "Q3", "Q4"})
@@ -59,6 +41,12 @@ def _gather_tag_rows(
     if not concept:
         return out
     units = concept.get("units") or {}
+    unit_axes_with_facts = [
+        uk
+        for uk, ents in units.items()
+        if isinstance(ents, list) and len(ents) > 0
+    ]
+    multi_unit_variation = len(unit_axes_with_facts) > 1
     for unit_key, entries in units.items():
         if unit_key != "USD":
             # Exclude facts reported in non-USD units (e.g. shares, pure).
@@ -112,9 +100,42 @@ def _gather_tag_rows(
                     "value": v,
                     "filed": e.get("filed") or "",
                     "form": form,
+                    "multi_unit_variation": multi_unit_variation,
                 }
             )
     return out
+
+
+def _build_extraction_caveat_rows(
+    all_rows: list[dict[str, Any]],
+    final_keys: list[dict[str, Any]],
+) -> list[dict[str, Any]]:
+    """Deterministic caveat codes per winning (cik, period, metric) after tag resolution."""
+    caveat_records: list[dict[str, Any]] = []
+    for row in final_keys:
+        metric_name = row["metric"]
+        tag_order = METRIC_TAGS[metric_name]
+        mrows = [r for r in all_rows if r["metric"] == metric_name]
+        key_triple = (metric_name, row["fy"], row["fp"])
+        n_cand = sum(1 for r in mrows if (r["metric"], r["fy"], r["fp"]) == key_triple)
+        codes: list[str] = []
+        if row["tag"] != tag_order[0]:
+            codes.append("fallback_tag_used")
+        if n_cand > 1:
+            codes.append("duplicate_candidates_resolved")
+        if row.get("multi_unit_variation"):
+            codes.append("unresolved_unit_variation")
+        caveat_records.append(
+            {
+                "cik": row["cik"],
+                "period": row["period"],
+                "metric": metric_name,
+                "source_tag": row["tag"],
+                "n_candidates": n_cand,
+                "caveat_codes": ";".join(sorted(set(codes))),
+            }
+        )
+    return caveat_records
 
 
 def _pick_best_per_period(rows: list[dict[str, Any]], tag_order: list[str]) -> dict[tuple[str, int, str], dict[str, Any]]:
@@ -149,6 +170,24 @@ def extract_metrics(
     Parse companyfacts JSON into a long DataFrame.
     Ignores non-USD and non–10-K/10-Q quarterly facts.
     """
+    values_df, _caveats = extract_metrics_with_extraction_caveats(
+        facts_json, cik, years=years, exclusion_counts=exclusion_counts
+    )
+    return values_df
+
+
+def extract_metrics_with_extraction_caveats(
+    facts_json: dict[str, Any],
+    cik: int,
+    *,
+    years: int = 5,
+    exclusion_counts: dict[str, int] | None = None,
+) -> tuple[pd.DataFrame, pd.DataFrame]:
+    """
+    Same as :func:`extract_metrics`, plus a long table of extraction-time caveat codes per
+    ``(cik, period, metric)`` (``fallback_tag_used``, ``duplicate_candidates_resolved``,
+    ``unresolved_unit_variation`` when applicable).
+    """
     year_min = _year_cutoff(years)
     all_rows: list[dict[str, Any]] = []
 
@@ -164,10 +203,15 @@ def extract_metrics(
                 r["tag"] = tag
                 all_rows.append(r)
 
+    empty_vals = pd.DataFrame(columns=["cik", "period", "metric", "value"])
+    empty_cave = pd.DataFrame(
+        columns=["cik", "period", "metric", "source_tag", "n_candidates", "caveat_codes"]
+    )
+
     if not all_rows:
         if exclusion_counts and sum(exclusion_counts.values()) > 0:
             _log.info("metric_extraction cik=%s: no rows after filters; counts=%s", cik, exclusion_counts)
-        return pd.DataFrame(columns=["cik", "period", "metric", "value"])
+        return empty_vals, empty_cave
 
     # Dedupe: per (metric, fy, fp) choose best tag (drops alternate tags / filings).
     by_metric: dict[str, list[str]] = {m: METRIC_TAGS[m] for m in METRIC_TAGS}
@@ -178,21 +222,25 @@ def extract_metrics(
         ex.bump(exclusion_counts, ex.DUPLICATE_RESOLVED, max(0, len(mrows) - len(best_map)))
         final_keys.extend(best_map.values())
 
+    caveat_records = _build_extraction_caveat_rows(all_rows, final_keys)
     df = pd.DataFrame(final_keys)
     if df.empty:
-        return pd.DataFrame(columns=["cik", "period", "metric", "value"])
+        return empty_vals, empty_cave
 
+    cave = pd.DataFrame(caveat_records)
     pre_dedupe = len(df)
     df = df[["cik", "period", "metric", "value"]].drop_duplicates(
         subset=["cik", "period", "metric"], keep="first"
     )
+    cave = cave.drop_duplicates(subset=["cik", "period", "metric"], keep="first")
     ex.bump(exclusion_counts, ex.DROP_DUPLICATE_ROW, max(0, pre_dedupe - len(df)))
     df = df.sort_values(["cik", "period", "metric"]).reset_index(drop=True)
+    cave = cave.sort_values(["cik", "period", "metric"]).reset_index(drop=True)
 
     if exclusion_counts and sum(exclusion_counts.values()) > 0:
         _log.info("metric_extraction cik=%s exclusions: %s", cik, dict(sorted(exclusion_counts.items())))
 
-    return df
+    return df, cave
 
 
 def sort_period_key(series: pd.Series) -> pd.Categorical:

@@ -18,9 +18,18 @@ from src.pipeline_runner import run_pipeline_computation, write_all_phase1_artif
 
 def main() -> None:
     tickers = config.DEFAULT_TICKERS[:5]
-    panel, feats, anom, report_md, dq_df, excl_df, peer_df = run_pipeline_computation(tickers, refresh=False)
+    panel, feats, anom, report_md, dq_df, excl_df, peer_df, cave_long = run_pipeline_computation(
+        tickers, refresh=False
+    )
     write_all_phase1_artifacts(
-        panel, feats, anom, report_md, data_quality=dq_df, exclusions=excl_df, peer_signals=peer_df
+        panel,
+        feats,
+        anom,
+        report_md,
+        data_quality=dq_df,
+        exclusions=excl_df,
+        peer_signals=peer_df,
+        extraction_caveats_long=cave_long,
     )
 
     print("\n=== Panel (head) ===\n")

@@ -28,3 +28,6 @@ SEC_COMPANYFACTS_URL = "https://data.sec.gov/api/xbrl/companyfacts/CIK{cik10}.js
 # Anomaly detection
 ZSCORE_WINDOW = 4
 ZSCORE_THRESHOLD = 2.5
+
+# Panel caveat: flag CIKs with fewer than this many (cik, period) rows after the revenue filter.
+CAVEAT_MIN_PERIODS_PER_CIK = 4
