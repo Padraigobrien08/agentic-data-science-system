@@ -89,6 +89,7 @@ def run_pipeline_computation(
     from src.features import compute_features
     from src.normalization import build_panel
     from src.peer_signals import compute_peer_signals
+    from src.trend_breaks import compute_trend_break_signals
     from src.metric_caveats import compute_panel_metric_caveats, filter_extraction_caveats_to_panel
     from src.metric_coverage import compute_metric_coverage_summary
     from src.report import generate_report
@@ -105,12 +106,18 @@ def run_pipeline_computation(
         )
 
     feats = compute_features(panel)
+    trend_breaks_df = compute_trend_break_signals(feats)
     peer_signals_df = compute_peer_signals(feats)
-    anom = detect_anomalies(feats, peer_signals=peer_signals_df)
-    dq_df = compute_data_quality_summary(long_frames, panel, feats, anom)
-    metric_cov_summary = compute_metric_coverage_summary(panel)
     extraction_caveats_for_report = filter_extraction_caveats_to_panel(extraction_caveats_long, panel)
     panel_caveats_df = compute_panel_metric_caveats(panel)
+    anom = detect_anomalies(
+        feats,
+        peer_signals=peer_signals_df,
+        extraction_caveats=extraction_caveats_for_report,
+        panel_caveats=panel_caveats_df,
+    )
+    dq_df = compute_data_quality_summary(long_frames, panel, feats, anom)
+    metric_cov_summary = compute_metric_coverage_summary(panel)
     md = generate_report(
         anom,
         feats,
@@ -120,6 +127,7 @@ def run_pipeline_computation(
         metric_coverage_summary=metric_cov_summary,
         extraction_caveats=extraction_caveats_for_report,
         panel_caveats=panel_caveats_df,
+        trend_breaks=trend_breaks_df,
         top_n=5,
     )
     return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df, extraction_caveats_long
@@ -181,6 +189,43 @@ def write_peer_signals_csv(peer_signals: pd.DataFrame) -> Path:
     return p.resolve()
 
 
+def write_trend_breaks_csv(trend_breaks: pd.DataFrame) -> Path:
+    """Write ``data/artifacts/trend_break_signals.csv``."""
+    p = config.DATA_ARTIFACTS / "trend_break_signals.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    trend_breaks.to_csv(p, index=False)
+    return p.resolve()
+
+
+def write_unified_findings_csv(unified_findings: pd.DataFrame) -> Path:
+    """Write ``data/artifacts/unified_findings.csv``."""
+    p = config.DATA_ARTIFACTS / "unified_findings.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    unified_findings.to_csv(p, index=False)
+    return p.resolve()
+
+
+def write_findings_summary_by_company_csv(df: pd.DataFrame) -> Path:
+    p = config.DATA_ARTIFACTS / "findings_summary_by_company.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(p, index=False)
+    return p.resolve()
+
+
+def write_findings_summary_by_metric_csv(df: pd.DataFrame) -> Path:
+    p = config.DATA_ARTIFACTS / "findings_summary_by_metric.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(p, index=False)
+    return p.resolve()
+
+
+def write_findings_summary_by_period_csv(df: pd.DataFrame) -> Path:
+    p = config.DATA_ARTIFACTS / "findings_summary_by_period.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    df.to_csv(p, index=False)
+    return p.resolve()
+
+
 def write_metric_coverage_artifacts(panel: pd.DataFrame) -> dict[str, Path]:
     """
     Write metric coverage CSVs derived from the **final wide panel** (post revenue filter).
@@ -231,6 +276,27 @@ def write_all_phase1_artifacts(
         out["exclusions"] = write_exclusions_csv(exclusions)
     if peer_signals is not None:
         out["peer_signals"] = write_peer_signals_csv(peer_signals)
+    from src.trend_breaks import compute_trend_break_signals
+    from src.findings import (
+        build_findings_summary_by_company,
+        build_findings_summary_by_metric,
+        build_findings_summary_by_period,
+        build_unified_findings,
+    )
+
+    trend_breaks_df = compute_trend_break_signals(features)
+    out["trend_breaks"] = write_trend_breaks_csv(trend_breaks_df)
+    uf = build_unified_findings(anomalies, trend_breaks=trend_breaks_df)
+    out["unified_findings"] = write_unified_findings_csv(uf)
+    out["findings_summary_by_company"] = write_findings_summary_by_company_csv(
+        build_findings_summary_by_company(uf)
+    )
+    out["findings_summary_by_metric"] = write_findings_summary_by_metric_csv(
+        build_findings_summary_by_metric(uf)
+    )
+    out["findings_summary_by_period"] = write_findings_summary_by_period_csv(
+        build_findings_summary_by_period(uf)
+    )
     return out
 
 
@@ -245,6 +311,11 @@ def phase1_paths() -> dict[str, Path]:
         "data_quality": (art / "data_quality_summary.csv").resolve(),
         "exclusions": (art / "exclusions_summary.csv").resolve(),
         "peer_signals": (art / "peer_signals.csv").resolve(),
+        "trend_breaks": (art / "trend_break_signals.csv").resolve(),
+        "unified_findings": (art / "unified_findings.csv").resolve(),
+        "findings_summary_by_company": (art / "findings_summary_by_company.csv").resolve(),
+        "findings_summary_by_metric": (art / "findings_summary_by_metric.csv").resolve(),
+        "findings_summary_by_period": (art / "findings_summary_by_period.csv").resolve(),
         "metric_coverage_summary": (art / "metric_coverage_summary.csv").resolve(),
         "metric_coverage_by_company": (art / "metric_coverage_by_company.csv").resolve(),
         "metric_coverage_by_period": (art / "metric_coverage_by_period.csv").resolve(),

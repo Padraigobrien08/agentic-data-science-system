@@ -22,6 +22,11 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_PEER_SIGNALS,
+    ARTIFACT_KEY_TREND_BREAKS,
+    ARTIFACT_KEY_UNIFIED_FINDINGS,
+    ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY,
+    ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC,
+    ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD,
     ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
@@ -404,6 +409,11 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
         peer_path_data: str | None = None
         mc_sum_p = mc_co_p = mc_pe_p = None
         cave_ext_path_data = cave_pan_path_data = None
+        trend_breaks_path_data: str | None = None
+        unified_findings_path_data: str | None = None
+        fs_company_path_data: str | None = None
+        fs_metric_path_data: str | None = None
+        fs_period_path_data: str | None = None
         cov_sum_for_tw = cov_co_for_tw = cov_pe_for_tw = None
         cave_ext_for_tw = cave_pan_for_tw = None
         extraction_caveat_rows_for_summary: int | None = None
@@ -435,6 +445,71 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
             cov_pe_for_tw = phase1_ap.get("metric_coverage_by_period")
             cave_ext_for_tw = phase1_ap.get("metric_caveats_extraction")
             cave_pan_for_tw = phase1_ap.get("metric_caveats_panel")
+            tb_p = phase1_ap.get("trend_breaks")
+            if tb_p is not None and tb_p.is_file():
+                try:
+                    tb_df = pd.read_csv(tb_p)
+                    trend_breaks_path_data = str(tb_p)
+                    src_paths[ARTIFACT_KEY_TREND_BREAKS] = trend_breaks_path_data
+                    sources_detail[ARTIFACT_KEY_TREND_BREAKS] = ad.artifact_info(
+                        tb_p, row_count=len(tb_df), columns=[str(c) for c in tb_df.columns]
+                    )
+                except Exception:
+                    trend_breaks_path_data = str(tb_p)
+                    src_paths[ARTIFACT_KEY_TREND_BREAKS] = trend_breaks_path_data
+                    sources_detail[ARTIFACT_KEY_TREND_BREAKS] = ad.artifact_info(tb_p)
+            uf_p = phase1_ap.get("unified_findings")
+            if uf_p is not None and uf_p.is_file():
+                try:
+                    uf_df = pd.read_csv(uf_p)
+                    unified_findings_path_data = str(uf_p)
+                    src_paths[ARTIFACT_KEY_UNIFIED_FINDINGS] = unified_findings_path_data
+                    sources_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(
+                        uf_p, row_count=len(uf_df), columns=[str(c) for c in uf_df.columns]
+                    )
+                except Exception:
+                    unified_findings_path_data = str(uf_p)
+                    src_paths[ARTIFACT_KEY_UNIFIED_FINDINGS] = unified_findings_path_data
+                    sources_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(uf_p)
+            fsc_p = phase1_ap.get("findings_summary_by_company")
+            if fsc_p is not None and fsc_p.is_file():
+                try:
+                    fsc_df = pd.read_csv(fsc_p)
+                    fs_company_path_data = str(fsc_p)
+                    src_paths[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = fs_company_path_data
+                    sources_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = ad.artifact_info(
+                        fsc_p, row_count=len(fsc_df), columns=[str(c) for c in fsc_df.columns]
+                    )
+                except Exception:
+                    fs_company_path_data = str(fsc_p)
+                    src_paths[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = fs_company_path_data
+                    sources_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = ad.artifact_info(fsc_p)
+            fsm_p = phase1_ap.get("findings_summary_by_metric")
+            if fsm_p is not None and fsm_p.is_file():
+                try:
+                    fsm_df = pd.read_csv(fsm_p)
+                    fs_metric_path_data = str(fsm_p)
+                    src_paths[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = fs_metric_path_data
+                    sources_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = ad.artifact_info(
+                        fsm_p, row_count=len(fsm_df), columns=[str(c) for c in fsm_df.columns]
+                    )
+                except Exception:
+                    fs_metric_path_data = str(fsm_p)
+                    src_paths[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = fs_metric_path_data
+                    sources_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = ad.artifact_info(fsm_p)
+            fsp_p = phase1_ap.get("findings_summary_by_period")
+            if fsp_p is not None and fsp_p.is_file():
+                try:
+                    fsp_df = pd.read_csv(fsp_p)
+                    fs_period_path_data = str(fsp_p)
+                    src_paths[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = fs_period_path_data
+                    sources_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = ad.artifact_info(
+                        fsp_p, row_count=len(fsp_df), columns=[str(c) for c in fsp_df.columns]
+                    )
+                except Exception:
+                    fs_period_path_data = str(fsp_p)
+                    src_paths[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = fs_period_path_data
+                    sources_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = ad.artifact_info(fsp_p)
             cs_p = cov_sum_for_tw
             if cs_p is not None and cs_p.is_file():
                 try:
@@ -526,6 +601,16 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
             art_out[ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION] = cave_ext_path_data
         if cave_pan_path_data:
             art_out[ARTIFACT_KEY_METRIC_CAVEATS_PANEL] = cave_pan_path_data
+        if trend_breaks_path_data:
+            art_out[ARTIFACT_KEY_TREND_BREAKS] = trend_breaks_path_data
+        if unified_findings_path_data:
+            art_out[ARTIFACT_KEY_UNIFIED_FINDINGS] = unified_findings_path_data
+        if fs_company_path_data:
+            art_out[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = fs_company_path_data
+        if fs_metric_path_data:
+            art_out[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = fs_metric_path_data
+        if fs_period_path_data:
+            art_out[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = fs_period_path_data
 
         tw_summary: dict[str, int | None] = {}
         if cave_ext_for_tw is not None and cave_ext_for_tw.is_file():
@@ -562,6 +647,11 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 "metric_coverage_by_period_path": mc_pe_p,
                 "metric_caveats_extraction_path": cave_ext_path_data,
                 "metric_caveats_panel_path": cave_pan_path_data,
+                "trend_break_signals_path": trend_breaks_path_data,
+                "unified_findings_path": unified_findings_path_data,
+                "findings_summary_by_company_path": fs_company_path_data,
+                "findings_summary_by_metric_path": fs_metric_path_data,
+                "findings_summary_by_period_path": fs_period_path_data,
                 "manual_validation_path": manual_str,
                 "trustworthiness_artifact_paths": tw_paths,
                 "trustworthiness_summary": tw_summary,
@@ -633,6 +723,11 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
         cov_pe_path = paths.get("metric_coverage_by_period")
         cave_ext_path = paths.get("metric_caveats_extraction")
         cave_pan_path = paths.get("metric_caveats_panel")
+        trend_breaks_path = paths.get("trend_breaks")
+        unified_findings_path = paths.get("unified_findings")
+        fs_company_path = paths.get("findings_summary_by_company")
+        fs_metric_path = paths.get("findings_summary_by_metric")
+        fs_period_path = paths.get("findings_summary_by_period")
         extraction_caveat_rows_for_summary: int | None = None
         panel_caveat_rows_for_summary: int | None = None
         artifacts_detail = {
@@ -662,6 +757,46 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
             artifacts_detail[ARTIFACT_KEY_PEER_SIGNALS] = ad.artifact_info(
                 peer_path, row_count=len(peer_df), columns=pscols
             )
+        if trend_breaks_path is not None and trend_breaks_path.is_file():
+            try:
+                tbd = pd.read_csv(trend_breaks_path)
+                artifacts_detail[ARTIFACT_KEY_TREND_BREAKS] = ad.artifact_info(
+                    trend_breaks_path, row_count=len(tbd), columns=[str(c) for c in tbd.columns]
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_TREND_BREAKS] = ad.artifact_info(trend_breaks_path)
+        if unified_findings_path is not None and unified_findings_path.is_file():
+            try:
+                ufd = pd.read_csv(unified_findings_path)
+                artifacts_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(
+                    unified_findings_path, row_count=len(ufd), columns=[str(c) for c in ufd.columns]
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(unified_findings_path)
+        if fs_company_path is not None and fs_company_path.is_file():
+            try:
+                fcd = pd.read_csv(fs_company_path)
+                artifacts_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = ad.artifact_info(
+                    fs_company_path, row_count=len(fcd), columns=[str(c) for c in fcd.columns]
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = ad.artifact_info(fs_company_path)
+        if fs_metric_path is not None and fs_metric_path.is_file():
+            try:
+                fmd = pd.read_csv(fs_metric_path)
+                artifacts_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = ad.artifact_info(
+                    fs_metric_path, row_count=len(fmd), columns=[str(c) for c in fmd.columns]
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] = ad.artifact_info(fs_metric_path)
+        if fs_period_path is not None and fs_period_path.is_file():
+            try:
+                fpd = pd.read_csv(fs_period_path)
+                artifacts_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = ad.artifact_info(
+                    fs_period_path, row_count=len(fpd), columns=[str(c) for c in fpd.columns]
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] = ad.artifact_info(fs_period_path)
         if cov_sum_path is not None and cov_sum_path.is_file():
             try:
                 cov_sum_df = pd.read_csv(cov_sum_path)
@@ -760,6 +895,11 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "data_quality_summary_path": str(dq_path) if dq_path is not None else None,
                 "exclusions_summary_path": str(ex_path) if ex_path is not None else None,
                 "peer_signals_path": str(peer_path) if peer_path is not None else None,
+                "trend_break_signals_path": str(trend_breaks_path) if trend_breaks_path is not None else None,
+                "unified_findings_path": str(unified_findings_path) if unified_findings_path is not None else None,
+                "findings_summary_by_company_path": str(fs_company_path) if fs_company_path is not None else None,
+                "findings_summary_by_metric_path": str(fs_metric_path) if fs_metric_path is not None else None,
+                "findings_summary_by_period_path": str(fs_period_path) if fs_period_path is not None else None,
                 "metric_coverage_summary_path": str(cov_sum_path) if cov_sum_path is not None else None,
                 "metric_coverage_by_company_path": str(cov_co_path) if cov_co_path is not None else None,
                 "metric_coverage_by_period_path": str(cov_pe_path) if cov_pe_path is not None else None,
@@ -790,6 +930,31 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 **(
                     {ARTIFACT_KEY_PEER_SIGNALS: str(peer_path)}
                     if peer_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_TREND_BREAKS: str(trend_breaks_path)}
+                    if trend_breaks_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_UNIFIED_FINDINGS: str(unified_findings_path)}
+                    if unified_findings_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY: str(fs_company_path)}
+                    if fs_company_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC: str(fs_metric_path)}
+                    if fs_metric_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD: str(fs_period_path)}
+                    if fs_period_path is not None
                     else {}
                 ),
                 **(

@@ -12,6 +12,11 @@ Column semantics (read with :data:`ANOMALY_OUTPUT_COLUMNS`):
   * ``zscore`` — self-history z for the focal metric when ``self_anomaly``; else NaN.
   * ``z_score_peer`` — leave-one-out cross-section z (focal excluded from mean/std).
   * ``peer_cs_*`` — cross-section from ``peer_signals`` (mean/std **include** the focal firm); distinct from LOO.
+  * ``combined_score_raw`` — additive score from self + peer evidence before caveat penalties.
+  * ``combined_score_adjusted`` / ``combined_score`` — score after deterministic caveat penalties.
+  * ``combined_signal_type`` — compact class for combined layer provenance.
+  * ``contributing_signals`` / ``score_components`` / ``combined_explanation`` —
+    machine-friendly scoring trace (kept intentionally compact for CSV/MCP consumers).
 """
 
 from __future__ import annotations
@@ -65,9 +70,32 @@ ANOMALY_OUTPUT_COLUMNS: tuple[str, ...] = (
     "peer_cs_alert",
     "comparison_scope",
     "caveat_codes",
+    "combined_score_raw",
+    "combined_score_adjusted",
+    "combined_penalty_total",
+    "combined_score",
+    "combined_signal_type",
+    "contributing_signals",
+    "score_components",
+    "combined_explanation",
     "explanation",
     "abs_z",
 )
+
+# Combined layer constants (small deterministic weighting; inspectable and stable).
+_SELF_COMPONENT_CAP = 3.0
+_PEER_COMPONENT_CAP = 3.0
+_AGREEMENT_BONUS = 0.5
+_CAVEAT_PENALTIES: dict[str, float] = {
+    "sparse_history": 0.20,
+    "insufficient_peer_coverage": 0.25,
+    "limited_peer_coverage": 0.25,
+    "peer_zero_variance": 0.15,
+    "no_self_timeseries_flag": 0.10,
+    "fallback_tag_used": 0.10,
+    "low_period_count": 0.10,
+    "missing_prior_period": 0.10,
+}
 
 
 def _rolling_self_z_and_baselines(s: pd.Series, window: int) -> pd.DataFrame:
@@ -238,6 +266,116 @@ def _abs_z_for_sort(
     return float(max(vals)) if vals else 0.0
 
 
+def _direction_agreement(direction: str, peer_cs_alert: str) -> bool:
+    if peer_cs_alert == "extreme_high":
+        return direction == "high"
+    if peer_cs_alert == "extreme_low":
+        return direction == "low"
+    return False
+
+
+def _combined_signal(
+    *,
+    self_anomaly: bool,
+    peer_anomaly: bool,
+    z_self: float,
+    peer_cs_z: float,
+    peer_cs_pct: float,
+    peer_cs_alert: str,
+    direction: str,
+    caveats: str,
+    self_thr: float,
+    peer_thr: float,
+) -> dict[str, object]:
+    """
+    Deterministic combined score components.
+
+    Score rules (additive, low complexity):
+      - self_component = min(|self_z| / self_threshold, cap), only when self_anomaly.
+      - peer_component = max(
+            min(|peer_cs_z| / peer_threshold, cap),
+            abs(peer_pct_rank - 50) / 50
+        ), only when peer_anomaly.
+      - agreement_bonus = 0.5 when both layers flag and direction agrees.
+      - caveat_penalty = sum of known caveat penalties from ``caveat_codes``.
+      - combined_score = max(0, self_component + peer_component + agreement_bonus - caveat_penalty)
+    """
+    self_component = 0.0
+    if self_anomaly and np.isfinite(z_self) and self_thr > 0:
+        self_component = min(abs(float(z_self)) / float(self_thr), _SELF_COMPONENT_CAP)
+
+    peer_component = 0.0
+    if peer_anomaly:
+        z_norm = 0.0
+        if np.isfinite(peer_cs_z) and peer_thr > 0:
+            z_norm = min(abs(float(peer_cs_z)) / float(peer_thr), _PEER_COMPONENT_CAP)
+        pct_norm = 0.0
+        if np.isfinite(peer_cs_pct):
+            pct_norm = min(abs(float(peer_cs_pct) - 50.0) / 50.0, 1.0)
+        peer_component = max(z_norm, pct_norm)
+
+    agreement_bonus = (
+        _AGREEMENT_BONUS if self_anomaly and peer_anomaly and _direction_agreement(direction, peer_cs_alert) else 0.0
+    )
+
+    tokens = [t.strip() for t in str(caveats).split(";") if t.strip() and t.strip() != "none"]
+    caveat_penalty = sum(_CAVEAT_PENALTIES.get(t, 0.0) for t in sorted(set(tokens)))
+    raw = self_component + peer_component + agreement_bonus
+    adjusted = max(0.0, raw - caveat_penalty)
+
+    if self_anomaly and peer_anomaly:
+        signal_type = "dual_confirmed" if agreement_bonus > 0 else "dual_mixed"
+    elif self_anomaly:
+        signal_type = "self_only"
+    else:
+        signal_type = "peer_only"
+
+    contributing: list[str] = []
+    if self_component > 0:
+        contributing.append("self_z")
+    if peer_component > 0:
+        contributing.append("peer_cs")
+    if agreement_bonus > 0:
+        contributing.append("agreement")
+    if caveat_penalty > 0:
+        contributing.append("caveat_penalty")
+
+    comp = (
+        f"self={self_component:.3f};peer={peer_component:.3f};"
+        f"agreement={agreement_bonus:.3f};penalty={caveat_penalty:.3f};raw={raw:.3f};score={adjusted:.3f}"
+    )
+    expl = (
+        f"type={signal_type}; score={adjusted:.3f}; raw_score={raw:.3f}; self_component={self_component:.3f}; "
+        f"peer_component={peer_component:.3f}; agreement_bonus={agreement_bonus:.3f}; "
+        f"caveat_penalty={caveat_penalty:.3f}; contributors={','.join(contributing) if contributing else 'none'}"
+    )
+    return {
+        "combined_score_raw": float(raw),
+        "combined_score_adjusted": float(adjusted),
+        "combined_penalty_total": float(caveat_penalty),
+        "combined_score": float(adjusted),
+        "combined_signal_type": signal_type,
+        "contributing_signals": ";".join(contributing) if contributing else "none",
+        "score_components": comp,
+        "combined_explanation": expl,
+    }
+
+
+def _split_caveat_codes(raw: object) -> list[str]:
+    s = str(raw or "").strip()
+    if not s or s == "none":
+        return []
+    return [p.strip() for p in s.split(";") if p.strip() and p.strip() != "none"]
+
+
+def _merge_caveat_codes(*parts: object) -> str:
+    out: list[str] = []
+    for p in parts:
+        out.extend(_split_caveat_codes(p))
+    uniq = sorted(set(out))
+    return ";".join(uniq) if uniq else "none"
+
+
 def _collect_self_anomalies(features: pd.DataFrame) -> pd.DataFrame:
     """Rows where |self z| > threshold (internal building block)."""
     rows: list[dict] = []
@@ -302,8 +440,13 @@ def _merge_anomaly_layers(
     features: pd.DataFrame,
     self_df: pd.DataFrame,
     peer_full: pd.DataFrame,
+    *,
+    extraction_caveats: pd.DataFrame | None = None,
+    panel_caveats: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """Union self-flagged and peer-layer-flagged keys; one row per (cik, period, metric)."""
+    from src.peer_signals import PEER_Z_ALERT_THRESHOLD
+
     thr = config.ZSCORE_THRESHOLD
     w = config.ZSCORE_WINDOW
 
@@ -312,6 +455,16 @@ def _merge_anomaly_layers(
     peer_idx = (
         peer_full.set_index(["cik", "period", "metric"], drop=False)
         if not peer_full.empty
+        else None
+    )
+    ext_idx = (
+        extraction_caveats.set_index(["cik", "period", "metric"], drop=False)
+        if extraction_caveats is not None and not extraction_caveats.empty
+        else None
+    )
+    panel_idx = (
+        panel_caveats.set_index(["cik", "period"], drop=False)
+        if panel_caveats is not None and not panel_caveats.empty
         else None
     )
 
@@ -406,6 +559,20 @@ def _merge_anomaly_layers(
             peer_z=float(pz_loo),
             self_anomaly=self_ok,
         )
+        ext_codes = "none"
+        if ext_idx is not None and key in ext_idx.index:
+            ext_row = ext_idx.loc[key]
+            if isinstance(ext_row, pd.DataFrame):
+                ext_row = ext_row.iloc[0]
+            ext_codes = str(ext_row.get("caveat_codes", "none"))
+        pan_codes = "none"
+        pan_key = (cik, period)
+        if panel_idx is not None and pan_key in panel_idx.index:
+            pan_row = panel_idx.loc[pan_key]
+            if isinstance(pan_row, pd.DataFrame):
+                pan_row = pan_row.iloc[0]
+            pan_codes = str(pan_row.get("caveat_codes", "none"))
+        merged_caveats = _merge_caveat_codes(caveats, ext_codes, pan_codes)
         expl = _explanation_line(
             category=category,
             direction=direction,
@@ -418,13 +585,25 @@ def _merge_anomaly_layers(
             peer_z_loo=float(pz_loo),
             peer_n_loo=int(peer_group_n),
             thr=thr,
-            caveats=caveats,
+            caveats=merged_caveats,
             peer_cs_alert=peer_cs_alert,
             self_anomaly=self_ok,
             peer_anomaly=peer_extreme,
         )
         abs_z = _abs_z_for_sort(self_ok, peer_extreme, z_self if self_ok else np.nan, peer_cs_z, float(pz_loo))
 
+        combined = _combined_signal(
+            self_anomaly=self_ok,
+            peer_anomaly=peer_extreme,
+            z_self=z_self if self_ok else np.nan,
+            peer_cs_z=peer_cs_z,
+            peer_cs_pct=peer_cs_pct,
+            peer_cs_alert=peer_cs_alert,
+            direction=direction,
+            caveats=merged_caveats,
+            self_thr=thr,
+            peer_thr=float(PEER_Z_ALERT_THRESHOLD),
+        )
         rows_out.append(
             {
                 "cik": cik,
@@ -450,14 +629,15 @@ def _merge_anomaly_layers(
                 "peer_cs_z_signal": peer_cs_zsig if prow is not None else "unavailable",
                 "peer_cs_alert": peer_cs_alert if prow is not None else "unavailable",
                 "comparison_scope": _comparison_scope_label(category),
-                "caveat_codes": caveats,
+                "caveat_codes": merged_caveats,
+                **combined,
                 "explanation": expl,
                 "abs_z": abs_z,
             }
         )
 
     out = pd.DataFrame(rows_out)
-    out = out.sort_values("abs_z", ascending=False).reset_index(drop=True)
+    out = out.sort_values(["combined_score", "abs_z"], ascending=[False, False]).reset_index(drop=True)
     return out.reindex(columns=list(ANOMALY_OUTPUT_COLUMNS))
 
 
@@ -465,6 +645,8 @@ def detect_anomalies(
     features: pd.DataFrame,
     *,
     peer_signals: pd.DataFrame | None = None,
+    extraction_caveats: pd.DataFrame | None = None,
+    panel_caveats: pd.DataFrame | None = None,
 ) -> pd.DataFrame:
     """
     Self-relative anomalies merged with peer-layer extremes from ``peer_signals``.
@@ -479,4 +661,10 @@ def detect_anomalies(
     if self_df.empty and (peer_full.empty or peer_full["peer_alert"].isin(_PEER_ALERT_EXTREME).sum() == 0):
         return pd.DataFrame(columns=list(ANOMALY_OUTPUT_COLUMNS))
 
-    return _merge_anomaly_layers(features, self_df, peer_full)
+    return _merge_anomaly_layers(
+        features,
+        self_df,
+        peer_full,
+        extraction_caveats=extraction_caveats,
+        panel_caveats=panel_caveats,
+    )

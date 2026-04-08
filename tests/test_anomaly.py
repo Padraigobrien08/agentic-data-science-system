@@ -43,6 +43,11 @@ def test_detect_anomalies_has_explanation_columns() -> None:
     assert anom.iloc[0]["anomaly_category"] in ("self_relative", "combined")
     assert anom.iloc[0]["comparison_scope"] in ("self_history", "combined")
     assert bool(anom.iloc[0]["self_anomaly"])
+    assert "combined_score" in anom.columns
+    assert "combined_signal_type" in anom.columns
+    assert "contributing_signals" in anom.columns
+    assert "score_components" in anom.columns
+    assert "combined_explanation" in anom.columns
 
 
 def test_peer_loo_z_numeric() -> None:
@@ -141,3 +146,101 @@ def test_explanation_includes_caveat_token_when_sparse_history() -> None:
     assert not anom.empty
     expl = str(anom.iloc[0]["explanation"])
     assert "caveats=" in expl
+
+
+def test_combined_score_has_expected_trace_fields() -> None:
+    from src.features import compute_features
+    from src.peer_signals import compute_peer_signals
+
+    periods = [f"2020-Q{i}" for i in range(1, 5)] + [f"2021-Q{i}" for i in range(1, 5)]
+    n = len(periods)
+    rev_cik1 = np.linspace(100.0, 118.0, n - 1).tolist() + [500.0]
+    rows: list[dict] = []
+    for cik, series in [(1, rev_cik1), (2, [100.0] * n), (3, [110.0] * n)]:
+        for i, p in enumerate(periods):
+            r = float(series[i])
+            rows.append(
+                {
+                    "cik": cik,
+                    "period": p,
+                    "revenue": r,
+                    "net_income": r * 0.1,
+                    "total_assets": 1000.0,
+                    "total_liabilities": 400.0,
+                    "current_assets": 100.0,
+                    "current_liabilities": 50.0,
+                }
+            )
+    feats = compute_features(pd.DataFrame(rows))
+    ps = compute_peer_signals(feats)
+    anom = detect_anomalies(feats, peer_signals=ps)
+    assert not anom.empty
+    r0 = anom.iloc[0]
+    assert float(r0["combined_score"]) >= 0.0
+    assert str(r0["combined_signal_type"]) in ("dual_confirmed", "dual_mixed", "self_only", "peer_only")
+    assert "score=" in str(r0["combined_explanation"])
+    assert "self=" in str(r0["score_components"])
+
+
+def test_caveat_penalty_reduces_combined_score() -> None:
+    from src.features import compute_features
+
+    panel = _panel_features_monotone_growth()
+    feats = compute_features(panel)
+    anom = detect_anomalies(feats)
+    assert not anom.empty
+    r0 = anom.iloc[0]
+    comps = str(r0["score_components"])
+    assert "penalty=" in comps
+    parts = dict(part.split("=", 1) for part in comps.split(";") if "=" in part)
+    assert float(parts["score"]) <= float(parts["raw"])
+    assert float(r0["combined_score_raw"]) >= float(r0["combined_score_adjusted"])
+    assert float(r0["combined_score"]) == float(r0["combined_score_adjusted"])
+
+
+def test_external_trust_caveats_reduce_adjusted_score() -> None:
+    from src.features import compute_features
+    from src.peer_signals import compute_peer_signals
+
+    periods = [f"2020-Q{i}" for i in range(1, 5)] + [f"2021-Q{i}" for i in range(1, 5)]
+    n = len(periods)
+    rev_cik1 = np.linspace(100.0, 118.0, n - 1).tolist() + [500.0]
+    rows: list[dict] = []
+    for cik, series in [(1, rev_cik1), (2, [100.0] * n), (3, [110.0] * n)]:
+        for i, p in enumerate(periods):
+            r = float(series[i])
+            rows.append(
+                {
+                    "cik": cik,
+                    "period": p,
+                    "revenue": r,
+                    "net_income": r * 0.1,
+                    "total_assets": 1000.0,
+                    "total_liabilities": 400.0,
+                    "current_assets": 100.0,
+                    "current_liabilities": 50.0,
+                }
+            )
+    feats = compute_features(pd.DataFrame(rows))
+    ps = compute_peer_signals(feats)
+    base = detect_anomalies(feats, peer_signals=ps)
+    assert not base.empty
+    top = base.iloc[0]
+    key = {"cik": int(top["cik"]), "period": str(top["period"]), "metric": str(top["metric"])}
+    ext = pd.DataFrame([{**key, "source_tag": "Revenues", "n_candidates": 1, "caveat_codes": "fallback_tag_used"}])
+    pan = pd.DataFrame([{"cik": key["cik"], "period": key["period"], "caveat_codes": "low_period_count;missing_prior_period"}])
+    penalized = detect_anomalies(
+        feats,
+        peer_signals=ps,
+        extraction_caveats=ext,
+        panel_caveats=pan,
+    )
+    row = penalized[
+        (penalized["cik"] == key["cik"])
+        & (penalized["period"] == key["period"])
+        & (penalized["metric"] == key["metric"])
+    ].iloc[0]
+    assert "fallback_tag_used" in str(row["caveat_codes"])
+    assert "low_period_count" in str(row["caveat_codes"])
+    assert "missing_prior_period" in str(row["caveat_codes"])
+    assert float(row["combined_score_adjusted"]) < float(row["combined_score_raw"])

@@ -215,6 +215,8 @@ def test_credibility_footer_lists_stable_trust_artifact_paths() -> None:
     foot = _artifact_paths_footer()
     assert "relative to project root" in foot
     for needle in (
+        "trend_break_signals.csv",
+        "unified_findings.csv",
         "metric_coverage_summary.csv",
         "metric_coverage_by_company.csv",
         "metric_coverage_by_period.csv",
@@ -239,6 +241,46 @@ def test_trust_metric_coverage_warns_when_metric_name_column_missing(tmp_path: P
         panel_caveats=pd.DataFrame(),
     )
     assert "no `metric_name` column" in md
+
+
+def test_report_includes_trend_break_section_when_artifact_exists(
+    monkeypatch, tmp_path: Path
+) -> None:
+    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    pd.DataFrame(
+        [
+            {
+                "cik": 1,
+                "period": "2021-Q1",
+                "metric": "net_margin",
+                "value": 0.1,
+                "history_points": 6,
+                "window_prior": 3,
+                "window_recent": 2,
+                "prior_mean": 0.08,
+                "recent_mean": 0.12,
+                "mean_shift": 0.04,
+                "prior_slope": 0.01,
+                "recent_slope": 0.02,
+                "slope_shift": 0.01,
+                "consecutive_direction": "improving",
+                "consecutive_len": 2,
+                "short_history_flag": False,
+                "trend_score": 2.2,
+                "trend_signal_type": "strong_shift",
+                "explanation": "metric=net_margin; prior_window=3; recent_window=2; mean_shift=0.04",
+            }
+        ]
+    ).to_csv(tmp_path / "trend_break_signals.csv", index=False)
+    md = generate_report(
+        pd.DataFrame(),
+        _minimal_features(),
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+    )
+    assert "## Trend-break signals (window shifts)" in md
+    assert "strong_shift" in md
 
 
 def test_trustworthiness_snapshot_includes_metric_coverage_and_caveat_rollups() -> None:

@@ -94,3 +94,24 @@ def test_write_metric_coverage_artifacts_matches_compute_tables(monkeypatch: pyt
     pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_summary"]), expected["summary"])
     pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_by_company"]), expected["by_company"])
     pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_by_period"]), expected["by_period"])
+
+
+def test_write_all_phase1_artifacts_includes_trend_breaks(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+    from src.pipeline_runner import write_all_phase1_artifacts
+
+    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    monkeypatch.setattr(config, "DATA_PROCESSED", tmp_path)
+    panel = _minimal_panel()
+    paths = write_all_phase1_artifacts(
+        panel=panel,
+        features=panel.copy(),
+        anomalies=pd.DataFrame(),
+        report_markdown="# r\n",
+    )
+    assert "trend_breaks" in paths
+    assert paths["trend_breaks"].name == "trend_break_signals.csv"
+    assert "unified_findings" in paths
+    assert paths["unified_findings"].name == "unified_findings.csv"
+    assert paths["findings_summary_by_company"].name == "findings_summary_by_company.csv"
+    assert paths["findings_summary_by_metric"].name == "findings_summary_by_metric.csv"
+    assert paths["findings_summary_by_period"].name == "findings_summary_by_period.csv"

@@ -177,6 +177,8 @@ def _artifact_paths_footer() -> str:
         f"{ap('data_quality_summary.csv')}, "
         f"{ap('exclusions_summary.csv')}, "
         f"{ap('peer_signals.csv')}, "
+        f"{ap('trend_break_signals.csv')}, "
+        f"{ap('unified_findings.csv')}, "
         f"{ap('metric_coverage_summary.csv')}, "
         f"{ap('metric_coverage_by_company.csv')}, "
         f"{ap('metric_coverage_by_period.csv')}, "
@@ -274,6 +276,67 @@ def _credibility_peer_summary(peer_signals: pd.DataFrame | None, anomalies: pd.D
     return "".join(lines)
 
 
+def _trend_breaks_compact(trend_breaks: pd.DataFrame | None) -> str:
+    """Compact trend-break summary with explicit short-history handling."""
+    if trend_breaks is None or trend_breaks.empty:
+        return "_No trend-break rows (run pipeline or provide `trend_break_signals.csv`)._\n\n"
+    need = {"trend_signal_type", "trend_score", "metric", "cik", "period"}
+    if not need.issubset(set(trend_breaks.columns)):
+        return _df_to_md(trend_breaks.head(12), max_rows=12)
+    sh = int((trend_breaks["trend_signal_type"] == "short_history").sum())
+    lines = [f"- **Short-history rows**: {sh} of {len(trend_breaks)}\n"]
+    focused = trend_breaks[trend_breaks["trend_signal_type"].isin(["strong_shift", "moderate_shift"])].copy()
+    if focused.empty:
+        lines.append("_No moderate/strong trend-break rows at current thresholds._\n\n")
+        return "".join(lines)
+    show_cols = [
+        c
+        for c in (
+            "cik",
+            "period",
+            "metric",
+            "trend_signal_type",
+            "trend_score",
+            "mean_shift",
+            "slope_shift",
+            "consecutive_direction",
+            "history_points",
+            "window_prior",
+            "window_recent",
+        )
+        if c in focused.columns
+    ]
+    lines.append("\n")
+    lines.append(_df_to_md(focused.sort_values("trend_score", ascending=False)[show_cols].head(12), max_rows=12))
+    return "".join(lines)
+
+
+def _unified_findings_compact(unified_findings: pd.DataFrame | None, *, top_n: int = 12) -> str:
+    if unified_findings is None or unified_findings.empty:
+        return "_No unified findings rows (run pipeline or provide `unified_findings.csv`)._\n\n"
+    need = {"finding_source", "finding_type", "score_adjusted", "cik", "period", "metric"}
+    if not need.issubset(set(unified_findings.columns)):
+        return _df_to_md(unified_findings.head(top_n), max_rows=top_n)
+    show_cols = [
+        c
+        for c in (
+            "finding_source",
+            "finding_type",
+            "cik",
+            "period",
+            "metric",
+            "direction",
+            "score_adjusted",
+            "score_raw",
+            "score_penalty",
+            "caveat_codes",
+        )
+        if c in unified_findings.columns
+    ]
+    top = unified_findings.sort_values("score_adjusted", ascending=False).head(top_n)
+    return _df_to_md(top[show_cols], max_rows=top_n)
+
+
 def _trustworthiness_snapshot(
     *,
     metric_coverage_summary: pd.DataFrame | None,
@@ -366,6 +429,8 @@ def generate_report(
     metric_coverage_summary: pd.DataFrame | None = None,
     extraction_caveats: pd.DataFrame | None = None,
     panel_caveats: pd.DataFrame | None = None,
+    trend_breaks: pd.DataFrame | None = None,
+    unified_findings: pd.DataFrame | None = None,
     top_n: int = 5,
 ) -> str:
     if manual_validation_path is None:
@@ -380,6 +445,10 @@ def generate_report(
         extraction_caveats = _try_read_artifact_csv("metric_caveats_extraction.csv")
     if panel_caveats is None:
         panel_caveats = _try_read_artifact_csv("metric_caveats_panel.csv")
+    if trend_breaks is None:
+        trend_breaks = _try_read_artifact_csv("trend_break_signals.csv")
+    if unified_findings is None:
+        unified_findings = _try_read_artifact_csv("unified_findings.csv")
 
     lines: list[str] = []
     lines.append("# EDGAR Anomaly Report (V1)\n")
@@ -413,6 +482,17 @@ def generate_report(
     ]
     avail = [c for c in feat_cols if c in features.columns]
     lines.append(_df_to_md(features[avail].head(20)))
+    lines.append("## Trend-break signals (window shifts)\n")
+    lines.append(
+        "_Deterministic window comparison on feature trends: prior-window mean/slope vs recent-window mean/slope; "
+        "includes explicit short-history rows._\n\n"
+    )
+    lines.append(_trend_breaks_compact(trend_breaks))
+    lines.append("## Unified findings (high-level)\n")
+    lines.append(
+        "_Single machine-friendly table combining anomaly and trend-break findings with caveat-adjusted ranking._\n\n"
+    )
+    lines.append(_unified_findings_compact(unified_findings))
 
     lines.append("## Anomaly table (unified: self + peer layer)\n")
     lines.append(
