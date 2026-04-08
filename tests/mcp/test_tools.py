@@ -15,6 +15,11 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_PEER_SIGNALS,
+    ARTIFACT_KEY_TREND_BREAKS,
+    ARTIFACT_KEY_UNIFIED_FINDINGS,
+    ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY,
+    ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC,
+    ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD,
     ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION,
     ARTIFACT_KEY_METRIC_CAVEATS_PANEL,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
@@ -147,9 +152,19 @@ def test_run_pipeline_mocked_artifact_keys(
     assert ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD in art
     assert ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION in art
     assert ARTIFACT_KEY_METRIC_CAVEATS_PANEL in art
+    assert ARTIFACT_KEY_TREND_BREAKS in art
+    assert ARTIFACT_KEY_UNIFIED_FINDINGS in art
+    assert ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY in art
+    assert ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC in art
+    assert ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD in art
     assert str(tmp_artifact_paths["panel"]) in art[ARTIFACT_KEY_PANEL]
     assert "artifacts_detail" in env.data
     assert "trustworthiness_artifact_paths" in env.data
+    assert "unified_findings_path" in env.data
+    assert "findings_summary_by_company_path" in env.data
+    assert "findings_summary_by_metric_path" in env.data
+    assert "findings_summary_by_period_path" in env.data
+    assert "combined_findings_count" in env.data
 
 
 def test_build_panel_no_data_empty_panel() -> None:

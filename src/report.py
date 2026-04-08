@@ -179,6 +179,9 @@ def _artifact_paths_footer() -> str:
         f"{ap('peer_signals.csv')}, "
         f"{ap('trend_break_signals.csv')}, "
         f"{ap('unified_findings.csv')}, "
+        f"{ap('findings_summary_by_company.csv')}, "
+        f"{ap('findings_summary_by_metric.csv')}, "
+        f"{ap('findings_summary_by_period.csv')}, "
         f"{ap('metric_coverage_summary.csv')}, "
         f"{ap('metric_coverage_by_company.csv')}, "
         f"{ap('metric_coverage_by_period.csv')}, "
@@ -329,12 +332,148 @@ def _unified_findings_compact(unified_findings: pd.DataFrame | None, *, top_n: i
             "score_adjusted",
             "score_raw",
             "score_penalty",
+            "overlap_count",
+            "overlap_sources",
             "caveat_codes",
         )
         if c in unified_findings.columns
     ]
     top = unified_findings.sort_values("score_adjusted", ascending=False).head(top_n)
     return _df_to_md(top[show_cols], max_rows=top_n)
+
+
+def _top_combined_findings(unified_findings: pd.DataFrame | None, *, top_n: int = 8) -> str:
+    if unified_findings is None or unified_findings.empty:
+        return "_No unified findings rows._\n\n"
+    need = {"finding_source", "finding_type", "score_adjusted"}
+    if not need.issubset(set(unified_findings.columns)):
+        return _df_to_md(unified_findings.head(top_n), max_rows=top_n)
+    uf = unified_findings.copy()
+    uf["_prio"] = (
+        ((uf["finding_source"] == "anomaly") & (uf["finding_type"] == "combined"))
+        .astype(int)
+    )
+    show_cols = [
+        c
+        for c in (
+            "finding_source",
+            "finding_type",
+            "cik",
+            "period",
+            "metric",
+            "direction",
+            "score_adjusted",
+            "score_raw",
+            "score_penalty",
+            "overlap_count",
+            "overlap_sources",
+            "caveat_codes",
+        )
+        if c in uf.columns
+    ]
+    top = uf.sort_values(["_prio", "score_adjusted"], ascending=[False, False]).head(top_n)
+    return _df_to_md(top[show_cols], max_rows=top_n)
+
+
+def _company_summary_compact(findings_by_company: pd.DataFrame | None, *, top_n: int = 8) -> str:
+    if findings_by_company is None or findings_by_company.empty:
+        return "_No company-level findings summary rows._\n\n"
+    show_cols = [
+        c
+        for c in (
+            "cik",
+            "finding_count",
+            "high_severity_count",
+            "avg_score_adjusted",
+            "sum_score_adjusted",
+            "sum_score_penalty",
+            "top_finding_category",
+            "repeated_deterioration_count",
+        )
+        if c in findings_by_company.columns
+    ]
+    top = findings_by_company.sort_values("sum_score_adjusted", ascending=False).head(top_n)
+    return _df_to_md(top[show_cols], max_rows=top_n)
+
+
+def _peer_set_summary_compact(
+    findings_by_metric: pd.DataFrame | None,
+    findings_by_period: pd.DataFrame | None,
+    *,
+    top_n: int = 8,
+) -> str:
+    parts: list[str] = []
+    if findings_by_metric is None or findings_by_metric.empty:
+        parts.append("_No metric-level summary rows._\n\n")
+    else:
+        parts.append("**Metrics with highest adjusted severity**\n\n")
+        mcols = [
+            c
+            for c in (
+                "metric",
+                "finding_count",
+                "high_severity_count",
+                "avg_score_adjusted",
+                "sum_score_adjusted",
+                "sum_score_penalty",
+                "top_finding_category",
+            )
+            if c in findings_by_metric.columns
+        ]
+        parts.append(
+            _df_to_md(
+                findings_by_metric.sort_values("sum_score_adjusted", ascending=False).head(top_n)[mcols],
+                max_rows=top_n,
+            )
+        )
+    if findings_by_period is None or findings_by_period.empty:
+        parts.append("_No period-level summary rows._\n\n")
+    else:
+        parts.append("\n**Periods with broad finding concentration**\n\n")
+        pcols = [
+            c
+            for c in (
+                "period",
+                "finding_count",
+                "high_severity_count",
+                "avg_score_adjusted",
+                "sum_score_adjusted",
+                "sum_score_penalty",
+                "top_finding_category",
+            )
+            if c in findings_by_period.columns
+        ]
+        parts.append(
+            _df_to_md(
+                findings_by_period.sort_values("sum_score_adjusted", ascending=False).head(top_n)[pcols],
+                max_rows=top_n,
+            )
+        )
+    return "".join(parts)
+
+
+def _caveat_interpretation_notes(unified_findings: pd.DataFrame | None) -> str:
+    if unified_findings is None or unified_findings.empty or "caveat_codes" not in unified_findings.columns:
+        return "_No caveat-aware interpretation rows._\n\n"
+    uf = unified_findings.copy()
+    total = len(uf)
+    with_c = uf["caveat_codes"].astype(str).str.strip().ne("none").sum()
+    lines = [f"- **Findings with caveats**: {int(with_c)} of {int(total)}\n"]
+    if "score_penalty" in uf.columns:
+        pen = pd.to_numeric(uf["score_penalty"], errors="coerce").fillna(0.0)
+        lines.append(f"- **Total caveat penalty applied**: {float(pen.sum()):.3f}\n")
+        lines.append(f"- **Average penalty per finding**: {float(pen.mean()):.3f}\n")
+    codes: list[str] = []
+    for raw in uf["caveat_codes"].astype(str):
+        s = raw.strip()
+        if not s or s == "none":
+            continue
+        codes.extend([p.strip() for p in s.split(";") if p.strip()])
+    if codes:
+        vc = pd.Series(codes).value_counts().head(8)
+        lines.append("- **Most frequent caveat codes**: " + "; ".join(f"`{k}`={int(v)}" for k, v in vc.items()) + "\n")
+    lines.append("\n")
+    return "".join(lines)
 
 
 def _trustworthiness_snapshot(
@@ -431,6 +570,9 @@ def generate_report(
     panel_caveats: pd.DataFrame | None = None,
     trend_breaks: pd.DataFrame | None = None,
     unified_findings: pd.DataFrame | None = None,
+    findings_summary_by_company: pd.DataFrame | None = None,
+    findings_summary_by_metric: pd.DataFrame | None = None,
+    findings_summary_by_period: pd.DataFrame | None = None,
     top_n: int = 5,
 ) -> str:
     if manual_validation_path is None:
@@ -449,6 +591,12 @@ def generate_report(
         trend_breaks = _try_read_artifact_csv("trend_break_signals.csv")
     if unified_findings is None:
         unified_findings = _try_read_artifact_csv("unified_findings.csv")
+    if findings_summary_by_company is None:
+        findings_summary_by_company = _try_read_artifact_csv("findings_summary_by_company.csv")
+    if findings_summary_by_metric is None:
+        findings_summary_by_metric = _try_read_artifact_csv("findings_summary_by_metric.csv")
+    if findings_summary_by_period is None:
+        findings_summary_by_period = _try_read_artifact_csv("findings_summary_by_period.csv")
 
     lines: list[str] = []
     lines.append("# EDGAR Anomaly Report (V1)\n")
@@ -488,11 +636,22 @@ def generate_report(
         "includes explicit short-history rows._\n\n"
     )
     lines.append(_trend_breaks_compact(trend_breaks))
+    lines.append("## Top combined findings\n")
+    lines.append(
+        "_Highest adjusted findings first; prioritizes rows where self-relative and peer-relative evidence agree._\n\n"
+    )
+    lines.append(_top_combined_findings(unified_findings, top_n=max(8, top_n)))
     lines.append("## Unified findings (high-level)\n")
     lines.append(
         "_Single machine-friendly table combining anomaly and trend-break findings with caveat-adjusted ranking._\n\n"
     )
     lines.append(_unified_findings_compact(unified_findings))
+    lines.append("## Company-level summary\n")
+    lines.append(_company_summary_compact(findings_summary_by_company))
+    lines.append("## Peer-set summary\n")
+    lines.append(_peer_set_summary_compact(findings_summary_by_metric, findings_summary_by_period))
+    lines.append("## Caveat-aware interpretation notes\n")
+    lines.append(_caveat_interpretation_notes(unified_findings))
 
     lines.append("## Anomaly table (unified: self + peer layer)\n")
     lines.append(
@@ -501,7 +660,11 @@ def generate_report(
         "``anomaly_category`` = `self_relative` | `peer_relative` | `combined`. "
         "`z_score_peer` = LOO cross-section; `peer_cs_*` = full cross-section from peer_signals._ \n\n"
     )
-    lines.append(_df_to_md(anomalies, max_rows=50))
+    acols = _anomaly_compact_columns(anomalies)
+    if acols:
+        lines.append(_df_to_md(anomalies[acols], max_rows=25))
+    else:
+        lines.append(_df_to_md(anomalies, max_rows=25))
 
     lines.append(f"## Top {top_n} anomalies (numeric detail)\n")
     top = anomalies.head(top_n)

@@ -58,3 +58,22 @@ def test_trend_break_explanation_has_window_and_shift_trace() -> None:
     assert "recent_window=" in expl
     assert "mean_shift=" in expl
     assert "slope_shift=" in expl
+
+
+def test_trend_break_detection_is_deterministic_for_same_inputs() -> None:
+    feats = compute_features(_panel_with_shift())
+    t1 = compute_trend_break_signals(feats)
+    t2 = compute_trend_break_signals(feats)
+    cols = [
+        "cik",
+        "period",
+        "metric",
+        "trend_score",
+        "trend_signal_type",
+        "mean_shift",
+        "slope_shift",
+        "consecutive_direction",
+        "short_history_flag",
+        "explanation",
+    ]
+    pd.testing.assert_frame_equal(t1[cols].reset_index(drop=True), t2[cols].reset_index(drop=True))

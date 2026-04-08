@@ -37,6 +37,11 @@ def tmp_artifact_paths(tmp_path: Path) -> dict[str, Path]:
         "data_quality": tmp_path / "data_quality_summary.csv",
         "exclusions": tmp_path / "exclusions_summary.csv",
         "peer_signals": tmp_path / "peer_signals.csv",
+        "trend_breaks": tmp_path / "trend_break_signals.csv",
+        "unified_findings": tmp_path / "unified_findings.csv",
+        "findings_summary_by_company": tmp_path / "findings_summary_by_company.csv",
+        "findings_summary_by_metric": tmp_path / "findings_summary_by_metric.csv",
+        "findings_summary_by_period": tmp_path / "findings_summary_by_period.csv",
     }
     for p in paths.values():
         p.write_text("x", encoding="utf-8")

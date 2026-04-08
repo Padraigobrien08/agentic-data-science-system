@@ -244,3 +244,45 @@ def test_external_trust_caveats_reduce_adjusted_score() -> None:
     assert "low_period_count" in str(row["caveat_codes"])
     assert "missing_prior_period" in str(row["caveat_codes"])
     assert float(row["combined_score_adjusted"]) < float(row["combined_score_raw"])
+
+
+def test_combined_scoring_is_deterministic_for_same_inputs() -> None:
+    from src.features import compute_features
+    from src.peer_signals import compute_peer_signals
+
+    periods = [f"2020-Q{i}" for i in range(1, 5)] + [f"2021-Q{i}" for i in range(1, 5)]
+    n = len(periods)
+    rev_cik1 = np.linspace(100.0, 118.0, n - 1).tolist() + [500.0]
+    rows: list[dict] = []
+    for cik, series in [(1, rev_cik1), (2, [100.0] * n), (3, [110.0] * n)]:
+        for i, p in enumerate(periods):
+            r = float(series[i])
+            rows.append(
+                {
+                    "cik": cik,
+                    "period": p,
+                    "revenue": r,
+                    "net_income": r * 0.1,
+                    "total_assets": 1000.0,
+                    "total_liabilities": 400.0,
+                    "current_assets": 100.0,
+                    "current_liabilities": 50.0,
+                }
+            )
+    feats = compute_features(pd.DataFrame(rows))
+    ps = compute_peer_signals(feats)
+    a1 = detect_anomalies(feats, peer_signals=ps)
+    a2 = detect_anomalies(feats, peer_signals=ps)
+    cols = [
+        "cik",
+        "period",
+        "metric",
+        "combined_score_raw",
+        "combined_score_adjusted",
+        "combined_penalty_total",
+        "combined_score",
+        "combined_signal_type",
+        "contributing_signals",
+        "score_components",
+    ]
+    pd.testing.assert_frame_equal(a1[cols].reset_index(drop=True), a2[cols].reset_index(drop=True))

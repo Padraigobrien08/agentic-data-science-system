@@ -414,6 +414,7 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
         fs_company_path_data: str | None = None
         fs_metric_path_data: str | None = None
         fs_period_path_data: str | None = None
+        combined_findings_count: int | None = None
         cov_sum_for_tw = cov_co_for_tw = cov_pe_for_tw = None
         cave_ext_for_tw = cave_pan_for_tw = None
         extraction_caveat_rows_for_summary: int | None = None
@@ -462,6 +463,8 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
             if uf_p is not None and uf_p.is_file():
                 try:
                     uf_df = pd.read_csv(uf_p)
+                    if "finding_type" in uf_df.columns:
+                        combined_findings_count = int((uf_df["finding_type"].astype(str) == "combined").sum())
                     unified_findings_path_data = str(uf_p)
                     src_paths[ARTIFACT_KEY_UNIFIED_FINDINGS] = unified_findings_path_data
                     sources_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(
@@ -652,6 +655,7 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 "findings_summary_by_company_path": fs_company_path_data,
                 "findings_summary_by_metric_path": fs_metric_path_data,
                 "findings_summary_by_period_path": fs_period_path_data,
+                "combined_findings_count": combined_findings_count,
                 "manual_validation_path": manual_str,
                 "trustworthiness_artifact_paths": tw_paths,
                 "trustworthiness_summary": tw_summary,
@@ -730,6 +734,7 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
         fs_period_path = paths.get("findings_summary_by_period")
         extraction_caveat_rows_for_summary: int | None = None
         panel_caveat_rows_for_summary: int | None = None
+        combined_findings_count: int | None = None
         artifacts_detail = {
             ARTIFACT_KEY_PANEL: ad.artifact_info(
                 paths["panel"], row_count=len(panel), columns=pcols
@@ -768,6 +773,8 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
         if unified_findings_path is not None and unified_findings_path.is_file():
             try:
                 ufd = pd.read_csv(unified_findings_path)
+                if "finding_type" in ufd.columns:
+                    combined_findings_count = int((ufd["finding_type"].astype(str) == "combined").sum())
                 artifacts_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(
                     unified_findings_path, row_count=len(ufd), columns=[str(c) for c in ufd.columns]
                 )
@@ -900,6 +907,7 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "findings_summary_by_company_path": str(fs_company_path) if fs_company_path is not None else None,
                 "findings_summary_by_metric_path": str(fs_metric_path) if fs_metric_path is not None else None,
                 "findings_summary_by_period_path": str(fs_period_path) if fs_period_path is not None else None,
+                "combined_findings_count": combined_findings_count,
                 "metric_coverage_summary_path": str(cov_sum_path) if cov_sum_path is not None else None,
                 "metric_coverage_by_company_path": str(cov_co_path) if cov_co_path is not None else None,
                 "metric_coverage_by_period_path": str(cov_pe_path) if cov_pe_path is not None else None,

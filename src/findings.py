@@ -23,6 +23,8 @@ UNIFIED_FINDINGS_COLUMNS: tuple[str, ...] = (
     "score_raw",
     "score_adjusted",
     "score_penalty",
+    "overlap_count",
+    "overlap_sources",
     "caveat_codes",
     "explanation_summary",
     "provenance_artifacts",
@@ -91,6 +93,8 @@ def build_unified_findings(
                     "score_raw": raw,
                     "score_adjusted": adj,
                     "score_penalty": pen,
+                    "overlap_count": 1,
+                    "overlap_sources": "anomaly",
                     "caveat_codes": caveats,
                     "explanation_summary": expl,
                     "provenance_artifacts": "anomalies_csv;peer_signals_csv",
@@ -119,6 +123,8 @@ def build_unified_findings(
                     "score_raw": score,
                     "score_adjusted": score,
                     "score_penalty": 0.0,
+                    "overlap_count": 1,
+                    "overlap_sources": "trend_break",
                     "caveat_codes": "none",
                     "explanation_summary": expl,
                     "provenance_artifacts": "trend_break_signals_csv;features_csv",
@@ -129,6 +135,10 @@ def build_unified_findings(
         return pd.DataFrame(columns=list(UNIFIED_FINDINGS_COLUMNS))
 
     out = pd.DataFrame(rows).reindex(columns=list(UNIFIED_FINDINGS_COLUMNS))
+    key_cols = ["cik", "period", "metric"]
+    grp = out.groupby(key_cols, sort=False)["finding_source"]
+    out["overlap_count"] = grp.transform("nunique").astype(int)
+    out["overlap_sources"] = grp.transform(lambda s: ";".join(sorted(set(str(x) for x in s))))
     out["_src_ord"] = out["finding_source"].map(_SOURCE_PRIORITY).fillna(99)
     out = out.sort_values(
         ["score_adjusted", "score_raw", "_src_ord", "cik", "period", "metric", "finding_type"],

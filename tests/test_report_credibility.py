@@ -131,6 +131,10 @@ def test_report_includes_credibility_blocks_when_inputs_non_empty(tmp_path: Path
     assert "data_quality_summary.csv" in md
     assert "## Peer-relative detail (cross-section by period)" in md
     assert "## Top 1 anomaly explanations (machine-readable)" in md
+    assert "## Top combined findings" in md
+    assert "## Company-level summary" in md
+    assert "## Peer-set summary" in md
+    assert "## Caveat-aware interpretation notes" in md
 
 
 def test_report_normalized_panel_section_tolerates_missing_balance_sheet_columns() -> None:
@@ -217,6 +221,9 @@ def test_credibility_footer_lists_stable_trust_artifact_paths() -> None:
     for needle in (
         "trend_break_signals.csv",
         "unified_findings.csv",
+        "findings_summary_by_company.csv",
+        "findings_summary_by_metric.csv",
+        "findings_summary_by_period.csv",
         "metric_coverage_summary.csv",
         "metric_coverage_by_company.csv",
         "metric_coverage_by_period.csv",
@@ -281,6 +288,78 @@ def test_report_includes_trend_break_section_when_artifact_exists(
     )
     assert "## Trend-break signals (window shifts)" in md
     assert "strong_shift" in md
+
+
+def test_report_uses_summary_artifacts_when_present(monkeypatch, tmp_path: Path) -> None:
+    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    pd.DataFrame(
+        [
+            {
+                "finding_id": "f1",
+                "finding_source": "anomaly",
+                "finding_type": "combined",
+                "cik": 1,
+                "period": "2021-Q1",
+                "metric": "revenue",
+                "direction": "high",
+                "score_raw": 3.0,
+                "score_adjusted": 2.6,
+                "score_penalty": 0.4,
+                "caveat_codes": "sparse_history",
+                "explanation_summary": "x",
+                "provenance_artifacts": "anomalies_csv",
+            }
+        ]
+    ).to_csv(tmp_path / "unified_findings.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "cik": 1,
+                "finding_count": 1,
+                "high_severity_count": 1,
+                "avg_score_adjusted": 2.6,
+                "sum_score_adjusted": 2.6,
+                "sum_score_penalty": 0.4,
+                "top_finding_category": "combined",
+                "repeated_deterioration_count": 0,
+            }
+        ]
+    ).to_csv(tmp_path / "findings_summary_by_company.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "metric": "revenue",
+                "finding_count": 1,
+                "high_severity_count": 1,
+                "avg_score_adjusted": 2.6,
+                "sum_score_adjusted": 2.6,
+                "sum_score_penalty": 0.4,
+                "top_finding_category": "combined",
+            }
+        ]
+    ).to_csv(tmp_path / "findings_summary_by_metric.csv", index=False)
+    pd.DataFrame(
+        [
+            {
+                "period": "2021-Q1",
+                "finding_count": 1,
+                "high_severity_count": 1,
+                "avg_score_adjusted": 2.6,
+                "sum_score_adjusted": 2.6,
+                "sum_score_penalty": 0.4,
+                "top_finding_category": "combined",
+            }
+        ]
+    ).to_csv(tmp_path / "findings_summary_by_period.csv", index=False)
+    md = generate_report(
+        pd.DataFrame(),
+        _minimal_features(),
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+    )
+    assert "revenue" in md
+    assert "combined" in md
 
 
 def test_trustworthiness_snapshot_includes_metric_coverage_and_caveat_rollups() -> None:

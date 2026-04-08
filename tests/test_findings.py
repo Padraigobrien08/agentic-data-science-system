@@ -38,7 +38,7 @@ def test_build_unified_findings_schema_and_sort() -> None:
             {
                 "cik": 1,
                 "period": "2021-Q1",
-                "metric": "net_margin",
+                "metric": "revenue",
                 "trend_signal_type": "strong_shift",
                 "trend_score": 2.1,
                 "consecutive_direction": "improving",
@@ -51,6 +51,9 @@ def test_build_unified_findings_schema_and_sort() -> None:
         assert c in out.columns
     assert out.iloc[0]["finding_source"] == "anomaly"
     assert float(out.iloc[0]["score_adjusted"]) >= float(out.iloc[1]["score_adjusted"])
+    # Same (cik, period, metric) appears in both anomaly + trend rows -> explicit overlap metadata.
+    assert int(out.iloc[0]["overlap_count"]) == 2
+    assert str(out.iloc[0]["overlap_sources"]) == "anomaly;trend_break"
 
 
 def test_build_unified_findings_omits_low_value_trend_watch_rows() -> None:

@@ -90,6 +90,12 @@ def run_pipeline_computation(
     from src.normalization import build_panel
     from src.peer_signals import compute_peer_signals
     from src.trend_breaks import compute_trend_break_signals
+    from src.findings import (
+        build_findings_summary_by_company,
+        build_findings_summary_by_metric,
+        build_findings_summary_by_period,
+        build_unified_findings,
+    )
     from src.metric_caveats import compute_panel_metric_caveats, filter_extraction_caveats_to_panel
     from src.metric_coverage import compute_metric_coverage_summary
     from src.report import generate_report
@@ -116,6 +122,10 @@ def run_pipeline_computation(
         extraction_caveats=extraction_caveats_for_report,
         panel_caveats=panel_caveats_df,
     )
+    unified_findings_df = build_unified_findings(anom, trend_breaks=trend_breaks_df)
+    findings_by_company_df = build_findings_summary_by_company(unified_findings_df)
+    findings_by_metric_df = build_findings_summary_by_metric(unified_findings_df)
+    findings_by_period_df = build_findings_summary_by_period(unified_findings_df)
     dq_df = compute_data_quality_summary(long_frames, panel, feats, anom)
     metric_cov_summary = compute_metric_coverage_summary(panel)
     md = generate_report(
@@ -128,6 +138,10 @@ def run_pipeline_computation(
         extraction_caveats=extraction_caveats_for_report,
         panel_caveats=panel_caveats_df,
         trend_breaks=trend_breaks_df,
+        unified_findings=unified_findings_df,
+        findings_summary_by_company=findings_by_company_df,
+        findings_summary_by_metric=findings_by_metric_df,
+        findings_summary_by_period=findings_by_period_df,
         top_n=5,
     )
     return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df, extraction_caveats_long

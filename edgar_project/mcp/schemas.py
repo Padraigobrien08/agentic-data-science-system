@@ -59,7 +59,8 @@ class ToolResponseEnvelope(BaseModel):
     and for anomalies ``zscore_window``, ``zscore_threshold``, ``metrics_analyzed``.
     After ``run_pipeline`` / ``generate_report`` (default paths), optional paths may appear:
     ``data_quality_summary_path``, ``exclusions_summary_path``, ``peer_signals_path``,
-    ``manual_validation_path``, metric coverage paths, caveat CSV paths (see artifact keys),
+    ``manual_validation_path``, trend/unified findings paths, findings summary paths,
+    metric coverage paths, caveat CSV paths (see artifact keys), ``combined_findings_count``,
     and ``trustworthiness_artifact_paths`` (non-empty role → path map).
     """
 
