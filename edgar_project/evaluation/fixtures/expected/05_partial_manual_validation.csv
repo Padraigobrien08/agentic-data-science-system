@@ -1,0 +1,3 @@
+company,metric,period,finding_type,reason,status
+PDAT,revenue_growth_qoq,2024-Q2,missing_data,Missing values reduce confidence,review
+QDAT,net_income,2024-Q2,missing_data,Missing values reduce confidence,review

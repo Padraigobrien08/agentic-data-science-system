@@ -1,0 +1,2 @@
+cik,period,metric,anomaly_category,direction,caveat_codes,combined_score_raw,combined_score_adjusted
+4001,2024-Q4,revenue,self_relative,deteriorating,sparse_history;insufficient_peer_coverage,2.20,1.75

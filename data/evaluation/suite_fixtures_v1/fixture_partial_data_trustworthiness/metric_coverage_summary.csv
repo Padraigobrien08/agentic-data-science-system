@@ -1,0 +1,8 @@
+metric_name,n_slots,available_count,missing_count,coverage_ratio
+revenue,4,3,1,0.75
+net_income,4,3,1,0.75
+total_assets,4,0,4,0.0
+total_liabilities,4,0,4,0.0
+operating_cash_flow,4,0,4,0.0
+current_assets,4,0,4,0.0
+current_liabilities,4,0,4,0.0

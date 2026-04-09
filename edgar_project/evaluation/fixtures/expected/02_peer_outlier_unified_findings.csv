@@ -1,0 +1,2 @@
+finding_id,finding_source,finding_type,cik,period,metric,direction,score_raw,score_adjusted,score_penalty,category,caveat_codes
+anomaly:2004:2024-Q1:net_income:peer_relative,anomaly,peer_relative,2004,2024-Q1,net_income,deteriorating,2.60,2.60,0.00,peer_outlier,none

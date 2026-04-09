@@ -1,0 +1,51 @@
+{
+  "case_id": "example_case_id",
+  "description": "Describe what this benchmark validates.",
+  "tags": ["smoke"],
+  "input": {
+    "mode": "fixture",
+    "tickers": ["AAPL"],
+    "goal": "Detect a known-looking deterioration pattern in a controlled fixture.",
+    "refresh": false,
+    "peer_set_label": "big_tech_core",
+    "fixture_id": "deterioration_pattern_v1",
+    "fixture_paths": {
+      "panel_csv": "edgar_project/evaluation/fixtures/golden_artifacts/deterioration_panel_v1.csv",
+      "features_csv": "edgar_project/evaluation/fixtures/golden_artifacts/deterioration_features_v1.csv"
+    },
+    "notes": "Use fixture-backed deterministic inputs."
+  },
+  "fixtures": {
+    "golden_findings_csv": "edgar_project/evaluation/fixtures/golden_artifacts/expected_findings_v1.csv"
+  },
+  "max_runtime_seconds": 60.0,
+  "expected_artifacts": {
+    "expected_statuses": ["passed"],
+    "required_keys": ["anomalies_csv", "report_md", "unified_findings_csv"],
+    "items": [
+      {"key": "anomalies_csv", "required": true, "min_rows": 1},
+      {"key": "report_md", "required": true, "must_contain": ["## Findings", "## Trustworthiness"]},
+      {"key": "manual_validation_csv", "required": false}
+    ],
+    "qualitative_checks": [
+      "Trustworthiness artifacts are produced and referenced."
+    ]
+  },
+  "expected_findings": {
+    "required_types": ["anomaly", "trend_break"],
+    "required_categories": ["deterioration"],
+    "total_count": {"minimum": 1, "maximum": 50},
+    "by_type_min_counts": {"anomaly": 1},
+    "by_category_min_counts": {"deterioration": 1},
+    "qualitative_expectations": [
+      "Unified findings contain expected categories with coherent descriptions."
+    ]
+  },
+  "expected_metrics": {
+    "runtime_seconds": {"minimum": 0, "maximum": 60}
+  },
+  "qualitative_expectations": [
+    "Known-looking deterioration signal appears in top findings."
+  ],
+  "notes": "Template only. Adjust fields for live or hybrid cases."
+}

@@ -1,0 +1,2 @@
+stage,input_rows,output_rows,dropped_rows,missing_critical_fields,notes
+features,4,4,0,3,Partial metric availability expected for trustworthiness test case.

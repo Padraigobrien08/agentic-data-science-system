@@ -1,0 +1,16 @@
+category,name,value,unit,notes
+stage_count,long_metric_rows,0.0,rows,
+stage_count,distinct_cik_long,0.0,companies,
+stage_count,wide_panel_rows_before_revenue_required,0.0,rows,
+stage_count,panel_rows_after_revenue_required,4.0,rows,
+stage_count,feature_rows,4.0,rows,
+stage_count,anomaly_rows,1.0,rows,
+drop_rule,rows_removed_missing_revenue,0.0,rows,wide_panel_before_revenue_filter minus panel (revenue required)
+missingness_metric,revenue,0.0,frac_na,
+missingness_metric,net_income,0.0,frac_na,
+missingness_metric,total_assets,1.0,frac_na,column absent treated as all missing
+missingness_metric,total_liabilities,1.0,frac_na,column absent treated as all missing
+missingness_metric,operating_cash_flow,1.0,frac_na,column absent treated as all missing
+missingness_metric,current_assets,1.0,frac_na,column absent treated as all missing
+missingness_metric,current_liabilities,1.0,frac_na,column absent treated as all missing
+missingness_company,3001,0.0,frac_na_cells,"na_cells=0,total_cells=8"

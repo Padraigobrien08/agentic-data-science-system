@@ -1,0 +1,49 @@
+{
+  "suite_id": "suite_smoke",
+  "output_dir": "data/evaluation",
+  "cases": [
+    {
+      "case_id": "smoke_aapl_msft",
+      "description": "Minimal deterministic smoke benchmark for core outputs.",
+      "tags": ["smoke", "pipeline", "deterministic"],
+      "input": {
+        "mode": "live",
+        "tickers": ["AAPL", "MSFT"],
+        "goal": "Run anomaly analysis for a core peer set and produce baseline artifacts.",
+        "refresh": false
+      },
+      "max_runtime_seconds": 120.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["panel_csv", "features_csv", "anomalies_csv", "report_md"],
+        "items": [
+          {"key": "panel_csv", "required": true},
+          {"key": "features_csv", "required": true},
+          {"key": "anomalies_csv", "required": true},
+          {"key": "report_md", "required": true, "must_contain": ["# EDGAR", "## Findings"]},
+          {"key": "manual_validation_csv", "required": false},
+          {"key": "metric_coverage_summary_csv", "required": false}
+        ],
+        "qualitative_checks": [
+          "Trustworthiness-related artifacts are present or explicitly marked unavailable."
+        ]
+      },
+      "expected_findings": {
+        "required_types": ["anomaly"],
+        "required_categories": [],
+        "total_count": {"minimum": 1},
+        "by_type_min_counts": {"anomaly": 1},
+        "qualitative_expectations": [
+          "Unified findings include at least one materially unusual signal."
+        ]
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 120}
+      },
+      "qualitative_expectations": [
+        "Output report remains readable and includes a findings section."
+      ],
+      "notes": "Scaffold case: execution logic will be wired in runner TODOs."
+    }
+  ]
+}

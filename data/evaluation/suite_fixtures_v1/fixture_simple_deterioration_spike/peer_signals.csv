@@ -1,0 +1,17 @@
+cik,period,metric,value,peer_group_n,peer_coverage,peer_pct_rank,peer_z,peer_rank_signal,peer_z_signal,peer_alert
+1001,2023-Q1,current_ratio,1.8,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q1,debt_to_assets,0.4,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q1,net_margin,0.12,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q1,revenue,100.0,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q2,current_ratio,1.79,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q2,debt_to_assets,0.41,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q2,net_margin,0.121,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q2,revenue,101.0,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q3,current_ratio,1.78,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q3,debt_to_assets,0.41,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q3,net_margin,0.119,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q3,revenue,102.0,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q4,current_ratio,1.1,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q4,debt_to_assets,0.66,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q4,net_margin,0.035,1,insufficient_peers,,,unavailable,unavailable,unavailable
+1001,2023-Q4,revenue,72.0,1,insufficient_peers,,,unavailable,unavailable,unavailable

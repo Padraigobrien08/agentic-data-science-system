@@ -1,0 +1,5 @@
+metric,coverage_ratio,covered_rows,total_rows,coverage_band
+revenue,0.75,3,4,medium
+net_income,0.75,3,4,medium
+current_ratio,0.75,3,4,medium
+debt_to_assets,0.75,3,4,medium

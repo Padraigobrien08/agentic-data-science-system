@@ -1,0 +1,7 @@
+ticker,cik,period,metric,extracted_value,expected_value,source_reference,checked_by,checked_date,validation_status,notes
+,4001,2024-Q2,net_income,13.0,,,,,,
+,4001,2024-Q2,revenue,110.0,,,,,,
+,4001,2024-Q3,net_income,12.8,,,,,,
+,4001,2024-Q3,revenue,111.0,,,,,,
+,4001,2024-Q4,net_income,4.2,,,,,,
+,4001,2024-Q4,revenue,83.0,,,,,,

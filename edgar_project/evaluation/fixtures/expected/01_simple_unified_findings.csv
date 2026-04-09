@@ -1,0 +1,2 @@
+finding_id,finding_source,finding_type,cik,period,metric,direction,score_raw,score_adjusted,score_penalty,category,caveat_codes
+anomaly:1001:2023-Q4:revenue:self_relative,anomaly,self_relative,1001,2023-Q4,revenue,deteriorating,2.80,2.50,0.30,deterioration,sparse_history

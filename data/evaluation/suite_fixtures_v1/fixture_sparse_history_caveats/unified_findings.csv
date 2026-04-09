@@ -1,0 +1,2 @@
+finding_id,finding_source,finding_type,cik,period,metric,direction,score_raw,score_adjusted,score_penalty,overlap_count,overlap_sources,caveat_codes,explanation_summary,provenance_artifacts
+anomaly:4001:2024-Q4:revenue_growth_qoq:self_relative,anomaly,self_relative,4001,2024-Q4,revenue_growth_qoq,low,3.0,2.55,0.45,1,anomaly,insufficient_peer_coverage;sparse_history,"type=self_only; score=2.550; raw_score=3.000; self_component=3.000; peer_component=0.000; agreement_bonus=0.000; caveat_penalty=0.450; contributors=self_z,caveat_penalty",anomalies_csv;peer_signals_csv

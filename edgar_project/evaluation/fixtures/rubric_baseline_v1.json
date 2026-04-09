@@ -1,0 +1,24 @@
+{
+  "rubric_id": "deterministic_baseline_v1",
+  "pass_threshold": 0.8,
+  "criteria": [
+    {
+      "key": "artifacts_present",
+      "description": "All required artifact keys are produced.",
+      "weight": 0.4,
+      "minimum": 1.0
+    },
+    {
+      "key": "artifact_content_checks",
+      "description": "Required substrings/checks pass for key artifacts.",
+      "weight": 0.3,
+      "minimum": 0.8
+    },
+    {
+      "key": "runtime_budget",
+      "description": "Case runtime remains within deterministic budget.",
+      "weight": 0.3,
+      "minimum": 1.0
+    }
+  ]
+}

@@ -1,0 +1,211 @@
+{
+  "suite_id": "suite_fixtures_v1",
+  "output_dir": "data/evaluation",
+  "cases": [
+    {
+      "case_id": "fixture_simple_deterioration_spike",
+      "description": "Single-company obvious deterioration/spike anomaly on controlled mini panel.",
+      "tags": ["fixture", "anomaly", "deterioration", "core"],
+      "input": {
+        "mode": "fixture",
+        "tickers": ["ACME"],
+        "goal": "Flag obvious deterioration anomaly without live SEC dependencies.",
+        "refresh": false,
+        "fixture_id": "simple_deterioration_spike_v1",
+        "fixture_paths": {
+          "features_csv": "edgar_project/evaluation/fixtures/data/01_simple_anomaly_features.csv",
+          "expected_unified_findings_csv": "edgar_project/evaluation/fixtures/expected/01_simple_unified_findings.csv"
+        }
+      },
+      "fixtures": {
+        "case_notes_md": "edgar_project/evaluation/fixtures/cases/README.md"
+      },
+      "max_runtime_seconds": 10.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["anomalies_csv", "unified_findings_csv"],
+        "items": [
+          {"key": "anomalies_csv", "required": true, "min_rows": 1},
+          {"key": "unified_findings_csv", "required": true, "min_rows": 1}
+        ],
+        "qualitative_checks": [
+          "Top finding should correspond to the deterioration quarter."
+        ]
+      },
+      "expected_findings": {
+        "required_types": ["self_relative"],
+        "required_categories": ["deterioration"],
+        "total_count": {"minimum": 1, "maximum": 5},
+        "by_type_min_counts": {"self_relative": 1},
+        "by_category_min_counts": {"deterioration": 1},
+        "qualitative_expectations": [
+          "Explanation mentions a deteriorating move versus prior baseline."
+        ]
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "notes": "First-line deterministic sanity check for obvious anomaly behavior."
+    },
+    {
+      "case_id": "fixture_peer_relative_outlier",
+      "description": "Peer-set cross-sectional outlier where one company deviates sharply from peers.",
+      "tags": ["fixture", "peer", "outlier", "core"],
+      "input": {
+        "mode": "fixture",
+        "tickers": ["ALFA", "BETA", "GAMMA", "DELTA"],
+        "goal": "Confirm peer-relative outlier detection on a controlled peer set.",
+        "refresh": false,
+        "peer_set_label": "synthetic_quad_v1",
+        "fixture_id": "peer_outlier_v1",
+        "fixture_paths": {
+          "features_csv": "edgar_project/evaluation/fixtures/data/02_peer_outlier_features.csv",
+          "expected_unified_findings_csv": "edgar_project/evaluation/fixtures/expected/02_peer_outlier_unified_findings.csv"
+        }
+      },
+      "max_runtime_seconds": 10.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["anomalies_csv", "peer_signals_csv", "unified_findings_csv"],
+        "items": [
+          {"key": "peer_signals_csv", "required": true, "min_rows": 1},
+          {"key": "unified_findings_csv", "required": true, "min_rows": 1}
+        ],
+        "qualitative_checks": [
+          "Outlier company should dominate top peer-relative findings."
+        ]
+      },
+      "expected_findings": {
+        "required_types": ["peer_relative"],
+        "required_categories": ["peer_outlier"],
+        "total_count": {"minimum": 1, "maximum": 8},
+        "by_type_min_counts": {"peer_relative": 1},
+        "by_category_min_counts": {"peer_outlier": 1}
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "notes": "Validates peer-layer behavior independent of live filings."
+    },
+    {
+      "case_id": "fixture_anomaly_trend_overlap",
+      "description": "Controlled overlap case where anomaly and trend-break coincide on same metric/period.",
+      "tags": ["fixture", "overlap", "trend_break", "anomaly"],
+      "input": {
+        "mode": "fixture",
+        "tickers": ["OMEGA"],
+        "goal": "Ensure overlap logic preserves both anomaly and trend-break signals.",
+        "refresh": false,
+        "fixture_id": "overlap_anomaly_trend_v1",
+        "fixture_paths": {
+          "features_csv": "edgar_project/evaluation/fixtures/data/03_overlap_features.csv",
+          "trend_break_signals_csv": "edgar_project/evaluation/fixtures/data/03_overlap_trend_break_signals.csv",
+          "expected_unified_findings_csv": "edgar_project/evaluation/fixtures/expected/03_overlap_unified_findings.csv"
+        }
+      },
+      "max_runtime_seconds": 10.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["anomalies_csv", "trend_break_signals_csv", "unified_findings_csv"],
+        "items": [
+          {"key": "trend_break_signals_csv", "required": true, "min_rows": 1},
+          {"key": "unified_findings_csv", "required": true, "min_rows": 2}
+        ],
+        "qualitative_checks": [
+          "Unified findings should include both anomaly and trend-break entries for overlap key."
+        ]
+      },
+      "expected_findings": {
+        "required_types": ["self_relative", "strong_shift"],
+        "required_categories": ["deterioration", "trend_break"],
+        "total_count": {"minimum": 2, "maximum": 10},
+        "by_type_min_counts": {"self_relative": 1, "strong_shift": 1},
+        "by_category_min_counts": {"deterioration": 1, "trend_break": 1}
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "notes": "Confirms overlap_count/overlap_sources behavior in unified findings."
+    },
+    {
+      "case_id": "fixture_sparse_history_caveats",
+      "description": "Sparse time history case where caveat annotations should be present.",
+      "tags": ["fixture", "caveats", "sparse_history", "trustworthiness"],
+      "input": {
+        "mode": "fixture",
+        "tickers": ["SPRS"],
+        "goal": "Verify sparse-history caveats are emitted for limited baseline windows.",
+        "refresh": false,
+        "fixture_id": "sparse_history_v1",
+        "fixture_paths": {
+          "features_csv": "edgar_project/evaluation/fixtures/data/04_sparse_history_features.csv",
+          "expected_anomalies_csv": "edgar_project/evaluation/fixtures/expected/04_sparse_history_anomalies.csv"
+        }
+      },
+      "max_runtime_seconds": 10.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["anomalies_csv"],
+        "items": [
+          {"key": "anomalies_csv", "required": true, "min_rows": 1}
+        ],
+        "qualitative_checks": [
+          "At least one finding should include sparse-history caveat codes."
+        ]
+      },
+      "expected_findings": {
+        "required_types": ["self_relative"],
+        "required_categories": ["data_limitations"],
+        "total_count": {"minimum": 1, "maximum": 5},
+        "by_category_min_counts": {"data_limitations": 1}
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "notes": "Targets trustworthiness caveat propagation."
+    },
+    {
+      "case_id": "fixture_partial_data_trustworthiness",
+      "description": "Partial-data case to exercise trustworthiness/data-quality artifact expectations.",
+      "tags": ["fixture", "partial_data", "trustworthiness", "quality"],
+      "input": {
+        "mode": "fixture",
+        "tickers": ["PDAT", "QDAT"],
+        "goal": "Ensure trustworthiness artifacts are produced on incomplete panel coverage.",
+        "refresh": false,
+        "fixture_id": "partial_data_trustworthiness_v1",
+        "fixture_paths": {
+          "features_csv": "edgar_project/evaluation/fixtures/data/05_partial_data_features.csv",
+          "expected_data_quality_csv": "edgar_project/evaluation/fixtures/expected/05_partial_data_quality_summary.csv",
+          "expected_metric_coverage_csv": "edgar_project/evaluation/fixtures/expected/05_partial_metric_coverage_summary.csv",
+          "expected_manual_validation_csv": "edgar_project/evaluation/fixtures/expected/05_partial_manual_validation.csv"
+        }
+      },
+      "max_runtime_seconds": 10.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["data_quality_csv", "metric_coverage_summary_csv", "manual_validation_csv"],
+        "items": [
+          {"key": "data_quality_csv", "required": true, "min_rows": 1},
+          {"key": "metric_coverage_summary_csv", "required": true, "min_rows": 1},
+          {"key": "manual_validation_csv", "required": true, "min_rows": 1}
+        ],
+        "qualitative_checks": [
+          "Coverage/quality artifacts should make missingness explicit."
+        ]
+      },
+      "expected_findings": {
+        "required_types": [],
+        "required_categories": ["trustworthiness"],
+        "total_count": {"minimum": 0, "maximum": 10},
+        "qualitative_expectations": [
+          "If findings exist, caveats should explain partial-data limitations."
+        ]
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "notes": "Focus is artifact quality and transparency, not finding volume."
+    }
+  ]
+}
