@@ -14,6 +14,48 @@ import pandas as pd
 # --- layout -----------------------------------------------------------------
 
 _SEP = "─" * 52
+_REPO_ROOT = Path(__file__).resolve().parents[1]
+_DATA_README = _REPO_ROOT / "data" / "README.md"
+
+_PRIMARY_ARTIFACT_LABELS: tuple[tuple[str, str], ...] = (
+    ("report_md", "Report (Markdown)"),
+    ("unified_findings_csv", "Unified findings"),
+    ("anomalies_csv", "Anomalies"),
+    ("panel_csv", "Panel (processed)"),
+    ("features_csv", "Features (processed)"),
+    ("trend_break_signals_csv", "Trend-break signals"),
+    ("peer_signals_csv", "Peer signals"),
+    ("data_quality_csv", "Data quality summary"),
+    ("metric_coverage_summary_csv", "Metric coverage"),
+    ("manual_validation_csv", "Manual validation candidates"),
+)
+
+
+def _find_data_subdir(path: Path, sub: str) -> Path | None:
+    """Return .../data/<sub> if ``path`` lies under that directory."""
+    try:
+        path = path.resolve()
+    except OSError:
+        return None
+    for d in path.parents:
+        if d.name == sub and len(d.parts) >= 2 and d.parent.name == "data":
+            return d
+    return None
+
+
+def _roots_touched(artifact_paths: dict[str, str]) -> dict[str, Path]:
+    """Which top-level ``data/*`` roots appear in this run's paths."""
+    found: dict[str, Path] = {}
+    order = ("raw", "processed", "artifacts", "evaluation")
+    for sub in order:
+        for p in artifact_paths.values():
+            if not p or not str(p).strip():
+                continue
+            hit = _find_data_subdir(Path(p), sub)
+            if hit is not None:
+                found[sub] = hit.resolve()
+                break
+    return found
 
 
 def _truncate(s: str, max_len: int) -> str:
@@ -80,6 +122,48 @@ def format_run_digest(
     lines.append(f"  plan:     {plan_code}")
     if one_line_summary:
         lines.append(f"  summary:  {_truncate(one_line_summary, 140)}")
+    lines.append("")
+
+    lines.append(" Output layout")
+    lines.append(
+        "   data/raw/        — SEC JSON cache (live runs)"
+    )
+    lines.append(
+        "   data/processed/  — panel.csv, features.csv (normalized inputs)"
+    )
+    lines.append(
+        "   data/artifacts/  — anomalies, unified findings, report.md, … (pipeline output)"
+    )
+    lines.append(
+        "   data/evaluation/   — benchmark suites only (not main pipeline)"
+    )
+    if _DATA_README.is_file():
+        lines.append(f"   (details: {_DATA_README})")
+
+    roots = _roots_touched(artifact_paths)
+    if roots:
+        lines.append(" Roots touched this run:")
+        for key in ("processed", "artifacts", "raw", "evaluation"):
+            if key in roots:
+                lines.append(f"   • {key:12}  {roots[key]}")
+
+    lines.append("")
+    lines.append(" Primary files (this run)")
+    printed = False
+    report_p = (final_report_path or "").strip() or artifact_paths.get("report_md", "")
+    if report_p:
+        lines.append(f"   {'Report (Markdown)':22}  {report_p}")
+        printed = True
+    for key, label in _PRIMARY_ARTIFACT_LABELS:
+        if key == "report_md":
+            continue
+        pth = artifact_paths.get(key)
+        if pth and str(pth).strip():
+            lines.append(f"   {label:22}  {pth}")
+            printed = True
+    if not printed:
+        lines.append("   (no artifact paths in response)")
+
     lines.append("")
 
     ticker_by_cik = _ticker_map_from_resolved(resolved_companies)
@@ -159,22 +243,6 @@ def format_run_digest(
             )
             if expl_s:
                 lines.append(f"      {expl_s}")
-
-    lines.append("")
-    lines.append(" Full narrative report")
-    if final_report_path and str(final_report_path).strip():
-        lines.append(f"   {final_report_path}")
-    elif artifact_paths.get("report_md"):
-        lines.append(f"   {artifact_paths['report_md']}")
-    else:
-        lines.append("   (not produced this run)")
-
-    lines.append("")
-    lines.append(" Key CSVs (open in editor or notebook)")
-    for key in ("unified_findings_csv", "anomalies_csv", "trend_break_signals_csv", "peer_signals_csv"):
-        pth = artifact_paths.get(key)
-        if pth:
-            lines.append(f"   {key}: {pth}")
 
     lines.append(_SEP)
     return lines

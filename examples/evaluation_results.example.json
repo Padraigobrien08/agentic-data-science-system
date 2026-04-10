@@ -1,0 +1,49 @@
+{
+  "case_count": 2,
+  "results": [
+    {
+      "artifacts": {
+        "anomalies_csv": "<repo>/data/evaluation/EXAMPLE_ONLY/case_alpha/anomalies.csv",
+        "unified_findings_csv": "<repo>/data/evaluation/EXAMPLE_ONLY/case_alpha/unified_findings.csv"
+      },
+      "case_id": "example_case_alpha",
+      "checks": {
+        "artifact_present::anomalies_csv": true,
+        "findings_total_count_in_range": true,
+        "regression_golden": true
+      },
+      "elapsed_seconds": 0.21,
+      "finding_counts": {
+        "category::deterioration": 1,
+        "category::trustworthiness": 1,
+        "total": 2,
+        "type::self_relative": 1
+      },
+      "message": "passed",
+      "metadata": {
+        "input_mode": "fixture",
+        "output_dir": "<repo>/data/evaluation/EXAMPLE_ONLY/case_alpha"
+      },
+      "qualitative_notes": [],
+      "rubric_score": null,
+      "run_goal": "Example goal string",
+      "status": "passed"
+    },
+    {
+      "artifacts": {},
+      "case_id": "example_case_beta",
+      "checks": {},
+      "elapsed_seconds": 0.01,
+      "finding_counts": {},
+      "message": "skipped: input mode 'live' not implemented yet (use fixture or orchestration_mocked).",
+      "metadata": {
+        "input_mode": "live"
+      },
+      "qualitative_notes": [],
+      "rubric_score": null,
+      "run_goal": "",
+      "status": "skipped"
+    }
+  ],
+  "suite_id": "suite_example_static"
+}

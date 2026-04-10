@@ -1,0 +1,4 @@
+finding_id,finding_source,finding_type,cik,period,metric,direction,score_raw,score_adjusted,score_penalty,overlap_count,overlap_sources,caveat_codes,explanation_summary,provenance_artifacts
+anomaly:320193:2023-Q3:revenue_growth_qoq:peer_relative,anomaly,peer_relative,320193,2023-Q3,revenue_growth_qoq,low,2.4,2.1,0.3,1,anomaly,none,QoQ revenue growth well below peer median,anomalies.csv
+anomaly:789019:2023-Q3:net_margin:peer_relative,anomaly,peer_relative,789019,2023-Q3,net_margin,high,2.1,2.0,0.1,1,anomaly,none,Net margin vs peers in top decile,anomalies.csv
+trend:320193:2023-Q3:revenue_growth_qoq:strong_shift,trend_break,strong_shift,320193,2023-Q3,revenue_growth_qoq,deteriorating,2.7,2.7,0.0,2,anomaly;trend_break,none,Sustained deterioration vs trend baseline,trend_break_signals.csv;anomalies.csv

@@ -3,12 +3,10 @@ Unified command-line interface for EDGAR analysis.
 
 Examples::
 
-    python -m edgar_project.cli run --tickers AAPL MSFT --goal "find unusual financial changes"
-    python -m edgar_project.cli demo
-    python -m edgar_project.cli demo retail_peers
-    python -m edgar_project.cli demo --list
-    python -m edgar_project.cli demo --fixtures
-    python -m edgar_project.cli evaluate
+    python3 -m edgar_project.cli run --tickers AAPL MSFT --goal "find unusual financial changes"
+    python3 -m edgar_project.cli demo
+    python3 -m edgar_project.cli demo --fixtures
+    python3 -m edgar_project.cli evaluate
 """
 
 from __future__ import annotations
@@ -29,7 +27,7 @@ from edgar_project.demo import DemoScenario, get_demo_scenario, list_demo_scenar
 from edgar_project.evaluation.rubric import Rubric
 from edgar_project.evaluation.runner import EvaluationRunner
 from edgar_project.evaluation.schemas import BenchmarkSuite, EvaluationStatus
-from edgar_project.evaluation.summary_report import format_console_report
+from edgar_project.evaluation.summary_report import format_benchmark_cli_summary, format_console_report
 from edgar_project.orchestration import OrchestrationInput, run_analysis_agent
 
 _ARTIFACT_ORDER = (
@@ -143,6 +141,11 @@ def _print_demo_guidance(scenario: DemoScenario) -> None:
     if scenario.highlights:
         print()
         print("Highlights: " + ", ".join(scenario.highlights))
+    print()
+    print(
+        "Live runs write under data/processed/ and data/artifacts/ "
+        f"(not data/evaluation/). See {_REPO_ROOT / 'data' / 'README.md'}"
+    )
     print(sep)
 
 
@@ -157,8 +160,9 @@ def _cmd_demo_list() -> int:
         print(f"      {s.title}")
         print(f"      tickers: {t}")
         print()
-    print("Run:  python -m edgar_project.cli demo [<scenario_id>]")
-    print("      python -m edgar_project.cli demo --fixtures   # offline benchmarks")
+    print("Run:  python3 -m edgar_project.cli demo [<scenario_id>]")
+    print("       python3 -m edgar_project.cli demo --fixtures   # offline benchmarks")
+    print("       python3 -m edgar_project.cli evaluate            # same fixtures, summary only")
     return 0
 
 
@@ -183,11 +187,16 @@ def _cmd_demo_fixtures(args: argparse.Namespace) -> int:
             for k, v in sorted(r.checks.items()):
                 print(f"    {k}: {v}")
     out_dir = Path(suite.output_dir).resolve()
+    suite_root = out_dir / suite.suite_id
     print()
-    print(f"Results:  {out_dir / f'{suite.suite_id}_results.json'}")
-    print(f"Summary:  {out_dir / f'{suite.suite_id}_summary.json'}")
+    print(" Benchmark / demo outputs (under data/evaluation/, not data/artifacts/)")
+    print(f"   Suite index:     {out_dir / f'{suite.suite_id}_results.json'}")
+    print(f"   Suite summary:   {out_dir / f'{suite.suite_id}_summary.json'}")
+    print(f"   Per-case CSVs:   {suite_root}/<case_id>/")
+    print(f"   Layout guide:    {_REPO_ROOT / 'data' / 'README.md'}")
     print()
-    print("Tip: For a live SEC demo with curated tickers, run:  python -m edgar_project.cli demo --list")
+    print("Tip: Live pipeline outputs go to data/processed/ and data/artifacts/ — see data/README.md")
+    print("Tip: For a live SEC demo with curated tickers, run:  python3 -m edgar_project.cli demo --list")
     if any(r.status in {EvaluationStatus.failed, EvaluationStatus.error} for r in results):
         return 1
     return 0
@@ -207,7 +216,7 @@ def _cmd_demo(args: argparse.Namespace) -> int:
         known = ", ".join(list_demo_scenario_ids()) or "(none)"
         print(
             f"Unknown scenario {scenario_id!r}. Known ids: {known}. "
-            "Use: python -m edgar_project.cli demo --list",
+            "Use: python3 -m edgar_project.cli demo --list",
             file=sys.stderr,
         )
         return 2
@@ -263,16 +272,32 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
     )
     results = runner.run_suite()
     summary = runner.latest_summary
+    out_dir = Path(suite.output_dir).resolve()
+    results_json = out_dir / f"{suite.suite_id}_results.json"
+    summary_json = out_dir / f"{suite.suite_id}_summary.json"
+
     if summary is not None:
-        print(format_console_report(summary, results))
+        print(
+            format_benchmark_cli_summary(
+                summary,
+                results,
+                results_json_path=str(results_json),
+                summary_json_path=str(summary_json),
+            )
+        )
     else:
-        print(f"Ran {len(results)} case(s) for suite '{suite.suite_id}'.")
+        print(f"Benchmark finished ({len(results)} case(s)) but no summary was built.")
+        print(f"  details (JSON): {results_json}")
+
     if not args.quiet:
-        out_dir = Path(suite.output_dir)
-        print(f"Results JSON: {(out_dir / f'{suite.suite_id}_results.json').resolve()}")
-        print(f"Summary JSON: {(out_dir / f'{suite.suite_id}_summary.json').resolve()}")
+        print()
+        print(f"  per-case outputs: {out_dir / suite.suite_id}/<case_id>/")
         if runner.latest_markdown_path is not None:
-            print(f"Markdown report: {runner.latest_markdown_path}")
+            print(f"  markdown report:  {runner.latest_markdown_path}")
+
+    if args.verbose and summary is not None:
+        print()
+        print(format_console_report(summary, results))
     if any(r.status in {EvaluationStatus.failed, EvaluationStatus.error} for r in results):
         return 1
     return 0
@@ -280,8 +305,14 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
 
 def build_parser() -> argparse.ArgumentParser:
     p = argparse.ArgumentParser(
-        prog="python -m edgar_project.cli",
-        description="EDGAR analysis — run orchestration, quick demo, or evaluation suites.",
+        prog="python3 -m edgar_project.cli",
+        description="EDGAR analysis — run orchestration, demo scenarios, or benchmarks.",
+        epilog=(
+            "Typical:  python3 -m edgar_project.cli demo --fixtures\n"
+            "          python3 -m edgar_project.cli evaluate\n"
+            "          python3 -m edgar_project.cli run --tickers AAPL MSFT --goal \"find unusual financial changes\""
+        ),
+        formatter_class=argparse.RawDescriptionHelpFormatter,
     )
     sub = p.add_subparsers(dest="command", required=True)
 
@@ -339,12 +370,21 @@ def build_parser() -> argparse.ArgumentParser:
     pdemo.add_argument("--json", action="store_true", help="Print OrchestrationOutput JSON (live demo)")
     pdemo.set_defaults(func=_cmd_demo)
 
-    pe = sub.add_parser("evaluate", help="Run a benchmark suite JSON")
+    pe = sub.add_parser(
+        "evaluate",
+        help="Run benchmark suite (default: fixture suite; no SEC)",
+    )
+    pe.add_argument(
+        "-v",
+        "--verbose",
+        action="store_true",
+        help="Print extended case table (in addition to the short summary)",
+    )
     pe.add_argument(
         "--suite",
         type=Path,
-        default=Path("edgar_project/evaluation/benchmarks/suite_smoke.json"),
-        help="Benchmark suite manifest",
+        default=Path("edgar_project/evaluation/benchmarks/suite_fixtures_v1.json"),
+        help="Benchmark suite JSON manifest",
     )
     pe.add_argument(
         "--rubric",
@@ -353,7 +393,11 @@ def build_parser() -> argparse.ArgumentParser:
         help="Rubric JSON",
     )
     pe.add_argument("--write-markdown", action="store_true", help="Write suite markdown report")
-    pe.add_argument("--quiet", action="store_true", help="Skip extra path lines")
+    pe.add_argument(
+        "--quiet",
+        action="store_true",
+        help="Only the short summary (no per-case directory / markdown hints)",
+    )
     pe.add_argument(
         "--update-regression-goldens",
         action="store_true",

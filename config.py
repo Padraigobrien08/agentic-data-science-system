@@ -5,6 +5,12 @@ from pathlib import Path
 # Repo root = parent of this file
 PROJECT_ROOT = Path(__file__).resolve().parent
 
+# --- Data layout (see data/README.md) ---------------------------------------
+# raw/        — SEC JSON cache (live fetch).
+# processed/  — panel.csv, features.csv (normalized inputs).
+# artifacts/  — anomalies, unified_findings, report.md, quality CSVs (pipeline output).
+# evaluation/ — benchmark JSON + per-case dirs (not main pipeline; suite-driven).
+
 DATA_RAW = PROJECT_ROOT / "data" / "raw"
 DATA_PROCESSED = PROJECT_ROOT / "data" / "processed"
 DATA_ARTIFACTS = PROJECT_ROOT / "data" / "artifacts"

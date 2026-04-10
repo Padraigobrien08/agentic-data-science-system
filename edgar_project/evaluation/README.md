@@ -1,6 +1,6 @@
 # Evaluation and benchmarks
 
-Deterministic checks over the analytical stack and (optionally) the orchestration entrypoint. Suites are JSON manifests; the runner executes cases and writes JSON summaries under the suite’s `output_dir`.
+Deterministic checks over the analytical stack and (optionally) the orchestration entrypoint. Suites are JSON manifests; the runner executes cases and writes JSON summaries under the suite’s `output_dir` (default **`data/evaluation/`** — benchmark-only; see repo **`data/README.md`** vs **`data/artifacts/`** for live pipeline output).
 
 ## Benchmark layers
 
@@ -39,7 +39,13 @@ This is **not** end-to-end validation against real EDGAR responses unless you ad
 
 ## How to run
 
-From the **repository root** (package import path must include the root):
+**CLI (short summary on stdout):**
+
+```bash
+PYTHONPATH=. python3 -m edgar_project.cli evaluate
+```
+
+**Script (same runner, more flags by default):**
 
 ```bash
 PYTHONPATH=. python3 edgar_project/evaluation/scripts/run_suite.py \

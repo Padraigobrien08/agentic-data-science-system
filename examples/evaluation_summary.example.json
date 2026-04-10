@@ -1,0 +1,12 @@
+{
+  "error_cases": 0,
+  "failed_case_briefs": [],
+  "failed_cases": 0,
+  "generated_at": "2026-01-15T12:00:00+00:00",
+  "notes": "EXAMPLE STATIC FILE — not from an actual benchmark run in this repo",
+  "passed_cases": 2,
+  "skipped_cases": 0,
+  "suite_id": "suite_example_static",
+  "total_cases": 2,
+  "total_elapsed_seconds": 0.42
+}

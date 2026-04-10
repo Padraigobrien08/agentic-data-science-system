@@ -16,7 +16,7 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--suite",
         type=Path,
-        default=Path("edgar_project/evaluation/benchmarks/suite_smoke.json"),
+        default=Path("edgar_project/evaluation/benchmarks/suite_fixtures_v1.json"),
         help="Path to benchmark suite JSON",
     )
     parser.add_argument(

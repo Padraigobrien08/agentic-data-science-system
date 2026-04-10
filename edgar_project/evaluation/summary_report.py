@@ -29,6 +29,42 @@ def total_elapsed_seconds(results: list[EvaluationResult]) -> float:
     return float(sum((r.elapsed_seconds or 0.0) for r in results))
 
 
+def format_benchmark_cli_summary(
+    summary: EvaluationSummary,
+    results: list[EvaluationResult],
+    *,
+    results_json_path: str,
+    summary_json_path: str | None = None,
+) -> str:
+    """
+    Short stdout block for ``edgar_project.cli evaluate`` — counts, failing IDs, paths.
+
+    Full per-case messages stay in ``results_json_path``.
+    """
+    lines: list[str] = [
+        "Benchmark results",
+        f"  suite:          {summary.suite_id}",
+        f"  cases:          {summary.total_cases}",
+        f"  passed:         {summary.passed_cases}",
+        f"  failed:         {summary.failed_cases}",
+        f"  skipped:        {summary.skipped_cases}",
+        f"  errors:         {summary.error_cases}",
+    ]
+    failing = [
+        r.case_id
+        for r in results
+        if r.status in {EvaluationStatus.failed, EvaluationStatus.error}
+    ]
+    if failing:
+        lines.append(f"  failing cases:  {', '.join(failing)}")
+    else:
+        lines.append("  failing cases:  (none)")
+    lines.append(f"  details (JSON): {results_json_path}")
+    if summary_json_path:
+        lines.append(f"  summary (JSON): {summary_json_path}")
+    return "\n".join(lines)
+
+
 def format_console_report(summary: EvaluationSummary, results: list[EvaluationResult]) -> str:
     """Multi-line string suitable for printing to stdout (CI logs)."""
     lines: list[str] = []
@@ -57,7 +93,7 @@ def format_console_report(summary: EvaluationSummary, results: list[EvaluationRe
             lines.append(f"  • [{r.status.value}] {r.case_id}: {reason}")
     else:
         lines.append("")
-        lines.append("All executed cases passed.")
+        lines.append("No failed or errored cases.")
 
     lines.append(sep)
     return "\n".join(lines)

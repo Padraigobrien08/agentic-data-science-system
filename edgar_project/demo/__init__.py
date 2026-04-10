@@ -1,5 +1,5 @@
 """
-Curated demo scenarios for ``python -m edgar_project.cli demo``.
+Curated demo scenarios for ``python3 -m edgar_project.cli demo``.
 
 Definitions live in :file:`scenarios.json` (version-controlled, inspectable).
 """

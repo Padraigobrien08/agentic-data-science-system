@@ -2,11 +2,11 @@
   "error_cases": 0,
   "failed_case_briefs": [],
   "failed_cases": 0,
-  "generated_at": "2026-04-10T21:11:36.548274+00:00",
+  "generated_at": "2026-04-10T21:22:05.320086+00:00",
   "notes": "edgar_project evaluation benchmark run",
   "passed_cases": 5,
   "skipped_cases": 0,
   "suite_id": "suite_fixtures_v1",
   "total_cases": 5,
-  "total_elapsed_seconds": 0.650446
+  "total_elapsed_seconds": 0.365764
 }

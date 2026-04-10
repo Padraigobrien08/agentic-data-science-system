@@ -1,0 +1,32 @@
+EXAMPLE: typical stdout from `python3 -m edgar_project.cli run ...` or `demo` (non-`--json`).
+Static copy for reviewers — not captured from a live SEC run.
+
+────────────────────────────────────────────────────
+ Run digest
+────────────────────────────────────────────────────
+  status:   success
+  tickers:  MSFT AAPL NVDA
+  run_id:   00000000-0000-0000-0000-00000000EXAM
+  plan:     full_pipeline
+  summary:  success: … | intent=full_pipeline_run | …
+
+ Counts
+   unified findings rows:  14
+   anomaly table rows:     28
+   companies touched:      3  (AAPL, MSFT, NVDA)
+   finding types:           peer_relative=6, self_relative=5, strong_shift=3
+
+ Top 5 findings (unified, severity order)
+   1. MSFT (CIK 789019)  net_margin  [peer_relative]  high  score=2.1
+      Net margin vs peers in top decile
+   2. …
+
+ Full narrative report
+   <repo>/data/artifacts/report.md
+
+ Key CSVs (open in editor or notebook)
+   unified_findings_csv: …/unified_findings.csv
+   anomalies_csv: …/anomalies.csv
+   trend_break_signals_csv: …/trend_break_signals.csv
+   peer_signals_csv: …/peer_signals.csv
+────────────────────────────────────────────────────
