@@ -1,0 +1,63 @@
+{
+  "schema_version": 1,
+  "default_scenario": "big_tech_peers",
+  "scenarios": [
+    {
+      "id": "big_tech_peers",
+      "title": "Big tech peer comparison",
+      "description": "Large-cap technology peers with deep, comparable fundamentals. Strong for peer-relative z-scores and cross-sectional outliers.",
+      "tickers": ["AAPL", "MSFT", "NVDA"],
+      "goal": "Find unusual financial changes for this technology peer set and surface peer-relative and self-relative signals.",
+      "look_for": [
+        "unified_findings.csv — rows with finding_type peer_relative: who diverges from the group on revenue, margins, or growth metrics.",
+        "anomalies.csv — self_relative spikes or dips versus each company’s own history.",
+        "peer_signals.csv — peer means/spreads that drive peer-relative flags.",
+        "trend_break_signals.csv — sustained shifts (trend_signal_type / trend_score) that may overlap anomalies on the same (cik, period, metric).",
+        "report.md — narrative summary tying anomalies, peers, and data-quality caveats together."
+      ],
+      "highlights": ["peer comparison", "anomalies", "trend signals"]
+    },
+    {
+      "id": "mixed_sector",
+      "title": "Mixed sector panel",
+      "description": "Diverse industries on one panel. Highlights how the stack handles heterogeneous businesses and both cross-sectional and time-series views.",
+      "tickers": ["JPM", "XOM", "NKE", "CAT"],
+      "goal": "Run anomaly analysis across companies in different sectors and call out unusual changes and peer context where peers exist.",
+      "look_for": [
+        "Peer-relative findings may be sparse or noisy across sectors — compare with self_relative rows.",
+        "data_quality_summary.csv — missingness and coverage differ by sector/metric; trustworthiness fields explain limitations.",
+        "metric_coverage_summary.csv — which metrics are populated across this mixed set.",
+        "unified_findings.csv — mix of deterioration, data_limitations, and peer_outlier categories when applicable."
+      ],
+      "highlights": ["anomalies", "data quality", "coverage"]
+    },
+    {
+      "id": "retail_peers",
+      "title": "Retail / consumer peer set",
+      "description": "Tight consumer/retail peer group where cross-sectional comparison is meaningful — good for clear peer-relative anomaly stories.",
+      "tickers": ["WMT", "TGT", "COST", "DG"],
+      "goal": "Compare this retail peer set and flag unusual financial changes with emphasis on peer-relative outliers.",
+      "look_for": [
+        "peer_relative rows in unified_findings.csv — retailers diverging from peers on growth, margin, or efficiency metrics.",
+        "peer_signals.csv — peer aggregates for the same period/metric keys as anomalies.",
+        "Overlap metadata (overlap_count, overlap_sources) when a name shows both anomaly and trend-break style signals.",
+        "report.md — readable ranking of the most material moves."
+      ],
+      "highlights": ["peer comparison", "anomalies", "trend signals"]
+    },
+    {
+      "id": "semi_peers",
+      "title": "Semiconductor peer set",
+      "description": "Semiconductor peers with cyclical, comparable drivers — strong demo for peer bands and cycle-sensitive anomalies.",
+      "tickers": ["AMD", "INTC", "QCOM", "AVGO"],
+      "goal": "Find unusual financial changes in this semiconductor peer group and highlight peer-relative and trend-based signals.",
+      "look_for": [
+        "unified_findings.csv — peer_relative findings tied to cycle metrics (growth, gross margin, capex intensity).",
+        "trend_break_signals.csv — breakouts or breakdowns that may coincide with peer stress.",
+        "anomalies.csv — company-specific extremes versus historical baselines.",
+        "Combined view: same (cik, period, metric) appearing in both anomaly and trend layers when overlap is computed."
+      ],
+      "highlights": ["peer comparison", "trend signals", "anomalies"]
+    }
+  ]
+}

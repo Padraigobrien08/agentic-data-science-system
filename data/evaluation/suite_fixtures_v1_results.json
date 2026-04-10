@@ -36,7 +36,7 @@
         "metric_case_max_runtime_seconds": true,
         "metric_range::runtime_seconds": true
       },
-      "elapsed_seconds": 0.073589,
+      "elapsed_seconds": 0.085879,
       "finding_counts": {
         "category::data_limitations": 1,
         "category::deterioration": 1,
@@ -106,7 +106,7 @@
         "metric_range::runtime_seconds": true,
         "regression_golden": true
       },
-      "elapsed_seconds": 0.072211,
+      "elapsed_seconds": 0.175941,
       "finding_counts": {
         "category::data_limitations": 4,
         "category::peer_outlier": 4,
@@ -183,7 +183,7 @@
         "metric_range::runtime_seconds": true,
         "regression_golden": true
       },
-      "elapsed_seconds": 0.029181,
+      "elapsed_seconds": 0.153886,
       "finding_counts": {
         "category::data_limitations": 1,
         "category::deterioration": 1,
@@ -250,7 +250,7 @@
         "metric_case_max_runtime_seconds": true,
         "metric_range::runtime_seconds": true
       },
-      "elapsed_seconds": 0.041625,
+      "elapsed_seconds": 0.084214,
       "finding_counts": {
         "category::data_limitations": 1,
         "category::deterioration": 1,
@@ -316,7 +316,7 @@
         "metric_range::runtime_seconds": true,
         "regression_golden": true
       },
-      "elapsed_seconds": 0.075035,
+      "elapsed_seconds": 0.150526,
       "finding_counts": {
         "category::data_limitations": 5,
         "category::peer_outlier": 5,
