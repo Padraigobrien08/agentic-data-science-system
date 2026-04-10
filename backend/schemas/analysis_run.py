@@ -13,6 +13,7 @@ from backend.schemas.common import OrmSchema, TimestampedRead
 
 class AnalysisRunCreate(OrmSchema):
     project_id: UUID
+    initiated_by_user_id: UUID | None = None
     correlation_id: str | None = Field(default=None, max_length=64)
     orchestration_goal_text: str | None = None
     input_payload_json: dict | list | None = None

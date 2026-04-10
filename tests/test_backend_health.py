@@ -20,9 +20,10 @@ def client() -> TestClient:
 
 
 def test_health_returns_ok_and_version(client: TestClient) -> None:
-    r = client.get("/v1/health")
-    assert r.status_code == 200
-    body = r.json()
-    assert body["status"] == "ok"
-    assert body["version"]
-    assert body["database"]["ok"] is True
+    for path in ("/health", "/v1/health"):
+        r = client.get(path)
+        assert r.status_code == 200
+        body = r.json()
+        assert body["status"] == "ok"
+        assert body["version"]
+        assert body["database"]["ok"] is True

@@ -9,6 +9,7 @@ from sqlalchemy.engine.url import make_url
 
 from backend import __version__
 from backend.api.router import api_router
+from backend.api.routes import health
 from backend.config.settings import get_settings
 
 
@@ -40,6 +41,7 @@ def create_app() -> FastAPI:
         debug=settings.debug,
         lifespan=lifespan,
     )
+    app.include_router(health.router, tags=["health"])
     app.include_router(api_router, prefix=settings.api_v1_prefix)
     return app
 

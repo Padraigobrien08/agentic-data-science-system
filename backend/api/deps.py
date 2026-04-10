@@ -6,7 +6,36 @@ from fastapi import Depends
 from sqlalchemy.orm import Session
 
 from backend.db.session import get_db
+from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.artifact_service import ArtifactService
+from backend.services.run_step_service import RunStepService
 
 DbSession = Annotated[Session, Depends(get_db)]
 
-__all__ = ["DbSession", "get_db"]
+
+def get_analysis_run_service(db: DbSession) -> AnalysisRunService:
+    return AnalysisRunService(db)
+
+
+def get_run_step_service(db: DbSession) -> RunStepService:
+    return RunStepService(db)
+
+
+def get_artifact_service(db: DbSession) -> ArtifactService:
+    return ArtifactService(db)
+
+
+AnalysisRunServiceDep = Annotated[AnalysisRunService, Depends(get_analysis_run_service)]
+RunStepServiceDep = Annotated[RunStepService, Depends(get_run_step_service)]
+ArtifactServiceDep = Annotated[ArtifactService, Depends(get_artifact_service)]
+
+__all__ = [
+    "AnalysisRunServiceDep",
+    "ArtifactServiceDep",
+    "DbSession",
+    "RunStepServiceDep",
+    "get_analysis_run_service",
+    "get_artifact_service",
+    "get_db",
+    "get_run_step_service",
+]
