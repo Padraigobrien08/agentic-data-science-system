@@ -1,51 +1,47 @@
 {
   "case_id": "example_case_id",
   "description": "Describe what this benchmark validates.",
-  "tags": ["smoke"],
+  "tags": ["fixture"],
   "input": {
     "mode": "fixture",
-    "tickers": ["AAPL"],
-    "goal": "Detect a known-looking deterioration pattern in a controlled fixture.",
+    "tickers": ["ACME"],
+    "goal": "One-line intent for logs and reports.",
     "refresh": false,
-    "peer_set_label": "big_tech_core",
-    "fixture_id": "deterioration_pattern_v1",
+    "fixture_id": "example_fixture_v1",
     "fixture_paths": {
-      "panel_csv": "edgar_project/evaluation/fixtures/golden_artifacts/deterioration_panel_v1.csv",
-      "features_csv": "edgar_project/evaluation/fixtures/golden_artifacts/deterioration_features_v1.csv"
+      "features_csv": "edgar_project/evaluation/fixtures/data/your_features.csv",
+      "trend_break_signals_csv": "edgar_project/evaluation/fixtures/data/your_trend_breaks.csv"
     },
-    "notes": "Use fixture-backed deterministic inputs."
+    "notes": "Omit trend_break_signals_csv to compute trend breaks from features in-runner."
   },
   "fixtures": {
-    "golden_findings_csv": "edgar_project/evaluation/fixtures/golden_artifacts/expected_findings_v1.csv"
+    "case_notes_md": "edgar_project/evaluation/fixtures/cases/README.md"
   },
   "max_runtime_seconds": 60.0,
   "expected_artifacts": {
     "expected_statuses": ["passed"],
-    "required_keys": ["anomalies_csv", "report_md", "unified_findings_csv"],
+    "enforce_schema": true,
+    "required_keys": ["anomalies_csv", "unified_findings_csv"],
     "items": [
       {"key": "anomalies_csv", "required": true, "min_rows": 1},
-      {"key": "report_md", "required": true, "must_contain": ["## Findings", "## Trustworthiness"]},
-      {"key": "manual_validation_csv", "required": false}
+      {"key": "unified_findings_csv", "required": true, "min_rows": 1}
     ],
-    "qualitative_checks": [
-      "Trustworthiness artifacts are produced and referenced."
-    ]
+    "qualitative_checks": ["Human-readable intent; not auto-verified."]
   },
   "expected_findings": {
-    "required_types": ["anomaly", "trend_break"],
+    "required_types": ["self_relative"],
     "required_categories": ["deterioration"],
     "total_count": {"minimum": 1, "maximum": 50},
-    "by_type_min_counts": {"anomaly": 1},
-    "by_category_min_counts": {"deterioration": 1},
-    "qualitative_expectations": [
-      "Unified findings contain expected categories with coherent descriptions."
-    ]
+    "by_type_min_counts": {},
+    "by_category_min_counts": {},
+    "top_n": 5,
+    "top_must_include_metrics": [],
+    "top_must_include_ciks": [],
+    "qualitative_expectations": []
   },
   "expected_metrics": {
     "runtime_seconds": {"minimum": 0, "maximum": 60}
   },
-  "qualitative_expectations": [
-    "Known-looking deterioration signal appears in top findings."
-  ],
-  "notes": "Template only. Adjust fields for live or hybrid cases."
+  "qualitative_expectations": [],
+  "notes": "Copy fields from suite_fixtures_v1.json; adjust expected_* for your scenario."
 }

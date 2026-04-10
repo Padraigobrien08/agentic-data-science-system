@@ -24,6 +24,7 @@ class InputMode(str, Enum):
     fixture = "fixture"
     live = "live"
     hybrid = "hybrid"
+    orchestration_mocked = "orchestration_mocked"
 
 
 class ValueRange(BaseModel):
@@ -61,6 +62,10 @@ class BenchmarkInput(BaseModel):
     fixture_paths: dict[str, str] = Field(
         default_factory=dict,
         description="Logical fixture key -> path for controlled cases",
+    )
+    orchestration_scenario: str | None = Field(
+        default=None,
+        description="Mock MCP scenario id when mode is orchestration_mocked (see orchestration_mocks.ORCHESTRATION_MOCK_SCENARIOS)",
     )
     notes: str = Field(default="")
 
@@ -116,6 +121,51 @@ class ExpectedArtifacts(BaseModel):
     notes: str = Field(default="")
 
 
+class ExpectedOrchestration(BaseModel):
+    """Expectations for user-facing orchestration output (mocked MCP)."""
+
+    expected_run_status: str = Field(
+        ...,
+        description="Terminal OrchestrationRunStatus value, e.g. success, partial_success, no_data, error",
+    )
+    required_artifact_keys: list[str] = Field(
+        default_factory=list,
+        description="Artifact role keys that must appear in OrchestrationOutput.artifact_paths with non-empty paths",
+    )
+    forbidden_artifact_keys: list[str] = Field(
+        default_factory=list,
+        description="Artifact keys that must be absent or empty",
+    )
+    final_report_path_non_null: bool = Field(
+        default=False,
+        description="If True, OrchestrationOutput.final_report_path must be set",
+    )
+    final_report_path_null: bool = Field(
+        default=False,
+        description="If True, final_report_path must be missing or empty",
+    )
+    tools_must_not_appear_in_call_sequence: list[str] = Field(
+        default_factory=list,
+        description="Tool names that must not appear in tool_call_sequence (e.g. build_panel on no_data path)",
+    )
+    warning_codes_must_include: list[str] = Field(
+        default_factory=list,
+        description="Every listed orchestration warning code must appear",
+    )
+    warning_codes_include_any: list[str] = Field(
+        default_factory=list,
+        description="At least one of these warning codes must appear",
+    )
+    max_errors: int | None = Field(
+        default=None,
+        description="If set, len(errors) must be <= this value",
+    )
+    min_errors: int | None = Field(
+        default=None,
+        description="If set, len(errors) must be >= this value",
+    )
+
+
 class ExpectedFindings(BaseModel):
     """Deterministic expectations for unified findings content."""
 
@@ -130,11 +180,59 @@ class ExpectedFindings(BaseModel):
     total_count: ValueRange | None = Field(default=None)
     by_type_min_counts: dict[str, int] = Field(default_factory=dict)
     by_category_min_counts: dict[str, int] = Field(default_factory=dict)
+
+    # --- Analytical quality (deterministic; unified table is already sorted by the pipeline) ---
+    top_n: int = Field(
+        default=5,
+        ge=1,
+        description="Number of leading unified-finding rows used for top-slice containment checks",
+    )
+    top_must_include_metrics: list[str] = Field(
+        default_factory=list,
+        description="Each metric must appear in the metric column within the first top_n rows",
+    )
+    top_must_include_ciks: list[int] = Field(
+        default_factory=list,
+        description="Each CIK must appear in the first top_n rows",
+    )
+    min_rows_with_overlap_ge_threshold: int | None = Field(
+        default=None,
+        ge=0,
+        description="Require at least this many rows with overlap_count >= overlap_ge_threshold",
+    )
+    overlap_ge_threshold: int = Field(
+        default=2,
+        ge=2,
+        description="Threshold for overlap_count when counting rows (typically 2 = multi-source overlap)",
+    )
+    overlap_sources_one_row_must_include_substrings: list[str] = Field(
+        default_factory=list,
+        description="At least one row's overlap_sources must contain every substring (e.g. anomaly + trend_break)",
+    )
+    unified_caveat_substring_min_row_counts: dict[str, int] = Field(
+        default_factory=dict,
+        description="Substring -> min row count in unified findings caveat_codes (e.g. sparse_history)",
+    )
+    anomaly_caveat_substring_min_row_counts: dict[str, int] = Field(
+        default_factory=dict,
+        description="Substring -> min row count in anomalies.csv caveat_codes",
+    )
+
     qualitative_expectations: list[str] = Field(
         default_factory=list,
         description="Optional rubric-like textual expectations",
     )
     notes: str = Field(default="")
+
+
+class RegressionGolden(BaseModel):
+    """Sparse JSON golden checked after a fixture run (subset comparison; see fixtures/regression/README)."""
+
+    golden_json_path: str = Field(
+        ...,
+        min_length=1,
+        description="Path to golden JSON, usually repo-relative to project root",
+    )
 
 
 class BenchmarkCase(BaseModel):
@@ -156,9 +254,17 @@ class BenchmarkCase(BaseModel):
     )
     expected_artifacts: ExpectedArtifacts = Field(default_factory=ExpectedArtifacts)
     expected_findings: ExpectedFindings | None = Field(default=None)
+    expected_orchestration: ExpectedOrchestration | None = Field(
+        default=None,
+        description="When using orchestration_mocked mode, validates OrchestrationOutput",
+    )
     expected_metrics: dict[str, ValueRange] = Field(
         default_factory=dict,
         description="Metric name -> acceptable range",
+    )
+    regression_golden: RegressionGolden | None = Field(
+        default=None,
+        description="Optional compact regression snapshot (category counts, overlap, trust fingerprints)",
     )
     qualitative_expectations: list[str] = Field(
         default_factory=list,
@@ -210,6 +316,14 @@ class EvaluationResult(BaseModel):
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 
+class CaseFailureBrief(BaseModel):
+    """One-line context for a failed or errored benchmark case (for summaries and CI)."""
+
+    case_id: str
+    status: str
+    reason_short: str = ""
+
+
 class EvaluationSummary(BaseModel):
     """Aggregated summary for a suite-level evaluation run."""
 
@@ -219,6 +333,14 @@ class EvaluationSummary(BaseModel):
     failed_cases: int = 0
     skipped_cases: int = 0
     error_cases: int = 0
+    total_elapsed_seconds: float | None = Field(
+        default=None,
+        description="Sum of per-case elapsed_seconds (wall-ish CPU for the runner)",
+    )
+    failed_case_briefs: list[CaseFailureBrief] = Field(
+        default_factory=list,
+        description="Failed and error cases with shortened reasons",
+    )
     generated_at: str | None = None
     notes: str = ""
 
@@ -229,3 +351,7 @@ class BenchmarkSuite(BaseModel):
     suite_id: str = "default_suite"
     cases: list[BenchmarkCase] = Field(default_factory=list)
     output_dir: str = "data/evaluation"
+    write_markdown_report: bool = Field(
+        default=False,
+        description="If True, write <suite_id>_report.md alongside JSON summaries",
+    )

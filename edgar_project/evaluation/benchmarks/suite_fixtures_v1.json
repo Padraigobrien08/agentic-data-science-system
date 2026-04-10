@@ -38,6 +38,9 @@
         "total_count": {"minimum": 1, "maximum": 5},
         "by_type_min_counts": {"self_relative": 1},
         "by_category_min_counts": {"deterioration": 1},
+        "top_n": 5,
+        "top_must_include_metrics": ["revenue_growth_qoq"],
+        "top_must_include_ciks": [1001],
         "qualitative_expectations": [
           "Explanation mentions a deteriorating move versus prior baseline."
         ]
@@ -80,10 +83,15 @@
         "required_categories": ["peer_outlier"],
         "total_count": {"minimum": 1, "maximum": 8},
         "by_type_min_counts": {"peer_relative": 1},
-        "by_category_min_counts": {"peer_outlier": 1}
+        "by_category_min_counts": {"peer_outlier": 1},
+        "top_n": 12,
+        "top_must_include_ciks": [2004]
       },
       "expected_metrics": {
         "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "regression_golden": {
+        "golden_json_path": "edgar_project/evaluation/fixtures/regression/golden_fixture_peer_relative_outlier.json"
       },
       "notes": "Validates peer-layer behavior independent of live filings."
     },
@@ -120,10 +128,16 @@
         "required_categories": ["deterioration", "trend_break"],
         "total_count": {"minimum": 2, "maximum": 10},
         "by_type_min_counts": {"self_relative": 1, "strong_shift": 1},
-        "by_category_min_counts": {"deterioration": 1, "trend_break": 1}
+        "by_category_min_counts": {"deterioration": 1, "trend_break": 1},
+        "min_rows_with_overlap_ge_threshold": 1,
+        "overlap_ge_threshold": 2,
+        "overlap_sources_one_row_must_include_substrings": ["anomaly", "trend_break"]
       },
       "expected_metrics": {
         "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "regression_golden": {
+        "golden_json_path": "edgar_project/evaluation/fixtures/regression/golden_fixture_anomaly_trend_overlap.json"
       },
       "notes": "Confirms overlap_count/overlap_sources behavior in unified findings."
     },
@@ -157,7 +171,9 @@
         "required_types": ["self_relative"],
         "required_categories": ["data_limitations"],
         "total_count": {"minimum": 1, "maximum": 5},
-        "by_category_min_counts": {"data_limitations": 1}
+        "by_category_min_counts": {"data_limitations": 1},
+        "unified_caveat_substring_min_row_counts": {"sparse_history": 1},
+        "anomaly_caveat_substring_min_row_counts": {"sparse_history": 1}
       },
       "expected_metrics": {
         "runtime_seconds": {"minimum": 0, "maximum": 10}
@@ -204,6 +220,9 @@
       },
       "expected_metrics": {
         "runtime_seconds": {"minimum": 0, "maximum": 10}
+      },
+      "regression_golden": {
+        "golden_json_path": "edgar_project/evaluation/fixtures/regression/golden_fixture_partial_data_trustworthiness.json"
       },
       "notes": "Focus is artifact quality and transparency, not finding volume."
     }

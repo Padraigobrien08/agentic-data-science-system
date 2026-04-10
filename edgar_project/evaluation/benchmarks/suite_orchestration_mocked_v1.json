@@ -1,0 +1,111 @@
+{
+  "suite_id": "suite_orchestration_mocked_v1",
+  "output_dir": "data/evaluation",
+  "cases": [
+    {
+      "case_id": "orch_mock_granular_success",
+      "description": "Full granular plan (resolve→report) with mocked MCP success; no SEC.",
+      "tags": ["orchestration", "mcp_mock", "e2e"],
+      "input": {
+        "mode": "orchestration_mocked",
+        "tickers": ["AAPL", "MSFT"],
+        "goal": "find unusual financial changes",
+        "refresh": false,
+        "orchestration_scenario": "mock_granular_success"
+      },
+      "max_runtime_seconds": 30.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed"],
+        "enforce_schema": false
+      },
+      "expected_orchestration": {
+        "expected_run_status": "success",
+        "required_artifact_keys": ["panel_csv", "features_csv", "anomalies_csv", "report_md"],
+        "final_report_path_non_null": true,
+        "max_errors": 0
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 30}
+      },
+      "notes": "User-facing anomaly path; artifacts are mock paths only (not on disk)."
+    },
+    {
+      "case_id": "orch_mock_partial_resolve",
+      "description": "One ticker fails resolve; pipeline continues; partial_success and warnings.",
+      "tags": ["orchestration", "mcp_mock", "partial_success"],
+      "input": {
+        "mode": "orchestration_mocked",
+        "tickers": ["AAPL", "BAD"],
+        "goal": "detect anomalies in financials",
+        "refresh": false,
+        "orchestration_scenario": "mock_partial_resolve"
+      },
+      "max_runtime_seconds": 30.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed"],
+        "enforce_schema": false
+      },
+      "expected_orchestration": {
+        "expected_run_status": "partial_success",
+        "required_artifact_keys": ["panel_csv", "features_csv", "anomalies_csv", "report_md"],
+        "warning_codes_include_any": ["ORCH_PARTIAL_RESOLVE", "ORCH_RESOLVE_TICKER_FAILED"],
+        "final_report_path_non_null": true,
+        "max_errors": 0
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 30}
+      }
+    },
+    {
+      "case_id": "orch_mock_no_data_after_fetch",
+      "description": "All fetches return no_data; terminal no_data; build_panel must not run.",
+      "tags": ["orchestration", "mcp_mock", "no_data"],
+      "input": {
+        "mode": "orchestration_mocked",
+        "tickers": ["AAPL"],
+        "goal": "find unusual financial changes",
+        "refresh": false,
+        "orchestration_scenario": "mock_no_data_fetch"
+      },
+      "max_runtime_seconds": 30.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed"],
+        "enforce_schema": false
+      },
+      "expected_orchestration": {
+        "expected_run_status": "no_data",
+        "tools_must_not_appear_in_call_sequence": ["build_panel"],
+        "max_errors": 0
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 30}
+      }
+    },
+    {
+      "case_id": "orch_mock_run_pipeline_success",
+      "description": "Single-step run_pipeline intent with mocked MCP success.",
+      "tags": ["orchestration", "mcp_mock", "run_pipeline"],
+      "input": {
+        "mode": "orchestration_mocked",
+        "tickers": ["AAPL"],
+        "goal": "run the pipeline for these tickers",
+        "refresh": false,
+        "orchestration_scenario": "mock_run_pipeline_success"
+      },
+      "max_runtime_seconds": 30.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed"],
+        "enforce_schema": false
+      },
+      "expected_orchestration": {
+        "expected_run_status": "success",
+        "required_artifact_keys": ["panel_csv", "features_csv", "anomalies_csv", "report_md"],
+        "final_report_path_non_null": true,
+        "max_errors": 0
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 30}
+      }
+    }
+  ]
+}

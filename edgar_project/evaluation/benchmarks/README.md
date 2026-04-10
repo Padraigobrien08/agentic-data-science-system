@@ -1,5 +1,7 @@
 # Benchmarks
 
+Framework overview (layers, modes, how to run, limitations): see [`../README.md`](../README.md).
+
 This directory stores inspectable benchmark suite manifests.
 
 - Prefer small, high-value deterministic cases.

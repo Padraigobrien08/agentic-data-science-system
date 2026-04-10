@@ -1,0 +1,34 @@
+{
+  "data_quality_summary": {
+    "category_values": [
+      "drop_rule",
+      "missingness_company",
+      "missingness_metric",
+      "stage_count"
+    ],
+    "present": true
+  },
+  "trust_artifacts_present": {
+    "data_quality_csv": true,
+    "manual_validation_csv": true,
+    "metric_coverage_summary_csv": true
+  },
+  "unified_findings": {
+    "category_counts": {
+      "data_limitations": 1,
+      "deterioration": 1,
+      "trend_break": 1,
+      "trustworthiness": 1
+    },
+    "finding_type_counts": {
+      "self_relative": 1,
+      "strong_shift": 1
+    },
+    "overlap": {
+      "any_multi_source_overlap": true,
+      "max_overlap_count": 2,
+      "rows_overlap_ge_2": 2
+    },
+    "row_count": 2
+  }
+}

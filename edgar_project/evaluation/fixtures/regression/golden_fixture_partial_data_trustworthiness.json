@@ -1,0 +1,22 @@
+{
+  "data_quality_summary": {
+    "category_count": 4,
+    "present": true
+  },
+  "trust_artifacts_present": {
+    "data_quality_csv": true,
+    "manual_validation_csv": true,
+    "metric_coverage_summary_csv": true
+  },
+  "unified_findings": {
+    "category_counts": {
+      "data_limitations": 5,
+      "peer_outlier": 5,
+      "trustworthiness": 1
+    },
+    "finding_type_counts": {
+      "peer_relative": 5
+    },
+    "row_count": 5
+  }
+}

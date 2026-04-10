@@ -121,6 +121,7 @@ def validate_produced_artifact_schemas(
     *,
     enforce_schema: bool,
     exempt_keys: frozenset[str] | set[str] | None = None,
+    case_id: str = "",
 ) -> tuple[list[str], dict[str, bool]]:
     """
     Run schema checks on all produced artifacts that have a known profile.
@@ -131,6 +132,7 @@ def validate_produced_artifact_schemas(
     if not enforce_schema:
         return [], {}
     skip = exempt_keys or set()
+    pfx = f"{case_id}: " if case_id else ""
     failures: list[str] = []
     checks: dict[str, bool] = {}
     for key in sorted(artifacts.keys()):
@@ -143,5 +145,5 @@ def validate_produced_artifact_schemas(
         ok = msg is None
         checks[f"artifact_schema::{key}"] = ok
         if msg is not None:
-            failures.append(msg)
+            failures.append(f"{pfx}{msg}")
     return failures, checks

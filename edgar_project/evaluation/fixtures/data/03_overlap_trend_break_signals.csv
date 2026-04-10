@@ -1,2 +1,2 @@
 cik,period,metric,trend_signal_type,trend_score,consecutive_direction,explanation
-3001,2023-Q4,revenue,strong_shift,2.70,deteriorating,Quarter shows a sharp break from prior stable trend.
+3001,2023-Q4,revenue_growth_qoq,strong_shift,2.70,deteriorating,QoQ growth path breaks sharply versus prior stable quarters.
