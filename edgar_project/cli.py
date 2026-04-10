@@ -128,7 +128,8 @@ def _cmd_run(args: argparse.Namespace) -> int:
 
 
 def _print_demo_guidance(scenario: DemoScenario) -> None:
-    sep = "—" * 64
+    # Match run-summary width from console_digest for visual continuity.
+    sep = "─" * 52
     print()
     print(sep)
     print(f"Demo: {scenario.title}  ({scenario.id})")
