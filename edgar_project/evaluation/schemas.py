@@ -96,6 +96,14 @@ class ExpectedArtifacts(BaseModel):
         default_factory=lambda: [EvaluationStatus.passed],
         description="Allowed run-level statuses for this case",
     )
+    enforce_schema: bool = Field(
+        default=True,
+        description="If True, validate known CSV column sets for produced artifacts (lightweight header check)",
+    )
+    schema_exempt_keys: list[str] = Field(
+        default_factory=list,
+        description="Logical artifact keys to skip for schema validation (rare escape hatch)",
+    )
     items: list[ExpectedArtifactItem] = Field(default_factory=list)
     required_keys: list[str] = Field(
         default_factory=list,

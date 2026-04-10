@@ -55,6 +55,8 @@ def main() -> int:
     summary_path = Path(suite.output_dir) / f"{suite.suite_id}_summary.json"
     print(f"Results JSON: {results_path}")
     print(f"Summary JSON: {summary_path}")
+    if any(r.status in {EvaluationStatus.failed, EvaluationStatus.error} for r in results):
+        return 1
     return 0
 
 

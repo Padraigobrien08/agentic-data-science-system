@@ -1,4 +1,4 @@
-"""Skeleton runner for deterministic evaluation and benchmark execution."""
+"""Deterministic evaluation runner for benchmark suites (fixture-first)."""
 
 from __future__ import annotations
 
@@ -9,6 +9,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from .artifact_checks import validate_produced_artifact_schemas
 from .rubric import Rubric
 from .schemas import (
     BenchmarkCase,
@@ -26,10 +27,12 @@ _TRUST_ARTIFACT_KEYS = frozenset({"data_quality_csv", "metric_coverage_summary_c
 
 class EvaluationRunner:
     """
-    Lightweight runner that will orchestrate benchmark cases.
+    Run benchmark cases against the current analytical stack.
 
-    This scaffold intentionally avoids wiring production execution until
-    benchmark cases and fixtures are finalized.
+    Fixture mode executes local CSV inputs through ``src.*`` helpers and writes
+    per-case artifacts under ``<suite.output_dir>/<suite_id>/<case_id>/``.
+
+    Live/hybrid execution is reserved for a later extension (see ``run_case``).
     """
 
     def __init__(self, suite: BenchmarkSuite, rubric: Rubric | None = None) -> None:
@@ -72,36 +75,61 @@ class EvaluationRunner:
 
         try:
             case_dir = self._case_output_dir(case.case_id)
-            produced = self._execute_case(case, case_dir)
-            result.artifacts = produced["artifacts"]
-            unified_findings = produced.get("unified_findings")
-
-            checks.update(self._check_expected_artifacts(case, result.artifacts, failures))
-            checks.update(self._check_expected_findings(case, unified_findings, result.artifacts, result, failures))
-            checks.update(self._check_expected_metrics(case, result, unified_findings, failures))
-
-            result.checks = checks
-            status = EvaluationStatus.passed if not failures else EvaluationStatus.failed
-            if case.expected_artifacts.expected_statuses and status not in case.expected_artifacts.expected_statuses:
-                failures.append(
-                    f"run status '{status.value}' not in expected statuses "
-                    f"{[s.value for s in case.expected_artifacts.expected_statuses]}"
+            if case.input.mode not in {InputMode.fixture}:
+                result.status = EvaluationStatus.skipped
+                result.message = (
+                    f"skipped: input mode {case.input.mode.value!r} not implemented yet "
+                    "(fixture mode is supported; live/hybrid planned)."
                 )
-                status = EvaluationStatus.failed
-            result.status = status
-            result.message = "passed" if status == EvaluationStatus.passed else "; ".join(failures)
-            result.qualitative_notes.extend(case.qualitative_expectations)
-            if case.expected_findings is not None:
-                result.qualitative_notes.extend(case.expected_findings.qualitative_expectations)
-            result.qualitative_notes.extend(case.expected_artifacts.qualitative_checks)
-            result.metadata = {
-                "input_mode": case.input.mode.value,
-                "tickers": case.input.tickers,
-                "refresh": case.input.refresh,
-                "fixture_id": case.input.fixture_id,
-                "tags": case.tags,
-                "output_dir": str(case_dir),
-            }
+                result.checks = checks
+                result.metadata = {
+                    "input_mode": case.input.mode.value,
+                    "tickers": case.input.tickers,
+                    "refresh": case.input.refresh,
+                    "fixture_id": case.input.fixture_id,
+                    "tags": case.tags,
+                    "output_dir": str(case_dir),
+                }
+            else:
+                produced = self._execute_case(case, case_dir)
+                result.artifacts = produced["artifacts"]
+                unified_findings = produced.get("unified_findings")
+
+                checks.update(self._check_expected_artifacts(case, result.artifacts, failures))
+                sf, sc = validate_produced_artifact_schemas(
+                    result.artifacts,
+                    enforce_schema=case.expected_artifacts.enforce_schema,
+                    exempt_keys=frozenset(case.expected_artifacts.schema_exempt_keys),
+                )
+                failures.extend(sf)
+                checks.update(sc)
+                checks.update(self._check_expected_findings(case, unified_findings, result.artifacts, result, failures))
+                checks.update(self._check_expected_metrics(case, result, unified_findings, failures))
+
+                result.checks = checks
+                status = EvaluationStatus.passed if not failures else EvaluationStatus.failed
+                if case.expected_artifacts.expected_statuses and status not in case.expected_artifacts.expected_statuses:
+                    failures.append(
+                        f"run status '{status.value}' not in expected statuses "
+                        f"{[s.value for s in case.expected_artifacts.expected_statuses]}"
+                    )
+                    status = EvaluationStatus.failed
+                result.status = status
+                result.message = "passed" if status == EvaluationStatus.passed else "; ".join(failures)
+                result.qualitative_notes.extend(case.qualitative_expectations)
+                if case.expected_findings is not None:
+                    result.qualitative_notes.extend(case.expected_findings.qualitative_expectations)
+                result.qualitative_notes.extend(case.expected_artifacts.qualitative_checks)
+                result.metadata = {
+                    "input_mode": case.input.mode.value,
+                    "tickers": case.input.tickers,
+                    "refresh": case.input.refresh,
+                    "fixture_id": case.input.fixture_id,
+                    "tags": case.tags,
+                    "output_dir": str(case_dir),
+                    "results_json": str((Path(self.suite.output_dir) / f"{self.suite.suite_id}_results.json").resolve()),
+                    "summary_json": str((Path(self.suite.output_dir) / f"{self.suite.suite_id}_summary.json").resolve()),
+                }
         except Exception as exc:  # pragma: no cover - defensive wrapper
             result.status = EvaluationStatus.error
             result.message = f"execution error: {type(exc).__name__}: {exc}"
