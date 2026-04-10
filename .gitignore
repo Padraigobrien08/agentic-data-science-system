@@ -15,3 +15,6 @@ __pycache__/
 
 # Local API database (Alembic / FastAPI dev)
 data/backend.db
+
+# Managed artifact blobs (local object store)
+data/artifact_storage/

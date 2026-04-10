@@ -25,8 +25,10 @@ def _ensure_database_parent_dir(database_url: str) -> None:
 
 @asynccontextmanager
 async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
-    """Startup: ensure SQLite parent dirs exist. Shutdown reserved for pool disposal."""
-    _ensure_database_parent_dir(get_settings().database_url)
+    """Startup: ensure SQLite parent dirs and artifact storage root exist."""
+    s = get_settings()
+    _ensure_database_parent_dir(s.database_url)
+    s.artifact_storage_root.mkdir(parents=True, exist_ok=True)
     yield
 
 

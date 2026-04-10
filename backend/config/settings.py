@@ -27,6 +27,12 @@ class Settings(BaseSettings):
         description="SQLAlchemy URL (e.g. postgresql+psycopg2://user:pass@host/dbname)",
     )
 
+    # Root directory for ``local:`` artifact blobs (see ``backend.storage``)
+    artifact_storage_root: Path = Field(
+        default=_REPO_ROOT / "data" / "artifact_storage",
+        description="Filesystem root for LocalFilesystemStore object keys",
+    )
+
     @field_validator("database_url", mode="before")
     @classmethod
     def _normalize_sqlite_url(cls, v: object) -> object:
