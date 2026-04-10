@@ -12,3 +12,6 @@ __pycache__/
 
 # OS
 .DS_Store
+
+# Local API database (Alembic / FastAPI dev)
+data/backend.db

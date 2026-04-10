@@ -1,0 +1,10 @@
+# Backend API service (FastAPI + SQLAlchemy + Alembic). Install alongside requirements.txt:
+#   pip install -r requirements.txt -r requirements-backend.txt
+
+-r requirements.txt
+fastapi>=0.115.0
+uvicorn[standard]>=0.30.0
+sqlalchemy>=2.0.36
+alembic>=1.14.0
+pydantic-settings>=2.0.0
+psycopg2-binary>=2.9.9
