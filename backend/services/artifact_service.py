@@ -1,4 +1,4 @@
-"""Persist artifact metadata (DB) and content (object store)."""
+"""Persist artifact metadata (DB via repository) and content (object store)."""
 
 from __future__ import annotations
 
@@ -11,12 +11,14 @@ from pathlib import Path
 from typing import BinaryIO
 from uuid import UUID
 
-from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.config.settings import Settings, get_settings
+from backend.domain.json_merge import merge_dict_json
 from backend.models.artifact import Artifact
 from backend.models.enums import ArtifactKind
+from backend.repositories.artifact_repository import ArtifactRepository
+from backend.repositories.run_step_repository import RunStepRepository
 from backend.storage import delete_at_uri, open_reader, read_bytes
 from backend.storage.factory import get_local_object_store
 from backend.storage.local import LocalFilesystemStore
@@ -49,11 +51,8 @@ def safe_role_segment(role_key: str) -> str:
 
 class ArtifactService:
     """
-    Coordinates :class:`~backend.models.artifact.Artifact` rows with the configured object store.
-
-    Write path uses :class:`~backend.storage.local.LocalFilesystemStore` (``local:`` URIs).
-    Reads resolve via :mod:`backend.storage.resolver` so S3-compatible backends can register later
-    without changing call sites.
+    Coordinates :class:`~backend.models.artifact.Artifact` rows (via :class:`~backend.repositories.artifact_repository.ArtifactRepository`)
+    with the configured object store.
     """
 
     def __init__(
@@ -62,10 +61,13 @@ class ArtifactService:
         *,
         store: LocalFilesystemStore | None = None,
         settings: Settings | None = None,
+        artifacts: ArtifactRepository | None = None,
+        run_steps: RunStepRepository | None = None,
     ) -> None:
-        self._session = session
         self._settings = settings if settings is not None else get_settings()
         self._store = store if store is not None else get_local_object_store(self._settings)
+        self._artifacts = artifacts if artifacts is not None else ArtifactRepository(session)
+        self._run_steps = run_steps if run_steps is not None else RunStepRepository(session)
 
     def _build_object_key(
         self,
@@ -133,8 +135,65 @@ class ArtifactService:
             content_sha256=stored.sha256_hex,
             meta_json=meta_json,
         )
-        self._session.add(row)
-        self._session.flush()
+        self._artifacts.add(row)
+        self._artifacts.flush()
+        return row
+
+    def attach_to_analysis_run(
+        self,
+        artifact_id: UUID,
+        analysis_run_id: UUID,
+        *,
+        clear_run_step: bool = True,
+    ) -> Artifact:
+        """
+        Associate an existing artifact row with an analysis run (clears evaluation scope).
+
+        Does not move bytes on disk; ``storage_uri`` is unchanged.
+        """
+        row = self.require(artifact_id)
+        row.analysis_run_id = analysis_run_id
+        row.evaluation_run_id = None
+        if clear_run_step:
+            row.run_step_id = None
+        self._artifacts.flush()
+        return row
+
+    def attach_to_run_step(self, artifact_id: UUID, run_step_id: UUID) -> Artifact:
+        """
+        Link an artifact to a step; sets ``analysis_run_id`` from the step.
+
+        Fails if the artifact is already bound to another analysis run.
+        """
+        row = self.require(artifact_id)
+        step = self._run_steps.get(run_step_id)
+        if step is None:
+            raise KeyError(f"Run step not found: {run_step_id}")
+        if row.analysis_run_id is not None and row.analysis_run_id != step.analysis_run_id:
+            raise ValueError(
+                "Artifact is bound to a different analysis_run_id than the step's run"
+            )
+        row.analysis_run_id = step.analysis_run_id
+        row.evaluation_run_id = None
+        row.run_step_id = run_step_id
+        self._artifacts.flush()
+        return row
+
+    def detach_from_run_step(self, artifact_id: UUID) -> Artifact:
+        """Clear ``run_step_id`` only; artifact remains on the analysis run if set."""
+        row = self.require(artifact_id)
+        row.run_step_id = None
+        self._artifacts.flush()
+        return row
+
+    def merge_meta_json(self, artifact_id: UUID, patch: dict | None) -> Artifact:
+        row = self.require(artifact_id)
+        merged = merge_dict_json(
+            row.meta_json if isinstance(row.meta_json, dict) else None,
+            patch,
+        )
+        row.meta_json = merged
+        self._artifacts.flush()
         return row
 
     def ingest_pipeline_file(
@@ -254,7 +313,7 @@ class ArtifactService:
         )
 
     def get(self, artifact_id: UUID) -> Artifact | None:
-        return self._session.get(Artifact, artifact_id)
+        return self._artifacts.get(artifact_id)
 
     def require(self, artifact_id: UUID) -> Artifact:
         row = self.get(artifact_id)
@@ -275,22 +334,13 @@ class ArtifactService:
             yield fh
 
     def list_for_analysis_run(self, analysis_run_id: UUID) -> list[Artifact]:
-        return list(
-            self._session.scalars(
-                select(Artifact)
-                .where(Artifact.analysis_run_id == analysis_run_id)
-                .order_by(Artifact.created_at, Artifact.role_key)
-            ).all()
-        )
+        return self._artifacts.list_for_analysis_run(analysis_run_id)
+
+    def list_for_run_step(self, run_step_id: UUID) -> list[Artifact]:
+        return self._artifacts.list_for_run_step(run_step_id)
 
     def list_for_evaluation_run(self, evaluation_run_id: UUID) -> list[Artifact]:
-        return list(
-            self._session.scalars(
-                select(Artifact)
-                .where(Artifact.evaluation_run_id == evaluation_run_id)
-                .order_by(Artifact.created_at, Artifact.role_key)
-            ).all()
-        )
+        return self._artifacts.list_for_evaluation_run(evaluation_run_id)
 
     def list_storage_keys_for_analysis_run(self, analysis_run_id: UUID) -> list[str]:
         """Raw object keys under the analysis-run prefix (storage reconciliation)."""
@@ -302,11 +352,11 @@ class ArtifactService:
         return self._store.list_keys_under(prefix)
 
     def delete(self, artifact_id: UUID) -> None:
-        """Remove DB row and best-effort delete of backing bytes."""
+        """Remove DB row and delete backing bytes."""
         row = self.get(artifact_id)
         if row is None:
             return
         uri = row.storage_uri
-        self._session.delete(row)
-        self._session.flush()
+        self._artifacts.delete(row)
+        self._artifacts.flush()
         delete_at_uri(uri, settings=self._settings)
