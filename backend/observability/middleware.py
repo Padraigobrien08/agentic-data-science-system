@@ -21,7 +21,7 @@ from backend.observability.tracing import bind_current_trace_for_logs, get_trace
 
 # Paths excluded from detailed route template (metrics cardinality)
 _METRICS_PATH = "/metrics"
-_HEALTH_PATHS = frozenset({"/health", "/ready"})
+_HEALTH_PATHS = frozenset({"/health", "/ready", "/v1/worker/health"})
 
 
 def _route_template(request: Request) -> str:

@@ -17,7 +17,13 @@ from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
 
 from backend.observability.context import bind_run_context, clear_run_context
-from backend.observability.metrics import monotonic_s, observe_worker_job
+from backend.observability.metrics import (
+    mark_worker_loop_tick,
+    monotonic_s,
+    observe_worker_attempt_complete,
+    observe_worker_job,
+    observe_worker_job_claimed,
+)
 from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
@@ -29,6 +35,38 @@ logger = logging.getLogger(__name__)
 log = structlog.get_logger(__name__)
 
 
+def _worker_log_fields(
+    *,
+    job_id: UUID,
+    analysis_run_id: UUID,
+    run: AnalysisRun | None = None,
+    orchestration_run_id: str | None = None,
+) -> dict[str, Any]:
+    """Stable ids for worker structured logs (``run_id`` is the analysis run UUID)."""
+    rid = str(analysis_run_id)
+    fields: dict[str, Any] = {
+        "run_id": rid,
+        "analysis_run_id": rid,
+        "worker_job_id": str(job_id),
+    }
+    orch = orchestration_run_id
+    if orch is None and run is not None and run.correlation_id:
+        orch = run.correlation_id
+    if orch:
+        fields["orchestration_run_id"] = orch
+    return fields
+
+
+def _coarse_worker_outcome(finalize_outcome: str) -> str:
+    if finalize_outcome == "completed_success":
+        return "completed"
+    if finalize_outcome == "requeued_transient":
+        return "requeued"
+    if finalize_outcome in ("cancelled_during_execution", "cancelled"):
+        return "cancelled"
+    return "failed"
+
+
 def _finalize_job_after_attempt(
     session: Session,
     *,
@@ -36,11 +74,16 @@ def _finalize_job_after_attempt(
     analysis_run_id: UUID,
     exc: BaseException | None,
     max_attempts: int,
-) -> None:
+    t_wall_start: float,
+) -> str | None:
     job = session.get(RunExecutionJob, job_id)
     if job is None:
-        log.warning("worker_job_finalize_missing_row", worker_job_id=str(job_id))
-        return
+        log.warning(
+            "worker_job_finalize_missing_row",
+            worker_event="worker_job_finish",
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id),
+        )
+        return None
     run = session.get(AnalysisRun, analysis_run_id)
     run_svc = AnalysisRunService(session)
 
@@ -52,13 +95,14 @@ def _finalize_job_after_attempt(
         job.lease_expires_at = None
         session.commit()
         log.info(
-            "worker_job_finalized",
-            worker_job_id=str(job_id),
-            analysis_run_id=str(analysis_run_id),
+            "worker_job_finished",
+            worker_event="worker_job_finish",
             transition="completed_success",
             attempt_count=job.attempt_count,
+            wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
         )
-        return
+        return "completed_success"
 
     if isinstance(exc, RunCancelledDuringExecution):
         job.status = RunExecutionJobStatus.cancelled
@@ -68,13 +112,15 @@ def _finalize_job_after_attempt(
             job.error_detail = detail
         session.commit()
         log.info(
-            "worker_job_finalized",
-            worker_job_id=str(job_id),
-            analysis_run_id=str(analysis_run_id),
+            "worker_job_finished",
+            worker_event="worker_job_finish",
             transition="cancelled_during_execution",
             attempt_count=job.attempt_count,
+            wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+            exc_type=type(exc).__name__,
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
         )
-        return
+        return "cancelled_during_execution"
 
     if run is not None and run.status == AnalysisRunStatus.cancelled:
         job.status = RunExecutionJobStatus.cancelled
@@ -82,13 +128,15 @@ def _finalize_job_after_attempt(
         job.error_detail = (job.error_detail or str(exc) or "Cancelled")[:2048]
         session.commit()
         log.info(
-            "worker_job_finalized",
-            worker_job_id=str(job_id),
-            analysis_run_id=str(analysis_run_id),
+            "worker_job_finished",
+            worker_event="worker_job_finish",
             transition="cancelled",
             attempt_count=job.attempt_count,
+            wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+            exc_type=type(exc).__name__,
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
         )
-        return
+        return "cancelled"
 
     if run is not None and run.status == AnalysisRunStatus.queued:
         job.status = RunExecutionJobStatus.failed
@@ -97,15 +145,16 @@ def _finalize_job_after_attempt(
         run_svc.set_error_summary(analysis_run_id, str(exc)[:2048])
         run_svc.transition_status(analysis_run_id, AnalysisRunStatus.error)
         session.commit()
-        log.info(
-            "worker_job_finalized",
-            worker_job_id=str(job_id),
-            analysis_run_id=str(analysis_run_id),
+        log.warning(
+            "worker_job_finished",
+            worker_event="worker_job_finish",
             transition="failed_run_still_queued",
             attempt_count=job.attempt_count,
+            wall_duration_s=round(monotonic_s() - t_wall_start, 4),
             exc_type=type(exc).__name__,
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
         )
-        return
+        return "failed_run_still_queued"
 
     transient = is_transient_pipeline_failure(exc)
     if transient and job.attempt_count < max_attempts:
@@ -115,45 +164,56 @@ def _finalize_job_after_attempt(
         except Exception:
             log.exception(
                 "worker_job_requeue_transition_failed",
-                worker_job_id=str(job_id),
-                analysis_run_id=str(analysis_run_id),
+                worker_event="worker_job_failure",
+                **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
             )
             job.status = RunExecutionJobStatus.failed
             job.lease_expires_at = None
             job.error_detail = str(exc)[:2048]
             session.commit()
-            return
+            log.error(
+                "worker_job_finished",
+                worker_event="worker_job_finish",
+                transition="requeue_transition_failed",
+                wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+                exc_type=type(exc).__name__,
+                **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
+            )
+            return "requeue_transition_failed"
         job.status = RunExecutionJobStatus.pending
         job.claimed_at = None
         job.lease_expires_at = None
         job.error_detail = str(exc)[:2048]
         session.commit()
         log.info(
-            "worker_job_requeued_transient",
-            worker_job_id=str(job_id),
-            analysis_run_id=str(analysis_run_id),
+            "worker_job_retry_scheduled",
+            worker_event="worker_job_retry",
             attempt_count=job.attempt_count,
             max_attempts=max_attempts,
             exc_type=type(exc).__name__,
+            wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
         )
-        return
+        return "requeued_transient"
 
     job.status = RunExecutionJobStatus.failed
     job.lease_expires_at = None
     if job.error_detail is None:
         job.error_detail = str(exc)[:2048]
     session.commit()
-    log.info(
-        "worker_job_finalized",
-        worker_job_id=str(job_id),
-        analysis_run_id=str(analysis_run_id),
+    log.warning(
+        "worker_job_finished",
+        worker_event="worker_job_finish",
         transition="failed_terminal_or_exhausted",
         attempt_count=job.attempt_count,
         max_attempts=max_attempts,
         transient=transient,
         exc_type=type(exc).__name__,
         run_status=run.status.value if run is not None else None,
+        wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+        **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
     )
+    return "failed_terminal_or_exhausted"
 
 
 def process_next_job(
@@ -173,6 +233,7 @@ def process_next_job(
 
     job_id: UUID | None = None
     analysis_run_id: UUID | None = None
+    attempt_after_claim: int | None = None
     overrides: dict[str, Any] = {}
     trace_carrier: dict[str, str] | None = None
 
@@ -184,6 +245,7 @@ def process_next_job(
             return False
         job_id = job.id
         analysis_run_id = job.analysis_run_id
+        attempt_after_claim = job.attempt_count
         raw = job.overrides_json
         if isinstance(raw, dict):
             overrides = dict(raw)
@@ -191,16 +253,34 @@ def process_next_job(
         if isinstance(raw_trace, dict):
             trace_carrier = {str(k): str(v) for k, v in raw_trace.items() if v is not None}
         session.commit()
+        observe_worker_job_claimed()
     finally:
         session.close()
 
     assert job_id is not None and analysis_run_id is not None
+    assert attempt_after_claim is not None
+
+    peek = session_factory()
+    orchestration_run_id_at_claim: str | None = None
+    try:
+        run_row = peek.get(AnalysisRun, analysis_run_id)
+        if run_row is not None and run_row.correlation_id:
+            orchestration_run_id_at_claim = run_row.correlation_id
+    finally:
+        peek.close()
+
+    t_wall_start = monotonic_s()
     log.info(
         "worker_job_claimed",
-        worker_job_id=str(job_id),
-        analysis_run_id=str(analysis_run_id),
+        worker_event="worker_job_claim",
+        attempt_count=attempt_after_claim,
         lease_seconds=lease_s,
         max_attempts=max_att,
+        **_worker_log_fields(
+            job_id=job_id,
+            analysis_run_id=analysis_run_id,
+            orchestration_run_id=orchestration_run_id_at_claim,
+        ),
     )
     worker_tracer = get_tracer("backend.worker")
     with attach_trace_carrier(trace_carrier):
@@ -209,17 +289,25 @@ def process_next_job(
             attributes={
                 "worker.job.id": str(job_id),
                 "analysis.run.id": str(analysis_run_id),
+                "run.id": str(analysis_run_id),
             },
         ):
             bind_current_trace_for_logs()
             bind_run_context(
                 worker_job_id=job_id,
                 analysis_run_id=analysis_run_id,
+                orchestration_run_id=orchestration_run_id_at_claim,
                 component="worker",
             )
             t_exec = monotonic_s()
             exc: BaseException | None = None
             try:
+                log.info(
+                    "worker_job_execution_started",
+                    worker_event="worker_job_start",
+                    attempt_count=attempt_after_claim,
+                    **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id),
+                )
                 run_session = session_factory()
                 try:
                     pipeline = EdgarPipelineExecutionService(run_session)
@@ -234,34 +322,47 @@ def process_next_job(
                     run_session.close()
             except BaseException as err:
                 exc = err
-                observe_worker_job("failed")
                 log.exception(
                     "worker_pipeline_failed",
-                    worker_job_id=str(job_id),
-                    analysis_run_id=str(analysis_run_id),
+                    worker_event="worker_job_failure",
+                    attempt_count=attempt_after_claim,
+                    pipeline_duration_s=round(monotonic_s() - t_exec, 4),
+                    wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+                    exc_type=type(err).__name__,
+                    **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id),
                 )
             else:
-                observe_worker_job("completed")
                 log.info(
                     "worker_pipeline_ok",
-                    worker_job_id=str(job_id),
-                    analysis_run_id=str(analysis_run_id),
-                    duration_s=round(monotonic_s() - t_exec, 4),
+                    worker_event="worker_job_pipeline_ok",
+                    attempt_count=attempt_after_claim,
+                    pipeline_duration_s=round(monotonic_s() - t_exec, 4),
+                    wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+                    **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id),
                 )
             finally:
                 clear_run_context()
 
     fin = session_factory()
     try:
-        _finalize_job_after_attempt(
+        finalize_outcome = _finalize_job_after_attempt(
             fin,
             job_id=job_id,
             analysis_run_id=analysis_run_id,
             exc=exc,
             max_attempts=max_att,
+            t_wall_start=t_wall_start,
         )
     finally:
         fin.close()
+
+    wall_duration_s = monotonic_s() - t_wall_start
+    if finalize_outcome is not None:
+        observe_worker_attempt_complete(
+            finalize_outcome=finalize_outcome,
+            coarse_outcome=_coarse_worker_outcome(finalize_outcome),
+            wall_duration_s=wall_duration_s,
+        )
     return True
 
 
@@ -272,6 +373,7 @@ def run_forever(
 ) -> None:
     """Block, processing jobs until interrupted."""
     while True:
+        mark_worker_loop_tick()
         try:
             did_work = process_next_job(session_factory)
         except Exception:

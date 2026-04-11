@@ -80,6 +80,10 @@ services:
     restart: unless-stopped
     environment:
       <<: *backend_env
+      # Process-local job activity gauges (optional scrape: host port → container 9100)
+      EDGAR_BACKEND_WORKER_METRICS_PORT: "9100"
+    ports:
+      - "${WORKER_METRICS_PORT:-9100}:9100"
     volumes:
       - artifacts:/var/lib/edgar/artifacts
     command: ["python", "-m", "backend.worker"]

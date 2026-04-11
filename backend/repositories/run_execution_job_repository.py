@@ -2,16 +2,27 @@
 
 from __future__ import annotations
 
+from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
-from sqlalchemy import select, update
+from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
 
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
 from backend.services.analysis_run_service import AnalysisRunService
+
+
+@dataclass(frozen=True, slots=True)
+class WorkerQueueSnapshot:
+    """Point-in-time counts for worker queue observability (aligned with claim logic)."""
+
+    pending_claimable: int
+    jobs_running_lease_ok: int
+    jobs_running_stale_lease: int
+    open_jobs_on_cancelled_run: int
 
 
 class RunExecutionJobRepository:
@@ -83,6 +94,96 @@ class RunExecutionJobRepository:
             .limit(1)
         )
         return self._session.scalars(stmt).first()
+
+    def queue_observability_snapshot(self, *, max_attempts: int) -> WorkerQueueSnapshot:
+        """
+        DB-backed queue picture for metrics (no worker process required).
+
+        * **pending_claimable** — matches fresh-claim branch: pending, run queued, attempts left.
+        * **jobs_running_lease_ok** — running with a non-expired lease.
+        * **jobs_running_stale_lease** — running with missing or expired lease (reclaim candidates).
+        * **open_jobs_on_cancelled_run** — pending/running while run is cancelled (zombie cleanup backlog).
+        """
+        now = datetime.now(timezone.utc)
+        sess = self._session
+
+        pending_claimable = int(
+            sess.scalar(
+                select(func.count())
+                .select_from(RunExecutionJob)
+                .join(AnalysisRun, RunExecutionJob.analysis_run_id == AnalysisRun.id)
+                .where(
+                    RunExecutionJob.status == RunExecutionJobStatus.pending,
+                    AnalysisRun.status == AnalysisRunStatus.queued,
+                    RunExecutionJob.attempt_count < max_attempts,
+                )
+            )
+            or 0
+        )
+
+        jobs_running_lease_ok = int(
+            sess.scalar(
+                select(func.count())
+                .select_from(RunExecutionJob)
+                .where(
+                    RunExecutionJob.status == RunExecutionJobStatus.running,
+                    RunExecutionJob.lease_expires_at.is_not(None),
+                    RunExecutionJob.lease_expires_at >= now,
+                )
+            )
+            or 0
+        )
+
+        jobs_running_stale_lease = int(
+            sess.scalar(
+                select(func.count())
+                .select_from(RunExecutionJob)
+                .where(
+                    RunExecutionJob.status == RunExecutionJobStatus.running,
+                    or_(
+                        RunExecutionJob.lease_expires_at.is_(None),
+                        RunExecutionJob.lease_expires_at < now,
+                    ),
+                )
+            )
+            or 0
+        )
+
+        open_jobs_on_cancelled_run = int(
+            sess.scalar(
+                select(func.count())
+                .select_from(RunExecutionJob)
+                .join(AnalysisRun, RunExecutionJob.analysis_run_id == AnalysisRun.id)
+                .where(
+                    RunExecutionJob.status.in_(
+                        (RunExecutionJobStatus.pending, RunExecutionJobStatus.running),
+                    ),
+                    AnalysisRun.status == AnalysisRunStatus.cancelled,
+                )
+            )
+            or 0
+        )
+
+        return WorkerQueueSnapshot(
+            pending_claimable=pending_claimable,
+            jobs_running_lease_ok=jobs_running_lease_ok,
+            jobs_running_stale_lease=jobs_running_stale_lease,
+            open_jobs_on_cancelled_run=open_jobs_on_cancelled_run,
+        )
+
+    def last_terminal_job_activity_at(self) -> datetime | None:
+        """Latest ``updated_at`` among terminal execution jobs (DB-visible worker progress)."""
+        return self._session.scalar(
+            select(func.max(RunExecutionJob.updated_at)).where(
+                RunExecutionJob.status.in_(
+                    (
+                        RunExecutionJobStatus.completed,
+                        RunExecutionJobStatus.failed,
+                        RunExecutionJobStatus.cancelled,
+                    ),
+                ),
+            ),
+        )
 
     def _for_update(self, stmt, *, dialect_name: str):
         if dialect_name == "postgresql":

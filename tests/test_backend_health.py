@@ -40,3 +40,16 @@ def test_metrics_prometheus_text(client: TestClient) -> None:
     r = client.get("/metrics")
     assert r.status_code == 200
     assert b"edgar_http_requests_total" in r.content
+    assert b"edgar_worker_queue_depth" in r.content
+    assert b"edgar_worker_queue_pending_claimable" in r.content
+    assert b"edgar_worker_last_terminal_job_unixtime" in r.content
+
+
+def test_worker_health_json(client: TestClient) -> None:
+    r = client.get("/v1/worker/health")
+    assert r.status_code == 200
+    body = r.json()
+    assert "queue_depth" in body
+    assert "jobs_running_lease_ok" in body
+    assert "stale_running_jobs" in body
+    assert "backlog_without_active_lease" in body

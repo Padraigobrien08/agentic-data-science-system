@@ -58,6 +58,16 @@ class Settings(BaseSettings):
         description="Sleep between DB queue polls when no job is available (``python -m backend.worker``)",
     )
 
+    worker_metrics_port: int = Field(
+        default=0,
+        ge=0,
+        le=65535,
+        description=(
+            "When > 0, the worker process exposes Prometheus metrics on this port "
+            "(``prometheus_client.start_http_server``). API ``GET /metrics`` still holds DB queue gauges."
+        ),
+    )
+
     run_job_max_attempts: int = Field(
         default=4,
         ge=1,

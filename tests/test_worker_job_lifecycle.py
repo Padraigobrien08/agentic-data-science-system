@@ -69,6 +69,19 @@ def _seed_queued_job(factory: sessionmaker[Session]) -> tuple[uuid.UUID, uuid.UU
         db.close()
 
 
+def test_queue_observability_snapshot_matches_claimable_pending(session_factory: sessionmaker[Session]) -> None:
+    _seed_queued_job(session_factory)
+    db = session_factory()
+    try:
+        snap = RunExecutionJobRepository(db).queue_observability_snapshot(max_attempts=4)
+        assert snap.pending_claimable == 1
+        assert snap.jobs_running_lease_ok == 0
+        assert snap.jobs_running_stale_lease == 0
+        assert snap.open_jobs_on_cancelled_run == 0
+    finally:
+        db.close()
+
+
 def test_claim_increments_attempt_and_sets_lease(session_factory: sessionmaker[Session]) -> None:
     _seed_queued_job(session_factory)
     db = session_factory()

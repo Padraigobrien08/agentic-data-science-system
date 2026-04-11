@@ -1,9 +1,9 @@
 """
 Request/run correlation via :mod:`structlog` context variables.
 
-All logs emitted while bound keys are set will include ``analysis_run_id``,
-``orchestration_run_id`` (orchestration ``run_id`` string), ``request_id``, and
-``worker_job_id`` when provided. Use :func:`bind_run_context` at API/worker/pipeline
+All logs emitted while bound keys are set will include ``run_id`` (alias of
+``analysis_run_id``), ``orchestration_run_id`` (orchestration ``run_id`` string),
+``request_id``, and ``worker_job_id`` when provided. Use :func:`bind_run_context` at API/worker/pipeline
 entrypoints and :func:`clear_run_context` in ``finally`` blocks.
 """
 
@@ -19,6 +19,7 @@ import structlog.contextvars
 CORRELATION_KEYS = frozenset(
     {
         "request_id",
+        "run_id",
         "analysis_run_id",
         "orchestration_run_id",
         "worker_job_id",
@@ -33,6 +34,7 @@ CORRELATION_KEYS = frozenset(
 _RUN_SEGMENT_KEYS = frozenset(
     {
         "request_id",
+        "run_id",
         "analysis_run_id",
         "orchestration_run_id",
         "worker_job_id",
@@ -56,7 +58,9 @@ def bind_run_context(
     if request_id is not None:
         data["request_id"] = request_id
     if analysis_run_id is not None:
-        data["analysis_run_id"] = str(analysis_run_id)
+        aid = str(analysis_run_id)
+        data["analysis_run_id"] = aid
+        data["run_id"] = aid
     if orchestration_run_id is not None:
         data["orchestration_run_id"] = orchestration_run_id
     if worker_job_id is not None:

@@ -17,6 +17,14 @@ def main() -> None:
     setup_observability_logging(level=level, json_logs=settings.observability_json_logs)
     setup_tracing(service_name=settings.otel_service_name)
     install_edgar_telemetry_hooks()
+    if settings.worker_metrics_port > 0:
+        from prometheus_client import start_http_server
+
+        start_http_server(settings.worker_metrics_port)
+        logging.getLogger(__name__).info(
+            "worker_metrics_listen",
+            extra={"worker_metrics_port": settings.worker_metrics_port},
+        )
     run_forever(SessionLocal, poll_interval_s=settings.worker_poll_interval_s)
 
 
