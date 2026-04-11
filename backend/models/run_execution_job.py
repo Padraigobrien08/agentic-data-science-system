@@ -42,6 +42,12 @@ class RunExecutionJob(Base):
         doc="Optional execute overrides: tickers, analysis_goal, refresh",
     )
 
+    trace_context_json: Mapped[dict | list | None] = mapped_column(
+        JSON,
+        nullable=True,
+        doc="W3C trace context (traceparent/tracestate) serialized at enqueue for worker continuation",
+    )
+
     error_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)

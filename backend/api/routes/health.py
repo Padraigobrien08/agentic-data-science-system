@@ -1,6 +1,7 @@
 """Liveness and dependency checks."""
 
-from fastapi import APIRouter
+from fastapi import APIRouter, status
+from fastapi.responses import JSONResponse
 from sqlalchemy import text
 
 from backend import __version__
@@ -8,6 +9,21 @@ from backend.api.deps import DbSession
 from backend.schemas.health import DatabaseHealth, HealthResponse
 
 router = APIRouter()
+
+
+@router.get("/ready")
+def readiness(db: DbSession) -> JSONResponse:
+    """
+    Readiness for orchestrators: ``200`` when the database accepts connections, else ``503``.
+    """
+    try:
+        db.execute(text("SELECT 1"))
+    except Exception as exc:  # noqa: BLE001
+        return JSONResponse(
+            status_code=status.HTTP_503_SERVICE_UNAVAILABLE,
+            content={"status": "not_ready", "detail": str(exc)},
+        )
+    return JSONResponse(status_code=status.HTTP_200_OK, content={"status": "ready"})
 
 
 @router.get("/health", response_model=HealthResponse)

@@ -40,6 +40,10 @@ PYTHONPATH=. python3 -m edgar_project.cli demo
 - **Data quality / coverage** artifacts make missingness explicit alongside flags.
 - **Orchestration** is deterministic rule-to-plan mapping over MCP tools (inspectable, no black-box scoring).
 
+## Developer documentation
+
+- **Artifact HTTP API** (metadata, streaming content, text preview): [`docs/artifact-delivery.md`](docs/artifact-delivery.md)
+
 ## CLI reference
 
 From repo root (`PYTHONPATH=.`):

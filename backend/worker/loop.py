@@ -8,16 +8,22 @@ from collections.abc import Callable
 from typing import Any
 from uuid import UUID
 
+import structlog
 from sqlalchemy.orm import Session
 
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
+
+from backend.observability.context import bind_run_context, clear_run_context
+from backend.observability.metrics import monotonic_s, observe_worker_job
+from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.edgar_pipeline_execution_service import EdgarPipelineExecutionService
 
 logger = logging.getLogger(__name__)
+log = structlog.get_logger(__name__)
 
 
 def _finalize_job_after_attempt(
@@ -61,6 +67,7 @@ def process_next_job(session_factory: Callable[[], Session]) -> bool:
     job_id: UUID | None = None
     analysis_run_id: UUID | None = None
     overrides: dict[str, Any] = {}
+    trace_carrier: dict[str, str] | None = None
 
     session = session_factory()
     try:
@@ -73,28 +80,62 @@ def process_next_job(session_factory: Callable[[], Session]) -> bool:
         raw = job.overrides_json
         if isinstance(raw, dict):
             overrides = dict(raw)
+        raw_trace = job.trace_context_json
+        if isinstance(raw_trace, dict):
+            trace_carrier = {str(k): str(v) for k, v in raw_trace.items() if v is not None}
         session.commit()
     finally:
         session.close()
 
     assert job_id is not None and analysis_run_id is not None
-    exc: BaseException | None = None
-    try:
-        run_session = session_factory()
-        try:
-            pipeline = EdgarPipelineExecutionService(run_session)
-            pipeline.execute_analysis_run(
-                analysis_run_id,
-                from_worker=True,
-                tickers=overrides.get("tickers"),
-                analysis_goal=overrides.get("analysis_goal"),
-                refresh=overrides.get("refresh"),
+    worker_tracer = get_tracer("backend.worker")
+    with attach_trace_carrier(trace_carrier):
+        with worker_tracer.start_as_current_span(
+            "worker.job.execute",
+            attributes={
+                "worker.job.id": str(job_id),
+                "analysis.run.id": str(analysis_run_id),
+            },
+        ):
+            bind_current_trace_for_logs()
+            bind_run_context(
+                worker_job_id=job_id,
+                analysis_run_id=analysis_run_id,
+                component="worker",
             )
-        finally:
-            run_session.close()
-    except BaseException as err:
-        exc = err
-        logger.exception("Pipeline execution failed for run %s job %s", analysis_run_id, job_id)
+            t_exec = monotonic_s()
+            exc: BaseException | None = None
+            try:
+                run_session = session_factory()
+                try:
+                    pipeline = EdgarPipelineExecutionService(run_session)
+                    pipeline.execute_analysis_run(
+                        analysis_run_id,
+                        from_worker=True,
+                        tickers=overrides.get("tickers"),
+                        analysis_goal=overrides.get("analysis_goal"),
+                        refresh=overrides.get("refresh"),
+                    )
+                finally:
+                    run_session.close()
+            except BaseException as err:
+                exc = err
+                observe_worker_job("failed")
+                log.exception(
+                    "worker_pipeline_failed",
+                    worker_job_id=str(job_id),
+                    analysis_run_id=str(analysis_run_id),
+                )
+            else:
+                observe_worker_job("completed")
+                log.info(
+                    "worker_pipeline_ok",
+                    worker_job_id=str(job_id),
+                    analysis_run_id=str(analysis_run_id),
+                    duration_s=round(monotonic_s() - t_exec, 4),
+                )
+            finally:
+                clear_run_context()
 
     fin = session_factory()
     try:
@@ -119,7 +160,8 @@ def run_forever(
         try:
             did_work = process_next_job(session_factory)
         except Exception:
-            logger.exception("Worker loop error")
+            observe_worker_job("loop_error")
+            log.exception("worker_loop_error")
             did_work = False
         if not did_work:
             time.sleep(poll_interval_s)

@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
+from backend.observability.tracing import serialize_trace_carrier
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
 
@@ -25,16 +26,24 @@ class RunQueueService:
         self._runs = runs if runs is not None else AnalysisRunService(session)
         self._jobs = jobs if jobs is not None else RunExecutionJobRepository(session)
 
-    def enqueue_after_create(self, analysis_run_id: UUID, overrides: dict[str, Any] | None) -> None:
+    def enqueue_after_create(
+        self,
+        analysis_run_id: UUID,
+        overrides: dict[str, Any] | None,
+        *,
+        trace_carrier: dict[str, str] | None = None,
+    ) -> None:
         """Move ``pending`` → ``queued`` and insert a pending :class:`~backend.models.run_execution_job.RunExecutionJob`."""
         row = self._runs.require(analysis_run_id)
         if row.status != AnalysisRunStatus.pending:
             raise ValueError(f"Can only enqueue a pending run, got {row.status.value!r}")
         self._runs.transition_status(analysis_run_id, AnalysisRunStatus.queued)
+        tc = trace_carrier if trace_carrier is not None else serialize_trace_carrier()
         job = RunExecutionJob(
             analysis_run_id=analysis_run_id,
             status=RunExecutionJobStatus.pending,
             overrides_json=overrides,
+            trace_context_json=tc,
         )
         self._jobs.add(job)
         self._jobs.flush()

@@ -80,6 +80,21 @@ class Settings(BaseSettings):
         description="Prompt file version under ``backend/agents/prompts/report/``",
     )
 
+    # Observability (structured logs + Prometheus /metrics)
+    observability_json_logs: bool = Field(
+        default=True,
+        description="Emit one JSON object per log line (stderr). Set false for console rendering.",
+    )
+    log_level: str = Field(
+        default="INFO",
+        description="Root log level: DEBUG, INFO, WARNING, ERROR",
+    )
+
+    otel_service_name: str | None = Field(
+        default=None,
+        description="OpenTelemetry ``service.name`` (falls back to OTEL_SERVICE_NAME env or edgar-backend)",
+    )
+
     @field_validator("database_url", mode="before")
     @classmethod
     def _normalize_sqlite_url(cls, v: object) -> object:

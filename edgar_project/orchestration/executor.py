@@ -27,6 +27,8 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 
+from opentelemetry import trace as otel_trace
+
 from edgar_project.mcp import tools as mcp_tools
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_REPORT,
@@ -77,6 +79,9 @@ from edgar_project.orchestration.schemas import (
 )
 from edgar_project.orchestration.run_logging import log_run_finished, logger, tool_summary_line
 from edgar_project.orchestration.state import OrchestrationRunState
+from edgar_project.orchestration.telemetry_callbacks import notify_mcp_tool
+
+_MCP_TRACER = otel_trace.get_tracer(__name__, "1.0.0")
 
 
 def _utc_now() -> datetime:
@@ -337,7 +342,15 @@ class Executor:
         ig = state.interpreted_goal or _placeholder_interpreted_goal(state.request.analysis_goal)
 
         if state.plan is None or not state.plan.steps:
-            logger.info("[%s] execute skipped: empty plan", state.run_id)
+            logger.info(
+                "[%s] execute skipped: empty plan",
+                state.run_id,
+                extra={
+                    "event": "orchestration_execute_skipped",
+                    "orchestration_run_id": state.run_id,
+                    "reason": "empty_plan",
+                },
+            )
             out = state.to_output(
                 status=OrchestrationRunStatus.success,
                 message="No steps to execute (empty plan).",
@@ -355,7 +368,16 @@ class Executor:
             return out
 
         steps_sorted = sorted(state.plan.steps, key=lambda x: x.order)
-        logger.info("[%s] execute start planned_steps=%d", state.run_id, len(steps_sorted))
+        logger.info(
+            "[%s] execute start planned_steps=%d",
+            state.run_id,
+            len(steps_sorted),
+            extra={
+                "event": "orchestration_execute_start",
+                "orchestration_run_id": state.run_id,
+                "planned_steps": len(steps_sorted),
+            },
+        )
         planned_resolve_tickers = [s.tool_input["ticker"] for s in steps_sorted if s.tool_name == TOOL_RESOLVE_COMPANY]
         has_fetch = any(s.tool_name == TOOL_FETCH_COMPANY_DATA for s in steps_sorted)
 
@@ -421,6 +443,13 @@ class Executor:
                         state.run_id,
                         step.order,
                         step.tool_name,
+                        extra={
+                            "event": "orchestration_skip_dispatch",
+                            "orchestration_run_id": state.run_id,
+                            "step_order": step.order,
+                            "tool_name": step.tool_name,
+                            "reason": "all_fetches_no_data",
+                        },
                     )
                     return _emit(
                         status=OrchestrationRunStatus.no_data,
@@ -434,9 +463,25 @@ class Executor:
                 step.order,
                 step.tool_name,
                 step.label,
+                extra={
+                    "event": "orchestration_mcp_step_start",
+                    "orchestration_run_id": state.run_id,
+                    "step_order": step.order,
+                    "tool_name": step.tool_name,
+                    "step_label": step.label,
+                },
             )
             try:
-                env = _dispatch_mcp(step)
+                with _MCP_TRACER.start_as_current_span(
+                    "mcp.tool.invoke",
+                    attributes={
+                        "mcp.tool.name": step.tool_name,
+                        "orchestration.run_id": state.run_id or "",
+                        "orchestration.step.order": int(step.order),
+                    },
+                ) as _otel_span:
+                    env = _dispatch_mcp(step)
+                    _otel_span.set_attribute("mcp.response.status", env.status.value)
             except Exception as exc:
                 err_rec = StepRecord(
                     tool_name=step.tool_name,
@@ -466,10 +511,20 @@ class Executor:
                     step.tool_name,
                     type(exc).__name__,
                     str(exc),
+                    extra={
+                        "event": "orchestration_mcp_dispatch_failed",
+                        "orchestration_run_id": state.run_id,
+                        "step_order": step.order,
+                        "tool_name": step.tool_name,
+                        "mcp_status": "dispatch_exception",
+                        "exc_type": type(exc).__name__,
+                    },
                 )
+                notify_mcp_tool(step.tool_name, "dispatch_exception")
                 aborted = True
                 break
 
+            notify_mcp_tool(step.tool_name, env.status.value)
             env_dict = mcp_tools.to_json_dict(env)
             state.record_step(
                 StepRecord(
@@ -489,6 +544,14 @@ class Executor:
                 step.tool_name,
                 step.label,
                 tool_summary_line(ts),
+                extra={
+                    "event": "orchestration_mcp_step_end",
+                    "orchestration_run_id": state.run_id,
+                    "step_order": step.order,
+                    "tool_name": step.tool_name,
+                    "step_label": step.label,
+                    "mcp_status": env.status.value,
+                },
             )
             if env.status == ToolStatus.error and env.errors:
                 logger.warning(

@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { ArtifactContentViewer } from "@/components/trace/artifact-content-viewer";
 import { JsonPanel, MetaRow, Section } from "@/components/ui/technical";
 import type { ArtifactDetail } from "@/lib/api/types";
 import { formatBytes, formatDate } from "@/lib/format";
@@ -10,7 +11,8 @@ type Props = {
 };
 
 /**
- * Artifact record with **provenance** and technical metadata (storage, hash, MIME).
+ * Artifact record with **provenance** and technical metadata (hash, MIME). Content bytes are not
+ * listed here; use the Content section to preview or download via the API proxy.
  */
 export function ArtifactDetailPanel({ row, runHref }: Props) {
   return (
@@ -26,8 +28,15 @@ export function ArtifactDetailPanel({ row, runHref }: Props) {
           <MetaRow label="mime_type">{row.mime_type ?? "—"}</MetaRow>
           <MetaRow label="byte_size">{formatBytes(row.byte_size)}</MetaRow>
           <MetaRow label="content_sha256">{row.content_sha256 ?? "—"}</MetaRow>
-          <MetaRow label="storage_uri">
-            <span className="break-all">{row.storage_uri}</span>
+          <MetaRow label="Byte delivery">
+            <span className="text-[var(--muted)]">
+              Raw bytes and text preview use{" "}
+              <code className="text-[var(--foreground)]">GET /v1/artifacts/{"{id}"}/content</code> and{" "}
+              <code className="text-[var(--foreground)]">…/preview</code>. In this app, the browser hits{" "}
+              <code className="text-[var(--foreground)]">/api/artifacts/{"{id}"}/…</code> (server proxy).
+              Storage locators are not shown in the UI. See{" "}
+              <code className="text-[var(--foreground)]">docs/artifact-delivery.md</code>.
+            </span>
           </MetaRow>
           <MetaRow label="created_at">{formatDate(row.created_at)}</MetaRow>
           <MetaRow label="updated_at">{formatDate(row.updated_at)}</MetaRow>
@@ -59,6 +68,13 @@ export function ArtifactDetailPanel({ row, runHref }: Props) {
           <code>meta_json</code> often includes <code>orchestration_run_id</code> and{" "}
           <code>source</code> from pipeline ingest for audit.
         </p>
+      </Section>
+
+      <Section
+        title="Content"
+        description="Text preview (size-capped JSON response) plus inline or download of full bytes. Binary types get no preview (415); use download."
+      >
+        <ArtifactContentViewer artifactId={row.id} kind={row.kind} />
       </Section>
 
       <Section title="meta_json" description="Opaque JSON from the object store / ingest layer.">

@@ -14,6 +14,7 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from backend.config.settings import Settings, get_settings
+from backend.observability.tracing import get_tracer
 from backend.domain.json_merge import merge_dict_json
 from backend.models.artifact import Artifact
 from backend.models.enums import ArtifactKind
@@ -69,6 +70,11 @@ class ArtifactService:
         self._artifacts = artifacts if artifacts is not None else ArtifactRepository(session)
         self._run_steps = run_steps if run_steps is not None else RunStepRepository(session)
 
+    @property
+    def settings(self) -> Settings:
+        """Settings bound to this service (object store root, etc.)."""
+        return self._settings
+
     def _build_object_key(
         self,
         *,
@@ -120,7 +126,20 @@ class ArtifactService:
         )
         k = kind if kind is not None else ArtifactKind.other
         mt = mime_type if mime_type is not None else "application/octet-stream"
-        stored = self._store.put(key, data, content_type=mt)
+        art_tr = get_tracer("backend.artifacts")
+        attrs: dict[str, str | int | bool] = {
+            "artifact.role": role_key,
+            "artifact.kind": k.value,
+        }
+        if analysis_run_id is not None:
+            attrs["analysis.run.id"] = str(analysis_run_id)
+        if evaluation_run_id is not None:
+            attrs["evaluation.run.id"] = str(evaluation_run_id)
+        with art_tr.start_as_current_span("artifact.persist", attributes=attrs) as span:
+            stored = self._store.put(key, data, content_type=mt)
+            span.set_attribute("artifact.byte_size", int(stored.byte_size))
+            uri = stored.uri
+            span.set_attribute("artifact.storage.uri", uri[:512] if len(uri) > 512 else uri)
 
         row = Artifact(
             id=artifact_id,

@@ -10,3 +10,7 @@ pydantic-settings>=2.0.0
 email-validator>=2.0.0
 psycopg2-binary>=2.9.9
 openai>=1.40.0
+structlog>=24.4.0
+prometheus-client>=0.21.0
+opentelemetry-sdk>=1.22.0
+opentelemetry-exporter-otlp-proto-http>=1.22.0

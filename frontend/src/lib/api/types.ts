@@ -21,7 +21,7 @@ export type RunStepStatus =
   | "no_data"
   | "error";
 
-export type ArtifactKind = "tabular" | "document" | "binary" | "other";
+export type ArtifactKind = "tabular" | "document" | "binary" | "json" | "other";
 
 export interface AnalysisRunSummary {
   id: string;
@@ -76,6 +76,16 @@ export interface ArtifactMetadata {
 
 export interface ArtifactDetail extends ArtifactMetadata {
   meta_json: Record<string, unknown> | unknown[] | null;
+}
+
+/** GET /v1/artifacts/{id}/preview */
+export interface ArtifactPreviewResponse {
+  format: "text" | "json";
+  text: string;
+  truncated: boolean;
+  mime_type: string | null;
+  total_bytes: number | null;
+  json_valid: boolean | null;
 }
 
 export interface AnalysisRunCreateBody {

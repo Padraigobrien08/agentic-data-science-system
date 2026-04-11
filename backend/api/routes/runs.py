@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.deps import (
@@ -34,6 +34,7 @@ from backend.schemas.api_phase_a import (
 )
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
 from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
+from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.services.run_lifecycle_service import RunLifecycleService
 from backend.services.run_queue_service import RunQueueService
 
@@ -43,6 +44,7 @@ router = APIRouter(prefix="/runs", tags=["runs"])
 @router.post("", response_model=AnalysisRunSummary, status_code=201)
 def create_run(
     body: AnalysisRunCreate,
+    request: Request,
     db: DbSession,
     run_svc: AnalysisRunServiceDep,
 ) -> AnalysisRunSummary:
@@ -62,7 +64,8 @@ def create_run(
             overrides = (
                 body.enqueue_overrides.model_dump(exclude_none=True) if body.enqueue_overrides else None
             )
-            RunQueueService(db).enqueue_after_create(row.id, overrides)
+            tc = getattr(request.state, "trace_carrier_for_jobs", None)
+            RunQueueService(db).enqueue_after_create(row.id, overrides, trace_carrier=tc)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -123,6 +126,7 @@ def cancel_run(run_id: UUID, db: DbSession) -> AnalysisRunSummary:
 @router.post("/{run_id}/retry", response_model=AnalysisRunSummary)
 def retry_run(
     run_id: UUID,
+    request: Request,
     db: DbSession,
     body: RunRetryRequest | None = None,
 ) -> AnalysisRunSummary:
@@ -133,7 +137,10 @@ def retry_run(
         else None
     )
     try:
-        row = RunLifecycleService(db).retry_analysis_run(run_id, overrides=overrides)
+        tc = getattr(request.state, "trace_carrier_for_jobs", None)
+        row = RunLifecycleService(db).retry_analysis_run(
+            run_id, overrides=overrides, trace_carrier=tc
+        )
         db.commit()
     except RunLifecycleError as exc:
         db.rollback()
@@ -193,6 +200,7 @@ def list_run_artifacts(
 @router.post("/{run_id}/execute", response_model=ExecuteRunResponse)
 def execute_run(
     run_id: UUID,
+    request: Request,
     pipeline: EdgarPipelineExecutionDep,
     run_svc: AnalysisRunServiceDep,
     body: ExecuteRunOverrides | None = None,
@@ -215,13 +223,22 @@ def execute_run(
             status_code=409,
             detail="Run is already executing",
         )
+    tc = getattr(request.state, "trace_carrier_for_jobs", None)
+    api_tracer = get_tracer("backend.api.runs")
     try:
-        out = pipeline.execute_analysis_run(
-            run_id,
-            tickers=body.tickers if body else None,
-            analysis_goal=body.analysis_goal if body else None,
-            refresh=body.refresh if body else None,
-        )
+        with attach_trace_carrier(tc):
+            bind_current_trace_for_logs()
+            with api_tracer.start_as_current_span(
+                "runs.dispatch_execute",
+                attributes={"analysis.run.id": str(run_id)},
+            ):
+                bind_current_trace_for_logs()
+                out = pipeline.execute_analysis_run(
+                    run_id,
+                    tickers=body.tickers if body else None,
+                    analysis_goal=body.analysis_goal if body else None,
+                    refresh=body.refresh if body else None,
+                )
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return ExecuteRunResponse(

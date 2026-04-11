@@ -13,6 +13,7 @@ from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
+from backend.observability.tracing import serialize_trace_carrier
 from backend.services.exceptions import RunLifecycleError
 
 
@@ -61,6 +62,7 @@ class RunLifecycleService:
         analysis_run_id: UUID,
         *,
         overrides: dict[str, Any] | None = None,
+        trace_carrier: dict[str, str] | None = None,
     ) -> AnalysisRun:
         row = self._runs.get(analysis_run_id)
         if row is None:
@@ -89,10 +91,12 @@ class RunLifecycleService:
             )
         self._runs.transition_status(analysis_run_id, AnalysisRunStatus.queued)
         self._runs.set_error_summary(analysis_run_id, None)
+        tc = trace_carrier if trace_carrier is not None else serialize_trace_carrier()
         job = RunExecutionJob(
             analysis_run_id=analysis_run_id,
             status=RunExecutionJobStatus.pending,
             overrides_json=overrides,
+            trace_context_json=tc,
         )
         self._jobs.add(job)
         self._jobs.flush()

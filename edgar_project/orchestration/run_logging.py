@@ -51,7 +51,25 @@ def log_run_finished(
         len(errors),
         warnings_count,
         artifact_path_count,
+        extra={
+            "event": "orchestration_run_finished",
+            "orchestration_run_id": run_id,
+            "orchestration_status": status.value,
+            "errors_count": len(errors),
+            "warnings_count": warnings_count,
+            "artifact_path_count": artifact_path_count,
+        },
     )
     if errors:
         e0 = errors[0]
-        logger.warning("[%s] primary_error code=%s message=%r", run_id, e0.code, e0.message)
+        logger.warning(
+            "[%s] primary_error code=%s message=%r",
+            run_id,
+            e0.code,
+            e0.message,
+            extra={
+                "event": "orchestration_primary_error",
+                "orchestration_run_id": run_id,
+                "error_code": e0.code,
+            },
+        )

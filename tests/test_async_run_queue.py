@@ -81,6 +81,35 @@ def test_post_run_enqueue_execution_sets_queued(api_client: tuple[TestClient, st
     assert body["status"] == "queued"
 
 
+def test_enqueue_persists_w3c_trace_context_for_worker(
+    api_client: tuple[TestClient, str, sessionmaker[Session]],
+) -> None:
+    """Queued jobs store traceparent so the worker can continue the API trace."""
+    client, project_id, factory = api_client
+    r = client.post(
+        "/v1/runs",
+        json={
+            "project_id": project_id,
+            "orchestration_goal_text": "goal",
+            "input_payload_json": {"tickers": ["MSFT"]},
+            "enqueue_execution": True,
+        },
+    )
+    assert r.status_code == 201
+    run_uuid = uuid.UUID(r.json()["id"])
+    db = factory()
+    try:
+        job = db.scalars(
+            select(RunExecutionJob).where(RunExecutionJob.analysis_run_id == run_uuid).limit(1)
+        ).first()
+        assert job is not None
+        assert isinstance(job.trace_context_json, dict)
+        assert "traceparent" in job.trace_context_json
+        assert job.trace_context_json["traceparent"].startswith("00-")
+    finally:
+        db.close()
+
+
 def test_sync_execute_returns_409_when_queued(api_client: tuple[TestClient, str, sessionmaker[Session]]) -> None:
     client, project_id, _factory = api_client
     r = client.post(

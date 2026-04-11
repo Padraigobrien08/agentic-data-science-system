@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 from typing import Any
 from uuid import UUID
 
+import structlog
 from sqlalchemy.orm import Session
 
 from backend.llm.exceptions import ChatCompletionProviderError
@@ -18,7 +19,11 @@ from backend.llm.protocol import ChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest, ChatCompletionResult
 from backend.models.enums import ModelCallStatus
 from backend.models.model_call import ModelCall
+from backend.observability.metrics import observe_llm_completion
+from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
 from backend.repositories.model_call_repository import ModelCallRepository
+
+log = structlog.get_logger(__name__)
 
 
 class RecordedChatCompletionService:
@@ -68,15 +73,39 @@ class RecordedChatCompletionService:
         self._calls.add(row)
         self._calls.flush()
 
+        agent_role = "unknown"
+        if request_metadata:
+            agent_role = str(request_metadata.get("role") or request_metadata.get("agent_role") or "unknown")
+
+        llm_tracer = get_tracer("backend.llm")
         t0 = time.perf_counter()
         try:
-            result = self._provider.complete(request)
+            with llm_tracer.start_as_current_span(
+                "llm.chat_completion",
+                attributes={
+                    "gen_ai.operation.name": "chat",
+                    "gen_ai.request.model": request.model,
+                    "edgar.agent.role": agent_role,
+                    "analysis.run.id": str(analysis_run_id) if analysis_run_id else "",
+                },
+            ):
+                bind_current_trace_for_logs()
+                result = self._provider.complete(request)
         except ChatCompletionProviderError as exc:
             row.status = ModelCallStatus.error
             row.error_detail = str(exc)[:8192]
             row.finished_at = datetime.now(timezone.utc)
             row.latency_ms = int((time.perf_counter() - t0) * 1000)
             self._calls.flush()
+            dur = time.perf_counter() - t0
+            observe_llm_completion(agent_role, "error", dur)
+            log.warning(
+                "llm_completion_failed",
+                agent_role=agent_role,
+                analysis_run_id=str(analysis_run_id) if analysis_run_id else None,
+                exc_type=type(exc).__name__,
+                duration_s=round(dur, 4),
+            )
             raise
 
         row.status = ModelCallStatus.success
@@ -87,4 +116,13 @@ class RecordedChatCompletionService:
         row.model_name = result.model
         row.response_payload_json = result.model_dump(mode="json")
         self._calls.flush()
+        dur = time.perf_counter() - t0
+        observe_llm_completion(agent_role, "success", dur)
+        log.info(
+            "llm_completion_ok",
+            agent_role=agent_role,
+            analysis_run_id=str(analysis_run_id) if analysis_run_id else None,
+            duration_s=round(dur, 4),
+            model=result.model,
+        )
         return row, result

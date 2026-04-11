@@ -12,12 +12,24 @@ from pathlib import Path
 from typing import Any
 from uuid import UUID
 
+import structlog
 from sqlalchemy.orm import Session
 
 from backend.agents.traceable_analysis_pipeline import run_traceable_edgar_pipeline
 from backend.llm.exceptions import LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
 from backend.models.enums import AnalysisRunStatus
+from backend.observability.context import (
+    bind_run_context,
+    clear_run_context,
+    merge_orchestration_run_id,
+)
+from backend.observability.metrics import (
+    monotonic_s,
+    observe_pipeline_complete,
+    observe_pipeline_exception,
+)
+from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
 from edgar_project.orchestration import OrchestrationInput
@@ -25,6 +37,8 @@ from edgar_project.orchestration.agent import AnalysisAgent
 from edgar_project.orchestration.schemas import OrchestrationOutput, OrchestrationRunStatus
 from edgar_project.orchestration.state import OrchestrationRunState
 from edgar_project.repo_layout import chdir_repo_root, ensure_repo_root_on_syspath
+
+log = structlog.get_logger(__name__)
 
 
 def _orch_status_to_db(status: OrchestrationRunStatus) -> AnalysisRunStatus:
@@ -120,86 +134,126 @@ class EdgarPipelineExecutionService:
         Raises:
             ValueError: unknown run, not executable, or invalid orchestration input.
         """
-        row = self._runs.require(analysis_run_id)
-        if from_worker:
-            if row.status != AnalysisRunStatus.queued:
-                raise ValueError(
-                    f"Worker execution requires status 'queued', got {row.status.value!r}"
-                )
-        else:
-            if row.status == AnalysisRunStatus.running:
-                raise ValueError("Run is already executing (stale running state)")
-            if row.status == AnalysisRunStatus.queued:
-                raise ValueError(
-                    "Run is queued for background execution; use the worker or create without enqueue"
-                )
-            if row.status not in _EXECUTABLE_STATUSES:
-                raise ValueError(f"Run status {row.status.value!r} is not executable")
-
-        orch_in = _build_orchestration_input(
-            input_payload=row.input_payload_json,
-            orchestration_goal_text=row.orchestration_goal_text,
-            overrides_tickers=tickers,
-            overrides_goal=analysis_goal,
-            overrides_refresh=refresh,
+        bind_run_context(
+            analysis_run_id=analysis_run_id,
+            component="pipeline",
+            from_worker=from_worker,
         )
-
-        self._runs.transition_status(analysis_run_id, AnalysisRunStatus.running)
-        self._session.flush()
-
-        ensure_repo_root_on_syspath()
-        chdir_repo_root()
-
-        traced = None
+        bind_current_trace_for_logs()
+        t0 = monotonic_s()
+        pipeline_tracer = get_tracer("backend.pipeline")
         try:
-            try:
-                llm_provider = get_chat_completion_provider()
-            except LLMProviderConfigurationError:
-                llm_provider = None
-            traced = run_traceable_edgar_pipeline(
-                self._session,
-                analysis_run_id,
-                orch_in,
-                llm_provider=llm_provider,
-                coordinator=self._coord,
-            )
-            out = traced.orchestration_output
-        except Exception as exc:
-            self._runs.set_error_summary(analysis_run_id, str(exc))
-            self._runs.transition_status(analysis_run_id, AnalysisRunStatus.error)
-            self._session.flush()
-            self._session.commit()
-            raise
+            with pipeline_tracer.start_as_current_span(
+                "pipeline.execute",
+                attributes={
+                    "analysis.run.id": str(analysis_run_id),
+                    "edgar.from_worker": from_worker,
+                },
+            ):
+                bind_current_trace_for_logs()
+                row = self._runs.require(analysis_run_id)
+                if from_worker:
+                    if row.status != AnalysisRunStatus.queued:
+                        raise ValueError(
+                            f"Worker execution requires status 'queued', got {row.status.value!r}"
+                        )
+                else:
+                    if row.status == AnalysisRunStatus.running:
+                        raise ValueError("Run is already executing (stale running state)")
+                    if row.status == AnalysisRunStatus.queued:
+                        raise ValueError(
+                            "Run is queued for background execution; use the worker or create without enqueue"
+                        )
+                    if row.status not in _EXECUTABLE_STATUSES:
+                        raise ValueError(f"Run status {row.status.value!r} is not executable")
 
-        db_terminal = _orch_status_to_db(out.status)
-        row = self._runs.require(analysis_run_id)
-        if out.run_id:
-            row.correlation_id = str(out.run_id)[:64]
-        self._runs.set_output_payload(analysis_run_id, out.model_dump(mode="json"))
-        if traced is not None and traced.output_payload_patch:
-            self._runs.merge_output_payload(analysis_run_id, traced.output_payload_patch)
-        if out.errors:
-            self._runs.set_error_summary(analysis_run_id, out.errors[0].message)
-        else:
-            self._runs.set_error_summary(analysis_run_id, None)
-
-        for role_key, path_str in out.artifact_paths.items():
-            if not path_str or not str(path_str).strip():
-                continue
-            p = Path(str(path_str))
-            if not p.is_file():
-                continue
-            try:
-                self._artifacts.ingest_pipeline_file(
-                    p,
-                    role_key=role_key,
-                    analysis_run_id=analysis_run_id,
-                    meta_json={"orchestration_run_id": out.run_id, "source": "pipeline"},
+                orch_in = _build_orchestration_input(
+                    input_payload=row.input_payload_json,
+                    orchestration_goal_text=row.orchestration_goal_text,
+                    overrides_tickers=tickers,
+                    overrides_goal=analysis_goal,
+                    overrides_refresh=refresh,
                 )
-            except (OSError, ValueError):
-                continue
 
-        self._runs.transition_status(analysis_run_id, db_terminal)
-        self._session.flush()
-        self._session.commit()
-        return out
+                self._runs.transition_status(analysis_run_id, AnalysisRunStatus.running)
+                self._session.flush()
+
+                ensure_repo_root_on_syspath()
+                chdir_repo_root()
+
+                traced = None
+                try:
+                    try:
+                        llm_provider = get_chat_completion_provider()
+                    except LLMProviderConfigurationError:
+                        llm_provider = None
+                    traced = run_traceable_edgar_pipeline(
+                        self._session,
+                        analysis_run_id,
+                        orch_in,
+                        llm_provider=llm_provider,
+                        coordinator=self._coord,
+                    )
+                    out = traced.orchestration_output
+                except Exception as exc:
+                    observe_pipeline_exception(exc)
+                    log.exception(
+                        "pipeline_failed",
+                        analysis_run_id=str(analysis_run_id),
+                        exc_type=type(exc).__name__,
+                    )
+                    self._runs.set_error_summary(analysis_run_id, str(exc))
+                    self._runs.transition_status(analysis_run_id, AnalysisRunStatus.error)
+                    self._session.flush()
+                    self._session.commit()
+                    raise
+
+                if out.run_id:
+                    merge_orchestration_run_id(str(out.run_id))
+
+                db_terminal = _orch_status_to_db(out.status)
+                row = self._runs.require(analysis_run_id)
+                if out.run_id:
+                    row.correlation_id = str(out.run_id)[:64]
+                self._runs.set_output_payload(analysis_run_id, out.model_dump(mode="json"))
+                if traced is not None and traced.output_payload_patch:
+                    self._runs.merge_output_payload(analysis_run_id, traced.output_payload_patch)
+                if out.errors:
+                    self._runs.set_error_summary(analysis_run_id, out.errors[0].message)
+                else:
+                    self._runs.set_error_summary(analysis_run_id, None)
+
+                duration_s = monotonic_s() - t0
+                observe_pipeline_complete(duration_s, db_terminal.value)
+                log.info(
+                    "pipeline_completed",
+                    analysis_run_id=str(analysis_run_id),
+                    orchestration_run_id=str(out.run_id) if out.run_id else None,
+                    duration_s=round(duration_s, 4),
+                    orchestration_status=out.status.value,
+                    db_terminal_status=db_terminal.value,
+                    artifact_path_count=len(out.artifact_paths),
+                )
+
+                for role_key, path_str in out.artifact_paths.items():
+                    if not path_str or not str(path_str).strip():
+                        continue
+                    p = Path(str(path_str))
+                    if not p.is_file():
+                        continue
+                    try:
+                        self._artifacts.ingest_pipeline_file(
+                            p,
+                            role_key=role_key,
+                            analysis_run_id=analysis_run_id,
+                            meta_json={"orchestration_run_id": out.run_id, "source": "pipeline"},
+                        )
+                    except (OSError, ValueError):
+                        continue
+
+                self._runs.transition_status(analysis_run_id, db_terminal)
+                self._session.flush()
+                self._session.commit()
+                return out
+        finally:
+            clear_run_context()
