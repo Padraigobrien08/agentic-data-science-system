@@ -25,13 +25,17 @@ def upgrade() -> None:
     op.drop_table("runs")
     op.drop_table("evaluation_runs")
 
+    # PostgreSQL rejects BOOLEAN DEFAULT 1; SQLite uses integer 0/1 for booleans.
+    _is_pg = op.get_bind().dialect.name == "postgresql"
+    _active_default = sa.true() if _is_pg else sa.text("1")
+
     op.create_table(
         "users",
         sa.Column("id", sa.Uuid(as_uuid=True), nullable=False),
         sa.Column("email", sa.String(length=320), nullable=False),
         sa.Column("display_name", sa.String(length=256), nullable=True),
         sa.Column("hashed_password", sa.String(length=255), nullable=True),
-        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=sa.text("1")),
+        sa.Column("is_active", sa.Boolean(), nullable=False, server_default=_active_default),
         sa.Column("preferences_json", sa.JSON(), nullable=True),
         sa.Column("created_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),
         sa.Column("updated_at", sa.DateTime(timezone=True), server_default=sa.func.now(), nullable=False),

@@ -42,6 +42,7 @@ PYTHONPATH=. python3 -m edgar_project.cli demo
 
 ## Developer documentation
 
+- **Local full stack** (Compose + manual run, migrations, env, artifacts, smoke checks): [`docs/local-stack.md`](docs/local-stack.md) — after `docker compose up -d`, run `./scripts/smoke-compose.sh` or `./scripts/stack smoke`.
 - **Artifact HTTP API** (metadata, streaming content, text preview): [`docs/artifact-delivery.md`](docs/artifact-delivery.md)
 - **Auth** (register, login, JWT bearer, ownership rules): [`docs/auth-api.md`](docs/auth-api.md)
 

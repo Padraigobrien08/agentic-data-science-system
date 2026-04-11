@@ -13,6 +13,9 @@ __pycache__/
 # OS
 .DS_Store
 
+# Local env (docker compose / secrets)
+.env
+
 # Local API database (Alembic / FastAPI dev)
 data/backend.db
 

@@ -1,0 +1,19 @@
+#!/usr/bin/env bash
+# Thin wrapper: run from anywhere; executes docker compose in the repo root.
+set -euo pipefail
+ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+cd "$ROOT"
+cmd="${1:-}"
+shift || true
+case "$cmd" in
+  up) docker compose up --build "$@" ;;
+  down) docker compose down "$@" ;;
+  smoke) exec "$ROOT/scripts/smoke-compose.sh" "$@" ;;
+  *)
+    echo "usage: $(basename "$0") up|down|smoke  [args...]" >&2
+    echo "  up    — docker compose up --build" >&2
+    echo "  down  — docker compose down" >&2
+    echo "  smoke — ./scripts/smoke-compose.sh (stack must already be up)" >&2
+    exit 1
+    ;;
+esac

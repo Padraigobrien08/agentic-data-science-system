@@ -1,0 +1,104 @@
+# Local full-stack dev & test: Postgres → migrations → API + worker → frontend.
+# Requires Docker Compose v2.20+ (`service_completed_successfully` for migrate).
+#
+# Quick start (sensible defaults; no `.env` required):
+#   docker compose up --build
+#
+# Overrides: copy `.env.example` to `.env` — Compose substitutes ${VAR} from that file.
+#
+# Startup order:
+#   1. db (waits until healthy)
+#   2. migrate (one-shot `alembic upgrade head`)
+#   3. api + worker (parallel; same Postgres URL + shared artifact volume)
+#   4. web (after api healthcheck passes; API_URL=http://api:8000)
+#
+# URLs: http://127.0.0.1:8000/v1/health   http://127.0.0.1:3000
+
+name: edgar
+
+x-backend-env: &backend_env
+  EDGAR_BACKEND_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-edgar}:${POSTGRES_PASSWORD:-edgar}@db:5432/${POSTGRES_DB:-edgar}
+  EDGAR_BACKEND_JWT_SECRET: ${EDGAR_BACKEND_JWT_SECRET:-dev-docker-compose-jwt-secret-change-me-32chars}
+  EDGAR_BACKEND_DEBUG: ${EDGAR_BACKEND_DEBUG:-false}
+  EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION: ${EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION:-true}
+  EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT: /var/lib/edgar/artifacts
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-edgar}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-edgar}
+      POSTGRES_DB: ${POSTGRES_DB:-edgar}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-edgar} -d ${POSTGRES_DB:-edgar}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    image: edgar-backend:latest
+    restart: "no"
+    environment:
+      <<: *backend_env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: .
+    image: edgar-backend:latest
+    restart: unless-stopped
+    environment:
+      <<: *backend_env
+    ports:
+      - "${API_PORT:-8000}:8000"
+    volumes:
+      - artifacts:/var/lib/edgar/artifacts
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/v1/health\")"',
+        ]
+      interval: 5s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    build: .
+    image: edgar-backend:latest
+    restart: unless-stopped
+    environment:
+      <<: *backend_env
+    volumes:
+      - artifacts:/var/lib/edgar/artifacts
+    command: ["python", "-m", "backend.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  web:
+    build: ./frontend
+    image: edgar-web:latest
+    restart: unless-stopped
+    environment:
+      API_URL: http://api:8000
+    ports:
+      - "${WEB_PORT:-3000}:3000"
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  artifacts:
