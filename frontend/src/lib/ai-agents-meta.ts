@@ -18,8 +18,43 @@ export type AgentPhaseMeta = {
   reason?: string;
   error?: string;
   model_call_id?: string;
+  phase_status?: string;
+  phase_output?: unknown;
   result?: unknown;
   [key: string]: unknown;
+};
+
+/** ``meta_json.ai_agents.traceability`` — cross-phase summaries (no prompts). */
+export type TraceabilityWire = {
+  contract_version?: string;
+  intent?: { decision_summary?: string };
+  planning?: {
+    decision_summary?: string;
+    selected_tools?: Array<Record<string, unknown>>;
+    rationale_summary?: string;
+  };
+  execution?: {
+    decision_summary?: string;
+    orchestration_message?: string;
+  };
+  critic?: {
+    phase_status?: string;
+    decision_summary?: string;
+    blocking_caveats?: string[];
+    overall_confidence?: string | null;
+    ran?: boolean;
+    excerpt_roles_used?: string[];
+  };
+  report?: {
+    phase_status?: string;
+    rationale_summary?: string;
+    key_takeaways_preview?: string[];
+    ran?: boolean;
+  };
+  step_indices?: Record<string, number | null>;
+  evidence_artifact_refs?: Array<{ role?: string; basename?: string }>;
+  evidence_artifact_ids?: string[];
+  evidence_artifacts_by_role?: Record<string, string>;
 };
 
 export type ParsedAiAgents = {
@@ -28,6 +63,7 @@ export type ParsedAiAgents = {
   critic?: AgentPhaseMeta;
   report?: AgentPhaseMeta;
   prompt_versions?: Record<string, string>;
+  traceability?: TraceabilityWire;
   traceable_pipeline?: unknown;
   mcp_trace?: unknown;
 };
@@ -64,8 +100,18 @@ export function parseAiAgents(meta: unknown): ParsedAiAgents | null {
   const prompt_versions = isRecord(ai.prompt_versions)
     ? (ai.prompt_versions as Record<string, string>)
     : undefined;
+  const traceability = isRecord(ai.traceability)
+    ? (ai.traceability as TraceabilityWire)
+    : undefined;
 
-  if (!intent && !planning && !critic && !report && !prompt_versions) {
+  if (
+    !intent &&
+    !planning &&
+    !critic &&
+    !report &&
+    !prompt_versions &&
+    !traceability
+  ) {
     return {
       traceable_pipeline: ai.traceable_pipeline,
       mcp_trace: ai.mcp_trace,
@@ -78,6 +124,7 @@ export function parseAiAgents(meta: unknown): ParsedAiAgents | null {
     critic,
     report,
     prompt_versions,
+    traceability,
     traceable_pipeline: ai.traceable_pipeline,
     mcp_trace: ai.mcp_trace,
   };

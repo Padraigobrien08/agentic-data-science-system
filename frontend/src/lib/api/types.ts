@@ -101,6 +101,31 @@ export interface ArtifactDetail extends ArtifactMetadata {
   meta_json: Record<string, unknown> | unknown[] | null;
 }
 
+/** ``GET /v1/runs/{id}/model-calls`` — persisted LLM invocations. */
+export type ModelCallStatus = "pending" | "running" | "success" | "error" | "cancelled";
+
+export interface ModelCallApiItem {
+  id: string;
+  analysis_run_id: string | null;
+  evaluation_run_id: string | null;
+  tool_call_id: string | null;
+  provider: string;
+  model_name: string;
+  prompt_id: string | null;
+  prompt_version: string | null;
+  status: ModelCallStatus;
+  prompt_tokens: number | null;
+  completion_tokens: number | null;
+  latency_ms: number | null;
+  error_detail: string | null;
+  started_at: string | null;
+  finished_at: string | null;
+  created_at: string;
+  updated_at: string;
+  request_payload_json: Record<string, unknown> | unknown[] | null;
+  response_payload_json: Record<string, unknown> | unknown[] | null;
+}
+
 /** GET /v1/artifacts/{id}/preview */
 export interface ArtifactPreviewResponse {
   format: "text" | "json";

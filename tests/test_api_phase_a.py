@@ -100,6 +100,10 @@ def test_runs_list_create_get_steps_artifacts(
     assert r.status_code == 200
     assert r.json() == []
 
+    r = client.get(f"/v1/runs/{run_id}/model-calls", headers=h)
+    assert r.status_code == 200
+    assert r.json() == []
+
 
 def test_post_execute_run_mocked(api_client: tuple[TestClient, str, dict[str, str]]) -> None:
     from unittest.mock import patch

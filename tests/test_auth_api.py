@@ -74,6 +74,7 @@ def test_protected_endpoints_reject_unauthenticated_requests(auth_api_client: Te
         ("get", f"/v1/runs/{fake_run}", {}),
         ("get", f"/v1/runs/{fake_run}/steps", {}),
         ("get", f"/v1/runs/{fake_run}/artifacts", {}),
+        ("get", f"/v1/runs/{fake_run}/model-calls", {}),
         ("get", f"/v1/artifacts/{fake_artifact}", {}),
         ("get", f"/v1/artifacts/{fake_artifact}/content", {}),
         ("get", f"/v1/artifacts/{fake_artifact}/preview", {}),
@@ -120,6 +121,7 @@ def test_project_and_run_listing_scoped_to_owner(auth_api_client: TestClient) ->
     assert r_run.status_code == 201
     run_id = r_run.json()["id"]
     assert client.get(f"/v1/runs/{run_id}", headers=h_b).status_code == 404
+    assert client.get(f"/v1/runs/{run_id}/model-calls", headers=h_b).status_code == 404
 
 
 def test_register_login_me(auth_api_client: TestClient) -> None:

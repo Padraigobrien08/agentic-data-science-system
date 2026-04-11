@@ -3,11 +3,10 @@ import { notFound } from "next/navigation";
 
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ExecuteRunButton } from "@/components/runs/execute-run-button";
-import { MarkdownReport } from "@/components/runs/markdown-report";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
 import { JsonPanel, MetaRow, Section, StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
-import { getRun, listRunArtifacts, listRunSteps } from "@/lib/api/runs";
+import { getRun, listRunArtifacts, listRunModelCalls, listRunSteps } from "@/lib/api/runs";
 import { formatDate } from "@/lib/format";
 import {
   parseOrchestrationOutput,
@@ -33,11 +32,13 @@ export default async function RunDetailPage({
   let run;
   let artifacts;
   let steps;
+  let modelCalls;
   try {
-    [run, artifacts, steps] = await Promise.all([
+    [run, artifacts, steps, modelCalls] = await Promise.all([
       getRun(runId, true),
       listRunArtifacts(runId),
       listRunSteps(runId, true),
+      listRunModelCalls(runId, false),
     ]);
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
@@ -127,9 +128,8 @@ export default async function RunDetailPage({
           Agentic trace &amp; artifacts
         </h2>
         <p className="mb-3 max-w-prose text-xs text-[var(--muted)]">
-          Planner output (goal + LLM plan), MCP tool sequence, LLM phases in{" "}
-          <code>meta_json</code>, persisted <code>RunStep</code> rows, and registered artifacts —
-          aligned for auditability.
+          Read-only trace: outcome → goal → plan → step timeline → model phases → tool summaries →
+          evidence → final report. Expand the technical inspector for full tables and per-step JSON.
         </p>
         <AgenticTraceView
           projectId={projectId}
@@ -138,34 +138,10 @@ export default async function RunDetailPage({
           metaJson={run.meta_json}
           steps={steps}
           artifacts={artifacts}
+          modelCalls={modelCalls}
+          userFacingReport={userReport}
         />
       </div>
-
-      {userReport ? (
-        <Section
-          title="Final report"
-          description="Merged user_facing_report from the traceable pipeline (report agent output)."
-        >
-          {userReport.model_call_id ? (
-            <p className="mb-3 font-mono text-[10px] text-[var(--muted)]">
-              model_call_id: {userReport.model_call_id}
-            </p>
-          ) : null}
-          {userReport.key_takeaways.length > 0 ? (
-            <div className="mb-4">
-              <p className="mb-1 text-xs font-semibold uppercase text-[var(--muted)]">
-                Key takeaways
-              </p>
-              <ul className="list-inside list-disc font-mono text-sm">
-                {userReport.key_takeaways.map((t) => (
-                  <li key={t}>{t}</li>
-                ))}
-              </ul>
-            </div>
-          ) : null}
-          <MarkdownReport source={userReport.markdown} />
-        </Section>
-      ) : null}
 
       <Section
         title="Raw payloads"

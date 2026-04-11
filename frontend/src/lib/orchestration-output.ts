@@ -30,6 +30,23 @@ export type ToolResultSummaryWire = {
   provenance_keys?: string[];
 };
 
+/** Mirror of ``build_llm_phases_summary_payload`` (output_payload_json.llm_phases_summary). */
+export type LlmPhaseSummaryEntry = {
+  phase_status?: string;
+  skipped?: boolean;
+  reason?: string;
+  error_excerpt?: string | null;
+  model_call_id?: string;
+  degraded?: boolean;
+  boundary_failure_class?: string;
+};
+
+export type LlmPhasesSummaryWire = {
+  contract_version?: string;
+  critic?: LlmPhaseSummaryEntry;
+  report?: LlmPhaseSummaryEntry;
+};
+
 export type ParsedOrchestrationOutput = {
   run_id?: string;
   status?: string;
@@ -43,6 +60,7 @@ export type ParsedOrchestrationOutput = {
   warnings?: unknown[];
   artifact_paths?: Record<string, string>;
   final_report_path?: string | null;
+  llm_phases_summary?: LlmPhasesSummaryWire;
 };
 
 export type UserFacingReport = {
@@ -67,6 +85,17 @@ export function parseOrchestrationOutput(
   const tool_results_summary = Array.isArray(output.tool_results_summary)
     ? (output.tool_results_summary as ToolResultSummaryWire[])
     : undefined;
+  const lpsRaw = output.llm_phases_summary;
+  let llm_phases_summary: LlmPhasesSummaryWire | undefined;
+  if (isRecord(lpsRaw)) {
+    llm_phases_summary = {
+      contract_version:
+        typeof lpsRaw.contract_version === "string" ? lpsRaw.contract_version : undefined,
+      critic: isRecord(lpsRaw.critic) ? (lpsRaw.critic as LlmPhaseSummaryEntry) : undefined,
+      report: isRecord(lpsRaw.report) ? (lpsRaw.report as LlmPhaseSummaryEntry) : undefined,
+    };
+  }
+
   return {
     run_id: typeof output.run_id === "string" ? output.run_id : undefined,
     status: typeof output.status === "string" ? output.status : undefined,
@@ -90,6 +119,7 @@ export function parseOrchestrationOutput(
         : output.final_report_path === null
           ? null
           : undefined,
+    llm_phases_summary,
   };
 }
 

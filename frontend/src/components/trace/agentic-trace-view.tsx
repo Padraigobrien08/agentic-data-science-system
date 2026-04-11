@@ -2,10 +2,14 @@ import { RunStepTrace } from "@/components/runs/run-step-trace";
 import { AgentModelStepsPanel } from "@/components/trace/agent-model-steps-panel";
 import { ArtifactsMetadataPanel } from "@/components/trace/artifacts-metadata-panel";
 import { PlannerOutputPanel } from "@/components/trace/planner-output-panel";
+import { RunTraceExperience } from "@/components/trace/run-trace-experience";
 import { ToolSequencePanel } from "@/components/trace/tool-sequence-panel";
-import type { ArtifactMetadata, RunStepDetail } from "@/lib/api/types";
+import type { ArtifactMetadata, ModelCallApiItem, RunStepDetail } from "@/lib/api/types";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
-import { parseOrchestrationOutput } from "@/lib/orchestration-output";
+import {
+  parseOrchestrationOutput,
+  type UserFacingReport,
+} from "@/lib/orchestration-output";
 
 type Props = {
   projectId: string;
@@ -14,6 +18,10 @@ type Props = {
   metaJson: unknown;
   steps: RunStepDetail[];
   artifacts: ArtifactMetadata[];
+  modelCalls: ModelCallApiItem[];
+  userFacingReport: UserFacingReport | null;
+  /** Omit “full trace view” link in step timeline when already on /trace. */
+  compactTraceLink?: boolean;
 };
 
 /**
@@ -26,22 +34,44 @@ export function AgenticTraceView({
   metaJson,
   steps,
   artifacts,
+  modelCalls,
+  userFacingReport,
+  compactTraceLink,
 }: Props) {
   const orch = parseOrchestrationOutput(outputPayload);
   const ai = parseAiAgents(metaJson);
 
   return (
     <div className="space-y-4">
-      <PlannerOutputPanel orch={orch} ai={ai} />
-      <ToolSequencePanel orch={orch} />
-      <AgentModelStepsPanel ai={ai} />
-      <SectionPersistedSteps steps={steps} />
-      <ArtifactsMetadataPanel
+      <RunTraceExperience
         projectId={projectId}
         runId={runId}
+        orch={orch}
+        ai={ai}
+        steps={steps}
         artifacts={artifacts}
-        orchestrationPaths={orch?.artifact_paths ?? null}
+        modelCalls={modelCalls}
+        userFacingReport={userFacingReport}
+        compactTraceLink={compactTraceLink}
       />
+
+      <details className="rounded border border-[var(--border)]">
+        <summary className="cursor-pointer select-none border-b border-[var(--border)] bg-neutral-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide dark:bg-neutral-900/50">
+          Technical inspector (full tables, step payloads, raw meta)
+        </summary>
+        <div className="space-y-4 p-3">
+          <PlannerOutputPanel orch={orch} ai={ai} />
+          <ToolSequencePanel orch={orch} />
+          <AgentModelStepsPanel ai={ai} />
+          <SectionPersistedSteps steps={steps} />
+          <ArtifactsMetadataPanel
+            projectId={projectId}
+            runId={runId}
+            artifacts={artifacts}
+            orchestrationPaths={orch?.artifact_paths ?? null}
+          />
+        </div>
+      </details>
     </div>
   );
 }

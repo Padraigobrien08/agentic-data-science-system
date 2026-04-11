@@ -9,7 +9,8 @@ from pydantic import BaseModel, ConfigDict, Field
 
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
-from backend.models.enums import AnalysisRunStatus, ArtifactKind, RunStepStatus
+from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus, RunStepStatus
+from backend.models.model_call import ModelCall
 from backend.models.run_step import RunStep
 
 
@@ -132,4 +133,54 @@ def artifact_to_detail(row: Artifact, *, include_meta: bool) -> ArtifactDetailRe
     return ArtifactDetailResponse(
         **base.model_dump(),
         meta_json=row.meta_json if include_meta else None,
+    )
+
+
+class ModelCallApiItem(BaseModel):
+    """Persisted LLM invocation (request/response JSON omitted unless explicitly requested)."""
+
+    model_config = ConfigDict(from_attributes=True)
+
+    id: UUID
+    analysis_run_id: UUID | None = None
+    evaluation_run_id: UUID | None = None
+    tool_call_id: UUID | None = None
+    provider: str
+    model_name: str
+    prompt_id: str | None = None
+    prompt_version: str | None = None
+    status: ModelCallStatus
+    prompt_tokens: int | None = None
+    completion_tokens: int | None = None
+    latency_ms: int | None = None
+    error_detail: str | None = None
+    started_at: datetime | None = None
+    finished_at: datetime | None = None
+    created_at: datetime
+    updated_at: datetime
+    request_payload_json: dict | list | None = None
+    response_payload_json: dict | list | None = None
+
+
+def model_call_to_api_item(row: ModelCall, *, include_payloads: bool) -> ModelCallApiItem:
+    return ModelCallApiItem(
+        id=row.id,
+        analysis_run_id=row.analysis_run_id,
+        evaluation_run_id=row.evaluation_run_id,
+        tool_call_id=row.tool_call_id,
+        provider=row.provider,
+        model_name=row.model_name,
+        prompt_id=row.prompt_id,
+        prompt_version=row.prompt_version,
+        status=row.status,
+        prompt_tokens=row.prompt_tokens,
+        completion_tokens=row.completion_tokens,
+        latency_ms=row.latency_ms,
+        error_detail=row.error_detail,
+        started_at=row.started_at,
+        finished_at=row.finished_at,
+        created_at=row.created_at,
+        updated_at=row.updated_at,
+        request_payload_json=row.request_payload_json if include_payloads else None,
+        response_payload_json=row.response_payload_json if include_payloads else None,
     )

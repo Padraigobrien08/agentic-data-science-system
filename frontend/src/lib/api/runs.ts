@@ -8,6 +8,7 @@ import type {
   ArtifactMetadata,
   ExecuteRunOverrides,
   ExecuteRunResponse,
+  ModelCallApiItem,
   RunStepDetail,
 } from "./types";
 
@@ -34,6 +35,14 @@ export async function listRunSteps(
 
 export async function listRunArtifacts(runId: string): Promise<ArtifactMetadata[]> {
   return apiGet<ArtifactMetadata[]>(`/v1/runs/${runId}/artifacts`);
+}
+
+export async function listRunModelCalls(
+  runId: string,
+  includePayloads: boolean,
+): Promise<ModelCallApiItem[]> {
+  const q = includePayloads ? "?include_payloads=true" : "";
+  return apiGet<ModelCallApiItem[]>(`/v1/runs/${runId}/model-calls${q}`);
 }
 
 export async function createRun(body: AnalysisRunCreateBody): Promise<AnalysisRunSummary> {

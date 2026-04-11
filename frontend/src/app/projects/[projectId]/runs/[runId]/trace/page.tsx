@@ -4,7 +4,8 @@ import { notFound } from "next/navigation";
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
 import { ApiError } from "@/lib/api/errors";
-import { getRun, listRunArtifacts, listRunSteps } from "@/lib/api/runs";
+import { getRun, listRunArtifacts, listRunModelCalls, listRunSteps } from "@/lib/api/runs";
+import { parseUserFacingReport } from "@/lib/orchestration-output";
 
 export const dynamic = "force-dynamic";
 
@@ -17,11 +18,13 @@ export default async function RunTracePage({
   let run;
   let steps;
   let artifacts;
+  let modelCalls;
   try {
-    [run, steps, artifacts] = await Promise.all([
+    [run, steps, artifacts, modelCalls] = await Promise.all([
       getRun(runId, true),
       listRunSteps(runId, true),
       listRunArtifacts(runId),
+      listRunModelCalls(runId, false),
     ]);
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
@@ -42,6 +45,8 @@ export default async function RunTracePage({
   if (run.project_id !== projectId) {
     notFound();
   }
+
+  const userReport = parseUserFacingReport(run.output_payload_json);
 
   return (
     <div className="space-y-4">
@@ -67,6 +72,9 @@ export default async function RunTracePage({
         metaJson={run.meta_json}
         steps={steps}
         artifacts={artifacts}
+        modelCalls={modelCalls}
+        userFacingReport={userReport}
+        compactTraceLink
       />
     </div>
   );

@@ -5,6 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Request
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.access_checks import require_analysis_run_owned, require_project_owned
@@ -17,6 +18,7 @@ from backend.api.deps import (
     RunStepServiceDep,
 )
 from backend.models.enums import AnalysisRunStatus
+from backend.models.model_call import ModelCall
 from backend.schemas.analysis_run import AnalysisRunCreate
 from backend.schemas.run_lifecycle import (
     AnalysisRunStatusResponse,
@@ -27,10 +29,12 @@ from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
     AnalysisRunSummary,
     ArtifactMetadata,
+    ModelCallApiItem,
     RunStepDetailItem,
     analysis_run_to_detail,
     analysis_run_to_summary,
     artifact_to_metadata,
+    model_call_to_api_item,
     run_step_to_detail,
 )
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
@@ -207,6 +211,26 @@ def list_run_artifacts(
     require_analysis_run_owned(db, run_id, user.id)
     rows = art_svc.list_for_analysis_run(run_id)
     return [artifact_to_metadata(a) for a in rows]
+
+
+@router.get("/{run_id}/model-calls", response_model=list[ModelCallApiItem])
+def list_run_model_calls(
+    run_id: UUID,
+    db: DbSession,
+    user: CurrentUserDep,
+    include_payloads: bool = Query(
+        False,
+        description="When true, include request_payload_json and response_payload_json (can be large).",
+    ),
+) -> list[ModelCallApiItem]:
+    """List ModelCall rows for this analysis run (audit: model, prompt version, tokens, latency)."""
+    require_analysis_run_owned(db, run_id, user.id)
+    rows = db.scalars(
+        select(ModelCall)
+        .where(ModelCall.analysis_run_id == run_id)
+        .order_by(ModelCall.created_at.asc())
+    ).all()
+    return [model_call_to_api_item(r, include_payloads=include_payloads) for r in rows]
 
 
 @router.post("/{run_id}/execute", response_model=ExecuteRunResponse)
