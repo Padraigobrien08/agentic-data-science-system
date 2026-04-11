@@ -17,6 +17,11 @@ from backend.api.deps import (
 from backend.models.project import Project
 from backend.models.enums import AnalysisRunStatus
 from backend.schemas.analysis_run import AnalysisRunCreate
+from backend.schemas.run_lifecycle import (
+    AnalysisRunStatusResponse,
+    RunRetryRequest,
+    analysis_run_status_to_response,
+)
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
     AnalysisRunSummary,
@@ -28,6 +33,9 @@ from backend.schemas.api_phase_a import (
     run_step_to_detail,
 )
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
+from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
+from backend.services.run_lifecycle_service import RunLifecycleService
+from backend.services.run_queue_service import RunQueueService
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -50,6 +58,11 @@ def create_run(
             input_payload_json=body.input_payload_json,
             meta_json=body.meta_json,
         )
+        if body.enqueue_execution:
+            overrides = (
+                body.enqueue_overrides.model_dump(exclude_none=True) if body.enqueue_overrides else None
+            )
+            RunQueueService(db).enqueue_after_create(row.id, overrides)
         db.commit()
     except IntegrityError:
         db.rollback()
@@ -57,6 +70,9 @@ def create_run(
             status_code=409,
             detail="Unique constraint violation (e.g. correlation_id already exists)",
         ) from None
+    except ValueError as exc:
+        db.rollback()
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
     db.refresh(row)
     return analysis_run_to_summary(row)
 
@@ -72,6 +88,61 @@ def list_runs(
         raise HTTPException(status_code=404, detail="Project not found")
     rows = run_svc.list_for_project(project_id)
     return [analysis_run_to_summary(r) for r in rows]
+
+
+@router.get("/{run_id}/status", response_model=AnalysisRunStatusResponse)
+def get_run_status(run_id: UUID, db: DbSession) -> AnalysisRunStatusResponse:
+    """Execution-focused status: terminal flag, open job, and latest job snapshot."""
+    try:
+        row, has_open, latest = RunLifecycleService(db).build_status_view(run_id)
+    except RunLifecycleError as exc:
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    return analysis_run_status_to_response(
+        row,
+        has_open_execution_job=has_open,
+        latest_execution_job=latest,
+    )
+
+
+@router.post("/{run_id}/cancel", response_model=AnalysisRunSummary)
+def cancel_run(run_id: UUID, db: DbSession) -> AnalysisRunSummary:
+    """Cancel a ``pending`` or ``queued`` run (not ``running`` or terminal)."""
+    try:
+        row = RunLifecycleService(db).cancel_analysis_run(run_id)
+        db.commit()
+    except RunLifecycleError as exc:
+        db.rollback()
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    except InvalidStatusTransition as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    db.refresh(row)
+    return analysis_run_to_summary(row)
+
+
+@router.post("/{run_id}/retry", response_model=AnalysisRunSummary)
+def retry_run(
+    run_id: UUID,
+    db: DbSession,
+    body: RunRetryRequest | None = None,
+) -> AnalysisRunSummary:
+    """Re-queue a finished non-success run for background execution."""
+    overrides = (
+        body.enqueue_overrides.model_dump(exclude_none=True)
+        if body is not None and body.enqueue_overrides is not None
+        else None
+    )
+    try:
+        row = RunLifecycleService(db).retry_analysis_run(run_id, overrides=overrides)
+        db.commit()
+    except RunLifecycleError as exc:
+        db.rollback()
+        raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
+    except InvalidStatusTransition as exc:
+        db.rollback()
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+    db.refresh(row)
+    return analysis_run_to_summary(row)
 
 
 @router.get("/{run_id}", response_model=AnalysisRunDetailResponse)
@@ -123,6 +194,7 @@ def list_run_artifacts(
 def execute_run(
     run_id: UUID,
     pipeline: EdgarPipelineExecutionDep,
+    run_svc: AnalysisRunServiceDep,
     body: ExecuteRunOverrides | None = None,
 ) -> ExecuteRunResponse:
     """
@@ -130,6 +202,19 @@ def execute_run(
 
     Body fields override ``input_payload_json`` / ``orchestration_goal_text`` for this invocation only.
     """
+    row = run_svc.get(run_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Run not found")
+    if row.status == AnalysisRunStatus.queued:
+        raise HTTPException(
+            status_code=409,
+            detail="Run is queued for background execution; wait for the worker or use synchronous create",
+        )
+    if row.status == AnalysisRunStatus.running:
+        raise HTTPException(
+            status_code=409,
+            detail="Run is already executing",
+        )
     try:
         out = pipeline.execute_analysis_run(
             run_id,

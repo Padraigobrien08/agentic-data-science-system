@@ -8,12 +8,14 @@ from backend.models.enums import (
     ArtifactKind,
     EvaluationRunStatus,
     ModelCallStatus,
+    RunExecutionJobStatus,
     RunStepStatus,
     ToolCallMcpStatus,
 )
 from backend.models.evaluation_run import EvaluationRun
 from backend.models.model_call import ModelCall
 from backend.models.project import Project
+from backend.models.run_execution_job import RunExecutionJob
 from backend.models.run_step import RunStep
 from backend.models.tool_call import ToolCall
 from backend.models.user import User
@@ -29,6 +31,8 @@ __all__ = [
     "ModelCall",
     "ModelCallStatus",
     "Project",
+    "RunExecutionJob",
+    "RunExecutionJobStatus",
     "RunStep",
     "RunStepStatus",
     "ToolCall",

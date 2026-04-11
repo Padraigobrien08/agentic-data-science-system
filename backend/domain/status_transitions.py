@@ -4,9 +4,26 @@ from __future__ import annotations
 
 from backend.models.enums import AnalysisRunStatus, RunStepStatus, ToolCallMcpStatus
 
+# Terminal runs (non-success) that may be re-queued for another execution attempt.
+_RETRY_TO_QUEUED: frozenset[AnalysisRunStatus] = frozenset(
+    {
+        AnalysisRunStatus.error,
+        AnalysisRunStatus.partial_success,
+        AnalysisRunStatus.no_data,
+        AnalysisRunStatus.cancelled,
+    }
+)
+
 _ANALYSIS_RUN_ALLOWED: dict[AnalysisRunStatus, frozenset[AnalysisRunStatus]] = {
     AnalysisRunStatus.pending: frozenset(
-        {AnalysisRunStatus.running, AnalysisRunStatus.cancelled}
+        {AnalysisRunStatus.queued, AnalysisRunStatus.running, AnalysisRunStatus.cancelled}
+    ),
+    AnalysisRunStatus.queued: frozenset(
+        {
+            AnalysisRunStatus.running,
+            AnalysisRunStatus.cancelled,
+            AnalysisRunStatus.error,
+        }
     ),
     AnalysisRunStatus.running: frozenset(
         {
@@ -14,7 +31,6 @@ _ANALYSIS_RUN_ALLOWED: dict[AnalysisRunStatus, frozenset[AnalysisRunStatus]] = {
             AnalysisRunStatus.partial_success,
             AnalysisRunStatus.no_data,
             AnalysisRunStatus.error,
-            AnalysisRunStatus.cancelled,
         }
     ),
 }
@@ -69,6 +85,8 @@ def can_transition_analysis_run(
         return True
     if target == AnalysisRunStatus.running and current in _RESTART_TO_RUNNING:
         return True
+    if target == AnalysisRunStatus.queued and current in _RETRY_TO_QUEUED:
+        return True
     if current in _ANALYSIS_RUN_TERMINAL:
         return False
     allowed = _ANALYSIS_RUN_ALLOWED.get(current)
@@ -82,6 +100,11 @@ def can_transition_run_step(current: RunStepStatus, target: RunStepStatus) -> bo
         return False
     allowed = _RUN_STEP_ALLOWED.get(current)
     return allowed is not None and target in allowed
+
+
+def is_retriable_terminal(status: AnalysisRunStatus) -> bool:
+    """Non-success terminal states that may transition back to ``queued`` (retry)."""
+    return status in _RETRY_TO_QUEUED
 
 
 def is_terminal_analysis_run(status: AnalysisRunStatus) -> bool:

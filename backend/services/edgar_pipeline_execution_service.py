@@ -89,18 +89,32 @@ class EdgarPipelineExecutionService:
         tickers: list[str] | None = None,
         analysis_goal: str | None = None,
         refresh: bool | None = None,
+        from_worker: bool = False,
     ) -> OrchestrationOutput:
         """
         Mark run *running*, invoke orchestration, map terminal status, persist output JSON and artifacts.
+
+        When ``from_worker`` is True, the run must be ``queued`` (background job claim). The API
+        synchronous ``/execute`` path must use ``from_worker=False``.
 
         Raises:
             ValueError: unknown run, not executable, or invalid orchestration input.
         """
         row = self._runs.require(analysis_run_id)
-        if row.status == AnalysisRunStatus.running:
-            raise ValueError("Run is already executing (stale running state)")
-        if row.status not in _EXECUTABLE_STATUSES:
-            raise ValueError(f"Run status {row.status.value!r} is not executable")
+        if from_worker:
+            if row.status != AnalysisRunStatus.queued:
+                raise ValueError(
+                    f"Worker execution requires status 'queued', got {row.status.value!r}"
+                )
+        else:
+            if row.status == AnalysisRunStatus.running:
+                raise ValueError("Run is already executing (stale running state)")
+            if row.status == AnalysisRunStatus.queued:
+                raise ValueError(
+                    "Run is queued for background execution; use the worker or create without enqueue"
+                )
+            if row.status not in _EXECUTABLE_STATUSES:
+                raise ValueError(f"Run status {row.status.value!r} is not executable")
 
         orch_in = _build_orchestration_input(
             input_payload=row.input_payload_json,

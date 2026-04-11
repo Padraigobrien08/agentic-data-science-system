@@ -9,3 +9,11 @@ class InvalidStatusTransition(ValueError):
         self.current = current
         self.target = target
         super().__init__(f"{entity}: cannot transition from {current!r} to {target!r}")
+
+
+class RunLifecycleError(ValueError):
+    """Business rule violation for cancel / retry (maps to HTTP 4xx)."""
+
+    def __init__(self, message: str, *, status_code: int = 409) -> None:
+        self.status_code = status_code
+        super().__init__(message)

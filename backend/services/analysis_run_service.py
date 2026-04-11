@@ -74,7 +74,10 @@ class AnalysisRunService:
             raise InvalidStatusTransition("AnalysisRun", row.status, target)
         row.status = target
         now = datetime.now(timezone.utc)
-        if target == AnalysisRunStatus.running:
+        if target == AnalysisRunStatus.queued:
+            row.finished_at = None
+            row.started_at = None
+        elif target == AnalysisRunStatus.running:
             row.finished_at = None
             row.started_at = now
         elif is_terminal_analysis_run(target) and row.finished_at is None:

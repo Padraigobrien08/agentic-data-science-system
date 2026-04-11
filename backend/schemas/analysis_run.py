@@ -11,6 +11,14 @@ from backend.models.enums import AnalysisRunStatus
 from backend.schemas.common import OrmSchema, TimestampedRead
 
 
+class RunEnqueueOverrides(OrmSchema):
+    """Optional overrides passed to the worker (same semantics as synchronous ``/execute``)."""
+
+    tickers: list[str] | None = None
+    analysis_goal: str | None = None
+    refresh: bool | None = None
+
+
 class AnalysisRunCreate(OrmSchema):
     project_id: UUID
     initiated_by_user_id: UUID | None = None
@@ -18,6 +26,8 @@ class AnalysisRunCreate(OrmSchema):
     orchestration_goal_text: str | None = None
     input_payload_json: dict | list | None = None
     meta_json: dict | list | None = None
+    enqueue_execution: bool = False
+    enqueue_overrides: RunEnqueueOverrides | None = None
 
 
 class AnalysisRunUpdate(OrmSchema):

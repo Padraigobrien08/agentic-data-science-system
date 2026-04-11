@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     from backend.models.artifact import Artifact
     from backend.models.model_call import ModelCall
     from backend.models.project import Project
+    from backend.models.run_execution_job import RunExecutionJob
     from backend.models.run_step import RunStep
     from backend.models.tool_call import ToolCall
     from backend.models.user import User
@@ -109,4 +110,10 @@ class AnalysisRun(Base):
         "ModelCall",
         back_populates="analysis_run",
         cascade="all, delete-orphan",
+    )
+    execution_jobs: Mapped[list[RunExecutionJob]] = relationship(
+        "RunExecutionJob",
+        back_populates="analysis_run",
+        cascade="all, delete-orphan",
+        order_by="RunExecutionJob.created_at",
     )

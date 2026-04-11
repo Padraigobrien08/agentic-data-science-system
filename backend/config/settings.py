@@ -33,6 +33,12 @@ class Settings(BaseSettings):
         description="Filesystem root for LocalFilesystemStore object keys",
     )
 
+    worker_poll_interval_s: float = Field(
+        default=2.0,
+        ge=0.1,
+        description="Sleep between DB queue polls when no job is available (``python -m backend.worker``)",
+    )
+
     @field_validator("database_url", mode="before")
     @classmethod
     def _normalize_sqlite_url(cls, v: object) -> object:

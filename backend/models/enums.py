@@ -9,6 +9,7 @@ class AnalysisRunStatus(str, enum.Enum):
     """Terminal and in-flight states for an orchestrated analysis run."""
 
     pending = "pending"
+    queued = "queued"
     running = "running"
     success = "success"
     partial_success = "partial_success"
@@ -55,6 +56,16 @@ class EvaluationRunStatus(str, enum.Enum):
     failed = "failed"
     skipped = "skipped"
     error = "error"
+
+
+class RunExecutionJobStatus(str, enum.Enum):
+    """DB-backed queue row for background pipeline execution."""
+
+    pending = "pending"
+    running = "running"
+    completed = "completed"
+    failed = "failed"
+    cancelled = "cancelled"
 
 
 class ModelCallStatus(str, enum.Enum):

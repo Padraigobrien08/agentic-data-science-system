@@ -5,15 +5,16 @@ from __future__ import annotations
 import uuid
 
 import pytest
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 import backend.models  # noqa: F401
 from backend.db.base import Base
 from backend.config.settings import Settings
 from backend.models.analysis_run import AnalysisRun
-from backend.models.enums import AnalysisRunStatus, RunStepStatus, ToolCallMcpStatus
+from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus, RunStepStatus, ToolCallMcpStatus
 from backend.models.project import Project
+from backend.models.run_execution_job import RunExecutionJob
 from backend.models.user import User
 from backend.repositories.analysis_run_repository import AnalysisRunRepository
 from backend.repositories.artifact_repository import ArtifactRepository
@@ -21,7 +22,9 @@ from backend.repositories.run_step_repository import RunStepRepository
 from backend.repositories.tool_call_repository import ToolCallRepository
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
-from backend.services.exceptions import InvalidStatusTransition
+from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
+from backend.services.run_lifecycle_service import RunLifecycleService
+from backend.services.run_queue_service import RunQueueService
 from backend.services.run_step_service import RunStepService
 from backend.services.tool_call_service import ToolCallService
 
@@ -52,6 +55,43 @@ def run_bundle(
     run = run_svc.create(p.id, correlation_id="corr-1", input_payload_json={"tickers": ["AAPL"]})
     session.commit()
     return session, settings, run, u, p
+
+
+def test_transition_error_to_queued_clears_finished_at(run_bundle) -> None:
+    session, _settings, run, _u, _p = run_bundle
+    svc = AnalysisRunService(session)
+    svc.transition_status(run.id, AnalysisRunStatus.running)
+    svc.transition_status(run.id, AnalysisRunStatus.error)
+    session.commit()
+    assert session.get(AnalysisRun, run.id).finished_at is not None
+    svc.transition_status(run.id, AnalysisRunStatus.queued)
+    session.commit()
+    row = session.get(AnalysisRun, run.id)
+    assert row is not None
+    assert row.status == AnalysisRunStatus.queued
+    assert row.finished_at is None
+    assert row.started_at is None
+
+
+def test_lifecycle_cancel_running_is_rejected(run_bundle) -> None:
+    session, _settings, run, _u, _p = run_bundle
+    svc = AnalysisRunService(session)
+    svc.transition_status(run.id, AnalysisRunStatus.running)
+    session.commit()
+    with pytest.raises(RunLifecycleError) as ei:
+        RunLifecycleService(session).cancel_analysis_run(run.id)
+    assert ei.value.status_code == 409
+
+
+def test_enqueue_after_create_sets_queued_and_job(run_bundle) -> None:
+    session, _settings, run, _u, _p = run_bundle
+    RunQueueService(session).enqueue_after_create(run.id, {"refresh": False})
+    session.commit()
+    row = session.get(AnalysisRun, run.id)
+    assert row is not None and row.status == AnalysisRunStatus.queued
+    jobs = list(session.scalars(select(RunExecutionJob).where(RunExecutionJob.analysis_run_id == run.id)).all())
+    assert len(jobs) == 1
+    assert jobs[0].status == RunExecutionJobStatus.pending
 
 
 def test_analysis_run_repository_list(run_bundle) -> None:
