@@ -5,7 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Request
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.access_checks import require_analysis_run_owned, require_project_owned
@@ -37,6 +37,7 @@ from backend.schemas.api_phase_a import (
     model_call_to_api_item,
     run_step_to_detail,
 )
+from backend.schemas.run_transparency import build_run_transparency_summary
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
 from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
 from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
@@ -176,13 +177,29 @@ def get_run(
     run_id: UUID,
     db: DbSession,
     user: CurrentUserDep,
+    art_svc: ArtifactServiceDep,
     include_payloads: bool = Query(
         False,
         description="When true, include input_payload_json, output_payload_json, and meta_json",
     ),
+    include_transparency: bool = Query(
+        False,
+        description="When true, include typed ``transparency`` (evidence artifact ids, prompt_versions, model_call_count).",
+    ),
 ) -> AnalysisRunDetailResponse:
     row = require_analysis_run_owned(db, run_id, user.id)
-    return analysis_run_to_detail(row, include_payloads=include_payloads)
+    trans = None
+    if include_transparency:
+        n_calls = db.scalar(
+            select(func.count()).select_from(ModelCall).where(ModelCall.analysis_run_id == run_id)
+        )
+        arts = art_svc.list_for_analysis_run(run_id)
+        trans = build_run_transparency_summary(
+            row.meta_json,
+            model_call_count=int(n_calls or 0),
+            artifacts=arts,
+        )
+    return analysis_run_to_detail(row, include_payloads=include_payloads, transparency=trans)
 
 
 @router.get("/{run_id}/steps", response_model=list[RunStepDetailItem])
@@ -190,15 +207,33 @@ def list_run_steps(
     run_id: UUID,
     db: DbSession,
     step_svc: RunStepServiceDep,
+    art_svc: ArtifactServiceDep,
     user: CurrentUserDep,
     include_payloads: bool = Query(
         False,
         description="When true, include planner_tool_input_json and meta_json per step",
     ),
+    include_transparency: bool = Query(
+        False,
+        description="When true, include per-step ``transparency`` (trace lane, model_call_id, output_summary, linked_artifact_ids).",
+    ),
 ) -> list[RunStepDetailItem]:
     require_analysis_run_owned(db, run_id, user.id)
     steps = step_svc.list_for_analysis_run(run_id)
-    return [run_step_to_detail(s, include_payloads=include_payloads) for s in steps]
+    art_by_step: dict[UUID, list[UUID]] = {}
+    if include_transparency:
+        for a in art_svc.list_for_analysis_run(run_id):
+            if a.run_step_id is not None:
+                art_by_step.setdefault(a.run_step_id, []).append(a.id)
+    return [
+        run_step_to_detail(
+            s,
+            include_payloads=include_payloads,
+            include_transparency=include_transparency,
+            linked_artifact_ids=art_by_step.get(s.id),
+        )
+        for s in steps
+    ]
 
 
 @router.get("/{run_id}/artifacts", response_model=list[ArtifactMetadata])

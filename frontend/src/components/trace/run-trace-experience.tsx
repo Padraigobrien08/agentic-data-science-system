@@ -8,9 +8,17 @@ import { PhaseStatusChip } from "@/components/transparency/phase-status-chip";
 import { PlanningOutputCard } from "@/components/transparency/planning-output-card";
 import { ReportEvidencePanel } from "@/components/transparency/report-evidence-panel";
 import { StepStatusTimeline } from "@/components/transparency/step-status-timeline";
-import { JsonPanel, MetaRow, Section } from "@/components/ui/technical";
-import { indexModelCallsById } from "@/lib/agent-transparency";
-import type { ArtifactMetadata, ModelCallApiItem, RunStepDetail } from "@/lib/api/types";
+import { JsonPanel, MetaRow, Section, StatusBadge } from "@/components/ui/technical";
+import { RunGapOverview } from "@/components/trace/run-gap-overview";
+import { RunTraceJumpNav } from "@/components/trace/run-trace-jump-nav";
+import { indexModelCallsById, stringArrayFromUnknown } from "@/lib/agent-transparency";
+import type {
+  AnalysisRunStatus,
+  ArtifactMetadata,
+  ModelCallApiItem,
+  RunStepDetail,
+  RunTransparencySummary,
+} from "@/lib/api/types";
 import type { ParsedAiAgents } from "@/lib/ai-agents-meta";
 import type {
   ParsedOrchestrationOutput,
@@ -32,7 +40,24 @@ type Props = {
   modelCalls: ModelCallApiItem[];
   /** When true, omit link to full trace from timeline footer. */
   compactTraceLink?: boolean;
+  runStatus?: AnalysisRunStatus;
+  runErrorSummary?: string | null;
+  runTransparency?: RunTransparencySummary | null;
 };
+
+function runNeedsAttention(
+  status: AnalysisRunStatus | undefined,
+  errorSummary: string | null | undefined,
+): boolean {
+  if (errorSummary?.trim()) return true;
+  if (!status) return false;
+  return (
+    status === "error" ||
+    status === "cancelled" ||
+    status === "partial_success" ||
+    status === "no_data"
+  );
+}
 
 function isRecord(v: unknown): v is Record<string, unknown> {
   return typeof v === "object" && v !== null && !Array.isArray(v);
@@ -86,6 +111,9 @@ export function RunTraceExperience({
   userFacingReport,
   modelCalls,
   compactTraceLink,
+  runStatus,
+  runErrorSummary,
+  runTransparency,
 }: Props) {
   const tr = ai?.traceability;
   const lps = orch?.llm_phases_summary;
@@ -95,6 +123,13 @@ export function RunTraceExperience({
   const planPo = phaseOutput(ai?.planning);
   const criticPo = phaseOutput(ai?.critic);
   const reportPo = phaseOutput(ai?.report);
+  const blockingForOverview =
+    tr?.critic?.blocking_caveats && tr.critic.blocking_caveats.length > 0
+      ? tr.critic.blocking_caveats
+      : stringArrayFromUnknown(criticPo?.issues, 12);
+  const criticConfidenceOverview =
+    (typeof criticPo?.overall_confidence === "string" ? criticPo.overall_confidence : null) ??
+    (typeof tr?.critic?.overall_confidence === "string" ? tr.critic.overall_confidence : null);
   const mcById = indexModelCallsById(modelCalls);
   const planningMc =
     typeof ai?.planning?.model_call_id === "string"
@@ -117,7 +152,139 @@ export function RunTraceExperience({
 
   return (
     <div className="space-y-4">
+      {runNeedsAttention(runStatus, runErrorSummary) ? (
+        <div
+          className={`rounded border p-3 ${
+            runStatus === "partial_success"
+              ? "border-amber-300 bg-amber-50/80 dark:border-amber-800 dark:bg-amber-950/30"
+              : "border-red-300 bg-red-50/80 dark:border-red-900 dark:bg-red-950/35"
+          }`}
+        >
+          <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--foreground)]">
+            Run outcome
+          </p>
+          <div className="mt-2 flex flex-wrap items-center gap-2">
+            {runStatus ? <StatusBadge status={runStatus} /> : null}
+          </div>
+          {runErrorSummary?.trim() ? (
+            <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-xs text-red-900 dark:text-red-100">
+              {runErrorSummary}
+            </pre>
+          ) : null}
+        </div>
+      ) : null}
+
+      <section id="run-overview" className="scroll-mt-20 space-y-3">
+        <RunGapOverview
+          orch={orch}
+          traceability={tr}
+          blockingCaveats={blockingForOverview}
+          overallConfidence={criticConfidenceOverview}
+        />
+        <RunTraceJumpNav />
+      </section>
+
+      {runTransparency ? (
+        <Section
+          title="Prompt & run audit"
+          description="Typed fields from GET /v1/runs/{id}?include_transparency=true — template versions on agents and persisted model-call count."
+        >
+          <div className="space-y-3 text-xs">
+            <MetaRow label="model_call_count">{runTransparency.model_call_count}</MetaRow>
+            <MetaRow label="evidence rows (ids)">{runTransparency.evidence_artifact_ids.length}</MetaRow>
+            {runTransparency.prompt_versions &&
+            Object.keys(runTransparency.prompt_versions).length > 0 ? (
+              <div className="overflow-x-auto border-t border-[var(--border)] pt-2">
+                <table className="w-full min-w-[16rem] border-collapse text-left font-mono text-[11px]">
+                  <thead>
+                    <tr className="border-b border-[var(--border)] text-[var(--muted)]">
+                      <th className="py-1 pr-2 font-medium">Agent / role key</th>
+                      <th className="py-1 font-medium">prompt_version</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {Object.entries(runTransparency.prompt_versions).map(([role, ver]) => (
+                      <tr key={role} className="border-b border-[var(--border)]">
+                        <td className="py-1 pr-2">{role}</td>
+                        <td className="py-1">{ver}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : (
+              <p className="text-[var(--muted)]">
+                No <code className="text-[var(--foreground)]">meta_json.ai_agents.prompt_versions</code>{" "}
+                on this run.
+              </p>
+            )}
+            {runTransparency.evidence_artifact_ids.length > 0 ? (
+              <p className="font-mono text-[10px] text-[var(--muted)]">
+                Evidence artifact ids (see table below):{" "}
+                {runTransparency.evidence_artifact_ids.slice(0, 6).map((id, i) => (
+                  <span key={id}>
+                    {i > 0 ? ", " : null}
+                    <Link href={`/artifacts/${id}`} className="underline">
+                      {id.slice(0, 8)}…
+                    </Link>
+                  </span>
+                ))}
+                {runTransparency.evidence_artifact_ids.length > 6 ? " …" : null}
+              </p>
+            ) : null}
+          </div>
+        </Section>
+      ) : null}
+
       <Section
+        id="run-goal"
+        title="Interpreted goal"
+        description="What the pipeline understood as the analysis intent (structured phase_output when available, else orchestration interpreted_goal)."
+      >
+        {tr?.intent?.decision_summary ? (
+          <p className="mb-3 max-w-prose whitespace-pre-wrap border-b border-[var(--border)] pb-3 text-sm">
+            {tr.intent.decision_summary}
+          </p>
+        ) : null}
+        {hasStructuredIntent ? (
+          <div className="space-y-0 border-t border-[var(--border)]">
+            {typeof intentPo.source === "string" ? (
+              <MetaRow label="source">{intentPo.source}</MetaRow>
+            ) : null}
+            {typeof intentPo.goal_code === "string" ? (
+              <MetaRow label="goal_code">{intentPo.goal_code}</MetaRow>
+            ) : null}
+            {typeof intentPo.orchestration_intent === "string" ? (
+              <MetaRow label="orchestration_intent">{intentPo.orchestration_intent}</MetaRow>
+            ) : null}
+            {typeof intentPo.description_excerpt === "string" ? (
+              <MetaRow label="description_excerpt">
+                <span className="whitespace-pre-wrap">{intentPo.description_excerpt}</span>
+              </MetaRow>
+            ) : null}
+            {typeof intentPo.user_goal_excerpt === "string" ? (
+              <MetaRow label="user_goal_excerpt">
+                <span className="whitespace-pre-wrap">{intentPo.user_goal_excerpt}</span>
+              </MetaRow>
+            ) : null}
+            {typeof intentPo.confidence === "string" ? (
+              <MetaRow label="confidence">{intentPo.confidence}</MetaRow>
+            ) : null}
+          </div>
+        ) : intentGoal ? (
+          <InterpretedGoalBody goal={intentGoal} />
+        ) : (
+          <p className="text-sm text-[var(--muted)]">No interpreted goal recorded.</p>
+        )}
+        {ai?.intent?.model_call_id ? (
+          <p className="mt-2 font-mono text-[10px] text-[var(--muted)]">
+            intent model_call_id: {ai.intent.model_call_id}
+          </p>
+        ) : null}
+      </Section>
+
+      <Section
+        id="run-pipeline"
         title="Pipeline outcome"
         description="Orchestration status and post-MCP LLM phase outcomes (from output_payload_json and meta_json)."
       >
@@ -168,70 +335,6 @@ export function RunTraceExperience({
             ) : null}
           </div>
         )}
-      </Section>
-
-      <Section
-        title="Model calls"
-        description="Persisted LLM invocations for this run (GET /v1/runs/{id}/model-calls). Expand a card for request/response JSON."
-      >
-        {modelCalls.length === 0 ? (
-          <p className="text-sm text-[var(--muted)]">
-            No model call rows. Traceable agents may not have run, or calls are not persisted for this
-            run.
-          </p>
-        ) : (
-          <div className="grid gap-3 sm:grid-cols-2">
-            {modelCalls.map((c) => (
-              <ModelCallSummaryCard key={c.id} call={c} />
-            ))}
-          </div>
-        )}
-      </Section>
-
-      <Section
-        title="Interpreted goal"
-        description="What the pipeline understood as the analysis intent (structured phase_output when available, else orchestration interpreted_goal)."
-      >
-        {tr?.intent?.decision_summary ? (
-          <p className="mb-3 max-w-prose whitespace-pre-wrap border-b border-[var(--border)] pb-3 text-sm">
-            {tr.intent.decision_summary}
-          </p>
-        ) : null}
-        {hasStructuredIntent ? (
-          <div className="space-y-0 border-t border-[var(--border)]">
-            {typeof intentPo.source === "string" ? (
-              <MetaRow label="source">{intentPo.source}</MetaRow>
-            ) : null}
-            {typeof intentPo.goal_code === "string" ? (
-              <MetaRow label="goal_code">{intentPo.goal_code}</MetaRow>
-            ) : null}
-            {typeof intentPo.orchestration_intent === "string" ? (
-              <MetaRow label="orchestration_intent">{intentPo.orchestration_intent}</MetaRow>
-            ) : null}
-            {typeof intentPo.description_excerpt === "string" ? (
-              <MetaRow label="description_excerpt">
-                <span className="whitespace-pre-wrap">{intentPo.description_excerpt}</span>
-              </MetaRow>
-            ) : null}
-            {typeof intentPo.user_goal_excerpt === "string" ? (
-              <MetaRow label="user_goal_excerpt">
-                <span className="whitespace-pre-wrap">{intentPo.user_goal_excerpt}</span>
-              </MetaRow>
-            ) : null}
-            {typeof intentPo.confidence === "string" ? (
-              <MetaRow label="confidence">{intentPo.confidence}</MetaRow>
-            ) : null}
-          </div>
-        ) : intentGoal ? (
-          <InterpretedGoalBody goal={intentGoal} />
-        ) : (
-          <p className="text-sm text-[var(--muted)]">No interpreted goal recorded.</p>
-        )}
-        {ai?.intent?.model_call_id ? (
-          <p className="mt-2 font-mono text-[10px] text-[var(--muted)]">
-            intent model_call_id: {ai.intent.model_call_id}
-          </p>
-        ) : null}
       </Section>
 
       <Section
@@ -311,7 +414,7 @@ export function RunTraceExperience({
 
       <Section
         title="Step timeline"
-        description="Persisted RunStep rows; LLM steps show joined model metadata when model_call_id matches."
+        description="Persisted RunStep rows; LLM steps join ModelCall rows by id. When steps are loaded with include_transparency, phase_output is summarized here without opening raw meta_json."
       >
         <StepStatusTimeline
           steps={steps}
@@ -324,6 +427,7 @@ export function RunTraceExperience({
       </Section>
 
       <Section
+        id="run-critic"
         title="Critic & report"
         description="Structured findings and report evidence (phase_output + traceability). Raw JSON only inside each card’s details."
       >
@@ -349,6 +453,37 @@ export function RunTraceExperience({
           />
         </div>
       </Section>
+
+      {userFacingReport ? (
+        <Section
+          id="run-conclusions"
+          title="Final report"
+          description="Conclusions tied to registered artifacts and critic context from meta_json / llm_phases_summary."
+        >
+          <FinalReportWithEvidence
+            markdown={userFacingReport.markdown}
+            keyTakeaways={userFacingReport.key_takeaways}
+            modelCallId={userFacingReport.model_call_id}
+            reportPhaseOutput={reportPo}
+            criticPhaseOutput={criticPo}
+            traceability={tr}
+            lpsCritic={lps?.critic}
+            lpsReport={lps?.report}
+            artifacts={artifacts}
+          />
+        </Section>
+      ) : (
+        <Section
+          id="run-conclusions"
+          title="Final report"
+          description="user_facing_report is absent when the report phase did not produce merged markdown."
+        >
+          <p className="text-sm text-[var(--muted)]">
+            No user-facing report on this run. Check model phase summaries and inspector panels for
+            partial outputs.
+          </p>
+        </Section>
+      )}
 
       <Section
         title="Tool call summaries"
@@ -389,6 +524,7 @@ export function RunTraceExperience({
       </Section>
 
       <Section
+        id="run-evidence"
         title="Evidence & artifact links"
         description="Registered artifacts for this run; traceability maps roles to IDs when ingest completed."
       >
@@ -436,34 +572,24 @@ export function RunTraceExperience({
         )}
       </Section>
 
-      {userFacingReport ? (
-        <Section
-          title="Final report"
-          description="Conclusions tied to registered artifacts and critic context from meta_json / llm_phases_summary."
-        >
-          <FinalReportWithEvidence
-            markdown={userFacingReport.markdown}
-            keyTakeaways={userFacingReport.key_takeaways}
-            modelCallId={userFacingReport.model_call_id}
-            reportPhaseOutput={reportPo}
-            criticPhaseOutput={criticPo}
-            traceability={tr}
-            lpsCritic={lps?.critic}
-            lpsReport={lps?.report}
-            artifacts={artifacts}
-          />
-        </Section>
-      ) : (
-        <Section
-          title="Final report"
-          description="user_facing_report is absent when the report phase did not produce merged markdown."
-        >
+      <Section
+        id="run-model-calls"
+        title="Model calls"
+        description="Persisted LLM invocations for this run (GET /v1/runs/{id}/model-calls). Expand a card for request/response JSON."
+      >
+        {modelCalls.length === 0 ? (
           <p className="text-sm text-[var(--muted)]">
-            No user-facing report on this run. Check model phase summaries and inspector panels for
-            partial outputs.
+            No model call rows. Traceable agents may not have run, or calls are not persisted for this
+            run.
           </p>
-        </Section>
-      )}
+        ) : (
+          <div className="grid gap-3 sm:grid-cols-2">
+            {modelCalls.map((c) => (
+              <ModelCallSummaryCard key={c.id} call={c} />
+            ))}
+          </div>
+        )}
+      </Section>
     </div>
   );
 }

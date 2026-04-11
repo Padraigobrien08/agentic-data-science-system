@@ -195,7 +195,12 @@ class EdgarPipelineExecutionService:
                 try:
                     try:
                         llm_provider = get_chat_completion_provider()
-                    except LLMProviderConfigurationError:
+                    except LLMProviderConfigurationError as exc:
+                        log.warning(
+                            "llm_provider_skipped",
+                            analysis_run_id=str(analysis_run_id),
+                            detail=str(exc),
+                        )
                         llm_provider = None
                     traced = run_traceable_edgar_pipeline(
                         self._session,

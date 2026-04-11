@@ -104,6 +104,27 @@ def test_runs_list_create_get_steps_artifacts(
     assert r.status_code == 200
     assert r.json() == []
 
+    r = client.get(
+        f"/v1/runs/{run_id}",
+        params={"include_transparency": "true"},
+        headers=h,
+    )
+    assert r.status_code == 200
+    body = r.json()
+    assert body.get("transparency") is not None
+    tr = body["transparency"]
+    assert tr["model_call_count"] == 0
+    assert tr["evidence_artifact_ids"] == []
+    assert tr["evidence_artifacts_by_role"] == {}
+
+    rs = client.get(
+        f"/v1/runs/{run_id}/steps",
+        params={"include_transparency": "true"},
+        headers=h,
+    )
+    assert rs.status_code == 200
+    assert rs.json() == []
+
 
 def test_post_execute_run_mocked(api_client: tuple[TestClient, str, dict[str, str]]) -> None:
     from unittest.mock import patch

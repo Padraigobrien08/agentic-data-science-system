@@ -87,6 +87,101 @@ class OrchestrationIntent(str, Enum):
 
 
 # ---------------------------------------------------------------------------
+# Structured analytical preferences (rule-based; persisted on InterpretedGoal)
+# ---------------------------------------------------------------------------
+
+
+class PrimaryAnalysisMode(str, Enum):
+    """What the user is primarily trying to learn."""
+
+    anomaly = "anomaly"
+    trend = "trend"
+    deterioration = "deterioration"
+    peer_comparison = "peer_comparison"
+    mixed = "mixed"
+
+
+class PreferredSignalStyle(str, Enum):
+    """Whether the user cares about one-off spikes vs sustained patterns."""
+
+    one_off = "one_off"
+    persistent = "persistent"
+    mixed = "mixed"
+
+
+class DirectionalFocus(str, Enum):
+    """Emphasis on negative (weakness) vs positive (strength) moves."""
+
+    negative = "negative"
+    positive = "positive"
+    both = "both"
+
+
+class TimeFocus(str, Enum):
+    """Horizon emphasis for the analysis."""
+
+    recent_quarters = "recent_quarters"
+    full_history = "full_history"
+    mixed = "mixed"
+
+
+class PeerRequirement(str, Enum):
+    """How much peer-relative context the user expects."""
+
+    required = "required"
+    optional = "optional"
+    none = "none"
+
+
+class MetricPriority(str, Enum):
+    """Ordered metric themes (planner uses order as priority)."""
+
+    margins = "margins"
+    revenue_growth = "revenue_growth"
+    cash_flow = "cash_flow"
+    liquidity = "liquidity"
+    leverage = "leverage"
+
+
+class GoalPreferences(BaseModel):
+    """
+    Rule-derived analytical preferences from ``analysis_goal`` text.
+
+    Compact, JSON-serializable; optional on :class:`InterpretedGoal` for backward compatibility.
+    """
+
+    primary_analysis_mode: PrimaryAnalysisMode = Field(
+        default=PrimaryAnalysisMode.mixed,
+        description="Dominant analytical framing.",
+    )
+    preferred_signal_style: PreferredSignalStyle = Field(
+        default=PreferredSignalStyle.mixed,
+        description="One-off outliers vs persistent patterns.",
+    )
+    directional_focus: DirectionalFocus = Field(
+        default=DirectionalFocus.both,
+        description="Negative vs positive emphasis.",
+    )
+    priority_metrics: list[MetricPriority] = Field(
+        default_factory=list,
+        description="User-stated metric themes in priority order (max 5).",
+    )
+    time_focus: TimeFocus = Field(
+        default=TimeFocus.mixed,
+        description="Recent quarters vs long history.",
+    )
+    peer_requirement: PeerRequirement = Field(
+        default=PeerRequirement.optional,
+        description="Whether peer-relative analysis is required.",
+    )
+    preference_rules_matched: list[str] = Field(
+        default_factory=list,
+        description="Stable ids for which preference rules fired (audit).",
+    )
+    schema_version: str = Field(default="1", description="Bump when fields or enums change.")
+
+
+# ---------------------------------------------------------------------------
 # Interpreted goal (structured; replaces opaque goal blobs)
 # ---------------------------------------------------------------------------
 
@@ -109,6 +204,9 @@ class InterpretedGoalCode(str, Enum):
 
     full_pipeline = "full_pipeline"
     """End-to-end panel → features → anomalies → report."""
+
+    trend_deterioration_focus = "trend_deterioration_focus"
+    """Single-step ``run_pipeline`` — trend breaks, unified findings, peer/coverage artifacts."""
 
     resolve_only = "resolve_only"
     """Ticker → CIK / name only."""
@@ -140,6 +238,10 @@ class InterpretedGoal(BaseModel):
     user_goal_text: str = Field(
         ...,
         description="Echo of ``OrchestrationInput.analysis_goal`` for audit.",
+    )
+    goal_preferences: GoalPreferences | None = Field(
+        default=None,
+        description="Structured preferences when the planner filled them (rule-based v1).",
     )
 
 

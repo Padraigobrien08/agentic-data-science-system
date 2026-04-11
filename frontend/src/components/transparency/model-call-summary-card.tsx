@@ -33,11 +33,26 @@ export function ModelCallSummaryCard({ call }: Props) {
   const title = modelCallLabel(call);
   const tokens = formatTokenTotal(call);
 
+  const failed = call.status === "error";
+
   return (
-    <div className="rounded border border-[var(--border)] bg-neutral-50/50 dark:bg-neutral-950/30">
+    <div
+      className={`rounded border bg-neutral-50/50 dark:bg-neutral-950/30 ${
+        failed
+          ? "border-red-400 dark:border-red-700"
+          : "border-[var(--border)]"
+      }`}
+    >
       <div className="border-b border-[var(--border)] px-3 py-2">
         <div className="flex flex-wrap items-baseline justify-between gap-2">
-          <h3 className="text-xs font-semibold uppercase tracking-wide">{title}</h3>
+          <h3 className="flex flex-wrap items-center gap-2 text-xs font-semibold uppercase tracking-wide">
+            {title}
+            {failed ? (
+              <span className="rounded bg-red-100 px-1.5 py-0.5 font-mono text-[10px] font-normal normal-case text-red-900 dark:bg-red-950/80 dark:text-red-100">
+                failed
+              </span>
+            ) : null}
+          </h3>
           <span className="font-mono text-[10px] text-[var(--muted)]">{call.id}</span>
         </div>
         <p className="mt-1 font-mono text-[11px] text-[var(--foreground)]">

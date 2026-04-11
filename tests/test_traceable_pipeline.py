@@ -164,18 +164,20 @@ class _CriticReportStubProvider:
 
     def complete(self, request: ChatCompletionRequest) -> ChatCompletionResult:
         user = request.messages[-1]["content"]
-        if "artifact_excerpts_by_role" in user:
-            body: dict[str, Any] = {
+        data = json.loads(user) if isinstance(user, str) else {}
+        # Report payload includes structured ``critic``; critic payload does not.
+        if isinstance(data.get("critic"), dict):
+            body = {
+                "user_report_markdown": "# Analysis\n\nThis is the user-facing summary.",
+                "key_takeaways": ["Takeaway one"],
+            }
+        else:
+            body = {
                 "findings_assessment": "Adequate for the goal.",
                 "caveat_coverage": "Caveats visible.",
                 "trustworthiness_notes": "No major gaps.",
                 "issues": [],
                 "overall_confidence": "medium",
-            }
-        else:
-            body = {
-                "user_report_markdown": "# Analysis\n\nThis is the user-facing summary.",
-                "key_takeaways": ["Takeaway one"],
             }
         text = json.dumps(body)
         return ChatCompletionResult(

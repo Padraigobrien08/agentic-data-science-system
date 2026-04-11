@@ -12,24 +12,41 @@ import type {
   RunStepDetail,
 } from "./types";
 
+export type RunFetchOptions = {
+  includePayloads?: boolean;
+  includeTransparency?: boolean;
+};
+
+function runQueryString(opts: boolean | RunFetchOptions | undefined): string {
+  const o: RunFetchOptions =
+    typeof opts === "boolean" ? { includePayloads: opts } : opts ?? {};
+  const p = new URLSearchParams();
+  if (o.includePayloads) p.set("include_payloads", "true");
+  if (o.includeTransparency) p.set("include_transparency", "true");
+  const s = p.toString();
+  return s ? `?${s}` : "";
+}
+
 export async function listRuns(projectId: string): Promise<AnalysisRunSummary[]> {
   const q = new URLSearchParams({ project_id: projectId });
   return apiGet<AnalysisRunSummary[]>(`/v1/runs?${q.toString()}`);
 }
 
+/** @param options Pass ``true`` for ``include_payloads`` only, or an object for transparency flags. */
 export async function getRun(
   runId: string,
-  includePayloads: boolean,
+  options?: boolean | RunFetchOptions,
 ): Promise<AnalysisRunDetail> {
-  const q = includePayloads ? "?include_payloads=true" : "";
+  const q = runQueryString(options);
   return apiGet<AnalysisRunDetail>(`/v1/runs/${runId}${q}`);
 }
 
+/** @param options Pass ``true`` for ``include_payloads`` only, or an object for transparency flags. */
 export async function listRunSteps(
   runId: string,
-  includePayloads: boolean,
+  options?: boolean | RunFetchOptions,
 ): Promise<RunStepDetail[]> {
-  const q = includePayloads ? "?include_payloads=true" : "";
+  const q = runQueryString(options);
   return apiGet<RunStepDetail[]>(`/v1/runs/${runId}/steps${q}`);
 }
 

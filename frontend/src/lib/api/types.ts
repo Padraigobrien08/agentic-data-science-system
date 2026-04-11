@@ -60,10 +60,42 @@ export interface AnalysisRunSummary {
   updated_at: string;
 }
 
+/** ``GET /v1/runs/{id}?include_transparency=true`` */
+export interface RunTransparencySummary {
+  evidence_artifact_ids: string[];
+  evidence_artifacts_by_role: Record<string, string>;
+  prompt_versions: Record<string, string> | null;
+  model_call_count: number;
+}
+
+export interface RunStepOutputSummary {
+  phase_status: string | null;
+  skipped: boolean | null;
+  skip_reason: string | null;
+  issue_count: number | null;
+  overall_confidence: string | null;
+  key_takeaway_count: number | null;
+  markdown_char_count: number | null;
+  step_count: number | null;
+  artifact_roles: string[];
+  weak_evidence_signals: string[];
+}
+
+/** Per-step slice from ``GET .../steps?include_transparency=true``. */
+export interface RunStepTransparencyView {
+  trace: string | null;
+  phase: string | null;
+  model_call_id: string | null;
+  output_summary: RunStepOutputSummary | null;
+  linked_artifact_ids: string[];
+}
+
 export interface AnalysisRunDetail extends AnalysisRunSummary {
   input_payload_json: Record<string, unknown> | unknown[] | null;
   output_payload_json: Record<string, unknown> | unknown[] | null;
   meta_json: Record<string, unknown> | unknown[] | null;
+  /** Present when requested with ``include_transparency``; may be omitted on older responses. */
+  transparency?: RunTransparencySummary | null;
 }
 
 export interface RunStepDetail {
@@ -80,6 +112,7 @@ export interface RunStepDetail {
   updated_at: string;
   planner_tool_input_json: Record<string, unknown> | unknown[] | null;
   meta_json: Record<string, unknown> | unknown[] | null;
+  transparency?: RunStepTransparencyView | null;
 }
 
 export interface ArtifactMetadata {

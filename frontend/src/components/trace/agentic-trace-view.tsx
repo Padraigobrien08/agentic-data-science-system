@@ -4,7 +4,13 @@ import { ArtifactsMetadataPanel } from "@/components/trace/artifacts-metadata-pa
 import { PlannerOutputPanel } from "@/components/trace/planner-output-panel";
 import { RunTraceExperience } from "@/components/trace/run-trace-experience";
 import { ToolSequencePanel } from "@/components/trace/tool-sequence-panel";
-import type { ArtifactMetadata, ModelCallApiItem, RunStepDetail } from "@/lib/api/types";
+import type {
+  AnalysisRunStatus,
+  ArtifactMetadata,
+  ModelCallApiItem,
+  RunStepDetail,
+  RunTransparencySummary,
+} from "@/lib/api/types";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
 import {
   parseOrchestrationOutput,
@@ -22,6 +28,9 @@ type Props = {
   userFacingReport: UserFacingReport | null;
   /** Omit “full trace view” link in step timeline when already on /trace. */
   compactTraceLink?: boolean;
+  runStatus?: AnalysisRunStatus;
+  runErrorSummary?: string | null;
+  runTransparency?: RunTransparencySummary | null;
 };
 
 /**
@@ -37,6 +46,9 @@ export function AgenticTraceView({
   modelCalls,
   userFacingReport,
   compactTraceLink,
+  runStatus,
+  runErrorSummary,
+  runTransparency,
 }: Props) {
   const orch = parseOrchestrationOutput(outputPayload);
   const ai = parseAiAgents(metaJson);
@@ -53,6 +65,9 @@ export function AgenticTraceView({
         modelCalls={modelCalls}
         userFacingReport={userFacingReport}
         compactTraceLink={compactTraceLink}
+        runStatus={runStatus}
+        runErrorSummary={runErrorSummary}
+        runTransparency={runTransparency}
       />
 
       <details className="rounded border border-[var(--border)]">

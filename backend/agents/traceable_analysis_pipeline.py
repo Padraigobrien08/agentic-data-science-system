@@ -165,12 +165,18 @@ def run_traceable_edgar_pipeline(
         "status": orch_out.status.value,
         "message": orch_out.message,
         "final_summary": orch_out.final_summary,
+        "interpreted_goal": orch_out.interpreted_goal.model_dump(mode="json"),
+        "resolved_companies": [c.model_dump(mode="json") for c in orch_out.resolved_companies],
         "tickers": list(orch_input.tickers),
         "analysis_goal": orch_input.analysis_goal,
         "refresh": orch_input.refresh,
         "warnings_count": len(orch_out.warnings),
         "errors_count": len(orch_out.errors),
         "step_statuses": [e.model_dump(mode="json") for e in orch_out.step_statuses],
+        "tool_results_summary": [t.model_dump(mode="json") for t in orch_out.tool_results_summary],
+        "tool_call_sequence": [x.model_dump(mode="json") for x in orch_out.tool_call_sequence],
+        "artifact_paths_by_role": dict(orch_out.artifact_paths),
+        "final_report_path": orch_out.final_report_path,
         "errors": [e.model_dump(mode="json") for e in orch_out.errors],
         "warnings": [w.model_dump(mode="json") for w in orch_out.warnings],
     }
@@ -193,6 +199,8 @@ def run_traceable_edgar_pipeline(
 
     excerpts = collect_critic_excerpts(orch_out.artifact_paths)
     critic_excerpt_roles = sorted(excerpts.keys())
+    orchestration_summary["artifact_excerpt_roles_loaded"] = list(critic_excerpt_roles)
+    orchestration_summary["artifact_paths_roles"] = sorted(orch_out.artifact_paths.keys())
 
     if llm_provider is None:
         co_skip = build_skipped_phase_output(
@@ -366,6 +374,7 @@ def run_traceable_edgar_pipeline(
                 analysis_run_id=analysis_run_id,
                 orchestration_summary=orchestration_summary,
                 critic=critic_model,
+                artifact_excerpts=excerpts,
             )
         except Exception as exc:
             rs_steps.transition_status(report_row.id, RunStepStatus.error, detail=str(exc)[:2048])

@@ -12,6 +12,11 @@ from backend.models.artifact import Artifact
 from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus, RunStepStatus
 from backend.models.model_call import ModelCall
 from backend.models.run_step import RunStep
+from backend.schemas.run_transparency import (
+    RunStepTransparencyView,
+    RunTransparencySummary,
+    build_run_step_transparency,
+)
 
 
 class AnalysisRunSummary(BaseModel):
@@ -38,13 +43,22 @@ class AnalysisRunDetailResponse(AnalysisRunSummary):
     input_payload_json: dict | list | None = None
     output_payload_json: dict | list | None = None
     meta_json: dict | list | None = None
+    transparency: RunTransparencySummary | None = Field(
+        None,
+        description="Sprint 3 audit slice; present when ``include_transparency=true`` on GET /v1/runs/{id}.",
+    )
 
 
 def analysis_run_to_summary(row: AnalysisRun) -> AnalysisRunSummary:
     return AnalysisRunSummary.model_validate(row)
 
 
-def analysis_run_to_detail(row: AnalysisRun, *, include_payloads: bool) -> AnalysisRunDetailResponse:
+def analysis_run_to_detail(
+    row: AnalysisRun,
+    *,
+    include_payloads: bool,
+    transparency: RunTransparencySummary | None = None,
+) -> AnalysisRunDetailResponse:
     base = analysis_run_to_summary(row)
     if not include_payloads:
         return AnalysisRunDetailResponse(
@@ -52,12 +66,14 @@ def analysis_run_to_detail(row: AnalysisRun, *, include_payloads: bool) -> Analy
             input_payload_json=None,
             output_payload_json=None,
             meta_json=None,
+            transparency=transparency,
         )
     return AnalysisRunDetailResponse(
         **base.model_dump(),
         input_payload_json=row.input_payload_json,
         output_payload_json=row.output_payload_json,
         meta_json=row.meta_json,
+        transparency=transparency,
     )
 
 
@@ -82,20 +98,39 @@ class RunStepListItem(BaseModel):
 class RunStepDetailItem(RunStepListItem):
     planner_tool_input_json: dict | list | None = None
     meta_json: dict | list | None = None
+    transparency: RunStepTransparencyView | None = Field(
+        None,
+        description="Step-level audit fields; present when ``include_transparency=true`` on GET .../steps.",
+    )
 
 
 def run_step_to_list_item(row: RunStep) -> RunStepListItem:
     return RunStepListItem.model_validate(row)
 
 
-def run_step_to_detail(row: RunStep, *, include_payloads: bool) -> RunStepDetailItem:
+def run_step_to_detail(
+    row: RunStep,
+    *,
+    include_payloads: bool,
+    include_transparency: bool = False,
+    linked_artifact_ids: list[UUID] | None = None,
+) -> RunStepDetailItem:
     item = run_step_to_list_item(row)
+    trans = None
+    if include_transparency:
+        trans = build_run_step_transparency(row.meta_json, list(linked_artifact_ids or []))
     if not include_payloads:
-        return RunStepDetailItem(**item.model_dump(), planner_tool_input_json=None, meta_json=None)
+        return RunStepDetailItem(
+            **item.model_dump(),
+            planner_tool_input_json=None,
+            meta_json=None,
+            transparency=trans,
+        )
     return RunStepDetailItem(
         **item.model_dump(),
         planner_tool_input_json=row.planner_tool_input_json,
         meta_json=row.meta_json,
+        transparency=trans,
     )
 
 

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import os
 from functools import lru_cache
 from pathlib import Path
 
@@ -116,8 +117,8 @@ class Settings(BaseSettings):
 
     # Intent / planning agents (``backend.agents``) — prompts under versioned files on disk
     agent_completion_model: str = Field(
-        default="gpt-4o-mini",
-        description="Chat model for intent and planning agents",
+        default="gpt-5.4-mini",
+        description="Chat model for intent, planning, critic, and report agents (``chat.completions`` model id).",
     )
     agent_intent_prompt_version: str = Field(
         default="1.0.0",
@@ -152,6 +153,17 @@ class Settings(BaseSettings):
     )
 
     @model_validator(mode="after")
+    def _openai_api_key_from_unprefixed_env(self) -> Settings:
+        """Accept ``OPENAI_API_KEY`` when ``EDGAR_BACKEND_OPENAI_API_KEY`` is unset (common convention)."""
+        cur = self.openai_api_key.get_secret_value() if self.openai_api_key else ""
+        if str(cur).strip():
+            return self
+        alt = os.environ.get("OPENAI_API_KEY", "").strip()
+        if alt:
+            object.__setattr__(self, "openai_api_key", SecretStr(alt))
+        return self
+
+    @model_validator(mode="after")
     def _production_sanity(self) -> Settings:
         if not self.debug and len(self.jwt_secret.get_secret_value()) < 32:
             raise ValueError(
@@ -166,6 +178,13 @@ class Settings(BaseSettings):
                     "(Docker Compose sets this automatically)."
                 )
         return self
+
+    @field_validator("openai_base_url", mode="before")
+    @classmethod
+    def _empty_openai_base_url_is_none(cls, v: object) -> object:
+        if v == "":
+            return None
+        return v
 
     @field_validator("database_url", mode="before")
     @classmethod

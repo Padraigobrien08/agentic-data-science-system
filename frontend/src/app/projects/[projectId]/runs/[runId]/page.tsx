@@ -35,9 +35,9 @@ export default async function RunDetailPage({
   let modelCalls;
   try {
     [run, artifacts, steps, modelCalls] = await Promise.all([
-      getRun(runId, true),
+      getRun(runId, { includePayloads: true, includeTransparency: true }),
       listRunArtifacts(runId),
-      listRunSteps(runId, true),
+      listRunSteps(runId, { includePayloads: true, includeTransparency: true }),
       listRunModelCalls(runId, false),
     ]);
   } catch (e) {
@@ -140,6 +140,9 @@ export default async function RunDetailPage({
           artifacts={artifacts}
           modelCalls={modelCalls}
           userFacingReport={userReport}
+          runStatus={run.status}
+          runErrorSummary={run.error_summary}
+          runTransparency={run.transparency ?? null}
         />
       </div>
 

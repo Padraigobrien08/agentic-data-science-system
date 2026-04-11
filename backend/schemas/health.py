@@ -12,12 +12,27 @@ class DatabaseHealth(BaseModel):
     detail: str | None = Field(default=None, description="Error message when ok is false")
 
 
+class LlmHealth(BaseModel):
+    """Whether agent LLM calls (critic/report) would run in this process — config only, no live probe."""
+
+    provider: str = Field(description="Normalized EDGAR_BACKEND_LLM_PROVIDER (e.g. off, openai)")
+    ready: bool = Field(
+        description="True when get_chat_completion_provider() would succeed (provider + key configured)",
+    )
+    message: str = Field(
+        description="Always set: what is wrong, or confirmation when ready (avoids null-only hints)",
+    )
+
+
 class HealthResponse(BaseModel):
     """Service health — suitable for load balancers and ops dashboards."""
 
     status: str = Field(default="ok", description="Overall status string")
     version: str = Field(description="API package version")
     database: DatabaseHealth
+    llm: LlmHealth = Field(
+        description="LLM agent configuration in this API process (worker has its own env — check logs / same vars)",
+    )
 
 
 class WorkerHealthResponse(BaseModel):

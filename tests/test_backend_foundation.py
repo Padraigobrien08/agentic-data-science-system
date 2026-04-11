@@ -252,6 +252,10 @@ def test_api_health_reports_database_ok(
         body = r.json()
         assert body["status"] == "ok"
         assert body["database"]["ok"] is True
+        llm = body["llm"]
+        assert llm["provider"] in ("off", "openai")
+        assert isinstance(llm["ready"], bool)
+        assert llm["message"]
 
 
 def test_api_runs_list_unknown_project_404(

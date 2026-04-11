@@ -11,6 +11,7 @@ import backend.models  # noqa: F401
 from backend.db.base import Base
 from backend.llm.exceptions import ChatCompletionProviderError, LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
+from backend.llm.openai_provider import _completion_length_payload, OpenAIChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest, ChatCompletionResult
 from backend.config.settings import Settings
 from backend.models.enums import ModelCallStatus
@@ -158,6 +159,42 @@ def test_factory_openai_builds() -> None:
 def test_factory_off_raises() -> None:
     with pytest.raises(LLMProviderConfigurationError):
         get_chat_completion_provider(Settings(llm_provider="off"))
+
+
+def test_completion_length_payload_gpt5_uses_max_completion_tokens() -> None:
+    assert _completion_length_payload("gpt-5.4-mini", 512) == {"max_completion_tokens": 512}
+    assert _completion_length_payload("o1-preview", 128) == {"max_completion_tokens": 128}
+    assert _completion_length_payload("gpt-4o-mini", 128) == {"max_tokens": 128}
+
+
+def test_openai_provider_maps_max_tokens_for_gpt5_without_dup_in_payload() -> None:
+    calls: list[dict] = []
+
+    def fake_create(**kwargs: object) -> object:
+        calls.append(kwargs)
+        raise RuntimeError("stop after capture")
+
+    p = OpenAIChatCompletionProvider(api_key="sk-test")
+    p._client.chat.completions.create = fake_create  # type: ignore[method-assign]
+
+    req = ChatCompletionRequest(
+        model="gpt-5.4-mini",
+        messages=[{"role": "user", "content": "hi"}],
+        max_tokens=100,
+    )
+    with pytest.raises(ChatCompletionProviderError, match="stop after capture"):
+        p.complete(req)
+    assert len(calls) == 1
+    assert calls[0]["max_completion_tokens"] == 100
+    assert "max_tokens" not in calls[0]
+
+
+def test_settings_openai_api_key_fallback_from_openai_api_key_env(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv("EDGAR_BACKEND_OPENAI_API_KEY", raising=False)
+    monkeypatch.setenv("OPENAI_API_KEY", "sk-plain-env-fallback")
+    s = Settings(llm_provider="openai", openai_api_key=None)
+    assert s.openai_api_key is not None
+    assert s.openai_api_key.get_secret_value() == "sk-plain-env-fallback"
 
 
 @pytest.mark.integration

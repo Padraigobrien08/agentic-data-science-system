@@ -16,6 +16,10 @@ export default async function HomePage() {
         <code className="text-xs">API_URL</code> and an HttpOnly session cookie after you{" "}
         <Link href="/login" className="underline">
           sign in
+        </Link>{" "}
+        or{" "}
+        <Link href="/register" className="underline">
+          register
         </Link>
         . Projects, runs, and artifacts require authentication.
       </p>
@@ -23,6 +27,11 @@ export default async function HomePage() {
         <li>
           <Link href="/login" className="underline">
             Sign in
+          </Link>
+        </li>
+        <li>
+          <Link href="/register" className="underline">
+            Create account
           </Link>
         </li>
         <li>

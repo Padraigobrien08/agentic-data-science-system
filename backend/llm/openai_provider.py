@@ -11,6 +11,23 @@ from backend.llm.types import ChatCompletionRequest, ChatCompletionResult
 OPENAI_PROVIDER_ID = "openai"
 
 
+def _completion_length_payload(model: str, max_tokens: int) -> dict[str, int]:
+    """
+    Newer OpenAI chat models reject ``max_tokens`` and require ``max_completion_tokens``.
+
+    See API error: unsupported_parameter max_tokens — use max_completion_tokens instead.
+    """
+    m = (model or "").strip().lower()
+    if (
+        m.startswith("gpt-5")
+        or m.startswith("o1")
+        or m.startswith("o3")
+        or m.startswith("o4")
+    ):
+        return {"max_completion_tokens": max_tokens}
+    return {"max_tokens": max_tokens}
+
+
 class OpenAIChatCompletionProvider:
     """Thin wrapper around ``openai.OpenAI`` — maps request/response only."""
 
@@ -41,7 +58,7 @@ class OpenAIChatCompletionProvider:
         if request.temperature is not None:
             payload["temperature"] = request.temperature
         if request.max_tokens is not None:
-            payload["max_tokens"] = request.max_tokens
+            payload.update(_completion_length_payload(request.model, request.max_tokens))
         if request.top_p is not None:
             payload["top_p"] = request.top_p
         if request.frequency_penalty is not None:
@@ -50,9 +67,23 @@ class OpenAIChatCompletionProvider:
             payload["presence_penalty"] = request.presence_penalty
         if request.stop is not None:
             payload["stop"] = request.stop
-        reserved = frozenset(payload)
+        # Do not re-inject ``max_tokens`` from model_dump when we emitted max_completion_tokens.
+        handled = frozenset(
+            {
+                "model",
+                "messages",
+                "temperature",
+                "max_tokens",
+                "top_p",
+                "frequency_penalty",
+                "presence_penalty",
+                "stop",
+            }
+        )
         for k, v in request.model_dump(mode="python", exclude_none=True).items():
-            if k not in reserved and v is not None:
+            if k in handled:
+                continue
+            if k not in payload and v is not None:
                 payload[k] = v
 
         t0 = time.perf_counter()

@@ -10,8 +10,9 @@ from sqlalchemy.exc import SQLAlchemyError
 from backend import __version__
 from backend.api.deps import DbSession
 from backend.config.settings import get_settings
+from backend.llm.factory import describe_llm_runtime
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
-from backend.schemas.health import DatabaseHealth, HealthResponse, WorkerHealthResponse
+from backend.schemas.health import DatabaseHealth, HealthResponse, LlmHealth, WorkerHealthResponse
 
 router = APIRouter()
 
@@ -41,10 +42,13 @@ def health(db: DbSession) -> HealthResponse:
     except Exception as exc:  # noqa: BLE001 — intentional boundary for health reporting
         db_ok = False
         detail = str(exc)
+    settings = get_settings()
+    lk, lr, lm = describe_llm_runtime(settings)
     return HealthResponse(
         status="ok" if db_ok else "degraded",
         version=__version__,
         database=DatabaseHealth(ok=db_ok, detail=detail),
+        llm=LlmHealth(provider=lk, ready=lr, message=lm),
     )
 
 

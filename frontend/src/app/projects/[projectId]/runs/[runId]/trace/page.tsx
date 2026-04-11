@@ -21,8 +21,8 @@ export default async function RunTracePage({
   let modelCalls;
   try {
     [run, steps, artifacts, modelCalls] = await Promise.all([
-      getRun(runId, true),
-      listRunSteps(runId, true),
+      getRun(runId, { includePayloads: true, includeTransparency: true }),
+      listRunSteps(runId, { includePayloads: true, includeTransparency: true }),
       listRunArtifacts(runId),
       listRunModelCalls(runId, false),
     ]);
@@ -75,6 +75,9 @@ export default async function RunTracePage({
         modelCalls={modelCalls}
         userFacingReport={userReport}
         compactTraceLink
+        runStatus={run.status}
+        runErrorSummary={run.error_summary}
+        runTransparency={run.transparency ?? null}
       />
     </div>
   );

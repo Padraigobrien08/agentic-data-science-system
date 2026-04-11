@@ -28,9 +28,11 @@ export default async function LoginPage({
       </div>
       <LoginForm nextPath={next?.startsWith("/") && !next.startsWith("//") ? next : "/projects"} />
       <p className="text-xs text-[var(--muted)]">
-        No account? Register via{" "}
-        <code className="text-[var(--foreground)]">POST /v1/auth/register</code> (e.g. curl) then sign in
-        here.
+        No account?{" "}
+        <Link href="/register" className="font-mono underline">
+          Create one
+        </Link>{" "}
+        (or <code className="text-[var(--foreground)]">POST /v1/auth/register</code>).
       </p>
       <Link href="/" className="block font-mono text-xs underline">
         ← Home

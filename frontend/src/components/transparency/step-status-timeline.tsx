@@ -1,6 +1,6 @@
 import Link from "next/link";
 
-import type { ModelCallApiItem, RunStepDetail } from "@/lib/api/types";
+import type { ModelCallApiItem, RunStepDetail, RunStepOutputSummary } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
 import { stepLaneFromMeta } from "@/lib/run-trace-derive";
 import { formatTokenTotal } from "@/lib/agent-transparency";
@@ -29,6 +29,23 @@ type Props = {
   toolNamesHint?: string[];
   hideTraceLink?: boolean;
 };
+
+function stepOutputSummaryLines(os: RunStepOutputSummary): string[] {
+  const lines: string[] = [];
+  if (os.phase_status) lines.push(`phase_status: ${os.phase_status}`);
+  if (os.skipped === true) lines.push("skipped");
+  if (os.skip_reason) lines.push(`skip_reason: ${os.skip_reason}`);
+  if (os.issue_count != null) lines.push(`issue_count: ${os.issue_count}`);
+  if (os.overall_confidence) lines.push(`overall_confidence: ${os.overall_confidence}`);
+  if (os.markdown_char_count != null) lines.push(`markdown_char_count: ${os.markdown_char_count}`);
+  if (os.key_takeaway_count != null) lines.push(`key_takeaways: ${os.key_takeaway_count}`);
+  if (os.step_count != null) lines.push(`step_count: ${os.step_count}`);
+  if (os.artifact_roles.length) lines.push(`artifact_roles: ${os.artifact_roles.join(", ")}`);
+  if (os.weak_evidence_signals.length) {
+    lines.push(`weak_evidence_signals: ${os.weak_evidence_signals.join(", ")}`);
+  }
+  return lines;
+}
 
 /**
  * Persisted steps with optional join to ModelCall rows (latency, model, tokens) for LLM steps.
@@ -61,13 +78,19 @@ export function StepStatusTimeline({
       <ol className="space-y-2">
         {ordered.map((s) => {
           const { lane, trace } = stepLaneFromMeta(s.meta_json);
+          const tr = s.transparency;
+          const traceShow = tr?.trace ?? trace;
+          const phaseShow = tr?.phase;
           const meta =
             s.meta_json && typeof s.meta_json === "object" && !Array.isArray(s.meta_json)
               ? (s.meta_json as Record<string, unknown>)
               : null;
-          const modelCallId = typeof meta?.model_call_id === "string" ? meta.model_call_id : null;
+          const modelCallId =
+            tr?.model_call_id ??
+            (typeof meta?.model_call_id === "string" ? meta.model_call_id : null);
           const mc = modelCallId ? modelCallById.get(modelCallId) : undefined;
           const tokens = mc ? formatTokenTotal(mc) : null;
+          const outLines = tr?.output_summary ? stepOutputSummaryLines(tr.output_summary) : [];
 
           return (
             <li
@@ -79,8 +102,11 @@ export function StepStatusTimeline({
                 <span className="font-mono text-[10px] font-semibold uppercase text-[var(--muted)]">
                   {lane}
                 </span>
-                {trace ? (
-                  <span className="font-mono text-[10px] text-[var(--muted)]">{trace}</span>
+                {traceShow ? (
+                  <span className="font-mono text-[10px] text-[var(--muted)]">{traceShow}</span>
+                ) : null}
+                {phaseShow ? (
+                  <span className="font-mono text-[10px] text-[var(--muted)]">phase:{phaseShow}</span>
                 ) : null}
                 <span className={`font-mono text-xs ${statusClass(s.status)}`}>{s.status}</span>
               </div>
@@ -115,6 +141,26 @@ export function StepStatusTimeline({
                     <span className="text-[var(--muted)]"> · prompt {mc.prompt_version}</span>
                   ) : null}
                 </div>
+              ) : null}
+              {outLines.length > 0 ? (
+                <ul className="mt-1.5 list-inside list-disc font-mono text-[10px] text-[var(--muted)]">
+                  {outLines.map((line, i) => (
+                    <li key={`${s.id}-out-${i}`}>{line}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {tr && tr.linked_artifact_ids.length > 0 ? (
+                <p className="mt-1 font-mono text-[10px] text-[var(--muted)]">
+                  Linked artifacts:{" "}
+                  {tr.linked_artifact_ids.map((aid, idx) => (
+                    <span key={aid}>
+                      {idx > 0 ? ", " : null}
+                      <Link href={`/artifacts/${aid}`} className="underline">
+                        {aid.slice(0, 8)}…
+                      </Link>
+                    </span>
+                  ))}
+                </p>
               ) : null}
             </li>
           );

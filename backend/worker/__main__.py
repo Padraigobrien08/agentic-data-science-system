@@ -4,7 +4,10 @@ from __future__ import annotations
 
 import logging
 
+import structlog
+
 from backend.config.settings import get_settings, log_database_posture_once
+from backend.llm.factory import describe_llm_runtime
 from backend.db.session import SessionLocal
 from backend.observability import install_edgar_telemetry_hooks, setup_observability_logging
 from backend.observability.tracing import setup_tracing
@@ -16,6 +19,9 @@ def main() -> None:
     level = getattr(logging, settings.log_level.upper(), logging.INFO)
     setup_observability_logging(level=level, json_logs=settings.observability_json_logs)
     log_database_posture_once(settings)
+    wlog = structlog.get_logger("backend.worker")
+    lk, lr, lm = describe_llm_runtime(settings)
+    wlog.info("worker_llm_config", llm_provider=lk, llm_ready=lr, llm_message=lm)
     setup_tracing(service_name=settings.otel_service_name)
     install_edgar_telemetry_hooks()
     if settings.worker_metrics_port > 0:

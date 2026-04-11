@@ -33,6 +33,7 @@ class ReportAgent:
         analysis_run_id: UUID,
         orchestration_summary: dict,
         critic: CriticAgentLLMOutput,
+        artifact_excerpts: dict[str, str] | None = None,
     ) -> tuple[ReportAgentLLMOutput, ModelCall]:
         reg = load_registered_prompt("report", self._settings.agent_report_prompt_version)
         tmpl = reg.template
@@ -40,6 +41,7 @@ class ReportAgent:
         user_payload = {
             "orchestration_summary": orchestration_summary,
             "critic": critic.model_dump(mode="json"),
+            "artifact_excerpts_by_role": artifact_excerpts or {},
         }
         messages = [
             {"role": "system", "content": system},

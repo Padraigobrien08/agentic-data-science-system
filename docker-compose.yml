@@ -4,6 +4,9 @@
 # Quick start (sensible defaults; no `.env` required):
 #   docker compose up --build
 #
+# After changing backend Python code or env-backed behavior, rebuild API/worker images (recreate alone
+# reuses the old image):  docker compose build api worker && docker compose up -d api worker
+#
 # Overrides: copy `.env.example` to `.env` — Compose substitutes ${VAR} from that file.
 #
 # Startup order:
@@ -22,6 +25,13 @@ x-backend-env: &backend_env
   EDGAR_BACKEND_DEBUG: ${EDGAR_BACKEND_DEBUG:-false}
   EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION: ${EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION:-true}
   EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT: /var/lib/edgar/artifacts
+  # LLM: set keys in repo-root `.env` then `docker compose up -d --force-recreate api worker`
+  EDGAR_BACKEND_LLM_PROVIDER: ${EDGAR_BACKEND_LLM_PROVIDER:-off}
+  EDGAR_BACKEND_OPENAI_API_KEY: ${EDGAR_BACKEND_OPENAI_API_KEY:-}
+  # Common alternate name (also read by Settings if prefixed key is empty):
+  OPENAI_API_KEY: ${OPENAI_API_KEY:-}
+  EDGAR_BACKEND_OPENAI_BASE_URL: ${EDGAR_BACKEND_OPENAI_BASE_URL:-}
+  EDGAR_BACKEND_AGENT_COMPLETION_MODEL: ${EDGAR_BACKEND_AGENT_COMPLETION_MODEL:-gpt-5.4-mini}
 
 services:
   db:

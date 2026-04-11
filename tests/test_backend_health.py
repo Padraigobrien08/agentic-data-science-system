@@ -27,6 +27,11 @@ def test_health_returns_ok_and_version(client: TestClient) -> None:
         assert body["status"] == "ok"
         assert body["version"]
         assert body["database"]["ok"] is True
+        assert "llm" in body
+        llm = body["llm"]
+        assert llm["provider"] in ("off", "openai")
+        assert isinstance(llm["ready"], bool)
+        assert llm["message"]  # never null — explains status or confirms ready
 
 
 def test_ready_returns_ready_when_db_ok(client: TestClient) -> None:

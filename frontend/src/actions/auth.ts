@@ -26,16 +26,13 @@ function parseDetail(text: string): string {
 
 export type LoginState = { error?: string };
 
-export async function loginAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
-  const email = String(formData.get("email") ?? "").trim();
-  const password = String(formData.get("password") ?? "");
-  const nextRaw = String(formData.get("next") ?? "").trim();
-  const next = safeNextPath(nextRaw || null);
+export type RegisterState = { error?: string };
 
-  if (!email || !password) {
-    return { error: "Email and password are required." };
-  }
-
+async function completeLoginSession(
+  email: string,
+  password: string,
+  next: string,
+): Promise<LoginState> {
   const base = getApiBaseUrl();
   const res = await fetch(`${base}/v1/auth/login`, {
     method: "POST",
@@ -64,6 +61,55 @@ export async function loginAction(_prev: LoginState, formData: FormData): Promis
   });
 
   redirect(next);
+}
+
+export async function loginAction(_prev: LoginState, formData: FormData): Promise<LoginState> {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = safeNextPath(nextRaw || null);
+
+  if (!email || !password) {
+    return { error: "Email and password are required." };
+  }
+
+  return completeLoginSession(email, password, next);
+}
+
+export async function registerAction(
+  _prev: RegisterState,
+  formData: FormData,
+): Promise<RegisterState> {
+  const email = String(formData.get("email") ?? "").trim();
+  const password = String(formData.get("password") ?? "");
+  const displayName = String(formData.get("display_name") ?? "").trim() || null;
+  const nextRaw = String(formData.get("next") ?? "").trim();
+  const next = safeNextPath(nextRaw || null);
+
+  if (!email || !password) {
+    return { error: "Email and password are required." };
+  }
+  if (password.length < 10) {
+    return { error: "Password must be at least 10 characters (backend requirement)." };
+  }
+
+  const base = getApiBaseUrl();
+  const reg = await fetch(`${base}/v1/auth/register`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json", Accept: "application/json" },
+    body: JSON.stringify({
+      email,
+      password,
+      display_name: displayName,
+    }),
+    cache: "no-store",
+  });
+  const regText = await reg.text();
+  if (!reg.ok) {
+    return { error: parseDetail(regText) };
+  }
+
+  return completeLoginSession(email, password, next);
 }
 
 export async function logoutAction(): Promise<void> {
