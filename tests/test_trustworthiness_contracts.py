@@ -21,6 +21,7 @@ def test_phase1_paths_include_metric_coverage_and_caveat_basenames() -> None:
     assert p["metric_coverage_summary"].name == "metric_coverage_summary.csv"
     assert p["metric_caveats_extraction"].name == "metric_caveats_extraction.csv"
     assert p["metric_caveats_panel"].name == "metric_caveats_panel.csv"
+    assert p["deterioration_focus"].name == "deterioration_focus.csv"
     assert "manual_validation" in p
 
 

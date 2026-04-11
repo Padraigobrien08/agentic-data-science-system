@@ -39,6 +39,8 @@ def test_intent_phase_output_deterministic() -> None:
     assert out["orchestration_intent"] == "full_pipeline_run"
     assert out["entities"]["tickers"] == ["AAPL"]
     assert out["contract_version"] == "1"
+    assert out["planning_transparency"]["present"] is True
+    assert out["planning_transparency"]["goal_code"] == "full_pipeline"
 
 
 def test_planning_phase_output() -> None:

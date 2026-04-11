@@ -1,0 +1,8 @@
+cik,metric_name,n_periods,available_count,missing_count,coverage_ratio
+1090872,revenue,15,15,0,1.0
+1090872,net_income,15,15,0,1.0
+1090872,total_assets,15,15,0,1.0
+1090872,total_liabilities,15,15,0,1.0
+1090872,operating_cash_flow,15,15,0,1.0
+1090872,current_assets,15,15,0,1.0
+1090872,current_liabilities,15,15,0,1.0

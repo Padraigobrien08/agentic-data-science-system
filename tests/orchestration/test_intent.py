@@ -16,6 +16,13 @@ def test_examples_from_spec() -> None:
     assert p is not None
     assert p.intent == OrchestrationIntent.peer_report
 
+    peer_highlight = interpret_goal_intent(
+        "Compare these companies against peers and highlight underperformers."
+    )
+    assert peer_highlight is not None
+    assert peer_highlight.intent == OrchestrationIntent.peer_report
+    assert any("compare+peers" in r for r in peer_highlight.rules_matched)
+
     f = interpret_goal_intent("run the pipeline for these tickers")
     assert f is not None
     assert f.intent == OrchestrationIntent.full_pipeline_run

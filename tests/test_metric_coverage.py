@@ -112,6 +112,7 @@ def test_write_all_phase1_artifacts_includes_trend_breaks(monkeypatch: pytest.Mo
     assert paths["trend_breaks"].name == "trend_break_signals.csv"
     assert "unified_findings" in paths
     assert paths["unified_findings"].name == "unified_findings.csv"
+    assert paths["deterioration_focus"].name == "deterioration_focus.csv"
     assert paths["findings_summary_by_company"].name == "findings_summary_by_company.csv"
     assert paths["findings_summary_by_metric"].name == "findings_summary_by_metric.csv"
     assert paths["findings_summary_by_period"].name == "findings_summary_by_period.csv"

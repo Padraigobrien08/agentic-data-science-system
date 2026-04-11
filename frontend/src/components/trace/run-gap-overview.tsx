@@ -6,6 +6,7 @@ import type { ParsedOrchestrationOutput } from "@/lib/orchestration-output";
 /** High-signal tables often absent on anomaly-only runs — surface explicitly in the UI. */
 const SYNTHESIS_LAYERS: { role: string; label: string }[] = [
   { role: "unified_findings_csv", label: "Unified findings" },
+  { role: "deterioration_focus_csv", label: "Deterioration focus" },
   { role: "trend_break_signals_csv", label: "Trend-break signals" },
   { role: "peer_signals_csv", label: "Peer signals" },
   { role: "findings_summary_by_company_csv", label: "Company-level summaries" },

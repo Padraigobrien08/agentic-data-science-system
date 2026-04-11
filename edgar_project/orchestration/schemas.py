@@ -16,7 +16,7 @@ from __future__ import annotations
 
 from datetime import datetime, timezone
 from enum import Enum
-from typing import Any, TypeAlias
+from typing import Any, Literal, TypeAlias
 from uuid import uuid4
 
 from pydantic import BaseModel, Field, JsonValue, field_validator
@@ -63,6 +63,14 @@ class OrchestrationInput(BaseModel):
     refresh: bool = Field(
         default=False,
         description="When True, MCP fetch steps may bypass cache (Phase 2 semantics).",
+    )
+    intent_assistance: IntentAssistancePayload | None = Field(
+        default=None,
+        description=(
+            "Optional validated LLM refinement of :class:`GoalPreferences` merged over rule-based parsing; "
+            "does not select tools or plans directly — :class:`~edgar_project.orchestration.planner.Planner` "
+            "still runs deterministic template selection."
+        ),
     )
 
     @field_validator("tickers", mode="before")
@@ -143,6 +151,58 @@ class MetricPriority(str, Enum):
     leverage = "leverage"
 
 
+class PlanTemplateId(str, Enum):
+    """
+    Named plan templates (planner → MCP shape + reporting contract).
+
+    Each template maps to one execution profile: granular steps vs single ``run_pipeline``.
+    """
+
+    anomaly_unusual_changes = "anomaly_unusual_changes"
+    trend_deterioration = "trend_deterioration"
+    peer_comparison = "peer_comparison"
+    mixed_trend_and_anomaly = "mixed_trend_and_anomaly"
+
+
+class PlanTemplateSnapshot(BaseModel):
+    """
+    Inspectable contract for a plan template — persisted on :class:`InterpretedGoal` for transparency.
+
+    Values are rule-defined in :mod:`edgar_project.orchestration.plan_templates`.
+    """
+
+    template_id: PlanTemplateId
+    ordered_phases: list[str] = Field(
+        ...,
+        description="Logical phases in execution order (human-readable).",
+    )
+    required_signals: list[str] = Field(
+        default_factory=list,
+        description="Artifact / analytic signals this template expects downstream to surface.",
+    )
+    peer_analysis_mandatory: bool = Field(
+        ...,
+        description="Whether peer-relative context is required for the narrative.",
+    )
+    persistence_filtering_required: bool = Field(
+        ...,
+        description="Whether sustained-pattern / multi-quarter filtering is part of the ask.",
+    )
+    report_emphasis: list[str] = Field(
+        default_factory=list,
+        description="What the written report should foreground.",
+    )
+    mcp_execution_profile: str = Field(
+        ...,
+        description="``granular`` (stepwise MCP) or ``run_pipeline`` (single Phase-1 bundle).",
+    )
+    template_rules_matched: list[str] = Field(
+        default_factory=list,
+        description="Planner rule ids that selected this template.",
+    )
+    schema_version: str = Field(default="1")
+
+
 class GoalPreferences(BaseModel):
     """
     Rule-derived analytical preferences from ``analysis_goal`` text.
@@ -181,6 +241,28 @@ class GoalPreferences(BaseModel):
     schema_version: str = Field(default="1", description="Bump when fields or enums change.")
 
 
+class IntentAssistancePayload(BaseModel):
+    """
+    Audit bundle for optional LLM-assisted preference extraction.
+
+    Only :class:`GoalPreferences` is consumed by the planner; LLM never emits tool names or step lists.
+    """
+
+    model_config = {"extra": "forbid"}
+
+    goal_preferences: GoalPreferences = Field(
+        ...,
+        description="Merged preferences (rules baseline + validated LLM patch).",
+    )
+    validation_status: Literal["llm_validated"] = Field(
+        default="llm_validated",
+        description="Set when JSON passed schema validation and merge completed.",
+    )
+    model_call_id: str = Field(..., description="Recorded chat completion row id.")
+    prompt_id: str = Field(..., description="Registry id, e.g. edgar.agent.intent_preferences_assistant.")
+    prompt_version: str = Field(..., description="Prompt file / template version.")
+
+
 # ---------------------------------------------------------------------------
 # Interpreted goal (structured; replaces opaque goal blobs)
 # ---------------------------------------------------------------------------
@@ -194,19 +276,22 @@ class InterpretedGoalCode(str, Enum):
     """
 
     anomaly_unusual_changes = "anomaly_unusual_changes"
-    """e.g. find unusual financial changes — anomaly / z-score path."""
+    """Granular MCP path — z-score / point anomaly screen."""
 
     anomaly_for_companies = "anomaly_for_companies"
     """e.g. run anomaly analysis for these companies."""
 
-    report_peer_set = "report_peer_set"
-    """e.g. build the report for this peer set."""
+    peer_comparison = "peer_comparison"
+    """Peer / compare goals — ``run_pipeline`` with peer-forward reporting."""
 
     full_pipeline = "full_pipeline"
-    """End-to-end panel → features → anomalies → report."""
+    """User explicitly asked to run the full MCP pipeline (single ``run_pipeline`` step)."""
 
-    trend_deterioration_focus = "trend_deterioration_focus"
-    """Single-step ``run_pipeline`` — trend breaks, unified findings, peer/coverage artifacts."""
+    trend_deterioration = "trend_deterioration"
+    """Sustained weakness / trend breaks — ``run_pipeline`` with trend-first reporting."""
+
+    mixed_trend_and_anomaly = "mixed_trend_and_anomaly"
+    """Both episodic outliers and rolling trends — ``run_pipeline``."""
 
     resolve_only = "resolve_only"
     """Ticker → CIK / name only."""
@@ -242,6 +327,10 @@ class InterpretedGoal(BaseModel):
     goal_preferences: GoalPreferences | None = Field(
         default=None,
         description="Structured preferences when the planner filled them (rule-based v1).",
+    )
+    plan_template: PlanTemplateSnapshot | None = Field(
+        default=None,
+        description="Named plan template contract (phases, signals, report emphasis).",
     )
 
 

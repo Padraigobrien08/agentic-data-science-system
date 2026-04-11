@@ -7,10 +7,16 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
 from edgar_project.orchestration.schemas import (
+    DirectionalFocus,
     InterpretedGoal,
     InterpretedGoalCode,
+    MetricPriority,
     OrchestrationIntent,
+    PeerRequirement,
     PlannedStep,
+    PreferredSignalStyle,
+    PrimaryAnalysisMode,
+    TimeFocus,
 )
 
 from backend.agents.tool_allowlist import PLANNING_ALLOWED_TOOL_NAMES
@@ -72,6 +78,26 @@ class PlanningStepLLM(BaseModel):
                 f"tool_name {v!r} not in allowed set: {PLANNING_ALLOWED_TOOL_NAMES!r}"
             )
         return v
+
+
+class LLMGoalPreferencesPatch(BaseModel):
+    """
+    Strict JSON subset for optional intent-assistance LLM (maps onto :class:`GoalPreferences`).
+
+    All fields optional: only non-null values overlay the rule-based baseline.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    primary_analysis_mode: PrimaryAnalysisMode | None = None
+    preferred_signal_style: PreferredSignalStyle | None = None
+    directional_focus: DirectionalFocus | None = None
+    time_focus: TimeFocus | None = None
+    peer_requirement: PeerRequirement | None = None
+    priority_metrics: list[MetricPriority] | None = Field(
+        default=None,
+        description="At most 5 metric themes; invalid or empty lists are ignored.",
+    )
 
 
 class CriticAgentLLMOutput(BaseModel):

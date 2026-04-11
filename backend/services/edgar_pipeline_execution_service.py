@@ -15,6 +15,7 @@ from uuid import UUID
 import structlog
 from sqlalchemy.orm import Session
 
+from backend.agents.intent_preferences_assistant import maybe_apply_llm_intent_preferences
 from backend.agents.traceable_analysis_pipeline import run_traceable_edgar_pipeline
 from backend.agents.llm_phase_status import maybe_llm_error_summary_note
 from backend.agents.traceability_summary import enrich_traceability_artifact_ids
@@ -34,6 +35,7 @@ from backend.observability.metrics import (
 from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
+from backend.config.settings import get_settings
 from backend.services.exceptions import RunCancelledDuringExecution
 from edgar_project.orchestration import OrchestrationInput
 from edgar_project.orchestration.agent import AnalysisAgent
@@ -176,6 +178,19 @@ class EdgarPipelineExecutionService:
                     overrides_tickers=tickers,
                     overrides_goal=analysis_goal,
                     overrides_refresh=refresh,
+                )
+
+                settings = get_settings()
+                try:
+                    llm_provider_pref = get_chat_completion_provider()
+                except LLMProviderConfigurationError:
+                    llm_provider_pref = None
+                orch_in = maybe_apply_llm_intent_preferences(
+                    self._session,
+                    analysis_run_id,
+                    orch_in,
+                    llm_provider=llm_provider_pref,
+                    settings=settings,
                 )
 
                 self._runs.transition_status(analysis_run_id, AnalysisRunStatus.running)

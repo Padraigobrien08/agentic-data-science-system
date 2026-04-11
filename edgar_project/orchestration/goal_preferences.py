@@ -56,16 +56,20 @@ _TREND: Final[tuple[str, ...]] = (
     "rolling",
 )
 
+# Peer *preference* signals (substring hits on normalized text). Do not include bare
+# "compare"/"comparison" — those fire on almost any cross-metric ask and inflate
+# peer_comparison primary mode; peer-vs-peer phrasing is covered by intent.py for
+# coarse peer_report, and by the tokens below for preference extraction.
 _PEER: Final[tuple[str, ...]] = (
     "peer",
     "peers",
+    "peer group",
     "vs peers",
     "versus peers",
+    "against peers",
     "industry",
     "relative to",
     "benchmark",
-    "compare",
-    "comparison",
 )
 
 _ANOMALY: Final[tuple[str, ...]] = (
@@ -141,7 +145,7 @@ _FULL_HISTORY: Final[tuple[str, ...]] = (
 )
 
 _METRIC_PATTERNS: Final[tuple[tuple[re.Pattern[str], MetricPriority, str], ...]] = (
-    (re.compile(r"\bmargin\b"), MetricPriority.margins, "metric:margins"),
+    (re.compile(r"\bmargins?\b"), MetricPriority.margins, "metric:margins"),
     (re.compile(r"\brevenue\s+growth\b"), MetricPriority.revenue_growth, "metric:revenue_growth"),
     (re.compile(r"\brevenue\b"), MetricPriority.revenue_growth, "metric:revenue"),
     (re.compile(r"\bcash\s+flow\b"), MetricPriority.cash_flow, "metric:cash_flow"),
@@ -172,8 +176,8 @@ def _resolve_primary_mode(
     ]
     nonzero = [(name, n, m) for name, n, m in scores if n > 0]
     if not nonzero:
-        rules.append("primary:default_mixed")
-        return PrimaryAnalysisMode.mixed
+        rules.append("primary:default_anomaly_screen")
+        return PrimaryAnalysisMode.anomaly
 
     max_n = max(x[1] for x in nonzero)
     top = [x for x in nonzero if x[1] == max_n]
@@ -229,7 +233,12 @@ def parse_goal_preferences(goal_text: str) -> GoalPreferences:
     primary = _resolve_primary_mode(compact, det=det, tr=tr, peer=peer, anom=anom, rules=rules)
 
     persistent_hits = _count_phrase_hits(compact, _PERSISTENT)
-    one_off_hits = _count_phrase_hits(compact, _ONE_OFF)
+    # Do not treat "one-off" as asking for spikes when the user explicitly rejects them.
+    compact_for_oneoff = compact
+    for neg_ctx in ("rather than one-off", "instead of one-off", "not just one-off", "avoid one-off"):
+        if neg_ctx in compact_for_oneoff:
+            compact_for_oneoff = compact_for_oneoff.replace(neg_ctx, " ")
+    one_off_hits = _count_phrase_hits(compact_for_oneoff, _ONE_OFF)
     if persistent_hits and not one_off_hits:
         pstyle = PreferredSignalStyle.persistent
         rules.append("signal:persistent_phrases")
@@ -306,7 +315,12 @@ def prefer_run_pipeline_over_granular(prefs: GoalPreferences) -> bool:
     if prefs.peer_requirement == PeerRequirement.required:
         return True
     if m == PrimaryAnalysisMode.mixed:
-        return True
+        return (
+            prefs.preferred_signal_style == PreferredSignalStyle.persistent
+            or prefs.directional_focus == DirectionalFocus.negative
+            or len(prefs.priority_metrics) >= 2
+            or prefs.peer_requirement == PeerRequirement.required
+        )
     if m == PrimaryAnalysisMode.anomaly:
         return (
             prefs.preferred_signal_style == PreferredSignalStyle.persistent

@@ -1,0 +1,7 @@
+metric,finding_count,high_severity_count,avg_score_adjusted,sum_score_adjusted,sum_score_penalty,top_finding_category
+current_ratio,12,5,2.1198264427176885,25.437917312612264,0.6,moderate_shift
+net_margin,10,5,2.0171062214363493,20.17106221436349,1.9,moderate_shift
+debt_to_assets,8,4,2.217483602051845,17.73986881641476,0.0,moderate_shift
+revenue_growth_qoq,9,4,1.716058992128569,15.444530929157121,0.0,moderate_shift
+net_income,1,0,0.9300885985967944,0.9300885985967944,0.5,self_relative
+revenue,1,0,0.1642347343378272,0.1642347343378272,0.8999999999999999,self_relative

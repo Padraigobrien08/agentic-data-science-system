@@ -92,6 +92,10 @@ def test_build_runtime_traceability_bundle_shape() -> None:
     assert full["contract_version"] == TRACEABILITY_CONTRACT_VERSION
     assert full["planning"]["selected_tools"] == tools
     assert "resolve_company" in full["planning"]["decision_summary"]
+    assert full["intent"]["planning_transparency"]["present"] is True
+    assert full["planning"]["planning_transparency"]["present"] is True
+    assert full["critic"]["plan_alignment_findings"] == []
+    assert full["critic"]["plan_alignment_codes"] == []
     assert full["step_indices"]["critic"] == 1
     assert full["evidence_artifact_refs"][0]["role"] == "panel_csv"
     assert c_step["blocking_caveats"] == []

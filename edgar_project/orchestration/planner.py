@@ -5,8 +5,9 @@ Maps :class:`OrchestrationInput` to a :class:`PlanningOutcome` containing an
 :class:`OrchestrationPlan` and :class:`InterpretedGoal`, or structured
 :class:`OrchestrationError` entries when inputs are invalid.
 
-Natural-language goals are classified by :mod:`edgar_project.orchestration.intent`
-into :class:`OrchestrationIntent` before choosing a plan shape.
+Plan **templates** (:mod:`edgar_project.orchestration.plan_templates`) define ordered phases,
+required signals, peer/persistence/report contracts, and whether execution is ``granular``
+or ``run_pipeline``.
 
 **Purity (planning only)**
 
@@ -39,14 +40,22 @@ from edgar_project.orchestration.constants import (
     TOOL_RESOLVE_COMPANY,
     TOOL_RUN_PIPELINE,
 )
+from edgar_project.orchestration.goal_preferences import parse_goal_preferences
 from edgar_project.orchestration.intent import (
     IntentInterpretation,
     interpret_goal_intent,
     supported_intents_summary,
 )
+from edgar_project.orchestration.plan_templates import (
+    build_plan_template_snapshot,
+    interpreted_goal_code_for,
+    select_plan_template,
+    short_description_for_code,
+)
 from edgar_project.orchestration.schemas import (
     CODE_ORCH_UNSUPPORTED_GOAL,
     CODE_ORCH_VALIDATION,
+    GoalPreferences,
     InterpretedGoal,
     InterpretedGoalCode,
     OrchestrationError,
@@ -54,6 +63,7 @@ from edgar_project.orchestration.schemas import (
     OrchestrationIntent,
     OrchestrationPlan,
     PlannedStep,
+    PlanTemplateId,
     PlanningOutcome,
 )
 
@@ -90,51 +100,8 @@ def _validation_failure(message: str, *, detail: str | None = None) -> PlanningO
     )
 
 
-def _success_granular_outcome(
-    tickers: list[str],
-    refresh: bool,
-    user_goal_text: str,
-    interpretation: IntentInterpretation,
-    *,
-    code: InterpretedGoalCode,
-    description: str,
-) -> PlanningOutcome:
-    """Shared granular plan + :class:`InterpretedGoal` for anomaly and peer intents."""
-    plan = _granular_plan(tickers, refresh)
-    ig = InterpretedGoal(
-        code=code,
-        intent=interpretation.intent,
-        intent_rules_matched=list(interpretation.rules_matched),
-        description=description,
-        user_goal_text=user_goal_text,
-    )
-    return PlanningOutcome(ok=True, plan=plan, interpreted_goal=ig, errors=[])
-
-
-def _unsupported_goal_failure() -> PlanningOutcome:
-    return PlanningOutcome(
-        ok=False,
-        plan=None,
-        interpreted_goal=None,
-        errors=[
-            OrchestrationError(
-                code=CODE_ORCH_UNSUPPORTED_GOAL,
-                message="Unsupported analysis_goal; no supported intent matched.",
-                source_tool=None,
-                mcp_error_code=None,
-                detail=f"Supported intent ids: {supported_intents_summary()}.",
-            )
-        ],
-    )
-
-
 def _granular_plan(tickers: list[str], refresh: bool) -> OrchestrationPlan:
-    """
-    Standard sequence: resolve → fetch per ticker, then panel → features → anomalies → report.
-
-    Later, branching (skip fetch if cache fresh) can insert conditions here without
-    changing the outer :class:`PlanningOutcome` shape.
-    """
+    """Template *anomaly_unusual_changes* — stepwise MCP through anomaly + report."""
     steps: list[PlannedStep] = []
     order = 0
 
@@ -207,6 +174,7 @@ def _granular_plan(tickers: list[str], refresh: bool) -> OrchestrationPlan:
 
 
 def _run_pipeline_plan(tickers: list[str], refresh: bool) -> OrchestrationPlan:
+    """Templates with ``mcp_execution_profile == run_pipeline``."""
     return OrchestrationPlan(
         steps=[
             PlannedStep(
@@ -219,12 +187,69 @@ def _run_pipeline_plan(tickers: list[str], refresh: bool) -> OrchestrationPlan:
     )
 
 
+def _plan_for_template(template_id: PlanTemplateId, tickers: list[str], refresh: bool) -> OrchestrationPlan:
+    if template_id == PlanTemplateId.anomaly_unusual_changes:
+        return _granular_plan(tickers, refresh)
+    return _run_pipeline_plan(tickers, refresh)
+
+
+def _planning_success(
+    *,
+    tickers: list[str],
+    refresh: bool,
+    user_goal_text: str,
+    interpretation: IntentInterpretation,
+    prefs: GoalPreferences,
+    template_id: PlanTemplateId,
+    template_rules: list[str],
+) -> PlanningOutcome:
+    code = interpreted_goal_code_for(template_id, interpretation)
+    plan = _plan_for_template(template_id, tickers, refresh)
+    template_snap = build_plan_template_snapshot(template_id, template_rules)
+    desc = short_description_for_code(code)
+    ig = InterpretedGoal(
+        code=code,
+        intent=interpretation.intent,
+        intent_rules_matched=list(interpretation.rules_matched),
+        description=desc[:512],
+        user_goal_text=user_goal_text,
+        goal_preferences=prefs,
+        plan_template=template_snap,
+    )
+    return PlanningOutcome(ok=True, plan=plan, interpreted_goal=ig, errors=[])
+
+
+def _unsupported_goal_failure() -> PlanningOutcome:
+    return PlanningOutcome(
+        ok=False,
+        plan=None,
+        interpreted_goal=None,
+        errors=[
+            OrchestrationError(
+                code=CODE_ORCH_UNSUPPORTED_GOAL,
+                message="Unsupported analysis_goal; no supported intent matched.",
+                source_tool=None,
+                mcp_error_code=None,
+                detail=f"Supported intent ids: {supported_intents_summary()}.",
+            )
+        ],
+    )
+
+
 class Planner:
     """
     Rule-based plan builder: interpreted goal + ordered :class:`PlannedStep` list.
 
     See module docstring **Purity** — no MCP/SEC I/O; intent rules live in
-    :mod:`edgar_project.orchestration.intent`.
+    :mod:`edgar_project.orchestration.intent`; preferences in
+    :mod:`edgar_project.orchestration.goal_preferences`; templates in
+    :mod:`edgar_project.orchestration.plan_templates`.
+
+    **Optional LLM intent assistance:** when ``OrchestrationInput.intent_assistance`` is set,
+    goal preferences are taken from that payload instead of :func:`parse_goal_preferences`.
+    That can rescue under-specified phrasing the keyword maps miss, but can also disagree
+    with the deterministic intent layer—alignment findings in the critic should be trusted
+    for audit when both paths are enabled.
     """
 
     def build_plan(self, request: OrchestrationInput) -> PlanningOutcome:
@@ -249,41 +274,26 @@ class Planner:
                 detail="Provide at least one ticker or rely on default tickers when the list is empty.",
             )
 
+        if request.intent_assistance is not None:
+            prefs = request.intent_assistance.goal_preferences
+        else:
+            prefs = parse_goal_preferences(request.analysis_goal)
         interpretation = interpret_goal_intent(request.analysis_goal)
         if interpretation is None:
             return _unsupported_goal_failure()
 
         user_text = request.analysis_goal.strip()
+        template_id, template_rules = select_plan_template(prefs, interpretation)
 
-        if interpretation.intent == OrchestrationIntent.anomaly_analysis:
-            return _success_granular_outcome(
-                tickers,
-                request.refresh,
-                user_text,
-                interpretation,
-                code=InterpretedGoalCode.anomaly_unusual_changes,
-                description="Anomaly-style path: resolve → fetch → panel → features → anomalies → report.",
-            )
-
-        if interpretation.intent == OrchestrationIntent.peer_report:
-            return _success_granular_outcome(
-                tickers,
-                request.refresh,
-                user_text,
-                interpretation,
-                code=InterpretedGoalCode.report_peer_set,
-                description="Peer / compare path with report: same granular MCP sequence.",
-            )
-
-        plan = _run_pipeline_plan(tickers, request.refresh)
-        ig = InterpretedGoal(
-            code=InterpretedGoalCode.full_pipeline,
-            intent=interpretation.intent,
-            intent_rules_matched=list(interpretation.rules_matched),
-            description="Single-step run_pipeline (explicit full-pipeline intent).",
+        return _planning_success(
+            tickers=tickers,
+            refresh=request.refresh,
             user_goal_text=user_text,
+            interpretation=interpretation,
+            prefs=prefs,
+            template_id=template_id,
+            template_rules=template_rules,
         )
-        return PlanningOutcome(ok=True, plan=plan, interpreted_goal=ig, errors=[])
 
     def describe_plan(self, plan: OrchestrationPlan) -> str:
         """Human-readable summary for logging (one line per step)."""

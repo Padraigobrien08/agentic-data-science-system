@@ -5,6 +5,13 @@ Evaluates ``analysis_goal`` text in fixed priority order; each branch is a small
 inspectable predicate. See :func:`interpret_goal_intent` and rule id strings returned
 in :attr:`IntentInterpretation.rules_matched`.
 
+**Relationship to preferences:** this module only picks a coarse
+:class:`~edgar_project.orchestration.schemas.OrchestrationIntent`. Fine-grained routing
+(``primary_analysis_mode``, signal style, peer *preference* tier) lives in
+:mod:`edgar_project.orchestration.goal_preferences` on the same user text. Peer-vs-peer
+reporting is gated here first; keyword overlap between the two layers is intentional
+but not identical (e.g. bare “compare” does not imply peer intent).
+
 Pure string/regex classification only—no I/O, MCP, or filesystem access.
 """
 
@@ -61,6 +68,14 @@ def _try_peer_report(compact: str) -> tuple[str, ...] | None:
         rules.append("combo:compare+(report|generate)")
     if has_compare and "compan" in compact and (has_report or has_generate):
         rules.append("combo:compare_companies+output")
+    # Compare + peers without explicit "report" / "generate" (e.g. highlight underperformers).
+    if has_compare and has_peer and (
+        has_report
+        or has_generate
+        or "underperform" in compact
+        or re.search(r"\bhighlight\b", compact) is not None
+    ):
+        rules.append("combo:compare+peers+emphasis_or_output")
     if rules:
         return tuple(rules)
     return None

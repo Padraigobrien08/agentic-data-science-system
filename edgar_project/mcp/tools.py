@@ -24,6 +24,7 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_PEER_SIGNALS,
     ARTIFACT_KEY_TREND_BREAKS,
     ARTIFACT_KEY_UNIFIED_FINDINGS,
+    ARTIFACT_KEY_DETERIORATION_FOCUS,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD,
@@ -411,6 +412,7 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
         cave_ext_path_data = cave_pan_path_data = None
         trend_breaks_path_data: str | None = None
         unified_findings_path_data: str | None = None
+        deterioration_focus_path_data: str | None = None
         fs_company_path_data: str | None = None
         fs_metric_path_data: str | None = None
         fs_period_path_data: str | None = None
@@ -474,6 +476,19 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                     unified_findings_path_data = str(uf_p)
                     src_paths[ARTIFACT_KEY_UNIFIED_FINDINGS] = unified_findings_path_data
                     sources_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(uf_p)
+            df_p = phase1_ap.get("deterioration_focus")
+            if df_p is not None and df_p.is_file():
+                try:
+                    dfd = pd.read_csv(df_p)
+                    deterioration_focus_path_data = str(df_p)
+                    src_paths[ARTIFACT_KEY_DETERIORATION_FOCUS] = deterioration_focus_path_data
+                    sources_detail[ARTIFACT_KEY_DETERIORATION_FOCUS] = ad.artifact_info(
+                        df_p, row_count=len(dfd), columns=[str(c) for c in dfd.columns]
+                    )
+                except Exception:
+                    deterioration_focus_path_data = str(df_p)
+                    src_paths[ARTIFACT_KEY_DETERIORATION_FOCUS] = deterioration_focus_path_data
+                    sources_detail[ARTIFACT_KEY_DETERIORATION_FOCUS] = ad.artifact_info(df_p)
             fsc_p = phase1_ap.get("findings_summary_by_company")
             if fsc_p is not None and fsc_p.is_file():
                 try:
@@ -608,6 +623,8 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
             art_out[ARTIFACT_KEY_TREND_BREAKS] = trend_breaks_path_data
         if unified_findings_path_data:
             art_out[ARTIFACT_KEY_UNIFIED_FINDINGS] = unified_findings_path_data
+        if deterioration_focus_path_data:
+            art_out[ARTIFACT_KEY_DETERIORATION_FOCUS] = deterioration_focus_path_data
         if fs_company_path_data:
             art_out[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] = fs_company_path_data
         if fs_metric_path_data:
@@ -652,6 +669,7 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 "metric_caveats_panel_path": cave_pan_path_data,
                 "trend_break_signals_path": trend_breaks_path_data,
                 "unified_findings_path": unified_findings_path_data,
+                "deterioration_focus_path": deterioration_focus_path_data,
                 "findings_summary_by_company_path": fs_company_path_data,
                 "findings_summary_by_metric_path": fs_metric_path_data,
                 "findings_summary_by_period_path": fs_period_path_data,
@@ -729,6 +747,7 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
         cave_pan_path = paths.get("metric_caveats_panel")
         trend_breaks_path = paths.get("trend_breaks")
         unified_findings_path = paths.get("unified_findings")
+        deterioration_focus_path = paths.get("deterioration_focus")
         fs_company_path = paths.get("findings_summary_by_company")
         fs_metric_path = paths.get("findings_summary_by_metric")
         fs_period_path = paths.get("findings_summary_by_period")
@@ -780,6 +799,16 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 )
             except Exception:
                 artifacts_detail[ARTIFACT_KEY_UNIFIED_FINDINGS] = ad.artifact_info(unified_findings_path)
+        if deterioration_focus_path is not None and deterioration_focus_path.is_file():
+            try:
+                dfd = pd.read_csv(deterioration_focus_path)
+                artifacts_detail[ARTIFACT_KEY_DETERIORATION_FOCUS] = ad.artifact_info(
+                    deterioration_focus_path,
+                    row_count=len(dfd),
+                    columns=[str(c) for c in dfd.columns],
+                )
+            except Exception:
+                artifacts_detail[ARTIFACT_KEY_DETERIORATION_FOCUS] = ad.artifact_info(deterioration_focus_path)
         if fs_company_path is not None and fs_company_path.is_file():
             try:
                 fcd = pd.read_csv(fs_company_path)
@@ -904,6 +933,9 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 "peer_signals_path": str(peer_path) if peer_path is not None else None,
                 "trend_break_signals_path": str(trend_breaks_path) if trend_breaks_path is not None else None,
                 "unified_findings_path": str(unified_findings_path) if unified_findings_path is not None else None,
+                "deterioration_focus_path": str(deterioration_focus_path)
+                if deterioration_focus_path is not None
+                else None,
                 "findings_summary_by_company_path": str(fs_company_path) if fs_company_path is not None else None,
                 "findings_summary_by_metric_path": str(fs_metric_path) if fs_metric_path is not None else None,
                 "findings_summary_by_period_path": str(fs_period_path) if fs_period_path is not None else None,
@@ -948,6 +980,11 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
                 **(
                     {ARTIFACT_KEY_UNIFIED_FINDINGS: str(unified_findings_path)}
                     if unified_findings_path is not None
+                    else {}
+                ),
+                **(
+                    {ARTIFACT_KEY_DETERIORATION_FOCUS: str(deterioration_focus_path)}
+                    if deterioration_focus_path is not None
                     else {}
                 ),
                 **(

@@ -219,6 +219,14 @@ def write_unified_findings_csv(unified_findings: pd.DataFrame) -> Path:
     return p.resolve()
 
 
+def write_deterioration_focus_csv(deterioration_focus: pd.DataFrame) -> Path:
+    """Write ``data/artifacts/deterioration_focus.csv`` (deterioration-prioritized unified slice)."""
+    p = config.DATA_ARTIFACTS / "deterioration_focus.csv"
+    p.parent.mkdir(parents=True, exist_ok=True)
+    deterioration_focus.to_csv(p, index=False)
+    return p.resolve()
+
+
 def write_findings_summary_by_company_csv(df: pd.DataFrame) -> Path:
     p = config.DATA_ARTIFACTS / "findings_summary_by_company.csv"
     p.parent.mkdir(parents=True, exist_ok=True)
@@ -292,6 +300,7 @@ def write_all_phase1_artifacts(
         out["peer_signals"] = write_peer_signals_csv(peer_signals)
     from src.trend_breaks import compute_trend_break_signals
     from src.findings import (
+        build_deterioration_focus,
         build_findings_summary_by_company,
         build_findings_summary_by_metric,
         build_findings_summary_by_period,
@@ -302,6 +311,7 @@ def write_all_phase1_artifacts(
     out["trend_breaks"] = write_trend_breaks_csv(trend_breaks_df)
     uf = build_unified_findings(anomalies, trend_breaks=trend_breaks_df)
     out["unified_findings"] = write_unified_findings_csv(uf)
+    out["deterioration_focus"] = write_deterioration_focus_csv(build_deterioration_focus(uf))
     out["findings_summary_by_company"] = write_findings_summary_by_company_csv(
         build_findings_summary_by_company(uf)
     )
@@ -327,6 +337,7 @@ def phase1_paths() -> dict[str, Path]:
         "peer_signals": (art / "peer_signals.csv").resolve(),
         "trend_breaks": (art / "trend_break_signals.csv").resolve(),
         "unified_findings": (art / "unified_findings.csv").resolve(),
+        "deterioration_focus": (art / "deterioration_focus.csv").resolve(),
         "findings_summary_by_company": (art / "findings_summary_by_company.csv").resolve(),
         "findings_summary_by_metric": (art / "findings_summary_by_metric.csv").resolve(),
         "findings_summary_by_period": (art / "findings_summary_by_period.csv").resolve(),

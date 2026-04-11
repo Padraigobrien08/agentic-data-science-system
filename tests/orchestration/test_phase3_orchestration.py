@@ -39,6 +39,7 @@ from edgar_project.orchestration.schemas import (
     CODE_ORCH_PARTIAL_RESOLVE,
     CODE_ORCH_RESOLVE_TICKER_FAILED,
     CODE_ORCH_UNSUPPORTED_GOAL,
+    InterpretedGoalCode,
     OrchestrationInput,
     OrchestrationIntent,
     OrchestrationOutput,
@@ -245,7 +246,7 @@ def test_hard_error_all_resolve_fail() -> None:
     out = AnalysisAgent().run(
         OrchestrationInput(
             tickers=["A", "B"],
-            analysis_goal="unusual financial trends",
+            analysis_goal="find unusual financial changes",
             refresh=False,
         )
     )
@@ -284,18 +285,12 @@ def test_planner_deterministic_supported_goals() -> None:
     assert a.ok and b.ok
     assert a.interpreted_goal is not None and b.interpreted_goal is not None
     assert a.interpreted_goal.intent == b.interpreted_goal.intent == OrchestrationIntent.peer_report
+    assert a.interpreted_goal.code == InterpretedGoalCode.peer_comparison
     assert [s.tool_name for s in sorted(a.plan.steps, key=lambda x: x.order)] == [
         s.tool_name for s in sorted(b.plan.steps, key=lambda x: x.order)
     ]
-    expected_head = [TOOL_RESOLVE_COMPANY, TOOL_RESOLVE_COMPANY, TOOL_FETCH_COMPANY_DATA, TOOL_FETCH_COMPANY_DATA]
     names = [s.tool_name for s in sorted(a.plan.steps, key=lambda x: x.order)]
-    assert names[:4] == expected_head
-    assert names[-4:] == [
-        TOOL_BUILD_PANEL,
-        TOOL_COMPUTE_FEATURES,
-        TOOL_DETECT_ANOMALIES,
-        TOOL_GENERATE_REPORT,
-    ]
+    assert names == [TOOL_RUN_PIPELINE]
 
 
 @pytest.mark.parametrize(
@@ -303,7 +298,7 @@ def test_planner_deterministic_supported_goals() -> None:
     [
         ("find unusual financial changes", OrchestrationIntent.anomaly_analysis, TOOL_RESOLVE_COMPANY),
         ("run the pipeline for these tickers", OrchestrationIntent.full_pipeline_run, TOOL_RUN_PIPELINE),
-        ("compare companies and generate a report", OrchestrationIntent.peer_report, TOOL_RESOLVE_COMPANY),
+        ("compare companies and generate a report", OrchestrationIntent.peer_report, TOOL_RUN_PIPELINE),
     ],
 )
 def test_planner_intent_and_first_tool(goal: str, intent: OrchestrationIntent, head_tool: str) -> None:

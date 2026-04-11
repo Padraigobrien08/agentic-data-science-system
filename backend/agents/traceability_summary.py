@@ -13,6 +13,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from edgar_project.orchestration.planning_transparency import build_planning_transparency
 from edgar_project.orchestration.schemas import InterpretedGoal, OrchestrationOutput
 
 from backend.agents.llm_phase_status import PHASE_DEGRADED, PHASE_FAILED, PHASE_SUCCESS
@@ -89,11 +90,14 @@ def build_runtime_traceability_bundle(
     Prompt text is intentionally omitted; references are structural (roles, indices, tool names).
     """
     ig = interpreted_goal
+    pt = ig.plan_template
+    plan_part = f" / plan_template={pt.template_id.value}" if pt else ""
     intent_summary = (
-        f"Template {ig.code.value}"
+        f"Template {ig.code.value}{plan_part}"
         + (f" ({ig.intent.value})" if ig.intent else "")
         + f": {_trunc(ig.description, _MAX_INTENT_SUMMARY)}"
     )
+    planning_tx = build_planning_transparency(ig)
 
     tool_names = [str(s.get("tool_name", "")) for s in selected_tools if s.get("tool_name")]
     planning_summary = (
@@ -101,7 +105,7 @@ def build_runtime_traceability_bundle(
         f"{' → '.join(tool_names) if tool_names else '—'}"
     )
     rationale_planning = (
-        "Rule-based planner mapped analysis_goal + tickers to a fixed MCP tool sequence."
+        "Rule-based planner mapped analysis_goal + tickers to a named plan template and MCP sequence."
         if planning_source == "deterministic_rules"
         else "LLM planning agent emitted an allowlisted tool sequence validated before any execution."
     )
@@ -110,6 +114,14 @@ def build_runtime_traceability_bundle(
     c_phase = critic_patch.get("phase_status")
     critic_ran = c_phase in (PHASE_SUCCESS, PHASE_DEGRADED)
     critic_failed = c_phase == PHASE_FAILED
+    critic_po = critic_patch.get("phase_output")
+    plan_align: list[Any] = []
+    plan_align_codes: list[str] = []
+    if isinstance(critic_po, dict):
+        raw_pa = critic_po.get("plan_alignment_findings")
+        if isinstance(raw_pa, list):
+            plan_align = [x for x in raw_pa if isinstance(x, dict)][:12]
+            plan_align_codes = [str(x.get("code", "")) for x in plan_align if x.get("code")]
     critic_decision = (
         f"Critic reviewed structured orchestration summary and {len(critic_excerpt_roles)} "
         f"artifact excerpt role(s): {', '.join(critic_excerpt_roles[:8])}"
@@ -143,11 +155,13 @@ def build_runtime_traceability_bundle(
         "contract_version": TRACEABILITY_CONTRACT_VERSION,
         "intent": {
             "decision_summary": intent_summary,
+            "planning_transparency": planning_tx,
         },
         "planning": {
             "decision_summary": planning_summary,
             "selected_tools": list(selected_tools),
             "rationale_summary": rationale_planning,
+            "planning_transparency": planning_tx,
         },
         "execution": {
             "decision_summary": (
@@ -163,6 +177,8 @@ def build_runtime_traceability_bundle(
             "overall_confidence": conf,
             "ran": critic_ran,
             "excerpt_roles_used": list(critic_excerpt_roles),
+            "plan_alignment_findings": plan_align,
+            "plan_alignment_codes": plan_align_codes,
         },
         "report": {
             "phase_status": report_patch.get("phase_status"),
@@ -184,6 +200,7 @@ def build_runtime_traceability_bundle(
         "overall_confidence": conf,
         "excerpt_roles_used": critic_excerpt_roles[:12],
         "decision_summary": _trunc(critic_decision, 400),
+        "plan_alignment_codes": plan_align_codes[:12],
         "traceability_doc": "Full cross-phase record: meta_json.ai_agents.traceability",
     }
     report_step_meta = {

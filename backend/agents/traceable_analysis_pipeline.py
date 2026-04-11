@@ -22,7 +22,9 @@ from backend.agents.boundary_failures import (
     classify_llm_phase_exception,
 )
 from backend.agents.persist_mcp_trace import persist_orchestration_step_trace
+from backend.agents.plan_alignment_review import compute_plan_alignment_findings
 from backend.agents.phase_outputs import (
+    attach_plan_alignment_findings,
     build_critic_phase_output,
     build_intent_phase_output,
     build_planning_phase_output,
@@ -202,11 +204,21 @@ def run_traceable_edgar_pipeline(
     orchestration_summary["artifact_excerpt_roles_loaded"] = list(critic_excerpt_roles)
     orchestration_summary["artifact_paths_roles"] = sorted(orch_out.artifact_paths.keys())
 
+    plan_alignment_findings = compute_plan_alignment_findings(
+        ig,
+        analysis_goal=analysis_goal,
+        artifact_paths=dict(orch_out.artifact_paths or {}),
+    )
+    orchestration_summary["plan_alignment_findings"] = plan_alignment_findings
+
     if llm_provider is None:
-        co_skip = build_skipped_phase_output(
-            reason="llm_provider_unavailable",
-            boundary_failure_class=LLM_NOT_CONFIGURED,
-            phase_status=PHASE_SKIPPED,
+        co_skip = attach_plan_alignment_findings(
+            build_skipped_phase_output(
+                reason="llm_provider_unavailable",
+                boundary_failure_class=LLM_NOT_CONFIGURED,
+                phase_status=PHASE_SKIPPED,
+            ),
+            plan_alignment_findings,
         )
         critic_patch = {
             "phase_status": PHASE_SKIPPED,
@@ -245,11 +257,14 @@ def run_traceable_edgar_pipeline(
                 prompt_id=AGENT_PROMPT_IDS["critic"],
             )
             mid = str(link_mc.id) if link_mc is not None else None
-            po = build_skipped_phase_output(
-                reason="critic_error",
-                error=str(exc)[:512],
-                boundary_failure_class=bf,
-                phase_status=PHASE_FAILED,
+            po = attach_plan_alignment_findings(
+                build_skipped_phase_output(
+                    reason="critic_error",
+                    error=str(exc)[:512],
+                    boundary_failure_class=bf,
+                    phase_status=PHASE_FAILED,
+                ),
+                plan_alignment_findings,
             )
             rs_steps.merge_meta_json(
                 critic_row.id,
@@ -270,7 +285,7 @@ def run_traceable_edgar_pipeline(
             }
         else:
             rs_steps.transition_status(critic_row.id, RunStepStatus.success)
-            co = build_critic_phase_output(critic_out)
+            co = build_critic_phase_output(critic_out, plan_alignment_findings=plan_alignment_findings)
             degraded = critic_out.overall_confidence == "low"
             c_status = PHASE_DEGRADED if degraded else PHASE_SUCCESS
             rs_steps.merge_meta_json(

@@ -1,5 +1,4 @@
 import Link from "next/link";
-import type { ReactNode } from "react";
 
 import { FinalReportWithEvidence } from "@/components/runs/final-report-with-evidence";
 import { CriticFindingsCard } from "@/components/transparency/critic-findings-card";
@@ -9,6 +8,12 @@ import { PlanningOutputCard } from "@/components/transparency/planning-output-ca
 import { ReportEvidencePanel } from "@/components/transparency/report-evidence-panel";
 import { StepStatusTimeline } from "@/components/transparency/step-status-timeline";
 import { JsonPanel, MetaRow, Section, StatusBadge } from "@/components/ui/technical";
+import { InterpretedGoalPanel } from "@/components/trace/interpreted-goal-panel";
+import {
+  collectPlanAlignmentFindings,
+  PlanAlignmentCallout,
+} from "@/components/trace/plan-alignment-callout";
+import { PlanningTransparencyPanel } from "@/components/trace/planning-transparency-panel";
 import { RunGapOverview } from "@/components/trace/run-gap-overview";
 import { RunTraceJumpNav } from "@/components/trace/run-trace-jump-nav";
 import { indexModelCallsById, stringArrayFromUnknown } from "@/lib/agent-transparency";
@@ -69,34 +74,6 @@ function phaseOutput(meta: unknown): Record<string, unknown> | null {
   return isRecord(po) ? po : null;
 }
 
-function InterpretedGoalBody({ goal }: { goal: unknown }): ReactNode {
-  if (!goal || typeof goal !== "object" || Array.isArray(goal)) {
-    return <JsonPanel value={goal} />;
-  }
-  const g = goal as Record<string, unknown>;
-  const code = typeof g.code === "string" ? g.code : null;
-  const desc = typeof g.description === "string" ? g.description : null;
-  const userGoal = typeof g.user_goal_text === "string" ? g.user_goal_text : null;
-  const intent = typeof g.intent === "string" ? g.intent : null;
-  if (!code && !desc && !userGoal && !intent) return <JsonPanel value={goal} />;
-  return (
-    <div className="space-y-0 border-t border-[var(--border)]">
-      {code ? <MetaRow label="goal_code">{code}</MetaRow> : null}
-      {intent ? <MetaRow label="orchestration_intent">{intent}</MetaRow> : null}
-      {desc ? (
-        <MetaRow label="description">
-          <span className="whitespace-pre-wrap">{desc}</span>
-        </MetaRow>
-      ) : null}
-      {userGoal ? (
-        <MetaRow label="user_goal_text">
-          <span className="whitespace-pre-wrap">{userGoal}</span>
-        </MetaRow>
-      ) : null}
-    </div>
-  );
-}
-
 /**
  * Readable first-pass trace: goal → plan → timeline → LLM phases → tools → evidence → report.
  * Deep tables and raw JSON remain in sibling inspector panels.
@@ -149,6 +126,14 @@ export function RunTraceExperience({
     (intentPo.goal_code != null ||
       intentPo.description_excerpt ||
       intentPo.user_goal_excerpt);
+  const planningTransparency =
+    (intentPo && isRecord(intentPo.planning_transparency) && intentPo.planning_transparency) ||
+    tr?.intent?.planning_transparency ||
+    tr?.planning?.planning_transparency ||
+    null;
+
+  const { findings: planAlignmentFindings, codes: planAlignmentCodes } =
+    collectPlanAlignmentFindings(criticPo, tr?.critic);
 
   return (
     <div className="space-y-4">
@@ -237,50 +222,48 @@ export function RunTraceExperience({
       ) : null}
 
       <Section
-        id="run-goal"
-        title="Interpreted goal"
-        description="What the pipeline understood as the analysis intent (structured phase_output when available, else orchestration interpreted_goal)."
+        id="run-planning-quality"
+        title="Planning quality"
+        description="Interpreted goal, selected template, rule-derived rationale, preference snapshot, and deterministic plan–goal alignment (typed fields; no raw JSON in the main view)."
       >
-        {tr?.intent?.decision_summary ? (
-          <p className="mb-3 max-w-prose whitespace-pre-wrap border-b border-[var(--border)] pb-3 text-sm">
-            {tr.intent.decision_summary}
-          </p>
-        ) : null}
-        {hasStructuredIntent ? (
-          <div className="space-y-0 border-t border-[var(--border)]">
-            {typeof intentPo.source === "string" ? (
-              <MetaRow label="source">{intentPo.source}</MetaRow>
-            ) : null}
-            {typeof intentPo.goal_code === "string" ? (
-              <MetaRow label="goal_code">{intentPo.goal_code}</MetaRow>
-            ) : null}
-            {typeof intentPo.orchestration_intent === "string" ? (
-              <MetaRow label="orchestration_intent">{intentPo.orchestration_intent}</MetaRow>
-            ) : null}
-            {typeof intentPo.description_excerpt === "string" ? (
-              <MetaRow label="description_excerpt">
-                <span className="whitespace-pre-wrap">{intentPo.description_excerpt}</span>
-              </MetaRow>
-            ) : null}
-            {typeof intentPo.user_goal_excerpt === "string" ? (
-              <MetaRow label="user_goal_excerpt">
-                <span className="whitespace-pre-wrap">{intentPo.user_goal_excerpt}</span>
-              </MetaRow>
-            ) : null}
-            {typeof intentPo.confidence === "string" ? (
-              <MetaRow label="confidence">{intentPo.confidence}</MetaRow>
-            ) : null}
-          </div>
-        ) : intentGoal ? (
-          <InterpretedGoalBody goal={intentGoal} />
-        ) : (
-          <p className="text-sm text-[var(--muted)]">No interpreted goal recorded.</p>
-        )}
-        {ai?.intent?.model_call_id ? (
-          <p className="mt-2 font-mono text-[10px] text-[var(--muted)]">
-            intent model_call_id: {ai.intent.model_call_id}
-          </p>
-        ) : null}
+        <div id="run-goal" className="scroll-mt-20 space-y-3">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+            Interpreted goal
+          </h3>
+          {tr?.intent?.decision_summary ? (
+            <p className="max-w-prose whitespace-pre-wrap border-b border-[var(--border)] pb-3 text-sm">
+              {tr.intent.decision_summary}
+            </p>
+          ) : null}
+          {hasStructuredIntent || intentGoal ? (
+            <InterpretedGoalPanel
+              orchestrationGoal={intentGoal}
+              phaseIntent={hasStructuredIntent && intentPo ? intentPo : null}
+            />
+          ) : (
+            <p className="text-sm text-[var(--muted)]">No interpreted goal recorded.</p>
+          )}
+          {typeof intentPo?.confidence === "string" ? (
+            <MetaRow label="intent_confidence">{intentPo.confidence}</MetaRow>
+          ) : null}
+          {ai?.intent?.model_call_id ? (
+            <p className="font-mono text-[10px] text-[var(--muted)]">
+              intent model_call_id: {ai.intent.model_call_id}
+            </p>
+          ) : null}
+        </div>
+
+        <div id="run-plan-decision" className="scroll-mt-20 mt-6 space-y-4 border-t border-[var(--border)] pt-6">
+          <h3 className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+            Plan template, rationale & preferences
+          </h3>
+          <PlanAlignmentCallout
+            findings={planAlignmentFindings}
+            codes={planAlignmentCodes}
+            variant="prominent"
+          />
+          <PlanningTransparencyPanel transparency={planningTransparency} />
+        </div>
       </Section>
 
       <Section

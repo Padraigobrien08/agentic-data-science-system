@@ -25,6 +25,7 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_REPORT,
     ARTIFACT_KEY_TREND_BREAKS,
     ARTIFACT_KEY_UNIFIED_FINDINGS,
+    ARTIFACT_KEY_DETERIORATION_FOCUS,
 )
 
 from backend.agents.artifact_excerpts import read_text_excerpt
@@ -33,6 +34,7 @@ from backend.agents.artifact_excerpts import read_text_excerpt
 CRITIC_EXCERPT_PLAN: tuple[tuple[str, int], ...] = (
     (ARTIFACT_KEY_ANOMALIES, 14_000),
     (ARTIFACT_KEY_UNIFIED_FINDINGS, 12_000),
+    (ARTIFACT_KEY_DETERIORATION_FOCUS, 9_000),
     (ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY, 7_000),
     (ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC, 7_000),
     (ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD, 7_000),

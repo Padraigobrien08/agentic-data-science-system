@@ -99,6 +99,8 @@ def _placeholder_interpreted_goal(request_text: str) -> InterpretedGoal:
         code=InterpretedGoalCode.full_pipeline,
         description="Placeholder when goal not set on state.",
         user_goal_text=request_text,
+        goal_preferences=None,
+        plan_template=None,
     )
 
 

@@ -1,0 +1,5 @@
+stage,reason_code,count,cik,period,metric,tag,detail
+metric_extraction,duplicate_resolved,145,,,,,SEC companyfacts → long
+metric_extraction,invalid_form,161,,,,,SEC companyfacts → long
+metric_extraction,invalid_period,308,,,,,SEC companyfacts → long
+metric_extraction,year_out_of_range,558,,,,,SEC companyfacts → long

@@ -58,6 +58,19 @@ FINDINGS_SUMMARY_BY_PERIOD_COLUMNS: tuple[str, ...] = (
     "top_finding_category",
 )
 
+# Extends unified rows with deterministic deterioration routing metadata (CSV / planner consumers).
+DETERIORATION_FOCUS_EXTRA_COLUMNS: tuple[str, ...] = (
+    "deterioration_axis",
+    "deteriorating_period_count",
+    "stress_period_count",
+    "multi_period_stress",
+    "deterioration_kind",
+    "deterioration_priority_score",
+    "deterioration_priority_rank",
+    "one_off_anomaly_only",
+)
+DETERIORATION_FOCUS_COLUMNS: tuple[str, ...] = UNIFIED_FINDINGS_COLUMNS + DETERIORATION_FOCUS_EXTRA_COLUMNS
+
 _SOURCE_PRIORITY: dict[str, int] = {"anomaly": 0, "trend_break": 1}
 _TREND_KEEP_TYPES = frozenset({"moderate_shift", "strong_shift"})
 _HIGH_SEVERITY_THRESHOLD = 2.0
@@ -227,3 +240,125 @@ def build_findings_summary_by_period(unified_findings: pd.DataFrame) -> pd.DataF
         .reindex(columns=list(FINDINGS_SUMMARY_BY_PERIOD_COLUMNS))
     )
     return out.sort_values(["sum_score_adjusted", "finding_count", "period"], ascending=[False, False, True], kind="mergesort").reset_index(drop=True)
+
+
+def _metric_to_deterioration_axis(metric: str) -> str:
+    m = str(metric).lower()
+    if "margin" in m:
+        return "margins"
+    if "revenue" in m or "growth" in m or m.endswith("_qoq") or m.endswith("_yoy"):
+        return "revenue_growth"
+    if "cash" in m or "fcf" in m or "ocf" in m or "operating_cash" in m:
+        return "cash_flow"
+    if "debt" in m or "leverage" in m or "liabilities" in m:
+        return "leverage"
+    if "current_ratio" in m or "liquidity" in m:
+        return "liquidity"
+    return "other"
+
+
+def _row_in_deterioration_focus(r: pd.Series) -> bool:
+    """Keep stress-oriented rows; drop obvious strength / growth spikes."""
+    src = str(r.get("finding_source", ""))
+    d = str(r.get("direction", "")).lower()
+    if src == "anomaly" and d == "high":
+        return False
+    if src == "trend_break" and d == "improving":
+        return False
+    if d in ("deteriorating", "low"):
+        return True
+    if src == "trend_break":
+        return d in ("deteriorating", "mixed", "none", "")
+    if src == "anomaly":
+        return d not in ("high",)
+    return False
+
+
+def _deterioration_kind(r: pd.Series, *, deteriorating_period_count: int) -> str:
+    src = str(r.get("finding_source", ""))
+    d = str(r.get("direction", "")).lower()
+    if deteriorating_period_count >= 2 and d == "deteriorating":
+        return "repeated_deterioration"
+    if src == "trend_break":
+        return "trend_break_stress"
+    if src == "anomaly":
+        return "negative_point_anomaly"
+    return "other_stress"
+
+
+def build_deterioration_focus(unified_findings: pd.DataFrame) -> pd.DataFrame:
+    """
+    Deterioration-prioritized slice of :func:`build_unified_findings`.
+
+    - Reuses unified columns; adds axis, multi-period counts, kind, and a rank.
+    - Suppresses one-off positive anomalies (direction ``high``) and improving trends.
+    - Up-ranks repeated ``deteriorating`` directions and trend-break stress; down-ranks
+      isolated anomalies when there is no multi-period corroboration.
+    """
+    if unified_findings.empty:
+        return pd.DataFrame(columns=list(DETERIORATION_FOCUS_COLUMNS))
+
+    uf = unified_findings.reindex(columns=list(UNIFIED_FINDINGS_COLUMNS)).copy()
+    for c in ("cik", "period", "metric", "finding_source", "direction"):
+        if c not in uf.columns:
+            uf[c] = ""
+    uf["score_adjusted"] = pd.to_numeric(uf["score_adjusted"], errors="coerce").fillna(0.0)
+    uf["overlap_count"] = pd.to_numeric(uf["overlap_count"], errors="coerce").fillna(1).astype(int)
+
+    mask = uf.apply(_row_in_deterioration_focus, axis=1)
+    df = uf.loc[mask].copy()
+    if df.empty:
+        return pd.DataFrame(columns=list(DETERIORATION_FOCUS_COLUMNS))
+
+    _det = (
+        uf[uf["direction"].astype(str).str.lower() == "deteriorating"]
+        .groupby(["cik", "metric"], sort=False)["period"]
+        .nunique()
+        .reset_index(name="deteriorating_period_count")
+    )
+    df = df.merge(_det, on=["cik", "metric"], how="left")
+    df["deteriorating_period_count"] = df["deteriorating_period_count"].fillna(0).astype(int)
+
+    df["stress_period_count"] = df.groupby(["cik", "metric"], sort=False)["period"].transform("nunique")
+    df["stress_period_count"] = df["stress_period_count"].astype(int)
+
+    df["deterioration_axis"] = df["metric"].map(_metric_to_deterioration_axis)
+    df["multi_period_stress"] = (df["deteriorating_period_count"] >= 2) | (df["stress_period_count"] >= 2)
+
+    df["deterioration_kind"] = df.apply(
+        lambda r: _deterioration_kind(
+            r,
+            deteriorating_period_count=int(r["deteriorating_period_count"]),
+        ),
+        axis=1,
+    )
+    df["one_off_anomaly_only"] = (
+        (df["finding_source"].astype(str) == "anomaly")
+        & (df["stress_period_count"] <= 1)
+        & (df["deteriorating_period_count"] <= 1)
+    )
+
+    adj = df["score_adjusted"].astype(float)
+    occ = df["overlap_count"].clip(lower=1)
+    bonus_det = (df["deteriorating_period_count"].clip(lower=0) - 1).clip(lower=0).astype(float)
+    bonus_stress = (df["stress_period_count"].clip(lower=0) - 1).clip(lower=0).astype(float)
+    tb_bonus = (df["finding_source"].astype(str) == "trend_break").astype(float) * 0.25
+    overlap_bonus = (occ - 1).clip(lower=0, upper=2).astype(float) * 0.12
+    one_off_penalty = df["one_off_anomaly_only"].astype(float) * 0.4
+
+    df["deterioration_priority_score"] = (
+        adj
+        + 0.45 * bonus_det.clip(upper=4)
+        + 0.22 * bonus_stress.clip(upper=4)
+        + tb_bonus
+        + overlap_bonus
+        - one_off_penalty
+    )
+
+    df = df.sort_values(
+        ["multi_period_stress", "deterioration_priority_score", "score_adjusted", "cik", "period", "metric"],
+        ascending=[False, False, False, True, True, True],
+        kind="mergesort",
+    ).reset_index(drop=True)
+    df["deterioration_priority_rank"] = range(1, len(df) + 1)
+    return df.reindex(columns=list(DETERIORATION_FOCUS_COLUMNS))

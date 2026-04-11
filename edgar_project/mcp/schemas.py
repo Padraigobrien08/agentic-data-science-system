@@ -60,7 +60,7 @@ class ToolResponseEnvelope(BaseModel):
     After ``run_pipeline`` / ``generate_report`` (default paths), optional paths may appear:
     ``data_quality_summary_path``, ``exclusions_summary_path``, ``peer_signals_path``,
     ``manual_validation_path``, trend/unified findings paths, findings summary paths,
-    metric coverage paths, caveat CSV paths (see artifact keys), ``combined_findings_count``,
+    metric coverage paths, caveat CSV paths (see artifact keys),     ``combined_findings_count``, ``deterioration_focus_path`` when Phase 1 wrote it,
     and ``trustworthiness_artifact_paths`` (non-empty role → path map).
     """
 
@@ -189,6 +189,7 @@ ARTIFACT_KEY_EXCLUSIONS = "exclusions_csv"
 ARTIFACT_KEY_PEER_SIGNALS = "peer_signals_csv"
 ARTIFACT_KEY_TREND_BREAKS = "trend_break_signals_csv"
 ARTIFACT_KEY_UNIFIED_FINDINGS = "unified_findings_csv"
+ARTIFACT_KEY_DETERIORATION_FOCUS = "deterioration_focus_csv"
 ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY = "findings_summary_by_company_csv"
 ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC = "findings_summary_by_metric_csv"
 ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD = "findings_summary_by_period_csv"

@@ -2,6 +2,7 @@
 const LINKS: { href: string; label: string }[] = [
   { href: "#run-overview", label: "Overview" },
   { href: "#run-goal", label: "Goal" },
+  { href: "#run-plan-decision", label: "Plan" },
   { href: "#run-pipeline", label: "Pipeline" },
   { href: "#run-critic", label: "Critic & report" },
   { href: "#run-conclusions", label: "Conclusions" },

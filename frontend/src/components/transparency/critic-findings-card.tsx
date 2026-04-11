@@ -5,6 +5,7 @@ import { PhaseStatusChip } from "@/components/transparency/phase-status-chip";
 import { stringArrayFromUnknown } from "@/lib/agent-transparency";
 import { ModelCallInlineSummary } from "@/components/transparency/model-call-summary-card";
 import type { ModelCallApiItem } from "@/lib/api/types";
+import { collectPlanAlignmentFindings } from "@/components/trace/plan-alignment-callout";
 
 type Props = {
   lps: LlmPhasesSummaryWire | undefined;
@@ -47,6 +48,11 @@ export function CriticFindingsCard({
       : null;
   const weak = stringArrayFromUnknown(phaseOutput?.weak_evidence_signals, 12);
 
+  const { findings: planAlign } = collectPlanAlignmentFindings(
+    phaseOutput,
+    trace,
+  );
+
   const hasAny =
     status ||
     trace?.decision_summary ||
@@ -55,7 +61,8 @@ export function CriticFindingsCard({
     caveats ||
     trust ||
     summary?.error_excerpt ||
-    criticModelCall;
+    criticModelCall ||
+    planAlign.length > 0;
 
   if (!hasAny) {
     return (
@@ -91,6 +98,16 @@ export function CriticFindingsCard({
       {conf ? (
         <p className="font-mono text-xs">
           <span className="text-[var(--muted)]">overall_confidence</span> {conf}
+        </p>
+      ) : null}
+
+      {planAlign.length > 0 ? (
+        <p className="rounded border border-[var(--border)] bg-[var(--background)]/40 px-2 py-1.5 text-xs text-[var(--muted)]">
+          Deterministic plan–goal alignment notes are shown under{" "}
+          <a href="#run-plan-decision" className="font-mono text-[var(--foreground)] underline">
+            Planning quality → Plan template…
+          </a>
+          .
         </p>
       ) : null}
 

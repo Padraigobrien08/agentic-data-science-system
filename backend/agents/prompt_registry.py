@@ -16,6 +16,7 @@ from backend.agents.prompt_loader import AgentPromptTemplate, load_agent_prompt
 # Stable IDs for audit / analytics (do not rename once shipped; add new IDs for new agents).
 AGENT_PROMPT_IDS: dict[str, str] = {
     "intent": "edgar.agent.intent",
+    "intent_preferences_assistant": "edgar.agent.intent_preferences_assistant",
     "planning": "edgar.agent.planning",
     "critic": "edgar.agent.critic",
     "report": "edgar.agent.report",

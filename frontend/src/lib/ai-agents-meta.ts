@@ -24,14 +24,56 @@ export type AgentPhaseMeta = {
   [key: string]: unknown;
 };
 
+/** Typed deterministic plan–goal alignment (critic phase; matches ``compute_plan_alignment_findings``). */
+export type PlanAlignmentFindingWire = {
+  code?: string;
+  severity?: string;
+  detail?: string;
+};
+
+/** Rule-derived planning transparency (matches backend ``build_planning_transparency``). */
+export type PlanningTransparencyWire = {
+  contract_version?: string;
+  present?: boolean;
+  planning_rationale_summary?: string;
+  plan_template_id?: string | null;
+  goal_code?: string;
+  /** Coarse intent from ``intent.py`` (before template-specific ``goal_code``). */
+  orchestration_intent?: string | null;
+  intent_rules_matched?: string[];
+  selected_signal_preferences?: {
+    primary_analysis_mode?: string;
+    preferred_signal_style?: string;
+    directional_focus?: string;
+    time_focus?: string;
+    peer_requirement?: string;
+    priority_metrics?: string[];
+    preference_rules_matched?: string[];
+  } | null;
+  priority_metrics?: string[];
+  directional_focus?: string | null;
+  preferred_signal_style?: string | null;
+  peer_requirement?: string | null;
+  time_focus?: string | null;
+  primary_analysis_mode?: string | null;
+  what_we_understood?: string;
+  user_goal_echo_excerpt?: string;
+  emphasized?: string[];
+  deemphasized?: string[];
+};
+
 /** ``meta_json.ai_agents.traceability`` — cross-phase summaries (no prompts). */
 export type TraceabilityWire = {
   contract_version?: string;
-  intent?: { decision_summary?: string };
+  intent?: {
+    decision_summary?: string;
+    planning_transparency?: PlanningTransparencyWire;
+  };
   planning?: {
     decision_summary?: string;
     selected_tools?: Array<Record<string, unknown>>;
     rationale_summary?: string;
+    planning_transparency?: PlanningTransparencyWire;
   };
   execution?: {
     decision_summary?: string;
@@ -44,6 +86,8 @@ export type TraceabilityWire = {
     overall_confidence?: string | null;
     ran?: boolean;
     excerpt_roles_used?: string[];
+    plan_alignment_findings?: PlanAlignmentFindingWire[];
+    plan_alignment_codes?: string[];
   };
   report?: {
     phase_status?: string;

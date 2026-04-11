@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from edgar_project.orchestration.planning_transparency import build_planning_transparency
 from edgar_project.orchestration.schemas import (
     InterpretedGoal,
     OrchestrationPlan,
@@ -22,6 +23,7 @@ from backend.agents.output_schemas import CriticAgentLLMOutput, ReportAgentLLMOu
 PHASE_OUTPUT_CONTRACT_VERSION = "1"
 
 _MAX_ISSUES = 20
+_MAX_PLAN_ALIGNMENT = 12
 _MAX_TAKEAWAYS = 15
 _MAX_ARTIFACT_REFS = 30
 _DEFAULT_PROSE_EXCERPT = 360
@@ -62,8 +64,9 @@ def build_intent_phase_output(
             "entities": entities,
             "confidence": confidence,
             "caveats": list(caveats or []),
+            "planning_transparency": build_planning_transparency(None),
         }
-    return {
+    row: dict[str, Any] = {
         "contract_version": PHASE_OUTPUT_CONTRACT_VERSION,
         "source": source,
         "goal_code": interpreted_goal.code.value,
@@ -75,6 +78,12 @@ def build_intent_phase_output(
         "confidence": confidence,
         "caveats": list(caveats or []),
     }
+    if interpreted_goal.goal_preferences is not None:
+        row["goal_preferences"] = interpreted_goal.goal_preferences.model_dump(mode="json")
+    if interpreted_goal.plan_template is not None:
+        row["plan_template"] = interpreted_goal.plan_template.model_dump(mode="json")
+    row["planning_transparency"] = build_planning_transparency(interpreted_goal)
+    return row
 
 
 def build_planning_phase_output(
@@ -104,7 +113,9 @@ def build_planning_phase_output(
             "goal_code": interpreted_goal.code.value,
             "orchestration_intent": interpreted_goal.intent.value if interpreted_goal.intent else None,
         }
-    return {
+        if interpreted_goal.plan_template is not None:
+            chosen["plan_template_id"] = interpreted_goal.plan_template.template_id.value
+    out: dict[str, Any] = {
         "contract_version": PHASE_OUTPUT_CONTRACT_VERSION,
         "source": source,
         "chosen_path": chosen,
@@ -112,6 +123,10 @@ def build_planning_phase_output(
         "step_count": len(ordered),
         "rationale": "rule_based_planner_v1" if source == "deterministic_rules" else "llm_planning_agent",
     }
+    if interpreted_goal is not None and interpreted_goal.plan_template is not None:
+        out["plan_template"] = interpreted_goal.plan_template.model_dump(mode="json")
+    out["planning_transparency"] = build_planning_transparency(interpreted_goal)
+    return out
 
 
 def build_planning_phase_output_from_step_statuses(
@@ -136,7 +151,9 @@ def build_planning_phase_output_from_step_statuses(
             "goal_code": interpreted_goal.code.value,
             "orchestration_intent": interpreted_goal.intent.value if interpreted_goal.intent else None,
         }
-    return {
+        if interpreted_goal.plan_template is not None:
+            chosen["plan_template_id"] = interpreted_goal.plan_template.template_id.value
+    out: dict[str, Any] = {
         "contract_version": PHASE_OUTPUT_CONTRACT_VERSION,
         "source": source,
         "chosen_path": chosen,
@@ -144,15 +161,30 @@ def build_planning_phase_output_from_step_statuses(
         "step_count": len(ordered),
         "rationale": "inferred_from_step_statuses",
     }
+    if interpreted_goal is not None and interpreted_goal.plan_template is not None:
+        out["plan_template"] = interpreted_goal.plan_template.model_dump(mode="json")
+    out["planning_transparency"] = build_planning_transparency(interpreted_goal)
+    return out
 
 
-def build_critic_phase_output(critic: CriticAgentLLMOutput, *, prose_max: int = _DEFAULT_PROSE_EXCERPT) -> dict[str, Any]:
+def build_critic_phase_output(
+    critic: CriticAgentLLMOutput,
+    *,
+    prose_max: int = _DEFAULT_PROSE_EXCERPT,
+    plan_alignment_findings: list[dict[str, Any]] | None = None,
+) -> dict[str, Any]:
     """Major concerns, excerpts, coarse signals (full JSON still in ai_agents.result when present)."""
     weak: list[str] = []
     if critic.overall_confidence == "low":
         weak.append("low_overall_confidence")
     if len(critic.issues) > 0:
         weak.append("flagged_issues")
+    pa = list(plan_alignment_findings or [])[:_MAX_PLAN_ALIGNMENT]
+    codes = [str(x.get("code", "")) for x in pa if x.get("code")]
+    if any(str(x.get("severity")) == "high" for x in pa):
+        weak.append("plan_alignment_high_severity")
+    elif pa:
+        weak.append("plan_alignment_flags")
     return {
         "contract_version": PHASE_OUTPUT_CONTRACT_VERSION,
         "overall_confidence": critic.overall_confidence,
@@ -162,6 +194,8 @@ def build_critic_phase_output(critic: CriticAgentLLMOutput, *, prose_max: int = 
         "caveat_coverage_excerpt": _trunc(critic.caveat_coverage, prose_max),
         "trustworthiness_notes_excerpt": _trunc(critic.trustworthiness_notes, prose_max),
         "weak_evidence_signals": weak,
+        "plan_alignment_findings": pa,
+        "plan_alignment_codes": codes,
     }
 
 
@@ -186,6 +220,27 @@ def build_report_phase_output(
         "markdown_char_count": len(report.user_report_markdown or ""),
         "artifact_refs": refs,
     }
+
+
+def attach_plan_alignment_findings(
+    phase_output: dict[str, Any],
+    plan_alignment_findings: list[dict[str, Any]] | None,
+) -> dict[str, Any]:
+    """Merge deterministic plan-alignment rows into critic (or skipped-critic) phase_output."""
+    pa = list(plan_alignment_findings or [])[:_MAX_PLAN_ALIGNMENT]
+    codes = [str(x.get("code", "")) for x in pa if x.get("code")]
+    out = dict(phase_output)
+    out["plan_alignment_findings"] = pa
+    out["plan_alignment_codes"] = codes
+    w = list(out.get("weak_evidence_signals") or [])
+    if any(str(x.get("severity")) == "high" for x in pa):
+        if "plan_alignment_high_severity" not in w:
+            w.append("plan_alignment_high_severity")
+    elif pa and "plan_alignment_flags" not in w:
+        w.append("plan_alignment_flags")
+    if w:
+        out["weak_evidence_signals"] = w
+    return out
 
 
 def build_skipped_phase_output(

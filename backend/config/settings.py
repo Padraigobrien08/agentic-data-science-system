@@ -124,6 +124,17 @@ class Settings(BaseSettings):
         default="1.0.0",
         description="Prompt file version directory under ``backend/agents/prompts/intent/``",
     )
+    orchestration_llm_intent_assistance: bool = Field(
+        default=False,
+        description=(
+            "When true and an LLM provider is available, merge validated preference JSON over "
+            "rule-based :class:`GoalPreferences` before deterministic template selection (no tool plans)."
+        ),
+    )
+    agent_intent_preferences_prompt_version: str = Field(
+        default="1.0.0",
+        description="Prompt file under ``backend/agents/prompts/intent_preferences_assistant/``",
+    )
     agent_planning_prompt_version: str = Field(
         default="1.0.0",
         description="Prompt file version directory under ``backend/agents/prompts/planning/``",

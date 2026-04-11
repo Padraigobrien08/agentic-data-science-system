@@ -15,8 +15,15 @@ from edgar_project.orchestration.planner import (
 from edgar_project.orchestration.schemas import (
     CODE_ORCH_UNSUPPORTED_GOAL,
     CODE_ORCH_VALIDATION,
+    DirectionalFocus,
+    InterpretedGoalCode,
+    MetricPriority,
     OrchestrationIntent,
     OrchestrationInput,
+    PlanTemplateId,
+    PreferredSignalStyle,
+    PrimaryAnalysisMode,
+    TimeFocus,
 )
 
 
@@ -46,9 +53,15 @@ def test_granular_path_keyword_anomaly() -> None:
     assert out.interpreted_goal is not None
     assert out.interpreted_goal.intent == OrchestrationIntent.anomaly_analysis
     assert out.interpreted_goal.intent_rules_matched
+    assert out.interpreted_goal.goal_preferences is not None
+    assert out.interpreted_goal.goal_preferences.primary_analysis_mode == PrimaryAnalysisMode.anomaly
+    assert out.interpreted_goal.code == InterpretedGoalCode.anomaly_unusual_changes
+    assert out.interpreted_goal.plan_template is not None
+    assert out.interpreted_goal.plan_template.template_id == PlanTemplateId.anomaly_unusual_changes
+    assert out.interpreted_goal.plan_template.mcp_execution_profile == "granular"
 
 
-def test_granular_path_two_tickers_order_and_labels() -> None:
+def test_peer_report_uses_run_pipeline_single_step() -> None:
     p = Planner()
     out = p.build_plan(
         OrchestrationInput(
@@ -58,12 +71,13 @@ def test_granular_path_two_tickers_order_and_labels() -> None:
         )
     )
     assert out.ok and out.plan
-    assert len(out.plan.steps) == 2 + 2 + 4  # resolve×2 fetch×2 + 4 tail
-    labels = [s.label for s in out.plan.steps]
-    assert "resolve_company:AAPL" in labels
-    assert "fetch_company_data:MSFT" in labels
+    assert len(out.plan.steps) == 1
+    assert out.plan.steps[0].tool_name == TOOL_RUN_PIPELINE
     assert out.interpreted_goal is not None
     assert out.interpreted_goal.intent == OrchestrationIntent.peer_report
+    assert out.interpreted_goal.code == InterpretedGoalCode.peer_comparison
+    assert out.interpreted_goal.plan_template is not None
+    assert out.interpreted_goal.plan_template.template_id == PlanTemplateId.peer_comparison
 
 
 def test_full_pipeline_intent_run_pipeline_single_step() -> None:
@@ -109,6 +123,9 @@ def test_compare_companies_report_peer_intent() -> None:
     assert out.ok
     assert out.interpreted_goal is not None
     assert out.interpreted_goal.intent == OrchestrationIntent.peer_report
+    assert out.interpreted_goal.code == InterpretedGoalCode.peer_comparison
+    assert out.interpreted_goal.plan_template is not None
+    assert out.interpreted_goal.plan_template.peer_analysis_mandatory is True
 
 
 def test_too_many_tickers_validation() -> None:
@@ -132,4 +149,36 @@ def test_planning_outcome_json_round_trip() -> None:
     assert out.ok
     d = out.model_dump(mode="json")
     assert d["ok"] is True
-    assert len(d["plan"]["steps"]) == 6
+    assert len(d["plan"]["steps"]) == 1
+    assert d["plan"]["steps"][0]["tool_name"] == TOOL_RUN_PIPELINE
+
+
+EXAMPLE_DETERIORATION_GOAL = (
+    "Detect any signs of financial deterioration in the selected companies over recent quarters. "
+    "Focus on declining margins, slowing revenue growth, and weakening cash flow. "
+    "Prioritize persistent negative trends rather than one-off anomalies."
+)
+
+
+def test_deterioration_example_prefers_run_pipeline_and_preferences() -> None:
+    p = Planner()
+    out = p.build_plan(
+        OrchestrationInput(tickers=["AAPL", "MSFT", "NVDA"], analysis_goal=EXAMPLE_DETERIORATION_GOAL, refresh=False)
+    )
+    assert out.ok and out.plan
+    assert len(out.plan.steps) == 1
+    assert out.plan.steps[0].tool_name == TOOL_RUN_PIPELINE
+    assert out.interpreted_goal is not None
+    assert out.interpreted_goal.code == InterpretedGoalCode.trend_deterioration
+    assert out.interpreted_goal.plan_template is not None
+    assert out.interpreted_goal.plan_template.template_id == PlanTemplateId.trend_deterioration
+    assert out.interpreted_goal.plan_template.persistence_filtering_required is True
+    gp = out.interpreted_goal.goal_preferences
+    assert gp is not None
+    assert gp.primary_analysis_mode != PrimaryAnalysisMode.anomaly
+    assert gp.preferred_signal_style == PreferredSignalStyle.persistent
+    assert gp.directional_focus == DirectionalFocus.negative
+    assert MetricPriority.margins in gp.priority_metrics
+    assert MetricPriority.revenue_growth in gp.priority_metrics
+    assert MetricPriority.cash_flow in gp.priority_metrics
+    assert gp.time_focus == TimeFocus.recent_quarters
