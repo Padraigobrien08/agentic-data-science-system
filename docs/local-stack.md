@@ -4,8 +4,13 @@ Concise runbook for **Docker Compose** (recommended) and **manual** processes. S
 
 ## Database defaults (Compose vs manual)
 
-- **Compose** always sets `EDGAR_BACKEND_DATABASE_URL` to **Postgres** (`db` service). SQLite is not used in the default stack.
-- **Manual / `settings.py`** default when `EDGAR_BACKEND_DATABASE_URL` is unset is **SQLite** at `data/backend.db`. Do not mix “API on SQLite” with “worker on Postgres” for the same logical environment.
+**Recommended / documented default:** **Postgres**, as in `docker-compose.yml` (`EDGAR_BACKEND_DATABASE_URL` points at the `db` service). Use this for the full stack, CI-style compose smoke, and anything you treat as a “real” environment.
+
+**Convenience default (no Docker):** If `EDGAR_BACKEND_DATABASE_URL` is **unset**, `backend/config/settings.py` falls back to a **SQLite file** at `data/backend.db`. That keeps local `pytest` and quick `uvicorn` runs working without Postgres. On startup the API and worker log a **`database_backend_sqlite`** warning so it is obvious you are not on the Compose default.
+
+**Strict production:** Set **`EDGAR_BACKEND_ALLOW_SQLITE=false`** so a SQLite URL is rejected; use a Postgres URL only.
+
+**Do not** mix “API on SQLite” with “worker on Postgres” for the same logical environment — both processes must use the same `EDGAR_BACKEND_DATABASE_URL`.
 
 ## Prerequisites
 

@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import logging
 
-from backend.config.settings import get_settings
+from backend.config.settings import get_settings, log_database_posture_once
 from backend.db.session import SessionLocal
 from backend.observability import install_edgar_telemetry_hooks, setup_observability_logging
 from backend.observability.tracing import setup_tracing
@@ -15,6 +15,7 @@ def main() -> None:
     settings = get_settings()
     level = getattr(logging, settings.log_level.upper(), logging.INFO)
     setup_observability_logging(level=level, json_logs=settings.observability_json_logs)
+    log_database_posture_once(settings)
     setup_tracing(service_name=settings.otel_service_name)
     install_edgar_telemetry_hooks()
     if settings.worker_metrics_port > 0:

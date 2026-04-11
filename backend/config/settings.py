@@ -7,8 +7,11 @@ from pathlib import Path
 
 from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+from sqlalchemy.engine.url import make_url
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
+
+_DB_POSTURE_LOGGED = False
 
 
 class Settings(BaseSettings):
@@ -40,10 +43,21 @@ class Settings(BaseSettings):
         description="When false, POST /v1/auth/register returns 403.",
     )
 
-    # Default: SQLite file under repo data/ (created by migration/runtime, not necessarily by config.py)
+    # Default file SQLite is for quick local API/tests without Docker. The documented stack uses Postgres
+    # (see docker-compose.yml and docs/local-stack.md). Set EDGAR_BACKEND_ALLOW_SQLITE=false in production.
     database_url: str = Field(
         default=f"sqlite:///{_REPO_ROOT / 'data' / 'backend.db'}",
-        description="SQLAlchemy URL (e.g. postgresql+psycopg2://user:pass@host/dbname)",
+        description=(
+            "SQLAlchemy URL. Recommended for real deployments: Postgres "
+            "(same as Docker Compose). Default here is a local SQLite file when unset."
+        ),
+    )
+    allow_sqlite: bool = Field(
+        default=True,
+        description=(
+            "When false, SQLite URLs are rejected (use Postgres). "
+            "Set EDGAR_BACKEND_ALLOW_SQLITE=false alongside a Postgres URL in production."
+        ),
     )
 
     # Root directory for ``local:`` artifact blobs (see ``backend.storage``)
@@ -138,11 +152,19 @@ class Settings(BaseSettings):
     )
 
     @model_validator(mode="after")
-    def _jwt_secret_length_in_prod(self) -> Settings:
+    def _production_sanity(self) -> Settings:
         if not self.debug and len(self.jwt_secret.get_secret_value()) < 32:
             raise ValueError(
                 "EDGAR_BACKEND_JWT_SECRET must be at least 32 characters when EDGAR_BACKEND_DEBUG is false.",
             )
+        if not self.allow_sqlite:
+            driver = make_url(self.database_url).drivername
+            if driver == "sqlite":
+                raise ValueError(
+                    "EDGAR_BACKEND_ALLOW_SQLITE is false but EDGAR_BACKEND_DATABASE_URL is SQLite. "
+                    "Use Postgres, e.g. postgresql+psycopg2://user:pass@host:5432/dbname "
+                    "(Docker Compose sets this automatically)."
+                )
         return self
 
     @field_validator("database_url", mode="before")
@@ -159,3 +181,40 @@ class Settings(BaseSettings):
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+def log_database_posture_once(settings: Settings | None = None) -> None:
+    """
+    Log which database backend is active (once per process).
+
+    SQLite triggers a clear WARNING so it is not mistaken for the Compose/Postgres default.
+    """
+    global _DB_POSTURE_LOGGED
+    if _DB_POSTURE_LOGGED:
+        return
+    _DB_POSTURE_LOGGED = True
+
+    import structlog
+
+    s = settings if settings is not None else get_settings()
+    log = structlog.get_logger("backend.database")
+    url = make_url(s.database_url)
+    if url.drivername == "sqlite":
+        db_name = Path(url.database).name if url.database else "(memory)"
+        log.warning(
+            "database_backend_sqlite",
+            database_backend="sqlite",
+            sqlite_file=db_name,
+            hint=(
+                "SQLite is a convenience default for local dev without Docker. "
+                "The documented full stack uses Postgres (docker-compose.yml → EDGAR_BACKEND_DATABASE_URL). "
+                "Do not mix API on SQLite with worker on Postgres."
+            ),
+        )
+    else:
+        log.info(
+            "database_backend",
+            database_backend=url.drivername.split("+", 1)[0],
+            host=url.host,
+            database=url.database,
+        )

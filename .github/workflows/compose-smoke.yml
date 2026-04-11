@@ -1,0 +1,41 @@
+# Optional Docker Compose smoke: not triggered by PRs; does not gate merge.
+# Starts only db → migrate → api (skips web/worker) for a fast build and /v1/health check.
+
+name: Compose smoke (optional)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  compose-smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+
+      # Only the API dependency chain — avoids Next.js image build and worker.
+      - name: Build images and start db + migrate + api
+        run: docker compose up -d --build api
+
+      - name: Wait for API health
+        run: |
+          set -euo pipefail
+          for _ in $(seq 1 40); do
+            if curl -sfS --max-time 5 "http://127.0.0.1:8000/v1/health" >/dev/null; then
+              echo "OK: GET /v1/health"
+              curl -sfS "http://127.0.0.1:8000/v1/health"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo "Timeout waiting for /v1/health"
+          docker compose ps || true
+          docker compose logs api --tail 80 || true
+          exit 1
+
+      - name: Tear down
+        if: always()
+        run: docker compose down -v

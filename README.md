@@ -42,7 +42,7 @@ PYTHONPATH=. python3 -m edgar_project.cli demo
 
 ## Developer documentation
 
-- **Local full stack** (Compose + manual run, migrations, env, artifacts, smoke checks): [`docs/local-stack.md`](docs/local-stack.md) — after `docker compose up -d`, run `./scripts/smoke-compose.sh` or `./scripts/stack smoke`.
+- **Local full stack** (Compose + manual run, migrations, env, artifacts, smoke checks): [`docs/local-stack.md`](docs/local-stack.md) — after `docker compose up -d`, run `./scripts/smoke-compose.sh` or `./scripts/stack smoke`. **Database:** Postgres is the documented default (Compose). Without Docker, the backend defaults to SQLite under `data/backend.db` and logs `database_backend_sqlite` at startup; see `docs/local-stack.md` and `EDGAR_BACKEND_ALLOW_SQLITE` in `.env.example`.
 - **Artifact HTTP API** (metadata, streaming content, text preview): [`docs/artifact-delivery.md`](docs/artifact-delivery.md)
 - **Auth** (register, login, JWT bearer, ownership rules): [`docs/auth-api.md`](docs/auth-api.md)
 
