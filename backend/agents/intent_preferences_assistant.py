@@ -21,6 +21,7 @@ from backend.agents.llm_context import build_intent_preferences_assistant_contex
 from backend.agents.output_schemas import LLMGoalPreferencesPatch
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.ai_agents_meta import merge_ai_agents_meta
+from backend.agents.model_routing import resolve_agent_completion_model
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest
@@ -91,8 +92,9 @@ def maybe_apply_llm_intent_preferences(
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
         ]
+        model_id, routing_src = resolve_agent_completion_model(s, "intent_preferences")
         req = ChatCompletionRequest(
-            model=s.agent_completion_model,
+            model=model_id,
             messages=messages,
             temperature=0.1,
             max_tokens=512,
@@ -100,6 +102,8 @@ def maybe_apply_llm_intent_preferences(
         )
         meta = {
             "role": "intent_preferences_assistant",
+            "phase": "intent_preferences",
+            "completion_model_routing_source": routing_src,
             "prompt_id": reg.prompt_id,
             "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,

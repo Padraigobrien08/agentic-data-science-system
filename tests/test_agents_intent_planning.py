@@ -76,26 +76,26 @@ def session_with_run() -> tuple[Session, Settings, AnalysisRunRow]:
     session.flush()
     settings = Settings(
         agent_completion_model="stub-model",
-        agent_intent_prompt_version="1.0.0",
-        agent_planning_prompt_version="1.0.0",
+        agent_intent_prompt_version="1.1.0",
+        agent_planning_prompt_version="1.1.0",
     )
     return session, settings, arun
 
 
 def test_load_versioned_prompts() -> None:
-    assert "1.0.0" in list_prompt_versions("intent")
-    t = load_agent_prompt("intent", "1.0.0")
+    assert "1.1.0" in list_prompt_versions("intent")
+    t = load_agent_prompt("intent", "1.1.0")
     assert t.template_id == "intent"
-    assert t.version == "1.0.0"
+    assert t.version == "1.1.0"
     rendered = render_check_intent(t.system_body)
     assert "{{ALLOWED_GOAL_CODES}}" not in rendered
     assert "full_pipeline" in rendered
 
 
 def test_prompt_registry_stable_ids() -> None:
-    reg = load_registered_prompt("intent", "1.0.0")
+    reg = load_registered_prompt("intent", "1.1.0")
     assert reg.prompt_id == AGENT_PROMPT_IDS["intent"] == "edgar.agent.intent"
-    assert reg.prompt_version == "1.0.0"
+    assert reg.prompt_version == "1.1.0"
     assert reg.template.system_body
 
 
@@ -129,11 +129,11 @@ def test_run_intent_planning_persists_calls_and_meta(session_with_run: tuple[Ses
     assert roles == {"intent", "planning"}
     by_role = {m.request_payload_json["agent"]["role"]: m for m in mcs}
     assert by_role["intent"].prompt_id == "edgar.agent.intent"
-    assert by_role["intent"].prompt_version == "1.0.0"
+    assert by_role["intent"].prompt_version == "1.1.0"
     assert by_role["intent"].provider == "stub"
     assert by_role["intent"].model_name == "stub-model"
     assert by_role["planning"].prompt_id == "edgar.agent.planning"
-    assert by_role["planning"].prompt_version == "1.0.0"
+    assert by_role["planning"].prompt_version == "1.1.0"
     assert by_role["planning"].request_payload_json["agent"]["prompt_id"] == "edgar.agent.planning"
 
     session.refresh(arun)

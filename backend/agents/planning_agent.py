@@ -11,6 +11,7 @@ from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.llm_context import build_planning_llm_context
+from backend.agents.model_routing import resolve_agent_completion_model
 from backend.agents.llm_plan_handoff import validate_llm_planned_steps_for_handoff
 from backend.agents.json_extract import parse_json_object
 from backend.agents.output_schemas import PlanningAgentLLMOutput
@@ -54,8 +55,9 @@ class PlanningAgent:
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
         ]
+        model_id, routing_src = resolve_agent_completion_model(self._settings, "planning")
         req = ChatCompletionRequest(
-            model=self._settings.agent_completion_model,
+            model=model_id,
             messages=messages,
             temperature=0.2,
             max_tokens=4096,
@@ -63,6 +65,8 @@ class PlanningAgent:
         )
         meta = {
             "role": "planning",
+            "phase": "planning",
+            "completion_model_routing_source": routing_src,
             "prompt_id": reg.prompt_id,
             "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,

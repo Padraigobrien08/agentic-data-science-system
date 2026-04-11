@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
 from backend.agents.llm_context import build_intent_llm_context
+from backend.agents.model_routing import resolve_agent_completion_model
 from backend.agents.output_schemas import IntentAgentLLMOutput
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.template_render import render_intent_prompt
@@ -51,8 +52,9 @@ class IntentAgent:
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
         ]
+        model_id, routing_src = resolve_agent_completion_model(self._settings, "intent")
         req = ChatCompletionRequest(
-            model=self._settings.agent_completion_model,
+            model=model_id,
             messages=messages,
             temperature=0.2,
             max_tokens=1024,
@@ -60,6 +62,8 @@ class IntentAgent:
         )
         meta = {
             "role": "intent",
+            "phase": "intent",
+            "completion_model_routing_source": routing_src,
             "prompt_id": reg.prompt_id,
             "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,

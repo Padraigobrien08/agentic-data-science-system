@@ -15,7 +15,8 @@ from uuid import UUID
 from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 from sqlalchemy.orm import Session
 
-from backend.agents.ai_agents_meta import merge_ai_agents_meta
+from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
+from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.agents.intent_agent import IntentAgent
 from backend.agents.phase_outputs import build_intent_phase_output, build_planning_phase_output
 from backend.agents.planning_agent import PlanningAgent
@@ -105,6 +106,22 @@ def run_intent_planning_agents(
             "model_call_id": str(mc_p.id),
             "steps": [st.model_dump(mode="json") for st in steps],
             "phase_output": plan_po,
+        },
+    )
+    merge_completion_models_entries(
+        session,
+        analysis_run_id,
+        {
+            "intent": completion_model_audit_dict(
+                model_call_model_name=mc_i.model_name,
+                routing_source=resolve_agent_completion_model(s, "intent")[1],
+                phase="intent",
+            ),
+            "planning": completion_model_audit_dict(
+                model_call_model_name=mc_p.model_name,
+                routing_source=resolve_agent_completion_model(s, "planning")[1],
+                phase="planning",
+            ),
         },
     )
 

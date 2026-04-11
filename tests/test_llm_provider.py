@@ -87,17 +87,17 @@ def test_recorded_completion_persists_prompt_columns(memory_session: Session) ->
     provider = StubChatProvider(result=result)
     svc = RecordedChatCompletionService(memory_session, provider)
     req = ChatCompletionRequest(model="stub-model", messages=[{"role": "user", "content": "hi"}])
-    meta = {"role": "intent", "prompt_id": "edgar.agent.intent", "prompt_version": "1.0.0"}
+    meta = {"role": "intent", "prompt_id": "edgar.agent.intent", "prompt_version": "1.1.0"}
     row, _ = svc.complete_and_persist(
         req,
         analysis_run_id=None,
         request_metadata=meta,
         prompt_id="edgar.agent.intent",
-        prompt_version="1.0.0",
+        prompt_version="1.1.0",
     )
     memory_session.commit()
     assert row.prompt_id == "edgar.agent.intent"
-    assert row.prompt_version == "1.0.0"
+    assert row.prompt_version == "1.1.0"
     assert row.provider == "stub"
     assert row.model_name == "stub-model"
 

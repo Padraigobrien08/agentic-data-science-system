@@ -40,7 +40,7 @@ def test_planner_prefers_intent_assistance_over_rule_parse() -> None:
         goal_preferences=assisted,
         model_call_id="00000000-0000-0000-0000-000000000001",
         prompt_id="edgar.agent.intent_preferences_assistant",
-        prompt_version="1.0.0",
+        prompt_version="1.1.0",
     )
     req = OrchestrationInput(
         tickers=["AAPL"],

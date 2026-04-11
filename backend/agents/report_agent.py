@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
+from backend.agents.model_routing import resolve_agent_completion_model
 from backend.agents.output_schemas import ReportAgentLLMOutput
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.config.settings import Settings, get_settings
@@ -41,8 +42,9 @@ class ReportAgent:
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},
         ]
+        model_id, routing_src = resolve_agent_completion_model(self._settings, "report")
         req = ChatCompletionRequest(
-            model=self._settings.agent_completion_model,
+            model=model_id,
             messages=messages,
             temperature=0.3,
             max_tokens=4096,
@@ -50,6 +52,8 @@ class ReportAgent:
         )
         meta = {
             "role": "report",
+            "phase": "report",
+            "completion_model_routing_source": routing_src,
             "prompt_id": reg.prompt_id,
             "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,

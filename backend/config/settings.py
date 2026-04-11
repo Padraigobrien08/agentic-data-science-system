@@ -118,10 +118,36 @@ class Settings(BaseSettings):
     # Intent / planning agents (``backend.agents``) — prompts under versioned files on disk
     agent_completion_model: str = Field(
         default="gpt-5.4-mini",
-        description="Chat model for intent, planning, critic, and report agents (``chat.completions`` model id).",
+        description=(
+            "Default chat model id for all agent phases when a phase-specific "
+            "``agent_*_model`` field is empty (``chat.completions``)."
+        ),
+    )
+    agent_intent_model: str = Field(
+        default="",
+        description="Intent agent model id; empty uses ``agent_completion_model`` (EDGAR_BACKEND_AGENT_INTENT_MODEL).",
+    )
+    agent_intent_preferences_model: str = Field(
+        default="",
+        description=(
+            "Intent-preferences assistant model; empty uses ``agent_intent_model``, "
+            "then ``agent_completion_model`` (EDGAR_BACKEND_AGENT_INTENT_PREFERENCES_MODEL)."
+        ),
+    )
+    agent_planning_model: str = Field(
+        default="",
+        description="Planning agent model id; empty uses ``agent_completion_model`` (EDGAR_BACKEND_AGENT_PLANNING_MODEL).",
+    )
+    agent_critic_model: str = Field(
+        default="",
+        description="Critic agent model id; empty uses ``agent_completion_model`` (EDGAR_BACKEND_AGENT_CRITIC_MODEL).",
+    )
+    agent_report_model: str = Field(
+        default="",
+        description="Report agent model id; empty uses ``agent_completion_model`` (EDGAR_BACKEND_AGENT_REPORT_MODEL).",
     )
     agent_intent_prompt_version: str = Field(
-        default="1.0.0",
+        default="1.1.0",
         description="Prompt file version directory under ``backend/agents/prompts/intent/``",
     )
     orchestration_llm_intent_assistance: bool = Field(
@@ -132,19 +158,19 @@ class Settings(BaseSettings):
         ),
     )
     agent_intent_preferences_prompt_version: str = Field(
-        default="1.0.0",
+        default="1.1.0",
         description="Prompt file under ``backend/agents/prompts/intent_preferences_assistant/``",
     )
     agent_planning_prompt_version: str = Field(
-        default="1.0.0",
+        default="1.1.0",
         description="Prompt file version directory under ``backend/agents/prompts/planning/``",
     )
     agent_critic_prompt_version: str = Field(
-        default="1.0.0",
+        default="1.1.0",
         description="Prompt file version under ``backend/agents/prompts/critic/``",
     )
     agent_report_prompt_version: str = Field(
-        default="1.0.0",
+        default="1.1.0",
         description="Prompt file version under ``backend/agents/prompts/report/``",
     )
 
@@ -162,6 +188,23 @@ class Settings(BaseSettings):
         default=None,
         description="OpenTelemetry ``service.name`` (falls back to OTEL_SERVICE_NAME env or edgar-backend)",
     )
+
+    @field_validator(
+        "agent_completion_model",
+        "agent_intent_model",
+        "agent_intent_preferences_model",
+        "agent_planning_model",
+        "agent_critic_model",
+        "agent_report_model",
+        mode="before",
+    )
+    @classmethod
+    def _strip_agent_model_fields(cls, v: object) -> object:
+        if v is None:
+            return ""
+        if isinstance(v, str):
+            return v.strip()
+        return v
 
     @model_validator(mode="after")
     def _openai_api_key_from_unprefixed_env(self) -> Settings:

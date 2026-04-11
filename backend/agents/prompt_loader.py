@@ -5,7 +5,7 @@ Each file may start with optional YAML-style front matter between ``---`` lines:
 
   ---
   template_id: intent
-  version: 1.0.0
+  version: 1.1.0
   ---
   <markdown body>
 """

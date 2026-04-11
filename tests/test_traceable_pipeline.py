@@ -110,8 +110,8 @@ def test_traceable_persists_mcp_skipped_and_llm_run_steps_without_llm(
 
     settings = Settings(
         agent_completion_model="stub",
-        agent_critic_prompt_version="1.0.0",
-        agent_report_prompt_version="1.0.0",
+        agent_critic_prompt_version="1.1.0",
+        agent_report_prompt_version="1.1.0",
     )
     traced = run_traceable_edgar_pipeline(
         session,
@@ -205,8 +205,8 @@ def test_traceable_critic_and_report_with_stub_llm(
 
     settings = Settings(
         agent_completion_model="stub",
-        agent_critic_prompt_version="1.0.0",
-        agent_report_prompt_version="1.0.0",
+        agent_critic_prompt_version="1.1.0",
+        agent_report_prompt_version="1.1.0",
     )
     traced = run_traceable_edgar_pipeline(
         session,
@@ -260,5 +260,5 @@ def test_traceable_critic_and_report_with_stub_llm(
     roles = {m.request_payload_json.get("agent", {}).get("role") for m in mcs}
     assert roles == {"critic", "report"}
     assert {m.prompt_id for m in mcs} == {"edgar.agent.critic", "edgar.agent.report"}
-    assert all(m.prompt_version == "1.0.0" for m in mcs)
+    assert all(m.prompt_version == "1.1.0" for m in mcs)
     assert all(m.provider == "stub" and m.model_name == "stub" for m in mcs)

@@ -281,7 +281,7 @@ def test_run_detail_include_transparency_does_not_mutate_payload_fields(
         row = db.get(AnalysisRun, run_id)
         assert row is not None
         row.output_payload_json = {"run_id": "orch-1", "status": "success"}
-        row.meta_json = {"ai_agents": {"prompt_versions": {"intent": "1.0.0"}}}
+        row.meta_json = {"ai_agents": {"prompt_versions": {"intent": "1.1.0"}}}
         db.commit()
     finally:
         db.close()

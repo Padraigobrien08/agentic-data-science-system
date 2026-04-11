@@ -38,7 +38,8 @@ from backend.agents.phase_outputs import (
     build_skipped_phase_output,
 )
 from backend.agents.report_agent import ReportAgent
-from backend.agents.ai_agents_meta import merge_ai_agents_meta
+from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
+from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.agents.llm_phase_status import (
     PHASE_DEGRADED,
     PHASE_FAILED,
@@ -52,6 +53,7 @@ from backend.agents.traceability_summary import build_runtime_traceability_bundl
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
 from backend.models.enums import RunStepStatus
+from backend.models.model_call import ModelCall
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.recorded_chat_completion_service import RecordedChatCompletionService
 from backend.services.run_step_service import RunStepService
@@ -182,6 +184,8 @@ def run_traceable_edgar_pipeline(
 
     critic_patch: dict[str, Any] = {"skipped": True, "phase_status": PHASE_SKIPPED}
     report_patch: dict[str, Any] = {"skipped": True, "phase_status": PHASE_SKIPPED}
+    critic_model_call_for_audit: ModelCall | None = None
+    report_model_call_for_audit: ModelCall | None = None
 
     artifact_summaries_bundle = build_artifact_summaries_for_llm(orch_out.artifact_paths)
     critic_summary_roles = sorted((artifact_summaries_bundle.get("by_role") or {}).keys())
@@ -247,6 +251,7 @@ def run_traceable_edgar_pipeline(
                 analysis_run_id,
                 prompt_id=AGENT_PROMPT_IDS["critic"],
             )
+            critic_model_call_for_audit = link_mc
             mid = str(link_mc.id) if link_mc is not None else None
             po = attach_plan_alignment_findings(
                 build_skipped_phase_output(
@@ -276,6 +281,7 @@ def run_traceable_edgar_pipeline(
             }
         else:
             rs_steps.transition_status(critic_row.id, RunStepStatus.success)
+            critic_model_call_for_audit = critic_mc
             co = build_critic_phase_output(critic_out, plan_alignment_findings=plan_alignment_findings)
             degraded = critic_out.overall_confidence == "low"
             c_status = PHASE_DEGRADED if degraded else PHASE_SUCCESS
@@ -399,6 +405,7 @@ def run_traceable_edgar_pipeline(
                 analysis_run_id,
                 prompt_id=AGENT_PROMPT_IDS["report"],
             )
+            report_model_call_for_audit = link_mc
             r_mid = str(link_mc.id) if link_mc is not None else None
             po = build_skipped_phase_output(
                 reason="report_error",
