@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SignInHint } from "@/components/auth/sign-in-hint";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
 import { ApiError } from "@/lib/api/errors";
 import { getRun, listRunArtifacts, listRunSteps } from "@/lib/api/runs";
@@ -25,6 +26,14 @@ export default async function RunTracePage({
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
       notFound();
+    }
+    if (e instanceof ApiError && e.status === 401) {
+      return (
+        <div className="space-y-3">
+          <h1 className="text-lg font-semibold">Full trace</h1>
+          <SignInHint nextPath={`/projects/${projectId}/runs/${runId}/trace`} />
+        </div>
+      );
     }
     const msg = e instanceof ApiError ? e.body || e.message : "Unknown error";
     return <p className="font-mono text-sm text-red-700 dark:text-red-400">{msg}</p>;

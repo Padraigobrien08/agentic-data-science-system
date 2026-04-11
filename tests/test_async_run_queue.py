@@ -20,9 +20,7 @@ from backend.db.session import get_db
 from backend.main import create_app
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
-from backend.models.project import Project
 from backend.models.run_execution_job import RunExecutionJob
-from backend.models.user import User
 from backend.worker.loop import process_next_job
 from edgar_project.orchestration.schemas import (
     InterpretedGoal,
@@ -30,10 +28,11 @@ from edgar_project.orchestration.schemas import (
     OrchestrationOutput,
     OrchestrationRunStatus,
 )
+from tests.api_auth import register_project_and_headers
 
 
 @pytest.fixture
-def api_client() -> Iterator[tuple[TestClient, str, sessionmaker[Session]]]:
+def api_client() -> Iterator[tuple[TestClient, str, dict[str, str], sessionmaker[Session]]]:
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -41,15 +40,6 @@ def api_client() -> Iterator[tuple[TestClient, str, sessionmaker[Session]]]:
     )
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
-    seed = factory()
-    u = User(email=f"q-{uuid.uuid4().hex[:8]}@example.com")
-    seed.add(u)
-    seed.flush()
-    p = Project(owner_user_id=u.id, name="QueueProj")
-    seed.add(p)
-    seed.commit()
-    project_id = str(p.id)
-    seed.close()
 
     def override_get_db() -> Iterator[Session]:
         db = factory()
@@ -61,14 +51,18 @@ def api_client() -> Iterator[tuple[TestClient, str, sessionmaker[Session]]]:
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
-        yield client, project_id, factory
+        project_id, headers = register_project_and_headers(client)
+        yield client, project_id, headers, factory
     app.dependency_overrides.clear()
 
 
-def test_post_run_enqueue_execution_sets_queued(api_client: tuple[TestClient, str, sessionmaker[Session]]) -> None:
-    client, project_id, _factory = api_client
+def test_post_run_enqueue_execution_sets_queued(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, h, _factory = api_client
     r = client.post(
         "/v1/runs",
+        headers=h,
         json={
             "project_id": project_id,
             "orchestration_goal_text": "goal",
@@ -82,12 +76,13 @@ def test_post_run_enqueue_execution_sets_queued(api_client: tuple[TestClient, st
 
 
 def test_enqueue_persists_w3c_trace_context_for_worker(
-    api_client: tuple[TestClient, str, sessionmaker[Session]],
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
 ) -> None:
     """Queued jobs store traceparent so the worker can continue the API trace."""
-    client, project_id, factory = api_client
+    client, project_id, h, factory = api_client
     r = client.post(
         "/v1/runs",
+        headers=h,
         json={
             "project_id": project_id,
             "orchestration_goal_text": "goal",
@@ -110,10 +105,13 @@ def test_enqueue_persists_w3c_trace_context_for_worker(
         db.close()
 
 
-def test_sync_execute_returns_409_when_queued(api_client: tuple[TestClient, str, sessionmaker[Session]]) -> None:
-    client, project_id, _factory = api_client
+def test_sync_execute_returns_409_when_queued(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, h, _factory = api_client
     r = client.post(
         "/v1/runs",
+        headers=h,
         json={
             "project_id": project_id,
             "orchestration_goal_text": "goal",
@@ -122,14 +120,17 @@ def test_sync_execute_returns_409_when_queued(api_client: tuple[TestClient, str,
         },
     )
     run_id = r.json()["id"]
-    r2 = client.post(f"/v1/runs/{run_id}/execute", json={})
+    r2 = client.post(f"/v1/runs/{run_id}/execute", json={}, headers=h)
     assert r2.status_code == 409
 
 
-def test_worker_process_next_job_mocked(api_client: tuple[TestClient, str, sessionmaker[Session]]) -> None:
-    client, project_id, factory = api_client
+def test_worker_process_next_job_mocked(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, h, factory = api_client
     r = client.post(
         "/v1/runs",
+        headers=h,
         json={
             "project_id": project_id,
             "orchestration_goal_text": "goal",

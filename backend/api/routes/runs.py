@@ -7,6 +7,8 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query, Request
 from sqlalchemy.exc import IntegrityError
 
+from backend.api.access_checks import require_analysis_run_owned, require_project_owned
+from backend.api.auth_deps import CurrentUserDep
 from backend.api.deps import (
     AnalysisRunServiceDep,
     ArtifactServiceDep,
@@ -14,7 +16,6 @@ from backend.api.deps import (
     EdgarPipelineExecutionDep,
     RunStepServiceDep,
 )
-from backend.models.project import Project
 from backend.models.enums import AnalysisRunStatus
 from backend.schemas.analysis_run import AnalysisRunCreate
 from backend.schemas.run_lifecycle import (
@@ -47,14 +48,14 @@ def create_run(
     request: Request,
     db: DbSession,
     run_svc: AnalysisRunServiceDep,
+    user: CurrentUserDep,
 ) -> AnalysisRunSummary:
     """Create an analysis run in ``pending`` (orchestration execution is not started here)."""
-    if db.get(Project, body.project_id) is None:
-        raise HTTPException(status_code=404, detail="Project not found")
+    require_project_owned(db, body.project_id, user.id)
     try:
         row = run_svc.create(
             body.project_id,
-            initiated_by_user_id=body.initiated_by_user_id,
+            initiated_by_user_id=user.id,
             correlation_id=body.correlation_id,
             orchestration_goal_text=body.orchestration_goal_text,
             input_payload_json=body.input_payload_json,
@@ -84,18 +85,29 @@ def create_run(
 def list_runs(
     db: DbSession,
     run_svc: AnalysisRunServiceDep,
-    project_id: UUID = Query(..., description="Filter runs for this project"),
+    user: CurrentUserDep,
+    project_id: UUID | None = Query(
+        None,
+        description="If set, list runs for this project (must be yours). If omitted, list runs across all projects you own.",
+    ),
 ) -> list[AnalysisRunSummary]:
-    """List runs for a project (newest first)."""
-    if db.get(Project, project_id) is None:
-        raise HTTPException(status_code=404, detail="Project not found")
-    rows = run_svc.list_for_project(project_id)
+    """List runs (newest first), scoped to the current user."""
+    if project_id is not None:
+        require_project_owned(db, project_id, user.id)
+        rows = run_svc.list_for_project(project_id)
+    else:
+        rows = run_svc.list_for_projects_owned_by(user.id)
     return [analysis_run_to_summary(r) for r in rows]
 
 
 @router.get("/{run_id}/status", response_model=AnalysisRunStatusResponse)
-def get_run_status(run_id: UUID, db: DbSession) -> AnalysisRunStatusResponse:
+def get_run_status(
+    run_id: UUID,
+    db: DbSession,
+    user: CurrentUserDep,
+) -> AnalysisRunStatusResponse:
     """Execution-focused status: terminal flag, open job, and latest job snapshot."""
+    require_analysis_run_owned(db, run_id, user.id)
     try:
         row, has_open, latest = RunLifecycleService(db).build_status_view(run_id)
     except RunLifecycleError as exc:
@@ -108,8 +120,9 @@ def get_run_status(run_id: UUID, db: DbSession) -> AnalysisRunStatusResponse:
 
 
 @router.post("/{run_id}/cancel", response_model=AnalysisRunSummary)
-def cancel_run(run_id: UUID, db: DbSession) -> AnalysisRunSummary:
+def cancel_run(run_id: UUID, db: DbSession, user: CurrentUserDep) -> AnalysisRunSummary:
     """Cancel a ``pending`` or ``queued`` run (not ``running`` or terminal)."""
+    require_analysis_run_owned(db, run_id, user.id)
     try:
         row = RunLifecycleService(db).cancel_analysis_run(run_id)
         db.commit()
@@ -128,9 +141,11 @@ def retry_run(
     run_id: UUID,
     request: Request,
     db: DbSession,
+    user: CurrentUserDep,
     body: RunRetryRequest | None = None,
 ) -> AnalysisRunSummary:
     """Re-queue a finished non-success run for background execution."""
+    require_analysis_run_owned(db, run_id, user.id)
     overrides = (
         body.enqueue_overrides.model_dump(exclude_none=True)
         if body is not None and body.enqueue_overrides is not None
@@ -156,15 +171,13 @@ def retry_run(
 def get_run(
     run_id: UUID,
     db: DbSession,
-    run_svc: AnalysisRunServiceDep,
+    user: CurrentUserDep,
     include_payloads: bool = Query(
         False,
         description="When true, include input_payload_json, output_payload_json, and meta_json",
     ),
 ) -> AnalysisRunDetailResponse:
-    row = run_svc.get(run_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+    row = require_analysis_run_owned(db, run_id, user.id)
     return analysis_run_to_detail(row, include_payloads=include_payloads)
 
 
@@ -172,15 +185,14 @@ def get_run(
 def list_run_steps(
     run_id: UUID,
     db: DbSession,
-    run_svc: AnalysisRunServiceDep,
     step_svc: RunStepServiceDep,
+    user: CurrentUserDep,
     include_payloads: bool = Query(
         False,
         description="When true, include planner_tool_input_json and meta_json per step",
     ),
 ) -> list[RunStepDetailItem]:
-    if run_svc.get(run_id) is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+    require_analysis_run_owned(db, run_id, user.id)
     steps = step_svc.list_for_analysis_run(run_id)
     return [run_step_to_detail(s, include_payloads=include_payloads) for s in steps]
 
@@ -188,11 +200,11 @@ def list_run_steps(
 @router.get("/{run_id}/artifacts", response_model=list[ArtifactMetadata])
 def list_run_artifacts(
     run_id: UUID,
-    run_svc: AnalysisRunServiceDep,
+    db: DbSession,
     art_svc: ArtifactServiceDep,
+    user: CurrentUserDep,
 ) -> list[ArtifactMetadata]:
-    if run_svc.get(run_id) is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+    require_analysis_run_owned(db, run_id, user.id)
     rows = art_svc.list_for_analysis_run(run_id)
     return [artifact_to_metadata(a) for a in rows]
 
@@ -201,8 +213,9 @@ def list_run_artifacts(
 def execute_run(
     run_id: UUID,
     request: Request,
+    db: DbSession,
     pipeline: EdgarPipelineExecutionDep,
-    run_svc: AnalysisRunServiceDep,
+    user: CurrentUserDep,
     body: ExecuteRunOverrides | None = None,
 ) -> ExecuteRunResponse:
     """
@@ -210,9 +223,7 @@ def execute_run(
 
     Body fields override ``input_payload_json`` / ``orchestration_goal_text`` for this invocation only.
     """
-    row = run_svc.get(run_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Run not found")
+    row = require_analysis_run_owned(db, run_id, user.id)
     if row.status == AnalysisRunStatus.queued:
         raise HTTPException(
             status_code=409,

@@ -1,5 +1,7 @@
 import "server-only";
 
+import { bearerAuthHeaders } from "@/lib/auth/backend-auth";
+
 import { getApiBaseUrl } from "./config";
 import { ApiError } from "./errors";
 
@@ -25,8 +27,10 @@ async function request<T>(
 ): Promise<T> {
   const base = getApiBaseUrl();
   const url = `${base}${path.startsWith("/") ? path : `/${path}`}`;
+  const auth = await bearerAuthHeaders();
   const headers: HeadersInit = {
     Accept: "application/json",
+    ...auth,
     ...(body !== undefined ? { "Content-Type": "application/json" } : {}),
     ...init?.headers,
   };

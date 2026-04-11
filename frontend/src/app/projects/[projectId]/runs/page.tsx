@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { SignInHint } from "@/components/auth/sign-in-hint";
 import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
 import { listRuns } from "@/lib/api/runs";
@@ -18,6 +19,14 @@ export default async function RunsListPage({
   try {
     runs = await listRuns(projectId);
   } catch (e) {
+    if (e instanceof ApiError && e.status === 401) {
+      return (
+        <div className="space-y-3">
+          <h1 className="text-lg font-semibold">Analysis runs</h1>
+          <SignInHint nextPath={`/projects/${projectId}/runs`} />
+        </div>
+      );
+    }
     const msg = e instanceof ApiError ? e.body || e.message : "Unknown error";
     return (
       <div className="space-y-2">

@@ -23,6 +23,29 @@ export type RunStepStatus =
 
 export type ArtifactKind = "tabular" | "document" | "binary" | "json" | "other";
 
+/** ``GET /v1/auth/me`` */
+export interface CurrentUser {
+  id: string;
+  email: string;
+  display_name: string | null;
+  is_active: boolean;
+  preferences_json: Record<string, unknown> | unknown[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ProjectRead {
+  id: string;
+  owner_user_id: string;
+  name: string;
+  slug: string | null;
+  description: string | null;
+  settings_json: Record<string, unknown> | unknown[] | null;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
 export interface AnalysisRunSummary {
   id: string;
   project_id: string;
@@ -90,7 +113,6 @@ export interface ArtifactPreviewResponse {
 
 export interface AnalysisRunCreateBody {
   project_id: string;
-  initiated_by_user_id?: string | null;
   correlation_id?: string | null;
   orchestration_goal_text?: string | null;
   input_payload_json?: Record<string, unknown> | null;

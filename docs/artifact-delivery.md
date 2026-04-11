@@ -2,6 +2,8 @@
 
 The FastAPI app exposes registered **artifact rows** (DB metadata) separately from **stored bytes** (object storage). Clients use the artifact UUID in every URL path segment below.
 
+**Authentication:** all `/v1/artifacts/*` routes require `Authorization: Bearer <access_token>` (see [`docs/auth-api.md`](auth-api.md)). Cross-tenant artifact IDs return **404** (not 403).
+
 Base path: **`/v1/artifacts`**.
 
 ## Metadata: `GET /v1/artifacts/{artifact_id}`

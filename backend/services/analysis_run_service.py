@@ -68,6 +68,9 @@ class AnalysisRunService:
     def list_for_project(self, project_id: UUID) -> list[AnalysisRun]:
         return self._runs.list_for_project(project_id)
 
+    def list_for_projects_owned_by(self, owner_user_id: UUID) -> list[AnalysisRun]:
+        return self._runs.list_for_projects_owned_by(owner_user_id)
+
     def transition_status(self, run_id: UUID, target: AnalysisRunStatus) -> AnalysisRun:
         row = self.require(run_id)
         if not can_transition_analysis_run(row.status, target):

@@ -8,6 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.models.analysis_run import AnalysisRun
+from backend.models.project import Project
 
 
 class AnalysisRunRepository:
@@ -30,6 +31,17 @@ class AnalysisRunRepository:
             self._session.scalars(
                 select(AnalysisRun)
                 .where(AnalysisRun.project_id == project_id)
+                .order_by(AnalysisRun.created_at.desc())
+            ).all()
+        )
+
+    def list_for_projects_owned_by(self, owner_user_id: UUID) -> list[AnalysisRun]:
+        """All analysis runs in projects owned by ``owner_user_id`` (newest first)."""
+        return list(
+            self._session.scalars(
+                select(AnalysisRun)
+                .join(Project, AnalysisRun.project_id == Project.id)
+                .where(Project.owner_user_id == owner_user_id)
                 .order_by(AnalysisRun.created_at.desc())
             ).all()
         )

@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ArtifactDetailPanel } from "@/components/trace/artifact-detail-panel";
 import { getArtifact } from "@/lib/api/artifacts";
 import { ApiError } from "@/lib/api/errors";
@@ -20,6 +21,14 @@ export default async function ArtifactDetailPage({
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
       notFound();
+    }
+    if (e instanceof ApiError && e.status === 401) {
+      return (
+        <div className="space-y-3">
+          <h1 className="text-lg font-semibold">Artifact</h1>
+          <SignInHint nextPath={`/artifacts/${artifactId}`} />
+        </div>
+      );
     }
     const msg = e instanceof ApiError ? e.body || e.message : "Unknown error";
     return <p className="text-sm text-red-700 dark:text-red-400">{msg}</p>;

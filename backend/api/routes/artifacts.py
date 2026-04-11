@@ -10,7 +10,9 @@ from uuid import UUID
 from fastapi import APIRouter, HTTPException, Query
 from starlette.responses import StreamingResponse
 
-from backend.api.deps import ArtifactServiceDep
+from backend.api.access_checks import require_artifact_readable
+from backend.api.auth_deps import CurrentUserDep
+from backend.api.deps import ArtifactServiceDep, DbSession
 from backend.config.settings import Settings
 from backend.models.artifact import Artifact
 from backend.models.enums import ArtifactKind
@@ -31,13 +33,6 @@ router = APIRouter(prefix="/artifacts", tags=["artifacts"])
 
 _PREVIEW_MAX_BYTES = 512 * 1024
 _STREAM_CHUNK = 64 * 1024
-
-
-def _require_artifact_row(art_svc: ArtifactServiceDep, artifact_id: UUID) -> Artifact:
-    row = art_svc.get(artifact_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Artifact not found")
-    return row
 
 
 def _verify_storage_openable(row: Artifact, *, settings: Settings) -> None:
@@ -80,6 +75,8 @@ def _byte_stream(row: Artifact, *, settings: Settings) -> Iterator[bytes]:
 def get_artifact_content(
     artifact_id: UUID,
     art_svc: ArtifactServiceDep,
+    db: DbSession,
+    user: CurrentUserDep,
     disposition: Annotated[
         Literal["inline", "attachment", "auto"],
         Query(description="``auto``: inline for text/json-like MIME types, else attachment."),
@@ -90,7 +87,7 @@ def get_artifact_content(
 
     Uses :func:`backend.storage.resolver.open_reader` — no raw filesystem paths in the response.
     """
-    row = _require_artifact_row(art_svc, artifact_id)
+    row = require_artifact_readable(db, art_svc, artifact_id, user.id)
     settings = art_svc.settings
     _verify_storage_openable(row, settings=settings)
 
@@ -123,6 +120,8 @@ def get_artifact_content(
 def get_artifact_preview(
     artifact_id: UUID,
     art_svc: ArtifactServiceDep,
+    db: DbSession,
+    user: CurrentUserDep,
 ) -> ArtifactPreviewResponse:
     """
     Return a bounded UTF-8 text (or pretty JSON) preview for markdown/CSV/JSON/text artifacts.
@@ -132,7 +131,7 @@ def get_artifact_preview(
 
     Returns **415** when the artifact is not treated as text-previewable (e.g. binary).
     """
-    row = _require_artifact_row(art_svc, artifact_id)
+    row = require_artifact_readable(db, art_svc, artifact_id, user.id)
     if not artifact_previewable(row):
         raise HTTPException(
             status_code=415,
@@ -186,12 +185,12 @@ def get_artifact_preview(
 def get_artifact(
     artifact_id: UUID,
     art_svc: ArtifactServiceDep,
+    db: DbSession,
+    user: CurrentUserDep,
     include_meta: bool = Query(
         False,
         description="When true, include meta_json (may be large)",
     ),
 ) -> ArtifactDetailResponse:
-    row = art_svc.get(artifact_id)
-    if row is None:
-        raise HTTPException(status_code=404, detail="Artifact not found")
+    row = require_artifact_readable(db, art_svc, artifact_id, user.id)
     return artifact_to_detail(row, include_meta=include_meta)

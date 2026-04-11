@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ExecuteRunButton } from "@/components/runs/execute-run-button";
 import { MarkdownReport } from "@/components/runs/markdown-report";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
@@ -41,6 +42,14 @@ export default async function RunDetailPage({
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
       notFound();
+    }
+    if (e instanceof ApiError && e.status === 401) {
+      return (
+        <div className="space-y-3">
+          <h1 className="text-lg font-semibold">Run detail</h1>
+          <SignInHint nextPath={`/projects/${projectId}/runs/${runId}`} />
+        </div>
+      );
     }
     const msg = e instanceof ApiError ? e.body || e.message : "Unknown error";
     return (

@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 
+import { bearerAuthHeaders } from "@/lib/auth/backend-auth";
 import { getApiBaseUrl } from "@/lib/api/config";
 
 const UUID_RE =
@@ -21,9 +22,10 @@ export async function GET(
   const disposition = ALLOWED_DISPOSITION.has(raw) ? raw : "auto";
 
   const base = getApiBaseUrl();
+  const auth = await bearerAuthHeaders();
   const upstream = await fetch(
     `${base}/v1/artifacts/${artifactId}/content?disposition=${encodeURIComponent(disposition)}`,
-    { cache: "no-store" },
+    { cache: "no-store", headers: { ...auth } },
   );
 
   if (!upstream.ok) {

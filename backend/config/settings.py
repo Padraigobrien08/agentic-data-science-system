@@ -1,9 +1,11 @@
 """Application settings — env-driven, safe defaults for local development."""
 
+from __future__ import annotations
+
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field, SecretStr, field_validator
+from pydantic import Field, SecretStr, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -20,6 +22,23 @@ class Settings(BaseSettings):
     app_name: str = "EDGAR Analytics API"
     api_v1_prefix: str = "/v1"
     debug: bool = False
+
+    # Auth (JWT HS256). Set EDGAR_BACKEND_JWT_SECRET in production.
+    jwt_secret: SecretStr = Field(
+        default=SecretStr("dev-only-set-edgar-backend-jwt-secret-min-32-chars"),
+        description="HMAC secret for access tokens (use a long random value in production).",
+    )
+    jwt_algorithm: str = Field(default="HS256", description="JWT signing algorithm.")
+    access_token_expire_minutes: int = Field(
+        default=720,
+        ge=5,
+        le=60 * 24 * 14,
+        description="Access token lifetime in minutes.",
+    )
+    allow_open_registration: bool = Field(
+        default=True,
+        description="When false, POST /v1/auth/register returns 403.",
+    )
 
     # Default: SQLite file under repo data/ (created by migration/runtime, not necessarily by config.py)
     database_url: str = Field(
@@ -94,6 +113,14 @@ class Settings(BaseSettings):
         default=None,
         description="OpenTelemetry ``service.name`` (falls back to OTEL_SERVICE_NAME env or edgar-backend)",
     )
+
+    @model_validator(mode="after")
+    def _jwt_secret_length_in_prod(self) -> Settings:
+        if not self.debug and len(self.jwt_secret.get_secret_value()) < 32:
+            raise ValueError(
+                "EDGAR_BACKEND_JWT_SECRET must be at least 32 characters when EDGAR_BACKEND_DEBUG is false.",
+            )
+        return self
 
     @field_validator("database_url", mode="before")
     @classmethod

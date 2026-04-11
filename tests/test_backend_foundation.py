@@ -33,6 +33,7 @@ from backend.models.enums import AnalysisRunStatus, ArtifactKind, RunStepStatus
 from backend.models.project import Project
 from backend.models.run_step import RunStep
 from backend.models.user import User
+from tests.api_auth import register_project_and_headers
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
 from backend.services.edgar_pipeline_execution_service import EdgarPipelineExecutionService
@@ -74,7 +75,7 @@ def session_settings_artifacts(tmp_path: Path) -> Iterator[tuple[Session, Settin
 
 
 @pytest.fixture
-def foundation_api_client(tmp_path: Path) -> Iterator[tuple[TestClient, str]]:
+def foundation_api_client(tmp_path: Path) -> Iterator[tuple[TestClient, str, dict[str, str]]]:
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -82,15 +83,6 @@ def foundation_api_client(tmp_path: Path) -> Iterator[tuple[TestClient, str]]:
     )
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
-    seed = factory()
-    u = User(email=f"fb-{uuid.uuid4().hex[:8]}@example.com")
-    seed.add(u)
-    seed.flush()
-    p = Project(owner_user_id=u.id, name="FoundationProj")
-    seed.add(p)
-    seed.commit()
-    project_id = str(p.id)
-    seed.close()
 
     def override_get_db() -> Iterator[Session]:
         db = factory()
@@ -119,7 +111,8 @@ def foundation_api_client(tmp_path: Path) -> Iterator[tuple[TestClient, str]]:
     app.dependency_overrides[api_deps.get_edgar_pipeline_execution_service] = _pipeline
 
     with TestClient(app) as client:
-        yield client, project_id
+        project_id, headers = register_project_and_headers(client)
+        yield client, project_id, headers
     app.dependency_overrides.clear()
 
 
@@ -249,8 +242,10 @@ def test_local_store_put_get_roundtrip(tmp_path: Path) -> None:
 # --- API ---
 
 
-def test_api_health_reports_database_ok(foundation_api_client: tuple[TestClient, str]) -> None:
-    client, _ = foundation_api_client
+def test_api_health_reports_database_ok(
+    foundation_api_client: tuple[TestClient, str, dict[str, str]],
+) -> None:
+    client, _, _ = foundation_api_client
     for path in ("/health", "/v1/health"):
         r = client.get(path)
         assert r.status_code == 200
@@ -259,19 +254,22 @@ def test_api_health_reports_database_ok(foundation_api_client: tuple[TestClient,
         assert body["database"]["ok"] is True
 
 
-def test_api_runs_list_unknown_project_404(foundation_api_client: tuple[TestClient, str]) -> None:
-    client, _ = foundation_api_client
+def test_api_runs_list_unknown_project_404(
+    foundation_api_client: tuple[TestClient, str, dict[str, str]],
+) -> None:
+    client, _, h = foundation_api_client
     bad = "00000000-0000-4000-8000-000000000099"
-    r = client.get("/v1/runs", params={"project_id": bad})
+    r = client.get("/v1/runs", params={"project_id": bad}, headers=h)
     assert r.status_code == 404
 
 
 def test_api_run_get_404_and_artifact_get_with_mocked_pipeline(
-    foundation_api_client: tuple[TestClient, str], tmp_path: Path
+    foundation_api_client: tuple[TestClient, str, dict[str, str]],
+    tmp_path: Path,
 ) -> None:
-    client, project_id = foundation_api_client
+    client, project_id, h = foundation_api_client
     missing = "00000000-0000-4000-8000-000000000088"
-    assert client.get(f"/v1/runs/{missing}").status_code == 404
+    assert client.get(f"/v1/runs/{missing}", headers=h).status_code == 404
 
     csv_path = tmp_path / "panel.csv"
     csv_path.write_text("c1,c2\n1,2\n", encoding="utf-8")
@@ -299,6 +297,7 @@ def test_api_run_get_404_and_artifact_get_with_mocked_pipeline(
     ):
         r = client.post(
             "/v1/runs",
+            headers=h,
             json={
                 "project_id": project_id,
                 "orchestration_goal_text": "goal",
@@ -307,18 +306,18 @@ def test_api_run_get_404_and_artifact_get_with_mocked_pipeline(
         )
         assert r.status_code == 201
         run_id = r.json()["id"]
-        ex = client.post(f"/v1/runs/{run_id}/execute", json={})
+        ex = client.post(f"/v1/runs/{run_id}/execute", json={}, headers=h)
         assert ex.status_code == 200
         assert ex.json()["artifact_count"] == 1
 
-    arts = client.get(f"/v1/runs/{run_id}/artifacts")
+    arts = client.get(f"/v1/runs/{run_id}/artifacts", headers=h)
     assert arts.status_code == 200
     items = arts.json()
     assert len(items) == 1
     assert items[0]["role_key"] == "panel_csv"
 
     art_id = items[0]["id"]
-    d = client.get(f"/v1/artifacts/{art_id}")
+    d = client.get(f"/v1/artifacts/{art_id}", headers=h)
     assert d.status_code == 200
     assert d.json()["kind"] == "tabular"
-    assert client.get(f"/v1/artifacts/{missing}").status_code == 404
+    assert client.get(f"/v1/artifacts/{missing}", headers=h).status_code == 404
