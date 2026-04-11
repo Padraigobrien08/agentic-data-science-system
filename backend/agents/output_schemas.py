@@ -74,6 +74,48 @@ class PlanningStepLLM(BaseModel):
         return v
 
 
+class CriticAgentLLMOutput(BaseModel):
+    """Structured critique of pipeline artifacts (findings, caveats, trustworthiness signals)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    findings_assessment: str = Field(
+        ...,
+        description="How well unified / structured findings support the stated goal.",
+    )
+    caveat_coverage: str = Field(
+        ...,
+        description="Whether metric caveats and manual validation signals are adequately surfaced.",
+    )
+    trustworthiness_notes: str = Field(
+        ...,
+        description="Data quality, exclusions, trustworthiness paths, or missing evidence.",
+    )
+    issues: list[str] = Field(
+        default_factory=list,
+        description="Concrete problems an end user should know (short strings).",
+    )
+    overall_confidence: str = Field(
+        ...,
+        description="One of: high | medium | low (audit-friendly coarse label).",
+    )
+
+
+class ReportAgentLLMOutput(BaseModel):
+    """Final user-facing narrative (markdown)."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    user_report_markdown: str = Field(
+        ...,
+        description="Markdown suitable for direct display; no JSON, no internal IDs.",
+    )
+    key_takeaways: list[str] = Field(
+        default_factory=list,
+        description="3–7 short bullets summarizing the headline conclusions.",
+    )
+
+
 class PlanningAgentLLMOutput(BaseModel):
     model_config = ConfigDict(extra="forbid")
 

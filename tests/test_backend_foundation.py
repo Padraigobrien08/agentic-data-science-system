@@ -288,9 +288,14 @@ def test_api_run_get_404_and_artifact_get_with_mocked_pipeline(
             artifact_paths={"panel_csv": str(csv_path)},
         )
 
+    from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
+
+    def _fake_traceable(_session, _analysis_run_id, _orch_in, **_: object) -> TraceableEdgarPipelineResult:
+        return TraceableEdgarPipelineResult(_fake_out(), {})
+
     with patch(
-        "backend.services.edgar_pipeline_execution_service.run_analysis_agent",
-        lambda _req: _fake_out(),
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        _fake_traceable,
     ):
         r = client.post(
             "/v1/runs",

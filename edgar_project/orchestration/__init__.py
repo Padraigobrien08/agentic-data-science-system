@@ -14,7 +14,12 @@ from __future__ import annotations
 
 from pydantic import JsonValue
 
-from edgar_project.orchestration.agent import AnalysisAgent, run_analysis, run_analysis_agent
+from edgar_project.orchestration.agent import (
+    AnalysisAgent,
+    run_analysis,
+    run_analysis_agent,
+    run_analysis_agent_returning_state,
+)
 from edgar_project.orchestration.execution_contract import ExecutionRequest, ExecutionResult
 from edgar_project.orchestration.executor import Executor
 from edgar_project.orchestration.constants import (
@@ -113,6 +118,7 @@ __all__ = [
     "ToolResultSummary",
     "run_analysis",
     "run_analysis_agent",
+    "run_analysis_agent_returning_state",
     "interpret_goal_intent",
     "log_run_finished",
     "orchestration_logger",

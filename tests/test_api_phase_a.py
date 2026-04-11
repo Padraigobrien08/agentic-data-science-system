@@ -103,6 +103,7 @@ def test_runs_list_create_get_steps_artifacts(api_client: tuple[TestClient, str]
 def test_post_execute_run_mocked(api_client: tuple[TestClient, str]) -> None:
     from unittest.mock import patch
 
+    from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
     from edgar_project.orchestration.schemas import (
         InterpretedGoal,
         InterpretedGoalCode,
@@ -124,9 +125,12 @@ def test_post_execute_run_mocked(api_client: tuple[TestClient, str]) -> None:
             artifact_paths={},
         )
 
+    def _fake_traceable(_session, _analysis_run_id, _orch_in, **_: object) -> TraceableEdgarPipelineResult:
+        return TraceableEdgarPipelineResult(_fake_out(), {})
+
     with patch(
-        "backend.services.edgar_pipeline_execution_service.run_analysis_agent",
-        lambda _req: _fake_out(),
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        _fake_traceable,
     ):
         r = client.post(
             "/v1/runs",

@@ -35,6 +35,7 @@ from uuid import uuid4
 from edgar_project.orchestration.execution_contract import ExecutionRequest
 from edgar_project.orchestration.executor import Executor
 from edgar_project.orchestration.planner import Planner
+from edgar_project.orchestration.state import OrchestrationRunState
 from edgar_project.orchestration.run_logging import log_run_finished, logger
 from edgar_project.orchestration.schemas import (
     InterpretedGoal,
@@ -103,6 +104,19 @@ class AnalysisAgent:
 
     def run(self, request: OrchestrationInput) -> OrchestrationOutput:
         """Run the coordinator pipeline (caller supplies already-validated ``request``)."""
+        out, _ = self.run_returning_state(request)
+        return out
+
+    def run_returning_state(
+        self,
+        request: OrchestrationInput,
+    ) -> tuple[OrchestrationOutput, OrchestrationRunState | None]:
+        """
+        Plan, execute MCP steps via :class:`~edgar_project.orchestration.executor.Executor`, return output
+        plus mutable :class:`~edgar_project.orchestration.state.OrchestrationRunState` when the executor ran.
+
+        On planning failure the executor is not invoked and the second value is ``None``.
+        """
         run_id = str(uuid4())
         goal_preview = request.analysis_goal.strip()[:240]
         logger.info(
@@ -121,7 +135,7 @@ class AnalysisAgent:
                 outcome.errors[0].code if outcome.errors else "unknown",
                 outcome.errors[0].message if outcome.errors else "",
             )
-            return _orchestration_output_when_planning_fails(run_id, request, outcome)
+            return _orchestration_output_when_planning_fails(run_id, request, outcome), None
 
         assert outcome.plan is not None
         logger.info(
@@ -132,8 +146,8 @@ class AnalysisAgent:
         )
 
         execution = ExecutionRequest.from_planning(run_id=run_id, request=request, outcome=outcome)
-        out = self._executor.run(execution)
-        return out.model_copy(update={"final_summary": _build_final_summary_line(out)})
+        out, state = self._executor.run_returning_state(execution)
+        return out.model_copy(update={"final_summary": _build_final_summary_line(out)}), state
 
 
 def run_analysis_agent(request: OrchestrationInput | Mapping[str, Any]) -> OrchestrationOutput:
@@ -145,6 +159,14 @@ def run_analysis_agent(request: OrchestrationInput | Mapping[str, Any]) -> Orche
     """
     validated = OrchestrationInput.model_validate(request)
     return AnalysisAgent().run(validated)
+
+
+def run_analysis_agent_returning_state(
+    request: OrchestrationInput | Mapping[str, Any],
+) -> tuple[OrchestrationOutput, OrchestrationRunState | None]:
+    """Like :func:`run_analysis_agent` but also returns executor state for MCP envelope persistence."""
+    validated = OrchestrationInput.model_validate(request)
+    return AnalysisAgent().run_returning_state(validated)
 
 
 def run_analysis(request: OrchestrationInput) -> OrchestrationOutput:

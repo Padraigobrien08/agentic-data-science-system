@@ -71,6 +71,14 @@ class Settings(BaseSettings):
         default="1.0.0",
         description="Prompt file version directory under ``backend/agents/prompts/planning/``",
     )
+    agent_critic_prompt_version: str = Field(
+        default="1.0.0",
+        description="Prompt file version under ``backend/agents/prompts/critic/``",
+    )
+    agent_report_prompt_version: str = Field(
+        default="1.0.0",
+        description="Prompt file version under ``backend/agents/prompts/report/``",
+    )
 
     @field_validator("database_url", mode="before")
     @classmethod

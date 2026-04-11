@@ -1,7 +1,8 @@
 """
 Execute the in-repo deterministic EDGAR orchestration pipeline against a persisted analysis run.
 
-Delegates numerical work to :func:`edgar_project.orchestration.run_analysis_agent` (no rewrites).
+Uses :func:`backend.agents.traceable_analysis_pipeline.run_traceable_edgar_pipeline` so MCP steps,
+LLM critic/report (when configured), and envelopes are persisted in the analysis run session.
 """
 
 from __future__ import annotations
@@ -13,11 +14,16 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from backend.agents.traceable_analysis_pipeline import run_traceable_edgar_pipeline
+from backend.llm.exceptions import LLMProviderConfigurationError
+from backend.llm.factory import get_chat_completion_provider
 from backend.models.enums import AnalysisRunStatus
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
-from edgar_project.orchestration import OrchestrationInput, run_analysis_agent
+from edgar_project.orchestration import OrchestrationInput
+from edgar_project.orchestration.agent import AnalysisAgent
 from edgar_project.orchestration.schemas import OrchestrationOutput, OrchestrationRunStatus
+from edgar_project.orchestration.state import OrchestrationRunState
 from edgar_project.repo_layout import chdir_repo_root, ensure_repo_root_on_syspath
 
 
@@ -61,7 +67,7 @@ _EXECUTABLE_STATUSES: frozenset[AnalysisRunStatus] = frozenset(
 
 class EdgarPipelineExecutionService:
     """
-    Run :func:`~edgar_project.orchestration.run_analysis_agent` for a DB row and persist outcomes.
+    Run traceable orchestration (MCP + optional critic/report LLMs) for a DB row and persist outcomes.
 
     Uses :class:`~edgar_project.repo_layout.chdir_repo_root` so ``config`` / MCP paths match the CLI.
 
@@ -76,11 +82,25 @@ class EdgarPipelineExecutionService:
         run_service: AnalysisRunService | None = None,
         artifact_service: ArtifactService | None = None,
         agent_runner: Callable[[OrchestrationInput | Mapping[str, Any]], OrchestrationOutput] | None = None,
+        orchestration_with_state: Callable[
+            [OrchestrationInput], tuple[OrchestrationOutput, OrchestrationRunState | None]
+        ]
+        | None = None,
     ) -> None:
         self._session = session
         self._runs = run_service or AnalysisRunService(self._session)
         self._artifacts = artifact_service or ArtifactService(self._session)
-        self._agent_runner = agent_runner or run_analysis_agent
+        if orchestration_with_state is not None:
+            self._coord = orchestration_with_state
+        elif agent_runner is not None:
+
+            def _legacy(inp: OrchestrationInput) -> tuple[OrchestrationOutput, OrchestrationRunState | None]:
+                return agent_runner(inp), None
+
+            self._coord = _legacy
+        else:
+            self._analysis_agent = AnalysisAgent()
+            self._coord = self._analysis_agent.run_returning_state
 
     def execute_analysis_run(
         self,
@@ -130,8 +150,20 @@ class EdgarPipelineExecutionService:
         ensure_repo_root_on_syspath()
         chdir_repo_root()
 
+        traced = None
         try:
-            out = self._agent_runner(orch_in)
+            try:
+                llm_provider = get_chat_completion_provider()
+            except LLMProviderConfigurationError:
+                llm_provider = None
+            traced = run_traceable_edgar_pipeline(
+                self._session,
+                analysis_run_id,
+                orch_in,
+                llm_provider=llm_provider,
+                coordinator=self._coord,
+            )
+            out = traced.orchestration_output
         except Exception as exc:
             self._runs.set_error_summary(analysis_run_id, str(exc))
             self._runs.transition_status(analysis_run_id, AnalysisRunStatus.error)
@@ -144,6 +176,8 @@ class EdgarPipelineExecutionService:
         if out.run_id:
             row.correlation_id = str(out.run_id)[:64]
         self._runs.set_output_payload(analysis_run_id, out.model_dump(mode="json"))
+        if traced is not None and traced.output_payload_patch:
+            self._runs.merge_output_payload(analysis_run_id, traced.output_payload_patch)
         if out.errors:
             self._runs.set_error_summary(analysis_run_id, out.errors[0].message)
         else:

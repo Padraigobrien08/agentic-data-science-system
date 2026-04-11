@@ -122,9 +122,14 @@ def test_worker_process_next_job_mocked(api_client: tuple[TestClient, str, sessi
             artifact_paths={},
         )
 
+    from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
+
+    def _fake_traceable(_session, _analysis_run_id, _orch_in, **_: object) -> TraceableEdgarPipelineResult:
+        return TraceableEdgarPipelineResult(_fake_out(), {})
+
     with patch(
-        "backend.services.edgar_pipeline_execution_service.run_analysis_agent",
-        lambda _req: _fake_out(),
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        _fake_traceable,
     ):
         assert process_next_job(factory) is True
 

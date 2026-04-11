@@ -136,9 +136,14 @@ def test_retry_conflict_when_success(api_client: tuple[TestClient, str]) -> None
             artifact_paths={},
         )
 
+    from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
+
+    def _fake_traceable(_session, _analysis_run_id, _orch_in, **_: object) -> TraceableEdgarPipelineResult:
+        return TraceableEdgarPipelineResult(_out(), {})
+
     with patch(
-        "backend.services.edgar_pipeline_execution_service.run_analysis_agent",
-        lambda _req: _out(),
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        _fake_traceable,
     ):
         ex = client.post(f"/v1/runs/{run_id}/execute", json={})
         assert ex.status_code == 200
@@ -173,9 +178,14 @@ def test_retry_after_error_queues_again(api_client: tuple[TestClient, str]) -> N
             artifact_paths={},
         )
 
+    from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
+
+    def _fake_traceable(_session, _analysis_run_id, _orch_in, **_: object) -> TraceableEdgarPipelineResult:
+        return TraceableEdgarPipelineResult(_out(), {})
+
     with patch(
-        "backend.services.edgar_pipeline_execution_service.run_analysis_agent",
-        lambda _req: _out(),
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        _fake_traceable,
     ):
         ex = client.post(f"/v1/runs/{run_id}/execute", json={})
         assert ex.status_code == 200

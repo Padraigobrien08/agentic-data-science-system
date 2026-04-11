@@ -320,6 +320,18 @@ class Executor:
         """Execute the planned MCP sequence (planner/executor contract entry point)."""
         return self._run_with_state(execution.to_run_state())
 
+    def run_returning_state(
+        self,
+        execution: ExecutionRequest,
+    ) -> tuple[OrchestrationOutput, OrchestrationRunState]:
+        """
+        Same execution as :meth:`run`, but also return the mutable run state (``steps_completed`` with
+        per-step MCP envelopes) for downstream persistence / auditing.
+        """
+        state = execution.to_run_state()
+        output = self._run_with_state(state)
+        return output, state
+
     def _run_with_state(self, state: OrchestrationRunState) -> OrchestrationOutput:
         # Interpreted goal comes from the planner via ExecutionRequest; never re-derived from NL here.
         ig = state.interpreted_goal or _placeholder_interpreted_goal(state.request.analysis_goal)

@@ -15,11 +15,11 @@ from uuid import UUID
 from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 from sqlalchemy.orm import Session
 
+from backend.agents.ai_agents_meta import merge_ai_agents_meta
 from backend.agents.intent_agent import IntentAgent
 from backend.agents.planning_agent import PlanningAgent
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
-from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.recorded_chat_completion_service import RecordedChatCompletionService
 
 
@@ -29,15 +29,6 @@ class IntentPlanningAgentResult:
     planned_steps: list[PlannedStep]
     intent_model_call_id: UUID
     planning_model_call_id: UUID
-
-
-def _merge_ai_agents_patch(session: Session, analysis_run_id: UUID, key: str, payload: object) -> None:
-    run_svc = AnalysisRunService(session)
-    row = run_svc.require(analysis_run_id)
-    base = row.meta_json if isinstance(row.meta_json, dict) else {}
-    ai = dict(base.get("ai_agents") or {})
-    ai[key] = payload
-    run_svc.merge_meta_json(analysis_run_id, {"ai_agents": ai})
 
 
 def run_intent_planning_agents(
@@ -64,7 +55,7 @@ def run_intent_planning_agents(
         tickers=tickers,
         refresh=refresh,
     )
-    _merge_ai_agents_patch(
+    merge_ai_agents_meta(
         session,
         analysis_run_id,
         "intent",
@@ -73,7 +64,7 @@ def run_intent_planning_agents(
             "interpreted_goal": ig.model_dump(mode="json"),
         },
     )
-    _merge_ai_agents_patch(
+    merge_ai_agents_meta(
         session,
         analysis_run_id,
         "prompt_versions",
@@ -90,7 +81,7 @@ def run_intent_planning_agents(
         tickers=tickers,
         refresh=refresh,
     )
-    _merge_ai_agents_patch(
+    merge_ai_agents_meta(
         session,
         analysis_run_id,
         "planning",
