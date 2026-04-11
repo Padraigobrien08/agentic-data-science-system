@@ -62,6 +62,17 @@ def test_analysis_run_repository_list(run_bundle) -> None:
     assert len(repo.list_for_project(p.id)) == 1
 
 
+def test_analysis_run_error_can_restart_to_running(run_bundle) -> None:
+    session, _settings, run, _u, _p = run_bundle
+    svc = AnalysisRunService(session)
+    svc.transition_status(run.id, AnalysisRunStatus.running)
+    svc.transition_status(run.id, AnalysisRunStatus.error)
+    session.commit()
+    svc.transition_status(run.id, AnalysisRunStatus.running)
+    row = session.get(AnalysisRun, run.id)
+    assert row is not None and row.status == AnalysisRunStatus.running
+
+
 def test_analysis_run_status_and_payloads(run_bundle) -> None:
     session, _settings, run, _u, _p = run_bundle
     svc = AnalysisRunService(session)

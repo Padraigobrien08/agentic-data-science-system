@@ -14,13 +14,12 @@ from __future__ import annotations
 import argparse
 import json
 import logging
-import os
 import sys
 from pathlib import Path
 
-_REPO_ROOT = Path(__file__).resolve().parent.parent
-if str(_REPO_ROOT) not in sys.path:
-    sys.path.insert(0, str(_REPO_ROOT))
+from edgar_project.repo_layout import REPO_ROOT, chdir_repo_root, ensure_repo_root_on_syspath
+
+ensure_repo_root_on_syspath()
 
 from edgar_project.console_digest import print_run_digest_stdout
 from edgar_project.demo import DemoScenario, get_demo_scenario, list_demo_scenario_ids, load_demo_catalog
@@ -46,10 +45,7 @@ _ARTIFACT_ORDER = (
 
 def _chdir_repo_root() -> None:
     """Make cwd the repository root so MCP/pipeline paths match defaults."""
-    try:
-        os.chdir(_REPO_ROOT)
-    except OSError:
-        pass
+    chdir_repo_root()
 
 
 def _format_artifact_lines(paths: dict[str, str]) -> list[str]:
@@ -145,7 +141,7 @@ def _print_demo_guidance(scenario: DemoScenario) -> None:
     print()
     print(
         "Live runs write under data/processed/ and data/artifacts/ "
-        f"(not data/evaluation/). See {_REPO_ROOT / 'data' / 'README.md'}"
+        f"(not data/evaluation/). See {REPO_ROOT / 'data' / 'README.md'}"
     )
     print(sep)
 
@@ -168,10 +164,10 @@ def _cmd_demo_list() -> int:
 
 
 def _cmd_demo_fixtures(args: argparse.Namespace) -> int:
-    suite_path = _REPO_ROOT / "edgar_project/evaluation/benchmarks/suite_fixtures_v1.json"
-    rubric_path = _REPO_ROOT / "edgar_project/evaluation/fixtures/rubric_baseline_v1.json"
+    suite_path = REPO_ROOT / "edgar_project/evaluation/benchmarks/suite_fixtures_v1.json"
+    rubric_path = REPO_ROOT / "edgar_project/evaluation/fixtures/rubric_baseline_v1.json"
     print("EDGAR demo — deterministic fixture benchmarks (no live SEC).")
-    print(f"Suite: {suite_path.relative_to(_REPO_ROOT)}")
+    print(f"Suite: {suite_path.relative_to(REPO_ROOT)}")
     print()
     suite = BenchmarkSuite.model_validate_json(suite_path.read_text(encoding="utf-8"))
     rubric = Rubric.from_json_file(rubric_path)
@@ -194,7 +190,7 @@ def _cmd_demo_fixtures(args: argparse.Namespace) -> int:
     print(f"   Suite index:     {out_dir / f'{suite.suite_id}_results.json'}")
     print(f"   Suite summary:   {out_dir / f'{suite.suite_id}_summary.json'}")
     print(f"   Per-case CSVs:   {suite_root}/<case_id>/")
-    print(f"   Layout guide:    {_REPO_ROOT / 'data' / 'README.md'}")
+    print(f"   Layout guide:    {REPO_ROOT / 'data' / 'README.md'}")
     print()
     print("Tip: Live pipeline outputs go to data/processed/ and data/artifacts/ — see data/README.md")
     print("Tip: For a live SEC demo with curated tickers, run:  python3 -m edgar_project.cli demo --list")
@@ -258,10 +254,10 @@ def _cmd_demo(args: argparse.Namespace) -> int:
 def _cmd_evaluate(args: argparse.Namespace) -> int:
     suite_path = Path(args.suite)
     if not suite_path.is_absolute():
-        suite_path = (_REPO_ROOT / suite_path).resolve()
+        suite_path = (REPO_ROOT / suite_path).resolve()
     rubric_path = Path(args.rubric)
     if not rubric_path.is_absolute():
-        rubric_path = (_REPO_ROOT / rubric_path).resolve()
+        rubric_path = (REPO_ROOT / rubric_path).resolve()
     suite = BenchmarkSuite.model_validate_json(suite_path.read_text(encoding="utf-8"))
     if args.write_markdown:
         suite = suite.model_copy(update={"write_markdown_report": True})

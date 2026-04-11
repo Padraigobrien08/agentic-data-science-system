@@ -1,4 +1,4 @@
-"""Analysis run CRUD (Phase A — synchronous, pending records only until executor is wired)."""
+"""Analysis run CRUD and synchronous EDGAR execution (Phase A)."""
 
 from __future__ import annotations
 
@@ -6,8 +6,16 @@ from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query
 from sqlalchemy.exc import IntegrityError
-from backend.api.deps import AnalysisRunServiceDep, ArtifactServiceDep, DbSession, RunStepServiceDep
+
+from backend.api.deps import (
+    AnalysisRunServiceDep,
+    ArtifactServiceDep,
+    DbSession,
+    EdgarPipelineExecutionDep,
+    RunStepServiceDep,
+)
 from backend.models.project import Project
+from backend.models.enums import AnalysisRunStatus
 from backend.schemas.analysis_run import AnalysisRunCreate
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
@@ -19,6 +27,7 @@ from backend.schemas.api_phase_a import (
     artifact_to_metadata,
     run_step_to_detail,
 )
+from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -108,3 +117,34 @@ def list_run_artifacts(
         raise HTTPException(status_code=404, detail="Run not found")
     rows = art_svc.list_for_analysis_run(run_id)
     return [artifact_to_metadata(a) for a in rows]
+
+
+@router.post("/{run_id}/execute", response_model=ExecuteRunResponse)
+def execute_run(
+    run_id: UUID,
+    pipeline: EdgarPipelineExecutionDep,
+    body: ExecuteRunOverrides | None = None,
+) -> ExecuteRunResponse:
+    """
+    Run the deterministic EDGAR orchestration for this row (synchronous; may take minutes with SEC).
+
+    Body fields override ``input_payload_json`` / ``orchestration_goal_text`` for this invocation only.
+    """
+    try:
+        out = pipeline.execute_analysis_run(
+            run_id,
+            tickers=body.tickers if body else None,
+            analysis_goal=body.analysis_goal if body else None,
+            refresh=body.refresh if body else None,
+        )
+    except ValueError as exc:
+        raise HTTPException(status_code=400, detail=str(exc)) from exc
+    return ExecuteRunResponse(
+        analysis_run_id=run_id,
+        orchestration_run_id=str(out.run_id),
+        orchestration_status=out.status.value,
+        message=out.message,
+        final_summary=out.final_summary or "",
+        artifact_count=len(out.artifact_paths),
+        db_status=AnalysisRunStatus(out.status.value),
+    )

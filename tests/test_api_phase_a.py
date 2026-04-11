@@ -100,6 +100,53 @@ def test_runs_list_create_get_steps_artifacts(api_client: tuple[TestClient, str]
     assert r.json() == []
 
 
+def test_post_execute_run_mocked(api_client: tuple[TestClient, str]) -> None:
+    from unittest.mock import patch
+
+    from edgar_project.orchestration.schemas import (
+        InterpretedGoal,
+        InterpretedGoalCode,
+        OrchestrationOutput,
+        OrchestrationRunStatus,
+    )
+
+    client, project_id = api_client
+
+    def _fake_out() -> OrchestrationOutput:
+        return OrchestrationOutput(
+            status=OrchestrationRunStatus.success,
+            message="ok",
+            interpreted_goal=InterpretedGoal(
+                code=InterpretedGoalCode.full_pipeline,
+                description="d",
+                user_goal_text="g",
+            ),
+            artifact_paths={},
+        )
+
+    with patch(
+        "backend.services.edgar_pipeline_execution_service.run_analysis_agent",
+        lambda _req: _fake_out(),
+    ):
+        r = client.post(
+            "/v1/runs",
+            json={
+                "project_id": project_id,
+                "orchestration_goal_text": "test goal",
+                "input_payload_json": {"tickers": ["AAPL"]},
+            },
+        )
+        assert r.status_code == 201
+        run_id = r.json()["id"]
+        r2 = client.post(f"/v1/runs/{run_id}/execute", json={})
+        assert r2.status_code == 200
+        body = r2.json()
+        assert body["orchestration_status"] == "success"
+        assert body["artifact_count"] == 0
+        r3 = client.get(f"/v1/runs/{run_id}", params={"include_payloads": "true"})
+        assert r3.json()["status"] == "success"
+
+
 def test_get_artifact_404(api_client: tuple[TestClient, str]) -> None:
     client, _ = api_client
     fake = "00000000-0000-4000-8000-000000000001"

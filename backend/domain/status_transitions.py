@@ -29,6 +29,16 @@ _ANALYSIS_RUN_TERMINAL: frozenset[AnalysisRunStatus] = frozenset(
     }
 )
 
+# Allow another pipeline attempt after these terminal outcomes (not ``success``).
+_RESTART_TO_RUNNING: frozenset[AnalysisRunStatus] = frozenset(
+    {
+        AnalysisRunStatus.error,
+        AnalysisRunStatus.partial_success,
+        AnalysisRunStatus.no_data,
+        AnalysisRunStatus.cancelled,
+    }
+)
+
 _RUN_STEP_ALLOWED: dict[RunStepStatus, frozenset[RunStepStatus]] = {
     RunStepStatus.pending: frozenset({RunStepStatus.running, RunStepStatus.skipped}),
     RunStepStatus.running: frozenset(
@@ -56,6 +66,8 @@ def can_transition_analysis_run(
     target: AnalysisRunStatus,
 ) -> bool:
     if current == target:
+        return True
+    if target == AnalysisRunStatus.running and current in _RESTART_TO_RUNNING:
         return True
     if current in _ANALYSIS_RUN_TERMINAL:
         return False
