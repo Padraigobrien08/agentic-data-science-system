@@ -18,3 +18,7 @@ data/backend.db
 
 # Managed artifact blobs (local object store)
 data/artifact_storage/
+
+# Next.js app (see frontend/.gitignore)
+frontend/node_modules/
+frontend/.next/

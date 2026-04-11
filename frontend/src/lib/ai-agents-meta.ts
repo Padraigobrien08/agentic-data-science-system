@@ -1,0 +1,84 @@
+/**
+ * Parse `analysis_run.meta_json.ai_agents` for transparent agent UI.
+ */
+
+function isRecord(v: unknown): v is Record<string, unknown> {
+  return typeof v === "object" && v !== null && !Array.isArray(v);
+}
+
+export type PlanningStepWire = {
+  order: number;
+  tool_name: string;
+  label?: string;
+  tool_input?: Record<string, unknown>;
+};
+
+export type AgentPhaseMeta = {
+  skipped?: boolean;
+  reason?: string;
+  error?: string;
+  model_call_id?: string;
+  result?: unknown;
+  [key: string]: unknown;
+};
+
+export type ParsedAiAgents = {
+  intent?: AgentPhaseMeta & { interpreted_goal?: unknown };
+  planning?: AgentPhaseMeta & { steps?: PlanningStepWire[] };
+  critic?: AgentPhaseMeta;
+  report?: AgentPhaseMeta;
+  prompt_versions?: Record<string, string>;
+  traceable_pipeline?: unknown;
+  mcp_trace?: unknown;
+};
+
+function parsePlanningSteps(raw: unknown): PlanningStepWire[] | undefined {
+  if (!Array.isArray(raw)) return undefined;
+  const out: PlanningStepWire[] = [];
+  for (const row of raw) {
+    if (!isRecord(row)) continue;
+    const order = typeof row.order === "number" ? row.order : Number(row.order);
+    const tool_name = typeof row.tool_name === "string" ? row.tool_name : "";
+    if (!Number.isFinite(order) || !tool_name) continue;
+    const label = typeof row.label === "string" ? row.label : undefined;
+    const tool_input = isRecord(row.tool_input) ? row.tool_input : undefined;
+    out.push({ order, tool_name, label, tool_input });
+  }
+  return out.length ? out.sort((a, b) => a.order - b.order) : undefined;
+}
+
+export function parseAiAgents(meta: unknown): ParsedAiAgents | null {
+  if (!isRecord(meta)) return null;
+  const ai = meta.ai_agents;
+  if (!isRecord(ai)) return null;
+
+  const intent = isRecord(ai.intent) ? (ai.intent as ParsedAiAgents["intent"]) : undefined;
+  const planningRaw = isRecord(ai.planning) ? ai.planning : undefined;
+  let planning: ParsedAiAgents["planning"];
+  if (planningRaw) {
+    const steps = parsePlanningSteps(planningRaw.steps);
+    planning = { ...planningRaw, steps } as ParsedAiAgents["planning"];
+  }
+  const critic = isRecord(ai.critic) ? (ai.critic as AgentPhaseMeta) : undefined;
+  const report = isRecord(ai.report) ? (ai.report as AgentPhaseMeta) : undefined;
+  const prompt_versions = isRecord(ai.prompt_versions)
+    ? (ai.prompt_versions as Record<string, string>)
+    : undefined;
+
+  if (!intent && !planning && !critic && !report && !prompt_versions) {
+    return {
+      traceable_pipeline: ai.traceable_pipeline,
+      mcp_trace: ai.mcp_trace,
+    };
+  }
+
+  return {
+    intent,
+    planning,
+    critic,
+    report,
+    prompt_versions,
+    traceable_pipeline: ai.traceable_pipeline,
+    mcp_trace: ai.mcp_trace,
+  };
+}
