@@ -16,6 +16,8 @@ import structlog
 from sqlalchemy.orm import Session
 
 from backend.agents.traceable_analysis_pipeline import run_traceable_edgar_pipeline
+from backend.agents.llm_phase_status import maybe_llm_error_summary_note
+from backend.agents.traceability_summary import enrich_traceability_artifact_ids
 from backend.llm.exceptions import LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
 from backend.models.enums import AnalysisRunStatus
@@ -257,6 +259,15 @@ class EdgarPipelineExecutionService:
                 else:
                     self._runs.set_error_summary(analysis_run_id, None)
 
+                self._session.refresh(row)
+                if not out.errors:
+                    opl = row.output_payload_json if isinstance(row.output_payload_json, dict) else {}
+                    lps = opl.get("llm_phases_summary")
+                    if isinstance(lps, dict):
+                        llm_note = maybe_llm_error_summary_note(list(out.errors), lps)
+                        if llm_note:
+                            self._runs.set_error_summary(analysis_run_id, llm_note)
+
                 duration_s = monotonic_s() - t0
                 observe_pipeline_complete(duration_s, db_terminal.value)
                 log.info(
@@ -291,6 +302,8 @@ class EdgarPipelineExecutionService:
                         )
                     except (OSError, ValueError):
                         continue
+
+                enrich_traceability_artifact_ids(self._session, analysis_run_id)
 
                 self._runs.transition_status(analysis_run_id, db_terminal)
                 self._session.flush()

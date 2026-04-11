@@ -73,6 +73,12 @@ class ExecutionRequest(BaseModel):
         if not outcome.ok or outcome.plan is None:
             msg = "PlanningOutcome must be ok with a non-null plan"
             raise ValueError(msg)
+        if not outcome.plan.steps:
+            msg = (
+                "Execution handoff rejected: planner produced an empty plan (no PlannedStep rows). "
+                "The deterministic executor must not run without at least one tool step."
+            )
+            raise ValueError(msg)
         return cls(
             run_id=run_id,
             request=request,

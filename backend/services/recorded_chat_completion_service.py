@@ -46,12 +46,17 @@ class RecordedChatCompletionService:
         evaluation_run_id: UUID | None = None,
         tool_call_id: UUID | None = None,
         request_metadata: dict[str, Any] | None = None,
+        prompt_id: str | None = None,
+        prompt_version: str | None = None,
     ) -> tuple[ModelCall, ChatCompletionResult]:
         """
         Insert ``ModelCall`` (running), invoke provider, update row with tokens/latency/raw response.
 
         ``request_metadata`` is merged into the persisted ``request_payload_json`` under ``agent`` (not
-        sent to the provider). Use it for template id/version and agent role for audits.
+        sent to the provider). Use it for agent role and optional extra audit fields.
+
+        ``prompt_id`` / ``prompt_version`` are stored as first-class columns when provided (agent
+        runtime); generic LLM calls may omit them.
 
         Commits are the caller's responsibility. On provider error the row is left ``error`` and the
         exception is re-raised.
@@ -63,6 +68,8 @@ class RecordedChatCompletionService:
         row = ModelCall(
             provider=self._provider.provider_id,
             model_name=request.model,
+            prompt_id=prompt_id,
+            prompt_version=prompt_version,
             analysis_run_id=analysis_run_id,
             evaluation_run_id=evaluation_run_id,
             tool_call_id=tool_call_id,
@@ -126,3 +133,25 @@ class RecordedChatCompletionService:
             model=result.model,
         )
         return row, result
+
+    def mark_agent_output_failed(
+        self,
+        model_call_id: UUID,
+        *,
+        detail: str,
+        agent_code: str | None = None,
+    ) -> None:
+        """
+        After a successful HTTP completion, the model response failed agent-side validation.
+
+        Marks the row ``error`` so traces do not show a false success for unusable output.
+        """
+        row = self._calls.get(model_call_id)
+        if row is None:
+            return
+        row.status = ModelCallStatus.error
+        prefix = f"agent_output_invalid[{agent_code}]" if agent_code else "agent_output_invalid"
+        row.error_detail = f"{prefix}: {detail}"[:8192]
+        if row.finished_at is None:
+            row.finished_at = datetime.now(timezone.utc)
+        self._calls.flush()

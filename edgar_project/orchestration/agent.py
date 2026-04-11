@@ -38,8 +38,10 @@ from edgar_project.orchestration.planner import Planner
 from edgar_project.orchestration.state import OrchestrationRunState
 from edgar_project.orchestration.run_logging import log_run_finished, logger
 from edgar_project.orchestration.schemas import (
+    CODE_ORCH_VALIDATION,
     InterpretedGoal,
     InterpretedGoalCode,
+    OrchestrationError,
     OrchestrationInput,
     OrchestrationOutput,
     OrchestrationRunStatus,
@@ -76,6 +78,44 @@ def _orchestration_output_when_planning_fails(
         message=err0.message if err0 else "Planning failed",
         interpreted_goal=ig,
         errors=list(outcome.errors),
+        step_statuses=[],
+    )
+    out = out.model_copy(update={"final_summary": _build_final_summary_line(out)})
+    log_run_finished(
+        out.run_id,
+        status=out.status,
+        message=out.message,
+        errors=list(out.errors),
+        warnings_count=len(out.warnings),
+        artifact_path_count=len(out.artifact_paths),
+    )
+    return out
+
+
+def _orchestration_output_when_handoff_rejected(
+    run_id: str,
+    request: OrchestrationInput,
+    outcome: PlanningOutcome,
+    detail: str,
+) -> OrchestrationOutput:
+    """Terminal output when :class:`ExecutionRequest` cannot be built (e.g. empty plan)."""
+    ig = outcome.interpreted_goal or InterpretedGoal(
+        code=InterpretedGoalCode.planning_failed,
+        description="Planning did not yield an executable handoff to the executor.",
+        user_goal_text=request.analysis_goal.strip(),
+    )
+    out = OrchestrationOutput(
+        run_id=run_id,
+        status=OrchestrationRunStatus.error,
+        message="Execution handoff rejected",
+        interpreted_goal=ig,
+        errors=[
+            OrchestrationError(
+                code=CODE_ORCH_VALIDATION,
+                message="Planner output cannot be passed to the executor.",
+                detail=detail[:512],
+            )
+        ],
         step_statuses=[],
     )
     out = out.model_copy(update={"final_summary": _build_final_summary_line(out)})
@@ -145,7 +185,35 @@ class AnalysisAgent:
             self._planner.describe_plan(outcome.plan),
         )
 
-        execution = ExecutionRequest.from_planning(run_id=run_id, request=request, outcome=outcome)
+        try:
+            execution = ExecutionRequest.from_planning(run_id=run_id, request=request, outcome=outcome)
+        except ValueError as exc:
+            logger.error(
+                "[%s] execution_handoff_rejected detail=%r",
+                run_id,
+                str(exc),
+                extra={
+                    "event": "orchestration_execution_handoff_rejected",
+                    "orchestration_run_id": run_id,
+                },
+            )
+            return _orchestration_output_when_handoff_rejected(run_id, request, outcome, str(exc)), None
+
+        tool_chain = [s.tool_name for s in sorted(execution.plan.steps, key=lambda x: x.order)]
+        goal_code = execution.interpreted_goal.code.value if execution.interpreted_goal else None
+        logger.info(
+            "[%s] execution_handoff ok step_count=%d tools=%s goal_code=%s",
+            run_id,
+            len(tool_chain),
+            tool_chain,
+            goal_code,
+            extra={
+                "event": "orchestration_execution_handoff",
+                "orchestration_run_id": run_id,
+                "planned_step_count": len(tool_chain),
+                "goal_code": goal_code,
+            },
+        )
         out, state = self._executor.run_returning_state(execution)
         return out.model_copy(update={"final_summary": _build_final_summary_line(out)}), state
 

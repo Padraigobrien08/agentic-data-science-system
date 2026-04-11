@@ -199,9 +199,9 @@ class RunExecutionJobRepository:
         """
         Atomically claim one runnable job:
 
-        1. **Stale lease, run still queued** — extend lease (same attempt_count).
-        2. **Stale lease, run running** — fail or requeue: if attempts exhausted mark failed;
-           else bump attempt_count, reset job to pending and run error→queued (idempotent reclaim).
+        1. **Stale or missing lease, run still queued** — extend lease (same attempt_count).
+        2. **Stale or missing lease, run running** — fail or requeue: if attempts exhausted mark failed;
+           else reset job to pending and run error→queued (idempotent reclaim).
         3. **Fresh pending** — run queued, attempt_count < max_attempts: set running, lease,
            increment attempt_count.
 
@@ -236,14 +236,16 @@ class RunExecutionJobRepository:
                 self._session.flush()
             return None
 
-        # --- 1) Stale: worker died before pipeline moved run off queued ---
+        # --- 1) Stale / no lease: worker died before pipeline moved run off queued ---
         q_stale_queued = self._for_update(
             select(RunExecutionJob.id)
             .join(AnalysisRun, RunExecutionJob.analysis_run_id == AnalysisRun.id)
             .where(
                 RunExecutionJob.status == RunExecutionJobStatus.running,
-                RunExecutionJob.lease_expires_at.is_not(None),
-                RunExecutionJob.lease_expires_at < now,
+                or_(
+                    RunExecutionJob.lease_expires_at.is_(None),
+                    RunExecutionJob.lease_expires_at < now,
+                ),
                 AnalysisRun.status == AnalysisRunStatus.queued,
             )
             .order_by(RunExecutionJob.claimed_at.asc().nulls_first())
@@ -260,14 +262,16 @@ class RunExecutionJobRepository:
                 self._session.flush()
                 return job
 
-        # --- 2) Stale: pipeline had committed run=running, worker died ---
+        # --- 2) Stale / no lease: pipeline had committed run=running, worker died ---
         q_stale_running = self._for_update(
             select(RunExecutionJob.id)
             .join(AnalysisRun, RunExecutionJob.analysis_run_id == AnalysisRun.id)
             .where(
                 RunExecutionJob.status == RunExecutionJobStatus.running,
-                RunExecutionJob.lease_expires_at.is_not(None),
-                RunExecutionJob.lease_expires_at < now,
+                or_(
+                    RunExecutionJob.lease_expires_at.is_(None),
+                    RunExecutionJob.lease_expires_at < now,
+                ),
                 AnalysisRun.status == AnalysisRunStatus.running,
             )
             .order_by(RunExecutionJob.claimed_at.asc().nulls_first())

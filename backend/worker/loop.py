@@ -363,6 +363,8 @@ def process_next_job(
             coarse_outcome=_coarse_worker_outcome(finalize_outcome),
             wall_duration_s=wall_duration_s,
         )
+    else:
+        observe_worker_job("finalize_missing_job")
     return True
 
 

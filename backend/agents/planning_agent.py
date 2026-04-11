@@ -5,12 +5,15 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
+from pydantic import ValidationError
+
 from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 
-from backend.agents.errors import AgentOutputError
+from backend.agents.errors import AgentFailureCode, AgentOutputError
+from backend.agents.llm_plan_handoff import validate_llm_planned_steps_for_handoff
 from backend.agents.json_extract import parse_json_object
 from backend.agents.output_schemas import PlanningAgentLLMOutput
-from backend.agents.prompt_loader import load_agent_prompt
+from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.template_render import render_planning_prompt
 from backend.config.settings import Settings, get_settings
 from backend.llm.types import ChatCompletionRequest
@@ -37,8 +40,8 @@ class PlanningAgent:
         tickers: list[str],
         refresh: bool,
     ) -> tuple[list[PlannedStep], ModelCall]:
-        version = self._settings.agent_planning_prompt_version
-        tmpl = load_agent_prompt("planning", version)
+        reg = load_registered_prompt("planning", self._settings.agent_planning_prompt_version)
+        tmpl = reg.template
         system = render_planning_prompt(tmpl.system_body)
         user_payload = {
             "interpreted_goal": interpreted_goal.model_dump(mode="json"),
@@ -59,22 +62,37 @@ class PlanningAgent:
         )
         meta = {
             "role": "planning",
-            "template_id": tmpl.template_id,
-            "template_version": tmpl.version,
+            "prompt_id": reg.prompt_id,
+            "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,
         }
         model_call, result = self._rec.complete_and_persist(
             req,
             analysis_run_id=analysis_run_id,
             request_metadata=meta,
+            prompt_id=reg.prompt_id,
+            prompt_version=reg.prompt_version,
         )
         text = (result.assistant_text or "").strip()
         if not text:
-            raise AgentOutputError("Planning model returned empty content")
+            raise AgentOutputError(
+                "Planning model returned empty content",
+                code=AgentFailureCode.MODEL_EMPTY,
+            )
         try:
             raw = parse_json_object(text)
+        except json.JSONDecodeError as exc:
+            raise AgentOutputError(
+                f"Planning model output is not valid JSON: {exc}",
+                code=AgentFailureCode.MODEL_JSON,
+            ) from exc
+        try:
             parsed = PlanningAgentLLMOutput.model_validate(raw)
-            steps = parsed.to_planned_steps()
-        except Exception as exc:
-            raise AgentOutputError(f"Invalid planning JSON: {exc}") from exc
+        except ValidationError as exc:
+            raise AgentOutputError(
+                f"Planning model JSON failed schema validation: {exc}",
+                code=AgentFailureCode.MODEL_SCHEMA,
+            ) from exc
+        steps = parsed.to_planned_steps()
+        validate_llm_planned_steps_for_handoff(steps)
         return steps, model_call

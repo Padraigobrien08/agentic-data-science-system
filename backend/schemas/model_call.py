@@ -38,6 +38,8 @@ class ModelCallRead(TimestampedRead):
     tool_call_id: UUID | None
     provider: str
     model_name: str
+    prompt_id: str | None = None
+    prompt_version: str | None = None
     status: ModelCallStatus
     prompt_tokens: int | None
     completion_tokens: int | None

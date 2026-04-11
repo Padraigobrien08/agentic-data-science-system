@@ -5,10 +5,12 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
-from backend.agents.errors import AgentOutputError
+from pydantic import ValidationError
+
+from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
 from backend.agents.output_schemas import CriticAgentLLMOutput, ReportAgentLLMOutput
-from backend.agents.prompt_loader import load_agent_prompt
+from backend.agents.prompt_registry import load_registered_prompt
 from backend.config.settings import Settings, get_settings
 from backend.llm.types import ChatCompletionRequest
 from backend.models.model_call import ModelCall
@@ -32,8 +34,8 @@ class ReportAgent:
         orchestration_summary: dict,
         critic: CriticAgentLLMOutput,
     ) -> tuple[ReportAgentLLMOutput, ModelCall]:
-        version = self._settings.agent_report_prompt_version
-        tmpl = load_agent_prompt("report", version)
+        reg = load_registered_prompt("report", self._settings.agent_report_prompt_version)
+        tmpl = reg.template
         system = tmpl.system_body
         user_payload = {
             "orchestration_summary": orchestration_summary,
@@ -52,21 +54,43 @@ class ReportAgent:
         )
         meta = {
             "role": "report",
-            "template_id": tmpl.template_id,
-            "template_version": tmpl.version,
+            "prompt_id": reg.prompt_id,
+            "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,
         }
         model_call, result = self._rec.complete_and_persist(
             req,
             analysis_run_id=analysis_run_id,
             request_metadata=meta,
+            prompt_id=reg.prompt_id,
+            prompt_version=reg.prompt_version,
         )
-        text = (result.assistant_text or "").strip()
-        if not text:
-            raise AgentOutputError("Report model returned empty content")
         try:
-            raw = parse_json_object(text)
-            parsed = ReportAgentLLMOutput.model_validate(raw)
-        except Exception as exc:
-            raise AgentOutputError(f"Invalid report JSON: {exc}") from exc
-        return parsed, model_call
+            text = (result.assistant_text or "").strip()
+            if not text:
+                raise AgentOutputError(
+                    "Report model returned empty content",
+                    code=AgentFailureCode.MODEL_EMPTY,
+                )
+            try:
+                raw = parse_json_object(text)
+            except json.JSONDecodeError as exc:
+                raise AgentOutputError(
+                    f"Report model output is not valid JSON: {exc}",
+                    code=AgentFailureCode.MODEL_JSON,
+                ) from exc
+            try:
+                parsed = ReportAgentLLMOutput.model_validate(raw)
+            except ValidationError as exc:
+                raise AgentOutputError(
+                    f"Report model JSON failed schema validation: {exc}",
+                    code=AgentFailureCode.MODEL_SCHEMA,
+                ) from exc
+            return parsed, model_call
+        except AgentOutputError as exc:
+            self._rec.mark_agent_output_failed(
+                model_call.id,
+                detail=str(exc),
+                agent_code=exc.code,
+            )
+            raise

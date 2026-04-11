@@ -70,6 +70,35 @@ def test_recorded_completion_persists_success(memory_session: Session) -> None:
     assert row.request_payload_json == req.to_request_log_dict()
     assert row.response_payload_json == result.model_dump(mode="json")
     assert row.started_at is not None and row.finished_at is not None
+    assert row.prompt_id is None and row.prompt_version is None
+
+
+def test_recorded_completion_persists_prompt_columns(memory_session: Session) -> None:
+    result = ChatCompletionResult(
+        model="stub-model",
+        assistant_text="x",
+        finish_reason="stop",
+        prompt_tokens=1,
+        completion_tokens=1,
+        latency_ms=1,
+        raw_response={},
+    )
+    provider = StubChatProvider(result=result)
+    svc = RecordedChatCompletionService(memory_session, provider)
+    req = ChatCompletionRequest(model="stub-model", messages=[{"role": "user", "content": "hi"}])
+    meta = {"role": "intent", "prompt_id": "edgar.agent.intent", "prompt_version": "1.0.0"}
+    row, _ = svc.complete_and_persist(
+        req,
+        analysis_run_id=None,
+        request_metadata=meta,
+        prompt_id="edgar.agent.intent",
+        prompt_version="1.0.0",
+    )
+    memory_session.commit()
+    assert row.prompt_id == "edgar.agent.intent"
+    assert row.prompt_version == "1.0.0"
+    assert row.provider == "stub"
+    assert row.model_name == "stub-model"
 
 
 def test_recorded_completion_persists_provider_error(memory_session: Session) -> None:
@@ -85,6 +114,27 @@ def test_recorded_completion_persists_provider_error(memory_session: Session) ->
     assert rows[0].status == ModelCallStatus.error
     assert "rate limit" in (rows[0].error_detail or "")
     assert rows[0].latency_ms is not None
+
+
+def test_mark_agent_output_failed_after_success(memory_session: Session) -> None:
+    result = ChatCompletionResult(
+        model="stub-model",
+        assistant_text="{}",
+        finish_reason="stop",
+        prompt_tokens=1,
+        completion_tokens=1,
+        latency_ms=1,
+        raw_response={},
+    )
+    svc = RecordedChatCompletionService(memory_session, StubChatProvider(result=result))
+    row, _ = svc.complete_and_persist(
+        ChatCompletionRequest(model="stub-model", messages=[{"role": "user", "content": "x"}]),
+    )
+    svc.mark_agent_output_failed(row.id, detail="schema mismatch", agent_code="model_output_schema_invalid")
+    memory_session.commit()
+    memory_session.refresh(row)
+    assert row.status == ModelCallStatus.error
+    assert "agent_output_invalid" in (row.error_detail or "")
 
 
 def test_factory_openai_requires_key() -> None:

@@ -46,6 +46,9 @@ class ModelCall(Base):
     provider: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     model_name: Mapped[str] = mapped_column(String(256), nullable=False, index=True)
 
+    prompt_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
+    prompt_version: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
+
     status: Mapped[ModelCallStatus] = mapped_column(
         str_enum_column(ModelCallStatus, name="model_call_status"),
         nullable=False,

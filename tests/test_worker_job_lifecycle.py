@@ -98,6 +98,40 @@ def test_claim_increments_attempt_and_sets_lease(session_factory: sessionmaker[S
         db.close()
 
 
+def test_null_lease_reclaimed_when_run_still_queued(session_factory: sessionmaker[Session]) -> None:
+    """Running row with missing lease + run queued: same reclaim path as expired lease."""
+    run_id, _jid = _seed_queued_job(session_factory)
+    db = session_factory()
+    try:
+        repo = RunExecutionJobRepository(db)
+        j1 = repo.claim_next_runnable(lease_seconds=60.0, max_attempts=4)
+        assert j1 is not None
+        assert j1.attempt_count == 1
+        db.commit()
+    finally:
+        db.close()
+
+    db2 = session_factory()
+    try:
+        job = db2.scalars(select(RunExecutionJob).where(RunExecutionJob.analysis_run_id == run_id)).first()
+        assert job is not None
+        job.lease_expires_at = None
+        db2.commit()
+    finally:
+        db2.close()
+
+    db3 = session_factory()
+    try:
+        repo = RunExecutionJobRepository(db3)
+        j2 = repo.claim_next_runnable(lease_seconds=120.0, max_attempts=4)
+        assert j2 is not None
+        assert j2.attempt_count == 1
+        assert j2.lease_expires_at is not None
+        db3.commit()
+    finally:
+        db3.close()
+
+
 def test_stale_lease_same_attempt_when_run_still_queued(session_factory: sessionmaker[Session]) -> None:
     """Expired lease + run queued: reclaim extends lease without bumping attempt_count."""
     run_id, _jid = _seed_queued_job(session_factory)

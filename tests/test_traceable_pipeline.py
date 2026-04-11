@@ -16,6 +16,7 @@ from backend.db.base import Base
 from backend.llm.types import ChatCompletionRequest, ChatCompletionResult
 from backend.models.analysis_run import AnalysisRun as AnalysisRunRow
 from backend.models.enums import AnalysisRunStatus, RunStepStatus
+from backend.models.model_call import ModelCall
 from backend.models.project import Project
 from backend.models.run_step import RunStep
 from backend.models.tool_call import ToolCall
@@ -140,6 +141,23 @@ def test_traceable_persists_mcp_skipped_and_llm_run_steps_without_llm(
     assert len(tcs) == 1
     assert tcs[0].tool_name == "resolve_company"
 
+    session.refresh(arun)
+    meta = arun.meta_json if isinstance(arun.meta_json, dict) else {}
+    ai = meta.get("ai_agents") or {}
+    assert ai["critic"]["phase_status"] == "skipped"
+    assert ai["critic"]["boundary_failure_class"] == "llm_not_configured"
+    assert ai["report"]["boundary_failure_class"] == "llm_not_configured"
+    assert steps[2].meta_json.get("boundary_failure_class") == "llm_not_configured"
+    assert steps[3].meta_json.get("boundary_failure_class") == "llm_not_configured"
+    assert ai["intent"]["phase_output"]["goal_code"] == "full_pipeline"
+    tr = ai.get("traceability") or {}
+    assert tr.get("contract_version") == "1"
+    assert len(tr.get("planning", {}).get("selected_tools", [])) == 2
+    assert tr["step_indices"]["critic"] == 2
+    assert steps[2].meta_json.get("traceability", {}).get("traceability_doc")
+    assert ai["planning"]["phase_output"]["step_count"] == 2
+    assert len(ai["planning"]["steps"]) == 2
+
 
 class _CriticReportStubProvider:
     provider_id = "stub"
@@ -210,6 +228,16 @@ def test_traceable_critic_and_report_with_stub_llm(
     ai = meta.get("ai_agents") or {}
     assert ai.get("critic", {}).get("skipped") is False
     assert ai.get("report", {}).get("skipped") is False
+    assert ai["critic"]["phase_output"]["issue_count"] == 0
+    assert "markdown_preview" in ai["report"]["phase_output"]
+    tr2 = ai.get("traceability") or {}
+    assert ai["critic"]["phase_status"] in ("success", "degraded")
+    assert ai["report"]["phase_status"] == "success"
+    opl = row.output_payload_json if isinstance(row.output_payload_json, dict) else {}
+    assert opl.get("llm_phases_summary", {}).get("critic", {}).get("phase_status") in ("success", "degraded")
+    assert tr2["critic"]["ran"] is True
+    assert tr2["report"]["ran"] is True
+    assert tr2["report"]["key_takeaways_preview"]
 
     out_json = row.output_payload_json if isinstance(row.output_payload_json, dict) else {}
     ufr = out_json.get("user_facing_report") or {}
@@ -222,3 +250,13 @@ def test_traceable_critic_and_report_with_stub_llm(
     )
     assert steps[2].status == RunStepStatus.success
     assert steps[3].status == RunStepStatus.success
+    assert steps[2].meta_json and steps[2].meta_json.get("phase_output", {}).get("overall_confidence")
+    assert steps[3].meta_json and steps[3].meta_json.get("phase_output", {}).get("artifact_refs") is not None
+
+    mcs = list(session.scalars(select(ModelCall).where(ModelCall.analysis_run_id == arun.id)).all())
+    assert len(mcs) == 2
+    roles = {m.request_payload_json.get("agent", {}).get("role") for m in mcs}
+    assert roles == {"critic", "report"}
+    assert {m.prompt_id for m in mcs} == {"edgar.agent.critic", "edgar.agent.report"}
+    assert all(m.prompt_version == "1.0.0" for m in mcs)
+    assert all(m.provider == "stub" and m.model_name == "stub" for m in mcs)

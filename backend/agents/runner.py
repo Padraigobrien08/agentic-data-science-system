@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from backend.agents.ai_agents_meta import merge_ai_agents_meta
 from backend.agents.intent_agent import IntentAgent
+from backend.agents.phase_outputs import build_intent_phase_output, build_planning_phase_output
 from backend.agents.planning_agent import PlanningAgent
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
@@ -55,13 +56,21 @@ def run_intent_planning_agents(
         tickers=tickers,
         refresh=refresh,
     )
+    intent_po = build_intent_phase_output(
+        interpreted_goal=ig,
+        tickers=tickers,
+        analysis_goal=user_request,
+        source="llm",
+    )
     merge_ai_agents_meta(
         session,
         analysis_run_id,
         "intent",
         {
+            "source": "llm",
             "model_call_id": str(mc_i.id),
             "interpreted_goal": ig.model_dump(mode="json"),
+            "phase_output": intent_po,
         },
     )
     merge_ai_agents_meta(
@@ -81,13 +90,21 @@ def run_intent_planning_agents(
         tickers=tickers,
         refresh=refresh,
     )
+    plan_po = build_planning_phase_output(
+        plan=None,
+        interpreted_goal=ig,
+        source="llm",
+        ordered_steps=steps,
+    )
     merge_ai_agents_meta(
         session,
         analysis_run_id,
         "planning",
         {
+            "source": "llm",
             "model_call_id": str(mc_p.id),
             "steps": [st.model_dump(mode="json") for st in steps],
+            "phase_output": plan_po,
         },
     )
 

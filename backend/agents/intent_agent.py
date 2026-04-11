@@ -5,10 +5,12 @@ from __future__ import annotations
 import json
 from uuid import UUID
 
-from backend.agents.errors import AgentOutputError
+from pydantic import ValidationError
+
+from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
 from backend.agents.output_schemas import IntentAgentLLMOutput
-from backend.agents.prompt_loader import load_agent_prompt
+from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.template_render import render_intent_prompt
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
@@ -36,8 +38,8 @@ class IntentAgent:
         tickers: list[str],
         refresh: bool,
     ) -> tuple[InterpretedGoal, ModelCall]:
-        version = self._settings.agent_intent_prompt_version
-        tmpl = load_agent_prompt("intent", version)
+        reg = load_registered_prompt("intent", self._settings.agent_intent_prompt_version)
+        tmpl = reg.template
         system = render_intent_prompt(tmpl.system_body)
         user_payload = {
             "user_request": user_request,
@@ -57,22 +59,42 @@ class IntentAgent:
         )
         meta = {
             "role": "intent",
-            "template_id": tmpl.template_id,
-            "template_version": tmpl.version,
+            "prompt_id": reg.prompt_id,
+            "prompt_version": reg.prompt_version,
             "template_path": tmpl.source_uri,
         }
         model_call, result = self._rec.complete_and_persist(
             req,
             analysis_run_id=analysis_run_id,
             request_metadata=meta,
+            prompt_id=reg.prompt_id,
+            prompt_version=reg.prompt_version,
         )
         text = (result.assistant_text or "").strip()
         if not text:
-            raise AgentOutputError("Intent model returned empty content")
+            raise AgentOutputError(
+                "Intent model returned empty content",
+                code=AgentFailureCode.MODEL_EMPTY,
+            )
         try:
             raw = parse_json_object(text)
+        except json.JSONDecodeError as exc:
+            raise AgentOutputError(
+                f"Intent model output is not valid JSON: {exc}",
+                code=AgentFailureCode.MODEL_JSON,
+            ) from exc
+        try:
             parsed = IntentAgentLLMOutput.model_validate(raw)
+        except ValidationError as exc:
+            raise AgentOutputError(
+                f"Intent model JSON failed schema validation: {exc}",
+                code=AgentFailureCode.MODEL_SCHEMA,
+            ) from exc
+        try:
             ig = parsed.to_interpreted_goal()
-        except Exception as exc:
-            raise AgentOutputError(f"Invalid intent JSON: {exc}") from exc
+        except ValueError as exc:
+            raise AgentOutputError(
+                f"Intent model fields are not usable for orchestration: {exc}",
+                code=AgentFailureCode.MODEL_SEMANTIC,
+            ) from exc
         return ig, model_call

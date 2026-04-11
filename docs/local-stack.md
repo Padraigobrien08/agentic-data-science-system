@@ -105,6 +105,8 @@ export PYTHONPATH=.
 python -m backend.worker
 ```
 
+**Worker queue:** each claim sets a **lease** (`lease_expires_at`). If a job stays `running` but the lease is **expired or missing** (crash, bug, or legacy row), the next poll **reclaims** it like a stale lease so the queue does not stick forever.
+
 **5. Frontend** (`frontend/`):
 
 ```bash
