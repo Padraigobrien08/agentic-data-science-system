@@ -30,6 +30,8 @@ class RunJobStatusSnapshot(BaseModel):
     status: RunExecutionJobStatus
     error_detail: str | None = None
     claimed_at: datetime | None = None
+    attempt_count: int = 0
+    lease_expires_at: datetime | None = None
     created_at: datetime
 
 

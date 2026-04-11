@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import DateTime, ForeignKey, JSON, Text, Uuid, func
+from sqlalchemy import DateTime, ForeignKey, Integer, JSON, Text, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
@@ -51,6 +51,19 @@ class RunExecutionJob(Base):
     error_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     claimed_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+
+    attempt_count: Mapped[int] = mapped_column(
+        Integer,
+        nullable=False,
+        default=0,
+        doc="Increments on each fresh claim (not on stale lease extension).",
+    )
+
+    lease_expires_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        doc="While status is running, worker must finish or refresh before this time.",
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

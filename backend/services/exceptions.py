@@ -17,3 +17,12 @@ class RunLifecycleError(ValueError):
     def __init__(self, message: str, *, status_code: int = 409) -> None:
         self.status_code = status_code
         super().__init__(message)
+
+
+class RunCancelledDuringExecution(Exception):
+    """
+    The run was marked cancelled in the DB while this pipeline session was active.
+
+    The pipeline session should rollback before raising so the worker can finalize the job
+    without overwriting the cancelled run with success or a generic error.
+    """

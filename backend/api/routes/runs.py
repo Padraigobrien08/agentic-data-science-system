@@ -121,7 +121,7 @@ def get_run_status(
 
 @router.post("/{run_id}/cancel", response_model=AnalysisRunSummary)
 def cancel_run(run_id: UUID, db: DbSession, user: CurrentUserDep) -> AnalysisRunSummary:
-    """Cancel a ``pending`` or ``queued`` run (not ``running`` or terminal)."""
+    """Cancel a non-terminal run (``pending``, ``queued``, or ``running``)."""
     require_analysis_run_owned(db, run_id, user.id)
     try:
         row = RunLifecycleService(db).cancel_analysis_run(run_id)

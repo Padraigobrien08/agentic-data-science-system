@@ -58,6 +58,19 @@ class Settings(BaseSettings):
         description="Sleep between DB queue polls when no job is available (``python -m backend.worker``)",
     )
 
+    run_job_max_attempts: int = Field(
+        default=4,
+        ge=1,
+        le=100,
+        description="Max fresh execution attempts per queue row (attempt_count increments on each new claim).",
+    )
+    run_job_lease_seconds: float = Field(
+        default=900.0,
+        ge=30.0,
+        le=86400.0,
+        description="While a job is running, lease_expires_at must stay in the future or the job becomes reclaimable.",
+    )
+
     # LLM (chat completions) — see ``backend.llm``
     llm_provider: str = Field(
         default="off",

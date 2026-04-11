@@ -33,11 +33,6 @@ class RunLifecycleService:
         row = self._runs.get(analysis_run_id)
         if row is None:
             raise RunLifecycleError("Run not found", status_code=404)
-        if row.status == AnalysisRunStatus.running:
-            raise RunLifecycleError(
-                "Run is currently executing; wait for it to finish before cancelling",
-                status_code=409,
-            )
         if is_terminal_analysis_run(row.status):
             raise RunLifecycleError(
                 f"Run is already finished ({row.status.value})",
@@ -49,6 +44,12 @@ class RunLifecycleService:
             return self._runs.require(analysis_run_id)
         if row.status == AnalysisRunStatus.queued:
             self._jobs.cancel_open_jobs_for_run(analysis_run_id, reason="Cancelled by user")
+            self._runs.transition_status(analysis_run_id, AnalysisRunStatus.cancelled)
+            self._jobs.flush()
+            return self._runs.require(analysis_run_id)
+        if row.status == AnalysisRunStatus.running:
+            self._jobs.cancel_open_jobs_for_run(analysis_run_id, reason="Cancelled by user")
+            self._runs.set_error_summary(analysis_run_id, "Cancelled by user")
             self._runs.transition_status(analysis_run_id, AnalysisRunStatus.cancelled)
             self._jobs.flush()
             return self._runs.require(analysis_run_id)
@@ -97,6 +98,10 @@ class RunLifecycleService:
             status=RunExecutionJobStatus.pending,
             overrides_json=overrides,
             trace_context_json=tc,
+            attempt_count=0,
+            claimed_at=None,
+            lease_expires_at=None,
+            error_detail=None,
         )
         self._jobs.add(job)
         self._jobs.flush()

@@ -31,6 +31,7 @@ _ANALYSIS_RUN_ALLOWED: dict[AnalysisRunStatus, frozenset[AnalysisRunStatus]] = {
             AnalysisRunStatus.partial_success,
             AnalysisRunStatus.no_data,
             AnalysisRunStatus.error,
+            AnalysisRunStatus.cancelled,
         }
     ),
 }

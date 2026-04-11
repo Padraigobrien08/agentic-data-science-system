@@ -185,8 +185,10 @@ def test_retry_after_error_queues_again(api_client: tuple[TestClient, str, dict[
 
     st = client.get(f"/v1/runs/{run_id}/status", headers=h)
     assert st.status_code == 200
+    snap = st.json()["latest_execution_job"]
     assert st.json()["has_open_execution_job"] is True
-    assert st.json()["latest_execution_job"]["status"] == "pending"
+    assert snap["status"] == "pending"
+    assert snap["attempt_count"] == 0
 
 
 def test_status_not_found(api_client: tuple[TestClient, str, dict[str, str]]) -> None:

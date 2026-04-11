@@ -22,7 +22,7 @@ from backend.repositories.run_step_repository import RunStepRepository
 from backend.repositories.tool_call_repository import ToolCallRepository
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
-from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
+from backend.services.exceptions import InvalidStatusTransition
 from backend.services.run_lifecycle_service import RunLifecycleService
 from backend.services.run_queue_service import RunQueueService
 from backend.services.run_step_service import RunStepService
@@ -73,14 +73,14 @@ def test_transition_error_to_queued_clears_finished_at(run_bundle) -> None:
     assert row.started_at is None
 
 
-def test_lifecycle_cancel_running_is_rejected(run_bundle) -> None:
+def test_lifecycle_cancel_running_marks_cancelled(run_bundle) -> None:
     session, _settings, run, _u, _p = run_bundle
     svc = AnalysisRunService(session)
     svc.transition_status(run.id, AnalysisRunStatus.running)
     session.commit()
-    with pytest.raises(RunLifecycleError) as ei:
-        RunLifecycleService(session).cancel_analysis_run(run.id)
-    assert ei.value.status_code == 409
+    row = RunLifecycleService(session).cancel_analysis_run(run.id)
+    session.commit()
+    assert row.status == AnalysisRunStatus.cancelled
 
 
 def test_enqueue_after_create_sets_queued_and_job(run_bundle) -> None:

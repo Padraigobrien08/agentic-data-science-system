@@ -32,6 +32,7 @@ from backend.observability.metrics import (
 from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
+from backend.services.exceptions import RunCancelledDuringExecution
 from edgar_project.orchestration import OrchestrationInput
 from edgar_project.orchestration.agent import AnalysisAgent
 from edgar_project.orchestration.schemas import OrchestrationOutput, OrchestrationRunStatus
@@ -177,6 +178,13 @@ class EdgarPipelineExecutionService:
 
                 self._runs.transition_status(analysis_run_id, AnalysisRunStatus.running)
                 self._session.flush()
+                row = self._runs.require(analysis_run_id)
+                self._session.refresh(row)
+                if row.status == AnalysisRunStatus.cancelled:
+                    self._session.rollback()
+                    raise RunCancelledDuringExecution(
+                        "Run was cancelled before pipeline execution started"
+                    )
 
                 ensure_repo_root_on_syspath()
                 chdir_repo_root()
@@ -195,8 +203,21 @@ class EdgarPipelineExecutionService:
                         coordinator=self._coord,
                     )
                     out = traced.orchestration_output
+                except RunCancelledDuringExecution:
+                    raise
                 except Exception as exc:
                     observe_pipeline_exception(exc)
+                    self._session.rollback()
+                    row_cancel = self._runs.get(analysis_run_id)
+                    if row_cancel is not None and row_cancel.status == AnalysisRunStatus.cancelled:
+                        log.info(
+                            "pipeline_abort_cancelled",
+                            analysis_run_id=str(analysis_run_id),
+                            exc_type=type(exc).__name__,
+                        )
+                        raise RunCancelledDuringExecution(
+                            "Run was cancelled while the pipeline was executing"
+                        ) from exc
                     log.exception(
                         "pipeline_failed",
                         analysis_run_id=str(analysis_run_id),
@@ -208,13 +229,26 @@ class EdgarPipelineExecutionService:
                     self._session.commit()
                     raise
 
+                row = self._runs.require(analysis_run_id)
+                self._session.refresh(row)
+                if row.status == AnalysisRunStatus.cancelled:
+                    self._session.rollback()
+                    raise RunCancelledDuringExecution(
+                        "Run was cancelled while the pipeline was executing"
+                    )
+
                 if out.run_id:
                     merge_orchestration_run_id(str(out.run_id))
 
                 db_terminal = _orch_status_to_db(out.status)
-                row = self._runs.require(analysis_run_id)
                 if out.run_id:
                     row.correlation_id = str(out.run_id)[:64]
+                self._session.refresh(row)
+                if row.status == AnalysisRunStatus.cancelled:
+                    self._session.rollback()
+                    raise RunCancelledDuringExecution(
+                        "Run was cancelled before pipeline results were persisted"
+                    )
                 self._runs.set_output_payload(analysis_run_id, out.model_dump(mode="json"))
                 if traced is not None and traced.output_payload_patch:
                     self._runs.merge_output_payload(analysis_run_id, traced.output_payload_patch)
@@ -234,6 +268,13 @@ class EdgarPipelineExecutionService:
                     db_terminal_status=db_terminal.value,
                     artifact_path_count=len(out.artifact_paths),
                 )
+
+                self._session.refresh(row)
+                if row.status == AnalysisRunStatus.cancelled:
+                    self._session.rollback()
+                    raise RunCancelledDuringExecution(
+                        "Run was cancelled before artifacts were ingested"
+                    )
 
                 for role_key, path_str in out.artifact_paths.items():
                     if not path_str or not str(path_str).strip():
