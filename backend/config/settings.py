@@ -3,7 +3,7 @@
 from functools import lru_cache
 from pathlib import Path
 
-from pydantic import Field, field_validator
+from pydantic import Field, SecretStr, field_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -37,6 +37,39 @@ class Settings(BaseSettings):
         default=2.0,
         ge=0.1,
         description="Sleep between DB queue polls when no job is available (``python -m backend.worker``)",
+    )
+
+    # LLM (chat completions) — see ``backend.llm``
+    llm_provider: str = Field(
+        default="off",
+        description="``off`` disables factory; ``openai`` uses the OpenAI API (requires API key).",
+    )
+    openai_api_key: SecretStr | None = Field(
+        default=None,
+        description="OpenAI API key (EDGAR_BACKEND_OPENAI_API_KEY)",
+    )
+    openai_base_url: str | None = Field(
+        default=None,
+        description="Optional OpenAI-compatible base URL (Azure, proxies)",
+    )
+    openai_timeout_s: float = Field(
+        default=120.0,
+        ge=5.0,
+        description="HTTP timeout for OpenAI chat completion requests",
+    )
+
+    # Intent / planning agents (``backend.agents``) — prompts under versioned files on disk
+    agent_completion_model: str = Field(
+        default="gpt-4o-mini",
+        description="Chat model for intent and planning agents",
+    )
+    agent_intent_prompt_version: str = Field(
+        default="1.0.0",
+        description="Prompt file version directory under ``backend/agents/prompts/intent/``",
+    )
+    agent_planning_prompt_version: str = Field(
+        default="1.0.0",
+        description="Prompt file version directory under ``backend/agents/prompts/planning/``",
     )
 
     @field_validator("database_url", mode="before")
