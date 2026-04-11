@@ -14,7 +14,12 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from backend.agents.critic_agent import CriticAgent
-from backend.agents.critic_artifact_keys import collect_critic_excerpts
+from backend.agents.artifact_summaries import build_artifact_summaries_for_llm
+from backend.agents.llm_context import (
+    audit_compact_context,
+    build_critic_llm_context,
+    build_report_llm_context,
+)
 from backend.agents.output_schemas import CriticAgentLLMOutput
 from backend.agents.boundary_failures import (
     CRITIC_BLOCKED_REPORT,
@@ -162,27 +167,6 @@ def run_traceable_edgar_pipeline(
     prompt_versions["report"] = s.agent_report_prompt_version
     merge_ai_agents_meta(session, analysis_run_id, "prompt_versions", prompt_versions)
 
-    orchestration_summary = {
-        "run_id": orch_out.run_id,
-        "status": orch_out.status.value,
-        "message": orch_out.message,
-        "final_summary": orch_out.final_summary,
-        "interpreted_goal": orch_out.interpreted_goal.model_dump(mode="json"),
-        "resolved_companies": [c.model_dump(mode="json") for c in orch_out.resolved_companies],
-        "tickers": list(orch_input.tickers),
-        "analysis_goal": orch_input.analysis_goal,
-        "refresh": orch_input.refresh,
-        "warnings_count": len(orch_out.warnings),
-        "errors_count": len(orch_out.errors),
-        "step_statuses": [e.model_dump(mode="json") for e in orch_out.step_statuses],
-        "tool_results_summary": [t.model_dump(mode="json") for t in orch_out.tool_results_summary],
-        "tool_call_sequence": [x.model_dump(mode="json") for x in orch_out.tool_call_sequence],
-        "artifact_paths_by_role": dict(orch_out.artifact_paths),
-        "final_report_path": orch_out.final_report_path,
-        "errors": [e.model_dump(mode="json") for e in orch_out.errors],
-        "warnings": [w.model_dump(mode="json") for w in orch_out.warnings],
-    }
-
     output_patch: dict[str, Any] = {}
 
     # --- Step 3: critic (LLM) — artifact excerpts + orchestration summary ---
@@ -199,17 +183,25 @@ def run_traceable_edgar_pipeline(
     critic_patch: dict[str, Any] = {"skipped": True, "phase_status": PHASE_SKIPPED}
     report_patch: dict[str, Any] = {"skipped": True, "phase_status": PHASE_SKIPPED}
 
-    excerpts = collect_critic_excerpts(orch_out.artifact_paths)
-    critic_excerpt_roles = sorted(excerpts.keys())
-    orchestration_summary["artifact_excerpt_roles_loaded"] = list(critic_excerpt_roles)
-    orchestration_summary["artifact_paths_roles"] = sorted(orch_out.artifact_paths.keys())
+    artifact_summaries_bundle = build_artifact_summaries_for_llm(orch_out.artifact_paths)
+    critic_summary_roles = sorted((artifact_summaries_bundle.get("by_role") or {}).keys())
+    artifact_paths_roles = sorted(orch_out.artifact_paths.keys())
 
     plan_alignment_findings = compute_plan_alignment_findings(
         ig,
         analysis_goal=analysis_goal,
         artifact_paths=dict(orch_out.artifact_paths or {}),
     )
-    orchestration_summary["plan_alignment_findings"] = plan_alignment_findings
+
+    critic_llm_context = build_critic_llm_context(
+        orch=orch_out,
+        orch_input=orch_input,
+        plan_alignment_findings=plan_alignment_findings,
+        artifact_summaries=artifact_summaries_bundle,
+        paths_roles=artifact_paths_roles,
+        summary_roles_loaded=critic_summary_roles,
+    )
+    critic_llm_audit = audit_compact_context(critic_llm_context)
 
     if llm_provider is None:
         co_skip = attach_plan_alignment_findings(
@@ -245,8 +237,7 @@ def run_traceable_edgar_pipeline(
         try:
             critic_out, critic_mc = CriticAgent(recorder, settings=s).run(
                 analysis_run_id=analysis_run_id,
-                orchestration_summary=orchestration_summary,
-                artifact_excerpts=excerpts,
+                llm_user_context=critic_llm_context,
             )
         except Exception as exc:
             rs_steps.transition_status(critic_row.id, RunStepStatus.error, detail=str(exc)[:2048])
@@ -295,6 +286,7 @@ def run_traceable_edgar_pipeline(
                     "phase_output": co,
                     "phase_status": c_status,
                     "degraded": degraded,
+                    "llm_context_audit": critic_llm_audit,
                 },
             )
             critic_patch = {
@@ -305,6 +297,7 @@ def run_traceable_edgar_pipeline(
                 "result": critic_out.model_dump(mode="json"),
                 "phase_output": co,
                 "boundary_failure_class": None,
+                "llm_context_audit": critic_llm_audit,
             }
 
     merge_ai_agents_meta(session, analysis_run_id, "critic", critic_patch)
@@ -383,13 +376,20 @@ def run_traceable_edgar_pipeline(
         )
     else:
         critic_model = CriticAgentLLMOutput.model_validate(critic_patch["result"])
+        report_llm_context = build_report_llm_context(
+            orch=orch_out,
+            orch_input=orch_input,
+            critic=critic_model.model_dump(mode="json"),
+            artifact_summaries=artifact_summaries_bundle,
+            paths_roles=artifact_paths_roles,
+            summary_roles_loaded=critic_summary_roles,
+        )
+        report_llm_audit = audit_compact_context(report_llm_context)
         recorder = RecordedChatCompletionService(session, llm_provider)
         try:
             report_out, report_mc = ReportAgent(recorder, settings=s).run(
                 analysis_run_id=analysis_run_id,
-                orchestration_summary=orchestration_summary,
-                critic=critic_model,
-                artifact_excerpts=excerpts,
+                llm_user_context=report_llm_context,
             )
         except Exception as exc:
             rs_steps.transition_status(report_row.id, RunStepStatus.error, detail=str(exc)[:2048])
@@ -432,6 +432,7 @@ def run_traceable_edgar_pipeline(
                     "model_call_id": str(report_mc.id),
                     "phase_output": ro,
                     "phase_status": PHASE_SUCCESS,
+                    "llm_context_audit": report_llm_audit,
                 },
             )
             report_patch = {
@@ -441,6 +442,7 @@ def run_traceable_edgar_pipeline(
                 "result": report_out.model_dump(mode="json"),
                 "phase_output": ro,
                 "boundary_failure_class": None,
+                "llm_context_audit": report_llm_audit,
             }
             output_patch["user_facing_report"] = {
                 "markdown": report_out.user_report_markdown,
@@ -471,7 +473,7 @@ def run_traceable_edgar_pipeline(
         base_idx=base_idx,
         critic_patch=critic_patch,
         report_patch=report_patch,
-        critic_excerpt_roles=critic_excerpt_roles,
+        critic_summary_roles=critic_summary_roles,
     )
     merge_ai_agents_meta(session, analysis_run_id, "traceability", trace_full)
     rs_steps.merge_meta_json(critic_row.id, {"traceability": trace_critic_step})

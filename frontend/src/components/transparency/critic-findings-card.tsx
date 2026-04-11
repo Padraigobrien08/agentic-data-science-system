@@ -166,9 +166,9 @@ export function CriticFindingsCard({
         </div>
       ) : null}
 
-      {trace?.excerpt_roles_used && trace.excerpt_roles_used.length > 0 ? (
-        <MetaRow label="excerpt_roles_used">
-          {trace.excerpt_roles_used.join(", ")}
+      {(trace?.artifact_summary_roles_used?.length ?? trace?.excerpt_roles_used?.length) ? (
+        <MetaRow label="artifact_summary_roles_used">
+          {(trace?.artifact_summary_roles_used ?? trace?.excerpt_roles_used ?? []).join(", ")}
         </MetaRow>
       ) : null}
 

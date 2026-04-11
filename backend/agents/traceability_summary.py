@@ -82,7 +82,7 @@ def build_runtime_traceability_bundle(
     base_idx: int,
     critic_patch: dict[str, Any],
     report_patch: dict[str, Any],
-    critic_excerpt_roles: list[str],
+    critic_summary_roles: list[str],
 ) -> tuple[dict[str, Any], dict[str, Any], dict[str, Any]]:
     """
     Returns ``(full_traceability, critic_run_step_meta, report_run_step_meta)``.
@@ -123,11 +123,11 @@ def build_runtime_traceability_bundle(
             plan_align = [x for x in raw_pa if isinstance(x, dict)][:12]
             plan_align_codes = [str(x.get("code", "")) for x in plan_align if x.get("code")]
     critic_decision = (
-        f"Critic reviewed structured orchestration summary and {len(critic_excerpt_roles)} "
-        f"artifact excerpt role(s): {', '.join(critic_excerpt_roles[:8])}"
-        + ("…" if len(critic_excerpt_roles) > 8 else "")
-        if critic_excerpt_roles
-        else "Critic had no on-disk artifact excerpts for configured roles (paths missing or empty)."
+        f"Critic reviewed structured orchestration summary and {len(critic_summary_roles)} "
+        f"artifact summary role(s): {', '.join(critic_summary_roles[:8])}"
+        + ("…" if len(critic_summary_roles) > 8 else "")
+        if critic_summary_roles
+        else "Critic had no on-disk artifact summaries for configured roles (paths missing or empty)."
     )
     if critic_failed:
         critic_decision = f"Critic phase failed ({critic_patch.get('reason', 'critic_error')})."
@@ -142,8 +142,8 @@ def build_runtime_traceability_bundle(
 
     if report_ran:
         report_rationale = (
-            "Report model consumed JSON-only inputs: orchestration_summary + critic structured fields "
-            "(findings assessment, caveat coverage, trustworthiness notes, issues, confidence). "
+            "Report model consumed compact JSON (report_llm_v1): run/request/interpreted_goal, critic "
+            "structured fields, tool_scope, warnings/errors samples, artifact_coverage, and compact artifact_summaries. "
             "System prompt text is not duplicated here."
         )
     else:
@@ -176,7 +176,7 @@ def build_runtime_traceability_bundle(
             "blocking_caveats": blocking,
             "overall_confidence": conf,
             "ran": critic_ran,
-            "excerpt_roles_used": list(critic_excerpt_roles),
+            "artifact_summary_roles_used": list(critic_summary_roles),
             "plan_alignment_findings": plan_align,
             "plan_alignment_codes": plan_align_codes,
         },
@@ -198,7 +198,7 @@ def build_runtime_traceability_bundle(
     critic_step_meta = {
         "blocking_caveats": blocking[:8],
         "overall_confidence": conf,
-        "excerpt_roles_used": critic_excerpt_roles[:12],
+        "artifact_summary_roles_used": critic_summary_roles[:12],
         "decision_summary": _trunc(critic_decision, 400),
         "plan_alignment_codes": plan_align_codes[:12],
         "traceability_doc": "Full cross-phase record: meta_json.ai_agents.traceability",

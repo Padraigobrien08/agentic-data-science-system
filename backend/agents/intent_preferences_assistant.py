@@ -17,6 +17,7 @@ from sqlalchemy.orm import Session
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
+from backend.agents.llm_context import build_intent_preferences_assistant_context
 from backend.agents.output_schemas import LLMGoalPreferencesPatch
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.ai_agents_meta import merge_ai_agents_meta
@@ -81,11 +82,11 @@ def maybe_apply_llm_intent_preferences(
         )
         tmpl = reg.template
         system = tmpl.system_body
-        user_payload: dict[str, Any] = {
-            "analysis_goal": request.analysis_goal,
-            "tickers": list(request.tickers),
-            "rule_based_goal_preferences": rules_prefs.model_dump(mode="json"),
-        }
+        user_payload = build_intent_preferences_assistant_context(
+            analysis_goal=request.analysis_goal,
+            tickers=list(request.tickers),
+            rule_based_goal_preferences=rules_prefs,
+        )
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},

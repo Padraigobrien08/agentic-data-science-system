@@ -228,14 +228,18 @@ export function FinalReportWithEvidence({
               </li>
             ))}
           </ul>
-          {traceability?.critic?.excerpt_roles_used &&
-          traceability.critic.excerpt_roles_used.length > 0 ? (
+          {(traceability?.critic?.artifact_summary_roles_used?.length ??
+            traceability?.critic?.excerpt_roles_used?.length) ? (
             <div className="mt-4 border-t border-[var(--border)] pt-3">
               <p className="mb-1 font-semibold uppercase text-[var(--foreground)]">
-                Critic excerpt roles
+                Critic artifact summary roles
               </p>
               <p className="text-[var(--muted)]">
-                {traceability.critic.excerpt_roles_used.join(", ")}
+                {(
+                  traceability?.critic?.artifact_summary_roles_used ??
+                  traceability?.critic?.excerpt_roles_used ??
+                  []
+                ).join(", ")}
               </p>
             </div>
           ) : null}

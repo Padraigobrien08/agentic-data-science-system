@@ -41,7 +41,7 @@ type Props = {
 };
 
 /**
- * At-a-glance: which narrative layers exist on disk, which reached the critic excerpts,
+ * At-a-glance: which narrative layers exist on disk, which were summarized for the critic,
  * and what the critic flagged — so “what’s missing” is visible without reading prose.
  */
 export function RunGapOverview({
@@ -52,8 +52,12 @@ export function RunGapOverview({
 }: Props) {
   const pathRoles = orch?.artifact_paths ? sortRoles(Object.keys(orch.artifact_paths)) : [];
   const pathSet = new Set(pathRoles);
-  const excerptRoles = sortRoles(traceability?.critic?.excerpt_roles_used ?? []);
-  const excerptSet = new Set(excerptRoles);
+  const criticSummaryRoles = sortRoles(
+    traceability?.critic?.artifact_summary_roles_used ??
+      traceability?.critic?.excerpt_roles_used ??
+      [],
+  );
+  const criticSummarySet = new Set(criticSummaryRoles);
   const evidenceRoles = traceability?.evidence_artifacts_by_role
     ? sortRoles(Object.keys(traceability.evidence_artifacts_by_role))
     : [];
@@ -70,7 +74,7 @@ export function RunGapOverview({
         </h2>
         <p className="mt-1 max-w-prose text-xs leading-relaxed text-[var(--muted)]">
           Compare what the pipeline <strong className="text-[var(--foreground)]">wrote to disk</strong>, what was{" "}
-          <strong className="text-[var(--foreground)]">excerpted for the critic</strong>, and what was{" "}
+          <strong className="text-[var(--foreground)]">summarized for the critic</strong>, and what was{" "}
           <strong className="text-[var(--foreground)]">registered as evidence</strong>. Empty synthesis layers
           usually mean that step did not run or produced no file — not a UI bug.
         </p>
@@ -140,7 +144,7 @@ export function RunGapOverview({
                       <span className="mt-0.5 block font-mono text-[10px] text-[var(--muted)]">{role}</span>
                     </td>
                     <td className="py-2 pr-3 font-mono">{cell(pathSet.has(role))}</td>
-                    <td className="py-2 pr-3 font-mono">{cell(excerptSet.has(role))}</td>
+                    <td className="py-2 pr-3 font-mono">{cell(criticSummarySet.has(role))}</td>
                     <td className="py-2 font-mono">{cell(evidenceSet.has(role))}</td>
                   </tr>
                 ))}
@@ -151,7 +155,7 @@ export function RunGapOverview({
 
         <div>
           <p className="mb-2 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Core tables this run (union of disk / excerpts / evidence)
+            Core tables this run (union of disk / critic summaries / evidence)
           </p>
           <div className="overflow-x-auto">
             <table className="w-full min-w-[32rem] border-collapse text-left text-[10px]">
@@ -166,13 +170,13 @@ export function RunGapOverview({
               <tbody>
                 {sortRoles(
                   Array.from(
-                    new Set([...pathRoles, ...excerptRoles, ...evidenceRoles]),
+                    new Set([...pathRoles, ...criticSummaryRoles, ...evidenceRoles]),
                   ),
                 ).map((role) => (
                   <tr key={role} className="border-b border-[var(--border)]">
                     <td className="py-1.5 pr-2 font-mono text-[var(--foreground)]">{role}</td>
                     <td className="py-1.5 pr-2 font-mono">{cell(pathSet.has(role))}</td>
-                    <td className="py-1.5 pr-2 font-mono">{cell(excerptSet.has(role))}</td>
+                    <td className="py-1.5 pr-2 font-mono">{cell(criticSummarySet.has(role))}</td>
                     <td className="py-1.5 font-mono">{cell(evidenceSet.has(role))}</td>
                   </tr>
                 ))}

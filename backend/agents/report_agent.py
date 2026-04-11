@@ -9,7 +9,7 @@ from pydantic import ValidationError
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
-from backend.agents.output_schemas import CriticAgentLLMOutput, ReportAgentLLMOutput
+from backend.agents.output_schemas import ReportAgentLLMOutput
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.config.settings import Settings, get_settings
 from backend.llm.types import ChatCompletionRequest
@@ -31,18 +31,12 @@ class ReportAgent:
         self,
         *,
         analysis_run_id: UUID,
-        orchestration_summary: dict,
-        critic: CriticAgentLLMOutput,
-        artifact_excerpts: dict[str, str] | None = None,
+        llm_user_context: dict,
     ) -> tuple[ReportAgentLLMOutput, ModelCall]:
         reg = load_registered_prompt("report", self._settings.agent_report_prompt_version)
         tmpl = reg.template
         system = tmpl.system_body
-        user_payload = {
-            "orchestration_summary": orchestration_summary,
-            "critic": critic.model_dump(mode="json"),
-            "artifact_excerpts_by_role": artifact_excerpts or {},
-        }
+        user_payload = llm_user_context
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},

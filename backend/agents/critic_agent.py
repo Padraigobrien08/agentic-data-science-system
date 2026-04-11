@@ -31,16 +31,12 @@ class CriticAgent:
         self,
         *,
         analysis_run_id: UUID,
-        orchestration_summary: dict,
-        artifact_excerpts: dict[str, str],
+        llm_user_context: dict,
     ) -> tuple[CriticAgentLLMOutput, ModelCall]:
         reg = load_registered_prompt("critic", self._settings.agent_critic_prompt_version)
         tmpl = reg.template
         system = tmpl.system_body
-        user_payload = {
-            "orchestration_summary": orchestration_summary,
-            "artifact_excerpts_by_role": artifact_excerpts,
-        }
+        user_payload = llm_user_context
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},

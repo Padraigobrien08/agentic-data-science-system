@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
+from backend.agents.llm_context import build_intent_llm_context
 from backend.agents.output_schemas import IntentAgentLLMOutput
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.template_render import render_intent_prompt
@@ -41,11 +42,11 @@ class IntentAgent:
         reg = load_registered_prompt("intent", self._settings.agent_intent_prompt_version)
         tmpl = reg.template
         system = render_intent_prompt(tmpl.system_body)
-        user_payload = {
-            "user_request": user_request,
-            "tickers": tickers,
-            "refresh": refresh,
-        }
+        user_payload = build_intent_llm_context(
+            user_request=user_request,
+            tickers=tickers,
+            refresh=refresh,
+        )
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},

@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
+from backend.agents.llm_context import build_planning_llm_context
 from backend.agents.llm_plan_handoff import validate_llm_planned_steps_for_handoff
 from backend.agents.json_extract import parse_json_object
 from backend.agents.output_schemas import PlanningAgentLLMOutput
@@ -43,12 +44,12 @@ class PlanningAgent:
         reg = load_registered_prompt("planning", self._settings.agent_planning_prompt_version)
         tmpl = reg.template
         system = render_planning_prompt(tmpl.system_body)
-        user_payload = {
-            "interpreted_goal": interpreted_goal.model_dump(mode="json"),
-            "user_request": user_request,
-            "tickers": tickers,
-            "refresh": refresh,
-        }
+        user_payload = build_planning_llm_context(
+            interpreted_goal=interpreted_goal,
+            user_request=user_request,
+            tickers=tickers,
+            refresh=refresh,
+        )
         messages = [
             {"role": "system", "content": system},
             {"role": "user", "content": json.dumps(user_payload, ensure_ascii=False)},

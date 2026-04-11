@@ -87,7 +87,7 @@ def test_build_runtime_traceability_bundle_shape() -> None:
         base_idx=1,
         critic_patch=critic_patch,
         report_patch=report_patch,
-        critic_excerpt_roles=["unified_findings_csv"],
+        critic_summary_roles=["unified_findings_csv"],
     )
     assert full["contract_version"] == TRACEABILITY_CONTRACT_VERSION
     assert full["planning"]["selected_tools"] == tools

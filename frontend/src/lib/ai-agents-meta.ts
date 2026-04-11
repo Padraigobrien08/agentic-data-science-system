@@ -85,6 +85,8 @@ export type TraceabilityWire = {
     blocking_caveats?: string[];
     overall_confidence?: string | null;
     ran?: boolean;
+    artifact_summary_roles_used?: string[];
+    /** @deprecated Old persisted runs; prefer artifact_summary_roles_used */
     excerpt_roles_used?: string[];
     plan_alignment_findings?: PlanAlignmentFindingWire[];
     plan_alignment_codes?: string[];
