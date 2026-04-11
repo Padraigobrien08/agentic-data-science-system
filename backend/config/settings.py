@@ -174,6 +174,58 @@ class Settings(BaseSettings):
         description="Prompt file version under ``backend/agents/prompts/report/``",
     )
 
+    # LLM context budgets — see :class:`backend.agents.context_budget.ContextBudget` / ``from_settings``
+    agent_context_max_user_request_chars: int = Field(default=8_000, ge=256)
+    agent_context_max_goal_excerpt_chars: int = Field(default=600, ge=64)
+    agent_context_max_intent_rules_matched: int = Field(default=16, ge=1, le=256)
+    agent_context_max_template_rules_matched: int = Field(default=12, ge=1, le=128)
+    agent_context_max_plan_alignment_findings: int = Field(default=12, ge=0, le=256)
+    agent_context_max_resolved_companies: int = Field(default=24, ge=0, le=512)
+    agent_context_max_tool_result_rows: int = Field(default=32, ge=0, le=512)
+    agent_context_max_step_rows: int = Field(default=48, ge=0, le=512)
+    agent_context_max_warn_err_samples: int = Field(default=5, ge=0, le=128)
+    agent_context_max_warn_err_message_chars: int = Field(default=240, ge=32)
+    agent_context_max_run_message_chars: int = Field(default=1_000, ge=64)
+    agent_context_max_final_summary_chars: int = Field(default=2_000, ge=128)
+    agent_context_max_tool_result_artifact_keys: int = Field(default=12, ge=1, le=64)
+    agent_context_max_slim_row_keys: int = Field(default=14, ge=4, le=64)
+    agent_context_max_coverage_roles: int = Field(
+        default=0,
+        ge=0,
+        description="Max entries in artifact_coverage role lists; 0 = unlimited.",
+    )
+    agent_context_max_critic_issue_items: int = Field(default=24, ge=1, le=256)
+    agent_context_max_critic_text_field_chars: int = Field(default=8_000, ge=256)
+    agent_context_max_read_bytes: int = Field(default=2_000_000, ge=8_192)
+    agent_context_max_anomaly_rows: int = Field(default=15, ge=0, le=512)
+    agent_context_max_unified_findings_rows: int = Field(default=12, ge=0, le=512)
+    agent_context_max_deterioration_rows: int = Field(default=12, ge=0, le=512)
+    agent_context_max_findings_summary_rows: int = Field(default=24, ge=0, le=512)
+    agent_context_max_caveat_sample_rows: int = Field(default=200, ge=0, le=10_000)
+    agent_context_max_caveat_token_types: int = Field(default=40, ge=0, le=512)
+    agent_context_max_caveat_detail_rows: int = Field(default=8, ge=0, le=256)
+    agent_context_max_generic_csv_rows: int = Field(default=20, ge=0, le=512)
+    agent_context_max_panel_feature_rows: int = Field(default=4, ge=0, le=64)
+    agent_context_max_panel_trim_chars: int = Field(default=80, ge=16, le=512)
+    agent_context_max_cell_chars: int = Field(default=120, ge=16, le=2_000)
+    agent_context_max_anomaly_category_buckets: int = Field(default=12, ge=0, le=128)
+    agent_context_max_markdown_preview_lines: int = Field(default=100, ge=0, le=2_000)
+    agent_context_max_markdown_chars: int = Field(default=10_000, ge=256)
+    agent_context_max_markdown_headings: int = Field(default=20, ge=0, le=256)
+    agent_context_max_trustworthiness_chars: int = Field(default=4_000, ge=256)
+    agent_context_max_generic_column_names: int = Field(default=30, ge=0, le=256)
+    agent_context_max_generic_row_columns: int = Field(default=12, ge=0, le=128)
+    agent_context_max_artifact_summary_roles: int = Field(
+        default=0,
+        ge=0,
+        description="Max artifact roles in critic/report summary bundle; 0 = unlimited.",
+    )
+    agent_context_max_artifact_index_entries: int = Field(
+        default=0,
+        ge=0,
+        description="Max artifact_index rows; 0 = unlimited.",
+    )
+
     # Observability (structured logs + Prometheus /metrics)
     observability_json_logs: bool = Field(
         default=True,

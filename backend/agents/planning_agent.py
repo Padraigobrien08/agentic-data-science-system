@@ -10,6 +10,7 @@ from pydantic import ValidationError
 from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
+from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import build_planning_llm_context
 from backend.agents.model_routing import resolve_agent_completion_model
 from backend.agents.llm_plan_handoff import validate_llm_planned_steps_for_handoff
@@ -50,6 +51,7 @@ class PlanningAgent:
             user_request=user_request,
             tickers=tickers,
             refresh=refresh,
+            budget=ContextBudget.from_settings(self._settings),
         )
         messages = [
             {"role": "system", "content": system},

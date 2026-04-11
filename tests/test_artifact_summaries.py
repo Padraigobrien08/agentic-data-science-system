@@ -11,6 +11,7 @@ from backend.agents.artifact_summaries import (
     build_artifact_summaries_for_llm,
     summarize_anomalies_csv,
 )
+from backend.agents.context_budget import ContextBudget
 from edgar_project.mcp.schemas import ARTIFACT_KEY_ANOMALIES, ARTIFACT_KEY_UNIFIED_FINDINGS
 
 
@@ -51,6 +52,7 @@ def test_build_bundle_deterministic_order_and_index(tmp_path: Path) -> None:
     b1 = build_artifact_summaries_for_llm(paths)
     b2 = build_artifact_summaries_for_llm(paths)
     assert b1["contract_version"] == SUMMARIES_CONTRACT
+    assert "context_budget" in b1
     assert b1 == b2
     roles = list((b1.get("by_role") or {}).keys())
     assert ARTIFACT_KEY_ANOMALIES in roles

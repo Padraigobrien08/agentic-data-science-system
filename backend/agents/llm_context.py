@@ -2,6 +2,7 @@
 Compact, JSON-serializable LLM user payloads per agent phase.
 
 Reduces tokens vs passing full orchestration dumps while preserving fields the prompts need.
+Size limits are driven by :class:`~backend.agents.context_budget.ContextBudget`.
 """
 
 from __future__ import annotations
@@ -11,6 +12,11 @@ from typing import Any
 from pydantic import BaseModel, ConfigDict, Field
 
 from backend.agents.artifact_summaries import audit_summaries_bundle
+from backend.agents.context_budget import (
+    ContextBudget,
+    clip_critic_for_report_llm,
+    clip_sorted_role_list,
+)
 
 from edgar_project.orchestration.schemas import (
     GoalPreferences,
@@ -29,14 +35,7 @@ CONTRACT_CRITIC_LLM = "critic_llm_v1"
 CONTRACT_REPORT_LLM = "report_llm_v1"
 CONTRACT_INTENT_PREFERENCES_LLM = "intent_preferences_llm_v1"
 
-_MAX_USER_REQUEST_CHARS = 8_000
-_MAX_GOAL_EXCERPT_CHARS = 600
-_MAX_WARN_ERR_SAMPLES = 5
-_MAX_MSG_CHARS = 240
-_MAX_PLAN_ALIGNMENT = 12
-_MAX_RESOLVED_COMPANIES = 24
-_MAX_TOOL_RESULT_ROWS = 32
-_MAX_STEP_ROWS = 48
+_DEFAULT_BUDGET = ContextBudget()
 
 
 def _trunc(s: str | None, max_len: int) -> str:
@@ -48,7 +47,10 @@ def _trunc(s: str | None, max_len: int) -> str:
     return t[: max_len - 1].rstrip() + "…"
 
 
-def slim_interpreted_goal_for_llm(ig: InterpretedGoal) -> dict[str, Any]:
+def slim_interpreted_goal_for_llm(
+    ig: InterpretedGoal,
+    budget: ContextBudget = _DEFAULT_BUDGET,
+) -> dict[str, Any]:
     """Template + prefs for planning/critic/report — omit bulky narrative lists."""
     pt = ig.plan_template
     pt_out: dict[str, Any] | None = None
@@ -58,24 +60,24 @@ def slim_interpreted_goal_for_llm(ig: InterpretedGoal) -> dict[str, Any]:
             "mcp_execution_profile": pt.mcp_execution_profile,
             "peer_analysis_mandatory": pt.peer_analysis_mandatory,
             "persistence_filtering_required": pt.persistence_filtering_required,
-            "template_rules_matched": list(pt.template_rules_matched)[:12],
+            "template_rules_matched": list(pt.template_rules_matched)[: budget.max_template_rules_matched],
         }
     gp = ig.goal_preferences
     gp_out = gp.model_dump(mode="json") if gp is not None else None
     return {
         "code": ig.code.value,
         "orchestration_intent": ig.intent.value if ig.intent is not None else None,
-        "intent_rules_matched": list(ig.intent_rules_matched)[:16],
+        "intent_rules_matched": list(ig.intent_rules_matched)[: budget.max_intent_rules_matched],
         "description": _trunc(ig.description, 512),
-        "user_goal_excerpt": _trunc(ig.user_goal_text, _MAX_GOAL_EXCERPT_CHARS),
+        "user_goal_excerpt": _trunc(ig.user_goal_text, budget.max_goal_excerpt_chars),
         "goal_preferences": gp_out,
         "plan_template": pt_out,
     }
 
 
-def _slim_tool_result_row(t: ToolResultSummary) -> dict[str, Any]:
+def _slim_tool_result_row(t: ToolResultSummary, budget: ContextBudget) -> dict[str, Any]:
     ap = t.artifact_paths or {}
-    ap_keys = sorted(ap.keys())[:12]
+    ap_keys = sorted(ap.keys())[: budget.max_tool_result_artifact_keys]
     return {
         "order": t.order,
         "tool_name": t.tool_name,
@@ -89,7 +91,7 @@ def _slim_tool_result_row(t: ToolResultSummary) -> dict[str, Any]:
     }
 
 
-def _slim_step_row(s: StepStatusEntry) -> dict[str, Any]:
+def _slim_step_row(s: StepStatusEntry, budget: ContextBudget) -> dict[str, Any]:
     return {
         "order": s.order,
         "tool_name": s.tool_name,
@@ -103,14 +105,17 @@ def build_tool_scope_summary(
     *,
     step_statuses: list[StepStatusEntry],
     tool_results_summary: list[ToolResultSummary],
+    budget: ContextBudget = _DEFAULT_BUDGET,
 ) -> dict[str, Any]:
     """Aggregated execution scope — no raw MCP envelopes."""
-    steps = [_slim_step_row(s) for s in step_statuses[:_MAX_STEP_ROWS]]
-    if len(step_statuses) > _MAX_STEP_ROWS:
-        steps.append({"truncated": True, "omitted_count": len(step_statuses) - _MAX_STEP_ROWS})
-    tr = [_slim_tool_result_row(t) for t in tool_results_summary[:_MAX_TOOL_RESULT_ROWS]]
-    if len(tool_results_summary) > _MAX_TOOL_RESULT_ROWS:
-        tr.append({"truncated": True, "omitted_count": len(tool_results_summary) - _MAX_TOOL_RESULT_ROWS})
+    max_s = budget.max_step_rows
+    max_t = budget.max_tool_result_rows
+    steps = [_slim_step_row(s, budget) for s in step_statuses[:max_s]]
+    if len(step_statuses) > max_s:
+        steps.append({"truncated": True, "omitted_count": len(step_statuses) - max_s})
+    tr = [_slim_tool_result_row(t, budget) for t in tool_results_summary[:max_t]]
+    if len(tool_results_summary) > max_t:
+        tr.append({"truncated": True, "omitted_count": len(tool_results_summary) - max_t})
     return {
         "step_count": len(step_statuses),
         "tool_result_row_count": len(tool_results_summary),
@@ -119,26 +124,30 @@ def build_tool_scope_summary(
     }
 
 
-def _slim_errors(errs: list[OrchestrationError]) -> list[dict[str, Any]]:
+def _slim_errors(errs: list[OrchestrationError], budget: ContextBudget) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
-    for e in errs[:_MAX_WARN_ERR_SAMPLES]:
+    n = budget.max_warn_err_samples
+    mx = budget.max_warn_err_message_chars
+    for e in errs[:n]:
         out.append(
             {
                 "code": e.code,
-                "message": _trunc(e.message, _MAX_MSG_CHARS),
+                "message": _trunc(e.message, mx),
                 "source_tool": e.source_tool,
             }
         )
     return out
 
 
-def _slim_warnings(w: list[OrchestrationWarning]) -> list[dict[str, Any]]:
+def _slim_warnings(w: list[OrchestrationWarning], budget: ContextBudget) -> list[dict[str, Any]]:
     out: list[dict[str, Any]] = []
-    for x in w[:_MAX_WARN_ERR_SAMPLES]:
+    n = budget.max_warn_err_samples
+    mx = budget.max_warn_err_message_chars
+    for x in w[:n]:
         out.append(
             {
                 "code": x.code,
-                "message": _trunc(x.message, _MAX_MSG_CHARS),
+                "message": _trunc(x.message, mx),
                 "source_tool": x.source_tool,
             }
         )
@@ -155,12 +164,12 @@ class RunFingerprint(BaseModel):
     final_report_path: str | None = None
 
 
-def build_run_fingerprint(orch: OrchestrationOutput) -> dict[str, Any]:
+def build_run_fingerprint(orch: OrchestrationOutput, budget: ContextBudget = _DEFAULT_BUDGET) -> dict[str, Any]:
     return RunFingerprint(
         run_id=orch.run_id,
         status=orch.status.value,
-        message=_trunc(orch.message, 1_000),
-        final_summary=_trunc(orch.final_summary, 2_000),
+        message=_trunc(orch.message, budget.max_run_message_chars),
+        final_summary=_trunc(orch.final_summary, budget.max_final_summary_chars),
         final_report_path=orch.final_report_path,
     ).model_dump(mode="json")
 
@@ -170,10 +179,12 @@ def build_intent_llm_context(
     user_request: str,
     tickers: list[str],
     refresh: bool,
+    budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
+    b = budget or _DEFAULT_BUDGET
     return {
         "contract_version": CONTRACT_INTENT_LLM,
-        "user_request": _trunc(user_request, _MAX_USER_REQUEST_CHARS),
+        "user_request": _trunc(user_request, b.max_user_request_chars),
         "tickers": list(tickers),
         "refresh": refresh,
     }
@@ -185,13 +196,15 @@ def build_planning_llm_context(
     user_request: str,
     tickers: list[str],
     refresh: bool,
+    budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
+    b = budget or _DEFAULT_BUDGET
     return {
         "contract_version": CONTRACT_PLANNING_LLM,
-        "user_request": _trunc(user_request, _MAX_USER_REQUEST_CHARS),
+        "user_request": _trunc(user_request, b.max_user_request_chars),
         "tickers": list(tickers),
         "refresh": refresh,
-        "interpreted_goal": slim_interpreted_goal_for_llm(interpreted_goal),
+        "interpreted_goal": slim_interpreted_goal_for_llm(interpreted_goal, b),
     }
 
 
@@ -203,50 +216,69 @@ def build_critic_llm_context(
     artifact_summaries: dict[str, Any],
     paths_roles: list[str],
     summary_roles_loaded: list[str],
+    budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
-    pa = list(plan_alignment_findings or [])[:_MAX_PLAN_ALIGNMENT]
+    b = budget or _DEFAULT_BUDGET
+    pa = list(plan_alignment_findings or [])[: b.max_plan_alignment_findings]
+    max_co = b.max_resolved_companies
     companies = [
         {
             "ticker": c.ticker,
             "cik": c.cik,
             "company_name": c.company_name,
         }
-        for c in orch.resolved_companies[:_MAX_RESOLVED_COMPANIES]
+        for c in orch.resolved_companies[:max_co]
     ]
-    if len(orch.resolved_companies) > _MAX_RESOLVED_COMPANIES:
+    co_trunc = False
+    if len(orch.resolved_companies) > max_co:
+        co_trunc = True
         companies.append(
             {
                 "truncated": True,
-                "omitted_count": len(orch.resolved_companies) - _MAX_RESOLVED_COMPANIES,
+                "omitted_count": len(orch.resolved_companies) - max_co,
             }
         )
 
+    paths_eff, paths_meta = clip_sorted_role_list(list(paths_roles), b.max_coverage_roles)
+    summ_eff, summ_meta = clip_sorted_role_list(list(summary_roles_loaded), b.max_coverage_roles)
+    llm_budget: dict[str, Any] = {
+        "resolved_companies_truncated": co_trunc,
+        "artifact_paths_roles_truncated": paths_meta.get("truncated", False),
+        "artifact_summary_roles_truncated": summ_meta.get("truncated", False),
+    }
+    if paths_meta.get("truncated"):
+        llm_budget["artifact_paths_roles_omitted_count"] = paths_meta.get("omitted_count", 0)
+    if summ_meta.get("truncated"):
+        llm_budget["artifact_summary_roles_omitted_count"] = summ_meta.get("omitted_count", 0)
+
     return {
         "contract_version": CONTRACT_CRITIC_LLM,
-        "run": build_run_fingerprint(orch),
+        "run": build_run_fingerprint(orch, b),
         "request": {
-            "analysis_goal": _trunc(orch_input.analysis_goal, _MAX_USER_REQUEST_CHARS),
+            "analysis_goal": _trunc(orch_input.analysis_goal, b.max_user_request_chars),
             "tickers": list(orch_input.tickers),
             "refresh": orch_input.refresh,
         },
-        "interpreted_goal": slim_interpreted_goal_for_llm(orch.interpreted_goal),
+        "interpreted_goal": slim_interpreted_goal_for_llm(orch.interpreted_goal, b),
         "resolved_companies": companies,
         "plan_alignment_findings": pa,
         "tool_scope": build_tool_scope_summary(
             step_statuses=orch.step_statuses,
             tool_results_summary=orch.tool_results_summary,
+            budget=b,
         ),
         "warnings_errors": {
             "warnings_count": len(orch.warnings),
             "errors_count": len(orch.errors),
-            "errors_sample": _slim_errors(orch.errors),
-            "warnings_sample": _slim_warnings(orch.warnings),
+            "errors_sample": _slim_errors(orch.errors, b),
+            "warnings_sample": _slim_warnings(orch.warnings, b),
         },
         "artifact_coverage": {
-            "artifact_paths_roles": sorted(paths_roles),
-            "artifact_summary_roles_loaded": sorted(summary_roles_loaded),
+            "artifact_paths_roles": paths_eff,
+            "artifact_summary_roles_loaded": summ_eff,
         },
         "artifact_summaries": artifact_summaries,
+        "llm_context_budget": llm_budget,
     }
 
 
@@ -258,33 +290,72 @@ def build_report_llm_context(
     artifact_summaries: dict[str, Any],
     paths_roles: list[str],
     summary_roles_loaded: list[str],
+    budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
     """Critic must be structured critic output (e.g. CriticAgentLLMOutput.model_dump)."""
+    b = budget or _DEFAULT_BUDGET
+    critic_clipped, critic_trunc = clip_critic_for_report_llm(critic, b)
+
+    max_co = b.max_resolved_companies
+    companies = [
+        {
+            "ticker": c.ticker,
+            "cik": c.cik,
+            "company_name": c.company_name,
+        }
+        for c in orch.resolved_companies[:max_co]
+    ]
+    co_trunc = False
+    if len(orch.resolved_companies) > max_co:
+        co_trunc = True
+        companies.append(
+            {
+                "truncated": True,
+                "omitted_count": len(orch.resolved_companies) - max_co,
+            }
+        )
+
+    paths_eff, paths_meta = clip_sorted_role_list(list(paths_roles), b.max_coverage_roles)
+    summ_eff, summ_meta = clip_sorted_role_list(list(summary_roles_loaded), b.max_coverage_roles)
+    llm_budget: dict[str, Any] = {
+        "resolved_companies_truncated": co_trunc,
+        "artifact_paths_roles_truncated": paths_meta.get("truncated", False),
+        "artifact_summary_roles_truncated": summ_meta.get("truncated", False),
+    }
+    if paths_meta.get("truncated"):
+        llm_budget["artifact_paths_roles_omitted_count"] = paths_meta.get("omitted_count", 0)
+    if summ_meta.get("truncated"):
+        llm_budget["artifact_summary_roles_omitted_count"] = summ_meta.get("omitted_count", 0)
+    for k, v in critic_trunc.items():
+        llm_budget[f"critic_{k}"] = v
+
     return {
         "contract_version": CONTRACT_REPORT_LLM,
-        "run": build_run_fingerprint(orch),
+        "run": build_run_fingerprint(orch, b),
         "request": {
-            "analysis_goal": _trunc(orch_input.analysis_goal, _MAX_USER_REQUEST_CHARS),
+            "analysis_goal": _trunc(orch_input.analysis_goal, b.max_user_request_chars),
             "tickers": list(orch_input.tickers),
             "refresh": orch_input.refresh,
         },
-        "interpreted_goal": slim_interpreted_goal_for_llm(orch.interpreted_goal),
-        "critic": critic,
+        "interpreted_goal": slim_interpreted_goal_for_llm(orch.interpreted_goal, b),
+        "critic": critic_clipped,
         "tool_scope": build_tool_scope_summary(
             step_statuses=orch.step_statuses,
             tool_results_summary=orch.tool_results_summary,
+            budget=b,
         ),
         "warnings_errors": {
             "warnings_count": len(orch.warnings),
             "errors_count": len(orch.errors),
-            "errors_sample": _slim_errors(orch.errors),
-            "warnings_sample": _slim_warnings(orch.warnings),
+            "errors_sample": _slim_errors(orch.errors, b),
+            "warnings_sample": _slim_warnings(orch.warnings, b),
         },
         "artifact_coverage": {
-            "artifact_paths_roles": sorted(paths_roles),
-            "artifact_summary_roles_loaded": sorted(summary_roles_loaded),
+            "artifact_paths_roles": paths_eff,
+            "artifact_summary_roles_loaded": summ_eff,
         },
         "artifact_summaries": artifact_summaries,
+        "llm_context_budget": llm_budget,
     }
 
 
@@ -293,11 +364,13 @@ def build_intent_preferences_assistant_context(
     analysis_goal: str,
     tickers: list[str],
     rule_based_goal_preferences: GoalPreferences,
+    budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
     """Optional pre-orchestration preference patch — rule baseline + goal text only."""
+    b = budget or _DEFAULT_BUDGET
     return {
         "contract_version": CONTRACT_INTENT_PREFERENCES_LLM,
-        "analysis_goal": _trunc(analysis_goal, _MAX_USER_REQUEST_CHARS),
+        "analysis_goal": _trunc(analysis_goal, b.max_user_request_chars),
         "tickers": list(tickers),
         "rule_based_goal_preferences": rule_based_goal_preferences.model_dump(mode="json"),
     }
@@ -318,5 +391,18 @@ def audit_compact_context(context: dict[str, Any]) -> dict[str, Any]:
         if isinstance(summaries, dict)
         else [],
     }
+    lcb = context.get("llm_context_budget")
+    if isinstance(lcb, dict) and (
+        any(
+            lcb.get(k)
+            for k in (
+                "resolved_companies_truncated",
+                "artifact_paths_roles_truncated",
+                "artifact_summary_roles_truncated",
+            )
+        )
+        or lcb.get("critic_truncated")
+    ):
+        out["llm_context_budget_applied"] = True
     out.update(audit)
     return out

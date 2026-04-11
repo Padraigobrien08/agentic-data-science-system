@@ -68,6 +68,7 @@ def test_critic_and_report_contract_versions() -> None:
         "contract_version": "artifact_summaries_v1",
         "by_role": {"anomalies_csv": {"kind": "anomalies_csv", "top_rows": []}},
         "artifact_index": [],
+        "context_budget": {"truncated": False, "artifact_roles_omitted": [], "artifact_index_truncated": False},
     }
     c = build_critic_llm_context(
         orch=orch,
@@ -80,6 +81,7 @@ def test_critic_and_report_contract_versions() -> None:
     assert c["contract_version"] == CONTRACT_CRITIC_LLM
     assert "tool_scope" in c
     assert c["artifact_summaries"]["by_role"]["anomalies_csv"]["kind"] == "anomalies_csv"
+    assert "llm_context_budget" in c
     aud = audit_compact_context(c)
     assert aud["approx_json_chars"] > 0
     assert "anomalies_csv" in aud["roles_with_summaries"]

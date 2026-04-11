@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 from backend.agents.critic_agent import CriticAgent
 from backend.agents.artifact_summaries import build_artifact_summaries_for_llm
+from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import (
     audit_compact_context,
     build_critic_llm_context,
@@ -187,7 +188,8 @@ def run_traceable_edgar_pipeline(
     critic_model_call_for_audit: ModelCall | None = None
     report_model_call_for_audit: ModelCall | None = None
 
-    artifact_summaries_bundle = build_artifact_summaries_for_llm(orch_out.artifact_paths)
+    _ctx_budget = ContextBudget.from_settings(s)
+    artifact_summaries_bundle = build_artifact_summaries_for_llm(orch_out.artifact_paths, _ctx_budget)
     critic_summary_roles = sorted((artifact_summaries_bundle.get("by_role") or {}).keys())
     artifact_paths_roles = sorted(orch_out.artifact_paths.keys())
 
@@ -204,6 +206,7 @@ def run_traceable_edgar_pipeline(
         artifact_summaries=artifact_summaries_bundle,
         paths_roles=artifact_paths_roles,
         summary_roles_loaded=critic_summary_roles,
+        budget=_ctx_budget,
     )
     critic_llm_audit = audit_compact_context(critic_llm_context)
 
@@ -389,6 +392,7 @@ def run_traceable_edgar_pipeline(
             artifact_summaries=artifact_summaries_bundle,
             paths_roles=artifact_paths_roles,
             summary_roles_loaded=critic_summary_roles,
+            budget=_ctx_budget,
         )
         report_llm_audit = audit_compact_context(report_llm_context)
         recorder = RecordedChatCompletionService(session, llm_provider)
@@ -432,6 +436,7 @@ def run_traceable_edgar_pipeline(
             }
         else:
             rs_steps.transition_status(report_row.id, RunStepStatus.success)
+            report_model_call_for_audit = report_mc
             ro = build_report_phase_output(report_out, orch_out.artifact_paths)
             rs_steps.merge_meta_json(
                 report_row.id,
@@ -456,6 +461,22 @@ def run_traceable_edgar_pipeline(
                 "key_takeaways": report_out.key_takeaways,
                 "model_call_id": str(report_mc.id),
             }
+
+    _cm: dict[str, Any] = {}
+    if critic_model_call_for_audit is not None:
+        _cm["critic"] = completion_model_audit_dict(
+            model_call_model_name=critic_model_call_for_audit.model_name,
+            routing_source=resolve_agent_completion_model(s, "critic")[1],
+            phase="critic",
+        )
+    if report_model_call_for_audit is not None:
+        _cm["report"] = completion_model_audit_dict(
+            model_call_model_name=report_model_call_for_audit.model_name,
+            routing_source=resolve_agent_completion_model(s, "report")[1],
+            phase="report",
+        )
+    if _cm:
+        merge_completion_models_entries(session, analysis_run_id, _cm)
 
     merge_ai_agents_meta(session, analysis_run_id, "report", report_patch)
 

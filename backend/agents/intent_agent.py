@@ -9,6 +9,7 @@ from pydantic import ValidationError
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
+from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import build_intent_llm_context
 from backend.agents.model_routing import resolve_agent_completion_model
 from backend.agents.output_schemas import IntentAgentLLMOutput
@@ -47,6 +48,7 @@ class IntentAgent:
             user_request=user_request,
             tickers=tickers,
             refresh=refresh,
+            budget=ContextBudget.from_settings(self._settings),
         )
         messages = [
             {"role": "system", "content": system},

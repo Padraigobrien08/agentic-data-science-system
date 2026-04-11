@@ -17,11 +17,12 @@ from sqlalchemy.orm import Session
 
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
+from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import build_intent_preferences_assistant_context
 from backend.agents.output_schemas import LLMGoalPreferencesPatch
 from backend.agents.prompt_registry import load_registered_prompt
-from backend.agents.ai_agents_meta import merge_ai_agents_meta
-from backend.agents.model_routing import resolve_agent_completion_model
+from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
+from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest
@@ -87,6 +88,7 @@ def maybe_apply_llm_intent_preferences(
             analysis_goal=request.analysis_goal,
             tickers=list(request.tickers),
             rule_based_goal_preferences=rules_prefs,
+            budget=ContextBudget.from_settings(s),
         )
         messages = [
             {"role": "system", "content": system},
@@ -148,6 +150,17 @@ def maybe_apply_llm_intent_preferences(
                 "prompt_id": reg.prompt_id,
                 "prompt_version": reg.prompt_version,
                 "parsed_goal_preferences": merged.model_dump(mode="json"),
+            },
+        )
+        merge_completion_models_entries(
+            session,
+            analysis_run_id,
+            {
+                "intent_preferences": completion_model_audit_dict(
+                    model_call_model_name=model_call.model_name,
+                    routing_source=resolve_agent_completion_model(s, "intent_preferences")[1],
+                    phase="intent_preferences",
+                ),
             },
         )
         return request.model_copy(
