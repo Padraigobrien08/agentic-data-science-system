@@ -5,7 +5,7 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter, HTTPException, Query, Request
-from sqlalchemy import func, select
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.access_checks import require_analysis_run_owned, require_project_owned
@@ -36,6 +36,12 @@ from backend.schemas.api_phase_a import (
     artifact_to_metadata,
     model_call_to_api_item,
     run_step_to_detail,
+)
+from backend.config.settings import get_settings
+from backend.schemas.llm_usage import (
+    LlmRunUsageSummary,
+    aggregate_llm_usage_for_calls,
+    to_transparency_wire,
 )
 from backend.schemas.run_transparency import build_run_transparency_summary
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
@@ -190,14 +196,23 @@ def get_run(
     row = require_analysis_run_owned(db, run_id, user.id)
     trans = None
     if include_transparency:
-        n_calls = db.scalar(
-            select(func.count()).select_from(ModelCall).where(ModelCall.analysis_run_id == run_id)
-        )
+        calls_rows = db.scalars(
+            select(ModelCall)
+            .where(ModelCall.analysis_run_id == run_id)
+            .order_by(ModelCall.created_at.asc())
+        ).all()
         arts = art_svc.list_for_analysis_run(run_id)
+        settings = get_settings()
+        usage = aggregate_llm_usage_for_calls(
+            run_id,
+            list(calls_rows),
+            pricing_json=settings.agent_llm_pricing_json,
+        )
         trans = build_run_transparency_summary(
             row.meta_json,
-            model_call_count=int(n_calls or 0),
+            model_call_count=len(calls_rows),
             artifacts=arts,
+            llm_usage=to_transparency_wire(usage),
         )
     return analysis_run_to_detail(row, include_payloads=include_payloads, transparency=trans)
 
@@ -266,6 +281,27 @@ def list_run_model_calls(
         .order_by(ModelCall.created_at.asc())
     ).all()
     return [model_call_to_api_item(r, include_payloads=include_payloads) for r in rows]
+
+
+@router.get("/{run_id}/llm-usage", response_model=LlmRunUsageSummary)
+def get_run_llm_usage(
+    run_id: UUID,
+    db: DbSession,
+    user: CurrentUserDep,
+) -> LlmRunUsageSummary:
+    """Aggregate prompt/completion tokens, latency, and optional USD estimates by agent phase."""
+    require_analysis_run_owned(db, run_id, user.id)
+    settings = get_settings()
+    rows = db.scalars(
+        select(ModelCall)
+        .where(ModelCall.analysis_run_id == run_id)
+        .order_by(ModelCall.created_at.asc())
+    ).all()
+    return aggregate_llm_usage_for_calls(
+        run_id,
+        list(rows),
+        pricing_json=settings.agent_llm_pricing_json,
+    )
 
 
 @router.post("/{run_id}/execute", response_model=ExecuteRunResponse)

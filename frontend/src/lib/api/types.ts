@@ -60,12 +60,47 @@ export interface AnalysisRunSummary {
   updated_at: string;
 }
 
+/** Per-phase rollup embedded in run transparency (also returned in full from ``GET /v1/runs/{id}/llm-usage``). */
+export interface LlmUsageTotals {
+  prompt_tokens: number;
+  completion_tokens: number;
+  latency_ms_total: number;
+  estimated_cost_usd: number | null;
+  call_count: number;
+}
+
+export interface LlmPhaseUsageRow {
+  phase: string;
+  call_count: number;
+  prompt_tokens: number;
+  completion_tokens: number;
+  latency_ms_total: number;
+  estimated_cost_usd: number | null;
+  model_names: string[];
+}
+
+/** Wire shape under ``transparency.llm_usage`` (no ``analysis_run_id``). */
+export interface LlmRunUsageSummaryWire {
+  phases: LlmPhaseUsageRow[];
+  totals: LlmUsageTotals;
+  pricing_configured: boolean;
+  pricing_complete: boolean;
+  pricing_source: string;
+}
+
+/** Full response from ``GET /v1/runs/{id}/llm-usage``. */
+export interface LlmRunUsageSummary extends LlmRunUsageSummaryWire {
+  analysis_run_id: string;
+}
+
 /** ``GET /v1/runs/{id}?include_transparency=true`` */
 export interface RunTransparencySummary {
   evidence_artifact_ids: string[];
   evidence_artifacts_by_role: Record<string, string>;
   prompt_versions: Record<string, string> | null;
   model_call_count: number;
+  /** Per-phase token, latency, and optional cost rollup when the API computes it. */
+  llm_usage?: LlmRunUsageSummaryWire | null;
 }
 
 export interface RunStepOutputSummary {

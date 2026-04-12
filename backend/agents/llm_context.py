@@ -3,6 +3,13 @@ Compact, JSON-serializable LLM user payloads per agent phase.
 
 Reduces tokens vs passing full orchestration dumps while preserving fields the prompts need.
 Size limits are driven by :class:`~backend.agents.context_budget.ContextBudget`.
+
+**Transparency:** when trimming applies, payloads include ``llm_context_budget`` with booleans such as
+``user_request_truncated``, ``interpreted_goal_intent_rules_truncated``,
+``interpreted_goal_template_rules_truncated``, ``interpreted_goal_user_goal_excerpt_truncated``,
+``plan_alignment_findings_truncated``, ``errors_sample_truncated``, ``warnings_sample_truncated``,
+plus existing coverage/company/critic clip flags. :func:`audit_compact_context` records
+``llm_context_budget_applied`` when any signal is set.
 """
 
 from __future__ import annotations
@@ -50,29 +57,60 @@ def _trunc(s: str | None, max_len: int) -> str:
 def slim_interpreted_goal_for_llm(
     ig: InterpretedGoal,
     budget: ContextBudget = _DEFAULT_BUDGET,
-) -> dict[str, Any]:
-    """Template + prefs for planning/critic/report — omit bulky narrative lists."""
+) -> tuple[dict[str, Any], dict[str, bool]]:
+    """
+    Template + prefs for planning/critic/report — omit bulky narrative lists.
+
+    Returns ``(payload, truncation_flags)``. Flags are only present (True) when a list or string
+    was shortened vs. the full orchestration object — surfaced under ``llm_context_budget`` on
+    critic/report/planning payloads for transparency.
+    """
+    flags: dict[str, bool] = {}
+    rules_full = list(ig.intent_rules_matched)
+    if len(rules_full) > budget.max_intent_rules_matched:
+        flags["interpreted_goal_intent_rules_truncated"] = True
+
     pt = ig.plan_template
     pt_out: dict[str, Any] | None = None
     if pt is not None:
+        tr_full = list(pt.template_rules_matched)
+        if len(tr_full) > budget.max_template_rules_matched:
+            flags["interpreted_goal_template_rules_truncated"] = True
         pt_out = {
             "template_id": pt.template_id.value,
             "mcp_execution_profile": pt.mcp_execution_profile,
             "peer_analysis_mandatory": pt.peer_analysis_mandatory,
             "persistence_filtering_required": pt.persistence_filtering_required,
-            "template_rules_matched": list(pt.template_rules_matched)[: budget.max_template_rules_matched],
+            "template_rules_matched": tr_full[: budget.max_template_rules_matched],
         }
     gp = ig.goal_preferences
     gp_out = gp.model_dump(mode="json") if gp is not None else None
-    return {
+    ug_raw = (ig.user_goal_text or "").strip()
+    if len(ug_raw) > budget.max_goal_excerpt_chars:
+        flags["interpreted_goal_user_goal_excerpt_truncated"] = True
+    out = {
         "code": ig.code.value,
         "orchestration_intent": ig.intent.value if ig.intent is not None else None,
-        "intent_rules_matched": list(ig.intent_rules_matched)[: budget.max_intent_rules_matched],
+        "intent_rules_matched": rules_full[: budget.max_intent_rules_matched],
         "description": _trunc(ig.description, 512),
         "user_goal_excerpt": _trunc(ig.user_goal_text, budget.max_goal_excerpt_chars),
         "goal_preferences": gp_out,
         "plan_template": pt_out,
     }
+    return out, flags
+
+
+def _user_request_truncated(user_request: str | None, max_chars: int) -> bool:
+    return len((user_request or "").strip()) > max_chars
+
+
+def _warnings_errors_truncation_flags(orch: OrchestrationOutput, budget: ContextBudget) -> dict[str, bool]:
+    flags: dict[str, bool] = {}
+    if len(orch.errors) > budget.max_warn_err_samples:
+        flags["errors_sample_truncated"] = True
+    if len(orch.warnings) > budget.max_warn_err_samples:
+        flags["warnings_sample_truncated"] = True
+    return flags
 
 
 def _slim_tool_result_row(t: ToolResultSummary, budget: ContextBudget) -> dict[str, Any]:
@@ -182,12 +220,15 @@ def build_intent_llm_context(
     budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
     b = budget or _DEFAULT_BUDGET
-    return {
+    out: dict[str, Any] = {
         "contract_version": CONTRACT_INTENT_LLM,
         "user_request": _trunc(user_request, b.max_user_request_chars),
         "tickers": list(tickers),
         "refresh": refresh,
     }
+    if _user_request_truncated(user_request, b.max_user_request_chars):
+        out["llm_context_budget"] = {"user_request_truncated": True}
+    return out
 
 
 def build_planning_llm_context(
@@ -199,13 +240,20 @@ def build_planning_llm_context(
     budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
     b = budget or _DEFAULT_BUDGET
-    return {
+    ig_slim, ig_flags = slim_interpreted_goal_for_llm(interpreted_goal, b)
+    budget_meta: dict[str, bool] = {**ig_flags}
+    if _user_request_truncated(user_request, b.max_user_request_chars):
+        budget_meta["user_request_truncated"] = True
+    out: dict[str, Any] = {
         "contract_version": CONTRACT_PLANNING_LLM,
         "user_request": _trunc(user_request, b.max_user_request_chars),
         "tickers": list(tickers),
         "refresh": refresh,
-        "interpreted_goal": slim_interpreted_goal_for_llm(interpreted_goal, b),
+        "interpreted_goal": ig_slim,
     }
+    if budget_meta:
+        out["llm_context_budget"] = budget_meta
+    return out
 
 
 def build_critic_llm_context(
@@ -219,7 +267,9 @@ def build_critic_llm_context(
     budget: ContextBudget | None = None,
 ) -> dict[str, Any]:
     b = budget or _DEFAULT_BUDGET
-    pa = list(plan_alignment_findings or [])[: b.max_plan_alignment_findings]
+    pa_full = list(plan_alignment_findings or [])
+    pa = pa_full[: b.max_plan_alignment_findings]
+    ig_slim, ig_flags = slim_interpreted_goal_for_llm(orch.interpreted_goal, b)
     max_co = b.max_resolved_companies
     companies = [
         {
@@ -251,6 +301,13 @@ def build_critic_llm_context(
     if summ_meta.get("truncated"):
         llm_budget["artifact_summary_roles_omitted_count"] = summ_meta.get("omitted_count", 0)
 
+    llm_budget.update({k: True for k, v in ig_flags.items() if v})
+    if len(pa_full) > b.max_plan_alignment_findings:
+        llm_budget["plan_alignment_findings_truncated"] = True
+    llm_budget.update(_warnings_errors_truncation_flags(orch, b))
+    if _user_request_truncated(orch_input.analysis_goal, b.max_user_request_chars):
+        llm_budget["user_request_truncated"] = True
+
     return {
         "contract_version": CONTRACT_CRITIC_LLM,
         "run": build_run_fingerprint(orch, b),
@@ -259,7 +316,7 @@ def build_critic_llm_context(
             "tickers": list(orch_input.tickers),
             "refresh": orch_input.refresh,
         },
-        "interpreted_goal": slim_interpreted_goal_for_llm(orch.interpreted_goal, b),
+        "interpreted_goal": ig_slim,
         "resolved_companies": companies,
         "plan_alignment_findings": pa,
         "tool_scope": build_tool_scope_summary(
@@ -295,6 +352,7 @@ def build_report_llm_context(
     """Critic must be structured critic output (e.g. CriticAgentLLMOutput.model_dump)."""
     b = budget or _DEFAULT_BUDGET
     critic_clipped, critic_trunc = clip_critic_for_report_llm(critic, b)
+    ig_slim, ig_flags = slim_interpreted_goal_for_llm(orch.interpreted_goal, b)
 
     max_co = b.max_resolved_companies
     companies = [
@@ -328,6 +386,10 @@ def build_report_llm_context(
         llm_budget["artifact_summary_roles_omitted_count"] = summ_meta.get("omitted_count", 0)
     for k, v in critic_trunc.items():
         llm_budget[f"critic_{k}"] = v
+    llm_budget.update({k: True for k, v in ig_flags.items() if v})
+    llm_budget.update(_warnings_errors_truncation_flags(orch, b))
+    if _user_request_truncated(orch_input.analysis_goal, b.max_user_request_chars):
+        llm_budget["user_request_truncated"] = True
 
     return {
         "contract_version": CONTRACT_REPORT_LLM,
@@ -337,7 +399,7 @@ def build_report_llm_context(
             "tickers": list(orch_input.tickers),
             "refresh": orch_input.refresh,
         },
-        "interpreted_goal": slim_interpreted_goal_for_llm(orch.interpreted_goal, b),
+        "interpreted_goal": ig_slim,
         "critic": critic_clipped,
         "tool_scope": build_tool_scope_summary(
             step_statuses=orch.step_statuses,
@@ -368,12 +430,15 @@ def build_intent_preferences_assistant_context(
 ) -> dict[str, Any]:
     """Optional pre-orchestration preference patch — rule baseline + goal text only."""
     b = budget or _DEFAULT_BUDGET
-    return {
+    out: dict[str, Any] = {
         "contract_version": CONTRACT_INTENT_PREFERENCES_LLM,
         "analysis_goal": _trunc(analysis_goal, b.max_user_request_chars),
         "tickers": list(tickers),
         "rule_based_goal_preferences": rule_based_goal_preferences.model_dump(mode="json"),
     }
+    if _user_request_truncated(analysis_goal, b.max_user_request_chars):
+        out["llm_context_budget"] = {"user_request_truncated": True}
+    return out
 
 
 def audit_compact_context(context: dict[str, Any]) -> dict[str, Any]:
@@ -392,15 +457,22 @@ def audit_compact_context(context: dict[str, Any]) -> dict[str, Any]:
         else [],
     }
     lcb = context.get("llm_context_budget")
+    _BUDGET_SIGNAL_KEYS = frozenset(
+        {
+            "resolved_companies_truncated",
+            "artifact_paths_roles_truncated",
+            "artifact_summary_roles_truncated",
+            "user_request_truncated",
+            "plan_alignment_findings_truncated",
+            "interpreted_goal_intent_rules_truncated",
+            "interpreted_goal_template_rules_truncated",
+            "interpreted_goal_user_goal_excerpt_truncated",
+            "errors_sample_truncated",
+            "warnings_sample_truncated",
+        }
+    )
     if isinstance(lcb, dict) and (
-        any(
-            lcb.get(k)
-            for k in (
-                "resolved_companies_truncated",
-                "artifact_paths_roles_truncated",
-                "artifact_summary_roles_truncated",
-            )
-        )
+        any(lcb.get(k) for k in _BUDGET_SIGNAL_KEYS)
         or lcb.get("critic_truncated")
     ):
         out["llm_context_budget_applied"] = True

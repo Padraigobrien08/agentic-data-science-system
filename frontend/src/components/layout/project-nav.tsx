@@ -17,6 +17,9 @@ export function ProjectNav({ projectId }: Props) {
       <Link href={`${base}/runs/new`} className="text-[var(--muted)] hover:text-[var(--foreground)]">
         Submit run
       </Link>
+      <Link href={`${base}/chat`} className="text-[var(--muted)] hover:text-[var(--foreground)]">
+        Chat
+      </Link>
     </nav>
   );
 }

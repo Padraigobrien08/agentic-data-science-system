@@ -225,6 +225,13 @@ class Settings(BaseSettings):
         ge=0,
         description="Max artifact_index rows; 0 = unlimited.",
     )
+    agent_llm_pricing_json: str = Field(
+        default="{}",
+        description=(
+            "Optional JSON map of OpenAI-style model id → "
+            '{"prompt_usd_per_1m": float, "completion_usd_per_1m": float} for run cost estimates.'
+        ),
+    )
 
     # Observability (structured logs + Prometheus /metrics)
     observability_json_logs: bool = Field(

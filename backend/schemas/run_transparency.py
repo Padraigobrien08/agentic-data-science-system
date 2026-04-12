@@ -12,6 +12,7 @@ from uuid import UUID
 from pydantic import BaseModel, Field
 
 from backend.models.artifact import Artifact
+from backend.schemas.llm_usage import LlmRunUsageSummaryWire
 
 
 def _as_dict(meta_json: dict | list | None) -> dict[str, Any] | None:
@@ -76,6 +77,10 @@ class RunTransparencySummary(BaseModel):
         ge=0,
         description="Count of ``model_calls`` rows for this analysis run (see also GET .../model-calls).",
     )
+    llm_usage: LlmRunUsageSummaryWire | None = Field(
+        None,
+        description="Per-phase token/latency/cost rollup when computed (see GET .../llm-usage).",
+    )
 
 
 def build_run_transparency_summary(
@@ -83,6 +88,7 @@ def build_run_transparency_summary(
     *,
     model_call_count: int,
     artifacts: list[Artifact],
+    llm_usage: LlmRunUsageSummaryWire | None = None,
 ) -> RunTransparencySummary:
     meta = _as_dict(meta_json)
     prompt_versions: dict[str, str] | None = None
@@ -114,6 +120,7 @@ def build_run_transparency_summary(
         evidence_artifacts_by_role=by_role,
         prompt_versions=prompt_versions,
         model_call_count=model_call_count,
+        llm_usage=llm_usage,
     )
 
 

@@ -1,0 +1,7 @@
+{
+  "code": "trend_deterioration",
+  "intent": "anomaly_analysis",
+  "description": "Persistent negative financial trends over recent quarters; de-emphasize one-off noise.",
+  "user_goal_text": "Detect any signs of financial deterioration in the selected companies over recent quarters. Prioritize persistent negative trends rather than one-off anomalies.",
+  "intent_rules_matched": ["llm_intent_agent", "regression_fixture_trend_v1"]
+}

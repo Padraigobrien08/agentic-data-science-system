@@ -1,0 +1,7 @@
+{
+  "user_report_markdown": "# Peer comparison summary\n\n## Evidence\n\nCross-sectional margins and cash conversion metrics in **findings_summary** and **panel** summaries support the relative ranking narrative.\n\n## Limitations\n\nWhere **artifact_summary** roles were absent, conclusions rely on path-level coverage only.\n\n## Per company\n\n### AAPL\nEvidence ties to summarized rows; caveats apply if peer cohort is small.\n",
+  "key_takeaways": [
+    "Peer-relative underperformance is supported by summarized metrics where cohorts are dense.",
+    "Treat z-scores cautiously when baseline windows are short."
+  ]
+}

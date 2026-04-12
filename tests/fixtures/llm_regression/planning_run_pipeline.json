@@ -1,0 +1,16 @@
+{
+  "steps": [
+    {
+      "order": 0,
+      "tool_name": "resolve_company",
+      "tool_input": {},
+      "label": "resolve_symbols"
+    },
+    {
+      "order": 1,
+      "tool_name": "run_pipeline",
+      "tool_input": {},
+      "label": "execute_analysis"
+    }
+  ]
+}

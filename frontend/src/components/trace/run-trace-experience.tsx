@@ -15,6 +15,7 @@ import {
 } from "@/components/trace/plan-alignment-callout";
 import { PlanningTransparencyPanel } from "@/components/trace/planning-transparency-panel";
 import { RunGapOverview } from "@/components/trace/run-gap-overview";
+import { LlmPhaseUsageCard } from "@/components/trace/llm-phase-usage-card";
 import { RunTraceJumpNav } from "@/components/trace/run-trace-jump-nav";
 import { indexModelCallsById, stringArrayFromUnknown } from "@/lib/agent-transparency";
 import type {
@@ -166,13 +167,13 @@ export function RunTraceExperience({
           blockingCaveats={blockingForOverview}
           overallConfidence={criticConfidenceOverview}
         />
-        <RunTraceJumpNav />
+        <RunTraceJumpNav includeLlmUsageAnchor={!!runTransparency} />
       </section>
 
       {runTransparency ? (
         <Section
           title="Prompt & run audit"
-          description="Typed fields from GET /v1/runs/{id}?include_transparency=true — template versions on agents and persisted model-call count."
+          description="Typed fields from GET /v1/runs/{id}?include_transparency=true — template versions, persisted model-call count, and per-phase LLM tokens/latency/cost rollup when available."
         >
           <div className="space-y-3 text-xs">
             <MetaRow label="model_call_count">{runTransparency.model_call_count}</MetaRow>
@@ -217,6 +218,22 @@ export function RunTraceExperience({
                 {runTransparency.evidence_artifact_ids.length > 6 ? " …" : null}
               </p>
             ) : null}
+            <div id="run-llm-usage" className="scroll-mt-20">
+              {runTransparency.llm_usage ? (
+                <LlmPhaseUsageCard usage={runTransparency.llm_usage} />
+              ) : (
+                <div className="border-t border-[var(--border)] pt-3">
+                  <h3 className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                    LLM usage by phase
+                  </h3>
+                  <p className="mt-1 text-[var(--muted)]">
+                    No usage rollup on this response. Load the run with{" "}
+                    <code className="font-mono text-[var(--foreground)]">include_transparency=true</code>{" "}
+                    or call <code className="font-mono text-[var(--foreground)]">GET /v1/runs/…/llm-usage</code>.
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </Section>
       ) : null}

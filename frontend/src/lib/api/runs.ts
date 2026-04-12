@@ -8,6 +8,7 @@ import type {
   ArtifactMetadata,
   ExecuteRunOverrides,
   ExecuteRunResponse,
+  LlmRunUsageSummary,
   ModelCallApiItem,
   RunStepDetail,
 } from "./types";
@@ -60,6 +61,11 @@ export async function listRunModelCalls(
 ): Promise<ModelCallApiItem[]> {
   const q = includePayloads ? "?include_payloads=true" : "";
   return apiGet<ModelCallApiItem[]>(`/v1/runs/${runId}/model-calls${q}`);
+}
+
+/** Per-phase token, latency, and optional cost rollup (same aggregation as ``transparency.llm_usage``). */
+export async function getRunLlmUsage(runId: string): Promise<LlmRunUsageSummary> {
+  return apiGet<LlmRunUsageSummary>(`/v1/runs/${runId}/llm-usage`);
 }
 
 export async function createRun(body: AnalysisRunCreateBody): Promise<AnalysisRunSummary> {

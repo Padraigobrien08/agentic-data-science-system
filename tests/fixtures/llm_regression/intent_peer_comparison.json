@@ -1,0 +1,7 @@
+{
+  "code": "peer_comparison",
+  "intent": "peer_report",
+  "description": "Compare selected companies against peers for relative performance and underperformers.",
+  "user_goal_text": "Compare these companies against peers and highlight underperformers.",
+  "intent_rules_matched": ["llm_intent_agent", "regression_fixture_peer_v1"]
+}
