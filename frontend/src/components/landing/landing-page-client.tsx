@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { AnalysisComposerFields } from "@/components/analysis/analysis-composer-fields";
 import { createAnalysisRunForm } from "@/actions/runs";
@@ -124,7 +125,7 @@ function RunButton() {
 
 function LandingRunForm({ projectId }: { projectId: string }) {
   const action = createAnalysisRunForm.bind(null, projectId);
-  const [state, formAction] = useFormState(action, {});
+  const [state, formAction] = useActionState(action, {});
 
   return (
     <div className="mx-auto max-w-2xl space-y-8">

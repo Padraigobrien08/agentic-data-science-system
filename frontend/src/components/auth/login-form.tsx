@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { loginAction, type LoginState } from "@/actions/auth";
 
@@ -24,7 +25,7 @@ type Props = {
 const initial: LoginState = {};
 
 export function LoginForm({ nextPath }: Props) {
-  const [state, formAction] = useFormState(loginAction, initial);
+  const [state, formAction] = useActionState(loginAction, initial);
 
   return (
     <form action={formAction} className="space-y-4 rounded border border-[var(--border)] p-4">

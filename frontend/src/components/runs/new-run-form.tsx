@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { AnalysisComposerFields } from "@/components/analysis/analysis-composer-fields";
 import { createAnalysisRunForm } from "@/actions/runs";
@@ -25,7 +26,7 @@ type Props = {
 
 export function NewRunForm({ projectId }: Props) {
   const action = createAnalysisRunForm.bind(null, projectId);
-  const [state, formAction] = useFormState(action, {});
+  const [state, formAction] = useActionState(action, {});
 
   return (
     <form action={formAction} className="max-w-2xl space-y-6">

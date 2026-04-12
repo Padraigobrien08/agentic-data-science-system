@@ -1,6 +1,7 @@
 "use client";
 
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { createProjectAction, type CreateProjectState } from "@/actions/projects";
 
@@ -20,7 +21,7 @@ function SubmitButton() {
 const initial: CreateProjectState = {};
 
 export function CreateProjectForm() {
-  const [state, formAction] = useFormState(createProjectAction, initial);
+  const [state, formAction] = useActionState(createProjectAction, initial);
 
   return (
     <form action={formAction} className="flex flex-wrap items-end gap-2">

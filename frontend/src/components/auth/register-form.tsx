@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { useFormState, useFormStatus } from "react-dom";
+import { useActionState } from "react";
+import { useFormStatus } from "react-dom";
 
 import { registerAction, type RegisterState } from "@/actions/auth";
 
@@ -25,7 +26,7 @@ type Props = {
 const initial: RegisterState = {};
 
 export function RegisterForm({ nextPath }: Props) {
-  const [state, formAction] = useFormState(registerAction, initial);
+  const [state, formAction] = useActionState(registerAction, initial);
 
   return (
     <form action={formAction} className="space-y-4 rounded border border-[var(--border)] p-4">
