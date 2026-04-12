@@ -63,12 +63,23 @@ export type PrimaryAnswerView = {
   conclusionRider: { text: string; href: string } | null;
   /** Optional footnote for the evidence block (sampling / truncation / unmapped artifacts). */
   evidenceProvenanceHint: string | null;
+  /** Raw goal text for deterministic outcome hints (may match ``goalDisplay``). */
+  suggestionGoalText: string;
+  /** Tickers from ``input_payload_json`` for outcome hinting. */
+  inputTickers: string[];
 };
 
 function inputGoalText(input: unknown): string | null {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const g = (input as Record<string, unknown>).analysis_goal;
   return typeof g === "string" && g.trim() ? g.trim() : null;
+}
+
+function parseInputTickers(input: unknown): string[] {
+  if (!input || typeof input !== "object" || Array.isArray(input)) return [];
+  const t = (input as Record<string, unknown>).tickers;
+  if (!Array.isArray(t)) return [];
+  return t.filter((x): x is string => typeof x === "string").map((s) => s.trim()).filter(Boolean);
 }
 
 function truncate(s: string, max: number): string {
@@ -276,10 +287,14 @@ export function buildPrimaryAnswerView(
   ai: ParsedAiAgents | null,
   nav?: PrimaryAnswerNavContext,
 ): PrimaryAnswerView {
-  const goalDisplay =
+  const suggestionGoalText =
     (input.orchestration_goal_text && input.orchestration_goal_text.trim()) ||
     inputGoalText(input.input_payload_json) ||
-    "—";
+    "";
+
+  const goalDisplay = suggestionGoalText || "—";
+
+  const inputTickers = parseInputTickers(input.input_payload_json);
 
   const summaryLine =
     (orch?.final_summary && orch.final_summary.trim()) ||
@@ -363,5 +378,7 @@ export function buildPrimaryAnswerView(
     contextSignals,
     conclusionRider,
     evidenceProvenanceHint,
+    suggestionGoalText,
+    inputTickers,
   };
 }

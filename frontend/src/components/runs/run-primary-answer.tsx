@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { OutcomeSuggestionsPanel } from "@/components/runs/outcome-suggestions-panel";
 import { VerifyAnalysisSection } from "@/components/runs/verify-analysis-section";
 import {
   AnswerSummary,
@@ -50,6 +51,16 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute
         orchestrationStatus={view.orchestrationStatus}
         runStatus={runStatus}
         conclusionRider={view.conclusionRider}
+      />
+
+      <OutcomeSuggestionsPanel
+        status={runStatus}
+        goalText={view.suggestionGoalText}
+        tickers={view.inputTickers}
+        contextSignals={view.contextSignals}
+        weakEvidenceCount={view.weakEvidenceSignals.length}
+        projectId={projectId}
+        traceHref={traceHref}
       />
 
       {hasFindings ? (
