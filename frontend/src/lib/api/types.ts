@@ -58,6 +58,10 @@ export interface AnalysisRunSummary {
   finished_at: string | null;
   created_at: string;
   updated_at: string;
+  /** Derived from ``run_steps`` + status (no extra persistence). */
+  current_phase: string;
+  total_steps: number;
+  completed_steps: number;
 }
 
 /** Per-phase rollup embedded in run transparency (also returned in full from ``GET /v1/runs/{id}/llm-usage``). */

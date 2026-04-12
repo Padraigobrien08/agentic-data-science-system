@@ -25,6 +25,8 @@ from backend.schemas.run_lifecycle import (
     RunRetryRequest,
     analysis_run_status_to_response,
 )
+from backend.domain.run_progress import derive_run_progress_public
+from backend.repositories.run_step_repository import RunStepRepository
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
     AnalysisRunSummary,
@@ -108,7 +110,15 @@ def list_runs(
         rows = run_svc.list_for_project(project_id)
     else:
         rows = run_svc.list_for_projects_owned_by(user.id)
-    return [analysis_run_to_summary(r) for r in rows]
+    step_repo = RunStepRepository(db)
+    grouped = step_repo.list_grouped_by_run_ids([r.id for r in rows])
+    return [
+        analysis_run_to_summary(
+            r,
+            progress=derive_run_progress_public(r.status, grouped.get(r.id, [])),
+        )
+        for r in rows
+    ]
 
 
 @router.get("/{run_id}/status", response_model=AnalysisRunStatusResponse)
@@ -194,6 +204,8 @@ def get_run(
     ),
 ) -> AnalysisRunDetailResponse:
     row = require_analysis_run_owned(db, run_id, user.id)
+    steps = RunStepRepository(db).list_for_analysis_run(run_id)
+    progress = derive_run_progress_public(row.status, steps)
     trans = None
     if include_transparency:
         calls_rows = db.scalars(
@@ -214,7 +226,12 @@ def get_run(
             artifacts=arts,
             llm_usage=to_transparency_wire(usage),
         )
-    return analysis_run_to_detail(row, include_payloads=include_payloads, transparency=trans)
+    return analysis_run_to_detail(
+        row,
+        include_payloads=include_payloads,
+        transparency=trans,
+        progress=progress,
+    )
 
 
 @router.get("/{run_id}/steps", response_model=list[RunStepDetailItem])

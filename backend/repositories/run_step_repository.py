@@ -37,6 +37,22 @@ class RunStepRepository:
             ).all()
         )
 
+    def list_grouped_by_run_ids(self, run_ids: list[UUID]) -> dict[UUID, list[RunStep]]:
+        """All steps for the given runs (ordered by ``step_index``), grouped by ``analysis_run_id``."""
+        if not run_ids:
+            return {}
+        rows = list(
+            self._session.scalars(
+                select(RunStep)
+                .where(RunStep.analysis_run_id.in_(run_ids))
+                .order_by(RunStep.analysis_run_id, RunStep.step_index)
+            ).all()
+        )
+        out: dict[UUID, list[RunStep]] = {}
+        for s in rows:
+            out.setdefault(s.analysis_run_id, []).append(s)
+        return out
+
     def add(self, row: RunStep) -> RunStep:
         self._session.add(row)
         return row

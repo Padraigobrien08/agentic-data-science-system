@@ -2,11 +2,13 @@
 
 from __future__ import annotations
 
+from dataclasses import asdict
 from datetime import datetime
 from uuid import UUID
 
 from pydantic import BaseModel, ConfigDict, Field
 
+from backend.domain.run_progress import RunProgressPublic, derive_run_progress_public
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
 from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus, RunStepStatus
@@ -35,6 +37,20 @@ class AnalysisRunSummary(BaseModel):
     finished_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+    current_phase: str = Field(
+        default="not_started",
+        description=(
+            "Coarse pipeline phase derived from ``run_steps`` + run status: "
+            "``not_started``, ``queued``, ``plan``, ``panels``, ``signals``, ``review``, ``report``, "
+            "``completed``, ``unknown``."
+        ),
+    )
+    total_steps: int = Field(default=0, ge=0, description="Count of persisted run steps for this analysis run.")
+    completed_steps: int = Field(
+        default=0,
+        ge=0,
+        description="Steps in a terminal outcome (success, skipped, no_data, error).",
+    )
 
 
 class AnalysisRunDetailResponse(AnalysisRunSummary):
@@ -49,8 +65,14 @@ class AnalysisRunDetailResponse(AnalysisRunSummary):
     )
 
 
-def analysis_run_to_summary(row: AnalysisRun) -> AnalysisRunSummary:
-    return AnalysisRunSummary.model_validate(row)
+def analysis_run_to_summary(
+    row: AnalysisRun,
+    *,
+    progress: RunProgressPublic | None = None,
+) -> AnalysisRunSummary:
+    base = AnalysisRunSummary.model_validate(row)
+    prog = progress if progress is not None else derive_run_progress_public(row.status, [])
+    return base.model_copy(update=asdict(prog))
 
 
 def analysis_run_to_detail(
@@ -58,8 +80,9 @@ def analysis_run_to_detail(
     *,
     include_payloads: bool,
     transparency: RunTransparencySummary | None = None,
+    progress: RunProgressPublic | None = None,
 ) -> AnalysisRunDetailResponse:
-    base = analysis_run_to_summary(row)
+    base = analysis_run_to_summary(row, progress=progress)
     if not include_payloads:
         return AnalysisRunDetailResponse(
             **base.model_dump(),
