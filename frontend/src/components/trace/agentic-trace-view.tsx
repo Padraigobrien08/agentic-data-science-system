@@ -1,6 +1,7 @@
 import { RunStepTrace } from "@/components/runs/run-step-trace";
 import { AgentModelStepsPanel } from "@/components/trace/agent-model-steps-panel";
 import { ArtifactsMetadataPanel } from "@/components/trace/artifacts-metadata-panel";
+import { DeepDiveLayout } from "@/components/trace/deep-dive-layout";
 import { PlannerOutputPanel } from "@/components/trace/planner-output-panel";
 import { RunTraceExperience } from "@/components/trace/run-trace-experience";
 import { ToolSequencePanel } from "@/components/trace/tool-sequence-panel";
@@ -34,7 +35,8 @@ type Props = {
 };
 
 /**
- * Composed **transparent** trace: planner → tools → LLM phases → persisted steps → artifacts.
+ * Deep-dive transparency stack: audit narrative in {@link RunTraceExperience} + {@link DeepDiveLayout},
+ * then collapsible technical inspector (raw planner, tools, steps, artifact paths).
  */
 export function AgenticTraceView({
   projectId,
@@ -52,27 +54,30 @@ export function AgenticTraceView({
 }: Props) {
   const orch = parseOrchestrationOutput(outputPayload);
   const ai = parseAiAgents(metaJson);
+  const includeLlmUsageAnchor = !!runTransparency;
 
   return (
     <div className="space-y-4">
-      <RunTraceExperience
-        projectId={projectId}
-        runId={runId}
-        orch={orch}
-        ai={ai}
-        steps={steps}
-        artifacts={artifacts}
-        modelCalls={modelCalls}
-        userFacingReport={userFacingReport}
-        compactTraceLink={compactTraceLink}
-        runStatus={runStatus}
-        runErrorSummary={runErrorSummary}
-        runTransparency={runTransparency}
-      />
+      <DeepDiveLayout includeLlmUsageAnchor={includeLlmUsageAnchor}>
+        <RunTraceExperience
+          projectId={projectId}
+          runId={runId}
+          orch={orch}
+          ai={ai}
+          steps={steps}
+          artifacts={artifacts}
+          modelCalls={modelCalls}
+          userFacingReport={userFacingReport}
+          compactTraceLink={compactTraceLink}
+          runStatus={runStatus}
+          runErrorSummary={runErrorSummary}
+          runTransparency={runTransparency}
+        />
+      </DeepDiveLayout>
 
       <details className="rounded border border-[var(--border)]">
         <summary className="cursor-pointer select-none border-b border-[var(--border)] bg-neutral-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide dark:bg-neutral-900/50">
-          Technical inspector (full tables, step payloads, raw meta)
+          Technical inspector — planner JSON, tool sequence, agent meta, persisted steps, artifact paths
         </summary>
         <div className="space-y-4 p-3">
           <PlannerOutputPanel orch={orch} ai={ai} />

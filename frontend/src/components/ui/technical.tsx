@@ -5,12 +5,33 @@ type SectionProps = {
   title: string;
   description?: string;
   children: React.ReactNode;
+  /** Extra classes on the outer `<section>` (e.g. scroll margin, density). */
+  className?: string;
+  /** Classes on the inner content wrapper (default `p-3`). */
+  bodyClassName?: string;
+  /** Classes on the section header strip. */
+  headerClassName?: string;
 };
 
-export function Section({ id, title, description, children }: SectionProps) {
+export function Section({
+  id,
+  title,
+  description,
+  children,
+  className,
+  bodyClassName,
+  headerClassName,
+}: SectionProps) {
+  const outer = className?.trim()
+    ? `border border-[var(--border)] rounded ${className}`
+    : "border border-[var(--border)] rounded";
+  const body = bodyClassName?.trim() ? bodyClassName : "p-3";
+  const head = headerClassName?.trim()
+    ? `border-b border-[var(--border)] bg-neutral-50 px-3 py-2 dark:bg-neutral-900/50 ${headerClassName}`
+    : "border-b border-[var(--border)] bg-neutral-50 px-3 py-2 dark:bg-neutral-900/50";
   return (
-    <section id={id} className="border border-[var(--border)] rounded">
-      <header className="border-b border-[var(--border)] bg-neutral-50 px-3 py-2 dark:bg-neutral-900/50">
+    <section id={id} className={outer}>
+      <header className={head}>
         <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground)]">
           {title}
         </h2>
@@ -18,7 +39,7 @@ export function Section({ id, title, description, children }: SectionProps) {
           <p className="mt-0.5 text-xs text-[var(--muted)]">{description}</p>
         ) : null}
       </header>
-      <div className="p-3">{children}</div>
+      <div className={body}>{children}</div>
     </section>
   );
 }

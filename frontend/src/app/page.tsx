@@ -1,53 +1,35 @@
 import Link from "next/link";
 
+import { LandingPageClient } from "@/components/landing/landing-page-client";
 import { getCurrentUser } from "@/lib/auth/session";
+import { resolveLandingProjectId } from "@/lib/landing-project";
 
 export const dynamic = "force-dynamic";
 
 export default async function HomePage() {
-  const defaultProject = process.env.NEXT_PUBLIC_DEFAULT_PROJECT_ID?.trim();
   const user = await getCurrentUser();
+  const projectId = await resolveLandingProjectId(user);
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-xl font-semibold">EDGAR analysis</h1>
-      <p className="max-w-prose text-sm text-[var(--muted)]">
-        This UI calls the FastAPI backend from the Next server using{" "}
-        <code className="text-xs">API_URL</code> and an HttpOnly session cookie after you{" "}
-        <Link href="/login" className="underline">
-          sign in
-        </Link>{" "}
-        or{" "}
-        <Link href="/register" className="underline">
-          register
-        </Link>
-        . Projects, runs, and artifacts require authentication.
-      </p>
-      <ul className="list-inside list-disc text-sm">
-        <li>
-          <Link href="/login" className="underline">
-            Sign in
-          </Link>
-        </li>
-        <li>
-          <Link href="/register" className="underline">
-            Create account
-          </Link>
-        </li>
-        <li>
+    <div className="space-y-10 pb-8">
+      <LandingPageClient isAuthenticated={!!user} projectId={projectId} />
+      {user ? (
+        <footer className="mx-auto max-w-2xl border-t border-[var(--border)] pt-6 text-center text-[11px] text-[var(--muted)]">
+          <span>Signed in as {user.email}</span>
+          {" · "}
           <Link href="/projects" className="underline">
-            Projects (redirects to login if needed)
+            Projects
           </Link>
-        </li>
-        {user && defaultProject ? (
-          <li>
-            <Link href={`/projects/${defaultProject}/runs`} className="underline">
-              Default project runs
-            </Link>
-            <span className="ml-1 text-xs text-[var(--muted)]">(env shortcut)</span>
-          </li>
-        ) : null}
-      </ul>
+          {projectId ? (
+            <>
+              {" · "}
+              <Link href={`/projects/${projectId}/chat`} className="underline">
+                Chat workspace
+              </Link>
+            </>
+          ) : null}
+        </footer>
+      ) : null}
     </div>
   );
 }

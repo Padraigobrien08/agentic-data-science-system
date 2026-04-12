@@ -2,9 +2,12 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SignInHint } from "@/components/auth/sign-in-hint";
+import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
+import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
 import { getRun, listRunArtifacts, listRunModelCalls, listRunSteps } from "@/lib/api/runs";
+import { formatDate } from "@/lib/format";
 import { parseUserFacingReport } from "@/lib/orchestration-output";
 
 export const dynamic = "force-dynamic";
@@ -33,7 +36,7 @@ export default async function RunTracePage({
     if (e instanceof ApiError && e.status === 401) {
       return (
         <div className="space-y-3">
-          <h1 className="text-lg font-semibold">Full trace</h1>
+          <h1 className="text-lg font-semibold">Deep dive</h1>
           <SignInHint nextPath={`/projects/${projectId}/runs/${runId}/trace`} />
         </div>
       );
@@ -49,22 +52,56 @@ export default async function RunTracePage({
   const userReport = parseUserFacingReport(run.output_payload_json);
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-wrap items-baseline justify-between gap-2">
-        <div>
-          <h1 className="text-lg font-semibold">Full trace</h1>
-          <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-            Planner, tools, agents, persisted steps, and artifact metadata for this run.
-          </p>
+    <div className="space-y-6">
+      <ProjectWorkspaceNav projectId={projectId} runId={runId} current="trace" />
+
+      <header className="border-b border-[var(--border)] pb-5">
+        <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
+          <div className="min-w-0 space-y-2">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
+              Inspection / audit workspace
+            </p>
+            <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Deep dive</h1>
+            <p className="max-w-prose text-xs leading-relaxed text-[var(--muted)]">
+              Full transparency for this run: interpreted goal, plan, MCP execution, persisted steps, LLM calls,
+              critic and report phases, artifacts, and prompt metadata. Denser than the run answer page by design.
+            </p>
+            <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
+              <StatusBadge status={run.status} />
+              <span className="hidden sm:inline">·</span>
+              <span>
+                {formatDate(run.created_at)}
+                {run.finished_at ? ` → ${formatDate(run.finished_at)}` : ""}
+              </span>
+            </div>
+            <details className="text-[10px] text-[var(--muted)]">
+              <summary className="cursor-pointer font-mono underline">Run id</summary>
+              <p className="mt-1 break-all">{runId}</p>
+            </details>
+          </div>
+          <div className="flex flex-shrink-0 flex-wrap gap-2">
+            <Link
+              href={`/projects/${projectId}/runs/${runId}`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--foreground)] px-3 py-2 text-center text-sm font-medium text-[var(--background)]"
+            >
+              Run answer
+            </Link>
+            <Link
+              href={`/projects/${projectId}/chat`}
+              className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
+            >
+              Chat
+            </Link>
+            <Link
+              href={`/projects/${projectId}/runs`}
+              className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--muted)]"
+            >
+              All runs
+            </Link>
+          </div>
         </div>
-        <Link
-          href={`/projects/${projectId}/runs/${runId}`}
-          className="font-mono text-sm underline"
-        >
-          ← Run detail
-        </Link>
-      </div>
-      <p className="font-mono text-xs text-[var(--muted)] break-all">{runId}</p>
+      </header>
+
       <AgenticTraceView
         projectId={projectId}
         runId={runId}

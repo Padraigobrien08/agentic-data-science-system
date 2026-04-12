@@ -2,16 +2,16 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { SignInHint } from "@/components/auth/sign-in-hint";
+import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { ExecuteRunButton } from "@/components/runs/execute-run-button";
-import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
-import { JsonPanel, MetaRow, Section, StatusBadge } from "@/components/ui/technical";
+import { RunPrimaryAnswer } from "@/components/runs/run-primary-answer";
+import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
-import { getRun, listRunArtifacts, listRunModelCalls, listRunSteps } from "@/lib/api/runs";
+import { parseAiAgents } from "@/lib/ai-agents-meta";
+import { getRun, listRunArtifacts } from "@/lib/api/runs";
 import { formatDate } from "@/lib/format";
-import {
-  parseOrchestrationOutput,
-  parseUserFacingReport,
-} from "@/lib/orchestration-output";
+import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
+import { buildPrimaryAnswerView } from "@/lib/run-primary-view";
 
 export const dynamic = "force-dynamic";
 
@@ -31,14 +31,10 @@ export default async function RunDetailPage({
   const { projectId, runId } = await params;
   let run;
   let artifacts;
-  let steps;
-  let modelCalls;
   try {
-    [run, artifacts, steps, modelCalls] = await Promise.all([
-      getRun(runId, { includePayloads: true, includeTransparency: true }),
+    [run, artifacts] = await Promise.all([
+      getRun(runId, { includePayloads: true, includeTransparency: false }),
       listRunArtifacts(runId),
-      listRunSteps(runId, { includePayloads: true, includeTransparency: true }),
-      listRunModelCalls(runId, false),
     ]);
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
@@ -47,7 +43,7 @@ export default async function RunDetailPage({
     if (e instanceof ApiError && e.status === 401) {
       return (
         <div className="space-y-3">
-          <h1 className="text-lg font-semibold">Run detail</h1>
+          <h1 className="text-lg font-semibold">Run answer</h1>
           <SignInHint nextPath={`/projects/${projectId}/runs/${runId}`} />
         </div>
       );
@@ -55,7 +51,7 @@ export default async function RunDetailPage({
     const msg = e instanceof ApiError ? e.body || e.message : "Unknown error";
     return (
       <div className="space-y-2">
-        <h1 className="text-lg font-semibold">Run detail</h1>
+        <h1 className="text-lg font-semibold">Run answer</h1>
         <p className="font-mono text-sm text-red-700 dark:text-red-400">{msg}</p>
       </div>
     );
@@ -67,27 +63,29 @@ export default async function RunDetailPage({
 
   const orch = parseOrchestrationOutput(run.output_payload_json);
   const userReport = parseUserFacingReport(run.output_payload_json);
+  const ai = parseAiAgents(run.meta_json);
+  const view = buildPrimaryAnswerView(run, artifacts, orch, userReport, ai);
   const canExecute = EXECUTABLE_HINT.has(run.status);
+  const isQueued = run.status === "queued";
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-wrap items-start justify-between gap-4">
+    <div className="space-y-8">
+      <ProjectWorkspaceNav projectId={projectId} runId={runId} current="run" />
+
+      <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-6 sm:flex-row sm:items-start sm:justify-between">
         <div className="min-w-0 space-y-2">
-          <h1 className="text-lg font-semibold">Run detail</h1>
-          <StatusBadge status={run.status} />
-          <div className="mt-3 max-w-3xl border-t border-[var(--border)]">
-            <MetaRow label="run.id">{run.id}</MetaRow>
-            <MetaRow label="project_id">{run.project_id}</MetaRow>
-            <MetaRow label="correlation_id">
-              {run.correlation_id ?? "—"}
-            </MetaRow>
-            {orch?.run_id ? (
-              <MetaRow label="orchestration_run_id">{orch.run_id}</MetaRow>
-            ) : null}
-            <MetaRow label="created_at">{formatDate(run.created_at)}</MetaRow>
-            <MetaRow label="finished_at">{formatDate(run.finished_at)}</MetaRow>
-            <MetaRow label="started_at">{formatDate(run.started_at)}</MetaRow>
+          <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Run answer</h1>
+          <div className="flex flex-wrap items-center gap-2">
+            <StatusBadge status={run.status} />
+            <span className="text-xs text-[var(--muted)]">
+              {formatDate(run.created_at)}
+              {run.finished_at ? ` → ${formatDate(run.finished_at)}` : ""}
+            </span>
           </div>
+          <details className="text-[11px] text-[var(--muted)]">
+            <summary className="cursor-pointer font-mono underline">Run id</summary>
+            <p className="mt-1 break-all">{run.id}</p>
+          </details>
         </div>
         <div className="flex flex-shrink-0 flex-wrap gap-2">
           {canExecute ? (
@@ -95,67 +93,50 @@ export default async function RunDetailPage({
           ) : null}
           <Link
             href={`/projects/${projectId}/runs/${runId}/trace`}
-            className="rounded border border-[var(--border)] px-3 py-2 font-mono text-sm"
+            className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
           >
-            Full trace view
+            Deep dive
+          </Link>
+          <Link
+            href={`/projects/${projectId}/chat`}
+            className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
+          >
+            Chat
           </Link>
           <Link
             href={`/projects/${projectId}/runs`}
-            className="rounded border border-[var(--border)] px-3 py-2 font-mono text-sm"
+            className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm text-[var(--muted)]"
           >
             All runs
           </Link>
         </div>
-      </div>
+      </header>
 
-      {run.status === "queued" ? (
-        <p className="rounded border border-amber-200 bg-amber-50 p-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
-          Status <code className="font-mono">queued</code>: execution is handled by the backend
-          worker. Refresh this page after the job completes.
+      {isQueued ? (
+        <p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-950 dark:border-amber-900 dark:bg-amber-950/40 dark:text-amber-100">
+          Queued for the worker — refresh after completion for the answer summary.
         </p>
       ) : null}
 
       {run.error_summary ? (
-        <Section title="Error summary" description="Persisted error_summary on the analysis run row.">
-          <pre className="whitespace-pre-wrap font-mono text-sm text-red-800 dark:text-red-200">
-            {run.error_summary}
-          </pre>
-        </Section>
+        <div
+          role="alert"
+          className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100"
+        >
+          <p className="font-medium">Run error</p>
+          <pre className="mt-1 max-h-40 overflow-auto whitespace-pre-wrap font-mono text-xs">{run.error_summary}</pre>
+        </div>
       ) : null}
 
-      <div>
-        <h2 className="mb-2 text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-          Agentic trace &amp; artifacts
-        </h2>
-        <p className="mb-3 max-w-prose text-xs text-[var(--muted)]">
-          Read-only trace: outcome → goal → plan → step timeline → model phases → tool summaries →
-          evidence → final report. Expand the technical inspector for full tables and per-step JSON.
-        </p>
-        <AgenticTraceView
-          projectId={projectId}
-          runId={runId}
-          outputPayload={run.output_payload_json}
-          metaJson={run.meta_json}
-          steps={steps}
-          artifacts={artifacts}
-          modelCalls={modelCalls}
-          userFacingReport={userReport}
-          runStatus={run.status}
-          runErrorSummary={run.error_summary}
-          runTransparency={run.transparency ?? null}
-        />
-      </div>
+      <RunPrimaryAnswer projectId={projectId} runId={runId} runStatus={run.status} view={view} isQueued={isQueued} />
 
-      <Section
-        title="Raw payloads"
-        description="Full JSON as returned by GET /v1/runs/{id}?include_payloads=true"
-      >
-        <div className="space-y-4">
-          <JsonPanel title="input_payload_json" value={run.input_payload_json} />
-          <JsonPanel title="output_payload_json" value={run.output_payload_json} />
-          <JsonPanel title="meta_json" value={run.meta_json} />
-        </div>
-      </Section>
+      <p className="mx-auto max-w-3xl text-center text-[11px] text-[var(--muted)]">
+        Full orchestration tables, model calls, and raw JSON live on{" "}
+        <Link href={`/projects/${projectId}/runs/${runId}/trace`} className="underline">
+          Deep dive
+        </Link>
+        .
+      </p>
     </div>
   );
 }
