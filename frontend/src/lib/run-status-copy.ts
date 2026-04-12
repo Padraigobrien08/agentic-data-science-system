@@ -62,8 +62,8 @@ export type RunStateBannerModel = {
 
 function progressCopy(surface: RunStateBannerSurface): string {
   return surface === "trace"
-    ? "This view refreshes every few seconds while the run is active."
-    : "This page refreshes every few seconds while the run is active.";
+    ? "The checklist and tables update as each stage completes."
+    : "The checklist below updates as each stage completes.";
 }
 
 export function getRunStateBannerModel(

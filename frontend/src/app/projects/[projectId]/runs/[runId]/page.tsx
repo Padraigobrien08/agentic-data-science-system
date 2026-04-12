@@ -4,12 +4,13 @@ import { notFound } from "next/navigation";
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { ExecuteRunButton } from "@/components/runs/execute-run-button";
+import { RunPipelinePhaseTrack } from "@/components/runs/run-pipeline-phase-track";
 import { RunPrimaryAnswer } from "@/components/runs/run-primary-answer";
 import { RunStateBanner } from "@/components/runs/run-state-banner";
 import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
-import { getRun, listRunArtifacts } from "@/lib/api/runs";
+import { getRun, listRunArtifacts, listRunSteps } from "@/lib/api/runs";
 import { formatDate } from "@/lib/format";
 import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
 import { buildPrimaryAnswerView } from "@/lib/run-primary-view";
@@ -32,10 +33,12 @@ export default async function RunDetailPage({
   const { projectId, runId } = await params;
   let run;
   let artifacts;
+  let steps;
   try {
-    [run, artifacts] = await Promise.all([
+    [run, artifacts, steps] = await Promise.all([
       getRun(runId, { includePayloads: true, includeTransparency: false }),
       listRunArtifacts(runId),
+      listRunSteps(runId, false),
     ]);
   } catch (e) {
     if (e instanceof ApiError && e.status === 404) {
@@ -119,6 +122,8 @@ export default async function RunDetailPage({
         </header>
 
         <RunStateBanner status={run.status} surface="run-answer" runAnswerHref={runAnswerHref} />
+
+        <RunPipelinePhaseTrack status={run.status} steps={steps} />
 
         {run.error_summary ? (
           <div

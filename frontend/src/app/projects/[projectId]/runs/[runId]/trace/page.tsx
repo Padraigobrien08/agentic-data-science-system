@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
+import { RunPipelinePhaseTrack } from "@/components/runs/run-pipeline-phase-track";
 import { RunStateBanner } from "@/components/runs/run-state-banner";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
 import { StatusBadge } from "@/components/ui/technical";
@@ -116,6 +117,8 @@ export default async function RunTracePage({
       </header>
 
       <RunStateBanner status={run.status} surface="trace" runAnswerHref={runAnswerHref} />
+
+      <RunPipelinePhaseTrack status={run.status} steps={steps} />
 
       <AgenticTraceView
         projectId={projectId}
