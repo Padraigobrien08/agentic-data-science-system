@@ -1,5 +1,6 @@
 import Link from "next/link";
 
+import { VerifyAnalysisSection } from "@/components/runs/verify-analysis-section";
 import {
   AnswerSummary,
   CaveatBadgeGroup,
@@ -18,13 +19,15 @@ type Props = {
   runId: string;
   runStatus: AnalysisRunStatus;
   view: PrimaryAnswerView;
+  /** When true, the verify strip includes a compact re-run control. */
+  canExecute: boolean;
 };
 
 /**
  * Main product surface for a completed (or in-progress) run: conclusion, findings, evidence, actions.
  * No full markdown report or trace tables — link out for those.
  */
-export function RunPrimaryAnswer({ projectId, runId, runStatus, view }: Props) {
+export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute }: Props) {
   const traceHref = `/projects/${projectId}/runs/${runId}/trace`;
   const runsHref = `/projects/${projectId}/runs`;
   const chatHref = `/projects/${projectId}/chat`;
@@ -75,6 +78,15 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view }: Props) {
           </p>
         </section>
       )}
+
+      <VerifyAnalysisSection
+        traceHref={traceHref}
+        evidenceLinks={view.evidenceLinks}
+        reportArtifactId={view.reportArtifactId}
+        projectId={projectId}
+        runId={runId}
+        canExecute={canExecute}
+      />
 
       <section className="space-y-3">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Evidence</p>

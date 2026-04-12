@@ -135,7 +135,13 @@ export default async function RunDetailPage({
           </div>
         ) : null}
 
-        <RunPrimaryAnswer projectId={projectId} runId={runId} runStatus={run.status} view={view} />
+        <RunPrimaryAnswer
+          projectId={projectId}
+          runId={runId}
+          runStatus={run.status}
+          view={view}
+          canExecute={canExecute}
+        />
       </div>
     </div>
   );
