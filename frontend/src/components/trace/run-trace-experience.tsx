@@ -14,6 +14,7 @@ import {
   PlanAlignmentCallout,
 } from "@/components/trace/plan-alignment-callout";
 import { PlanningTransparencyPanel } from "@/components/trace/planning-transparency-panel";
+import { ContextTransparencyPanel } from "@/components/trace/context-transparency-panel";
 import { RunGapOverview } from "@/components/trace/run-gap-overview";
 import { LlmPhaseUsageCard } from "@/components/trace/llm-phase-usage-card";
 import { indexModelCallsById, stringArrayFromUnknown } from "@/lib/agent-transparency";
@@ -155,7 +156,7 @@ export function RunTraceExperience({
             Run status & errors
           </p>
           <div className="mt-1.5 flex flex-wrap items-center gap-2">
-            {runStatus ? <StatusBadge status={runStatus} /> : null}
+            {runStatus ? <StatusBadge status={runStatus} variant="friendly" /> : null}
           </div>
           {runErrorSummary?.trim() ? (
             <pre className="mt-2 max-h-48 overflow-auto whitespace-pre-wrap font-mono text-[11px] text-red-900 dark:text-red-100">
@@ -438,6 +439,13 @@ export function RunTraceExperience({
         bodyClassName={auditBody}
         headerClassName={auditHeader}
       >
+        <p className="mb-2 text-[10px] leading-snug text-[var(--muted)]">
+          The{" "}
+          <Link href={`/projects/${projectId}/runs/${runId}`} className="text-[var(--foreground)] underline">
+            run answer
+          </Link>{" "}
+          page routes conclusion and finding chips to this roster and to critic/report sections above.
+        </p>
         {tr?.evidence_artifact_refs && tr.evidence_artifact_refs.length > 0 ? (
           <div className="mb-2">
             <p className="mb-1 text-[10px] font-semibold uppercase text-[var(--muted)]">Pipeline evidence refs</p>
@@ -557,6 +565,7 @@ export function RunTraceExperience({
         bodyClassName={auditBody}
         headerClassName={auditHeader}
       >
+        <ContextTransparencyPanel ai={ai} />
         {runTransparency ? (
           <div className="space-y-2 text-[11px]">
             <MetaRow label="model_call_count">{runTransparency.model_call_count}</MetaRow>

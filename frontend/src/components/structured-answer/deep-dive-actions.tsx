@@ -4,12 +4,12 @@ import type { DeepDiveActionsProps } from "./types";
 
 export function DeepDiveActions({ traceHref, reportArtifactId, chatHref, runsHref, className }: DeepDiveActionsProps) {
   return (
-    <div className={className ?? "flex flex-col gap-2 sm:flex-row sm:flex-wrap"}>
+    <div className={className ?? "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"}>
       <Link
         href={traceHref}
         className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--foreground)] px-4 py-2.5 text-center text-sm font-semibold text-[var(--background)]"
       >
-        View deep dive
+        Deep dive (steps &amp; artifacts)
       </Link>
       {reportArtifactId ? (
         <Link
@@ -23,14 +23,9 @@ export function DeepDiveActions({ traceHref, reportArtifactId, chatHref, runsHre
           Report artifact not linked yet
         </span>
       )}
-      <Link
-        href={traceHref}
-        className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] px-4 py-2.5 text-center text-sm font-medium text-[var(--foreground)]"
-      >
-        Inspect artifacts &amp; trace
-      </Link>
+      <div className="hidden h-6 w-px bg-[var(--border)] sm:block" aria-hidden />
       <Link href={chatHref} className="inline-flex items-center justify-center text-sm text-[var(--muted)] underline">
-        Chat workspace
+        Chat
       </Link>
       <Link href={runsHref} className="inline-flex items-center justify-center text-sm text-[var(--muted)] underline">
         All runs

@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { humanizeWeakEvidenceSignal } from "./signal-labels";
 import type { CaveatBadgeGroupProps } from "./types";
 
@@ -19,10 +21,19 @@ export function CaveatBadgeGroup({
   blockingCaveats,
   weakEvidenceSignals,
   contextSignals,
+  maxContextBadges = 12,
+  maxWeakBadges = 8,
+  overflowHref,
   className,
 }: CaveatBadgeGroupProps) {
-  const weakLabels = weakEvidenceSignals.map(humanizeWeakEvidenceSignal);
-  const hasBadges = weakLabels.length > 0 || contextSignals.length > 0;
+  const ctxVisible = contextSignals.slice(0, Math.max(0, maxContextBadges));
+  const ctxOverflow = Math.max(0, contextSignals.length - ctxVisible.length);
+  const weakVisible = weakEvidenceSignals.slice(0, Math.max(0, maxWeakBadges));
+  const weakOverflow = Math.max(0, weakEvidenceSignals.length - weakVisible.length);
+  const weakLabels = weakVisible.map(humanizeWeakEvidenceSignal);
+  const overflowCount = ctxOverflow + weakOverflow;
+  const hasBadges =
+    ctxVisible.length > 0 || weakLabels.length > 0 || (overflowCount > 0 && overflowHref);
   const hasBlocking = blockingCaveats.length > 0;
 
   if (!hasBadges && !hasBlocking) {
@@ -35,23 +46,33 @@ export function CaveatBadgeGroup({
     <div className={className ?? "space-y-2"}>
       {hasBadges ? (
         <div className="flex flex-wrap gap-1.5">
-          {contextSignals.map((s) => (
+          {ctxVisible.map((s) => (
             <span
               key={s.id}
               className={`inline-flex max-w-full rounded-full border px-2 py-0.5 text-[10px] font-medium leading-tight ${toneClasses(s.tone)}`}
-              title={s.label}
+              title={s.tooltip ?? s.label}
             >
               {s.label}
             </span>
           ))}
           {weakLabels.map((label, i) => (
             <span
-              key={`${weakEvidenceSignals[i]}-${i}`}
+              key={`${weakVisible[i]}-${i}`}
               className={`inline-flex max-w-full rounded-full border px-2 py-0.5 text-[10px] font-medium leading-tight ${toneClasses("warning")}`}
+              title={weakVisible[i]}
             >
               {label}
             </span>
           ))}
+          {overflowCount > 0 && overflowHref ? (
+            <Link
+              href={overflowHref}
+              className="inline-flex items-center rounded-full border border-dashed border-[var(--border)] px-2 py-0.5 text-[10px] font-medium text-[var(--muted)] hover:text-[var(--foreground)]"
+              title="Additional context, budget, and weak-evidence signals"
+            >
+              +{overflowCount} in deep dive
+            </Link>
+          ) : null}
         </div>
       ) : null}
       {hasBlocking ? (

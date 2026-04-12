@@ -2,13 +2,41 @@ import Link from "next/link";
 
 import type { EvidenceSummaryProps } from "./types";
 
+function inFlight(runStatus: EvidenceSummaryProps["runStatus"]): boolean {
+  return runStatus === "queued" || runStatus === "running";
+}
+
 /** Role → artifact links; mentions extras without listing huge tables. */
-export function EvidenceSummary({ links, extraArtifactCount, className }: EvidenceSummaryProps) {
+export function EvidenceSummary({
+  links,
+  extraArtifactCount,
+  provenanceHint,
+  deepDiveHref,
+  runStatus,
+  className,
+}: EvidenceSummaryProps) {
   const hasLinks = links.length > 0;
   const hasExtras = extraArtifactCount > 0;
 
   if (!hasLinks && !hasExtras) {
-    return <p className="text-sm text-[var(--muted)]">No evidence artifact map on this run yet.</p>;
+    const workerLine = inFlight(runStatus)
+      ? "Evidence links usually appear as the worker writes artifacts — deep dive shows whatever is available so far."
+      : "No evidence artifact map on this run yet — this is normal before execution or when the pipeline produced no linked roles.";
+    return (
+      <div className={className}>
+        <p className="text-sm text-[var(--muted)]">{workerLine}</p>
+        {provenanceHint ? (
+          <p className="mt-2 text-[11px] leading-snug text-[var(--muted)]">
+            {provenanceHint}{" "}
+            {deepDiveHref ? (
+              <Link href={deepDiveHref} className="font-medium text-[var(--foreground)] underline">
+                Deep dive
+              </Link>
+            ) : null}
+          </p>
+        ) : null}
+      </div>
+    );
   }
 
   return (
@@ -32,6 +60,16 @@ export function EvidenceSummary({ links, extraArtifactCount, className }: Eviden
         <p className="text-xs text-[var(--muted)]">
           +{extraArtifactCount} other artifact{extraArtifactCount === 1 ? "" : "s"} (roles not in evidence map) —
           listed in deep dive.
+        </p>
+      ) : null}
+      {provenanceHint ? (
+        <p className="text-[11px] leading-snug text-[var(--muted)]">
+          {provenanceHint}{" "}
+          {deepDiveHref ? (
+            <Link href={deepDiveHref} className="font-medium text-[var(--foreground)] underline">
+              Deep dive
+            </Link>
+          ) : null}
         </p>
       ) : null}
     </div>

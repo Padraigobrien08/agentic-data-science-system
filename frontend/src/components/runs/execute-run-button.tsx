@@ -16,10 +16,11 @@ export function ExecuteRunButton({ projectId, runId }: Props) {
     <button
       type="button"
       disabled={pending}
+      aria-busy={pending}
       onClick={() => start(() => executeAnalysisRunAction(projectId, runId))}
       className="rounded border border-[var(--border)] bg-[var(--foreground)] px-3 py-1.5 text-sm text-[var(--background)] disabled:opacity-50"
     >
-      {pending ? "Running…" : "Execute pipeline"}
+      {pending ? "Starting…" : "Execute pipeline"}
     </button>
   );
 }

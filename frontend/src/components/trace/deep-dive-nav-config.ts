@@ -13,6 +13,7 @@ const CORE: DeepDiveNavItem[] = [
   { href: "#run-artifacts", label: "Artifacts" },
   { href: "#run-agents", label: "Critic & report" },
   { href: "#run-conclusions", label: "Report" },
+  { href: "#run-context-transparency", label: "Model context" },
   { href: "#run-audit-meta", label: "Prompts & usage" },
 ];
 

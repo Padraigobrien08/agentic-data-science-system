@@ -1,4 +1,5 @@
 import type { AnalysisRunStatus } from "@/lib/api/types";
+import { formatRunStatusLabel, runStatusBadgeTitle } from "@/lib/run-status-copy";
 
 type SectionProps = {
   id?: string;
@@ -56,13 +57,22 @@ const STATUS_STYLES: Partial<Record<AnalysisRunStatus, string>> = {
   no_data: "bg-violet-100 text-violet-950 dark:bg-violet-950 dark:text-violet-100",
 };
 
-export function StatusBadge({ status }: { status: AnalysisRunStatus }) {
+type StatusBadgeProps = {
+  status: AnalysisRunStatus;
+  /** `code`: API enum (dense tables). `friendly`: short label with code + explanation in `title`. */
+  variant?: "code" | "friendly";
+};
+
+export function StatusBadge({ status, variant = "code" }: StatusBadgeProps) {
   const cls = STATUS_STYLES[status] ?? "bg-neutral-100 text-neutral-800";
+  const mono = variant === "code";
+  const label = variant === "friendly" ? formatRunStatusLabel(status) : status;
   return (
     <span
-      className={`inline-block rounded px-2 py-0.5 font-mono text-xs font-medium ${cls}`}
+      title={runStatusBadgeTitle(status)}
+      className={`inline-block rounded px-2 py-0.5 text-xs font-medium ${cls} ${mono ? "font-mono" : "font-sans"}`}
     >
-      {status}
+      {label}
     </span>
   );
 }

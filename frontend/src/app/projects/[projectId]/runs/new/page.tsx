@@ -13,16 +13,14 @@ export default async function NewRunPage({
     <div className="space-y-6">
       <div className="flex flex-wrap items-baseline justify-between gap-2">
         <div>
-          <h1 className="text-lg font-semibold">Submit analysis run</h1>
+          <h1 className="text-lg font-semibold tracking-tight text-[var(--foreground)]">New analysis run</h1>
           <p className="mt-1 max-w-prose text-sm text-[var(--muted)]">
-            Create an analysis run and optionally trigger execution against the FastAPI backend.
+            Describe what you want analyzed, add tickers, then choose whether to run now, queue for the worker, or
+            save as pending.
           </p>
         </div>
-        <Link
-          href={`/projects/${projectId}/runs`}
-          className="font-mono text-sm underline"
-        >
-          ← Runs list
+        <Link href={`/projects/${projectId}/runs`} className="text-sm text-[var(--muted)] underline">
+          ← Runs
         </Link>
       </div>
       <NewRunForm projectId={projectId} />

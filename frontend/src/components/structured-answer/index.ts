@@ -1,3 +1,4 @@
+export { EvidenceChipRow } from "./evidence-chip-row";
 export { AnswerSummary } from "./answer-summary";
 export { TopFindingsList } from "./top-findings-list";
 export { FindingCards } from "./finding-cards";
@@ -14,5 +15,6 @@ export type {
   DeepDiveActionsProps,
   EvidenceSummaryProps,
   FindingCardsProps,
+  TakeawayRow,
   TopFindingsListProps,
 } from "./types";

@@ -3,31 +3,9 @@
 import Link from "next/link";
 import { useFormState, useFormStatus } from "react-dom";
 
+import { AnalysisComposerFields } from "@/components/analysis/analysis-composer-fields";
 import { createAnalysisRunForm } from "@/actions/runs";
-
-type Example = {
-  label: string;
-  goal: string;
-  tickers: string;
-};
-
-const EXAMPLES: Example[] = [
-  {
-    label: "Peer comparison",
-    goal: "Compare AAPL and MSFT to peers; highlight relative margin pressure over the last eight quarters.",
-    tickers: "AAPL, MSFT",
-  },
-  {
-    label: "Anomaly screen",
-    goal: "Flag unusual one-off moves in cash flow and operating margins; de-emphasize single-quarter noise.",
-    tickers: "AAPL, MSFT, NVDA",
-  },
-  {
-    label: "Deterioration trend",
-    goal: "Detect persistent negative profitability trends; prioritize sustained patterns over one-off spikes.",
-    tickers: "NVDA",
-  },
-];
+import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
 
 function Hero() {
   return (
@@ -36,7 +14,7 @@ function Hero() {
         Company analysis on SEC data
       </h1>
       <p className="text-sm text-[var(--muted)]">
-        Natural-language goals, resolved tickers, deterministic pipeline, artifact-backed answers.
+        Ask a question in your own words, add tickers, and run a deterministic pipeline — no perfect phrasing required.
       </p>
     </div>
   );
@@ -49,15 +27,15 @@ function HowItWorksStrip() {
       <ol className="mt-2 flex flex-col gap-2 text-xs text-[var(--foreground)] sm:flex-row sm:flex-wrap sm:gap-x-6 sm:gap-y-1">
         <li className="flex gap-2">
           <span className="font-mono text-[var(--muted)]">1.</span>
-          <span>Goal + tickers define orchestration input.</span>
+          <span>Describe what you want; tickers scope SEC panels.</span>
         </li>
         <li className="flex gap-2">
           <span className="font-mono text-[var(--muted)]">2.</span>
-          <span>Pipeline executes tools and writes artifacts.</span>
+          <span>Planner picks tools and writes artifacts.</span>
         </li>
         <li className="flex gap-2">
           <span className="font-mono text-[var(--muted)]">3.</span>
-          <span>Open the run page for status, report, and evidence.</span>
+          <span>Open the run answer, then deep dive for evidence and trace.</span>
         </li>
       </ol>
     </div>
@@ -69,7 +47,7 @@ function ExampleCardsStatic() {
     <div>
       <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-[var(--muted)]">Examples</p>
       <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        {EXAMPLES.map((ex) => (
+        {ANALYSIS_EXAMPLES.map((ex) => (
           <div
             key={ex.label}
             className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-left text-xs"
@@ -136,31 +114,11 @@ function RunButton() {
     <button
       type="submit"
       disabled={pending}
+      aria-busy={pending}
       className="w-full rounded-lg bg-[var(--foreground)] px-4 py-3 text-sm font-semibold text-[var(--background)] transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto sm:min-w-[12rem]"
     >
-      {pending ? "Running…" : "Run analysis"}
+      {pending ? "Starting analysis…" : "Run analysis"}
     </button>
-  );
-}
-
-function ExampleChipsInteractive({ onSelect }: { onSelect: (ex: Example) => void }) {
-  return (
-    <div>
-      <p className="mb-2 text-[11px] font-medium uppercase tracking-wide text-[var(--muted)]">Examples</p>
-      <div className="flex flex-col gap-2 sm:flex-row sm:flex-wrap">
-        {EXAMPLES.map((ex) => (
-          <button
-            key={ex.label}
-            type="button"
-            onClick={() => onSelect(ex)}
-            className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-left text-xs text-[var(--foreground)] transition-colors hover:bg-neutral-50 dark:hover:bg-neutral-900"
-          >
-            <span className="font-medium">{ex.label}</span>
-            <span className="mt-0.5 block line-clamp-2 text-[var(--muted)]">{ex.goal}</span>
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -168,19 +126,11 @@ function LandingRunForm({ projectId }: { projectId: string }) {
   const action = createAnalysisRunForm.bind(null, projectId);
   const [state, formAction] = useFormState(action, {});
 
-  const applyExample = (ex: Example) => {
-    const goalEl = document.getElementById("landing-goal") as HTMLTextAreaElement | null;
-    const tickEl = document.getElementById("landing-tickers") as HTMLInputElement | null;
-    if (goalEl) goalEl.value = ex.goal;
-    if (tickEl) tickEl.value = ex.tickers;
-    goalEl?.focus();
-  };
-
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <Hero />
       <HowItWorksStrip />
-      <form action={formAction} className="space-y-5">
+      <form action={formAction} className="space-y-6">
         <input type="hidden" name="execute_now" value="on" />
 
         {state.error ? (
@@ -192,37 +142,9 @@ function LandingRunForm({ projectId }: { projectId: string }) {
           </div>
         ) : null}
 
-        <div className="space-y-2">
-          <label htmlFor="landing-goal" className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Analysis goal
-          </label>
-          <textarea
-            id="landing-goal"
-            name="goal"
-            required
-            rows={4}
-            className="w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 text-sm text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
-            placeholder="What should the run optimize for?"
-            autoComplete="off"
-          />
+        <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 shadow-sm sm:p-5">
+          <AnalysisComposerFields variant="landing" idPrefix="landing" />
         </div>
-
-        <div className="space-y-2">
-          <label htmlFor="landing-tickers" className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-            Tickers
-          </label>
-          <input
-            id="landing-tickers"
-            name="tickers"
-            type="text"
-            className="w-full rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2.5 font-mono text-sm uppercase text-[var(--foreground)] placeholder:text-[var(--muted)] focus:outline-none focus:ring-2 focus:ring-neutral-400 dark:focus:ring-neutral-600"
-            placeholder="AAPL, MSFT, NVDA"
-            autoComplete="off"
-          />
-          <p className="text-[11px] text-[var(--muted)]">Comma-separated symbols; normalized server-side.</p>
-        </div>
-
-        <ExampleChipsInteractive onSelect={applyExample} />
 
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <RunButton />
@@ -241,8 +163,8 @@ type Props = {
 };
 
 /**
- * High-signal landing: goal + tickers + CTA, examples, minimal how-it-works.
- * Successful submit redirects to run answer (`createAnalysisRunForm` + execute_now).
+ * Landing: goal + tickers composer, examples, minimal how-it-works.
+ * Submit uses `createAnalysisRunForm` + execute_now → run answer page.
  */
 export function LandingPageClient({ isAuthenticated, projectId }: Props) {
   if (!isAuthenticated) {

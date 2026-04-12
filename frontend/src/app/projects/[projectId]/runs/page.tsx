@@ -1,9 +1,11 @@
 import Link from "next/link";
 
 import { SignInHint } from "@/components/auth/sign-in-hint";
+import { RunsListAutoRefresh } from "@/components/runs/runs-list-auto-refresh";
 import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
 import { listRuns } from "@/lib/api/runs";
+import { shouldPollRunStatus } from "@/lib/run-status-copy";
 import type { AnalysisRunSummary } from "@/lib/api/types";
 import { formatDate, shortId } from "@/lib/format";
 
@@ -41,9 +43,11 @@ export default async function RunsListPage({
   const sorted = [...runs].sort(
     (a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
   );
+  const hasActiveRuns = sorted.some((r) => shouldPollRunStatus(r.status));
 
   return (
     <div className="space-y-4">
+      <RunsListAutoRefresh active={hasActiveRuns} />
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
           <h1 className="text-lg font-semibold">Analysis runs</h1>
@@ -59,16 +63,35 @@ export default async function RunsListPage({
         </Link>
       </div>
 
+      {hasActiveRuns ? (
+        <p className="text-xs text-[var(--muted)]" role="status">
+          At least one run is queued or running — this list refreshes every few seconds until all settle.
+        </p>
+      ) : null}
+
       {sorted.length === 0 ? (
-        <p className="text-sm text-[var(--muted)]">No runs for this project.</p>
+        <div className="rounded-xl border border-dashed border-[var(--border)] bg-neutral-50/50 px-5 py-8 text-center dark:bg-neutral-950/30">
+          <p className="text-sm font-medium text-[var(--foreground)]">No analysis runs yet</p>
+          <p className="mx-auto mt-2 max-w-md text-sm text-[var(--muted)]">
+            Runs you create from the landing page or “Submit run” appear here with status, goal, and links into the
+            answer and trace.
+          </p>
+          <Link
+            href={`/projects/${projectId}/runs/new`}
+            className="mt-5 inline-flex rounded-lg bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--background)]"
+          >
+            Submit run
+          </Link>
+        </div>
       ) : (
         <div className="overflow-x-auto rounded border border-[var(--border)]">
-          <table className="w-full min-w-[36rem] border-collapse text-left text-sm">
+          <table className="w-full min-w-[40rem] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-[var(--border)] bg-neutral-50 text-xs dark:bg-neutral-900/50">
                 <th className="px-3 py-2 font-semibold text-[var(--muted)]">Run ID</th>
                 <th className="px-3 py-2 font-semibold text-[var(--muted)]">Status</th>
                 <th className="px-3 py-2 font-semibold text-[var(--muted)]">Goal</th>
+                <th className="px-3 py-2 font-semibold text-[var(--muted)]">Deep dive</th>
                 <th className="px-3 py-2 font-semibold text-[var(--muted)]">Correlation</th>
                 <th className="px-3 py-2 font-semibold text-[var(--muted)]">Created</th>
               </tr>
@@ -94,6 +117,14 @@ export default async function RunsListPage({
                     ) : (
                       <span className="text-[var(--muted)]">—</span>
                     )}
+                  </td>
+                  <td className="px-3 py-2 align-top text-xs">
+                    <Link
+                      href={`/projects/${projectId}/runs/${r.id}/trace`}
+                      className="font-medium text-[var(--foreground)] underline decoration-dotted underline-offset-2"
+                    >
+                      Trace
+                    </Link>
                   </td>
                   <td className="px-3 py-2 align-top font-mono text-[10px] text-[var(--muted)]">
                     {r.correlation_id ?? "—"}

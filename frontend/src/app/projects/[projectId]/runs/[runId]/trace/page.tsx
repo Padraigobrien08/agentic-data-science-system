@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
+import { RunStateBanner } from "@/components/runs/run-state-banner";
 import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
 import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
@@ -50,6 +51,7 @@ export default async function RunTracePage({
   }
 
   const userReport = parseUserFacingReport(run.output_payload_json);
+  const runAnswerHref = `/projects/${projectId}/runs/${runId}`;
 
   return (
     <div className="space-y-6">
@@ -59,15 +61,26 @@ export default async function RunTracePage({
         <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
           <div className="min-w-0 space-y-2">
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Inspection / audit workspace
+              Audit trail
             </p>
             <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Deep dive</h1>
-            <p className="max-w-prose text-xs leading-relaxed text-[var(--muted)]">
-              Full transparency for this run: interpreted goal, plan, MCP execution, persisted steps, LLM calls,
-              critic and report phases, artifacts, and prompt metadata. Denser than the run answer page by design.
+            <p className="max-w-prose text-xs leading-relaxed text-[var(--foreground)]">
+              Step-level transparency: plan, tool calls, persisted steps, LLM usage, artifacts, and prompts.
             </p>
+            <details className="max-w-prose text-[11px] leading-relaxed text-[var(--muted)]">
+              <summary className="cursor-pointer font-medium text-[var(--foreground)] underline decoration-dotted underline-offset-2">
+                How this differs from run answer
+              </summary>
+              <p className="mt-2">
+                This surface is intentionally dense. Use{" "}
+                <Link href={runAnswerHref} className="font-medium text-[var(--foreground)] underline">
+                  run answer
+                </Link>{" "}
+                first for the conclusion and top findings; return here to verify or debug.
+              </p>
+            </details>
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
-              <StatusBadge status={run.status} />
+              <StatusBadge status={run.status} variant="friendly" />
               <span className="hidden sm:inline">·</span>
               <span>
                 {formatDate(run.created_at)}
@@ -81,7 +94,7 @@ export default async function RunTracePage({
           </div>
           <div className="flex flex-shrink-0 flex-wrap gap-2">
             <Link
-              href={`/projects/${projectId}/runs/${runId}`}
+              href={runAnswerHref}
               className="rounded-lg border border-[var(--border)] bg-[var(--foreground)] px-3 py-2 text-center text-sm font-medium text-[var(--background)]"
             >
               Run answer
@@ -101,6 +114,8 @@ export default async function RunTracePage({
           </div>
         </div>
       </header>
+
+      <RunStateBanner status={run.status} surface="trace" runAnswerHref={runAnswerHref} />
 
       <AgenticTraceView
         projectId={projectId}

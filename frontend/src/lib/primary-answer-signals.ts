@@ -1,11 +1,14 @@
+import { stringArrayFromUnknown } from "@/lib/agent-transparency";
+import { parseLlmContextAuditRows } from "@/lib/context-transparency";
 import type { ParsedAiAgents } from "@/lib/ai-agents-meta";
 import type { ParsedOrchestrationOutput } from "@/lib/orchestration-output";
-import { stringArrayFromUnknown } from "@/lib/agent-transparency";
 
 export type PrimaryContextSignal = {
   id: string;
   label: string;
   tone: "neutral" | "warning" | "info";
+  /** Longer explanation for hover / accessibility. */
+  tooltip?: string;
 };
 
 function isRecord(v: unknown): v is Record<string, unknown> {
@@ -23,20 +26,36 @@ export function extractWeakEvidenceSignals(ai: ParsedAiAgents | null): string[] 
   return stringArrayFromUnknown(po.weak_evidence_signals, 12);
 }
 
-function auditFlags(audit: Record<string, unknown>): PrimaryContextSignal[] {
+/** Map ``llm_context_audit`` to product signals (granular budget keys when persisted). */
+function auditToContextSignals(audit: Record<string, unknown>): PrimaryContextSignal[] {
+  const rows = parseLlmContextAuditRows(audit);
+  return rows.map((r) => ({
+    id: `lcb_${r.key}`,
+    label: r.shortLabel,
+    tone: "warning" as const,
+    tooltip: r.tooltip,
+  }));
+}
+
+function orchestrationTransparencySignals(orch: ParsedOrchestrationOutput | null): PrimaryContextSignal[] {
+  if (!orch) return [];
   const out: PrimaryContextSignal[] = [];
-  if (audit.llm_context_budget_applied === true) {
+  const errN = Array.isArray(orch.errors) ? orch.errors.length : 0;
+  const warnN = Array.isArray(orch.warnings) ? orch.warnings.length : 0;
+  if (errN > 0) {
     out.push({
-      id: "llm_context_budget",
-      label: "LLM context trimmed for limits",
+      id: "orch_errors",
+      label: errN === 1 ? "1 run error" : `${errN} run errors`,
       tone: "warning",
+      tooltip: "Orchestration recorded errors; the model may have seen only a sampled subset in context.",
     });
   }
-  if (audit.context_budget_truncated === true) {
+  if (warnN > 0) {
     out.push({
-      id: "artifact_summaries_truncated",
-      label: "Artifact summaries clipped",
-      tone: "warning",
+      id: "orch_warnings",
+      label: warnN === 1 ? "1 run warning" : `${warnN} run warnings`,
+      tone: "info",
+      tooltip: "Orchestration warnings were recorded; some may be omitted from model-facing context when budgets apply.",
     });
   }
   return out;
@@ -62,9 +81,11 @@ export function collectContextSignals(
   for (const phase of [ai?.critic, ai?.report]) {
     const raw = phase && isRecord(phase) ? (phase as Record<string, unknown>).llm_context_audit : undefined;
     if (isRecord(raw)) {
-      for (const f of auditFlags(raw)) push(f);
+      for (const f of auditToContextSignals(raw)) push(f);
     }
   }
+
+  for (const f of orchestrationTransparencySignals(orch)) push(f);
 
   const lps = orch?.llm_phases_summary;
   if (lps?.critic?.degraded === true) {
@@ -100,4 +121,40 @@ export function collectContextSignals(
   }
 
   return merged;
+}
+
+/**
+ * One-line footnote for the confidence strip when budgets, sampling, or weak evidence apply.
+ */
+export function contextReliabilityFootnote(
+  signals: PrimaryContextSignal[],
+  weakEvidenceIds: string[],
+): string | null {
+  const budgetUmbrella = signals.some((s) => s.id === "lcb_llm_context_budget_applied");
+  const granularBudget = signals.some((s) => s.id.startsWith("lcb_") && s.id !== "lcb_llm_context_budget_applied");
+  const compact = budgetUmbrella || granularBudget;
+  const sampled = signals.some(
+    (s) =>
+      s.id === "lcb_errors_sample_truncated" ||
+      s.id === "lcb_warnings_sample_truncated" ||
+      s.id === "lcb_plan_alignment_findings_truncated",
+  );
+  const orchNoise = signals.some((s) => s.id === "orch_errors" || s.id === "orch_warnings");
+
+  if (compact && weakEvidenceIds.length > 0) {
+    return "Compact model context and weak-evidence flags apply — treat conclusions as provisional.";
+  }
+  if (weakEvidenceIds.length > 0) {
+    return "Weak-evidence signals were recorded — validate with artifacts before acting.";
+  }
+  if (sampled) {
+    return "Errors, warnings, or alignment lists may be sampled in model context — see context panel in deep dive.";
+  }
+  if (compact) {
+    return "Some model inputs were trimmed for limits — nuances may only appear in deep dive.";
+  }
+  if (orchNoise) {
+    return "Orchestration reported warnings or errors — coverage may be incomplete.";
+  }
+  return null;
 }
