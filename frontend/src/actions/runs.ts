@@ -20,12 +20,18 @@ export async function createAnalysisRunFromChat(
 ): Promise<{ error?: string }> {
   const goal = String(formData.get("goal") ?? "").trim();
   const tickers = parseTickers(String(formData.get("tickers") ?? ""));
+  const refresh = formData.get("refresh") === "on";
+  const executeNow = formData.get("execute_now") === "on";
+  const enqueueExecution = formData.get("enqueue_execution") === "on";
 
   if (!goal) {
     return { error: "Analysis goal is required." };
   }
   if (tickers.length === 0) {
     return { error: "This workspace has no tickers configured. Add tickers in workspace settings." };
+  }
+  if (executeNow && enqueueExecution) {
+    return { error: "Choose either execute now or queue for worker, not both." };
   }
 
   let run;
@@ -36,9 +42,9 @@ export async function createAnalysisRunFromChat(
       input_payload_json: {
         tickers,
         analysis_goal: goal,
-        refresh: false,
+        refresh,
       },
-      enqueue_execution: false,
+      enqueue_execution: enqueueExecution,
     });
   } catch (e) {
     if (e instanceof ApiError) {
@@ -47,13 +53,15 @@ export async function createAnalysisRunFromChat(
     return { error: e instanceof Error ? e.message : "Request failed." };
   }
 
-  try {
-    await executeRun(run.id, {});
-  } catch (e) {
-    if (e instanceof ApiError) {
-      return { error: e.body || e.message };
+  if (executeNow && !enqueueExecution) {
+    try {
+      await executeRun(run.id, {});
+    } catch (e) {
+      if (e instanceof ApiError) {
+        return { error: e.body || e.message };
+      }
+      return { error: e instanceof Error ? e.message : "Execution failed." };
     }
-    return { error: e instanceof Error ? e.message : "Execution failed." };
   }
 
   revalidatePath(`/projects/${projectId}/runs`);

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
+import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 
 type Props = {
   disabled?: boolean;
@@ -21,6 +21,9 @@ export function ChatComposer({
   action,
 }: Props) {
   const [value, setValue] = useState("");
+  const [refresh, setRefresh] = useState(false);
+  const [executeNow, setExecuteNow] = useState(true);
+  const [enqueueExecution, setEnqueueExecution] = useState(false);
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const submit = useCallback(() => {
@@ -36,11 +39,6 @@ export function ChatComposer({
     }
   };
 
-  // If the action redirects on success, this never runs; but if it returns an error, keep the text.
-  useEffect(() => {
-    if (!error) return;
-  }, [error]);
-
   return (
     <form
       ref={formRef}
@@ -49,6 +47,9 @@ export function ChatComposer({
     >
       <input type="hidden" name="tickers" value={tickers.join(",")} />
       <input type="hidden" name="goal" value={value} />
+      <input type="hidden" name="refresh" value={refresh ? "on" : "off"} />
+      <input type="hidden" name="execute_now" value={executeNow ? "on" : "off"} />
+      <input type="hidden" name="enqueue_execution" value={enqueueExecution ? "on" : "off"} />
       <div className="mx-auto flex max-w-4xl gap-2 rounded-xl border border-[var(--border)] bg-neutral-50 p-2 dark:bg-neutral-950">
         <textarea
           value={value}
@@ -67,6 +68,43 @@ export function ChatComposer({
         >
           Send
         </button>
+      </div>
+      <div className="mx-auto mt-2 flex max-w-4xl flex-wrap items-center gap-3 text-xs text-[var(--muted)]">
+        <label className="inline-flex items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={refresh}
+            onChange={(e) => setRefresh(e.target.checked)}
+            className="rounded border-[var(--border)]"
+          />
+          <span>Refresh SEC cache</span>
+        </label>
+        <label className="inline-flex items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={executeNow}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setExecuteNow(checked);
+              if (checked) setEnqueueExecution(false);
+            }}
+            className="rounded border-[var(--border)]"
+          />
+          <span>Execute now</span>
+        </label>
+        <label className="inline-flex items-center gap-1.5">
+          <input
+            type="checkbox"
+            checked={enqueueExecution}
+            onChange={(e) => {
+              const checked = e.target.checked;
+              setEnqueueExecution(checked);
+              if (checked) setExecuteNow(false);
+            }}
+            className="rounded border-[var(--border)]"
+          />
+          <span>Queue for worker</span>
+        </label>
       </div>
       {error ? (
         <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[10px] text-red-700 dark:text-red-400">

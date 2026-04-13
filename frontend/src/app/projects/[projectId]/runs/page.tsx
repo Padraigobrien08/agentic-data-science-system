@@ -55,11 +55,8 @@ export default async function RunsListPage({
             project_id={projectId}
           </p>
         </div>
-        <Link
-          href={`/projects/${projectId}/runs/new`}
-          className="rounded border border-[var(--border)] px-3 py-1.5 font-mono text-sm"
-        >
-          Advanced run
+        <Link href={`/projects/${projectId}/chat`} className="rounded border border-[var(--border)] px-3 py-1.5 font-mono text-sm">
+          Open chat
         </Link>
       </div>
 
@@ -76,10 +73,10 @@ export default async function RunsListPage({
             Runs created from workspace chat appear here with status, goal, and links into the answer and trace.
           </p>
           <Link
-            href={`/projects/${projectId}/runs/new`}
+            href={`/projects/${projectId}/chat`}
             className="mt-5 inline-flex rounded-lg bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--background)]"
           >
-            Advanced run
+            Start in chat
           </Link>
         </div>
       ) : (
