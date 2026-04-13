@@ -22,15 +22,16 @@ function nowIso(): string {
 
 function initialMessages(): ChatMessage[] {
   const boot: ChatSystemMessage = {
-    id: newId(),
+    id: "local-1-system",
     role: "system",
     content: "Describe a goal below — each message creates an analysis run for this workspace.",
-    createdAt: nowIso(),
+    createdAt: "local",
   };
   const slot: ChatAssistantMessage = {
-    id: newId(),
+    id: "local-1-assistant",
     role: "assistant",
-    createdAt: nowIso(),
+    content: "I’ll return concise analysis updates here with links to run answer and deep dive.",
+    createdAt: "local",
   };
   return [boot, slot];
 }
@@ -51,7 +52,7 @@ export function ChatShell({ projectId, tickers }: Props) {
     {
       id: "local-1",
       title: "New analysis",
-      updatedAt: nowIso().slice(0, 16).replace("T", " "),
+      updatedAt: "local",
     },
   ]);
   const [activeSessionId, setActiveSessionId] = useState<string | null>("local-1");
@@ -74,6 +75,29 @@ export function ChatShell({ projectId, tickers }: Props) {
       setScopeTickers(scopeState.tickers);
     }
   }, [scopeState.tickers]);
+  useEffect(() => {
+    const reply = state.reply;
+    if (!reply || !activeSessionId) return;
+    setMessagesBySession((prev) => {
+      const rows = [...(prev[activeSessionId] ?? [])];
+      const idx = rows.findIndex((m) => m.role === "assistant" && m.id === `assist-${reply.requestId}`);
+      const nextAssistant: ChatAssistantMessage = {
+        id: `assist-${reply.requestId}`,
+        role: "assistant",
+        content: reply.content,
+        runHref: reply.runHref,
+        deepDiveHref: reply.deepDiveHref,
+        runsHref: reply.runsHref,
+        createdAt: nowIso(),
+      };
+      if (idx >= 0) {
+        rows[idx] = nextAssistant;
+      } else {
+        rows.push(nextAssistant);
+      }
+      return { ...prev, [activeSessionId]: rows };
+    });
+  }, [state.reply, activeSessionId]);
 
   const onNewSession = () => {
     const id = newId();
@@ -92,6 +116,33 @@ export function ChatShell({ projectId, tickers }: Props) {
 
   const onSelectSession = (id: string) => {
     setActiveSessionId(id);
+  };
+  const onSend = (text: string, requestId: string) => {
+    if (!activeSessionId) return;
+    const userMsg: ChatMessage = {
+      id: `user-${requestId}`,
+      role: "user",
+      content: text,
+      createdAt: nowIso(),
+    };
+    const assistantPending: ChatAssistantMessage = {
+      id: `assist-${requestId}`,
+      role: "assistant",
+      content: "Running analysis...",
+      pending: true,
+      createdAt: nowIso(),
+    };
+    setMessagesBySession((prev) => ({
+      ...prev,
+      [activeSessionId]: [...(prev[activeSessionId] ?? []), userMsg, assistantPending],
+    }));
+    setSessions((prev) =>
+      prev.map((s) =>
+        s.id === activeSessionId
+          ? { ...s, title: text.slice(0, 48) || s.title, updatedAt: nowIso().slice(0, 16).replace("T", " ") }
+          : s,
+      ),
+    );
   };
 
   return (
@@ -151,6 +202,7 @@ export function ChatShell({ projectId, tickers }: Props) {
           action={formAction}
           error={state.error}
           tickers={scopeTickers}
+          onSend={onSend}
         />
       </div>
     </div>

@@ -17,10 +17,14 @@ export type ChatSystemMessage = {
   createdAt: string;
 };
 
-/** Assistant message: no `content` field — render only via structured frame. */
 export type ChatAssistantMessage = {
   id: string;
   role: "assistant";
+  content: string;
+  runHref?: string;
+  deepDiveHref?: string;
+  runsHref?: string;
+  pending?: boolean;
   createdAt: string;
 };
 

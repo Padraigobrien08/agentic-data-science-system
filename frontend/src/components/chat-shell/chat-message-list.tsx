@@ -1,6 +1,6 @@
 "use client";
 
-import { AssistantStructuredFrame } from "./assistant-structured-frame";
+import Link from "next/link";
 import type { ChatMessage } from "./types";
 
 type Props = {
@@ -16,7 +16,7 @@ function SystemStrip({ content }: { content: string }) {
 }
 
 /**
- * Conversation strip: user text bubbles; assistant = structured frames only.
+ * Conversation strip: user and assistant chat bubbles.
  */
 export function ChatMessageList({ messages }: Props) {
   return (
@@ -53,7 +53,21 @@ export function ChatMessageList({ messages }: Props) {
           }
           return (
             <article key={m.id} className="flex w-full justify-start">
-              <AssistantStructuredFrame messageId={m.id} variant="empty" />
+              <div className="max-w-[min(100%,38rem)] rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm">
+                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  Assistant
+                </p>
+                <div className="mt-1 whitespace-pre-wrap text-[var(--foreground)]">{m.content}</div>
+                {m.pending ? (
+                  <p className="mt-2 text-[10px] text-[var(--muted)]">Working…</p>
+                ) : m.runHref || m.deepDiveHref || m.runsHref ? (
+                  <div className="mt-2 flex flex-wrap gap-3 text-xs">
+                    {m.runHref ? <Link href={m.runHref} className="underline">Run answer</Link> : null}
+                    {m.deepDiveHref ? <Link href={m.deepDiveHref} className="underline">Deep dive</Link> : null}
+                    {m.runsHref ? <Link href={m.runsHref} className="underline">All runs</Link> : null}
+                  </div>
+                ) : null}
+              </div>
             </article>
           );
         })

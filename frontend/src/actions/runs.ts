@@ -15,10 +15,31 @@ function parseTickers(raw: string): string[] {
 
 export async function createAnalysisRunFromChat(
   projectId: string,
-  _prev: { error?: string },
+  _prev: {
+    error?: string;
+    reply?: {
+      requestId: string;
+      content: string;
+      runId: string;
+      runHref: string;
+      deepDiveHref: string;
+      runsHref: string;
+    };
+  },
   formData: FormData,
-): Promise<{ error?: string }> {
+): Promise<{
+  error?: string;
+  reply?: {
+    requestId: string;
+    content: string;
+    runId: string;
+    runHref: string;
+    deepDiveHref: string;
+    runsHref: string;
+  };
+}> {
   const goal = String(formData.get("goal") ?? "").trim();
+  const requestId = String(formData.get("request_id") ?? "").trim() || "local";
   const tickers = parseTickers(String(formData.get("tickers") ?? ""));
   const refresh = formData.get("refresh") === "on";
   const executeNow = formData.get("execute_now") === "on";
@@ -66,7 +87,18 @@ export async function createAnalysisRunFromChat(
 
   revalidatePath(`/projects/${projectId}/runs`);
   revalidatePath(`/projects/${projectId}/runs/${run.id}`);
-  redirect(`/projects/${projectId}/runs/${run.id}`);
+  revalidatePath(`/projects/${projectId}/runs/${run.id}/trace`);
+  const mode = enqueueExecution ? "queued for worker" : executeNow ? "executed" : "created";
+  return {
+    reply: {
+      requestId,
+      runId: run.id,
+      runHref: `/projects/${projectId}/runs/${run.id}`,
+      deepDiveHref: `/projects/${projectId}/runs/${run.id}/trace`,
+      runsHref: `/projects/${projectId}/runs`,
+      content: `Run ${mode} for ${tickers.join(", ")}. Open run answer or deep dive when ready.`,
+    },
+  };
 }
 
 export async function executeAnalysisRunAction(projectId: string, runId: string) {

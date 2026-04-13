@@ -8,6 +8,7 @@ type Props = {
   tickers: string[];
   error?: string;
   action: (payload: FormData) => void;
+  onSend?: (text: string, requestId: string) => void;
 };
 
 /**
@@ -19,18 +20,26 @@ export function ChatComposer({
   tickers,
   error,
   action,
+  onSend,
 }: Props) {
   const [value, setValue] = useState("");
   const [refresh, setRefresh] = useState(false);
   const [executeNow, setExecuteNow] = useState(true);
   const [enqueueExecution, setEnqueueExecution] = useState(false);
+  const [requestId, setRequestId] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
 
   const submit = useCallback(() => {
     const t = value.trim();
     if (!t || disabled) return;
+    const id =
+      typeof crypto !== "undefined" && "randomUUID" in crypto
+        ? crypto.randomUUID()
+        : `rq-${Date.now()}`;
+    setRequestId(id);
+    onSend?.(t, id);
     formRef.current?.requestSubmit();
-  }, [value, disabled]);
+  }, [value, disabled, onSend]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -47,6 +56,7 @@ export function ChatComposer({
     >
       <input type="hidden" name="tickers" value={tickers.join(",")} />
       <input type="hidden" name="goal" value={value} />
+      <input type="hidden" name="request_id" value={requestId} />
       <input type="hidden" name="refresh" value={refresh ? "on" : "off"} />
       <input type="hidden" name="execute_now" value={executeNow ? "on" : "off"} />
       <input type="hidden" name="enqueue_execution" value={enqueueExecution ? "on" : "off"} />
