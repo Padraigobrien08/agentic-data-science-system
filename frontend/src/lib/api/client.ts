@@ -19,6 +19,14 @@ export async function apiPost<T>(
   return request<T>("POST", path, body as RequestBody, init);
 }
 
+export async function apiPatch<T>(
+  path: string,
+  body: object | unknown[] | null,
+  init?: RequestInit,
+): Promise<T> {
+  return request<T>("PATCH", path, body as RequestBody, init);
+}
+
 async function request<T>(
   method: string,
   path: string,

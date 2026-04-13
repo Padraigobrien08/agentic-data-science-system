@@ -1,11 +1,12 @@
 "use client";
 
-import { useActionState, useMemo, useState } from "react";
+import { useActionState, useEffect, useMemo, useState } from "react";
 
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
 import type { ChatAssistantMessage, ChatMessage, ChatSessionStub, ChatSystemMessage } from "./types";
+import { updateWorkspaceScopeAction } from "@/actions/projects";
 import { createAnalysisRunFromChat } from "@/actions/runs";
 
 function newId(): string {
@@ -44,6 +45,8 @@ type Props = {
  * Assistant turns are structured frames only (no default prose rendering).
  */
 export function ChatShell({ projectId, tickers }: Props) {
+  const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
+  const [isEditingScope, setIsEditingScope] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionStub[]>(() => [
     {
       id: "local-1",
@@ -64,6 +67,13 @@ export function ChatShell({ projectId, tickers }: Props) {
 
   const action = createAnalysisRunFromChat.bind(null, projectId);
   const [state, formAction] = useActionState(action, {});
+  const scopeAction = updateWorkspaceScopeAction.bind(null, projectId);
+  const [scopeState, scopeFormAction] = useActionState(scopeAction, { tickers });
+  useEffect(() => {
+    if (scopeState.tickers) {
+      setScopeTickers(scopeState.tickers);
+    }
+  }, [scopeState.tickers]);
 
   const onNewSession = () => {
     const id = newId();
@@ -95,19 +105,52 @@ export function ChatShell({ projectId, tickers }: Props) {
       />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="border-b border-[var(--border)] px-4 py-3">
-          <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Analysis workspace</h2>
-          <p className="text-[10px] text-[var(--muted)]">
-            Scope:{" "}
-            <span className="font-mono text-[var(--foreground)]">
-              {tickers.length ? tickers.join(", ") : "—"}
-            </span>
-          </p>
+          <div className="flex items-start justify-between gap-3">
+            <div>
+              <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Analysis workspace</h2>
+              <p className="text-[10px] text-[var(--muted)]">
+                Scope:{" "}
+                <span className="font-mono text-[var(--foreground)]">
+                  {scopeTickers.length ? scopeTickers.join(", ") : "—"}
+                </span>
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => setIsEditingScope((v) => !v)}
+              className="rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--foreground)]"
+            >
+              {isEditingScope ? "Close scope editor" : "Edit scope"}
+            </button>
+          </div>
+          {isEditingScope ? (
+            <form action={scopeFormAction} className="mt-2 space-y-2 rounded border border-[var(--border)] p-2">
+              <textarea
+                name="tickers"
+                defaultValue={scopeTickers.join(", ")}
+                rows={2}
+                className="w-full resize-y rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-xs"
+              />
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] text-[var(--muted)]">Comma or newline separated</p>
+                <button
+                  type="submit"
+                  className="rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--foreground)]"
+                >
+                  Save scope
+                </button>
+              </div>
+              {scopeState.error ? (
+                <p className="font-mono text-[10px] text-red-700 dark:text-red-400">{scopeState.error}</p>
+              ) : null}
+            </form>
+          ) : null}
         </header>
         <ChatMessageList messages={messages} />
         <ChatComposer
           action={formAction}
           error={state.error}
-          tickers={tickers}
+          tickers={scopeTickers}
         />
       </div>
     </div>

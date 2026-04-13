@@ -1,4 +1,4 @@
-"""Projects: list and create for the authenticated owner."""
+"""Projects: list/create/update for the authenticated owner."""
 
 from __future__ import annotations
 
@@ -10,7 +10,7 @@ from backend.api.access_checks import require_project_owned
 from backend.api.auth_deps import CurrentUserDep
 from backend.api.deps import DbSession
 from backend.models.project import Project
-from backend.schemas.project import ProjectCreate, ProjectRead
+from backend.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
 from sqlalchemy import select
 
 router = APIRouter(prefix="/projects", tags=["projects"])
@@ -47,6 +47,34 @@ def create_project(
         settings_json=body.settings_json,
         tickers=tickers,
     )
+    db.add(row)
+    db.commit()
+    db.refresh(row)
+    return row
+
+
+@router.patch("/{project_id}", response_model=ProjectRead)
+def update_project(
+    project_id: UUID,
+    body: ProjectUpdate,
+    db: DbSession,
+    user: CurrentUserDep,
+) -> Project:
+    row = require_project_owned(db, project_id, user.id)
+
+    if body.name is not None:
+        row.name = body.name
+    if body.slug is not None:
+        row.slug = body.slug
+    if body.description is not None:
+        row.description = body.description
+    if body.settings_json is not None:
+        row.settings_json = body.settings_json
+    if body.tickers is not None:
+        row.tickers = [t.strip().upper() for t in body.tickers if t and t.strip()]
+    if body.archived_at is not None:
+        row.archived_at = body.archived_at
+
     db.add(row)
     db.commit()
     db.refresh(row)
