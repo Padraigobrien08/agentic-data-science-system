@@ -34,6 +34,7 @@ class Project(Base):
     description: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     settings_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
+    tickers: Mapped[list[str] | None] = mapped_column(JSON, nullable=True)
 
     archived_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
 

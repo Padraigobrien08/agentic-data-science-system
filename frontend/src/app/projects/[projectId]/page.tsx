@@ -6,5 +6,5 @@ export default async function ProjectOverviewPage({
   params: Promise<{ projectId: string }>;
 }>) {
   const { projectId } = await params;
-  redirect(`/projects/${projectId}/runs`);
+  redirect(`/projects/${projectId}/chat`);
 }

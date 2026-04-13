@@ -41,6 +41,7 @@ export interface ProjectRead {
   slug: string | null;
   description: string | null;
   settings_json: Record<string, unknown> | unknown[] | null;
+  tickers: string[] | null;
   archived_at: string | null;
   created_at: string;
   updated_at: string;

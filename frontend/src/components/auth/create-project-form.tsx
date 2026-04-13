@@ -24,20 +24,32 @@ export function CreateProjectForm() {
   const [state, formAction] = useActionState(createProjectAction, initial);
 
   return (
-    <form action={formAction} className="flex flex-wrap items-end gap-2">
+    <form action={formAction} className="flex flex-col gap-3">
       {state.error ? (
         <p className="w-full font-mono text-xs text-red-700 dark:text-red-400">{state.error}</p>
       ) : null}
-      <label className="flex min-w-[12rem] flex-1 flex-col gap-1">
-        <span className="text-[10px] text-[var(--muted)]">name</span>
-        <input
-          name="name"
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
+        <label className="flex min-w-[12rem] flex-1 flex-col gap-1">
+          <span className="text-[10px] text-[var(--muted)]">workspace name</span>
+          <input
+            name="name"
+            required
+            placeholder="My workspace"
+            className="rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-sm"
+          />
+        </label>
+        <SubmitButton />
+      </div>
+      <label className="flex flex-col gap-1">
+        <span className="text-[10px] text-[var(--muted)]">tickers (comma or newline separated)</span>
+        <textarea
+          name="tickers"
           required
-          placeholder="My workspace"
-          className="rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-sm"
+          rows={3}
+          placeholder="AAPL, MSFT, NVDA"
+          className="resize-y rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-sm"
         />
       </label>
-      <SubmitButton />
     </form>
   );
 }

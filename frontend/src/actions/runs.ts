@@ -13,6 +13,54 @@ function parseTickers(raw: string): string[] {
     .filter(Boolean);
 }
 
+export async function createAnalysisRunFromChat(
+  projectId: string,
+  _prev: { error?: string },
+  formData: FormData,
+): Promise<{ error?: string }> {
+  const goal = String(formData.get("goal") ?? "").trim();
+  const tickers = parseTickers(String(formData.get("tickers") ?? ""));
+
+  if (!goal) {
+    return { error: "Analysis goal is required." };
+  }
+  if (tickers.length === 0) {
+    return { error: "This workspace has no tickers configured. Add tickers in workspace settings." };
+  }
+
+  let run;
+  try {
+    run = await createRun({
+      project_id: projectId,
+      orchestration_goal_text: goal,
+      input_payload_json: {
+        tickers,
+        analysis_goal: goal,
+        refresh: false,
+      },
+      enqueue_execution: false,
+    });
+  } catch (e) {
+    if (e instanceof ApiError) {
+      return { error: e.body || e.message };
+    }
+    return { error: e instanceof Error ? e.message : "Request failed." };
+  }
+
+  try {
+    await executeRun(run.id, {});
+  } catch (e) {
+    if (e instanceof ApiError) {
+      return { error: e.body || e.message };
+    }
+    return { error: e instanceof Error ? e.message : "Execution failed." };
+  }
+
+  revalidatePath(`/projects/${projectId}/runs`);
+  revalidatePath(`/projects/${projectId}/runs/${run.id}`);
+  redirect(`/projects/${projectId}/runs/${run.id}`);
+}
+
 export async function createAnalysisRunForm(
   projectId: string,
   _prev: { error?: string },

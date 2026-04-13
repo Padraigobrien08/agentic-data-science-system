@@ -34,25 +34,30 @@ export default async function ProjectsIndexPage() {
   return (
     <div className="space-y-6 text-sm">
       <div>
-        <h1 className="text-lg font-semibold">Projects</h1>
+        <h1 className="text-lg font-semibold">Workspaces</h1>
         <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-          Scoped to your account (<code className="text-[var(--foreground)]">GET /v1/projects</code>).
+          Each workspace has a default ticker scope; chat messages create runs in that scope.
         </p>
       </div>
 
       {projects.length === 0 ? (
-        <p className="text-[var(--muted)]">No projects yet. Create one below.</p>
+        <p className="text-[var(--muted)]">No workspaces yet. Create one below.</p>
       ) : (
         <ul className="space-y-2">
           {projects.map((p) => (
             <li key={p.id}>
               <Link
-                href={`/projects/${p.id}/runs`}
+                href={`/projects/${p.id}/chat`}
                 className="font-mono text-sm underline decoration-dotted"
                 title={p.id}
               >
                 {p.name}
               </Link>
+              {p.tickers?.length ? (
+                <span className="ml-2 text-[10px] text-[var(--muted)]">
+                  {p.tickers.join(", ")}
+                </span>
+              ) : null}
               <span className="ml-2 text-[10px] text-[var(--muted)]">{formatDate(p.created_at)}</span>
             </li>
           ))}
@@ -61,10 +66,10 @@ export default async function ProjectsIndexPage() {
 
       <div className="rounded border border-[var(--border)] p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-          New project
+          New workspace
         </h2>
         <p className="mt-1 text-xs text-[var(--muted)]">
-          <code className="text-[var(--foreground)]">POST /v1/projects</code> with your session cookie.
+          Pick tickers once; then use workspace chat to submit analysis questions.
         </p>
         <div className="mt-3">
           <CreateProjectForm />

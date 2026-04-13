@@ -1,11 +1,12 @@
 "use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useActionState, useMemo, useState } from "react";
 
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
 import type { ChatAssistantMessage, ChatMessage, ChatSessionStub, ChatSystemMessage } from "./types";
+import { createAnalysisRunFromChat } from "@/actions/runs";
 
 function newId(): string {
   if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
@@ -22,7 +23,7 @@ function initialMessages(): ChatMessage[] {
   const boot: ChatSystemMessage = {
     id: newId(),
     role: "system",
-    content: "Session is local-only until connected to EDGAR runs.",
+    content: "Describe a goal below — each message creates an analysis run for this workspace.",
     createdAt: nowIso(),
   };
   const slot: ChatAssistantMessage = {
@@ -35,13 +36,14 @@ function initialMessages(): ChatMessage[] {
 
 type Props = {
   projectId: string;
+  tickers: string[];
 };
 
 /**
  * Chatbot UI–style workspace: sidebar + message column + composer.
  * Assistant turns are structured frames only (no default prose rendering).
  */
-export function ChatShell({ projectId }: Props) {
+export function ChatShell({ projectId, tickers }: Props) {
   const [sessions, setSessions] = useState<ChatSessionStub[]>(() => [
     {
       id: "local-1",
@@ -60,36 +62,10 @@ export function ChatShell({ projectId }: Props) {
     return messagesBySession[activeSessionId] ?? [];
   }, [activeSessionId, messagesBySession]);
 
-  const onSend = useCallback(
-    (text: string) => {
-      if (!activeSessionId) return;
-      const userMsg: ChatMessage = {
-        id: newId(),
-        role: "user",
-        content: text,
-        createdAt: nowIso(),
-      };
-      const assistantSlot: ChatAssistantMessage = {
-        id: newId(),
-        role: "assistant",
-        createdAt: nowIso(),
-      };
-      setMessagesBySession((prev) => ({
-        ...prev,
-        [activeSessionId]: [...(prev[activeSessionId] ?? []), userMsg, assistantSlot],
-      }));
-      setSessions((prev) =>
-        prev.map((s) =>
-          s.id === activeSessionId
-            ? { ...s, title: text.slice(0, 48) || s.title, updatedAt: nowIso().slice(0, 16).replace("T", " ") }
-            : s,
-        ),
-      );
-    },
-    [activeSessionId],
-  );
+  const action = createAnalysisRunFromChat.bind(null, projectId);
+  const [state, formAction] = useActionState(action, {});
 
-  const onNewSession = useCallback(() => {
+  const onNewSession = () => {
     const id = newId();
     const stub: ChatSessionStub = {
       id,
@@ -102,11 +78,11 @@ export function ChatShell({ projectId }: Props) {
       [id]: initialMessages(),
     }));
     setActiveSessionId(id);
-  }, []);
+  };
 
-  const onSelectSession = useCallback((id: string) => {
+  const onSelectSession = (id: string) => {
     setActiveSessionId(id);
-  }, []);
+  };
 
   return (
     <div className="flex h-[min(calc(100vh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row">
@@ -120,10 +96,19 @@ export function ChatShell({ projectId }: Props) {
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="border-b border-[var(--border)] px-4 py-3">
           <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Analysis workspace</h2>
-          <p className="text-[10px] text-[var(--muted)]">Project · structured responses</p>
+          <p className="text-[10px] text-[var(--muted)]">
+            Scope:{" "}
+            <span className="font-mono text-[var(--foreground)]">
+              {tickers.length ? tickers.join(", ") : "—"}
+            </span>
+          </p>
         </header>
         <ChatMessageList messages={messages} />
-        <ChatComposer onSend={onSend} />
+        <ChatComposer
+          action={formAction}
+          error={state.error}
+          tickers={tickers}
+        />
       </div>
     </div>
   );

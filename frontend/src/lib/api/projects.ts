@@ -11,6 +11,6 @@ export async function getProject(projectId: string): Promise<ProjectRead> {
   return apiGet<ProjectRead>(`/v1/projects/${projectId}`);
 }
 
-export async function createProject(body: { name: string }): Promise<ProjectRead> {
-  return apiPost<ProjectRead>("/v1/projects", { name: body.name });
+export async function createProject(body: { name: string; tickers: string[] }): Promise<ProjectRead> {
+  return apiPost<ProjectRead>("/v1/projects", { name: body.name, tickers: body.tickers });
 }

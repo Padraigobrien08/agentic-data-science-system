@@ -38,12 +38,14 @@ def create_project(
     db: DbSession,
     user: CurrentUserDep,
 ) -> Project:
+    tickers = [t.strip().upper() for t in (body.tickers or []) if t and t.strip()]
     row = Project(
         owner_user_id=user.id,
         name=body.name,
         slug=body.slug,
         description=body.description,
         settings_json=body.settings_json,
+        tickers=tickers,
     )
     db.add(row)
     db.commit()

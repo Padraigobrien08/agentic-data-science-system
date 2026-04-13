@@ -17,8 +17,9 @@ export default async function ProjectChatPage({
 }>) {
   const { projectId } = await params;
 
+  let project;
   try {
-    await getProject(projectId);
+    project = await getProject(projectId);
   } catch (e) {
     if (e instanceof ApiError && e.status === 401) {
       return (
@@ -34,14 +35,14 @@ export default async function ProjectChatPage({
   return (
     <div className="space-y-4">
       <div>
-        <h1 className="text-lg font-semibold">Analysis chat</h1>
+        <h1 className="text-lg font-semibold">Workspace chat</h1>
         <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-          Primary workspace — assistant replies use structured slots (not generic chat prose). Use Run answer
-          / Deep dive when viewing an executed run.
+          Ask questions against this workspace’s ticker scope. Each message creates a run; use Run answer / Deep dive
+          to review results and evidence.
         </p>
       </div>
       <ProjectWorkspaceNav projectId={projectId} current="chat" />
-      <ChatShell projectId={projectId} />
+      <ChatShell projectId={projectId} tickers={project.tickers ?? []} />
     </div>
   );
 }

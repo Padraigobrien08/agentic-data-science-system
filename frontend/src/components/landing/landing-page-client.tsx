@@ -1,11 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useActionState } from "react";
-import { useFormStatus } from "react-dom";
 
-import { AnalysisComposerFields } from "@/components/analysis/analysis-composer-fields";
-import { createAnalysisRunForm } from "@/actions/runs";
 import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
 
 function Hero() {
@@ -109,51 +105,28 @@ function LandingNoProject() {
   );
 }
 
-function RunButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      aria-busy={pending}
-      className="w-full rounded-lg bg-[var(--foreground)] px-4 py-3 text-sm font-semibold text-[var(--background)] transition-opacity hover:opacity-90 disabled:opacity-50 sm:w-auto sm:min-w-[12rem]"
-    >
-      {pending ? "Starting analysis…" : "Run analysis"}
-    </button>
-  );
-}
-
-function LandingRunForm({ projectId }: { projectId: string }) {
-  const action = createAnalysisRunForm.bind(null, projectId);
-  const [state, formAction] = useActionState(action, {});
-
+function LandingWorkspace({ projectId }: { projectId: string }) {
   return (
     <div className="mx-auto max-w-2xl space-y-8">
       <Hero />
       <HowItWorksStrip />
-      <form action={formAction} className="space-y-6">
-        <input type="hidden" name="execute_now" value="on" />
-
-        {state.error ? (
-          <div
-            role="alert"
-            className="rounded-lg border border-red-300 bg-red-50 px-3 py-2 text-sm text-red-900 dark:border-red-800 dark:bg-red-950/40 dark:text-red-100"
+      <div className="rounded-xl border border-[var(--border)] bg-neutral-50/50 p-6 text-center dark:bg-neutral-950/30">
+        <p className="text-sm text-[var(--foreground)]">Go to your workspace chat to submit analysis questions.</p>
+        <div className="mt-4 flex flex-wrap justify-center gap-3">
+          <Link
+            href={`/projects/${projectId}/chat`}
+            className="inline-flex rounded-lg bg-[var(--foreground)] px-5 py-2.5 text-sm font-semibold text-[var(--background)]"
           >
-            {state.error}
-          </div>
-        ) : null}
-
-        <div className="rounded-xl border border-[var(--border)] bg-[var(--background)] p-4 shadow-sm sm:p-5">
-          <AnalysisComposerFields variant="landing" idPrefix="landing" />
-        </div>
-
-        <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-          <RunButton />
-          <Link href={`/projects/${projectId}/runs`} className="text-center text-xs text-[var(--muted)] underline sm:text-left">
-            All runs in this project
+            Open workspace chat
+          </Link>
+          <Link
+            href={`/projects/${projectId}/runs`}
+            className="inline-flex rounded-lg border border-[var(--border)] px-5 py-2.5 text-sm font-medium text-[var(--foreground)]"
+          >
+            View run history
           </Link>
         </div>
-      </form>
+      </div>
     </div>
   );
 }
@@ -163,10 +136,6 @@ type Props = {
   projectId: string | null;
 };
 
-/**
- * Landing: goal + tickers composer, examples, minimal how-it-works.
- * Submit uses `createAnalysisRunForm` + execute_now → run answer page.
- */
 export function LandingPageClient({ isAuthenticated, projectId }: Props) {
   if (!isAuthenticated) {
     return <LandingGuest />;
@@ -174,5 +143,5 @@ export function LandingPageClient({ isAuthenticated, projectId }: Props) {
   if (!projectId) {
     return <LandingNoProject />;
   }
-  return <LandingRunForm projectId={projectId} />;
+  return <LandingWorkspace projectId={projectId} />;
 }

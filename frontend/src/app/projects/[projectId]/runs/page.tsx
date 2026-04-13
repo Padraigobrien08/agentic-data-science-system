@@ -59,7 +59,7 @@ export default async function RunsListPage({
           href={`/projects/${projectId}/runs/new`}
           className="rounded border border-[var(--border)] px-3 py-1.5 font-mono text-sm"
         >
-          Submit run
+          Advanced run
         </Link>
       </div>
 
@@ -73,14 +73,13 @@ export default async function RunsListPage({
         <div className="rounded-xl border border-dashed border-[var(--border)] bg-neutral-50/50 px-5 py-8 text-center dark:bg-neutral-950/30">
           <p className="text-sm font-medium text-[var(--foreground)]">No analysis runs yet</p>
           <p className="mx-auto mt-2 max-w-md text-sm text-[var(--muted)]">
-            Runs you create from the landing page or “Submit run” appear here with status, goal, and links into the
-            answer and trace.
+            Runs created from workspace chat appear here with status, goal, and links into the answer and trace.
           </p>
           <Link
             href={`/projects/${projectId}/runs/new`}
             className="mt-5 inline-flex rounded-lg bg-[var(--foreground)] px-4 py-2 text-sm font-semibold text-[var(--background)]"
           >
-            Submit run
+            Advanced run
           </Link>
         </div>
       ) : (

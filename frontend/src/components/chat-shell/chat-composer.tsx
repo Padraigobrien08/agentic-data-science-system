@@ -1,34 +1,33 @@
 "use client";
 
-import { useCallback, useState, type FormEvent, type KeyboardEvent } from "react";
+import { useCallback, useEffect, useRef, useState, type KeyboardEvent } from "react";
 
 type Props = {
   disabled?: boolean;
   placeholder?: string;
-  onSend: (text: string) => void;
+  tickers: string[];
+  error?: string;
+  action: (payload: FormData) => void;
 };
 
 /**
- * Bottom input bar (Chatbot UI–style). Wired to parent; no API calls in the shell.
+ * Bottom input bar (Chatbot UI–style). Submits a server action that creates a run.
  */
 export function ChatComposer({
   disabled = false,
   placeholder = "Describe your analysis goal…",
-  onSend,
+  tickers,
+  error,
+  action,
 }: Props) {
   const [value, setValue] = useState("");
+  const formRef = useRef<HTMLFormElement | null>(null);
 
   const submit = useCallback(() => {
     const t = value.trim();
     if (!t || disabled) return;
-    onSend(t);
-    setValue("");
-  }, [value, disabled, onSend]);
-
-  const onSubmitForm = (e: FormEvent) => {
-    e.preventDefault();
-    submit();
-  };
+    formRef.current?.requestSubmit();
+  }, [value, disabled]);
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -37,11 +36,19 @@ export function ChatComposer({
     }
   };
 
+  // If the action redirects on success, this never runs; but if it returns an error, keep the text.
+  useEffect(() => {
+    if (!error) return;
+  }, [error]);
+
   return (
     <form
-      onSubmit={onSubmitForm}
+      ref={formRef}
+      action={action}
       className="border-t border-[var(--border)] bg-[var(--background)] px-3 py-3 md:px-6"
     >
+      <input type="hidden" name="tickers" value={tickers.join(",")} />
+      <input type="hidden" name="goal" value={value} />
       <div className="mx-auto flex max-w-4xl gap-2 rounded-xl border border-[var(--border)] bg-neutral-50 p-2 dark:bg-neutral-950">
         <textarea
           value={value}
@@ -61,9 +68,15 @@ export function ChatComposer({
           Send
         </button>
       </div>
-      <p className="mx-auto mt-2 max-w-4xl text-center text-[10px] text-[var(--muted)]">
-        Shell only — messages are local until connected to the EDGAR run API.
-      </p>
+      {error ? (
+        <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[10px] text-red-700 dark:text-red-400">
+          {error}
+        </p>
+      ) : (
+        <p className="mx-auto mt-2 max-w-4xl text-center text-[10px] text-[var(--muted)]">
+          Press Enter to submit · Shift+Enter for newline
+        </p>
+      )}
     </form>
   );
 }
