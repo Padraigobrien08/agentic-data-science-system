@@ -11,11 +11,13 @@ from __future__ import annotations
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
+from uuid import uuid4
 
 import pandas as pd
 
 import requests
-from edgar_project.run_workspace import RunWorkspace
+from edgar_project.orchestration.schemas import RunWorkspacePayload
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths as workspace_phase1_paths
 
 from .schemas import (
     ARTIFACT_KEY_CACHE_COMPANYFACTS,
@@ -37,6 +39,102 @@ def repo_root() -> Path:
     ``<repo>/edgar_project/mcp/adapters.py`` → ``parents[2] == <repo>``.
     """
     return Path(__file__).resolve().parents[2]
+
+
+def workspace_from_payload(payload: RunWorkspacePayload | dict[str, Any] | None) -> RunWorkspace | None:
+    if payload is None:
+        return None
+    if isinstance(payload, dict):
+        payload = RunWorkspacePayload.model_validate(payload)
+    return RunWorkspace(
+        run_scoped_id=payload.run_scoped_id,
+        root=Path(payload.root),
+        processed_dir=Path(payload.processed_dir),
+        artifacts_dir=Path(payload.artifacts_dir),
+        manual_validation_csv=Path(payload.manual_validation_csv),
+        use_legacy_shared_paths=payload.use_legacy_shared_paths,
+    )
+
+
+def _default_manual_validation_csv() -> Path:
+    return repo_root() / "validation" / "manual_validation.csv"
+
+
+def infer_workspace_from_phase1_paths(
+    *,
+    panel_csv_path: Path | None = None,
+    features_csv_path: Path | None = None,
+    anomalies_csv_path: Path | None = None,
+    manual_validation_csv: Path | None = None,
+) -> RunWorkspace | None:
+    processed_dir = None
+    artifacts_dir = None
+
+    if panel_csv_path is not None:
+        processed_dir = panel_csv_path.parent
+    elif features_csv_path is not None:
+        processed_dir = features_csv_path.parent
+
+    if anomalies_csv_path is not None:
+        artifacts_dir = anomalies_csv_path.parent
+
+    if processed_dir is None and artifacts_dir is None:
+        return None
+
+    if processed_dir is None and artifacts_dir is not None:
+        processed_dir = artifacts_dir.parent / "processed"
+    if artifacts_dir is None and processed_dir is not None:
+        artifacts_dir = processed_dir.parent / "artifacts"
+
+    if processed_dir is None or artifacts_dir is None:
+        return None
+
+    root = processed_dir.parent if processed_dir.name == "processed" else artifacts_dir.parent
+    run_scoped_id = root.name or "inferred-run"
+    return RunWorkspace(
+        run_scoped_id=run_scoped_id,
+        root=root,
+        processed_dir=processed_dir,
+        artifacts_dir=artifacts_dir,
+        manual_validation_csv=(manual_validation_csv or _default_manual_validation_csv()),
+        use_legacy_shared_paths=False,
+    )
+
+
+def default_run_workspace() -> RunWorkspace:
+    ensure_sys_path()
+    import config
+
+    return build_run_workspace(
+        workspace_root=config.DATA_RUNS,
+        run_scoped_id=f"mcp-{uuid4().hex[:12]}",
+        manual_validation_csv=_default_manual_validation_csv(),
+    )
+
+
+def resolve_run_workspace(
+    payload: RunWorkspacePayload | dict[str, Any] | RunWorkspace | None = None,
+    *,
+    panel_csv_path: Path | None = None,
+    features_csv_path: Path | None = None,
+    anomalies_csv_path: Path | None = None,
+    default_on_missing: bool = False,
+) -> RunWorkspace | None:
+    if isinstance(payload, RunWorkspace):
+        return payload
+    workspace = workspace_from_payload(payload)
+    if workspace is not None:
+        return workspace
+    workspace = infer_workspace_from_phase1_paths(
+        panel_csv_path=panel_csv_path,
+        features_csv_path=features_csv_path,
+        anomalies_csv_path=anomalies_csv_path,
+    )
+    if workspace is not None:
+        return workspace
+    if default_on_missing:
+        return default_run_workspace()
+    return None
 
 
 def ensure_sys_path() -> None:
@@ -268,6 +366,9 @@ def generate_report_markdown(
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     manual_validation_path: Path | None = None,
+    workspace: RunWorkspace | None = None,
+    artifact_paths: dict[str, Path] | None = None,
+    use_legacy_shared_paths: bool = False,
 ) -> str:
     """Delegate to :func:`src.report.generate_report`."""
     ensure_sys_path()
@@ -280,6 +381,9 @@ def generate_report_markdown(
         data_quality=data_quality,
         exclusions=exclusions,
         manual_validation_path=manual_validation_path,
+        workspace=workspace,
+        artifact_paths=artifact_paths,
+        use_legacy_shared_paths=use_legacy_shared_paths,
         top_n=5,
     )
 
@@ -288,6 +392,8 @@ def run_full_pipeline(
     tickers: list[str],
     *,
     refresh: bool,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
 ) -> tuple[
     pd.DataFrame,
     pd.DataFrame,
@@ -302,31 +408,56 @@ def run_full_pipeline(
     ensure_sys_path()
     from src.pipeline_runner import run_pipeline_computation
 
-    return run_pipeline_computation(tickers, refresh=refresh)
+    return run_pipeline_computation(
+        tickers,
+        refresh=refresh,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
 
 
-def write_panel_csv(panel: pd.DataFrame) -> Path:
+def write_panel_csv(
+    panel: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
     from src.pipeline_runner import write_panel_csv as _w
 
-    return _w(panel)
+    return _w(panel, workspace=workspace, use_legacy_shared_paths=use_legacy_shared_paths)
 
 
-def write_features_csv(features: pd.DataFrame) -> Path:
+def write_features_csv(
+    features: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
     from src.pipeline_runner import write_features_csv as _w
 
-    return _w(features)
+    return _w(features, workspace=workspace, use_legacy_shared_paths=use_legacy_shared_paths)
 
 
-def write_anomalies_csv(anomalies: pd.DataFrame) -> Path:
+def write_anomalies_csv(
+    anomalies: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
     from src.pipeline_runner import write_anomalies_csv as _w
 
-    return _w(anomalies)
+    return _w(anomalies, workspace=workspace, use_legacy_shared_paths=use_legacy_shared_paths)
 
 
-def write_report_md(text: str) -> Path:
+def write_report_md(
+    text: str,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
     from src.pipeline_runner import write_report_md as _w
 
-    return _w(text)
+    return _w(text, workspace=workspace, use_legacy_shared_paths=use_legacy_shared_paths)
 
 
 def write_all_phase1_artifacts(
@@ -335,6 +466,8 @@ def write_all_phase1_artifacts(
     anomalies: pd.DataFrame,
     report_markdown: str,
     *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     peer_signals: pd.DataFrame | None = None,
@@ -347,6 +480,8 @@ def write_all_phase1_artifacts(
         features,
         anomalies,
         report_markdown,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
         data_quality=data_quality,
         exclusions=exclusions,
         peer_signals=peer_signals,

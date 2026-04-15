@@ -169,6 +169,7 @@ def build_panel_tool(inp: BuildPanelInput) -> ToolResponseEnvelope:
             ad.err_one(CODE_EMPTY_INPUT, "tickers list is empty after normalization"),
         )
     try:
+        workspace = ad.resolve_run_workspace(inp.run_workspace, default_on_missing=True)
         panel = ad.build_panel_dataframe(tickers, refresh=inp.refresh)
         prov = _provenance_tickers(tickers)
         if panel.empty:
@@ -181,7 +182,7 @@ def build_panel_tool(inp: BuildPanelInput) -> ToolResponseEnvelope:
                 },
                 artifacts={},
             )
-        path = ad.write_panel_csv(panel)
+        path = ad.write_panel_csv(panel, workspace=workspace)
         cols = [str(c) for c in panel.columns]
         return ad.envelope_success(
             message="Panel written.",
@@ -209,9 +210,15 @@ def build_panel_tool(inp: BuildPanelInput) -> ToolResponseEnvelope:
 
 def compute_features_tool(inp: ComputeFeaturesInput) -> ToolResponseEnvelope:
     try:
+        workspace = ad.workspace_from_payload(inp.run_workspace)
         if inp.panel_csv_path:
             panel = ad.read_panel_csv(Path(inp.panel_csv_path).expanduser().resolve())
             pcsv = Path(inp.panel_csv_path).resolve()
+            workspace = ad.resolve_run_workspace(
+                workspace,
+                panel_csv_path=pcsv,
+                default_on_missing=True,
+            )
             src = {
                 "source": "panel_csv",
                 "panel_csv_path": str(pcsv),
@@ -221,6 +228,7 @@ def compute_features_tool(inp: ComputeFeaturesInput) -> ToolResponseEnvelope:
         else:
             assert inp.tickers is not None
             tickers = [t.strip().upper() for t in inp.tickers if t.strip()]
+            workspace = ad.resolve_run_workspace(workspace, default_on_missing=True)
             panel = ad.build_panel_dataframe(tickers, refresh=False)
             src = {
                 "source": "tickers",
@@ -233,7 +241,7 @@ def compute_features_tool(inp: ComputeFeaturesInput) -> ToolResponseEnvelope:
                 artifacts={},
             )
         feats = ad.compute_features_dataframe(panel)
-        path = ad.write_features_csv(feats)
+        path = ad.write_features_csv(feats, workspace=workspace)
         cols = [str(c) for c in feats.columns]
         extra: dict[str, Any] = {}
         if inp.panel_csv_path:
@@ -273,9 +281,15 @@ def compute_features_tool(inp: ComputeFeaturesInput) -> ToolResponseEnvelope:
 def detect_anomalies_tool(inp: DetectAnomaliesInput) -> ToolResponseEnvelope:
     try:
         an_meta = ad.anomaly_detection_params()
+        workspace = ad.workspace_from_payload(inp.run_workspace)
         if inp.features_csv_path:
             feats = ad.read_features_csv(Path(inp.features_csv_path).expanduser().resolve())
             fcsv = Path(inp.features_csv_path).resolve()
+            workspace = ad.resolve_run_workspace(
+                workspace,
+                features_csv_path=fcsv,
+                default_on_missing=True,
+            )
             src = {
                 "source": "features_csv",
                 "features_csv_path": str(fcsv),
@@ -285,6 +299,7 @@ def detect_anomalies_tool(inp: DetectAnomaliesInput) -> ToolResponseEnvelope:
         else:
             assert inp.tickers is not None
             tickers = [t.strip().upper() for t in inp.tickers if t.strip()]
+            workspace = ad.resolve_run_workspace(workspace, default_on_missing=True)
             panel = ad.build_panel_dataframe(tickers, refresh=False)
             if panel.empty:
                 return ad.envelope_no_data(
@@ -300,7 +315,7 @@ def detect_anomalies_tool(inp: DetectAnomaliesInput) -> ToolResponseEnvelope:
             feats = ad.compute_features_dataframe(panel)
             src = {"source": "tickers", **_provenance_tickers(tickers)}
         anom = ad.detect_anomalies_dataframe(feats)
-        path = ad.write_anomalies_csv(anom)
+        path = ad.write_anomalies_csv(anom, workspace=workspace)
         fcols = [str(c) for c in feats.columns]
         acols = [str(c) for c in anom.columns]
         extra: dict[str, Any] = {
@@ -339,14 +354,18 @@ def detect_anomalies_tool(inp: DetectAnomaliesInput) -> ToolResponseEnvelope:
 
 def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
     try:
-        import config
-
         peer_sig: pd.DataFrame | None = None
         dq_df: pd.DataFrame | None = None
         excl_df: pd.DataFrame | None = None
         phase1_ap: dict[str, Path] | None = None
+        workspace = ad.workspace_from_payload(inp.run_workspace)
         if inp.use_default_artifact_paths:
             phase1_ap = ad.phase1_paths(use_legacy_shared_paths=True)
+            workspace = ad.resolve_run_workspace(
+                workspace,
+                features_csv_path=phase1_ap["features"],
+                anomalies_csv_path=phase1_ap["anomalies"],
+            )
             feats = ad.read_features_csv(phase1_ap["features"])
             anom = ad.read_anomalies_csv(phase1_ap["anomalies"])
             art = _phase1_artifact_dict(phase1_ap)
@@ -364,12 +383,20 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
             assert inp.features_csv_path and inp.anomalies_csv_path
             fp = Path(inp.features_csv_path).expanduser().resolve()
             apath = Path(inp.anomalies_csv_path).expanduser().resolve()
+            workspace = ad.resolve_run_workspace(
+                workspace,
+                features_csv_path=fp,
+                anomalies_csv_path=apath,
+                default_on_missing=True,
+            )
             feats = ad.read_features_csv(fp)
             anom = ad.read_anomalies_csv(apath)
             art = {
                 ARTIFACT_KEY_FEATURES: str(fp),
                 ARTIFACT_KEY_ANOMALIES: str(apath),
             }
+            if workspace is not None:
+                phase1_ap = ad.phase1_paths(workspace=workspace)
         if feats.empty:
             return ad.envelope_no_data(
                 "Features input is empty; nothing to summarize.",
@@ -379,7 +406,7 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
                 },
                 artifacts=art,
             )
-        mv_path = config.PROJECT_ROOT / "validation" / "manual_validation.csv"
+        mv_path = workspace.manual_validation_csv if workspace is not None else (ad.repo_root() / "validation" / "manual_validation.csv")
         md = ad.generate_report_markdown(
             anom,
             feats,
@@ -387,8 +414,15 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
             data_quality=dq_df,
             exclusions=excl_df,
             manual_validation_path=mv_path,
+            workspace=workspace,
+            artifact_paths=phase1_ap,
+            use_legacy_shared_paths=inp.use_default_artifact_paths,
         )
-        path = ad.write_report_md(md)
+        path = ad.write_report_md(
+            md,
+            workspace=workspace,
+            use_legacy_shared_paths=inp.use_default_artifact_paths,
+        )
         src_paths = {
             ARTIFACT_KEY_FEATURES: str(art[ARTIFACT_KEY_FEATURES]),
             ARTIFACT_KEY_ANOMALIES: str(art[ARTIFACT_KEY_ANOMALIES]),
@@ -704,8 +738,11 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
 
         tickers = list(config.DEFAULT_TICKERS[:5])
     try:
+        workspace = ad.resolve_run_workspace(inp.run_workspace, default_on_missing=True)
         panel, feats, anom, md, dq_df, ex_df, peer_df, cave_long = ad.run_full_pipeline(
-            tickers, refresh=inp.refresh
+            tickers,
+            refresh=inp.refresh,
+            workspace=workspace,
         )
         prov = _provenance_tickers(tickers)
         an_meta = ad.anomaly_detection_params()
@@ -729,6 +766,7 @@ def run_pipeline_tool(inp: RunPipelineInput) -> ToolResponseEnvelope:
             feats,
             anom,
             md,
+            workspace=workspace,
             data_quality=dq_df,
             exclusions=ex_df,
             peer_signals=peer_df,

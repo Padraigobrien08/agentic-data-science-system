@@ -133,6 +133,7 @@ def generate_report(
     anomalies_csv_path: str | None = None,
     features_csv_path: str | None = None,
     use_default_artifact_paths: bool = False,
+    run_workspace: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Write data/artifacts/report.md from anomaly + feature CSVs (or default Phase 1 paths)."""
     _log_tool_call(
@@ -140,12 +141,14 @@ def generate_report(
         anomalies_csv_path=anomalies_csv_path,
         features_csv_path=features_csv_path,
         use_default_artifact_paths=use_default_artifact_paths,
+        run_workspace=run_workspace,
     )
     try:
         inp = GenerateReportInput(
             anomalies_csv_path=anomalies_csv_path,
             features_csv_path=features_csv_path,
             use_default_artifact_paths=use_default_artifact_paths,
+            run_workspace=run_workspace,
         )
     except ValidationError as e:
         return _validation_error_dict(e)
@@ -156,11 +159,12 @@ def generate_report(
 def run_pipeline(
     tickers: list[str] | None = None,
     refresh: bool = False,
+    run_workspace: dict[str, Any] | None = None,
 ) -> dict[str, Any]:
     """Run the full pipeline and write all Phase 1 artifacts (same as main.py)."""
-    _log_tool_call("run_pipeline", tickers=tickers, refresh=refresh)
+    _log_tool_call("run_pipeline", tickers=tickers, refresh=refresh, run_workspace=run_workspace)
     try:
-        inp = RunPipelineInput(tickers=tickers, refresh=refresh)
+        inp = RunPipelineInput(tickers=tickers, refresh=refresh, run_workspace=run_workspace)
     except ValidationError as e:
         return _validation_error_dict(e)
     return mcp_tools.to_json_dict(mcp_tools.run_pipeline_tool(inp))

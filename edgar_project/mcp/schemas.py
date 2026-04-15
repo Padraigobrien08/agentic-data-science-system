@@ -20,6 +20,7 @@ from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field, model_validator
+from edgar_project.orchestration.schemas import RunWorkspacePayload
 
 
 class ToolStatus(str, Enum):
@@ -94,11 +95,13 @@ class FetchCompanyDataInput(BaseModel):
 class BuildPanelInput(BaseModel):
     tickers: list[str] = Field(min_length=1, max_length=5)
     refresh: bool = False
+    run_workspace: RunWorkspacePayload | None = None
 
 
 class ComputeFeaturesInput(BaseModel):
     tickers: list[str] | None = Field(default=None, description="Build panel from these symbols")
     panel_csv_path: str | None = Field(default=None, description="Read existing panel CSV")
+    run_workspace: RunWorkspacePayload | None = None
 
     @model_validator(mode="after")
     def exactly_one_source(self) -> ComputeFeaturesInput:
@@ -114,6 +117,7 @@ class ComputeFeaturesInput(BaseModel):
 class DetectAnomaliesInput(BaseModel):
     tickers: list[str] | None = Field(default=None)
     features_csv_path: str | None = Field(default=None)
+    run_workspace: RunWorkspacePayload | None = None
 
     @model_validator(mode="after")
     def exactly_one_source(self) -> DetectAnomaliesInput:
@@ -129,6 +133,7 @@ class DetectAnomaliesInput(BaseModel):
 class GenerateReportInput(BaseModel):
     anomalies_csv_path: str | None = None
     features_csv_path: str | None = None
+    run_workspace: RunWorkspacePayload | None = None
     use_default_artifact_paths: bool = Field(
         default=False,
         description="If True, read anomalies/features from Phase 1 paths under config.DATA_*",
@@ -153,6 +158,7 @@ class RunPipelineInput(BaseModel):
         description="1–5 symbols; omit or empty uses config.DEFAULT_TICKERS",
     )
     refresh: bool = False
+    run_workspace: RunWorkspacePayload | None = None
 
     @model_validator(mode="after")
     def tickers_bounds(self) -> RunPipelineInput:

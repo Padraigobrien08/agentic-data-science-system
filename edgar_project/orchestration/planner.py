@@ -164,9 +164,9 @@ def _granular_plan(tickers: list[str], refresh: bool) -> OrchestrationPlan:
             tool_input={
                 "anomalies_csv_path": None,
                 "features_csv_path": None,
-                "use_default_artifact_paths": True,
+                "use_default_artifact_paths": False,
             },
-            label=f"{TOOL_GENERATE_REPORT}:default_paths",
+            label=f"{TOOL_GENERATE_REPORT}:explicit_paths",
         )
     )
 

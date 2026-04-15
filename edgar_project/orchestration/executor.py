@@ -31,6 +31,9 @@ from opentelemetry import trace as otel_trace
 
 from edgar_project.mcp import tools as mcp_tools
 from edgar_project.mcp.schemas import (
+    ARTIFACT_KEY_ANOMALIES,
+    ARTIFACT_KEY_FEATURES,
+    ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_REPORT,
     BuildPanelInput,
     ComputeFeaturesInput,
@@ -73,6 +76,7 @@ from edgar_project.orchestration.schemas import (
     OrchestrationWarning,
     PlannedStep,
     ResolvedCompany,
+    RunWorkspacePayload,
     StepRecord,
     StepStatusEntry,
     ToolResultSummary,
@@ -104,7 +108,12 @@ def _placeholder_interpreted_goal(request_text: str) -> InterpretedGoal:
     )
 
 
-def _dispatch_mcp(step: PlannedStep) -> ToolResponseEnvelope:
+def _dispatch_mcp(
+    step: PlannedStep,
+    *,
+    artifact_paths: dict[str, str] | None = None,
+    run_workspace: RunWorkspacePayload | None = None,
+) -> ToolResponseEnvelope:
     """
     Single dispatch gate for MCP tools in orchestration — all tool I/O goes through here.
 
@@ -113,6 +122,28 @@ def _dispatch_mcp(step: PlannedStep) -> ToolResponseEnvelope:
     """
     name = step.tool_name
     raw = dict(step.tool_input)
+    artifact_paths = dict(artifact_paths or {})
+    if run_workspace is not None and name in {
+        TOOL_BUILD_PANEL,
+        TOOL_COMPUTE_FEATURES,
+        TOOL_DETECT_ANOMALIES,
+        TOOL_GENERATE_REPORT,
+        TOOL_RUN_PIPELINE,
+    }:
+        raw["run_workspace"] = run_workspace.model_dump(mode="json")
+    if name == TOOL_COMPUTE_FEATURES and not raw.get("panel_csv_path"):
+        raw["panel_csv_path"] = artifact_paths.get(ARTIFACT_KEY_PANEL)
+        if raw.get("panel_csv_path"):
+            raw["tickers"] = None
+    if name == TOOL_DETECT_ANOMALIES and not raw.get("features_csv_path"):
+        raw["features_csv_path"] = artifact_paths.get(ARTIFACT_KEY_FEATURES)
+        if raw.get("features_csv_path"):
+            raw["tickers"] = None
+    if name == TOOL_GENERATE_REPORT:
+        if not raw.get("features_csv_path"):
+            raw["features_csv_path"] = artifact_paths.get(ARTIFACT_KEY_FEATURES)
+        if not raw.get("anomalies_csv_path"):
+            raw["anomalies_csv_path"] = artifact_paths.get(ARTIFACT_KEY_ANOMALIES)
 
     if name == TOOL_RESOLVE_COMPANY:
         return mcp_tools.resolve_company_tool(ResolveCompanyInput(**raw))
@@ -394,6 +425,13 @@ class Executor:
         final_report_path: str | None = None
         resolved_companies: list[ResolvedCompany] = []
         seen_cik: set[int] = set()
+        run_workspace: RunWorkspacePayload | None = None
+        raw_workspace = state.context.get("run_workspace")
+        if isinstance(raw_workspace, dict):
+            try:
+                run_workspace = RunWorkspacePayload.model_validate(raw_workspace)
+            except Exception:
+                run_workspace = None
 
         aborted = False
 
@@ -482,7 +520,11 @@ class Executor:
                         "orchestration.step.order": int(step.order),
                     },
                 ) as _otel_span:
-                    env = _dispatch_mcp(step)
+                    env = _dispatch_mcp(
+                        step,
+                        artifact_paths=artifact_paths,
+                        run_workspace=run_workspace,
+                    )
                     _otel_span.set_attribute("mcp.response.status", env.status.value)
             except Exception as exc:
                 err_rec = StepRecord(
