@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from unittest.mock import patch
+
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
     ARTIFACT_KEY_CACHE_COMPANYFACTS,
@@ -26,7 +28,9 @@ from edgar_project.mcp.schemas import (
     ToolResponseEnvelope,
     ToolStatus,
 )
-from edgar_project.orchestration.executor import _merge_artifact_paths
+from edgar_project.orchestration.constants import TOOL_GENERATE_REPORT
+from edgar_project.orchestration.executor import _dispatch_mcp, _merge_artifact_paths
+from edgar_project.orchestration.schemas import PlannedStep, RunWorkspacePayload
 
 # Analytical / credibility outputs added alongside core Phase 1 CSVs (explicit registry for drift detection).
 PHASE1_ANALYTICAL_ARTIFACT_KEYS = frozenset(
@@ -100,3 +104,49 @@ def test_cache_artifact_keys_remain_available_for_fetch_tools() -> None:
     """Cache keys stay defined alongside pipeline artifacts (contract surface)."""
     assert ARTIFACT_KEY_CACHE_SUBMISSIONS.endswith("_json")
     assert ARTIFACT_KEY_CACHE_COMPANYFACTS.endswith("_json")
+
+
+def test_dispatch_mcp_injects_upstream_artifact_paths_and_workspace() -> None:
+    workspace = RunWorkspacePayload(
+        run_scoped_id="run-123",
+        root="/runs/run-123",
+        processed_dir="/runs/run-123/processed",
+        artifacts_dir="/runs/run-123/artifacts",
+        manual_validation_csv="/repo/validation/manual_validation.csv",
+        use_legacy_shared_paths=False,
+    )
+    step = PlannedStep(
+        order=5,
+        tool_name=TOOL_GENERATE_REPORT,
+        tool_input={
+            "features_csv_path": None,
+            "anomalies_csv_path": None,
+            "use_default_artifact_paths": False,
+        },
+        label="generate_report:explicit_paths",
+    )
+    env = ToolResponseEnvelope(
+        status=ToolStatus.success,
+        message="ok",
+        data={},
+        artifacts={ARTIFACT_KEY_REPORT: "/runs/run-123/artifacts/report.md"},
+        errors=[],
+    )
+    with patch(
+        "edgar_project.orchestration.executor.mcp_tools.generate_report_tool",
+        return_value=env,
+    ) as mock_tool:
+        _dispatch_mcp(
+            step,
+            artifact_paths={
+                ARTIFACT_KEY_FEATURES: "/runs/run-123/processed/features.csv",
+                ARTIFACT_KEY_ANOMALIES: "/runs/run-123/artifacts/anomalies.csv",
+            },
+            run_workspace=workspace,
+        )
+
+    dispatched_input = mock_tool.call_args.args[0]
+    assert dispatched_input.features_csv_path == "/runs/run-123/processed/features.csv"
+    assert dispatched_input.anomalies_csv_path == "/runs/run-123/artifacts/anomalies.csv"
+    assert dispatched_input.run_workspace.run_scoped_id == "run-123"
+    assert dispatched_input.run_workspace.manual_validation_csv == "/repo/validation/manual_validation.csv"

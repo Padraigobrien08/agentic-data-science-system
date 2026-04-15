@@ -293,6 +293,22 @@ def test_planner_deterministic_supported_goals() -> None:
     assert names == [TOOL_RUN_PIPELINE]
 
 
+def test_planner_uses_explicit_report_paths_for_granular_plan() -> None:
+    out = Planner().build_plan(
+        OrchestrationInput(
+            tickers=["AAPL"],
+            analysis_goal="find unusual financial changes",
+            refresh=False,
+        )
+    )
+    assert out.ok and out.plan is not None
+    report_step = [s for s in out.plan.steps if s.tool_name == TOOL_GENERATE_REPORT][-1]
+    assert report_step.label == f"{TOOL_GENERATE_REPORT}:explicit_paths"
+    assert report_step.tool_input["use_default_artifact_paths"] is False
+    assert report_step.tool_input["features_csv_path"] is None
+    assert report_step.tool_input["anomalies_csv_path"] is None
+
+
 @pytest.mark.parametrize(
     ("goal", "intent", "head_tool"),
     [

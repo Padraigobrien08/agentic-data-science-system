@@ -39,6 +39,7 @@ from edgar_project.mcp.schemas import (
     ToolResponseEnvelope,
     ToolStatus,
 )
+from edgar_project.orchestration.schemas import RunWorkspacePayload
 
 
 def assert_envelope_shape(env: ToolResponseEnvelope) -> None:
@@ -292,6 +293,118 @@ def test_generate_report_default_paths_includes_trustworthiness(
     assert ARTIFACT_KEY_METRIC_CAVEATS_PANEL in env.artifacts
     assert ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY in env.data["trustworthiness_artifact_paths"]
     assert "trustworthiness_summary" in env.data
+
+
+def test_generate_report_tool_uses_workspace_payload_for_normal_mode(
+    sample_panel_row: pd.DataFrame,
+    tmp_artifact_paths: dict[str, Path],
+) -> None:
+    workspace = RunWorkspacePayload(
+        run_scoped_id="run-123",
+        root="/runs/run-123",
+        processed_dir="/runs/run-123/processed",
+        artifacts_dir="/runs/run-123/artifacts",
+        manual_validation_csv="/repo/validation/manual_validation.csv",
+        use_legacy_shared_paths=False,
+    )
+    anom = pd.DataFrame(
+        {
+            "cik": [320193],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "value": [1.0],
+            "zscore": [3.0],
+        }
+    )
+    out_report = tmp_artifact_paths["report"].parent / "workspace_report.md"
+    with patch.object(mcp_tools.ad, "read_features_csv", return_value=sample_panel_row):
+        with patch.object(mcp_tools.ad, "read_anomalies_csv", return_value=anom):
+            with patch.object(mcp_tools.ad, "generate_report_markdown", return_value="# r\n") as mock_generate:
+                with patch.object(mcp_tools.ad, "write_report_md", return_value=out_report) as mock_write:
+                    with patch.object(mcp_tools.ad, "sorted_unique_ciks", return_value=[320193]):
+                        env = mcp_tools.generate_report_tool(
+                            GenerateReportInput(
+                                features_csv_path="/runs/run-123/processed/features.csv",
+                                anomalies_csv_path="/runs/run-123/artifacts/anomalies.csv",
+                                run_workspace=workspace,
+                            )
+                        )
+    assert_envelope_shape(env)
+    assert env.status == ToolStatus.success
+    report_workspace = mock_generate.call_args.kwargs["workspace"]
+    assert report_workspace.run_scoped_id == "run-123"
+    assert report_workspace.manual_validation_csv.as_posix() == "/repo/validation/manual_validation.csv"
+    assert mock_write.call_args.kwargs["workspace"].run_scoped_id == "run-123"
+
+
+def test_run_pipeline_tool_passes_workspace_to_pipeline_and_writer_contract(
+    sample_panel_row: pd.DataFrame,
+    tmp_artifact_paths: dict[str, Path],
+) -> None:
+    workspace = RunWorkspacePayload(
+        run_scoped_id="run-123",
+        root="/runs/run-123",
+        processed_dir="/runs/run-123/processed",
+        artifacts_dir="/runs/run-123/artifacts",
+        manual_validation_csv="/repo/validation/manual_validation.csv",
+        use_legacy_shared_paths=False,
+    )
+    feats = sample_panel_row.copy()
+    anom = pd.DataFrame(
+        {
+            "cik": [320193],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "value": [1.0],
+            "zscore": [3.0],
+        }
+    )
+    dq_df = pd.DataFrame(
+        [{"category": "stage_count", "name": "panel_rows_after_revenue_required", "value": 1, "unit": "rows", "notes": ""}]
+    )
+    ex_df = pd.DataFrame(
+        [
+            {
+                "stage": "metric_extraction",
+                "reason_code": "unsupported_unit",
+                "count": 1,
+                "cik": "",
+                "period": "",
+                "metric": "",
+                "tag": "",
+                "detail": "",
+            }
+        ]
+    )
+    peer_df = pd.DataFrame(
+        [{"cik": 1, "period": "2021-Q1", "metric": "revenue", "peer_alert": "none"}]
+    )
+    prov = [{"ticker": "AAPL", "cik": 320193}]
+
+    with patch.object(mcp_tools.ad, "ticker_cik_pairs", return_value=prov):
+        with patch.object(
+            mcp_tools.ad,
+            "run_full_pipeline",
+            return_value=(sample_panel_row, feats, anom, "# report\n", dq_df, ex_df, peer_df, pd.DataFrame()),
+        ) as mock_run:
+            with patch.object(
+                mcp_tools.ad,
+                "write_all_phase1_artifacts",
+                return_value=tmp_artifact_paths,
+            ) as mock_write:
+                with patch.object(mcp_tools.ad, "anomaly_detection_params", return_value={}):
+                    with patch.object(mcp_tools.ad, "peer_signal_params", return_value={}):
+                        env = mcp_tools.run_pipeline_tool(
+                            RunPipelineInput(
+                                tickers=["AAPL"],
+                                refresh=False,
+                                run_workspace=workspace,
+                            )
+                        )
+    assert_envelope_shape(env)
+    assert env.status == ToolStatus.success
+    assert mock_run.call_args.kwargs["workspace"].run_scoped_id == "run-123"
+    assert mock_write.call_args.kwargs["workspace"].run_scoped_id == "run-123"
 
 
 def test_to_json_dict_serializes_envelope() -> None:
