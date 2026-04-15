@@ -2,8 +2,8 @@
 phase: 1
 slug: run-isolation
 status: draft
-nyquist_compliant: false
-wave_0_complete: false
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-15
 ---
 
@@ -38,9 +38,9 @@ created: 2026-04-15
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 1-01-01 | 01 | 1 | EXEC-01 | integration | `python3 -m pytest tests/test_run_isolation_overlap.py::test_overlapping_runs_keep_distinct_artifact_paths -q` | ❌ W0 | ⬜ pending |
-| 1-01-02 | 01 | 1 | EXEC-02 | unit/integration | `python3 -m pytest tests/test_run_isolation_workspace.py::test_workspace_paths_are_persisted_and_run_scoped -q` | ❌ W0 | ⬜ pending |
-| 1-01-03 | 01 | 1 | EXEC-03 | unit | `python3 -m pytest tests/test_run_isolation_execution_service.py::test_execute_analysis_run_uses_explicit_workspace_paths -q` | ❌ W0 | ⬜ pending |
+| 1-01-01 | 01 | 1 | EXEC-01 | Wave 0 seed | `python3 -m pytest tests/test_run_isolation_overlap.py --collect-only -q` | ✅ seeded in 01-01 | ⬜ pending |
+| 1-01-02 | 01 | 1 | EXEC-02 | unit/integration | `python3 -m pytest tests/test_run_isolation_workspace.py::test_run_workspace_payload_round_trip -q` | ✅ seeded in 01-01 | ⬜ pending |
+| 1-01-03 | 01 | 1 | EXEC-03 | Wave 0 seed | `python3 -m pytest tests/test_run_isolation_execution_service.py --collect-only -q` | ✅ seeded in 01-01 | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 
@@ -48,9 +48,9 @@ created: 2026-04-15
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_run_isolation_workspace.py` — shared contract builder, explicit path registry, report/footer provenance expectations
-- [ ] `tests/test_run_isolation_overlap.py` — overlapping run workspaces and artifact non-collision
-- [ ] `tests/test_run_isolation_execution_service.py` — backend execution without `chdir_repo_root()` and with persisted workspace metadata
+- [x] `tests/test_run_isolation_workspace.py` — seeded in Plan 01 for shared contract builder, explicit path registry, and report/footer provenance expectations
+- [x] `tests/test_run_isolation_overlap.py` — seeded in Plan 01 so later runtime plans expand overlapping-run non-collision assertions instead of introducing them at the end
+- [x] `tests/test_run_isolation_execution_service.py` — seeded in Plan 01 for backend no-`chdir_repo_root()` and persisted-workspace provenance coverage
 
 ---
 
@@ -64,11 +64,11 @@ created: 2026-04-15
 
 ## Validation Sign-Off
 
-- [ ] All tasks have `<automated>` verify or Wave 0 dependencies
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verify
-- [ ] Wave 0 covers all MISSING references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 120s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All tasks have `<automated>` verify or Wave 0 dependencies
+- [x] Sampling continuity: no 3 consecutive tasks without automated verify
+- [x] Wave 0 covers all MISSING references
+- [x] No watch-mode flags
+- [x] Feedback latency < 120s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** approved 2026-04-15

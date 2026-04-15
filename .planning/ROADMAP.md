@@ -28,12 +28,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   1. User can trigger overlapping runs without processed files or artifacts being overwritten across runs
   2. Generated reports and artifacts are resolved from explicit run-scoped paths instead of repo-global defaults
   3. Operator can rerun or resume a run without relying on cwd mutation or implicit repo-root path discovery
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 01-01: Define run-scoped workspace and artifact-path contracts across `src/`, `edgar_project/`, and `backend/`
-- [ ] 01-02: Refactor execution and report generation to pass explicit paths end-to-end
-- [ ] 01-03: Add regression coverage for overlapping runs and artifact ownership
+- [ ] 01-02: Refactor deterministic writers, readers, and orchestration to pass explicit paths end-to-end
+- [ ] 01-03: Migrate backend, CLI, direct entrypoints, and deployment docs to the shared run-workspace contract
+- [ ] 01-04: Add regression coverage for overlapping runs, artifact ownership, and no-cwd entrypoints
 
 ### Phase 2: Worker Resilience
 **Goal**: Make background execution robust when jobs run long, retry, or are reclaimed after worker interruption.
@@ -102,7 +103,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Run Isolation | 0/3 | Not started | - |
+| 1. Run Isolation | 0/4 | Not started | - |
 | 2. Worker Resilience | 0/3 | Not started | - |
 | 3. Secure Defaults | 0/3 | Not started | - |
 | 4. CI Coverage | 0/3 | Not started | - |
