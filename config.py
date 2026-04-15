@@ -7,15 +7,17 @@ PROJECT_ROOT = Path(__file__).resolve().parent
 
 # --- Data layout (see data/README.md) ---------------------------------------
 # raw/        — SEC JSON cache (live fetch).
-# processed/  — panel.csv, features.csv (normalized inputs).
-# artifacts/  — anomalies, unified_findings, report.md, quality CSVs (pipeline output).
+# runs/       — durable per-run processed/artifacts workspaces.
+# processed/  — legacy/dev-only shared Phase 1 processed outputs.
+# artifacts/  — legacy/dev-only shared Phase 1 pipeline outputs.
 # evaluation/ — benchmark JSON + per-case dirs (not main pipeline; suite-driven).
 
 DATA_RAW = PROJECT_ROOT / "data" / "raw"
+DATA_RUNS = PROJECT_ROOT / "data" / "runs"
 DATA_PROCESSED = PROJECT_ROOT / "data" / "processed"
 DATA_ARTIFACTS = PROJECT_ROOT / "data" / "artifacts"
 
-for _p in (DATA_RAW, DATA_PROCESSED, DATA_ARTIFACTS):
+for _p in (DATA_RAW, DATA_RUNS, DATA_PROCESSED, DATA_ARTIFACTS):
     _p.mkdir(parents=True, exist_ok=True)
 
 # V1 default input (max 5 companies)

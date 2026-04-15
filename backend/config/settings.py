@@ -66,6 +66,10 @@ class Settings(BaseSettings):
         default=_REPO_ROOT / "data" / "artifact_storage",
         description="Filesystem root for LocalFilesystemStore object keys",
     )
+    run_workspace_root: Path = Field(
+        default=_REPO_ROOT / "data" / "runs",
+        description="Filesystem root for durable per-run processed/artifacts workspaces",
+    )
 
     worker_poll_interval_s: float = Field(
         default=2.0,
