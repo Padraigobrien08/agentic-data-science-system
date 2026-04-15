@@ -2,16 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: planning
-stopped_at: Phase 1 context gathered
-last_updated: "2026-04-15T09:06:04.725Z"
-last_activity: 2026-04-15 - Project initialized and roadmap created
+status: Executing Phase 01
+stopped_at: Completed 01-01-PLAN.md
+last_updated: "2026-04-15T11:21:12.759Z"
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
-  percent: 0
+  total_plans: 4
+  completed_plans: 1
 ---
 
 # Project State
@@ -21,35 +19,33 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 1 - Run Isolation
+**Current focus:** Phase 01 — run-isolation
 
 ## Current Position
 
-Phase: 1 of 5 (Run Isolation)
-Plan: 1 of 3 in current phase
-Status: Ready to plan
-Last activity: 2026-04-15 - Project initialized and roadmap created
-
-Progress: [░░░░░░░░░░] 0%
+Phase: 01 (run-isolation) — EXECUTING
+Plan: 2 of 4
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 0
-- Average duration: 0 min
-- Total execution time: 0.0 hours
+- Total plans completed: 1
+- Average duration: 14 min
+- Total execution time: 0.2 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| - | - | - | - |
+| 01-run-isolation | 1 | 14min | 14min |
 
 **Recent Trend:**
 
-- Last 5 plans: none
+- Last 5 plans: 01-run-isolation-01 (14min)
 - Trend: Stable
+
+| Phase 01-run-isolation P01 | 14min | 3 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -61,6 +57,9 @@ Recent decisions affecting current work:
 - Initialization: Treat the repo as a brownfield hardening effort, not a greenfield rebuild
 - Initialization: Prioritize run isolation and trust boundaries before feature expansion
 - Initialization: Keep planning docs in git so architecture and operations decisions remain auditable
+- [Phase 01-run-isolation]: Model run isolation with a frozen RunWorkspace contract that keeps manual_validation_csv as an explicit shared input.
+- [Phase 01-run-isolation]: Expose run_workspace as a serialized orchestration context payload before runtime adoption changes land.
+- [Phase 01-run-isolation]: Keep remaining shared-path report behavior behind an explicit MCP legacy flag instead of a hidden zero-arg fallback.
 
 ### Pending Todos
 
@@ -73,6 +72,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T09:06:04.714Z
-Stopped at: Phase 1 context gathered
-Resume file: .planning/phases/01-run-isolation/01-CONTEXT.md
+Last session: 2026-04-15T11:21:12.755Z
+Stopped at: Completed 01-01-PLAN.md
+Resume file: None

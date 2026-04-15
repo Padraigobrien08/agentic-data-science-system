@@ -58,9 +58,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXEC-01 | Phase 1 | Pending |
-| EXEC-02 | Phase 1 | Pending |
-| EXEC-03 | Phase 1 | Pending |
+| EXEC-01 | Phase 1 | In Progress |
+| EXEC-02 | Phase 1 | In Progress |
+| EXEC-03 | Phase 1 | In Progress |
 | WORK-01 | Phase 2 | Pending |
 | WORK-02 | Phase 2 | Pending |
 | SECU-01 | Phase 3 | Pending |
