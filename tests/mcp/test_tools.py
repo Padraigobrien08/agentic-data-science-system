@@ -337,6 +337,29 @@ def test_generate_report_tool_uses_workspace_payload_for_normal_mode(
     assert mock_write.call_args.kwargs["workspace"].run_scoped_id == "run-123"
 
 
+def test_run_pipeline_and_generate_report_inputs_accept_run_workspace_payload() -> None:
+    workspace = RunWorkspacePayload(
+        run_scoped_id="run-123",
+        root="/runs/run-123",
+        processed_dir="/runs/run-123/processed",
+        artifacts_dir="/runs/run-123/artifacts",
+        manual_validation_csv="/repo/validation/manual_validation.csv",
+        use_legacy_shared_paths=False,
+    )
+
+    run_input = RunPipelineInput(tickers=["AAPL"], refresh=False, run_workspace=workspace)
+    report_input = GenerateReportInput(
+        features_csv_path="/runs/run-123/processed/features.csv",
+        anomalies_csv_path="/runs/run-123/artifacts/anomalies.csv",
+        run_workspace=workspace,
+    )
+
+    assert run_input.run_workspace is not None
+    assert run_input.run_workspace.run_scoped_id == "run-123"
+    assert report_input.run_workspace is not None
+    assert report_input.run_workspace.artifacts_dir == "/runs/run-123/artifacts"
+
+
 def test_run_pipeline_tool_passes_workspace_to_pipeline_and_writer_contract(
     sample_panel_row: pd.DataFrame,
     tmp_artifact_paths: dict[str, Path],

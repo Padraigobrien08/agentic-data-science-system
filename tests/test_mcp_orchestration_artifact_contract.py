@@ -64,40 +64,40 @@ def test_merge_artifact_paths_accumulates_mcp_artifacts_and_optional_data_paths(
         message="ok",
         data={
             "artifacts_detail": {
-                "extra_role": {"path": "/tmp/extra.csv"},
+                "extra_role": {"path": "/runs/run-123/artifacts/extra.csv"},
             },
-            "report": {"path": "/tmp/report.md"},
+            "report": {"path": "/runs/run-123/artifacts/report.md"},
         },
         artifacts={
-            ARTIFACT_KEY_PANEL: "/p/panel.csv",
-            ARTIFACT_KEY_FEATURES: "/p/features.csv",
-            ARTIFACT_KEY_ANOMALIES: "/p/anomalies.csv",
-            ARTIFACT_KEY_DATA_QUALITY: "/p/data_quality_summary.csv",
-            ARTIFACT_KEY_EXCLUSIONS: "/p/exclusions_summary.csv",
-            ARTIFACT_KEY_PEER_SIGNALS: "/p/peer_signals.csv",
-            ARTIFACT_KEY_TREND_BREAKS: "/p/trend_break_signals.csv",
-            ARTIFACT_KEY_UNIFIED_FINDINGS: "/p/unified_findings.csv",
-            ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY: "/p/findings_summary_by_company.csv",
-            ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC: "/p/findings_summary_by_metric.csv",
-            ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD: "/p/findings_summary_by_period.csv",
-            ARTIFACT_KEY_MANUAL_VALIDATION: "/p/manual_validation.csv",
+            ARTIFACT_KEY_PANEL: "/runs/run-123/processed/panel.csv",
+            ARTIFACT_KEY_FEATURES: "/runs/run-123/processed/features.csv",
+            ARTIFACT_KEY_ANOMALIES: "/runs/run-123/artifacts/anomalies.csv",
+            ARTIFACT_KEY_DATA_QUALITY: "/runs/run-123/artifacts/data_quality_summary.csv",
+            ARTIFACT_KEY_EXCLUSIONS: "/runs/run-123/artifacts/exclusions_summary.csv",
+            ARTIFACT_KEY_PEER_SIGNALS: "/runs/run-123/artifacts/peer_signals.csv",
+            ARTIFACT_KEY_TREND_BREAKS: "/runs/run-123/artifacts/trend_break_signals.csv",
+            ARTIFACT_KEY_UNIFIED_FINDINGS: "/runs/run-123/artifacts/unified_findings.csv",
+            ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY: "/runs/run-123/artifacts/findings_summary_by_company.csv",
+            ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC: "/runs/run-123/artifacts/findings_summary_by_metric.csv",
+            ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD: "/runs/run-123/artifacts/findings_summary_by_period.csv",
+            ARTIFACT_KEY_MANUAL_VALIDATION: "/repo/validation/manual_validation.csv",
         },
         errors=[],
     )
     accum: dict[str, str] = {}
     _merge_artifact_paths(accum, env)
-    assert accum[ARTIFACT_KEY_PANEL] == "/p/panel.csv"
-    assert accum[ARTIFACT_KEY_DATA_QUALITY] == "/p/data_quality_summary.csv"
-    assert accum[ARTIFACT_KEY_EXCLUSIONS] == "/p/exclusions_summary.csv"
-    assert accum[ARTIFACT_KEY_PEER_SIGNALS] == "/p/peer_signals.csv"
-    assert accum[ARTIFACT_KEY_TREND_BREAKS] == "/p/trend_break_signals.csv"
-    assert accum[ARTIFACT_KEY_UNIFIED_FINDINGS] == "/p/unified_findings.csv"
-    assert accum[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] == "/p/findings_summary_by_company.csv"
-    assert accum[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] == "/p/findings_summary_by_metric.csv"
-    assert accum[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] == "/p/findings_summary_by_period.csv"
-    assert accum[ARTIFACT_KEY_MANUAL_VALIDATION] == "/p/manual_validation.csv"
-    assert accum["extra_role"] == "/tmp/extra.csv"
-    assert accum[ARTIFACT_KEY_REPORT] == "/tmp/report.md"
+    assert accum[ARTIFACT_KEY_PANEL] == "/runs/run-123/processed/panel.csv"
+    assert accum[ARTIFACT_KEY_DATA_QUALITY] == "/runs/run-123/artifacts/data_quality_summary.csv"
+    assert accum[ARTIFACT_KEY_EXCLUSIONS] == "/runs/run-123/artifacts/exclusions_summary.csv"
+    assert accum[ARTIFACT_KEY_PEER_SIGNALS] == "/runs/run-123/artifacts/peer_signals.csv"
+    assert accum[ARTIFACT_KEY_TREND_BREAKS] == "/runs/run-123/artifacts/trend_break_signals.csv"
+    assert accum[ARTIFACT_KEY_UNIFIED_FINDINGS] == "/runs/run-123/artifacts/unified_findings.csv"
+    assert accum[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY] == "/runs/run-123/artifacts/findings_summary_by_company.csv"
+    assert accum[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC] == "/runs/run-123/artifacts/findings_summary_by_metric.csv"
+    assert accum[ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD] == "/runs/run-123/artifacts/findings_summary_by_period.csv"
+    assert accum[ARTIFACT_KEY_MANUAL_VALIDATION] == "/repo/validation/manual_validation.csv"
+    assert accum["extra_role"] == "/runs/run-123/artifacts/extra.csv"
+    assert accum[ARTIFACT_KEY_REPORT] == "/runs/run-123/artifacts/report.md"
 
 
 def test_cache_artifact_keys_remain_available_for_fetch_tools() -> None:

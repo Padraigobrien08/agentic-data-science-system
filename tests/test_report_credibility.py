@@ -283,7 +283,7 @@ def test_report_loads_trustworthiness_csvs_from_workspace_paths_when_frames_omit
 
 
 def test_credibility_footer_lists_stable_trust_artifact_paths() -> None:
-    foot = _artifact_paths_footer()
+    foot = _artifact_paths_footer(use_legacy_shared_paths=True)
     assert "relative to project root" in foot
     for needle in (
         "trend_break_signals.csv",

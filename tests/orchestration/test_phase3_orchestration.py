@@ -162,7 +162,10 @@ def test_successful_full_granular_pipeline() -> None:
     assert ARTIFACT_KEY_ANOMALIES in out.artifact_paths
     assert ARTIFACT_KEY_REPORT in out.artifact_paths
     names = [s.tool_name for s in out.step_statuses]
+    labels = [s.label for s in out.step_statuses]
     assert names[-1] == TOOL_GENERATE_REPORT
+    assert labels[-1] == f"{TOOL_GENERATE_REPORT}:explicit_paths"
+    assert out.tool_call_sequence[-1].params["use_default_artifact_paths"] is False
     assert all(s.mcp_status == "success" for s in out.step_statuses)
     _assert_core_output_shape(out)
 
