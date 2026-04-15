@@ -7,6 +7,7 @@ LLM critic/report (when configured), and envelopes are persisted in the analysis
 
 from __future__ import annotations
 
+import inspect
 from collections.abc import Callable, Mapping
 from pathlib import Path
 from typing import Any
@@ -41,13 +42,25 @@ from edgar_project.orchestration import OrchestrationInput
 from edgar_project.orchestration.agent import AnalysisAgent
 from edgar_project.orchestration.schemas import OrchestrationOutput, OrchestrationRunStatus
 from edgar_project.orchestration.state import OrchestrationRunState
-from edgar_project.repo_layout import chdir_repo_root, ensure_repo_root_on_syspath
+from edgar_project.repo_layout import REPO_ROOT, ensure_repo_root_on_syspath
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace
 
 log = structlog.get_logger(__name__)
 
 
 def _orch_status_to_db(status: OrchestrationRunStatus) -> AnalysisRunStatus:
     return AnalysisRunStatus(status.value)
+
+
+def _workspace_payload(workspace: RunWorkspace) -> dict[str, Any]:
+    return {
+        "run_scoped_id": workspace.run_scoped_id,
+        "root": str(workspace.root),
+        "processed_dir": str(workspace.processed_dir),
+        "artifacts_dir": str(workspace.artifacts_dir),
+        "manual_validation_csv": str(workspace.manual_validation_csv),
+        "use_legacy_shared_paths": workspace.use_legacy_shared_paths,
+    }
 
 
 def _build_orchestration_input(
@@ -88,7 +101,7 @@ class EdgarPipelineExecutionService:
     """
     Run traceable orchestration (MCP + optional critic/report LLMs) for a DB row and persist outcomes.
 
-    Uses :class:`~edgar_project.repo_layout.chdir_repo_root` so ``config`` / MCP paths match the CLI.
+    Anchors persisted runs to explicit run workspaces instead of process-global cwd mutation.
 
     Commits the SQLAlchemy session on success and after persisting a failure transition so API callers
     do not lose error state on rollback.
@@ -204,7 +217,24 @@ class EdgarPipelineExecutionService:
                     )
 
                 ensure_repo_root_on_syspath()
-                chdir_repo_root()
+                run_workspace = build_run_workspace(
+                    workspace_root=settings.run_workspace_root,
+                    run_scoped_id=str(analysis_run_id),
+                    manual_validation_csv=REPO_ROOT / "validation" / "manual_validation.csv",
+                )
+                run_workspace_payload = _workspace_payload(run_workspace)
+                self._runs.merge_meta_json(analysis_run_id, {"run_workspace": run_workspace_payload})
+
+                coordinator = self._coord
+                coordinator_sig = inspect.signature(coordinator)
+                if "execution_context" in coordinator_sig.parameters:
+                    execution_context = {"run_workspace": run_workspace_payload}
+
+                    def _coord_with_workspace(inp: OrchestrationInput):
+                        return coordinator(inp, execution_context=execution_context)
+
+                else:
+                    _coord_with_workspace = coordinator
 
                 traced = None
                 try:
@@ -222,7 +252,7 @@ class EdgarPipelineExecutionService:
                         analysis_run_id,
                         orch_in,
                         llm_provider=llm_provider,
-                        coordinator=self._coord,
+                        coordinator=_coord_with_workspace,
                     )
                     out = traced.orchestration_output
                 except RunCancelledDuringExecution:
@@ -318,7 +348,11 @@ class EdgarPipelineExecutionService:
                             p,
                             role_key=role_key,
                             analysis_run_id=analysis_run_id,
-                            meta_json={"orchestration_run_id": out.run_id, "source": "pipeline"},
+                            meta_json={
+                                "orchestration_run_id": out.run_id,
+                                "source": "pipeline",
+                                "run_workspace": run_workspace_payload,
+                            },
                         )
                     except (OSError, ValueError):
                         continue

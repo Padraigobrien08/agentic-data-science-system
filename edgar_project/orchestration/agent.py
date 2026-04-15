@@ -150,6 +150,8 @@ class AnalysisAgent:
     def run_returning_state(
         self,
         request: OrchestrationInput,
+        *,
+        execution_context: Mapping[str, Any] | None = None,
     ) -> tuple[OrchestrationOutput, OrchestrationRunState | None]:
         """
         Plan, execute MCP steps via :class:`~edgar_project.orchestration.executor.Executor`, return output
@@ -198,6 +200,11 @@ class AnalysisAgent:
                 },
             )
             return _orchestration_output_when_handoff_rejected(run_id, request, outcome, str(exc)), None
+
+        if execution_context:
+            execution = execution.model_copy(
+                update={"context": {**execution.context, **dict(execution_context)}}
+            )
 
         tool_chain = [s.tool_name for s in sorted(execution.plan.steps, key=lambda x: x.order)]
         goal_code = execution.interpreted_goal.code.value if execution.interpreted_goal else None
