@@ -24,6 +24,7 @@ from edgar_project.orchestration.schemas import (
     OrchestrationOutput,
     OrchestrationPlan,
     PlanningOutcome,
+    RunWorkspacePayload,
 )
 
 ExecutionResult: TypeAlias = OrchestrationOutput
@@ -53,8 +54,19 @@ class ExecutionRequest(BaseModel):
     )
     context: JsonDict = Field(
         default_factory=dict,
-        description="Optional JSON scratch for future coordinator ↔ executor data (unused today).",
+        description=(
+            "Optional JSON scratch for coordinator ↔ executor data. "
+            "Reserved key: ``context['run_workspace']`` stores a serialized "
+            ":class:`~edgar_project.orchestration.schemas.RunWorkspacePayload`."
+        ),
     )
+
+    def run_workspace_payload(self) -> RunWorkspacePayload | None:
+        """Return a validated ``run_workspace`` payload when the coordinator provided one."""
+        raw_payload = self.context.get("run_workspace")
+        if not isinstance(raw_payload, dict):
+            return None
+        return RunWorkspacePayload.model_validate(raw_payload)
 
     @classmethod
     def from_planning(

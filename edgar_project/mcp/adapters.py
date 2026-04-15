@@ -15,6 +15,7 @@ from typing import Any
 import pandas as pd
 
 import requests
+from edgar_project.run_workspace import RunWorkspace
 
 from .schemas import (
     ARTIFACT_KEY_CACHE_COMPANYFACTS,
@@ -47,12 +48,25 @@ def ensure_sys_path() -> None:
         sys.path.insert(0, root)
 
 
-def phase1_paths() -> dict[str, Path]:
-    """Delegate to :func:`src.pipeline_runner.phase1_paths`."""
+def phase1_paths(
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> dict[str, Path]:
+    """Delegate to the workspace-aware Phase 1 registry.
+
+    Shared repo-global paths remain available only via the explicit
+    ``use_legacy_shared_paths=True`` compatibility branch.
+    """
     ensure_sys_path()
+    from src.pipeline_runner import legacy_phase1_paths as _legacy_paths
     from src.pipeline_runner import phase1_paths as _paths
 
-    return _paths()
+    if workspace is not None:
+        return _paths(workspace)
+    if use_legacy_shared_paths:
+        return _legacy_paths()
+    raise ValueError("phase1_paths requires a workspace unless use_legacy_shared_paths=True")
 
 
 def cache_paths_from_fetch_result(payload: dict[str, Any]) -> dict[str, str]:

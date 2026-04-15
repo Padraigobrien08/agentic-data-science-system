@@ -14,6 +14,7 @@ from pathlib import Path
 import pandas as pd
 
 import config
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths as workspace_phase1_paths
 from src.exclusions import build_exclusions_dataframe
 
 _log = logging.getLogger(__name__)
@@ -324,27 +325,17 @@ def write_all_phase1_artifacts(
     return out
 
 
-def phase1_paths() -> dict[str, Path]:
-    """Expected artifact paths (may or may not exist on disk yet)."""
-    art = config.DATA_ARTIFACTS
-    return {
-        "panel": (config.DATA_PROCESSED / "panel.csv").resolve(),
-        "features": (config.DATA_PROCESSED / "features.csv").resolve(),
-        "anomalies": (art / "anomalies.csv").resolve(),
-        "report": (art / "report.md").resolve(),
-        "data_quality": (art / "data_quality_summary.csv").resolve(),
-        "exclusions": (art / "exclusions_summary.csv").resolve(),
-        "peer_signals": (art / "peer_signals.csv").resolve(),
-        "trend_breaks": (art / "trend_break_signals.csv").resolve(),
-        "unified_findings": (art / "unified_findings.csv").resolve(),
-        "deterioration_focus": (art / "deterioration_focus.csv").resolve(),
-        "findings_summary_by_company": (art / "findings_summary_by_company.csv").resolve(),
-        "findings_summary_by_metric": (art / "findings_summary_by_metric.csv").resolve(),
-        "findings_summary_by_period": (art / "findings_summary_by_period.csv").resolve(),
-        "metric_coverage_summary": (art / "metric_coverage_summary.csv").resolve(),
-        "metric_coverage_by_company": (art / "metric_coverage_by_company.csv").resolve(),
-        "metric_coverage_by_period": (art / "metric_coverage_by_period.csv").resolve(),
-        "metric_caveats_extraction": (art / "metric_caveats_extraction.csv").resolve(),
-        "metric_caveats_panel": (art / "metric_caveats_panel.csv").resolve(),
-        "manual_validation": (config.PROJECT_ROOT / "validation" / "manual_validation.csv").resolve(),
-    }
+def legacy_phase1_paths() -> dict[str, Path]:
+    """Compatibility registry for explicit legacy/dev workflows that still use shared Phase 1 roots."""
+    workspace = build_run_workspace(
+        workspace_root=config.DATA_RUNS,
+        run_scoped_id="_legacy_phase1",
+        manual_validation_csv=(config.PROJECT_ROOT / "validation" / "manual_validation.csv"),
+        use_legacy_shared_paths=True,
+    )
+    return phase1_paths(workspace)
+
+
+def phase1_paths(workspace: RunWorkspace) -> dict[str, Path]:
+    """Expected run-scoped artifact paths for ``workspace`` (may or may not exist on disk yet)."""
+    return {role: path.resolve() for role, path in workspace_phase1_paths(workspace).items()}

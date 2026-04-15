@@ -38,6 +38,25 @@ ToolParamValue: TypeAlias = str | int | float | bool | None | list[str]
 # Prefer :class:`OrchestrationRunState` fields typed with ``JsonValue`` over ``dict[str, Any]``.
 JsonDict: TypeAlias = dict[str, JsonValue]
 
+
+class RunWorkspacePayload(BaseModel):
+    """Serialized run workspace contract carried in ``ExecutionRequest.context['run_workspace']``."""
+
+    model_config = {"extra": "forbid"}
+
+    run_scoped_id: str = Field(..., description="Stable run identifier used in workspace folder naming.")
+    root: str = Field(..., description="Workspace root directory for this run.")
+    processed_dir: str = Field(..., description="Processed output directory for panel/features CSVs.")
+    artifacts_dir: str = Field(..., description="Artifact output directory for anomalies/report/trust CSVs.")
+    manual_validation_csv: str = Field(
+        ...,
+        description="Explicit shared validation input path; not copied into the run workspace.",
+    )
+    use_legacy_shared_paths: bool = Field(
+        default=False,
+        description="When true, processed/artifact paths point at the shared legacy Phase 1 roots.",
+    )
+
 # ---------------------------------------------------------------------------
 # Entrypoint input (single orchestration API)
 # ---------------------------------------------------------------------------

@@ -346,7 +346,7 @@ def generate_report_tool(inp: GenerateReportInput) -> ToolResponseEnvelope:
         excl_df: pd.DataFrame | None = None
         phase1_ap: dict[str, Path] | None = None
         if inp.use_default_artifact_paths:
-            phase1_ap = ad.phase1_paths()
+            phase1_ap = ad.phase1_paths(use_legacy_shared_paths=True)
             feats = ad.read_features_csv(phase1_ap["features"])
             anom = ad.read_anomalies_csv(phase1_ap["anomalies"])
             art = _phase1_artifact_dict(phase1_ap)
