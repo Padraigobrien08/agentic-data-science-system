@@ -47,9 +47,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 02-01: Add lease renewal or explicit expiry handling to the run-execution job lifecycle
-- [ ] 02-02: Tighten retry and recovery logic around worker restarts and transient failures
-- [ ] 02-03: Add worker lifecycle and lease-expiry regression tests
+- [ ] 02-01: Add claim-token heartbeat and lease-loss fencing to worker execution
+- [ ] 02-02: Convert retries and stale reclaims into durable per-attempt run history
+- [ ] 02-03: Add SQLite and Postgres regressions for heartbeat, recovery, and status history
 
 ### Phase 3: Secure Defaults
 **Goal**: Eliminate insecure production defaults and reduce exposure of sensitive operational data.
