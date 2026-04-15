@@ -6,12 +6,14 @@ wave: 1
 depends_on: []
 files_modified:
   - alembic/versions/006_run_job_claim_token.py
+  - backend/agents/traceable_analysis_pipeline.py
   - backend/models/run_execution_job.py
   - backend/repositories/run_execution_job_repository.py
   - backend/services/exceptions.py
   - backend/services/edgar_pipeline_execution_service.py
   - backend/worker/lease.py
   - backend/worker/loop.py
+  - edgar_project/orchestration/executor.py
   - tests/test_worker_job_lifecycle.py
   - tests/test_worker_lease_heartbeat.py
 autonomous: true
@@ -42,6 +44,10 @@ must_haves:
       to: backend/worker/lease.py
       via: "execution_checkpoint callback before persistence boundaries"
       pattern: "execution_checkpoint"
+    - from: backend/services/edgar_pipeline_execution_service.py
+      to: edgar_project/orchestration/executor.py
+      via: "execution checkpoints propagate into orchestration/tool dispatch, not only outer worker boundaries"
+      pattern: "execution_checkpoint|checkpoint"
 ---
 
 <objective>
@@ -134,25 +140,29 @@ tests/test_worker_job_lifecycle.py</read_first>
 
 <task type="auto" tdd="true">
   <name>Task 2: Heartbeat active worker leases and abort safely on ownership loss</name>
-  <files>backend/worker/lease.py, backend/worker/loop.py, backend/services/edgar_pipeline_execution_service.py, backend/repositories/run_execution_job_repository.py, backend/services/exceptions.py, tests/test_worker_lease_heartbeat.py</files>
+  <files>backend/worker/lease.py, backend/worker/loop.py, backend/services/edgar_pipeline_execution_service.py, backend/agents/traceable_analysis_pipeline.py, edgar_project/orchestration/executor.py, backend/repositories/run_execution_job_repository.py, backend/services/exceptions.py, tests/test_worker_lease_heartbeat.py</files>
   <read_first>.planning/phases/02-worker-resilience/02-CONTEXT.md
 .planning/phases/02-worker-resilience/02-RESEARCH.md
 backend/repositories/run_execution_job_repository.py
 backend/services/exceptions.py
 backend/services/edgar_pipeline_execution_service.py
+backend/agents/traceable_analysis_pipeline.py
+edgar_project/orchestration/executor.py
 backend/worker/loop.py
 tests/test_worker_job_lifecycle.py</read_first>
   <behavior>
     - A mocked long-running worker attempt keeps `lease_expires_at` moving forward while the pipeline is still in progress.
     - If heartbeats stop owning the row, the worker raises `WorkerLeaseLostError` before payload persistence and artifact ingestion.
+    - If ownership is lost during orchestration, the stale worker aborts before any subsequent MCP tool dispatch or terminal persistence step.
     - Finalization returns a non-success outcome when the job was already reclaimed instead of overwriting the newer owner’s state.
   </behavior>
-  <action>Create `backend/worker/lease.py` with a `WorkerLeaseGuard` helper that uses a fresh DB session from `session_factory`, renews the lease every `min(max(lease_seconds / 3.0, 5.0), 60.0)` seconds, and records lost ownership when `renew_lease()` raises `WorkerLeaseLostError`. The helper must expose `checkpoint()` that raises `WorkerLeaseLostError` immediately after any lost-ownership signal. Update `process_next_job()` to start `WorkerLeaseGuard` right after the claim commit, pass `guard.checkpoint` into `EdgarPipelineExecutionService.execute_analysis_run(...)`, and stop the guard in `finally` before finalization. Extend `execute_analysis_run()` with optional `execution_checkpoint: Callable[[], None] | None = None`, then call it at the existing safe boundaries: immediately after switching the run to `running`, immediately before invoking `run_traceable_edgar_pipeline`, immediately after orchestration returns, immediately before `set_output_payload`, immediately before artifact ingestion, and immediately before the final `transition_status`. Update `_finalize_job_after_attempt()` so every terminal mutation uses `finalize_attempt_if_owned(job_id, claim_token, ...)`; if ownership is already lost, return the literal finalize outcome `lease_lost` and do not mutate the superseded row or run. Add `tests/test_worker_lease_heartbeat.py` first to cover heartbeat renewal during a deliberately delayed pipeline and loss-of-ownership abort before terminal writes. Keep D-01 strict: the normal path is active heartbeat, not a longer static lease.</action>
+  <action>Create `backend/worker/lease.py` with a `WorkerLeaseGuard` helper that uses a fresh DB session from `session_factory`, renews the lease every `min(max(lease_seconds / 3.0, 5.0), 60.0)` seconds, and records lost ownership when `renew_lease()` raises `WorkerLeaseLostError`. The helper must expose `checkpoint()` that raises `WorkerLeaseLostError` immediately after any lost-ownership signal. Update `process_next_job()` to start `WorkerLeaseGuard` right after the claim commit, pass `guard.checkpoint` into `EdgarPipelineExecutionService.execute_analysis_run(...)`, and stop the guard in `finally` before finalization. Extend `execute_analysis_run()` with optional `execution_checkpoint: Callable[[], None] | None = None`, then thread that callback through `run_traceable_edgar_pipeline`, `backend/agents/traceable_analysis_pipeline.py`, and `edgar_project/orchestration/executor.py` so it runs at the existing safe boundaries plus immediately before each MCP tool dispatch / orchestration step transition. Keep the outer worker checkpoints as well: immediately after switching the run to `running`, immediately before invoking `run_traceable_edgar_pipeline`, immediately after orchestration returns, immediately before `set_output_payload`, immediately before artifact ingestion, and immediately before the final `transition_status`. Update `_finalize_job_after_attempt()` so every terminal mutation uses `finalize_attempt_if_owned(job_id, claim_token, ...)`; if ownership is already lost, return the literal finalize outcome `lease_lost` and do not mutate the superseded row or run. Add `tests/test_worker_lease_heartbeat.py` first to cover heartbeat renewal during a deliberately delayed pipeline, plus a reclaim-during-orchestration regression that proves the stale worker aborts before any subsequent MCP tool call, payload persistence, artifact ingestion, or terminal write. Keep D-01 strict: the normal path is active heartbeat, not a longer static lease.</action>
   <acceptance_criteria>`backend/worker/lease.py` exists and defines `WorkerLeaseGuard`.
 `backend/services/edgar_pipeline_execution_service.py` accepts `execution_checkpoint`.
+`execution_checkpoint()` is threaded into `backend/agents/traceable_analysis_pipeline.py` and `edgar_project/orchestration/executor.py` so ownership is checked before inner orchestration/tool-dispatch side effects as well as before persistence boundaries.
 `execute_analysis_run()` calls `execution_checkpoint()` before orchestration, before payload persistence, before artifact ingestion, and before terminal status persistence.
 `backend/worker/loop.py` passes the claimed `claim_token` into finalization and returns `lease_lost` when ownership is gone.
-`tests/test_worker_lease_heartbeat.py` covers lease renewal during a delayed pipeline and ownership-loss abort behavior.</acceptance_criteria>
+`tests/test_worker_lease_heartbeat.py` covers lease renewal during a delayed pipeline and ownership-loss abort behavior, including a mid-orchestration reclaim case.</acceptance_criteria>
   <verify>
     <automated>python3 -m pytest tests/test_worker_job_lifecycle.py tests/test_worker_lease_heartbeat.py -q</automated>
   </verify>

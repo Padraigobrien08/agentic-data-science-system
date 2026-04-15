@@ -8,6 +8,7 @@ depends_on:
   - 02-02
 files_modified:
   - tests/postgres_queue_test_utils.py
+  - tests/test_backend_health.py
   - tests/test_worker_job_lifecycle_postgres.py
   - tests/test_worker_attempt_history.py
   - tests/test_worker_lease_heartbeat.py
@@ -112,23 +113,27 @@ The Postgres suite creates isolated test databases instead of writing into the d
 
 <task type="auto">
   <name>Task 2: Lock heartbeat, retry-history, and cancellation guarantees with focused regressions</name>
-  <files>tests/test_worker_attempt_history.py, tests/test_worker_lease_heartbeat.py, tests/test_worker_job_lifecycle.py, tests/test_async_run_queue.py, tests/test_run_lifecycle_api.py, tests/test_run_lifecycle_production.py</files>
+  <files>tests/test_backend_health.py, tests/test_worker_attempt_history.py, tests/test_worker_lease_heartbeat.py, tests/test_worker_job_lifecycle.py, tests/test_async_run_queue.py, tests/test_run_lifecycle_api.py, tests/test_run_lifecycle_production.py</files>
   <read_first>.planning/phases/02-worker-resilience/02-CONTEXT.md
 .planning/phases/02-worker-resilience/02-VALIDATION.md
+backend/api/routes/health.py
+backend/observability/metrics.py
 backend/worker/loop.py
 backend/api/routes/runs.py
+tests/test_backend_health.py
 tests/test_worker_lease_heartbeat.py
 tests/test_worker_job_lifecycle.py
 tests/test_async_run_queue.py
 tests/test_run_lifecycle_api.py
 tests/test_run_lifecycle_production.py</read_first>
-  <action>Create `tests/test_worker_attempt_history.py` with end-to-end regression cases for transient retry, stale-running reclaim, and manual retry so one `analysis_run_id` accumulates visible attempt rows in newest-first order. Update `tests/test_worker_lease_heartbeat.py` so it checks both heartbeat renewal and the `lease_lost` finalize path. Tighten the existing SQLite-backed suites so they assert old rows remain terminal, `/v1/runs/{run_id}/status` returns `execution_job_history`, and cancelled runs never gain a new pending row after failure or reclaim. Keep the quick regression command aligned with `02-VALIDATION.md` by using the worker/job/status test modules already in the phase validation file plus the new attempt-history suite.</action>
+  <action>Create `tests/test_worker_attempt_history.py` with end-to-end regression cases for transient retry, stale-running reclaim, and manual retry so one `analysis_run_id` accumulates visible attempt rows in newest-first order. Update `tests/test_worker_lease_heartbeat.py` so it checks both heartbeat renewal and the `lease_lost` finalize path. Tighten the existing SQLite-backed suites so they assert old rows remain terminal, `/v1/runs/{run_id}/status` returns `execution_job_history`, and cancelled runs never gain a new pending row after failure or reclaim. Extend `tests/test_backend_health.py` so `/v1/worker/health` and `/metrics` continue to reflect the same truth as `queue_observability_snapshot()`: a pending row at the final allowed attempt still counts as claimable, exhausted attempts do not, stale running rows surface as stale, and backlog-without-active-lease flips only when that DB-backed condition is true. Keep the quick regression command aligned with `02-VALIDATION.md` by using the worker/job/status test modules already in the phase validation file plus the new attempt-history and backend-health suites.</action>
   <acceptance_criteria>`tests/test_worker_attempt_history.py` exists and covers transient retry, stale-running reclaim, and manual retry on one run id.
 `tests/test_run_lifecycle_api.py` asserts `execution_job_history` is present and newest-first.
 `tests/test_run_lifecycle_production.py` asserts cancelled runs do not auto-retry.
-`tests/test_worker_lease_heartbeat.py` covers the `lease_lost` finalize branch.</acceptance_criteria>
+`tests/test_worker_lease_heartbeat.py` covers the `lease_lost` finalize branch.
+`tests/test_backend_health.py` asserts `/v1/worker/health` and `/metrics` stay truthful for final-allowed pending attempts and stale-running leases.</acceptance_criteria>
   <verify>
-    <automated>python3 -m pytest tests/test_worker_lease_heartbeat.py tests/test_worker_attempt_history.py tests/test_worker_job_lifecycle.py tests/test_async_run_queue.py tests/test_run_lifecycle_api.py tests/test_run_lifecycle_production.py -q</automated>
+    <automated>python3 -m pytest tests/test_backend_health.py tests/test_worker_lease_heartbeat.py tests/test_worker_attempt_history.py tests/test_worker_job_lifecycle.py tests/test_async_run_queue.py tests/test_run_lifecycle_api.py tests/test_run_lifecycle_production.py -q</automated>
   </verify>
   <done>The heartbeat, attempt-history, and cancellation guarantees are enforced by focused regression suites rather than only by implementation intent.</done>
 </task>
