@@ -33,7 +33,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 Plans:
 - [x] 01-01: Define run-scoped workspace and artifact-path contracts across `src/`, `edgar_project/`, and `backend/`
 - [x] 01-02: Refactor deterministic writers, readers, and orchestration to pass explicit paths end-to-end
-- [ ] 01-03: Migrate backend, CLI, direct entrypoints, and deployment docs to the shared run-workspace contract
+- [x] 01-03: Migrate backend, CLI, direct entrypoints, and deployment docs to the shared run-workspace contract
 - [ ] 01-04: Add regression coverage for overlapping runs, artifact ownership, and no-cwd entrypoints
 
 ### Phase 2: Worker Resilience
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Run Isolation | 2/4 | In Progress | - |
+| 1. Run Isolation | 3/4 | In Progress | - |
 | 2. Worker Resilience | 0/3 | Not started | - |
 | 3. Secure Defaults | 0/3 | Not started | - |
 | 4. CI Coverage | 0/3 | Not started | - |
