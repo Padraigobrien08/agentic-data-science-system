@@ -80,9 +80,31 @@ def _find_data_subdir(path: Path, sub: str) -> Path | None:
     return None
 
 
+def _find_run_workspace_root(path: Path) -> Path | None:
+    """Return .../data/runs/<run_scoped_id> when ``path`` lies under a run workspace."""
+    try:
+        path = path.resolve()
+    except OSError:
+        return None
+    for d in path.parents:
+        if d.name not in {"processed", "artifacts"}:
+            continue
+        run_root = d.parent
+        if run_root.parent.name == "runs" and run_root.parent.parent.name == "data":
+            return run_root.resolve()
+    return None
+
+
 def _roots_touched(artifact_paths: dict[str, str]) -> dict[str, Path]:
     """Which top-level ``data/*`` roots appear in this run's paths."""
     found: dict[str, Path] = {}
+    for p in artifact_paths.values():
+        if not p or not str(p).strip():
+            continue
+        hit = _find_run_workspace_root(Path(p))
+        if hit is not None:
+            found["run_workspace"] = hit
+            break
     order = ("raw", "processed", "artifacts", "evaluation")
     for sub in order:
         for p in artifact_paths.values():
@@ -356,16 +378,18 @@ def format_run_digest(
     lines.append("")
 
     lines.append(" Where outputs go")
-    lines.append("   data/raw/            — SEC cache (live fetch)")
-    lines.append("   data/processed/      — panel & features")
-    lines.append("   data/artifacts/      — anomalies, combined findings, report")
-    lines.append("   data/evaluation/     — benchmarks only (not this pipeline)")
+    lines.append("   data/raw/                            — SEC cache (live fetch)")
+    lines.append("   data/runs/<run_scoped_id>/processed — panel & features")
+    lines.append("   data/runs/<run_scoped_id>/artifacts — anomalies, combined findings, report")
+    lines.append("   data/evaluation/                     — benchmarks only (not this pipeline)")
     if _DATA_README.is_file():
         lines.append(f"   More: {_DATA_README}")
 
     roots = _roots_touched(artifact_paths)
     if roots:
         lines.append(" Roots touched this run:")
+        if "run_workspace" in roots:
+            lines.append(f"   • {'run workspace':12}  {roots['run_workspace']}")
         for key in ("processed", "artifacts", "raw", "evaluation"):
             if key in roots:
                 lines.append(f"   • {key:12}  {roots[key]}")

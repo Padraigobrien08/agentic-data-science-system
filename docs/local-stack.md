@@ -121,7 +121,8 @@ The browser talks to **Next**; Next calls the API using `API_URL` on the server.
 
 - **Backend** stores blob paths as `local:` URIs under a single filesystem root: **`EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT`** (`backend/storage`, `open_reader`).
 - **Compose:** `api` and **worker** mount the same named Docker volume **`artifacts`** at `/var/lib/edgar/artifacts`. The worker writes blobs; the API serves `GET /v1/artifacts/.../content`. Both must see the **same** directory (or volume).
-- **Manual dev:** default root is repo `data/artifact_storage/` (created on API startup). Use the same path for every API and worker process on that machine.
+- **Run workspaces:** `api` and **worker** also mount the shared named Docker volume **`run_workspaces`** at `/var/lib/edgar/run_workspaces`, and `EDGAR_BACKEND_RUN_WORKSPACE_ROOT` points there. Both processes must see the same run-workspace root or persisted runs will not resolve their own outputs correctly.
+- **Manual dev:** artifact blobs still default to repo `data/artifact_storage/` (created on API startup). Durable run workspaces default to repo `data/runs/`; use the same run-workspace root for every API and worker process on that machine.
 - **Not in this stack:** S3/MinIO — only the **local filesystem** driver is wired for compose.
 
 ## Verification (after `docker compose up -d`)

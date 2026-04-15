@@ -17,7 +17,7 @@ import logging
 import sys
 from pathlib import Path
 
-from edgar_project.repo_layout import REPO_ROOT, chdir_repo_root, ensure_repo_root_on_syspath
+from edgar_project.repo_layout import REPO_ROOT, ensure_repo_root_on_syspath
 
 ensure_repo_root_on_syspath()
 
@@ -41,13 +41,6 @@ _ARTIFACT_ORDER = (
     "metric_coverage_summary_csv",
     "manual_validation_csv",
 )
-
-
-def _chdir_repo_root() -> None:
-    """Make cwd the repository root so MCP/pipeline paths match defaults."""
-    chdir_repo_root()
-
-
 def _format_artifact_lines(paths: dict[str, str]) -> list[str]:
     lines: list[str] = []
     seen: set[str] = set()
@@ -140,8 +133,8 @@ def _print_demo_guidance(scenario: DemoScenario) -> None:
         print("Highlights: " + ", ".join(scenario.highlights))
     print()
     print(
-        "Live runs write under data/processed/ and data/artifacts/ "
-        f"(not data/evaluation/). See {REPO_ROOT / 'data' / 'README.md'}"
+        "Live runs write under data/runs/<run_scoped_id>/processed and "
+        f"data/runs/<run_scoped_id>/artifacts (not data/evaluation/). See {REPO_ROOT / 'data' / 'README.md'}"
     )
     print(sep)
 
@@ -192,7 +185,7 @@ def _cmd_demo_fixtures(args: argparse.Namespace) -> int:
     print(f"   Per-case CSVs:   {suite_root}/<case_id>/")
     print(f"   Layout guide:    {REPO_ROOT / 'data' / 'README.md'}")
     print()
-    print("Tip: Live pipeline outputs go to data/processed/ and data/artifacts/ — see data/README.md")
+    print("Tip: Live pipeline outputs go to data/runs/<run_scoped_id>/processed and data/runs/<run_scoped_id>/artifacts — see data/README.md")
     print("Tip: For a live SEC demo with curated tickers, run:  python3 -m edgar_project.cli demo --list")
     if any(r.status in {EvaluationStatus.failed, EvaluationStatus.error} for r in results):
         return 1
@@ -406,7 +399,6 @@ def build_parser() -> argparse.ArgumentParser:
 
 
 def main(argv: list[str] | None = None) -> int:
-    _chdir_repo_root()
     args = build_parser().parse_args(argv)
     return int(args.func(args))
 

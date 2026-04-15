@@ -25,6 +25,7 @@ x-backend-env: &backend_env
   EDGAR_BACKEND_DEBUG: ${EDGAR_BACKEND_DEBUG:-false}
   EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION: ${EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION:-true}
   EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT: /var/lib/edgar/artifacts
+  EDGAR_BACKEND_RUN_WORKSPACE_ROOT: /var/lib/edgar/run_workspaces
   # LLM: set keys in repo-root `.env` then `docker compose up -d --force-recreate api worker`
   EDGAR_BACKEND_LLM_PROVIDER: ${EDGAR_BACKEND_LLM_PROVIDER:-off}
   EDGAR_BACKEND_OPENAI_API_KEY: ${EDGAR_BACKEND_OPENAI_API_KEY:-}
@@ -70,6 +71,7 @@ services:
       - "${API_PORT:-8000}:8000"
     volumes:
       - artifacts:/var/lib/edgar/artifacts
+      - run_workspaces:/var/lib/edgar/run_workspaces
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -96,6 +98,7 @@ services:
       - "${WORKER_METRICS_PORT:-9100}:9100"
     volumes:
       - artifacts:/var/lib/edgar/artifacts
+      - run_workspaces:/var/lib/edgar/run_workspaces
     command: ["python", "-m", "backend.worker"]
     depends_on:
       migrate:
@@ -116,3 +119,4 @@ services:
 volumes:
   pgdata:
   artifacts:
+  run_workspaces:
