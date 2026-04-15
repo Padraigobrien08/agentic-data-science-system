@@ -82,7 +82,7 @@ def test_build_run_workspace_legacy_shared_paths(tmp_path: Path) -> None:
     assert workspace.use_legacy_shared_paths is True
 
 
-def test_phase1_paths_are_run_scoped(tmp_path: Path) -> None:
+def test_workspace_paths_are_persisted_and_run_scoped(tmp_path: Path) -> None:
     workspace = build_run_workspace(
         workspace_root=tmp_path / "workspaces",
         run_scoped_id="run-123",
@@ -91,6 +91,8 @@ def test_phase1_paths_are_run_scoped(tmp_path: Path) -> None:
 
     paths = phase1_paths(workspace)
 
+    assert all(path.is_absolute() for path in paths.values())
+    assert all(path.parent in {workspace.processed_dir.resolve(), workspace.artifacts_dir.resolve()} for path in paths.values())
     assert paths["panel"] == workspace.processed_dir / "panel.csv"
     assert paths["features"] == workspace.processed_dir / "features.csv"
     assert paths["anomalies"] == workspace.artifacts_dir / "anomalies.csv"
