@@ -19,6 +19,10 @@ from edgar_project.orchestration.schemas import (
 from edgar_project.run_workspace import build_run_workspace
 from src.pipeline_runner import phase1_paths
 
+# Future regression expansion is tracked in:
+# - tests/test_run_isolation_overlap.py::test_overlapping_runs_keep_distinct_artifact_paths
+# - tests/test_run_isolation_execution_service.py::test_execute_analysis_run_uses_explicit_workspace_paths
+
 
 def test_build_run_workspace(tmp_path: Path) -> None:
     workspace_root = tmp_path / "workspaces"
