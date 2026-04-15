@@ -1,9 +1,8 @@
 """Metric coverage tables from the normalized wide panel."""
 
 import pandas as pd
-import pytest
 
-import config
+from edgar_project.run_workspace import build_run_workspace
 from src.metric_coverage import (
     compute_metric_coverage_by_company,
     compute_metric_coverage_by_period,
@@ -83,26 +82,34 @@ def test_empty_panel() -> None:
     assert compute_metric_coverage_by_period(panel).empty
 
 
-def test_write_metric_coverage_artifacts_matches_compute_tables(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+def test_write_metric_coverage_artifacts_matches_compute_tables(tmp_path) -> None:
     """Pipeline writer emits the same frames as :func:`compute_metric_coverage_tables` (no SEC)."""
     from src.pipeline_runner import write_metric_coverage_artifacts
 
-    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-coverage",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
     panel = _minimal_panel()
     expected = compute_metric_coverage_tables(panel)
-    paths = write_metric_coverage_artifacts(panel)
+    paths = write_metric_coverage_artifacts(panel, workspace=workspace)
     pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_summary"]), expected["summary"])
     pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_by_company"]), expected["by_company"])
     pd.testing.assert_frame_equal(pd.read_csv(paths["metric_coverage_by_period"]), expected["by_period"])
 
 
-def test_write_all_phase1_artifacts_includes_trend_breaks(monkeypatch: pytest.MonkeyPatch, tmp_path) -> None:
+def test_write_all_phase1_artifacts_includes_trend_breaks(tmp_path) -> None:
     from src.pipeline_runner import write_all_phase1_artifacts
 
-    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
-    monkeypatch.setattr(config, "DATA_PROCESSED", tmp_path)
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-phase1",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
     panel = _minimal_panel()
     paths = write_all_phase1_artifacts(
+        workspace=workspace,
         panel=panel,
         features=panel.copy(),
         anomalies=pd.DataFrame(),

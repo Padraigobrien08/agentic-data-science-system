@@ -14,6 +14,7 @@ from typing import Sequence
 import pandas as pd
 
 import config
+from edgar_project.run_workspace import RunWorkspace
 
 from .normalization import METRIC_COLUMNS
 
@@ -124,25 +125,69 @@ def format_candidate_table(
     return "\n".join(lines)
 
 
-def load_panel(path: Path | None = None) -> pd.DataFrame:
-    p = path or (config.DATA_PROCESSED / "panel.csv")
+def _resolve_panel_path(
+    path: Path | None = None,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    if path is not None:
+        return path
+    if workspace is not None:
+        return workspace.processed_dir / "panel.csv"
+    if use_legacy_shared_paths:
+        return config.DATA_PROCESSED / "panel.csv"
+    raise ValueError("panel path is required unless workspace or use_legacy_shared_paths=True is provided")
+
+
+def _resolve_validation_path(
+    path: Path | None = None,
+    *,
+    workspace: RunWorkspace | None = None,
+) -> Path:
+    if path is not None:
+        return path
+    if workspace is not None:
+        return workspace.manual_validation_csv
+    return VALIDATION_CSV_PATH
+
+
+def load_panel(
+    path: Path | None = None,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> pd.DataFrame:
+    p = _resolve_panel_path(
+        path,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     if not p.is_file():
         raise FileNotFoundError(f"panel not found: {p}")
     return pd.read_csv(p)
 
 
-def ensure_validation_csv(path: Path | None = None) -> Path:
+def ensure_validation_csv(
+    path: Path | None = None,
+    *,
+    workspace: RunWorkspace | None = None,
+) -> Path:
     """Ensure ``manual_validation.csv`` exists with the canonical header (no rows)."""
-    p = path or VALIDATION_CSV_PATH
+    p = _resolve_validation_path(path, workspace=workspace)
     p.parent.mkdir(parents=True, exist_ok=True)
     if not p.is_file() or p.stat().st_size == 0:
         pd.DataFrame(columns=list(VALIDATION_COLUMNS)).to_csv(p, index=False)
     return p.resolve()
 
 
-def load_validation_records(path: Path | None = None) -> pd.DataFrame:
+def load_validation_records(
+    path: Path | None = None,
+    *,
+    workspace: RunWorkspace | None = None,
+) -> pd.DataFrame:
     """Load validation CSV; legacy rows missing ``expected_value`` get an empty column."""
-    p = path or VALIDATION_CSV_PATH
+    p = _resolve_validation_path(path, workspace=workspace)
     if not p.is_file():
         return pd.DataFrame(columns=list(VALIDATION_COLUMNS))
     df = pd.read_csv(p)
@@ -185,8 +230,8 @@ def main(argv: list[str] | None = None) -> int:
     parser.add_argument(
         "--panel",
         type=Path,
-        default=config.DATA_PROCESSED / "panel.csv",
-        help="Wide panel CSV (default: data/processed/panel.csv)",
+        default=None,
+        help="Wide panel CSV. Required unless --use-legacy-shared-paths is set.",
     )
     parser.add_argument(
         "--metrics",
@@ -217,10 +262,18 @@ def main(argv: list[str] | None = None) -> int:
         default=None,
         help="Optional CSV with columns ticker,cik to fill ticker on candidate rows.",
     )
+    parser.add_argument(
+        "--use-legacy-shared-paths",
+        action="store_true",
+        help="Opt into the shared Phase 1 path fallback for local/manual workflows.",
+    )
     args = parser.parse_args(argv)
 
     try:
-        panel = load_panel(args.panel)
+        panel = load_panel(
+            args.panel,
+            use_legacy_shared_paths=args.use_legacy_shared_paths,
+        )
         metrics = _parse_metrics_arg(args.metrics)
         ticker_by = _parse_ticker_cik_pairs(args.ticker_map) if args.ticker_map else None
         candidates = candidate_records_from_panel(panel, metrics=metrics, ticker_by_cik=ticker_by)

@@ -20,6 +20,37 @@ from src.exclusions import build_exclusions_dataframe
 _log = logging.getLogger(__name__)
 
 
+def _legacy_phase1_workspace() -> RunWorkspace:
+    return build_run_workspace(
+        workspace_root=config.DATA_RUNS,
+        run_scoped_id="_legacy_phase1",
+        manual_validation_csv=(config.PROJECT_ROOT / "validation" / "manual_validation.csv"),
+        use_legacy_shared_paths=True,
+    )
+
+
+def _resolve_workspace(
+    workspace: RunWorkspace | None,
+    *,
+    use_legacy_shared_paths: bool = False,
+) -> RunWorkspace:
+    if workspace is not None:
+        return workspace.ensure_directories()
+    if use_legacy_shared_paths:
+        return _legacy_phase1_workspace().ensure_directories()
+    raise ValueError("workspace is required unless use_legacy_shared_paths=True")
+
+
+def _resolve_phase1_output_path(
+    role: str,
+    *,
+    workspace: RunWorkspace | None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    resolved_workspace = _resolve_workspace(workspace, use_legacy_shared_paths=use_legacy_shared_paths)
+    return phase1_paths(resolved_workspace)[role]
+
+
 def extract_long_frames(
     tickers: list[str], *, refresh: bool
 ) -> tuple[list[pd.DataFrame], pd.DataFrame, dict[str, int]]:
@@ -66,6 +97,8 @@ def run_pipeline_computation(
     tickers: list[str],
     *,
     refresh: bool = False,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
 ) -> tuple[
     pd.DataFrame,
     pd.DataFrame,
@@ -129,12 +162,17 @@ def run_pipeline_computation(
     findings_by_period_df = build_findings_summary_by_period(unified_findings_df)
     dq_df = compute_data_quality_summary(long_frames, panel, feats, anom)
     metric_cov_summary = compute_metric_coverage_summary(panel)
+    report_workspace = workspace
+    report_artifact_paths = phase1_paths(workspace) if workspace is not None else None
     md = generate_report(
         anom,
         feats,
         peer_signals=peer_signals_df,
         data_quality=dq_df,
         exclusions=exclusions_df,
+        workspace=report_workspace,
+        artifact_paths=report_artifact_paths,
+        use_legacy_shared_paths=use_legacy_shared_paths,
         metric_coverage_summary=metric_cov_summary,
         extraction_caveats=extraction_caveats_for_report,
         panel_caveats=panel_caveats_df,
@@ -148,108 +186,230 @@ def run_pipeline_computation(
     return panel, feats, anom, md, dq_df, exclusions_df, peer_signals_df, extraction_caveats_long
 
 
-def write_panel_csv(panel: pd.DataFrame) -> Path:
-    """Write ``data/processed/panel.csv`` (Phase 1 path)."""
-    p = config.DATA_PROCESSED / "panel.csv"
+def write_panel_csv(
+    panel: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``panel.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "panel",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     panel.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_features_csv(features: pd.DataFrame) -> Path:
-    """Write ``data/processed/features.csv``."""
-    p = config.DATA_PROCESSED / "features.csv"
+def write_features_csv(
+    features: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``features.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "features",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     features.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_anomalies_csv(anomalies: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/anomalies.csv``."""
-    p = config.DATA_ARTIFACTS / "anomalies.csv"
+def write_anomalies_csv(
+    anomalies: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``anomalies.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "anomalies",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     anomalies.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_report_md(report_md: str) -> Path:
-    """Write ``data/artifacts/report.md``."""
-    p = config.DATA_ARTIFACTS / "report.md"
+def write_report_md(
+    report_md: str,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``report.md`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "report",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     p.write_text(report_md, encoding="utf-8")
     return p.resolve()
 
 
-def write_data_quality_csv(data_quality: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/data_quality_summary.csv``."""
-    p = config.DATA_ARTIFACTS / "data_quality_summary.csv"
+def write_data_quality_csv(
+    data_quality: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``data_quality_summary.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "data_quality",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     data_quality.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_exclusions_csv(exclusions: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/exclusions_summary.csv``."""
-    p = config.DATA_ARTIFACTS / "exclusions_summary.csv"
+def write_exclusions_csv(
+    exclusions: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``exclusions_summary.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "exclusions",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     exclusions.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_peer_signals_csv(peer_signals: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/peer_signals.csv``."""
-    p = config.DATA_ARTIFACTS / "peer_signals.csv"
+def write_peer_signals_csv(
+    peer_signals: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``peer_signals.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "peer_signals",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     peer_signals.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_trend_breaks_csv(trend_breaks: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/trend_break_signals.csv``."""
-    p = config.DATA_ARTIFACTS / "trend_break_signals.csv"
+def write_trend_breaks_csv(
+    trend_breaks: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``trend_break_signals.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "trend_breaks",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     trend_breaks.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_unified_findings_csv(unified_findings: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/unified_findings.csv``."""
-    p = config.DATA_ARTIFACTS / "unified_findings.csv"
+def write_unified_findings_csv(
+    unified_findings: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``unified_findings.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "unified_findings",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     unified_findings.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_deterioration_focus_csv(deterioration_focus: pd.DataFrame) -> Path:
-    """Write ``data/artifacts/deterioration_focus.csv`` (deterioration-prioritized unified slice)."""
-    p = config.DATA_ARTIFACTS / "deterioration_focus.csv"
+def write_deterioration_focus_csv(
+    deterioration_focus: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    """Write ``deterioration_focus.csv`` under the explicit run workspace."""
+    p = _resolve_phase1_output_path(
+        "deterioration_focus",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     deterioration_focus.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_findings_summary_by_company_csv(df: pd.DataFrame) -> Path:
-    p = config.DATA_ARTIFACTS / "findings_summary_by_company.csv"
+def write_findings_summary_by_company_csv(
+    df: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    p = _resolve_phase1_output_path(
+        "findings_summary_by_company",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_findings_summary_by_metric_csv(df: pd.DataFrame) -> Path:
-    p = config.DATA_ARTIFACTS / "findings_summary_by_metric.csv"
+def write_findings_summary_by_metric_csv(
+    df: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    p = _resolve_phase1_output_path(
+        "findings_summary_by_metric",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_findings_summary_by_period_csv(df: pd.DataFrame) -> Path:
-    p = config.DATA_ARTIFACTS / "findings_summary_by_period.csv"
+def write_findings_summary_by_period_csv(
+    df: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path:
+    p = _resolve_phase1_output_path(
+        "findings_summary_by_period",
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     p.parent.mkdir(parents=True, exist_ok=True)
     df.to_csv(p, index=False)
     return p.resolve()
 
 
-def write_metric_coverage_artifacts(panel: pd.DataFrame) -> dict[str, Path]:
+def write_metric_coverage_artifacts(
+    panel: pd.DataFrame,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> dict[str, Path]:
     """
     Write metric coverage CSVs derived from the **final wide panel** (post revenue filter).
 
@@ -258,12 +418,14 @@ def write_metric_coverage_artifacts(panel: pd.DataFrame) -> dict[str, Path]:
     """
     from src.metric_coverage import compute_metric_coverage_tables
 
-    config.DATA_ARTIFACTS.mkdir(parents=True, exist_ok=True)
+    resolved_workspace = _resolve_workspace(workspace, use_legacy_shared_paths=use_legacy_shared_paths)
+    resolved_paths = phase1_paths(resolved_workspace)
+    resolved_workspace.artifacts_dir.mkdir(parents=True, exist_ok=True)
     tables = compute_metric_coverage_tables(panel)
     paths = {
-        "metric_coverage_summary": config.DATA_ARTIFACTS / "metric_coverage_summary.csv",
-        "metric_coverage_by_company": config.DATA_ARTIFACTS / "metric_coverage_by_company.csv",
-        "metric_coverage_by_period": config.DATA_ARTIFACTS / "metric_coverage_by_period.csv",
+        "metric_coverage_summary": resolved_paths["metric_coverage_summary"],
+        "metric_coverage_by_company": resolved_paths["metric_coverage_by_company"],
+        "metric_coverage_by_period": resolved_paths["metric_coverage_by_period"],
     }
     tables["summary"].to_csv(paths["metric_coverage_summary"], index=False)
     tables["by_company"].to_csv(paths["metric_coverage_by_company"], index=False)
@@ -277,6 +439,8 @@ def write_all_phase1_artifacts(
     anomalies: pd.DataFrame,
     report_markdown: str,
     *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     peer_signals: pd.DataFrame | None = None,
@@ -286,19 +450,60 @@ def write_all_phase1_artifacts(
     from src.metric_caveats import write_metric_caveats_artifacts
 
     out: dict[str, Path] = {
-        "panel": write_panel_csv(panel),
-        "features": write_features_csv(features),
-        "anomalies": write_anomalies_csv(anomalies),
-        "report": write_report_md(report_markdown),
+        "panel": write_panel_csv(
+            panel,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        ),
+        "features": write_features_csv(
+            features,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        ),
+        "anomalies": write_anomalies_csv(
+            anomalies,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        ),
+        "report": write_report_md(
+            report_markdown,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        ),
     }
-    out.update(write_metric_caveats_artifacts(panel, extraction_caveats_long))
-    out.update(write_metric_coverage_artifacts(panel))
+    out.update(
+        write_metric_caveats_artifacts(
+            panel,
+            extraction_caveats_long,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
+    )
+    out.update(
+        write_metric_coverage_artifacts(
+            panel,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
+    )
     if data_quality is not None:
-        out["data_quality"] = write_data_quality_csv(data_quality)
+        out["data_quality"] = write_data_quality_csv(
+            data_quality,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if exclusions is not None:
-        out["exclusions"] = write_exclusions_csv(exclusions)
+        out["exclusions"] = write_exclusions_csv(
+            exclusions,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if peer_signals is not None:
-        out["peer_signals"] = write_peer_signals_csv(peer_signals)
+        out["peer_signals"] = write_peer_signals_csv(
+            peer_signals,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     from src.trend_breaks import compute_trend_break_signals
     from src.findings import (
         build_deterioration_focus,
@@ -309,30 +514,43 @@ def write_all_phase1_artifacts(
     )
 
     trend_breaks_df = compute_trend_break_signals(features)
-    out["trend_breaks"] = write_trend_breaks_csv(trend_breaks_df)
+    out["trend_breaks"] = write_trend_breaks_csv(
+        trend_breaks_df,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     uf = build_unified_findings(anomalies, trend_breaks=trend_breaks_df)
-    out["unified_findings"] = write_unified_findings_csv(uf)
-    out["deterioration_focus"] = write_deterioration_focus_csv(build_deterioration_focus(uf))
+    out["unified_findings"] = write_unified_findings_csv(
+        uf,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
+    out["deterioration_focus"] = write_deterioration_focus_csv(
+        build_deterioration_focus(uf),
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
     out["findings_summary_by_company"] = write_findings_summary_by_company_csv(
-        build_findings_summary_by_company(uf)
+        build_findings_summary_by_company(uf),
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
     )
     out["findings_summary_by_metric"] = write_findings_summary_by_metric_csv(
-        build_findings_summary_by_metric(uf)
+        build_findings_summary_by_metric(uf),
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
     )
     out["findings_summary_by_period"] = write_findings_summary_by_period_csv(
-        build_findings_summary_by_period(uf)
+        build_findings_summary_by_period(uf),
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
     )
     return out
 
 
 def legacy_phase1_paths() -> dict[str, Path]:
     """Compatibility registry for explicit legacy/dev workflows that still use shared Phase 1 roots."""
-    workspace = build_run_workspace(
-        workspace_root=config.DATA_RUNS,
-        run_scoped_id="_legacy_phase1",
-        manual_validation_csv=(config.PROJECT_ROOT / "validation" / "manual_validation.csv"),
-        use_legacy_shared_paths=True,
-    )
+    workspace = _legacy_phase1_workspace()
     return phase1_paths(workspace)
 
 

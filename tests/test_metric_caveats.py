@@ -3,9 +3,9 @@
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 import config
+from edgar_project.run_workspace import build_run_workspace
 from src.metric_caveats import (
     compute_panel_metric_caveats,
     filter_extraction_caveats_to_panel,
@@ -124,13 +124,15 @@ def test_panel_caveats_period_order_is_fiscal_not_lexical() -> None:
     assert sub == ["2020-Q4", "2021-Q1"]
 
 
-def test_write_metric_caveats_artifacts_matches_in_memory_panel_table(
-    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
-) -> None:
+def test_write_metric_caveats_artifacts_matches_in_memory_panel_table(tmp_path: Path) -> None:
     """Written ``metric_caveats_panel.csv`` matches :func:`compute_panel_metric_caveats`."""
-    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-caveats",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
     panel = pd.DataFrame([_wide_row(1, "2021-Q1"), _wide_row(2, "2021-Q1"), _wide_row(3, "2021-Q1")])
-    paths = write_metric_caveats_artifacts(panel, None)
+    paths = write_metric_caveats_artifacts(panel, None, workspace=workspace)
     on_disk = pd.read_csv(paths["metric_caveats_panel"])
     direct = compute_panel_metric_caveats(panel)
     pd.testing.assert_frame_equal(

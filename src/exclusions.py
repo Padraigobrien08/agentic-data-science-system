@@ -6,7 +6,11 @@ Downstream reports should reference these ``reason_code`` values only (not free-
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
+
+import config
 
 # --- Stable reason_code values (metric_extraction / normalization) ---
 # Downstream reporting should use these literals only.
@@ -86,8 +90,25 @@ def build_exclusions_dataframe(
     return pd.DataFrame(rows)
 
 
-def format_exclusions_report_line(exclusions: pd.DataFrame) -> str:
+def _repo_rel_path(path: Path) -> str:
+    root = Path(config.PROJECT_ROOT).resolve()
+    try:
+        return path.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def format_exclusions_report_line(
+    exclusions: pd.DataFrame,
+    artifact_paths: dict[str, Path] | None = None,
+    *,
+    use_legacy_shared_paths: bool = True,
+) -> str:
     """One markdown line for ``report.md`` when the exclusions table has rows."""
     if exclusions is None or exclusions.empty:
         return ""
-    return "\n_Exclusions detail: `data/artifacts/exclusions_summary.csv`._\n"
+    if artifact_paths is not None and "exclusions" in artifact_paths:
+        return f"\n_Exclusions detail: `{_repo_rel_path(artifact_paths['exclusions'])}`._\n"
+    if use_legacy_shared_paths:
+        return "\n_Exclusions detail: `data/artifacts/exclusions_summary.csv`._\n"
+    return "\n_Exclusions detail path unavailable._\n"

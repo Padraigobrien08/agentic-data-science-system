@@ -6,12 +6,14 @@ Credibility sections pull from in-memory pipeline outputs (or optional CSV paths
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 import config
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths as workspace_phase1_paths
 from src.peer_signals import PEER_SIGNAL_METRICS, summarize_peer_coverage
 
 # Sample columns for the "normalized panel" section (intersection with actual columns is used).
@@ -32,14 +34,85 @@ def _df_to_md(df: pd.DataFrame, max_rows: int = 30) -> str:
     return show.to_markdown(index=False) + "\n"
 
 
-def _try_read_artifact_csv(basename: str) -> pd.DataFrame | None:
-    """
-    Load ``<DATA_ARTIFACTS>/<basename>`` if present (for MCP report-from-disk).
+def _legacy_workspace() -> RunWorkspace:
+    return build_run_workspace(
+        workspace_root=config.DATA_RUNS,
+        run_scoped_id="_legacy_phase1",
+        manual_validation_csv=(config.PROJECT_ROOT / "validation" / "manual_validation.csv"),
+        use_legacy_shared_paths=True,
+    )
 
-    Returns ``None`` if the file is missing or cannot be parsed (callers treat both like
-    “no coverage table” unless they pass explicit frames).
+
+def _resolve_artifact_paths(
+    *,
+    artifact_paths: Mapping[str, str | Path] | None = None,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> dict[str, Path]:
+    if use_legacy_shared_paths:
+        return {
+            role: path.resolve()
+            for role, path in workspace_phase1_paths(_legacy_workspace()).items()
+        }
+    if artifact_paths is not None:
+        return {
+            str(role): Path(path).expanduser().resolve()
+            for role, path in artifact_paths.items()
+        }
+    if workspace is not None:
+        return {
+            role: path.resolve()
+            for role, path in workspace_phase1_paths(workspace).items()
+        }
+    return {}
+
+
+def _artifact_path_for_basename(
+    basename: str,
+    *,
+    artifact_paths: Mapping[str, Path],
+) -> Path | None:
+    for path in artifact_paths.values():
+        if path.name == basename:
+            return path
+    return None
+
+
+def _resolve_manual_validation_path(
+    manual_validation_path: Path | None,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> Path | None:
+    if manual_validation_path is not None:
+        return manual_validation_path.resolve()
+    if workspace is not None:
+        return workspace.manual_validation_csv.resolve()
+    if use_legacy_shared_paths:
+        from src.manual_validation import VALIDATION_CSV_PATH
+
+        return VALIDATION_CSV_PATH.resolve()
+    return None
+
+
+def _try_read_artifact_csv(
+    basename: str,
+    *,
+    artifact_paths: Mapping[str, Path] | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> pd.DataFrame | None:
     """
-    p = config.DATA_ARTIFACTS / basename
+    Load an explicit artifact CSV by basename.
+
+    Shared repo-global fallback is available only behind ``use_legacy_shared_paths=True``.
+    """
+    p = None
+    if artifact_paths is not None:
+        p = _artifact_path_for_basename(basename, artifact_paths=artifact_paths)
+    if p is None and use_legacy_shared_paths:
+        p = config.DATA_ARTIFACTS / basename
+    if p is None:
+        return None
     if not p.is_file():
         return None
     try:
@@ -164,31 +237,55 @@ def _trust_pipeline_interpretation_notes(excl: pd.DataFrame | None) -> str:
     return "".join(lines)
 
 
-def _artifact_paths_footer() -> str:
+def _artifact_paths_footer(
+    *,
+    artifact_paths: Mapping[str, str | Path] | None = None,
+    manual_validation_path: Path | None = None,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
+) -> str:
     root = Path(config.PROJECT_ROOT)
-    art = _repo_rel_for_footer(Path(config.DATA_ARTIFACTS), root)
-    val = _repo_rel_for_footer(root / "validation", root)
-
-    def ap(name: str) -> str:
-        return f"`{art}/{name}`"
-
-    return (
-        "_Artifact paths (relative to project root): "
-        f"{ap('data_quality_summary.csv')}, "
-        f"{ap('exclusions_summary.csv')}, "
-        f"{ap('peer_signals.csv')}, "
-        f"{ap('trend_break_signals.csv')}, "
-        f"{ap('unified_findings.csv')}, "
-        f"{ap('findings_summary_by_company.csv')}, "
-        f"{ap('findings_summary_by_metric.csv')}, "
-        f"{ap('findings_summary_by_period.csv')}, "
-        f"{ap('metric_coverage_summary.csv')}, "
-        f"{ap('metric_coverage_by_company.csv')}, "
-        f"{ap('metric_coverage_by_period.csv')}, "
-        f"{ap('metric_caveats_extraction.csv')}, "
-        f"{ap('metric_caveats_panel.csv')}, "
-        f"`{val}/manual_validation.csv`._\n"
+    legacy_mode = use_legacy_shared_paths or (
+        artifact_paths is None and workspace is None and manual_validation_path is None
     )
+    resolved_artifact_paths = _resolve_artifact_paths(
+        artifact_paths=artifact_paths,
+        workspace=workspace,
+        use_legacy_shared_paths=legacy_mode,
+    )
+    resolved_manual_validation_path = _resolve_manual_validation_path(
+        manual_validation_path,
+        workspace=workspace,
+        use_legacy_shared_paths=legacy_mode,
+    )
+
+    ordered_roles = (
+        "data_quality",
+        "exclusions",
+        "peer_signals",
+        "trend_breaks",
+        "unified_findings",
+        "findings_summary_by_company",
+        "findings_summary_by_metric",
+        "findings_summary_by_period",
+        "metric_coverage_summary",
+        "metric_coverage_by_company",
+        "metric_coverage_by_period",
+        "metric_caveats_extraction",
+        "metric_caveats_panel",
+    )
+    rendered_paths = [
+        f"`{_repo_rel_for_footer(resolved_artifact_paths[role], root)}`"
+        for role in ordered_roles
+        if role in resolved_artifact_paths
+    ]
+    if resolved_manual_validation_path is not None:
+        rendered_paths.append(
+            f"`{_repo_rel_for_footer(resolved_manual_validation_path, root)}`"
+        )
+    if not rendered_paths:
+        return "_Artifact paths: unavailable (explicit workspace/artifact paths not provided)._ \n"
+    return "_Artifact paths (relative to project root): " + ", ".join(rendered_paths) + "._\n"
 
 
 def _credibility_data_quality_compact(dq: pd.DataFrame) -> str:
@@ -224,8 +321,13 @@ def _credibility_exclusions_compact(excl: pd.DataFrame) -> str:
 
 def _credibility_manual_validation(path: Path | None, *, preview_rows: int = 8) -> str:
     """Status from ``validation/manual_validation.csv`` when the file has data rows."""
+    shown_path = (
+        f"`{_repo_rel_for_footer(path.resolve(), Path(config.PROJECT_ROOT))}`"
+        if path is not None
+        else "`manual_validation.csv`"
+    )
     if path is None or not path.is_file():
-        return "_Manual validation: file not found at `validation/manual_validation.csv`._ \n\n"
+        return f"_Manual validation: file not found at {shown_path}._ \n\n"
     try:
         mv = pd.read_csv(path)
     except Exception:
@@ -507,6 +609,9 @@ def _credibility_section(
     metric_coverage_summary: pd.DataFrame | None,
     extraction_caveats: pd.DataFrame | None,
     panel_caveats: pd.DataFrame | None,
+    artifact_paths: Mapping[str, Path] | None = None,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
 ) -> str:
     parts: list[str] = ["## Credibility & coverage\n"]
     parts.append(
@@ -524,7 +629,14 @@ def _credibility_section(
     parts.append(_credibility_exclusions_compact(exclusions))
     parts.append("### Peer-relative findings summary\n")
     parts.append(_credibility_peer_summary(peer_signals, anomalies))
-    parts.append(_artifact_paths_footer())
+    parts.append(
+        _artifact_paths_footer(
+            artifact_paths=artifact_paths,
+            manual_validation_path=manual_validation_path,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
+    )
     parts.append("\n---\n\n")
     return "".join(parts)
 
@@ -565,6 +677,9 @@ def generate_report(
     data_quality: pd.DataFrame | None = None,
     exclusions: pd.DataFrame | None = None,
     manual_validation_path: Path | None = None,
+    workspace: RunWorkspace | None = None,
+    artifact_paths: Mapping[str, str | Path] | None = None,
+    use_legacy_shared_paths: bool = False,
     metric_coverage_summary: pd.DataFrame | None = None,
     extraction_caveats: pd.DataFrame | None = None,
     panel_caveats: pd.DataFrame | None = None,
@@ -575,28 +690,66 @@ def generate_report(
     findings_summary_by_period: pd.DataFrame | None = None,
     top_n: int = 5,
 ) -> str:
-    if manual_validation_path is None:
-        from src.manual_validation import VALIDATION_CSV_PATH
-
-        manual_validation_path = VALIDATION_CSV_PATH
+    resolved_artifact_paths = _resolve_artifact_paths(
+        artifact_paths=artifact_paths,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
+    resolved_manual_validation_path = _resolve_manual_validation_path(
+        manual_validation_path,
+        workspace=workspace,
+        use_legacy_shared_paths=use_legacy_shared_paths,
+    )
 
     # Prefer in-memory frames from the caller; else artifacts on disk (e.g. MCP report-only run).
     if metric_coverage_summary is None:
-        metric_coverage_summary = _try_read_artifact_csv("metric_coverage_summary.csv")
+        metric_coverage_summary = _try_read_artifact_csv(
+            "metric_coverage_summary.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if extraction_caveats is None:
-        extraction_caveats = _try_read_artifact_csv("metric_caveats_extraction.csv")
+        extraction_caveats = _try_read_artifact_csv(
+            "metric_caveats_extraction.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if panel_caveats is None:
-        panel_caveats = _try_read_artifact_csv("metric_caveats_panel.csv")
+        panel_caveats = _try_read_artifact_csv(
+            "metric_caveats_panel.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if trend_breaks is None:
-        trend_breaks = _try_read_artifact_csv("trend_break_signals.csv")
+        trend_breaks = _try_read_artifact_csv(
+            "trend_break_signals.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if unified_findings is None:
-        unified_findings = _try_read_artifact_csv("unified_findings.csv")
+        unified_findings = _try_read_artifact_csv(
+            "unified_findings.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if findings_summary_by_company is None:
-        findings_summary_by_company = _try_read_artifact_csv("findings_summary_by_company.csv")
+        findings_summary_by_company = _try_read_artifact_csv(
+            "findings_summary_by_company.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if findings_summary_by_metric is None:
-        findings_summary_by_metric = _try_read_artifact_csv("findings_summary_by_metric.csv")
+        findings_summary_by_metric = _try_read_artifact_csv(
+            "findings_summary_by_metric.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     if findings_summary_by_period is None:
-        findings_summary_by_period = _try_read_artifact_csv("findings_summary_by_period.csv")
+        findings_summary_by_period = _try_read_artifact_csv(
+            "findings_summary_by_period.csv",
+            artifact_paths=resolved_artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
 
     lines: list[str] = []
     lines.append("# EDGAR Anomaly Report (V1)\n")
@@ -606,10 +759,13 @@ def generate_report(
             exclusions=exclusions,
             peer_signals=peer_signals,
             anomalies=anomalies,
-            manual_validation_path=manual_validation_path,
+            manual_validation_path=resolved_manual_validation_path,
             metric_coverage_summary=metric_coverage_summary,
             extraction_caveats=extraction_caveats,
             panel_caveats=panel_caveats,
+            artifact_paths=resolved_artifact_paths,
+            workspace=workspace,
+            use_legacy_shared_paths=use_legacy_shared_paths,
         )
     )
     lines.append("## Normalized quarterly panel (sample)\n")

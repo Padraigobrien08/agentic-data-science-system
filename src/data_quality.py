@@ -10,7 +10,11 @@ Per-metric coverage slices (by company / period / overall) are emitted separatel
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
+
+import config
 
 from .normalization import METRIC_COLUMNS, wide_panel_before_revenue_filter
 
@@ -116,7 +120,12 @@ def compute_data_quality_summary(
     return pd.DataFrame(rows)
 
 
-def format_data_quality_markdown(dq: pd.DataFrame) -> str:
+def format_data_quality_markdown(
+    dq: pd.DataFrame,
+    artifact_paths: dict[str, Path] | None = None,
+    *,
+    use_legacy_shared_paths: bool = True,
+) -> str:
     """Short markdown section for embedding in ``report.md`` (deterministic, from summary table)."""
     lines: list[str] = ["## Data quality summary\n", "\n"]
     if dq.empty:
@@ -157,6 +166,29 @@ def format_data_quality_markdown(dq: pd.DataFrame) -> str:
         lines.append("\n")
 
     lines.append(
-        "_Full machine-readable table: `data/artifacts/data_quality_summary.csv`._\n"
+        _data_quality_artifact_footer(
+            artifact_paths,
+            use_legacy_shared_paths=use_legacy_shared_paths,
+        )
     )
     return "".join(lines)
+
+
+def _repo_rel_path(path: Path) -> str:
+    root = Path(config.PROJECT_ROOT).resolve()
+    try:
+        return path.resolve().relative_to(root).as_posix()
+    except ValueError:
+        return path.resolve().as_posix()
+
+
+def _data_quality_artifact_footer(
+    artifact_paths: dict[str, Path] | None = None,
+    *,
+    use_legacy_shared_paths: bool = True,
+) -> str:
+    if artifact_paths is not None and "data_quality" in artifact_paths:
+        return f"_Full machine-readable table: `{_repo_rel_path(artifact_paths['data_quality'])}`._\n"
+    if use_legacy_shared_paths:
+        return "_Full machine-readable table: `data/artifacts/data_quality_summary.csv`._\n"
+    return "_Full machine-readable table path unavailable._\n"

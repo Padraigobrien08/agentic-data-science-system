@@ -16,6 +16,7 @@ from pathlib import Path
 import pandas as pd
 
 import config
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths
 from .anomaly import MIN_PEER_GROUP
 from .metric_extraction import sort_period_key
 
@@ -119,10 +120,23 @@ def filter_extraction_caveats_to_panel(
 def write_metric_caveats_artifacts(
     panel: pd.DataFrame,
     extraction_caveats_long: pd.DataFrame | None,
+    *,
+    workspace: RunWorkspace | None = None,
+    use_legacy_shared_paths: bool = False,
 ) -> dict[str, Path]:
     """Write ``metric_caveats_extraction.csv`` and ``metric_caveats_panel.csv`` under artifacts."""
-    art = config.DATA_ARTIFACTS
-    art.mkdir(parents=True, exist_ok=True)
+    if workspace is None:
+        if not use_legacy_shared_paths:
+            raise ValueError("workspace is required unless use_legacy_shared_paths=True")
+        workspace = build_run_workspace(
+            workspace_root=config.DATA_RUNS,
+            run_scoped_id="_legacy_phase1",
+            manual_validation_csv=(config.PROJECT_ROOT / "validation" / "manual_validation.csv"),
+            use_legacy_shared_paths=True,
+        )
+    workspace = workspace.ensure_directories()
+    artifact_paths = phase1_paths(workspace)
+    workspace.artifacts_dir.mkdir(parents=True, exist_ok=True)
     ext = (
         filter_extraction_caveats_to_panel(extraction_caveats_long, panel)
         if extraction_caveats_long is not None
@@ -131,8 +145,8 @@ def write_metric_caveats_artifacts(
         )
     )
     pan = compute_panel_metric_caveats(panel)
-    p_ext = art / "metric_caveats_extraction.csv"
-    p_pan = art / "metric_caveats_panel.csv"
+    p_ext = artifact_paths["metric_caveats_extraction"]
+    p_pan = artifact_paths["metric_caveats_panel"]
     ext.to_csv(p_ext, index=False)
     pan.to_csv(p_pan, index=False)
     return {"metric_caveats_extraction": p_ext.resolve(), "metric_caveats_panel": p_pan.resolve()}

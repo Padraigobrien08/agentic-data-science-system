@@ -100,8 +100,16 @@ def test_report_includes_credibility_blocks_when_inputs_non_empty(tmp_path: Path
             "explanation": ["category=peer_relative; self=False; ..."],
         }
     )
-    mv = tmp_path / "manual_validation.csv"
-    mv.write_text("ticker,cik,period,metric,validation_status,checked_date\nX,1,2021-Q1,revenue,ok,2026-01-01\n", encoding="utf-8")
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-inline",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
+    workspace.manual_validation_csv.parent.mkdir(parents=True, exist_ok=True)
+    workspace.manual_validation_csv.write_text(
+        "ticker,cik,period,metric,validation_status,checked_date\nX,1,2021-Q1,revenue,ok,2026-01-01\n",
+        encoding="utf-8",
+    )
 
     feats = _minimal_features()
     empty_cov = pd.DataFrame()
@@ -111,7 +119,7 @@ def test_report_includes_credibility_blocks_when_inputs_non_empty(tmp_path: Path
         peer_signals=peer,
         data_quality=dq,
         exclusions=excl,
-        manual_validation_path=mv,
+        workspace=workspace,
         metric_coverage_summary=empty_cov,
         extraction_caveats=empty_cov,
         panel_caveats=empty_cov,
@@ -167,7 +175,7 @@ def test_report_normalized_panel_section_tolerates_missing_balance_sheet_columns
 def test_report_loads_trustworthiness_csvs_from_artifacts_dir_when_frames_omitted(
     monkeypatch, tmp_path: Path
 ) -> None:
-    """MCP-style run: ``generate_report`` fills coverage/caveats from ``DATA_ARTIFACTS`` (no SEC)."""
+    """Legacy opt-in run: ``generate_report`` fills coverage/caveats from shared artifact paths."""
     monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
     cov = pd.DataFrame(
         [
@@ -206,6 +214,7 @@ def test_report_loads_trustworthiness_csvs_from_artifacts_dir_when_frames_omitte
         data_quality=None,
         exclusions=None,
         manual_validation_path=mv,
+        use_legacy_shared_paths=True,
         metric_coverage_summary=None,
         extraction_caveats=None,
         panel_caveats=None,
@@ -367,6 +376,7 @@ def test_report_includes_trend_break_section_when_artifact_exists(
         peer_signals=None,
         data_quality=None,
         exclusions=None,
+        use_legacy_shared_paths=True,
     )
     assert "## Trend-break signals (window shifts)" in md
     assert "strong_shift" in md
@@ -439,6 +449,7 @@ def test_report_uses_summary_artifacts_when_present(monkeypatch, tmp_path: Path)
         peer_signals=None,
         data_quality=None,
         exclusions=None,
+        use_legacy_shared_paths=True,
     )
     assert "revenue" in md
     assert "combined" in md

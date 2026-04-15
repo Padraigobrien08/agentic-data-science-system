@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import pandas as pd
-import pytest
 
+from edgar_project.run_workspace import build_run_workspace
 from src.findings import (
     DETERIORATION_FOCUS_COLUMNS,
     build_deterioration_focus,
@@ -120,18 +120,19 @@ def test_build_deterioration_focus_prioritizes_multi_period_deterioration() -> N
     assert one_off["deterioration_axis"] == "revenue_growth"
 
 
-def test_write_all_phase1_artifacts_writes_deterioration_focus(
-    monkeypatch: pytest.MonkeyPatch, tmp_path
-) -> None:
-    import config
+def test_write_all_phase1_artifacts_writes_deterioration_focus(tmp_path) -> None:
     from src.pipeline_runner import write_all_phase1_artifacts
     from tests.test_metric_coverage import _minimal_panel
 
-    monkeypatch.setattr(config, "DATA_ARTIFACTS", tmp_path)
-    monkeypatch.setattr(config, "DATA_PROCESSED", tmp_path)
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-deterioration",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
 
     panel = _minimal_panel()
     paths = write_all_phase1_artifacts(
+        workspace=workspace,
         panel=panel,
         features=panel.copy(),
         anomalies=pd.DataFrame(),
