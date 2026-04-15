@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Completed Phase 01
-stopped_at: Completed 01-04-PLAN.md
-last_updated: "2026-04-15T12:21:19Z"
+status: Ready to Plan Phase 02
+stopped_at: Phase 02 context gathered
+last_updated: "2026-04-15T20:17:10Z"
 progress:
   total_phases: 5
   completed_phases: 1
@@ -23,9 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 
 ## Current Position
 
-Phase: 01 (run-isolation) — COMPLETE
-Plan: 4 of 4 complete
-Next: Phase 02 (worker-resilience) — READY TO START
+Phase: 02 (worker-resilience) — CONTEXT GATHERED
+Next: `$gsd-plan-phase 2`
 
 ## Performance Metrics
 
@@ -70,6 +69,10 @@ Recent decisions affecting current work:
 - [Phase 01-run-isolation]: CLI, `main.py`, and deployment docs now treat `data/runs/<run_scoped_id>` or `/var/lib/edgar/run_workspaces` as the normal execution root and avoid cwd mutation.
 - [Phase 01-run-isolation]: Overlap safety is now locked by a real dual-workspace artifact-write regression instead of a skipped seed.
 - [Phase 01-run-isolation]: Shared artifact footer/default-path expectations remain covered only through explicit legacy opt-in tests; normal regressions use run-scoped paths.
+- [Phase 02-worker-resilience]: Active jobs should renew their lease with a heartbeat instead of relying on static long leases.
+- [Phase 02-worker-resilience]: Lease expiry should automatically requeue the same persisted run up to attempt limits rather than creating a new run identity.
+- [Phase 02-worker-resilience]: Retry attempts should remain attached to the same run but stay explicitly visible in job/status history.
+- [Phase 02-worker-resilience]: Cancellation during active execution is best-effort at safe checkpoints and cancelled runs never auto-retry.
 
 ### Pending Todos
 
@@ -82,6 +85,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T12:21:19Z
-Stopped at: Completed 01-04-PLAN.md
-Resume file: None
+Last session: 2026-04-15T20:17:10Z
+Stopped at: Phase 02 context gathered
+Resume file: .planning/phases/02-worker-resilience/02-CONTEXT.md
