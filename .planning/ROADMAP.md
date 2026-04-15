@@ -12,7 +12,7 @@ This roadmap turns an already-valuable EDGAR analysis platform into a dependable
 
 Decimal phases appear between their surrounding integers in numeric order.
 
-- [ ] **Phase 1: Run Isolation** - Remove shared artifact-path and cwd assumptions from the execution flow
+- [x] **Phase 1: Run Isolation** - Remove shared artifact-path and cwd assumptions from the execution flow
 - [ ] **Phase 2: Worker Resilience** - Make queued execution lease-safe and retry-safe under overlap and failure
 - [ ] **Phase 3: Secure Defaults** - Enforce safe deployment defaults for auth, registration, metrics, and persisted payloads
 - [ ] **Phase 4: CI Coverage** - Gate the documented stack and key user flows with automated verification
@@ -34,7 +34,7 @@ Plans:
 - [x] 01-01: Define run-scoped workspace and artifact-path contracts across `src/`, `edgar_project/`, and `backend/`
 - [x] 01-02: Refactor deterministic writers, readers, and orchestration to pass explicit paths end-to-end
 - [x] 01-03: Migrate backend, CLI, direct entrypoints, and deployment docs to the shared run-workspace contract
-- [ ] 01-04: Add regression coverage for overlapping runs, artifact ownership, and no-cwd entrypoints
+- [x] 01-04: Add regression coverage for overlapping runs, artifact ownership, and no-cwd entrypoints
 
 ### Phase 2: Worker Resilience
 **Goal**: Make background execution robust when jobs run long, retry, or are reclaimed after worker interruption.
@@ -103,7 +103,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Run Isolation | 3/4 | In Progress | - |
+| 1. Run Isolation | 4/4 | Completed | 2026-04-15 |
 | 2. Worker Resilience | 0/3 | Not started | - |
 | 3. Secure Defaults | 0/3 | Not started | - |
 | 4. CI Coverage | 0/3 | Not started | - |

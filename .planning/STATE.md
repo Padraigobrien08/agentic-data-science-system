@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Executing Phase 01
-stopped_at: Completed 01-03-PLAN.md
-last_updated: "2026-04-15T12:15:21Z"
+status: Completed Phase 01
+stopped_at: Completed 01-04-PLAN.md
+last_updated: "2026-04-15T12:21:19Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 4
-  completed_plans: 3
+  completed_plans: 4
 ---
 
 # Project State
@@ -19,35 +19,37 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 01 — run-isolation
+**Current focus:** Phase 02 — worker-resilience
 
 ## Current Position
 
-Phase: 01 (run-isolation) — EXECUTING
-Plan: 4 of 4
+Phase: 01 (run-isolation) — COMPLETE
+Plan: 4 of 4 complete
+Next: Phase 02 (worker-resilience) — READY TO START
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 3
-- Average duration: 12 min
+- Total plans completed: 4
+- Average duration: 10 min
 - Total execution time: 0.6 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
-| 01-run-isolation | 3 | 37min | 12min |
+| 01-run-isolation | 4 | 38min | 10min |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-run-isolation-01 (14min), 01-run-isolation-02 (20min), 01-run-isolation-03 (3min)
+- Last 5 plans: 01-run-isolation-01 (14min), 01-run-isolation-02 (20min), 01-run-isolation-03 (3min), 01-run-isolation-04 (1min)
 - Trend: Stable
 
 | Phase 01-run-isolation P01 | 14min | 3 tasks | 12 files |
 | Phase 01-run-isolation P02 | 20min | 2 tasks | 15 files |
 | Phase 01-run-isolation P03 | 3min | 2 tasks | 10 files |
+| Phase 01-run-isolation P04 | 1min | 2 tasks | 7 files |
 
 ## Accumulated Context
 
@@ -66,6 +68,8 @@ Recent decisions affecting current work:
 - [Phase 01-run-isolation]: The orchestration executor injects upstream artifact paths and run_workspace payloads into later MCP steps when the planner leaves path placeholders empty.
 - [Phase 01-run-isolation]: Persisted backend runs now store one `analysis_run_id`-anchored workspace payload across execution context, run metadata, and ingested artifact provenance.
 - [Phase 01-run-isolation]: CLI, `main.py`, and deployment docs now treat `data/runs/<run_scoped_id>` or `/var/lib/edgar/run_workspaces` as the normal execution root and avoid cwd mutation.
+- [Phase 01-run-isolation]: Overlap safety is now locked by a real dual-workspace artifact-write regression instead of a skipped seed.
+- [Phase 01-run-isolation]: Shared artifact footer/default-path expectations remain covered only through explicit legacy opt-in tests; normal regressions use run-scoped paths.
 
 ### Pending Todos
 
@@ -73,11 +77,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Shared artifact paths and cwd assumptions are the first architectural trust boundary to remove
+- Worker lease, retry, and overlap semantics are the next architectural trust boundary to remove
 - CI still under-represents the documented stack and concurrent execution risks
 
 ## Session Continuity
 
-Last session: 2026-04-15T12:15:21Z
-Stopped at: Completed 01-03-PLAN.md
+Last session: 2026-04-15T12:21:19Z
+Stopped at: Completed 01-04-PLAN.md
 Resume file: None
