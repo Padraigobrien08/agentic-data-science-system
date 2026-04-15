@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pandas as pd
 
+from edgar_project.run_workspace import build_run_workspace, phase1_paths
 from src.report import _artifact_paths_footer, generate_report
 
 import config
@@ -215,6 +216,63 @@ def test_report_loads_trustworthiness_csvs_from_artifacts_dir_when_frames_omitte
     assert "limited_peer_coverage" in md
 
 
+def test_report_loads_trustworthiness_csvs_from_workspace_paths_when_frames_omitted(
+    tmp_path: Path,
+) -> None:
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-a",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
+
+    pd.DataFrame(
+        [
+            {
+                "metric_name": "revenue",
+                "n_slots": 4,
+                "available_count": 4,
+                "missing_count": 0,
+                "coverage_ratio": 1.0,
+            }
+        ]
+    ).to_csv(workspace.artifacts_dir / "metric_coverage_summary.csv", index=False)
+    pd.DataFrame(
+        {
+            "cik": [1],
+            "period": ["2021-Q1"],
+            "metric": ["revenue"],
+            "source_tag": ["Revenues"],
+            "n_candidates": [1],
+            "caveat_codes": ["tag_resolution_fallback"],
+        }
+    ).to_csv(workspace.artifacts_dir / "metric_caveats_extraction.csv", index=False)
+    pd.DataFrame(
+        {"cik": [1], "period": ["2021-Q1"], "caveat_codes": ["limited_peer_coverage"]}
+    ).to_csv(workspace.artifacts_dir / "metric_caveats_panel.csv", index=False)
+    workspace.manual_validation_csv.parent.mkdir(parents=True, exist_ok=True)
+    workspace.manual_validation_csv.write_text(
+        "ticker,cik,period,metric,validation_status,checked_date\nX,1,2021-Q1,revenue,ok,2026-01-01\n",
+        encoding="utf-8",
+    )
+
+    md = generate_report(
+        pd.DataFrame(),
+        _minimal_features(),
+        peer_signals=None,
+        data_quality=None,
+        exclusions=None,
+        workspace=workspace,
+        metric_coverage_summary=None,
+        extraction_caveats=None,
+        panel_caveats=None,
+    )
+
+    assert "### Trustworthiness snapshot" in md
+    assert "run-a" in md
+    assert "data/artifacts/" not in md
+    assert "manual_validation.csv" in md
+
+
 def test_credibility_footer_lists_stable_trust_artifact_paths() -> None:
     foot = _artifact_paths_footer()
     assert "relative to project root" in foot
@@ -232,6 +290,30 @@ def test_credibility_footer_lists_stable_trust_artifact_paths() -> None:
         "manual_validation.csv",
     ):
         assert needle in foot
+
+
+def test_artifact_paths_footer_uses_workspace_paths_in_normal_mode_and_legacy_paths_only_on_opt_in(
+    tmp_path: Path,
+) -> None:
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-a",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    )
+
+    foot = _artifact_paths_footer(
+        artifact_paths=phase1_paths(workspace),
+        manual_validation_path=workspace.manual_validation_csv,
+    )
+    assert "run-a" in foot
+    assert "data/artifacts/" not in foot
+
+    legacy_foot = _artifact_paths_footer(
+        artifact_paths=phase1_paths(workspace),
+        manual_validation_path=workspace.manual_validation_csv,
+        use_legacy_shared_paths=True,
+    )
+    assert "data/artifacts/" in legacy_foot
 
 
 def test_trust_metric_coverage_warns_when_metric_name_column_missing(tmp_path: Path) -> None:

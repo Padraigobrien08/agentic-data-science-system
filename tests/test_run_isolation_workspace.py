@@ -5,6 +5,8 @@ from __future__ import annotations
 from pathlib import Path
 
 import config
+import pandas as pd
+import pytest
 
 from edgar_project.orchestration.execution_contract import ExecutionRequest
 from edgar_project.orchestration.schemas import (
@@ -22,6 +24,26 @@ from src.pipeline_runner import phase1_paths
 # Future regression expansion is tracked in:
 # - tests/test_run_isolation_overlap.py::test_overlapping_runs_keep_distinct_artifact_paths
 # - tests/test_run_isolation_execution_service.py::test_execute_analysis_run_uses_explicit_workspace_paths
+
+
+def _minimal_panel() -> pd.DataFrame:
+    return pd.DataFrame(
+        {
+            "cik": [1],
+            "period": ["2021-Q1"],
+            "revenue": [100.0],
+            "net_income": [10.0],
+            "total_assets": [1000.0],
+            "total_liabilities": [400.0],
+            "operating_cash_flow": [5.0],
+            "current_assets": [100.0],
+            "current_liabilities": [50.0],
+            "revenue_growth_qoq": [0.0],
+            "net_margin": [0.1],
+            "current_ratio": [2.0],
+            "debt_to_assets": [0.4],
+        }
+    )
 
 
 def test_build_run_workspace(tmp_path: Path) -> None:
@@ -87,6 +109,62 @@ def test_manual_validation_csv_remains_explicit_input(tmp_path: Path) -> None:
 
     assert workspace.manual_validation_csv == manual_validation_csv
     assert "manual_validation" not in paths
+
+
+def test_write_all_phase1_artifacts_writes_into_run_workspace(tmp_path: Path) -> None:
+    from src.pipeline_runner import write_all_phase1_artifacts
+
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-a",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
+
+    panel = _minimal_panel()
+    paths = write_all_phase1_artifacts(
+        workspace=workspace,
+        panel=panel,
+        features=panel.copy(),
+        anomalies=pd.DataFrame(),
+        report_markdown="# Report\n",
+    )
+
+    assert paths["panel"] == (workspace.processed_dir / "panel.csv").resolve()
+    assert paths["features"] == (workspace.processed_dir / "features.csv").resolve()
+    assert paths["anomalies"] == (workspace.artifacts_dir / "anomalies.csv").resolve()
+    assert paths["report"] == (workspace.artifacts_dir / "report.md").resolve()
+
+
+def test_load_panel_uses_workspace_processed_path_and_legacy_is_opt_in(tmp_path: Path) -> None:
+    from src.manual_validation import load_panel
+
+    workspace = build_run_workspace(
+        workspace_root=tmp_path / "workspaces",
+        run_scoped_id="run-a",
+        manual_validation_csv=tmp_path / "validation" / "manual_validation.csv",
+    ).ensure_directories()
+    panel = _minimal_panel()
+    panel_path = workspace.processed_dir / "panel.csv"
+    panel.to_csv(panel_path, index=False)
+
+    loaded = load_panel(workspace=workspace)
+    pd.testing.assert_frame_equal(loaded, panel)
+
+    with pytest.raises(ValueError):
+        load_panel()
+
+    legacy_panel_path = tmp_path / "legacy" / "processed" / "panel.csv"
+    legacy_panel_path.parent.mkdir(parents=True, exist_ok=True)
+    panel.to_csv(legacy_panel_path, index=False)
+
+    original_processed = config.DATA_PROCESSED
+    config.DATA_PROCESSED = legacy_panel_path.parent
+    try:
+        legacy_loaded = load_panel(use_legacy_shared_paths=True)
+    finally:
+        config.DATA_PROCESSED = original_processed
+
+    pd.testing.assert_frame_equal(legacy_loaded, panel)
 
 
 def test_run_workspace_payload_round_trip(tmp_path: Path) -> None:
