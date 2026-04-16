@@ -66,7 +66,7 @@ def _seed_queued_job(factory: sessionmaker[Session]) -> uuid.UUID:
             RunExecutionJob(
                 analysis_run_id=rid,
                 status=RunExecutionJobStatus.pending,
-                attempt_count=0,
+                attempt_count=1,
             )
         )
         db.commit()
@@ -244,6 +244,7 @@ def test_process_next_job_aborts_when_ownership_lost_during_orchestration(
             "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
             checkpointed_traceable,
         ),
+        patch("backend.worker.loop.observe_worker_attempt_complete") as observe_complete,
     ):
         worker_thread = threading.Thread(target=run_worker)
         worker_thread.start()
@@ -252,6 +253,8 @@ def test_process_next_job_aborts_when_ownership_lost_during_orchestration(
         continue_pipeline.set()
         worker_thread.join(timeout=2.0)
         assert not worker_thread.is_alive()
+        assert observe_complete.call_count == 1
+        assert observe_complete.call_args.kwargs["finalize_outcome"] == "lease_lost"
 
     assert result["claimed"] is True
 
@@ -267,5 +270,6 @@ def test_process_next_job_aborts_when_ownership_lost_during_orchestration(
         assert run.output_payload_json is None
         assert job.status == RunExecutionJobStatus.running
         assert job.claim_token is not None
+        assert job.attempt_count == 1
     finally:
         db.close()
