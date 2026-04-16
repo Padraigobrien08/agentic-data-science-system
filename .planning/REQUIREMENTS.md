@@ -18,8 +18,8 @@
 
 ### Security Defaults
 
-- [ ] **SECU-01**: Deployment fails fast when the default JWT secret is still configured outside tests
-- [ ] **SECU-02**: New deployments keep self-service registration disabled unless an operator explicitly enables it
+- [x] **SECU-01**: Deployment fails fast when the default JWT secret is still configured outside tests
+- [x] **SECU-02**: New deployments keep self-service registration disabled unless an operator explicitly enables it
 - [ ] **SECU-03**: Metrics endpoints and persisted sensitive payload fields are protected or redacted by default
 
 ### Verification
@@ -63,8 +63,8 @@
 | EXEC-03 | Phase 1 | In Progress |
 | WORK-01 | Phase 2 | Complete |
 | WORK-02 | Phase 2 | Complete |
-| SECU-01 | Phase 3 | Pending |
-| SECU-02 | Phase 3 | Pending |
+| SECU-01 | Phase 3 | Complete |
+| SECU-02 | Phase 3 | Complete |
 | SECU-03 | Phase 3 | Pending |
 | QUAL-01 | Phase 4 | Pending |
 | QUAL-02 | Phase 4 | Pending |
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-15*
-*Last updated: 2026-04-16 after Phase 2 Plan 02*
+*Last updated: 2026-04-16 after Phase 3 Plan 01*

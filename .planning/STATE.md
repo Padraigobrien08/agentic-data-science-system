@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to Execute Phase 03
-stopped_at: Phase 03 plans validated
-last_updated: "2026-04-16T21:45:00Z"
+status: Ready to execute
+stopped_at: Completed 03-secure-defaults-01-PLAN.md
+last_updated: "2026-04-16T20:43:29.563Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 10
-  completed_plans: 7
+  completed_plans: 8
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 
 ## Current Position
 
-Phase: 03 (secure-defaults) — PLANNED
-Next: `$gsd-execute-phase 3`
+Phase: 03 (secure-defaults) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -53,6 +53,7 @@ Next: `$gsd-execute-phase 3`
 | Phase 02 P01 | 17min | 2 tasks | 12 files |
 | Phase 02 P02 | 10min | 2 tasks | 12 files |
 | Phase 02 P03 | 17min | 2 tasks | 5 files |
+| Phase 03-secure-defaults P01 | 6min | 2 tasks | 11 files |
 
 ## Accumulated Context
 
@@ -90,6 +91,9 @@ Recent decisions affecting current work:
 - [Phase 03-secure-defaults]: Built-in JWT secrets must fail startup unless an explicit insecure-dev override is enabled.
 - [Phase 03-secure-defaults]: Registration is planned to be closed by default, with first-admin onboarding moved to an explicit bootstrap route.
 - [Phase 03-secure-defaults]: `/metrics` and `/v1/worker/health` are planned to require a dedicated ops token, while raw payload/meta expansions are planned to require privileged access and sanitized artifact provenance.
+- [Phase 03-secure-defaults]: Reject the built-in JWT secret by exact value unless EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT=true is set explicitly.
+- [Phase 03-secure-defaults]: Close self-service registration by default and require a dedicated X-EDGAR-Bootstrap-Token flow for the first admin.
+- [Phase 03-secure-defaults]: Persist is_admin on users now so later Phase 3 plans can gate privileged payload and ops access without redesigning auth.
 
 ### Pending Todos
 
@@ -102,6 +106,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T21:45:00Z
-Stopped at: Phase 03 plans validated
-Resume file: .planning/phases/03-secure-defaults/03-secure-defaults-01-PLAN.md
+Last session: 2026-04-16T20:43:29.561Z
+Stopped at: Completed 03-secure-defaults-01-PLAN.md
+Resume file: None
