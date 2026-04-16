@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 02-01-PLAN.md
-last_updated: "2026-04-16T07:41:45.647Z"
+stopped_at: Completed 02-02-PLAN.md
+last_updated: "2026-04-16T07:51:53.000Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 5
+  completed_plans: 6
 ---
 
 # Project State
@@ -24,25 +24,26 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 ## Current Position
 
 Phase: 02 (worker-resilience) — EXECUTING
-Plan: 2 of 3
+Plan: 3 of 3
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 4
-- Average duration: 10 min
-- Total execution time: 0.6 hours
+- Total plans completed: 6
+- Average duration: 11 min
+- Total execution time: 0.8 hours
 
 **By Phase:**
 
 | Phase | Plans | Total | Avg/Plan |
 |-------|-------|-------|----------|
 | 01-run-isolation | 4 | 38min | 10min |
+| 02-worker-resilience | 2 | 27min | 14min |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-run-isolation-01 (14min), 01-run-isolation-02 (20min), 01-run-isolation-03 (3min), 01-run-isolation-04 (1min)
+- Last 5 plans: 01-run-isolation-02 (20min), 01-run-isolation-03 (3min), 01-run-isolation-04 (1min), 02-worker-resilience-01 (17min), 02-worker-resilience-02 (10min)
 - Trend: Stable
 
 | Phase 01-run-isolation P01 | 14min | 3 tasks | 12 files |
@@ -50,6 +51,7 @@ Plan: 2 of 3
 | Phase 01-run-isolation P03 | 3min | 2 tasks | 10 files |
 | Phase 01-run-isolation P04 | 1min | 2 tasks | 7 files |
 | Phase 02 P01 | 17min | 2 tasks | 12 files |
+| Phase 02 P02 | 10min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -77,6 +79,10 @@ Recent decisions affecting current work:
 - [Phase 02-worker-resilience]: Worker ownership is now fenced by per-claim `claim_token` compare-and-set checks instead of relying only on row-lock timing.
 - [Phase 02-worker-resilience]: Long-running worker attempts now renew leases in the background and check ownership before orchestration dispatch and persistence boundaries.
 - [Phase 02-worker-resilience]: `WorkerLeaseLostError` now rolls back in-flight execution state instead of persisting a stale run error after ownership is gone.
+- [Phase 02-worker-resilience]: Execution job history is now one durable row per attempt, starting at attempt `1`, instead of a single mutable retry row.
+- [Phase 02-worker-resilience]: Transient retry and stale-running reclaim now preserve the failed attempt row and create the next pending row only when attempts remain.
+- [Phase 02-worker-resilience]: `/v1/runs/{run_id}/status` keeps `latest_execution_job` for compatibility and adds ordered `execution_job_history` for operator truthfulness.
+- [Phase 02-worker-resilience]: Cancelled runs now surface cancelled execution history and never auto-create a replacement pending attempt.
 
 ### Pending Todos
 
@@ -84,11 +90,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Worker lease, retry, and overlap semantics are the next architectural trust boundary to remove
+- Postgres claim/reclaim coverage and health/metrics truthfulness are the remaining Phase 2 verification gap
 - CI still under-represents the documented stack and concurrent execution risks
 
 ## Session Continuity
 
-Last session: 2026-04-16T07:41:45.644Z
-Stopped at: Completed 02-01-PLAN.md
-Resume file: .planning/phases/02-worker-resilience/02-worker-resilience-02-PLAN.md
+Last session: 2026-04-16T07:51:53.000Z
+Stopped at: Completed 02-02-PLAN.md
+Resume file: .planning/phases/02-worker-resilience/02-worker-resilience-03-PLAN.md
