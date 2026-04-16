@@ -59,7 +59,7 @@ def api_client() -> Iterator[tuple[TestClient, str, dict[str, str], sessionmaker
 def test_post_run_enqueue_execution_sets_queued(
     api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
 ) -> None:
-    client, project_id, h, _factory = api_client
+    client, project_id, h, factory = api_client
     r = client.post(
         "/v1/runs",
         headers=h,
@@ -73,6 +73,19 @@ def test_post_run_enqueue_execution_sets_queued(
     assert r.status_code == 201
     body = r.json()
     assert body["status"] == "queued"
+
+    db = factory()
+    try:
+        run_row = db.get(AnalysisRun, uuid.UUID(body["id"]))
+        assert run_row is not None
+        job = db.scalars(
+            select(RunExecutionJob).where(RunExecutionJob.analysis_run_id == run_row.id)
+        ).first()
+        assert job is not None
+        assert job.status == RunExecutionJobStatus.pending
+        assert job.attempt_count == 1
+    finally:
+        db.close()
 
 
 def test_enqueue_persists_w3c_trace_context_for_worker(

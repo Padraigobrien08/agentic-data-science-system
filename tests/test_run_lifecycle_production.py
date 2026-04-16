@@ -176,3 +176,6 @@ def test_cancel_running_via_api(api_client_and_engine: tuple[TestClient, str, di
     body = st.json()
     assert body["has_open_execution_job"] is False
     assert body["latest_execution_job"]["status"] == "cancelled"
+    assert len(body["execution_job_history"]) == 1
+    assert body["execution_job_history"][0] == body["latest_execution_job"]
+    assert all(job["status"] != "pending" for job in body["execution_job_history"])

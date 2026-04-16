@@ -1,4 +1,4 @@
-"""Worker job claim, lease, and transient retry behavior."""
+"""Worker job claim, lease, and durable retry behavior."""
 
 from __future__ import annotations
 
@@ -61,7 +61,7 @@ def _seed_queued_job(factory: sessionmaker[Session]) -> tuple[uuid.UUID, uuid.UU
             id=jid,
             analysis_run_id=rid,
             status=RunExecutionJobStatus.pending,
-            attempt_count=0,
+            attempt_count=1,
         )
         db.add(job)
         db.commit()
@@ -83,7 +83,7 @@ def test_queue_observability_snapshot_matches_claimable_pending(session_factory:
         db.close()
 
 
-def test_claim_increments_attempt_and_sets_lease(session_factory: sessionmaker[Session]) -> None:
+def test_claim_preserves_attempt_and_sets_lease(session_factory: sessionmaker[Session]) -> None:
     _seed_queued_job(session_factory)
     db = session_factory()
     try:
@@ -173,6 +173,61 @@ def test_stale_lease_same_attempt_when_run_still_queued(session_factory: session
         db3.close()
 
 
+def test_queue_observability_counts_final_allowed_pending_attempt(
+    session_factory: sessionmaker[Session],
+) -> None:
+    _seed_queued_job(session_factory)
+    db = session_factory()
+    try:
+        snap = RunExecutionJobRepository(db).queue_observability_snapshot(max_attempts=1)
+        assert snap.pending_claimable == 1
+    finally:
+        db.close()
+
+
+def test_stale_running_reclaim_creates_next_pending_attempt(
+    session_factory: sessionmaker[Session],
+) -> None:
+    run_id, _jid = _seed_queued_job(session_factory)
+    db = session_factory()
+    try:
+        repo = RunExecutionJobRepository(db)
+        claimed = repo.claim_next_runnable(lease_seconds=1.0, max_attempts=3)
+        assert claimed is not None
+        run = db.get(AnalysisRun, run_id)
+        assert run is not None
+        run.status = AnalysisRunStatus.running
+        claimed.lease_expires_at = datetime.now(timezone.utc) - timedelta(seconds=5)
+        db.commit()
+    finally:
+        db.close()
+
+    db2 = session_factory()
+    try:
+        repo = RunExecutionJobRepository(db2)
+        reclaimed = repo.claim_next_runnable(lease_seconds=60.0, max_attempts=3)
+        assert reclaimed is None
+
+        rows = list(
+            db2.scalars(
+                select(RunExecutionJob)
+                .where(RunExecutionJob.analysis_run_id == run_id)
+                .order_by(RunExecutionJob.attempt_count.asc(), RunExecutionJob.created_at.asc())
+            ).all()
+        )
+        assert [row.attempt_count for row in rows] == [1, 2]
+        assert rows[0].status == RunExecutionJobStatus.failed
+        assert rows[0].error_detail == "lease_expired_mid_run"
+        assert rows[1].status == RunExecutionJobStatus.pending
+        assert rows[1].claim_token is None
+
+        run = db2.get(AnalysisRun, run_id)
+        assert run is not None
+        assert run.status == AnalysisRunStatus.queued
+    finally:
+        db2.close()
+
+
 def test_renew_lease_rejects_stale_claim_token(session_factory: sessionmaker[Session]) -> None:
     _seed_queued_job(session_factory)
     db = session_factory()
@@ -204,13 +259,20 @@ def test_transient_failure_requeues_until_max_attempts(session_factory: sessionm
             assert process_next_job(session_factory, lease_seconds=600.0, max_attempts=3) is True
             db = session_factory()
             try:
-                job = db.scalars(select(RunExecutionJob).where(RunExecutionJob.analysis_run_id == run_id)).first()
-                assert job is not None
+                rows = list(
+                    db.scalars(
+                        select(RunExecutionJob)
+                        .where(RunExecutionJob.analysis_run_id == run_id)
+                        .order_by(RunExecutionJob.attempt_count.asc(), RunExecutionJob.created_at.asc())
+                    ).all()
+                )
+                assert rows
                 if i < 2:
-                    assert job.status == RunExecutionJobStatus.pending, f"iteration {i}"
-                    assert job.attempt_count == i + 1
+                    assert [row.attempt_count for row in rows] == list(range(1, i + 3))
+                    assert all(row.status == RunExecutionJobStatus.failed for row in rows[:-1])
+                    assert rows[-1].status == RunExecutionJobStatus.pending, f"iteration {i}"
                 else:
-                    assert job.status == RunExecutionJobStatus.failed
-                    assert job.attempt_count == 3
+                    assert [row.attempt_count for row in rows] == [1, 2, 3]
+                    assert all(row.status == RunExecutionJobStatus.failed for row in rows)
             finally:
                 db.close()
