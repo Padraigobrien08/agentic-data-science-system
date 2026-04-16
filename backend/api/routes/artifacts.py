@@ -11,7 +11,7 @@ from fastapi import APIRouter, HTTPException, Query
 from starlette.responses import StreamingResponse
 
 from backend.api.access_checks import require_artifact_readable
-from backend.api.auth_deps import CurrentUserDep
+from backend.api.auth_deps import CurrentUserDep, require_admin_debug_access
 from backend.api.deps import ArtifactServiceDep, DbSession
 from backend.config.settings import Settings
 from backend.models.artifact import Artifact
@@ -193,4 +193,6 @@ def get_artifact(
     ),
 ) -> ArtifactDetailResponse:
     row = require_artifact_readable(db, art_svc, artifact_id, user.id)
+    if include_meta:
+        require_admin_debug_access(user, feature="raw artifact metadata")
     return artifact_to_detail(row, include_meta=include_meta)

@@ -30,7 +30,7 @@ from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatu
 from backend.models.model_call import ModelCall
 from backend.models.run_step import RunStep
 from backend.schemas.api_phase_a import run_step_to_detail
-from tests.api_auth import register_project_and_headers
+from tests.api_auth import bootstrap_admin_and_headers
 
 
 @pytest.fixture
@@ -53,7 +53,7 @@ def sprint3_client() -> Iterator[tuple[TestClient, str, dict[str, str], sessionm
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
-        project_id, headers = register_project_and_headers(client)
+        project_id, headers = bootstrap_admin_and_headers(client)
         yield client, project_id, headers, factory
     app.dependency_overrides.clear()
 

@@ -9,7 +9,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.access_checks import require_analysis_run_owned, require_project_owned
-from backend.api.auth_deps import CurrentUserDep
+from backend.api.auth_deps import CurrentUserDep, require_admin_debug_access
 from backend.api.deps import (
     AnalysisRunServiceDep,
     ArtifactServiceDep,
@@ -205,6 +205,8 @@ def get_run(
     ),
 ) -> AnalysisRunDetailResponse:
     row = require_analysis_run_owned(db, run_id, user.id)
+    if include_payloads:
+        require_admin_debug_access(user, feature="raw run payloads")
     steps = RunStepRepository(db).list_for_analysis_run(run_id)
     progress = derive_run_progress_public(row.status, steps)
     trans = None
@@ -252,6 +254,8 @@ def list_run_steps(
     ),
 ) -> list[RunStepDetailItem]:
     require_analysis_run_owned(db, run_id, user.id)
+    if include_payloads:
+        require_admin_debug_access(user, feature="raw run step payloads")
     steps = step_svc.list_for_analysis_run(run_id)
     art_by_step: dict[UUID, list[UUID]] = {}
     if include_transparency:
@@ -293,6 +297,8 @@ def list_run_model_calls(
 ) -> list[ModelCallApiItem]:
     """List ModelCall rows for this analysis run (audit: model, prompt version, tokens, latency)."""
     require_analysis_run_owned(db, run_id, user.id)
+    if include_payloads:
+        require_admin_debug_access(user, feature="raw model call payloads")
     rows = db.scalars(
         select(ModelCall)
         .where(ModelCall.analysis_run_id == run_id)

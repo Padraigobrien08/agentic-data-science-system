@@ -215,6 +215,25 @@ class ArtifactService:
         self._artifacts.flush()
         return row
 
+    def _pipeline_source_provenance(
+        self,
+        *,
+        path: Path,
+        analysis_run_id: UUID | None,
+    ) -> dict[str, str]:
+        meta = {"source_filename": path.name}
+        if analysis_run_id is None:
+            return meta
+
+        run_workspace_root = (self._settings.run_workspace_root / str(analysis_run_id)).resolve()
+        try:
+            relative_path = path.relative_to(run_workspace_root)
+        except ValueError:
+            return meta
+
+        meta["source_workspace_relative_path"] = relative_path.as_posix()
+        return meta
+
     def ingest_pipeline_file(
         self,
         source_path: Path | str,
@@ -235,11 +254,15 @@ class ArtifactService:
             raise FileNotFoundError(str(path))
         data = path.read_bytes()
         kind, mime = infer_artifact_kind_and_mime(path)
+        provenance_meta = self._pipeline_source_provenance(
+            path=path,
+            analysis_run_id=analysis_run_id,
+        )
         merged_meta: dict | list | None
         if meta_json is None:
-            merged_meta = {"source_path": str(path)}
+            merged_meta = provenance_meta
         elif isinstance(meta_json, dict):
-            merged_meta = {**meta_json, "source_path": str(path)}
+            merged_meta = {**meta_json, **provenance_meta}
         else:
             merged_meta = meta_json
         return self.save_bytes(

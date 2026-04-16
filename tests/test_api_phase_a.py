@@ -16,7 +16,7 @@ import backend.models  # noqa: F401
 from backend.db.base import Base
 from backend.db.session import get_db
 from backend.main import create_app
-from tests.api_auth import register_project_and_headers
+from tests.api_auth import bootstrap_admin_and_headers
 
 
 @pytest.fixture
@@ -40,7 +40,7 @@ def api_client() -> Iterator[tuple[TestClient, str, dict[str, str]]]:
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
-        project_id, headers = register_project_and_headers(client)
+        project_id, headers = bootstrap_admin_and_headers(client)
         yield client, project_id, headers
     app.dependency_overrides.clear()
 

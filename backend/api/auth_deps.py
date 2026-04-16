@@ -79,6 +79,12 @@ def require_ops_token(
     return token
 
 
+def require_admin_debug_access(user: User, *, feature: str) -> None:
+    if user.is_admin:
+        return
+    raise HTTPException(status_code=403, detail=f"Admin access required for {feature}")
+
+
 OpsTokenDep = Annotated[str, Depends(require_ops_token)]
 CurrentUserDep = Annotated[User, Depends(get_current_active_user)]
 
@@ -90,5 +96,6 @@ __all__ = [
     "get_current_user",
     "get_ops_token",
     "get_user_service",
+    "require_admin_debug_access",
     "require_ops_token",
 ]
