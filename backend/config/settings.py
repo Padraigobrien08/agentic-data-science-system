@@ -13,6 +13,7 @@ from sqlalchemy.engine.url import make_url
 _REPO_ROOT = Path(__file__).resolve().parents[2]
 
 _DB_POSTURE_LOGGED = False
+BUILTIN_DEV_JWT_SECRET = "dev-only-set-edgar-backend-jwt-secret-min-32-chars"
 
 
 class Settings(BaseSettings):
@@ -29,7 +30,7 @@ class Settings(BaseSettings):
 
     # Auth (JWT HS256). Set EDGAR_BACKEND_JWT_SECRET in production.
     jwt_secret: SecretStr = Field(
-        default=SecretStr("dev-only-set-edgar-backend-jwt-secret-min-32-chars"),
+        default=SecretStr(BUILTIN_DEV_JWT_SECRET),
         description="HMAC secret for access tokens (use a long random value in production).",
     )
     jwt_algorithm: str = Field(default="HS256", description="JWT signing algorithm.")
@@ -40,8 +41,16 @@ class Settings(BaseSettings):
         description="Access token lifetime in minutes.",
     )
     allow_open_registration: bool = Field(
-        default=True,
+        default=False,
         description="When false, POST /v1/auth/register returns 403.",
+    )
+    allow_insecure_dev_jwt: bool = Field(
+        default=False,
+        description="Allow the built-in development JWT secret for explicit local-only use.",
+    )
+    bootstrap_admin_token: SecretStr | None = Field(
+        default=None,
+        description="Required when open registration is disabled so the first admin can be bootstrapped explicitly.",
     )
 
     # Default file SQLite is for quick local API/tests without Docker. The documented stack uses Postgres
@@ -282,9 +291,20 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _production_sanity(self) -> Settings:
-        if not self.debug and len(self.jwt_secret.get_secret_value()) < 32:
+        jwt_secret_value = self.jwt_secret.get_secret_value()
+        bootstrap_token = self.bootstrap_admin_token.get_secret_value() if self.bootstrap_admin_token else ""
+        if not self.debug and len(jwt_secret_value) < 32:
             raise ValueError(
                 "EDGAR_BACKEND_JWT_SECRET must be at least 32 characters when EDGAR_BACKEND_DEBUG is false.",
+            )
+        if jwt_secret_value == BUILTIN_DEV_JWT_SECRET and not self.allow_insecure_dev_jwt:
+            raise ValueError(
+                "EDGAR_BACKEND_JWT_SECRET is still using the built-in development secret. "
+                "Set a real secret or explicitly opt in with EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT=true.",
+            )
+        if not self.allow_open_registration and not bootstrap_token.strip():
+            raise ValueError(
+                "EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN must be set when EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION is false.",
             )
         if not self.allow_sqlite:
             driver = make_url(self.database_url).drivername

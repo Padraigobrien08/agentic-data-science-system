@@ -27,4 +27,5 @@ class UserRead(TimestampedRead):
     email: EmailStr
     display_name: str | None
     is_active: bool
+    is_admin: bool
     preferences_json: dict | list | None = None

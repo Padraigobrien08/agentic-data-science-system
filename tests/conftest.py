@@ -9,3 +9,5 @@ os.environ.setdefault(
     "EDGAR_BACKEND_JWT_SECRET",
     "pytest-jwt-secret-minimum-32-characters-long-x",
 )
+os.environ.setdefault("EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION", "true")
+os.environ.setdefault("EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN", "pytest-bootstrap-token")

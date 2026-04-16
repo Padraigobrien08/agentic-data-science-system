@@ -27,12 +27,14 @@ class UserService:
         email: str,
         hashed_password: str,
         display_name: str | None,
+        is_admin: bool = False,
     ) -> User:
         normalized = email.strip().lower()
         row = User(
             email=normalized,
             display_name=display_name,
             hashed_password=hashed_password,
+            is_admin=is_admin,
         )
         self._session.add(row)
         self._session.flush()
