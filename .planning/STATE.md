@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to Plan Phase 04
-stopped_at: Phase 04 context gathered
-last_updated: "2026-04-16T21:25:45Z"
+status: Ready to Execute Phase 04
+stopped_at: Phase 04 plans validated
+last_updated: "2026-04-16T22:33:48Z"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 10
+  total_plans: 13
   completed_plans: 10
 ---
 
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 04 (ci-coverage) — CONTEXT GATHERED
-Next: `$gsd-plan-phase 4`
+Phase: 04 (ci-coverage) — PLANNED
+Next: `$gsd-execute-phase 4`
 
 ## Performance Metrics
 
@@ -104,6 +104,9 @@ Recent decisions affecting current work:
 - [Phase 04-ci-coverage]: CI should validate the secure-default bootstrap-admin and ops-token flows instead of weakening auth for tests.
 - [Phase 04-ci-coverage]: Authenticated frontend run-answer, trace, and artifact-delivery paths should be covered by a narrow browser-level flow.
 - [Phase 04-ci-coverage]: Collision, lease, and Postgres queue regressions should be promoted into PR-required targeted test slices for faster failure isolation.
+- [Phase 04-ci-coverage]: The CI plan splits into a secure-default full-stack Compose gate, a seeded Playwright browser path, and a separate Postgres regression workflow instead of one monolithic integration job.
+- [Phase 04-ci-coverage]: The full-stack smoke flow must use fixed admin credentials so bootstrap reruns remain login-capable after `409 Bootstrap already completed`.
+- [Phase 04-ci-coverage]: Required merge gating needs an explicit GitHub branch-protection/ruleset checkpoint; PR-triggered workflows alone are not enough.
 
 ### Pending Todos
 
@@ -111,11 +114,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 4 context is now locked around a truthful PR gate for the documented Postgres, API, worker, and frontend stack
-- Planning still needs to decide the concrete wave breakdown, but the direction is fixed: preserve secure-default auth in CI, add browser-level frontend flow coverage, and promote targeted concurrency regressions into required checks
+- Phase 4 CI coverage is now planned; the next open trust boundary is implementing the new workflows, Playwright fixture path, and required-check checkpoint without destabilizing the current stack
+- The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched during Phase 4 execution unless intentionally incorporated
 
 ## Session Continuity
 
-Last session: 2026-04-16T21:25:45Z
-Stopped at: Phase 04 context gathered
-Resume file: .planning/phases/04-ci-coverage/04-CONTEXT.md
+Last session: 2026-04-16T22:33:48Z
+Stopped at: Phase 04 plans validated
+Resume file: .planning/phases/04-ci-coverage/04-ci-coverage-01-PLAN.md
