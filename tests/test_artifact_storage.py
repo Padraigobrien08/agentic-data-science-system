@@ -79,6 +79,7 @@ def test_artifact_service_ingest_and_load(analysis_run_row) -> None:
     art = svc.ingest_pipeline_file(src, role_key="panel_csv", analysis_run_id=run.id)
     session.commit()
     assert art.role_key == "panel_csv"
+    assert art.meta_json == {"source_filename": "panel.csv"}
     assert art.byte_size == len(src.read_bytes())
     assert art.content_sha256
     assert svc.load_bytes(art.id) == src.read_bytes()
@@ -102,6 +103,8 @@ def test_ingest_pipeline_paths_and_json(analysis_run_row) -> None:
         analysis_run_id=run.id,
     )
     assert len(arts) == 2
+    assert arts[0].meta_json == {"source_filename": "a.csv"}
+    assert arts[1].meta_json == {"source_filename": "b.md"}
     j = svc.ingest_json_payload({"ok": True}, role_key="summary_json", analysis_run_id=run.id)
     assert j.kind == ArtifactKind.json
     session.commit()

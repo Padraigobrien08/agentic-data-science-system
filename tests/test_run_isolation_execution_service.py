@@ -130,9 +130,9 @@ def test_execute_analysis_run_uses_explicit_workspace_paths(tmp_path: Path) -> N
         assert isinstance(artifact.meta_json, dict)
         assert artifact.meta_json["run_workspace"] == payload
         assert artifact.meta_json["source"] == "pipeline"
-        assert artifact.meta_json["source_path"] == str(
-            settings.run_workspace_root / str(run.id) / "artifacts" / "report.md"
-        )
+        assert artifact.meta_json["source_filename"] == "report.md"
+        assert artifact.meta_json["source_workspace_relative_path"] == "artifacts/report.md"
+        assert "source_path" not in artifact.meta_json
     finally:
         try:
             next(session_iter)
