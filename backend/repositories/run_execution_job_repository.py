@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from dataclasses import dataclass
 from datetime import datetime, timedelta, timezone
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from sqlalchemy import func, or_, select, update
 from sqlalchemy.orm import Session
@@ -13,6 +13,7 @@ from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
 from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.exceptions import WorkerLeaseLostError
 
 
 @dataclass(frozen=True, slots=True)
@@ -37,6 +38,9 @@ class RunExecutionJobRepository:
 
     def flush(self) -> None:
         self._session.flush()
+
+    def _new_claim_token(self) -> str:
+        return str(uuid4())
 
     def has_pending_for_run(self, analysis_run_id: UUID) -> bool:
         stmt = (
@@ -81,6 +85,7 @@ class RunExecutionJobRepository:
             .values(
                 status=RunExecutionJobStatus.cancelled,
                 error_detail=reason,
+                claim_token=None,
                 lease_expires_at=None,
             )
         )
@@ -232,6 +237,7 @@ class RunExecutionJobRepository:
             if job is not None:
                 job.status = RunExecutionJobStatus.cancelled
                 job.error_detail = (job.error_detail or "Run was cancelled; cleaning up open job")[:2048]
+                job.claim_token = None
                 job.lease_expires_at = None
                 self._session.flush()
             return None
@@ -258,6 +264,7 @@ class RunExecutionJobRepository:
             run = self._session.get(AnalysisRun, job.analysis_run_id) if job else None
             if job is not None and run is not None and run.status == AnalysisRunStatus.queued:
                 job.claimed_at = now
+                job.claim_token = self._new_claim_token()
                 job.lease_expires_at = lease_end
                 self._session.flush()
                 return job
@@ -287,6 +294,7 @@ class RunExecutionJobRepository:
                     detail = "Lease expired and max execution attempts exhausted"
                     job.status = RunExecutionJobStatus.failed
                     job.error_detail = detail[:2048]
+                    job.claim_token = None
                     job.lease_expires_at = None
                     run_svc.set_error_summary(run.id, detail[:2048])
                     run_svc.transition_status(run.id, AnalysisRunStatus.error)
@@ -298,6 +306,7 @@ class RunExecutionJobRepository:
                 run_svc.set_error_summary(run.id, None)
                 job.status = RunExecutionJobStatus.pending
                 job.claimed_at = None
+                job.claim_token = None
                 job.lease_expires_at = None
                 job.error_detail = "lease_expired_mid_run"
                 self._session.flush()
@@ -330,12 +339,61 @@ class RunExecutionJobRepository:
             else:
                 job.status = RunExecutionJobStatus.failed
                 job.error_detail = "Run is not queued (state changed before claim)"
+            job.claim_token = None
             job.lease_expires_at = None
             self._session.flush()
             return None
         job.status = RunExecutionJobStatus.running
         job.claimed_at = now
+        job.claim_token = self._new_claim_token()
         job.lease_expires_at = lease_end
         job.attempt_count += 1
         self._session.flush()
         return job
+
+    def renew_lease(
+        self,
+        job_id: UUID,
+        claim_token: str,
+        *,
+        lease_seconds: float,
+    ) -> datetime:
+        lease_end = datetime.now(timezone.utc) + timedelta(seconds=lease_seconds)
+        res = self._session.execute(
+            update(RunExecutionJob)
+            .where(
+                RunExecutionJob.id == job_id,
+                RunExecutionJob.status == RunExecutionJobStatus.running,
+                RunExecutionJob.claim_token == claim_token,
+            )
+            .values(lease_expires_at=lease_end)
+        )
+        if int(res.rowcount or 0) != 1:
+            raise WorkerLeaseLostError("Worker no longer owns the claimed execution job")
+        return lease_end
+
+    def finalize_attempt_if_owned(
+        self,
+        job_id: UUID,
+        claim_token: str,
+        *,
+        status: RunExecutionJobStatus,
+        error_detail: str | None = None,
+    ) -> bool:
+        values: dict[str, object] = {
+            "status": status,
+            "claim_token": None,
+            "lease_expires_at": None,
+        }
+        if error_detail is not None:
+            values["error_detail"] = error_detail[:2048]
+        res = self._session.execute(
+            update(RunExecutionJob)
+            .where(
+                RunExecutionJob.id == job_id,
+                RunExecutionJob.status == RunExecutionJobStatus.running,
+                RunExecutionJob.claim_token == claim_token,
+            )
+            .values(**values)
+        )
+        return int(res.rowcount or 0) == 1

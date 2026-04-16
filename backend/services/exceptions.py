@@ -26,3 +26,7 @@ class RunCancelledDuringExecution(Exception):
     The pipeline session should rollback before raising so the worker can finalize the job
     without overwriting the cancelled run with success or a generic error.
     """
+
+
+class WorkerLeaseLostError(Exception):
+    """Raised when a worker no longer owns the claimed job row it is trying to mutate."""
