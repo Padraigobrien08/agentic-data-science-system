@@ -52,6 +52,10 @@ class Settings(BaseSettings):
         default=None,
         description="Required when open registration is disabled so the first admin can be bootstrapped explicitly.",
     )
+    ops_api_token: SecretStr | None = Field(
+        default=None,
+        description="Required bearer token for ops-only routes such as /metrics and /v1/worker/health.",
+    )
 
     # Default file SQLite is for quick local API/tests without Docker. The documented stack uses Postgres
     # (see docker-compose.yml and docs/local-stack.md). Set EDGAR_BACKEND_ALLOW_SQLITE=false in production.
@@ -293,6 +297,7 @@ class Settings(BaseSettings):
     def _production_sanity(self) -> Settings:
         jwt_secret_value = self.jwt_secret.get_secret_value()
         bootstrap_token = self.bootstrap_admin_token.get_secret_value() if self.bootstrap_admin_token else ""
+        ops_token = self.ops_api_token.get_secret_value() if self.ops_api_token else ""
         if not self.debug and len(jwt_secret_value) < 32:
             raise ValueError(
                 "EDGAR_BACKEND_JWT_SECRET must be at least 32 characters when EDGAR_BACKEND_DEBUG is false.",
@@ -305,6 +310,10 @@ class Settings(BaseSettings):
         if not self.allow_open_registration and not bootstrap_token.strip():
             raise ValueError(
                 "EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN must be set when EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION is false.",
+            )
+        if not ops_token.strip():
+            raise ValueError(
+                "EDGAR_BACKEND_OPS_API_TOKEN must be set to a non-empty value.",
             )
         if not self.allow_sqlite:
             driver = make_url(self.database_url).drivername

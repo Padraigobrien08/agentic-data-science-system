@@ -8,6 +8,7 @@ from sqlalchemy import text
 from sqlalchemy.exc import SQLAlchemyError
 
 from backend import __version__
+from backend.api.auth_deps import OpsTokenDep
 from backend.api.deps import DbSession
 from backend.config.settings import get_settings
 from backend.llm.factory import describe_llm_runtime
@@ -53,7 +54,7 @@ def health(db: DbSession) -> HealthResponse:
 
 
 @router.get("/worker/health", response_model=WorkerHealthResponse)
-def worker_health(db: DbSession) -> WorkerHealthResponse:
+def worker_health(db: DbSession, _ops_token: OpsTokenDep) -> WorkerHealthResponse:
     """
     DB-backed worker queue view (no worker process coupling).
 
