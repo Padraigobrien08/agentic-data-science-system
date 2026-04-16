@@ -92,13 +92,41 @@ class RunExecutionJobRepository:
         return int(res.rowcount or 0)
 
     def get_latest_for_run(self, analysis_run_id: UUID) -> RunExecutionJob | None:
+        rows = self.list_for_run(analysis_run_id, limit=1)
+        return rows[0] if rows else None
+
+    def list_for_run(self, analysis_run_id: UUID, *, limit: int | None = None) -> list[RunExecutionJob]:
         stmt = (
             select(RunExecutionJob)
             .where(RunExecutionJob.analysis_run_id == analysis_run_id)
-            .order_by(RunExecutionJob.created_at.desc())
-            .limit(1)
+            .order_by(RunExecutionJob.attempt_count.desc(), RunExecutionJob.created_at.desc())
         )
-        return self._session.scalars(stmt).first()
+        if limit is not None:
+            stmt = stmt.limit(limit)
+        return list(self._session.scalars(stmt).all())
+
+    def create_pending_attempt(
+        self,
+        *,
+        analysis_run_id: UUID,
+        attempt_count: int,
+        overrides_json: dict | list | None,
+        trace_context_json: dict | list | None,
+    ) -> RunExecutionJob:
+        row = RunExecutionJob(
+            analysis_run_id=analysis_run_id,
+            status=RunExecutionJobStatus.pending,
+            overrides_json=overrides_json,
+            trace_context_json=trace_context_json,
+            attempt_count=attempt_count,
+            claimed_at=None,
+            claim_token=None,
+            lease_expires_at=None,
+            error_detail=None,
+        )
+        self.add(row)
+        self.flush()
+        return row
 
     def queue_observability_snapshot(self, *, max_attempts: int) -> WorkerQueueSnapshot:
         """
@@ -120,7 +148,7 @@ class RunExecutionJobRepository:
                 .where(
                     RunExecutionJob.status == RunExecutionJobStatus.pending,
                     AnalysisRun.status == AnalysisRunStatus.queued,
-                    RunExecutionJob.attempt_count < max_attempts,
+                    RunExecutionJob.attempt_count <= max_attempts,
                 )
             )
             or 0
@@ -205,10 +233,10 @@ class RunExecutionJobRepository:
         Atomically claim one runnable job:
 
         1. **Stale or missing lease, run still queued** — extend lease (same attempt_count).
-        2. **Stale or missing lease, run running** — fail or requeue: if attempts exhausted mark failed;
-           else reset job to pending and run error→queued (idempotent reclaim).
-        3. **Fresh pending** — run queued, attempt_count < max_attempts: set running, lease,
-           increment attempt_count.
+        2. **Stale or missing lease, run running** — fail the stale attempt and create the next
+           pending attempt row when tries remain.
+        3. **Fresh pending** — run queued, attempt_count <= max_attempts: set running, lease,
+           preserve the attempt number on that row.
 
         PostgreSQL uses ``FOR UPDATE SKIP LOCKED``. SQLite uses ``FOR UPDATE`` (single-writer friendly).
         """
@@ -304,11 +332,16 @@ class RunExecutionJobRepository:
                 run_svc.transition_status(run.id, AnalysisRunStatus.error)
                 run_svc.transition_status(run.id, AnalysisRunStatus.queued)
                 run_svc.set_error_summary(run.id, None)
-                job.status = RunExecutionJobStatus.pending
-                job.claimed_at = None
+                job.status = RunExecutionJobStatus.failed
                 job.claim_token = None
                 job.lease_expires_at = None
                 job.error_detail = "lease_expired_mid_run"
+                self.create_pending_attempt(
+                    analysis_run_id=job.analysis_run_id,
+                    attempt_count=job.attempt_count + 1,
+                    overrides_json=job.overrides_json,
+                    trace_context_json=job.trace_context_json,
+                )
                 self._session.flush()
                 return None
 
@@ -319,7 +352,7 @@ class RunExecutionJobRepository:
             .where(
                 RunExecutionJob.status == RunExecutionJobStatus.pending,
                 AnalysisRun.status == AnalysisRunStatus.queued,
-                RunExecutionJob.attempt_count < max_attempts,
+                RunExecutionJob.attempt_count <= max_attempts,
             )
             .order_by(RunExecutionJob.created_at.asc())
             .limit(1),
@@ -347,7 +380,6 @@ class RunExecutionJobRepository:
         job.claimed_at = now
         job.claim_token = self._new_claim_token()
         job.lease_expires_at = lease_end
-        job.attempt_count += 1
         self._session.flush()
         return job
 

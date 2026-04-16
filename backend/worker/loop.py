@@ -193,12 +193,26 @@ def _finalize_job_after_attempt(
 
     transient = is_transient_pipeline_failure(exc)
     if transient and job.attempt_count < max_attempts:
+        next_attempt = job.attempt_count + 1
+        overrides_json = job.overrides_json
+        trace_context_json = job.trace_context_json
         try:
-            if not repo.requeue_if_owned(job_id, claim_token, error_detail=str(exc)[:2048]):
+            if not repo.finalize_attempt_if_owned(
+                job_id,
+                claim_token,
+                status=RunExecutionJobStatus.failed,
+                error_detail=str(exc)[:2048],
+            ):
                 session.rollback()
                 return "lease_lost"
             run_svc.transition_status(analysis_run_id, AnalysisRunStatus.queued)
             run_svc.set_error_summary(analysis_run_id, None)
+            repo.create_pending_attempt(
+                analysis_run_id=analysis_run_id,
+                attempt_count=next_attempt,
+                overrides_json=overrides_json,
+                trace_context_json=trace_context_json,
+            )
         except Exception:
             session.rollback()
             log.exception(

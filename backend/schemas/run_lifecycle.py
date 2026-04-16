@@ -5,7 +5,7 @@ from __future__ import annotations
 from datetime import datetime
 from uuid import UUID
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from backend.domain.status_transitions import is_terminal_analysis_run
 from backend.models.analysis_run import AnalysisRun
@@ -47,6 +47,7 @@ class AnalysisRunStatusResponse(BaseModel):
     finished_at: datetime | None = None
     has_open_execution_job: bool
     latest_execution_job: RunJobStatusSnapshot | None = None
+    execution_job_history: list[RunJobStatusSnapshot] = Field(default_factory=list)
 
 
 def analysis_run_status_to_response(
@@ -54,6 +55,7 @@ def analysis_run_status_to_response(
     *,
     has_open_execution_job: bool,
     latest_execution_job: RunExecutionJob | None,
+    execution_job_history: list[RunExecutionJob],
 ) -> AnalysisRunStatusResponse:
     return AnalysisRunStatusResponse(
         analysis_run_id=row.id,
@@ -67,4 +69,7 @@ def analysis_run_status_to_response(
         latest_execution_job=RunJobStatusSnapshot.model_validate(latest_execution_job)
         if latest_execution_job is not None
         else None,
+        execution_job_history=[
+            RunJobStatusSnapshot.model_validate(job) for job in execution_job_history
+        ],
     )

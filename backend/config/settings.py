@@ -91,7 +91,7 @@ class Settings(BaseSettings):
         default=4,
         ge=1,
         le=100,
-        description="Max fresh execution attempts per queue row (attempt_count increments on each new claim).",
+        description="Max execution attempts allowed for one analysis run before worker auto-retries stop.",
     )
     run_job_lease_seconds: float = Field(
         default=900.0,

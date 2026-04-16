@@ -93,24 +93,24 @@ class RunLifecycleService:
         self._runs.transition_status(analysis_run_id, AnalysisRunStatus.queued)
         self._runs.set_error_summary(analysis_run_id, None)
         tc = trace_carrier if trace_carrier is not None else serialize_trace_carrier()
-        job = RunExecutionJob(
+        latest = self._jobs.get_latest_for_run(analysis_run_id)
+        next_attempt = latest.attempt_count + 1 if latest is not None else 1
+        self._jobs.create_pending_attempt(
             analysis_run_id=analysis_run_id,
-            status=RunExecutionJobStatus.pending,
+            attempt_count=next_attempt,
             overrides_json=overrides,
             trace_context_json=tc,
-            attempt_count=0,
-            claimed_at=None,
-            lease_expires_at=None,
-            error_detail=None,
         )
-        self._jobs.add(job)
-        self._jobs.flush()
         return self._runs.require(analysis_run_id)
 
-    def build_status_view(self, analysis_run_id: UUID) -> tuple[AnalysisRun, bool, RunExecutionJob | None]:
+    def build_status_view(
+        self,
+        analysis_run_id: UUID,
+    ) -> tuple[AnalysisRun, bool, RunExecutionJob | None, list[RunExecutionJob]]:
         row = self._runs.get(analysis_run_id)
         if row is None:
             raise RunLifecycleError("Run not found", status_code=404)
         has_open = self._jobs.has_open_job_for_run(analysis_run_id)
-        latest = self._jobs.get_latest_for_run(analysis_run_id)
-        return row, has_open, latest
+        history = self._jobs.list_for_run(analysis_run_id)
+        latest = history[0] if history else None
+        return row, has_open, latest, history

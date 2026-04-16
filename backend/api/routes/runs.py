@@ -127,16 +127,17 @@ def get_run_status(
     db: DbSession,
     user: CurrentUserDep,
 ) -> AnalysisRunStatusResponse:
-    """Execution-focused status: terminal flag, open job, and latest job snapshot."""
+    """Execution-focused status: terminal flag, open job, latest job, and attempt history."""
     require_analysis_run_owned(db, run_id, user.id)
     try:
-        row, has_open, latest = RunLifecycleService(db).build_status_view(run_id)
+        row, has_open, latest, history = RunLifecycleService(db).build_status_view(run_id)
     except RunLifecycleError as exc:
         raise HTTPException(status_code=exc.status_code, detail=str(exc)) from exc
     return analysis_run_status_to_response(
         row,
         has_open_execution_job=has_open,
         latest_execution_job=latest,
+        execution_job_history=history,
     )
 
 

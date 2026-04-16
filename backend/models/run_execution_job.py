@@ -1,4 +1,4 @@
-"""Queued background execution job for an analysis run (one row per enqueue)."""
+"""Queued background execution job for an analysis run (one row per execution attempt)."""
 
 from __future__ import annotations
 
@@ -61,8 +61,8 @@ class RunExecutionJob(Base):
     attempt_count: Mapped[int] = mapped_column(
         Integer,
         nullable=False,
-        default=0,
-        doc="Increments on each fresh claim (not on stale lease extension).",
+        default=1,
+        doc="1-based attempt number for this durable execution-attempt row.",
     )
 
     lease_expires_at: Mapped[datetime | None] = mapped_column(

@@ -44,6 +44,9 @@ class RunQueueService:
             status=RunExecutionJobStatus.pending,
             overrides_json=overrides,
             trace_context_json=tc,
+            attempt_count=1,
+            claim_token=None,
+            lease_expires_at=None,
         )
         self._jobs.add(job)
         self._jobs.flush()
