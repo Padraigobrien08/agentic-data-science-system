@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to plan
-stopped_at: Completed 03-secure-defaults-03-PLAN.md
-last_updated: "2026-04-16T21:19:01.855Z"
+status: Ready to Plan Phase 04
+stopped_at: Phase 04 context gathered
+last_updated: "2026-04-16T21:25:45Z"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 04 (ci-coverage) — READY TO PLAN
-Plan: not planned yet
+Phase: 04 (ci-coverage) — CONTEXT GATHERED
+Next: `$gsd-plan-phase 4`
 
 ## Performance Metrics
 
@@ -100,6 +100,10 @@ Recent decisions affecting current work:
 - [Phase 03-secure-defaults]: Keep owner-scoped run and artifact routes summary-first, but require admin privilege before honoring raw payload or meta expansion flags.
 - [Phase 03-secure-defaults]: Require the documented compose stack to source JWT, bootstrap, and ops secrets from .env instead of shipping insecure fallbacks.
 - [Phase 03-secure-defaults]: Keep the register page available, but make its copy and error handling point users to the operator-controlled bootstrap path when registration is closed.
+- [Phase 04-ci-coverage]: Add a PR-required full-stack gate for the documented Postgres + API + worker + web stack alongside the current faster CI jobs rather than replacing them.
+- [Phase 04-ci-coverage]: CI should validate the secure-default bootstrap-admin and ops-token flows instead of weakening auth for tests.
+- [Phase 04-ci-coverage]: Authenticated frontend run-answer, trace, and artifact-delivery paths should be covered by a narrow browser-level flow.
+- [Phase 04-ci-coverage]: Collision, lease, and Postgres queue regressions should be promoted into PR-required targeted test slices for faster failure isolation.
 
 ### Pending Todos
 
@@ -107,11 +111,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 secure-defaults is complete; the next open trust boundary is aligning CI with the documented Postgres, API, worker, and frontend stack
-- CI still under-represents authenticated frontend flows and concurrency regressions, which are Phase 4's primary focus
+- Phase 4 context is now locked around a truthful PR gate for the documented Postgres, API, worker, and frontend stack
+- Planning still needs to decide the concrete wave breakdown, but the direction is fixed: preserve secure-default auth in CI, add browser-level frontend flow coverage, and promote targeted concurrency regressions into required checks
 
 ## Session Continuity
 
-Last session: 2026-04-16T21:07:21.582Z
-Stopped at: Completed 03-secure-defaults-03-PLAN.md
-Resume file: None
+Last session: 2026-04-16T21:25:45Z
+Stopped at: Phase 04 context gathered
+Resume file: .planning/phases/04-ci-coverage/04-CONTEXT.md
