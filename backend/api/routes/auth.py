@@ -2,7 +2,10 @@
 
 from __future__ import annotations
 
-from fastapi import APIRouter, Depends, HTTPException
+from secrets import compare_digest
+
+from fastapi import APIRouter, Depends, Header, HTTPException
+from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 
 from backend.api.auth_deps import CurrentUserDep
@@ -10,7 +13,7 @@ from backend.api.deps import DbSession
 from backend.auth.tokens import create_access_token
 from backend.config.settings import get_settings
 from backend.models.user import User
-from backend.schemas.auth import AccessTokenResponse, AuthLoginBody, AuthRegisterBody
+from backend.schemas.auth import AccessTokenResponse, AuthBootstrapBody, AuthLoginBody, AuthRegisterBody
 from backend.schemas.user import UserRead
 from backend.security.passwords import hash_password, verify_password
 from backend.services.user_service import UserService
@@ -34,6 +37,43 @@ def register(
             email=str(body.email),
             hashed_password=hash_password(body.password),
             display_name=body.display_name,
+        )
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=409, detail="Email already registered") from None
+    db.refresh(row)
+    return row
+
+
+@router.post("/bootstrap", response_model=UserRead, status_code=201)
+def bootstrap_admin(
+    body: AuthBootstrapBody,
+    db: DbSession,
+    bootstrap_token: str | None = Header(default=None, alias="X-EDGAR-Bootstrap-Token"),
+) -> User:
+    settings = get_settings()
+    configured_bootstrap_token = (
+        settings.bootstrap_admin_token.get_secret_value()
+        if settings.bootstrap_admin_token is not None
+        else ""
+    )
+    if not configured_bootstrap_token.strip():
+        raise HTTPException(status_code=503, detail="Bootstrap admin token is not configured")
+    if not bootstrap_token or not compare_digest(bootstrap_token, configured_bootstrap_token):
+        raise HTTPException(status_code=401, detail="Invalid bootstrap token")
+    if db.scalar(select(User.id).where(User.is_admin.is_(True)).limit(1)) is not None:
+        raise HTTPException(status_code=409, detail="Bootstrap already completed")
+
+    users = UserService(db)
+    if users.get_by_email(str(body.email)) is not None:
+        raise HTTPException(status_code=409, detail="Email already registered")
+    try:
+        row = users.create_with_password(
+            email=str(body.email),
+            hashed_password=hash_password(body.password),
+            display_name=body.display_name,
+            is_admin=True,
         )
         db.commit()
     except IntegrityError:

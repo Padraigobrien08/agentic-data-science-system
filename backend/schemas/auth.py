@@ -13,6 +13,10 @@ class AuthRegisterBody(BaseModel):
     display_name: str | None = Field(default=None, max_length=256)
 
 
+class AuthBootstrapBody(AuthRegisterBody):
+    pass
+
+
 class AuthLoginBody(BaseModel):
     email: EmailStr
     password: str = Field(min_length=1, max_length=72)
