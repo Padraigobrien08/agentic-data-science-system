@@ -23,6 +23,9 @@ Concise runbook for **Docker Compose** (recommended) and **manual** processes. S
 From the **repository root**:
 
 ```bash
+cp .env.example .env
+# Set EDGAR_BACKEND_JWT_SECRET, EDGAR_BACKEND_OPS_API_TOKEN,
+# and EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN in .env.
 docker compose up --build
 ```
 
@@ -77,8 +80,8 @@ Alembic reads the URL from settings (`alembic/env.py` → `get_settings().databa
 
 | Context | What to do |
 |--------|------------|
-| **Compose** | Optional: copy [`.env.example`](../.env.example) to `.env` in the repo root. Compose substitutes `${VAR}` from `.env`; if the file is absent, defaults in `docker-compose.yml` apply (Postgres user/password/db `edgar`, dev JWT secret, etc.). |
-| **Manual API/worker** | Export `EDGAR_BACKEND_DATABASE_URL`, `EDGAR_BACKEND_JWT_SECRET` (≥32 chars if `EDGAR_BACKEND_DEBUG=false`), and `EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT` (see below). |
+| **Compose** | Copy [`.env.example`](../.env.example) to `.env` in the repo root before `docker compose up`. Set `EDGAR_BACKEND_JWT_SECRET`, `EDGAR_BACKEND_OPS_API_TOKEN`, and `EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN`; the compose file fails fast if they are missing. Leave `EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION=false` unless you explicitly want self-service sign-up. |
+| **Manual API/worker** | Export `EDGAR_BACKEND_DATABASE_URL`, `EDGAR_BACKEND_JWT_SECRET` (≥32 chars if `EDGAR_BACKEND_DEBUG=false`), `EDGAR_BACKEND_OPS_API_TOKEN`, `EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN`, and `EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT` (see below). |
 | **Manual frontend** | `frontend/.env.local`: `API_URL=http://127.0.0.1:8000` (server-side only; see `frontend/.env.example`). |
 
 Never commit real `.env` / `.env.local` files.
@@ -143,8 +146,22 @@ Checks: Postgres `pg_isready`, `alembic current` in `api`, `GET /v1/health` with
 | DB up | `docker compose exec db pg_isready -U edgar -d edgar` |
 | Migrations | `docker compose exec api sh -c 'cd /app && alembic current'` shows a revision id |
 | Backend | `curl -sS http://127.0.0.1:8000/v1/health` → JSON with `"database":{"ok":true}` |
+| Ops auth | `curl -sS http://127.0.0.1:8000/metrics -H "Authorization: Bearer $EDGAR_BACKEND_OPS_API_TOKEN"` returns Prometheus text; `curl -sS http://127.0.0.1:8000/v1/worker/health -H "Authorization: Bearer $EDGAR_BACKEND_OPS_API_TOKEN"` returns JSON |
 | Worker | `docker compose ps worker` → `running` |
 | Frontend | `curl -sS -o /dev/null -w '%{http_code}' http://127.0.0.1:3000/` → `200` |
+
+## Bootstrap the first admin
+
+With the stack running and `EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN` set in `.env`:
+
+```bash
+curl -sS -X POST "http://127.0.0.1:8000/v1/auth/bootstrap" \
+  -H "Content-Type: application/json" \
+  -H "X-EDGAR-Bootstrap-Token: $EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN" \
+  -d '{"email":"admin@local.dev","password":"your-password-here","display_name":"Local Admin"}'
+```
+
+Registration is disabled by default, so use this bootstrap flow for the first operator account unless you intentionally set `EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION=true`.
 
 ## Scripts
 
@@ -155,5 +172,5 @@ Checks: Postgres `pg_isready`, `alembic current` in `api`, `GET /v1/health` with
 
 ## See also
 
-- [`docs/auth-api.md`](auth-api.md) — registering a user, JWT, protected routes.
+- [`docs/auth-api.md`](auth-api.md) — bootstrap admin, JWT auth, registration posture, and ops-token routes.
 - [`docker-compose.yml`](../docker-compose.yml), [`Dockerfile`](../Dockerfile), [`frontend/Dockerfile`](../frontend/Dockerfile).

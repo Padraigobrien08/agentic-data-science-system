@@ -1,13 +1,16 @@
 # Local full-stack dev & test: Postgres → migrations → API + worker → frontend.
 # Requires Docker Compose v2.20+ (`service_completed_successfully` for migrate).
 #
-# Quick start (sensible defaults; no `.env` required):
+# Quick start:
+#   cp .env.example .env
+#   # set EDGAR_BACKEND_JWT_SECRET, EDGAR_BACKEND_OPS_API_TOKEN,
+#   # and EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN
 #   docker compose up --build
 #
 # After changing backend Python code or env-backed behavior, rebuild API/worker images (recreate alone
 # reuses the old image):  docker compose build api worker && docker compose up -d api worker
 #
-# Overrides: copy `.env.example` to `.env` — Compose substitutes ${VAR} from that file.
+# The documented stack fails fast if required auth secrets are missing from `.env`.
 #
 # Startup order:
 #   1. db (waits until healthy)
@@ -21,9 +24,12 @@ name: edgar
 
 x-backend-env: &backend_env
   EDGAR_BACKEND_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:-edgar}:${POSTGRES_PASSWORD:-edgar}@db:5432/${POSTGRES_DB:-edgar}
-  EDGAR_BACKEND_JWT_SECRET: ${EDGAR_BACKEND_JWT_SECRET:-dev-docker-compose-jwt-secret-change-me-32chars}
+  EDGAR_BACKEND_JWT_SECRET: ${EDGAR_BACKEND_JWT_SECRET:?set in .env}
+  EDGAR_BACKEND_OPS_API_TOKEN: ${EDGAR_BACKEND_OPS_API_TOKEN:?set in .env}
+  EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN: ${EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN:?set in .env}
   EDGAR_BACKEND_DEBUG: ${EDGAR_BACKEND_DEBUG:-false}
-  EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION: ${EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION:-true}
+  EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION: ${EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION:-false}
+  EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT: ${EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT:-false}
   EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT: /var/lib/edgar/artifacts
   EDGAR_BACKEND_RUN_WORKSPACE_ROOT: /var/lib/edgar/run_workspaces
   # LLM: set keys in repo-root `.env` then `docker compose up -d --force-recreate api worker`

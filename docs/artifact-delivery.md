@@ -12,11 +12,13 @@ Returns the artifact record (id, `role_key`, `kind`, `mime_type`, `byte_size`, `
 
 | Query | Default | Meaning |
 |-------|---------|---------|
-| `include_meta` | `false` | When `true`, includes `meta_json` (may be large). |
+| `include_meta` | `false` | When `true`, includes `meta_json` (may be large). This expanded view is admin-only. |
 
 **404** if the row does not exist.
 
 JSON field names are **snake_case** (Pydantic / OpenAPI).
+
+When present, artifact provenance inside `meta_json` uses sanitized keys such as `source_filename` and `source_workspace_relative_path`. Normal artifact metadata does not store or expose absolute filesystem paths.
 
 ## Content: `GET /v1/artifacts/{artifact_id}/content`
 
