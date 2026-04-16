@@ -13,7 +13,7 @@ This roadmap turns an already-valuable EDGAR analysis platform into a dependable
 Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Run Isolation** - Remove shared artifact-path and cwd assumptions from the execution flow
-- [ ] **Phase 2: Worker Resilience** - Make queued execution lease-safe and retry-safe under overlap and failure
+- [x] **Phase 2: Worker Resilience** - Make queued execution lease-safe and retry-safe under overlap and failure
 - [ ] **Phase 3: Secure Defaults** - Enforce safe deployment defaults for auth, registration, metrics, and persisted payloads
 - [ ] **Phase 4: CI Coverage** - Gate the documented stack and key user flows with automated verification
 - [ ] **Phase 5: Storage and Ops** - Improve storage efficiency, retention policy, and operational truthfulness
@@ -49,7 +49,7 @@ Plans:
 Plans:
 - [x] 02-01: Add claim-token heartbeat and lease-loss fencing to worker execution
 - [x] 02-02: Convert retries and stale reclaims into durable per-attempt run history
-- [ ] 02-03: Add SQLite and Postgres regressions for heartbeat, recovery, and status history
+- [x] 02-03: Add SQLite and Postgres regressions for heartbeat, recovery, and status history
 
 ### Phase 3: Secure Defaults
 **Goal**: Eliminate insecure production defaults and reduce exposure of sensitive operational data.
@@ -104,7 +104,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Run Isolation | 4/4 | Completed | 2026-04-15 |
-| 2. Worker Resilience | 2/3 | In Progress | - |
+| 2. Worker Resilience | 3/3 | Completed | 2026-04-16 |
 | 3. Secure Defaults | 0/3 | Not started | - |
 | 4. CI Coverage | 0/3 | Not started | - |
 | 5. Storage and Ops | 0/3 | Not started | - |
