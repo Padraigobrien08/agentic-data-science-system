@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to Execute Phase 02
-stopped_at: Phase 02 plans validated
-last_updated: "2026-04-15T21:05:16Z"
+status: Ready to execute
+stopped_at: Completed 02-01-PLAN.md
+last_updated: "2026-04-16T07:41:45.647Z"
 progress:
   total_phases: 5
   completed_phases: 1
   total_plans: 7
-  completed_plans: 4
+  completed_plans: 5
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-15)
 
 ## Current Position
 
-Phase: 02 (worker-resilience) — PLANNED
-Next: `$gsd-execute-phase 2`
+Phase: 02 (worker-resilience) — EXECUTING
+Plan: 2 of 3
 
 ## Performance Metrics
 
@@ -49,6 +49,7 @@ Next: `$gsd-execute-phase 2`
 | Phase 01-run-isolation P02 | 20min | 2 tasks | 15 files |
 | Phase 01-run-isolation P03 | 3min | 2 tasks | 10 files |
 | Phase 01-run-isolation P04 | 1min | 2 tasks | 7 files |
+| Phase 02 P01 | 17min | 2 tasks | 12 files |
 
 ## Accumulated Context
 
@@ -73,6 +74,9 @@ Recent decisions affecting current work:
 - [Phase 02-worker-resilience]: Lease expiry should automatically requeue the same persisted run up to attempt limits rather than creating a new run identity.
 - [Phase 02-worker-resilience]: Retry attempts should remain attached to the same run but stay explicitly visible in job/status history.
 - [Phase 02-worker-resilience]: Cancellation during active execution is best-effort at safe checkpoints and cancelled runs never auto-retry.
+- [Phase 02-worker-resilience]: Worker ownership is now fenced by per-claim `claim_token` compare-and-set checks instead of relying only on row-lock timing.
+- [Phase 02-worker-resilience]: Long-running worker attempts now renew leases in the background and check ownership before orchestration dispatch and persistence boundaries.
+- [Phase 02-worker-resilience]: `WorkerLeaseLostError` now rolls back in-flight execution state instead of persisting a stale run error after ownership is gone.
 
 ### Pending Todos
 
@@ -85,6 +89,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-15T21:05:16Z
-Stopped at: Phase 02 plans validated
-Resume file: .planning/phases/02-worker-resilience/02-worker-resilience-01-PLAN.md
+Last session: 2026-04-16T07:41:45.644Z
+Stopped at: Completed 02-01-PLAN.md
+Resume file: .planning/phases/02-worker-resilience/02-worker-resilience-02-PLAN.md

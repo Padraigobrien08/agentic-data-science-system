@@ -13,7 +13,7 @@
 
 ### Worker Reliability
 
-- [ ] **WORK-01**: Worker renews or safely expires job leases so long-running jobs do not execute twice after delays or restarts
+- [x] **WORK-01**: Worker renews or safely expires job leases so long-running jobs do not execute twice after delays or restarts
 - [ ] **WORK-02**: Background execution remains idempotent when retries, worker restarts, or transient failures occur
 
 ### Security Defaults
@@ -61,7 +61,7 @@
 | EXEC-01 | Phase 1 | In Progress |
 | EXEC-02 | Phase 1 | In Progress |
 | EXEC-03 | Phase 1 | In Progress |
-| WORK-01 | Phase 2 | Pending |
+| WORK-01 | Phase 2 | Complete |
 | WORK-02 | Phase 2 | Pending |
 | SECU-01 | Phase 3 | Pending |
 | SECU-02 | Phase 3 | Pending |
