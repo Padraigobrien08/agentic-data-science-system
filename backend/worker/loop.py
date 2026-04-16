@@ -28,7 +28,8 @@ from backend.observability.tracing import attach_trace_carrier, bind_current_tra
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.edgar_pipeline_execution_service import EdgarPipelineExecutionService
-from backend.services.exceptions import RunCancelledDuringExecution
+from backend.services.exceptions import RunCancelledDuringExecution, WorkerLeaseLostError
+from backend.worker.lease import WorkerLeaseGuard
 from backend.worker.failure_classification import is_transient_pipeline_failure
 
 logger = logging.getLogger(__name__)
@@ -72,6 +73,7 @@ def _finalize_job_after_attempt(
     *,
     job_id: UUID,
     analysis_run_id: UUID,
+    claim_token: str,
     exc: BaseException | None,
     max_attempts: int,
     t_wall_start: float,
@@ -86,13 +88,32 @@ def _finalize_job_after_attempt(
         return None
     run = session.get(AnalysisRun, analysis_run_id)
     run_svc = AnalysisRunService(session)
+    repo = RunExecutionJobRepository(session)
 
     if exc is not None and run is not None:
         session.refresh(run)
 
+    if isinstance(exc, WorkerLeaseLostError):
+        session.rollback()
+        log.info(
+            "worker_job_finished",
+            worker_event="worker_job_finish",
+            transition="lease_lost",
+            attempt_count=job.attempt_count,
+            wall_duration_s=round(monotonic_s() - t_wall_start, 4),
+            exc_type=type(exc).__name__,
+            **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
+        )
+        return "lease_lost"
+
     if exc is None:
-        job.status = RunExecutionJobStatus.completed
-        job.lease_expires_at = None
+        if not repo.finalize_attempt_if_owned(
+            job_id,
+            claim_token,
+            status=RunExecutionJobStatus.completed,
+        ):
+            session.rollback()
+            return "lease_lost"
         session.commit()
         log.info(
             "worker_job_finished",
@@ -105,11 +126,15 @@ def _finalize_job_after_attempt(
         return "completed_success"
 
     if isinstance(exc, RunCancelledDuringExecution):
-        job.status = RunExecutionJobStatus.cancelled
-        job.lease_expires_at = None
         detail = str(exc)[:2048]
-        if job.error_detail is None or not job.error_detail.strip():
-            job.error_detail = detail
+        if not repo.finalize_attempt_if_owned(
+            job_id,
+            claim_token,
+            status=RunExecutionJobStatus.cancelled,
+            error_detail=job.error_detail if job.error_detail and job.error_detail.strip() else detail,
+        ):
+            session.rollback()
+            return "lease_lost"
         session.commit()
         log.info(
             "worker_job_finished",
@@ -123,9 +148,14 @@ def _finalize_job_after_attempt(
         return "cancelled_during_execution"
 
     if run is not None and run.status == AnalysisRunStatus.cancelled:
-        job.status = RunExecutionJobStatus.cancelled
-        job.lease_expires_at = None
-        job.error_detail = (job.error_detail or str(exc) or "Cancelled")[:2048]
+        if not repo.finalize_attempt_if_owned(
+            job_id,
+            claim_token,
+            status=RunExecutionJobStatus.cancelled,
+            error_detail=(job.error_detail or str(exc) or "Cancelled")[:2048],
+        ):
+            session.rollback()
+            return "lease_lost"
         session.commit()
         log.info(
             "worker_job_finished",
@@ -139,9 +169,14 @@ def _finalize_job_after_attempt(
         return "cancelled"
 
     if run is not None and run.status == AnalysisRunStatus.queued:
-        job.status = RunExecutionJobStatus.failed
-        job.lease_expires_at = None
-        job.error_detail = str(exc)[:2048]
+        if not repo.finalize_attempt_if_owned(
+            job_id,
+            claim_token,
+            status=RunExecutionJobStatus.failed,
+            error_detail=str(exc)[:2048],
+        ):
+            session.rollback()
+            return "lease_lost"
         run_svc.set_error_summary(analysis_run_id, str(exc)[:2048])
         run_svc.transition_status(analysis_run_id, AnalysisRunStatus.error)
         session.commit()
@@ -159,17 +194,26 @@ def _finalize_job_after_attempt(
     transient = is_transient_pipeline_failure(exc)
     if transient and job.attempt_count < max_attempts:
         try:
+            if not repo.requeue_if_owned(job_id, claim_token, error_detail=str(exc)[:2048]):
+                session.rollback()
+                return "lease_lost"
             run_svc.transition_status(analysis_run_id, AnalysisRunStatus.queued)
             run_svc.set_error_summary(analysis_run_id, None)
         except Exception:
+            session.rollback()
             log.exception(
                 "worker_job_requeue_transition_failed",
                 worker_event="worker_job_failure",
                 **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
             )
-            job.status = RunExecutionJobStatus.failed
-            job.lease_expires_at = None
-            job.error_detail = str(exc)[:2048]
+            if not repo.finalize_attempt_if_owned(
+                job_id,
+                claim_token,
+                status=RunExecutionJobStatus.failed,
+                error_detail=str(exc)[:2048],
+            ):
+                session.rollback()
+                return "lease_lost"
             session.commit()
             log.error(
                 "worker_job_finished",
@@ -180,10 +224,6 @@ def _finalize_job_after_attempt(
                 **_worker_log_fields(job_id=job_id, analysis_run_id=analysis_run_id, run=run),
             )
             return "requeue_transition_failed"
-        job.status = RunExecutionJobStatus.pending
-        job.claimed_at = None
-        job.lease_expires_at = None
-        job.error_detail = str(exc)[:2048]
         session.commit()
         log.info(
             "worker_job_retry_scheduled",
@@ -196,10 +236,14 @@ def _finalize_job_after_attempt(
         )
         return "requeued_transient"
 
-    job.status = RunExecutionJobStatus.failed
-    job.lease_expires_at = None
-    if job.error_detail is None:
-        job.error_detail = str(exc)[:2048]
+    if not repo.finalize_attempt_if_owned(
+        job_id,
+        claim_token,
+        status=RunExecutionJobStatus.failed,
+        error_detail=job.error_detail if job.error_detail is not None else str(exc)[:2048],
+    ):
+        session.rollback()
+        return "lease_lost"
     session.commit()
     log.warning(
         "worker_job_finished",
@@ -233,9 +277,11 @@ def process_next_job(
 
     job_id: UUID | None = None
     analysis_run_id: UUID | None = None
+    claim_token: str | None = None
     attempt_after_claim: int | None = None
     overrides: dict[str, Any] = {}
     trace_carrier: dict[str, str] | None = None
+    lease_guard: WorkerLeaseGuard | None = None
 
     session = session_factory()
     try:
@@ -245,6 +291,7 @@ def process_next_job(
             return False
         job_id = job.id
         analysis_run_id = job.analysis_run_id
+        claim_token = job.claim_token
         attempt_after_claim = job.attempt_count
         raw = job.overrides_json
         if isinstance(raw, dict):
@@ -253,11 +300,19 @@ def process_next_job(
         if isinstance(raw_trace, dict):
             trace_carrier = {str(k): str(v) for k, v in raw_trace.items() if v is not None}
         session.commit()
+        assert claim_token is not None
+        lease_guard = WorkerLeaseGuard(
+            session_factory,
+            job_id=job_id,
+            claim_token=claim_token,
+            lease_seconds=lease_s,
+        )
+        lease_guard.start()
         observe_worker_job_claimed()
     finally:
         session.close()
 
-    assert job_id is not None and analysis_run_id is not None
+    assert job_id is not None and analysis_run_id is not None and claim_token is not None
     assert attempt_after_claim is not None
 
     peek = session_factory()
@@ -317,6 +372,7 @@ def process_next_job(
                         tickers=overrides.get("tickers"),
                         analysis_goal=overrides.get("analysis_goal"),
                         refresh=overrides.get("refresh"),
+                        execution_checkpoint=lease_guard.checkpoint if lease_guard is not None else None,
                     )
                 finally:
                     run_session.close()
@@ -343,12 +399,16 @@ def process_next_job(
             finally:
                 clear_run_context()
 
+    if lease_guard is not None:
+        lease_guard.stop()
+
     fin = session_factory()
     try:
         finalize_outcome = _finalize_job_after_attempt(
             fin,
             job_id=job_id,
             analysis_run_id=analysis_run_id,
+            claim_token=claim_token,
             exc=exc,
             max_attempts=max_att,
             t_wall_start=t_wall_start,

@@ -397,3 +397,29 @@ class RunExecutionJobRepository:
             .values(**values)
         )
         return int(res.rowcount or 0) == 1
+
+    def requeue_if_owned(
+        self,
+        job_id: UUID,
+        claim_token: str,
+        *,
+        error_detail: str | None = None,
+    ) -> bool:
+        values: dict[str, object] = {
+            "status": RunExecutionJobStatus.pending,
+            "claimed_at": None,
+            "claim_token": None,
+            "lease_expires_at": None,
+        }
+        if error_detail is not None:
+            values["error_detail"] = error_detail[:2048]
+        res = self._session.execute(
+            update(RunExecutionJob)
+            .where(
+                RunExecutionJob.id == job_id,
+                RunExecutionJob.status == RunExecutionJobStatus.running,
+                RunExecutionJob.claim_token == claim_token,
+            )
+            .values(**values)
+        )
+        return int(res.rowcount or 0) == 1

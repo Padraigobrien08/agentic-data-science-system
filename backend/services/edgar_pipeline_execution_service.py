@@ -37,7 +37,7 @@ from backend.observability.tracing import bind_current_trace_for_logs, get_trace
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
 from backend.config.settings import get_settings
-from backend.services.exceptions import RunCancelledDuringExecution
+from backend.services.exceptions import RunCancelledDuringExecution, WorkerLeaseLostError
 from edgar_project.orchestration import OrchestrationInput
 from edgar_project.orchestration.agent import AnalysisAgent
 from edgar_project.orchestration.schemas import OrchestrationOutput, OrchestrationRunStatus
@@ -142,6 +142,7 @@ class EdgarPipelineExecutionService:
         analysis_goal: str | None = None,
         refresh: bool | None = None,
         from_worker: bool = False,
+        execution_checkpoint: Callable[[], None] | None = None,
     ) -> OrchestrationOutput:
         """
         Mark run *running*, invoke orchestration, map terminal status, persist output JSON and artifacts.
@@ -210,6 +211,8 @@ class EdgarPipelineExecutionService:
                 self._session.flush()
                 row = self._runs.require(analysis_run_id)
                 self._session.refresh(row)
+                if execution_checkpoint is not None:
+                    execution_checkpoint()
                 if row.status == AnalysisRunStatus.cancelled:
                     self._session.rollback()
                     raise RunCancelledDuringExecution(
@@ -227,14 +230,17 @@ class EdgarPipelineExecutionService:
 
                 coordinator = self._coord
                 coordinator_sig = inspect.signature(coordinator)
-                if "execution_context" in coordinator_sig.parameters:
-                    execution_context = {"run_workspace": run_workspace_payload}
+                execution_context = {"run_workspace": run_workspace_payload}
+                supports_execution_context = "execution_context" in coordinator_sig.parameters
+                supports_execution_checkpoint = "execution_checkpoint" in coordinator_sig.parameters
 
-                    def _coord_with_workspace(inp: OrchestrationInput):
-                        return coordinator(inp, execution_context=execution_context)
-
-                else:
-                    _coord_with_workspace = coordinator
+                def _coord_with_workspace(inp: OrchestrationInput):
+                    kwargs: dict[str, Any] = {}
+                    if supports_execution_context:
+                        kwargs["execution_context"] = execution_context
+                    if supports_execution_checkpoint and execution_checkpoint is not None:
+                        kwargs["execution_checkpoint"] = execution_checkpoint
+                    return coordinator(inp, **kwargs)
 
                 traced = None
                 try:
@@ -247,15 +253,21 @@ class EdgarPipelineExecutionService:
                             detail=str(exc),
                         )
                         llm_provider = None
+                    if execution_checkpoint is not None:
+                        execution_checkpoint()
                     traced = run_traceable_edgar_pipeline(
                         self._session,
                         analysis_run_id,
                         orch_in,
                         llm_provider=llm_provider,
                         coordinator=_coord_with_workspace,
+                        execution_checkpoint=execution_checkpoint,
                     )
                     out = traced.orchestration_output
                 except RunCancelledDuringExecution:
+                    raise
+                except WorkerLeaseLostError:
+                    self._session.rollback()
                     raise
                 except Exception as exc:
                     observe_pipeline_exception(exc)
@@ -283,6 +295,8 @@ class EdgarPipelineExecutionService:
 
                 row = self._runs.require(analysis_run_id)
                 self._session.refresh(row)
+                if execution_checkpoint is not None:
+                    execution_checkpoint()
                 if row.status == AnalysisRunStatus.cancelled:
                     self._session.rollback()
                     raise RunCancelledDuringExecution(
@@ -296,6 +310,8 @@ class EdgarPipelineExecutionService:
                 if out.run_id:
                     row.correlation_id = str(out.run_id)[:64]
                 self._session.refresh(row)
+                if execution_checkpoint is not None:
+                    execution_checkpoint()
                 if row.status == AnalysisRunStatus.cancelled:
                     self._session.rollback()
                     raise RunCancelledDuringExecution(
@@ -331,6 +347,8 @@ class EdgarPipelineExecutionService:
                 )
 
                 self._session.refresh(row)
+                if execution_checkpoint is not None:
+                    execution_checkpoint()
                 if row.status == AnalysisRunStatus.cancelled:
                     self._session.rollback()
                     raise RunCancelledDuringExecution(
@@ -359,6 +377,8 @@ class EdgarPipelineExecutionService:
 
                 enrich_traceability_artifact_ids(self._session, analysis_run_id)
 
+                if execution_checkpoint is not None:
+                    execution_checkpoint()
                 self._runs.transition_status(analysis_run_id, db_terminal)
                 self._session.flush()
                 self._session.commit()

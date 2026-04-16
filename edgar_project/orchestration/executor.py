@@ -26,6 +26,7 @@ Does **not**:
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from collections.abc import Callable
 
 from opentelemetry import trace as otel_trace
 
@@ -354,23 +355,38 @@ class Executor:
     that calls ``edgar_project.mcp.tools``.
     """
 
-    def run(self, execution: ExecutionRequest) -> ExecutionResult:
+    def run(
+        self,
+        execution: ExecutionRequest,
+        *,
+        execution_checkpoint: Callable[[], None] | None = None,
+    ) -> ExecutionResult:
         """Execute the planned MCP sequence (planner/executor contract entry point)."""
-        return self._run_with_state(execution.to_run_state())
+        return self._run_with_state(
+            execution.to_run_state(),
+            execution_checkpoint=execution_checkpoint,
+        )
 
     def run_returning_state(
         self,
         execution: ExecutionRequest,
+        *,
+        execution_checkpoint: Callable[[], None] | None = None,
     ) -> tuple[OrchestrationOutput, OrchestrationRunState]:
         """
         Same execution as :meth:`run`, but also return the mutable run state (``steps_completed`` with
         per-step MCP envelopes) for downstream persistence / auditing.
         """
         state = execution.to_run_state()
-        output = self._run_with_state(state)
+        output = self._run_with_state(state, execution_checkpoint=execution_checkpoint)
         return output, state
 
-    def _run_with_state(self, state: OrchestrationRunState) -> OrchestrationOutput:
+    def _run_with_state(
+        self,
+        state: OrchestrationRunState,
+        *,
+        execution_checkpoint: Callable[[], None] | None = None,
+    ) -> OrchestrationOutput:
         # Interpreted goal comes from the planner via ExecutionRequest; never re-derived from NL here.
         ig = state.interpreted_goal or _placeholder_interpreted_goal(state.request.analysis_goal)
 
@@ -465,6 +481,8 @@ class Executor:
             return out
 
         for step in steps_sorted:
+            if execution_checkpoint is not None:
+                execution_checkpoint()
             # Execution optimization: if every fetch returned no_data, skip build_panel MCP call
             # and short-circuit to no_data (still no Phase 1 imports — data path would be empty).
             if step.tool_name == TOOL_BUILD_PANEL:
@@ -520,6 +538,8 @@ class Executor:
                         "orchestration.step.order": int(step.order),
                     },
                 ) as _otel_span:
+                    if execution_checkpoint is not None:
+                        execution_checkpoint()
                     env = _dispatch_mcp(
                         step,
                         artifact_paths=artifact_paths,

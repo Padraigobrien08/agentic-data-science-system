@@ -28,7 +28,7 @@ and :class:`~edgar_project.orchestration.executor.Executor`.
 
 from __future__ import annotations
 
-from collections.abc import Mapping
+from collections.abc import Callable, Mapping
 from typing import Any
 from uuid import uuid4
 
@@ -152,6 +152,7 @@ class AnalysisAgent:
         request: OrchestrationInput,
         *,
         execution_context: Mapping[str, Any] | None = None,
+        execution_checkpoint: Callable[[], None] | None = None,
     ) -> tuple[OrchestrationOutput, OrchestrationRunState | None]:
         """
         Plan, execute MCP steps via :class:`~edgar_project.orchestration.executor.Executor`, return output
@@ -221,7 +222,10 @@ class AnalysisAgent:
                 "goal_code": goal_code,
             },
         )
-        out, state = self._executor.run_returning_state(execution)
+        out, state = self._executor.run_returning_state(
+            execution,
+            execution_checkpoint=execution_checkpoint,
+        )
         return out.model_copy(update={"final_summary": _build_final_summary_line(out)}), state
 
 

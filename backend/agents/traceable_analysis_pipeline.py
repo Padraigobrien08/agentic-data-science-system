@@ -82,6 +82,7 @@ def run_traceable_edgar_pipeline(
         [OrchestrationInput], tuple[OrchestrationOutput, OrchestrationRunState | None]
     ]
     | None = None,
+    execution_checkpoint: Callable[[], None] | None = None,
 ) -> TraceableEdgarPipelineResult:
     """
     Run plan + MCP tools, persist per-step trace, optionally run critic + report LLMs.
