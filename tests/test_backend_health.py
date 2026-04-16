@@ -26,6 +26,8 @@ from backend.models.project import Project
 from backend.models.run_execution_job import RunExecutionJob
 from backend.models.user import User
 
+OPS_HEADERS = {"Authorization": "Bearer pytest-ops-token"}
+
 
 @pytest.fixture
 def client_and_factory() -> tuple[TestClient, sessionmaker[Session]]:
@@ -132,9 +134,21 @@ def test_ready_returns_ready_when_db_ok(
         assert r.json()["status"] == "ready"
 
 
+@pytest.mark.parametrize("path", ["/metrics", "/v1/worker/health"])
+def test_ops_routes_require_ops_bearer_token(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    path: str,
+) -> None:
+    client, _factory = client_and_factory
+    r = client.get(path)
+    assert r.status_code == 401
+    assert r.headers["www-authenticate"] == "Bearer"
+    assert r.json()["detail"] == "Not authenticated"
+
+
 def test_metrics_prometheus_text(client_and_factory: tuple[TestClient, sessionmaker[Session]]) -> None:
     client, _factory = client_and_factory
-    r = client.get("/metrics")
+    r = client.get("/metrics", headers=OPS_HEADERS)
     assert r.status_code == 200
     assert b"edgar_http_requests_total" in r.content
     assert b"edgar_worker_queue_depth" in r.content
@@ -144,7 +158,7 @@ def test_metrics_prometheus_text(client_and_factory: tuple[TestClient, sessionma
 
 def test_worker_health_json(client_and_factory: tuple[TestClient, sessionmaker[Session]]) -> None:
     client, _factory = client_and_factory
-    r = client.get("/v1/worker/health")
+    r = client.get("/v1/worker/health", headers=OPS_HEADERS)
     assert r.status_code == 200
     body = r.json()
     assert "queue_depth" in body
@@ -173,7 +187,7 @@ def test_worker_health_counts_final_allowed_attempt_and_stale_running_truthfully
         lease_expires_at=datetime.now(timezone.utc) - timedelta(seconds=30),
     )
 
-    health = client.get("/v1/worker/health")
+    health = client.get("/v1/worker/health", headers=OPS_HEADERS)
     assert health.status_code == 200
     body = health.json()
     assert body["queue_depth"] == 1
@@ -182,7 +196,7 @@ def test_worker_health_counts_final_allowed_attempt_and_stale_running_truthfully
     assert body["stale_running_jobs"] is True
     assert body["backlog_without_active_lease"] is True
 
-    metrics = client.get("/metrics")
+    metrics = client.get("/metrics", headers=OPS_HEADERS)
     assert metrics.status_code == 200
     payload = metrics.text
     assert _metric_value(payload, "edgar_worker_queue_depth") == 1.0
@@ -217,7 +231,7 @@ def test_worker_health_ignores_exhausted_attempts_and_active_lease_blocks_backlo
         lease_expires_at=datetime.now(timezone.utc) + timedelta(seconds=30),
     )
 
-    health = client.get("/v1/worker/health")
+    health = client.get("/v1/worker/health", headers=OPS_HEADERS)
     assert health.status_code == 200
     body = health.json()
     assert body["queue_depth"] == 1
@@ -226,7 +240,7 @@ def test_worker_health_ignores_exhausted_attempts_and_active_lease_blocks_backlo
     assert body["stale_running_jobs"] is False
     assert body["backlog_without_active_lease"] is False
 
-    metrics = client.get("/metrics")
+    metrics = client.get("/metrics", headers=OPS_HEADERS)
     assert metrics.status_code == 200
     payload = metrics.text
     assert _metric_value(payload, "edgar_worker_queue_depth") == 1.0

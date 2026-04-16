@@ -11,3 +11,4 @@ os.environ.setdefault(
 )
 os.environ.setdefault("EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION", "true")
 os.environ.setdefault("EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN", "pytest-bootstrap-token")
+os.environ.setdefault("EDGAR_BACKEND_OPS_API_TOKEN", "pytest-ops-token")
