@@ -13,10 +13,11 @@ from sqlalchemy.pool import StaticPool
 pytest.importorskip("fastapi")
 
 import backend.models  # noqa: F401
+from backend.config.settings import get_settings
 from backend.db.base import Base
 from backend.db.session import get_db
 from backend.main import create_app
-from tests.api_auth import TEST_PASSWORD, register_project_and_headers
+from tests.api_auth import TEST_PASSWORD, bootstrap_admin_and_headers, register_project_and_headers
 
 
 @pytest.fixture
@@ -41,6 +42,37 @@ def auth_api_client() -> Iterator[TestClient]:
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def secure_defaults_auth_api_client(
+    monkeypatch: pytest.MonkeyPatch,
+) -> Iterator[TestClient]:
+    monkeypatch.setenv("EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION", "false")
+    monkeypatch.setenv("EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN", "pytest-bootstrap-token")
+    get_settings.cache_clear()
+
+    engine = create_engine(
+        "sqlite://",
+        connect_args={"check_same_thread": False},
+        poolclass=StaticPool,
+    )
+    Base.metadata.create_all(engine)
+    factory = sessionmaker(bind=engine, expire_on_commit=False)
+
+    def override_get_db() -> Iterator[Session]:
+        db = factory()
+        try:
+            yield db
+        finally:
+            db.close()
+
+    app = create_app()
+    app.dependency_overrides[get_db] = override_get_db
+    with TestClient(app) as client:
+        yield client
+    app.dependency_overrides.clear()
+    get_settings.cache_clear()
 
 
 def test_authenticated_access_to_protected_endpoints(auth_api_client: TestClient) -> None:
@@ -150,6 +182,41 @@ def test_register_login_me(auth_api_client: TestClient) -> None:
     )
     assert r3.status_code == 200
     assert r3.json()["email"] == email
+
+
+def test_register_returns_403_when_registration_closed(
+    secure_defaults_auth_api_client: TestClient,
+) -> None:
+    r = secure_defaults_auth_api_client.post(
+        "/v1/auth/register",
+        json={"email": "closed-registration@example.com", "password": TEST_PASSWORD},
+    )
+    assert r.status_code == 403
+    assert r.json()["detail"] == "Registration is disabled"
+
+
+def test_bootstrap_creates_first_admin_and_me_returns_is_admin(
+    secure_defaults_auth_api_client: TestClient,
+) -> None:
+    _, headers = bootstrap_admin_and_headers(secure_defaults_auth_api_client)
+
+    r = secure_defaults_auth_api_client.get("/v1/auth/me", headers=headers)
+    assert r.status_code == 200
+    assert r.json()["is_admin"] is True
+
+
+def test_second_bootstrap_returns_conflict_after_admin_exists(
+    secure_defaults_auth_api_client: TestClient,
+) -> None:
+    bootstrap_admin_and_headers(secure_defaults_auth_api_client)
+
+    r = secure_defaults_auth_api_client.post(
+        "/v1/auth/bootstrap",
+        json={"email": "second-admin@example.com", "password": TEST_PASSWORD},
+        headers={"X-EDGAR-Bootstrap-Token": "pytest-bootstrap-token"},
+    )
+    assert r.status_code == 409
+    assert r.json()["detail"] == "Bootstrap already completed"
 
 
 def test_login_invalid_credentials(auth_api_client: TestClient) -> None:
