@@ -21,6 +21,7 @@ from backend.models.project import Project
 from backend.models.run_execution_job import RunExecutionJob
 from backend.models.user import User
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
+from backend.services.exceptions import WorkerLeaseLostError
 from backend.worker.loop import process_next_job
 
 
@@ -93,6 +94,7 @@ def test_claim_increments_attempt_and_sets_lease(session_factory: sessionmaker[S
         assert job.attempt_count == 1
         assert job.lease_expires_at is not None
         assert job.claimed_at is not None
+        assert job.claim_token is not None
         db.commit()
     finally:
         db.close()
@@ -136,11 +138,14 @@ def test_stale_lease_same_attempt_when_run_still_queued(session_factory: session
     """Expired lease + run queued: reclaim extends lease without bumping attempt_count."""
     run_id, _jid = _seed_queued_job(session_factory)
     db = session_factory()
+    first_claim_token: str | None = None
     try:
         repo = RunExecutionJobRepository(db)
         j1 = repo.claim_next_runnable(lease_seconds=1.0, max_attempts=4)
         assert j1 is not None
         assert j1.attempt_count == 1
+        first_claim_token = j1.claim_token
+        assert first_claim_token is not None
         db.commit()
     finally:
         db.close()
@@ -161,9 +166,26 @@ def test_stale_lease_same_attempt_when_run_still_queued(session_factory: session
         assert j2 is not None
         assert j2.attempt_count == 1
         assert j2.lease_expires_at is not None
+        assert j2.claim_token is not None
+        assert j2.claim_token != first_claim_token
         db3.commit()
     finally:
         db3.close()
+
+
+def test_renew_lease_rejects_stale_claim_token(session_factory: sessionmaker[Session]) -> None:
+    _seed_queued_job(session_factory)
+    db = session_factory()
+    try:
+        repo = RunExecutionJobRepository(db)
+        job = repo.claim_next_runnable(lease_seconds=60.0, max_attempts=4)
+        assert job is not None
+        assert job.claim_token is not None
+
+        with pytest.raises(WorkerLeaseLostError):
+            repo.renew_lease(job.id, "stale-token", lease_seconds=120.0)
+    finally:
+        db.close()
 
 
 def test_transient_failure_requeues_until_max_attempts(session_factory: sessionmaker[Session]) -> None:
