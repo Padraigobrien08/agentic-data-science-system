@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 03-secure-defaults-02-PLAN.md
-last_updated: "2026-04-16T20:56:41.779Z"
+status: Ready to plan next phase
+stopped_at: Completed 03-secure-defaults-03-PLAN.md
+last_updated: "2026-04-16T21:07:21.584Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 10
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -19,20 +19,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-15)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 03 — secure-defaults
+**Current focus:** Phase 04 — ci-coverage
 
 ## Current Position
 
-Phase: 03 (secure-defaults) — EXECUTING
-Plan: 2 of 3
+Phase: 04 (ci-coverage) — READY TO PLAN
+Plan: not planned yet
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 7
-- Average duration: 12 min
-- Total execution time: 1.4 hours
+- Total plans completed: 10
+- Average duration: 10 min
+- Total execution time: 1.7 hours
 
 **By Phase:**
 
@@ -40,10 +40,11 @@ Plan: 2 of 3
 |-------|-------|-------|----------|
 | 01-run-isolation | 4 | 38min | 10min |
 | 02-worker-resilience | 3 | 44min | 15min |
+| 03-secure-defaults | 3 | 22min | 7min |
 
 **Recent Trend:**
 
-- Last 5 plans: 01-run-isolation-03 (3min), 01-run-isolation-04 (1min), 02-worker-resilience-01 (17min), 02-worker-resilience-02 (10min), 02-worker-resilience-03 (17min)
+- Last 5 plans: 02-worker-resilience-02 (10min), 02-worker-resilience-03 (17min), 03-secure-defaults-01 (6min), 03-secure-defaults-02 (7min), 03-secure-defaults-03 (9min)
 - Trend: Stable
 
 | Phase 01-run-isolation P01 | 14min | 3 tasks | 12 files |
@@ -54,6 +55,8 @@ Plan: 2 of 3
 | Phase 02 P02 | 10min | 2 tasks | 12 files |
 | Phase 02 P03 | 17min | 2 tasks | 5 files |
 | Phase 03-secure-defaults P01 | 6min | 2 tasks | 11 files |
+| Phase 03-secure-defaults P02 | 7min | 2 tasks | 14 files |
+| Phase 03-secure-defaults P03 | 9min | 2 tasks | 9 files |
 
 ## Accumulated Context
 
@@ -95,6 +98,8 @@ Recent decisions affecting current work:
 - [Phase 03-secure-defaults]: Close self-service registration by default and require a dedicated X-EDGAR-Bootstrap-Token flow for the first admin.
 - [Phase 03-secure-defaults]: Persist is_admin on users now so later Phase 3 plans can gate privileged payload and ops access without redesigning auth.
 - [Phase 03-secure-defaults]: Keep owner-scoped run and artifact routes summary-first, but require admin privilege before honoring raw payload or meta expansion flags.
+- [Phase 03-secure-defaults]: Require the documented compose stack to source JWT, bootstrap, and ops secrets from .env instead of shipping insecure fallbacks.
+- [Phase 03-secure-defaults]: Keep the register page available, but make its copy and error handling point users to the operator-controlled bootstrap path when registration is closed.
 
 ### Pending Todos
 
@@ -102,11 +107,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 3 secure-defaults is now planned; the next open trust boundary is executing the auth, ops, and payload-hardening changes without breaking current owner-scoped flows
-- CI still under-represents the documented stack and concurrent execution risks
+- Phase 3 secure-defaults is complete; the next open trust boundary is aligning CI with the documented Postgres, API, worker, and frontend stack
+- CI still under-represents authenticated frontend flows and concurrency regressions, which are Phase 4's primary focus
 
 ## Session Continuity
 
-Last session: 2026-04-16T20:56:33.280Z
-Stopped at: Completed 03-secure-defaults-02-PLAN.md
+Last session: 2026-04-16T21:07:21.582Z
+Stopped at: Completed 03-secure-defaults-03-PLAN.md
 Resume file: None

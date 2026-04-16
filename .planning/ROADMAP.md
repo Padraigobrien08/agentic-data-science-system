@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [x] **Phase 1: Run Isolation** - Remove shared artifact-path and cwd assumptions from the execution flow
 - [x] **Phase 2: Worker Resilience** - Make queued execution lease-safe and retry-safe under overlap and failure
-- [ ] **Phase 3: Secure Defaults** - Enforce safe deployment defaults for auth, registration, metrics, and persisted payloads
+- [x] **Phase 3: Secure Defaults** - Enforce safe deployment defaults for auth, registration, metrics, and persisted payloads
 - [ ] **Phase 4: CI Coverage** - Gate the documented stack and key user flows with automated verification
 - [ ] **Phase 5: Storage and Ops** - Improve storage efficiency, retention policy, and operational truthfulness
 
@@ -63,8 +63,8 @@ Plans:
 
 Plans:
 - [x] 03-01: Enforce secure configuration validation for JWT secrets and registration posture
-- [ ] 03-02: Reduce sensitive payload exposure in APIs, persistence, and metrics surfaces
-- [ ] 03-03: Add security-focused tests and operator-facing configuration guidance
+- [x] 03-02: Reduce sensitive payload exposure in APIs, persistence, and metrics surfaces
+- [x] 03-03: Add security-focused tests and operator-facing configuration guidance
 
 ### Phase 4: CI Coverage
 **Goal**: Align automated verification with the documented product stack and critical user journeys.
@@ -105,6 +105,6 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 |-------|----------------|--------|-----------|
 | 1. Run Isolation | 4/4 | Completed | 2026-04-15 |
 | 2. Worker Resilience | 3/3 | Completed | 2026-04-16 |
-| 3. Secure Defaults | 2/3 | In Progress|  |
+| 3. Secure Defaults | 3/3 | Completed | 2026-04-16 |
 | 4. CI Coverage | 0/3 | Not started | - |
 | 5. Storage and Ops | 0/3 | Not started | - |
