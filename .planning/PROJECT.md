@@ -16,12 +16,12 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Users can authenticate, create projects, launch runs, and inspect artifacts and trace data through the FastAPI and Next.js application layers — existing
 - ✓ The platform persists run steps, tool calls, artifacts, and model-call metadata so execution is traceable after a run completes — existing
 - ✓ The repo already supports a documented self-hosted stack with API, worker, Postgres, frontend, tests, and Docker-based local workflows — existing
+- ✓ Every run now uses an explicit run-scoped workspace and artifact-path contract, so overlapping execution no longer depends on shared repo-global outputs — validated in Phase 1
+- ✓ Background execution is now lease-safe, retry-safe, and auditable on one persisted run identity — validated in Phase 2
+- ✓ Deployment defaults now fail closed for JWT secrets, self-service registration, ops telemetry, and raw payload exposure — validated in Phase 3
 
 ### Active
 
-- [ ] Isolate every run into its own execution workspace and artifact path contract so concurrent analyses cannot overwrite each other
-- [ ] Make worker execution lease-safe, retry-safe, and observable under long-running or overlapping jobs
-- [ ] Harden security defaults for JWT secrets, self-service registration, metrics exposure, and persisted sensitive payloads
 - [ ] Expand automated verification so the documented backend, worker, frontend, and concurrency paths are gated in CI
 - [ ] Add storage and retention controls so artifact ingestion, payload growth, and operational history scale without corrupting trust
 
@@ -35,7 +35,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map shows that several core platform assumptions still depend on shared filesystem paths, cwd mutation, and large multi-responsibility modules.
 
-The highest-value current concerns are operational rather than feature-based. Shared artifact filenames under `data/processed/` and `data/artifacts/` make concurrent execution unsafe; worker health and retry behavior can misrepresent degraded database conditions; the backend ships insecure default stances for secrets and registration; and the documented product stack is not fully exercised in pull-request CI. The active project therefore treats this as a production-hardening milestone for an already-valuable system, not a greenfield build.
+The highest-value current concerns are operational rather than feature-based. The first three trust-boundary phases are now complete: run outputs are isolated, worker attempts are lease-safe and auditable, and insecure auth/ops defaults have been removed. The next major gap is verification depth: the documented product stack is still not fully exercised in pull-request CI, and authenticated frontend plus concurrency regressions are not yet gated automatically. The active project therefore remains a production-hardening milestone for an already-valuable system, not a greenfield build.
 
 ## Constraints
 
@@ -74,4 +74,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-15 after initialization*
+*Last updated: 2026-04-16 after Phase 3 completion*
