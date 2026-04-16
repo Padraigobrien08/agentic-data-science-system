@@ -20,7 +20,7 @@
 
 - [x] **SECU-01**: Deployment fails fast when the default JWT secret is still configured outside tests
 - [x] **SECU-02**: New deployments keep self-service registration disabled unless an operator explicitly enables it
-- [ ] **SECU-03**: Metrics endpoints and persisted sensitive payload fields are protected or redacted by default
+- [x] **SECU-03**: Metrics endpoints and persisted sensitive payload fields are protected or redacted by default
 
 ### Verification
 
@@ -65,7 +65,7 @@
 | WORK-02 | Phase 2 | Complete |
 | SECU-01 | Phase 3 | Complete |
 | SECU-02 | Phase 3 | Complete |
-| SECU-03 | Phase 3 | Pending |
+| SECU-03 | Phase 3 | Complete |
 | QUAL-01 | Phase 4 | Pending |
 | QUAL-02 | Phase 4 | Pending |
 | QUAL-03 | Phase 4 | Pending |

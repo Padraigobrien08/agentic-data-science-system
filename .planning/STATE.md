@@ -3,13 +3,13 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 03-secure-defaults-01-PLAN.md
-last_updated: "2026-04-16T20:43:29.563Z"
+stopped_at: Completed 03-secure-defaults-02-PLAN.md
+last_updated: "2026-04-16T20:56:41.779Z"
 progress:
   total_phases: 5
   completed_phases: 2
   total_plans: 10
-  completed_plans: 8
+  completed_plans: 9
 ---
 
 # Project State
@@ -94,6 +94,7 @@ Recent decisions affecting current work:
 - [Phase 03-secure-defaults]: Reject the built-in JWT secret by exact value unless EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT=true is set explicitly.
 - [Phase 03-secure-defaults]: Close self-service registration by default and require a dedicated X-EDGAR-Bootstrap-Token flow for the first admin.
 - [Phase 03-secure-defaults]: Persist is_admin on users now so later Phase 3 plans can gate privileged payload and ops access without redesigning auth.
+- [Phase 03-secure-defaults]: Keep owner-scoped run and artifact routes summary-first, but require admin privilege before honoring raw payload or meta expansion flags.
 
 ### Pending Todos
 
@@ -106,6 +107,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-16T20:43:29.561Z
-Stopped at: Completed 03-secure-defaults-01-PLAN.md
+Last session: 2026-04-16T20:56:33.280Z
+Stopped at: Completed 03-secure-defaults-02-PLAN.md
 Resume file: None
