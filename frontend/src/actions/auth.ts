@@ -106,7 +106,14 @@ export async function registerAction(
   });
   const regText = await reg.text();
   if (!reg.ok) {
-    return { error: parseDetail(regText) };
+    const detail = parseDetail(regText);
+    if (detail === "Registration is disabled") {
+      return {
+        error:
+          "Registration is disabled. Ask an operator to use the bootstrap admin token or explicitly enable open registration.",
+      };
+    }
+    return { error: detail };
   }
 
   return completeLoginSession(email, password, next);

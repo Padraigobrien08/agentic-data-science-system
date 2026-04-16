@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from pathlib import Path
 from uuid import UUID, uuid4
 
 import pytest
@@ -26,6 +27,7 @@ from backend.models.project import Project
 from backend.models.run_step import RunStep
 from backend.models.user import User
 from backend.security.passwords import hash_password
+from backend.services.artifact_service import ArtifactService
 from tests.api_auth import TEST_PASSWORD, bootstrap_admin_and_headers
 
 OPS_HEADERS = {"Authorization": "Bearer pytest-ops-token"}
@@ -35,10 +37,19 @@ WRONG_OPS_HEADERS = {"Authorization": "Bearer wrong-ops-token"}
 @pytest.fixture
 def secure_defaults_client_and_factory(
     monkeypatch: pytest.MonkeyPatch,
+    tmp_path: Path,
 ) -> Iterator[tuple[TestClient, sessionmaker[Session]]]:
     monkeypatch.setenv("EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION", "false")
     monkeypatch.setenv("EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN", "pytest-bootstrap-token")
     monkeypatch.setenv("EDGAR_BACKEND_OPS_API_TOKEN", "pytest-ops-token")
+    monkeypatch.setenv(
+        "EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT",
+        str(tmp_path / "artifact_storage"),
+    )
+    monkeypatch.setenv(
+        "EDGAR_BACKEND_RUN_WORKSPACE_ROOT",
+        str(tmp_path / "run_workspaces"),
+    )
     get_settings.cache_clear()
 
     engine = create_engine(
@@ -148,6 +159,71 @@ def _seed_debug_access_fixture(
         return email, run.id, artifact.id
     finally:
         db.close()
+
+
+def test_secure_defaults_bootstrap_registration_ops_and_provenance_flow(
+    secure_defaults_client_and_factory: tuple[TestClient, sessionmaker[Session]],
+) -> None:
+    client, factory = secure_defaults_client_and_factory
+
+    registration = client.post(
+        "/v1/auth/register",
+        json={"email": "closed-registration@example.com", "password": TEST_PASSWORD},
+    )
+    assert registration.status_code == 403
+    assert registration.json()["detail"] == "Registration is disabled"
+
+    project_id, admin_headers = bootstrap_admin_and_headers(client)
+
+    me = client.get("/v1/auth/me", headers=admin_headers)
+    assert me.status_code == 200
+    assert me.json()["is_admin"] is True
+
+    assert client.get("/metrics").status_code == 401
+    assert client.get("/v1/worker/health").status_code == 401
+    assert client.get("/metrics", headers=OPS_HEADERS).status_code == 200
+    assert client.get("/v1/worker/health", headers=OPS_HEADERS).status_code == 200
+
+    db = factory()
+    try:
+        project = db.get(Project, UUID(project_id))
+        assert project is not None
+
+        run = AnalysisRun(
+            project_id=project.id,
+            initiated_by_user_id=project.owner_user_id,
+            status=AnalysisRunStatus.success,
+            orchestration_goal_text="secure defaults provenance",
+            input_payload_json={"tickers": ["MSFT"]},
+        )
+        db.add(run)
+        db.flush()
+
+        settings = get_settings()
+        source_path = settings.run_workspace_root / str(run.id) / "artifacts" / "report.md"
+        source_path.parent.mkdir(parents=True, exist_ok=True)
+        source_path.write_text("# report\n", encoding="utf-8")
+
+        artifact = ArtifactService(db, settings=settings).ingest_pipeline_file(
+            source_path,
+            role_key="report_md",
+            analysis_run_id=run.id,
+        )
+        db.commit()
+        artifact_id = artifact.id
+    finally:
+        db.close()
+
+    artifact_response = client.get(
+        f"/v1/artifacts/{artifact_id}",
+        params={"include_meta": "true"},
+        headers=admin_headers,
+    )
+    assert artifact_response.status_code == 200
+    meta_json = artifact_response.json()["meta_json"]
+    assert meta_json["source_filename"] == "report.md"
+    assert meta_json["source_workspace_relative_path"] == "artifacts/report.md"
+    assert "source_path" not in meta_json
 
 
 @pytest.mark.parametrize("path", ["/health", "/v1/health", "/ready", "/v1/ready"])

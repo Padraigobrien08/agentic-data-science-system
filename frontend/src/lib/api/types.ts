@@ -29,6 +29,7 @@ export interface CurrentUser {
   email: string;
   display_name: string | null;
   is_active: boolean;
+  is_admin: boolean;
   preferences_json: Record<string, unknown> | unknown[] | null;
   created_at: string;
   updated_at: string;
