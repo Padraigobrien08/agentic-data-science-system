@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to Execute Phase 05
-stopped_at: Phase 05 plans validated
-last_updated: "2026-04-17T20:57:06Z"
+status: Ready to execute
+stopped_at: Completed 05-storage-and-ops-02-PLAN.md
+last_updated: "2026-04-17T21:07:46.070Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 17
-  completed_plans: 13
+  completed_plans: 15
 ---
 
 # Project State
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 05 (storage-and-ops) — PLANNED
-Next: `$gsd-execute-phase 5`
+Phase: 05 (storage-and-ops) — EXECUTING
+Plan: 3 of 4
 
 ## Performance Metrics
 
@@ -61,6 +61,7 @@ Next: `$gsd-execute-phase 5`
 | Phase 04-ci-coverage P01 | 28min | 2 tasks | 3 files |
 | Phase 04-ci-coverage P03 | 1min | 2 tasks | 2 files |
 | Phase 04-ci-coverage P02 | 13min | 2 tasks | 11 files |
+| Phase 05-storage-and-ops P01 | 4min | 2 tasks | 5 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,12 @@ Recent decisions affecting current work:
 - [Phase 05-storage-and-ops]: Artifact ingest should use streamed copy/hash behavior while preserving the current local object-store contract.
 - [Phase 05-storage-and-ops]: Retention policy should bound run history and raw model payload history first while preserving a minimal auditable record.
 - [Phase 05-storage-and-ops]: Retention should run as an explicit maintenance workflow/job with dry-run and reporting, not implicit request-path deletion.
+- [Phase 05-storage-and-ops]: Shared worker-health JSON and Prometheus refreshes now reuse one queue observability helper so degraded-state truth cannot drift between ops surfaces.
+- [Phase 05-storage-and-ops]: Unknown worker queue state is now explicit: nullable JSON counts and booleans plus NaN Prometheus gauges replace synthetic zeroes on DB-backed observability failure.
+- [Phase 05-storage-and-ops]: Worker queue degradation remains additive: `/metrics` route shape stays unchanged while `/v1/worker/health` adds database and queue_state_known fields for operator truthfulness.
+- [Phase 05-storage-and-ops]: Extended the existing storage protocol with put_fileobj so streamed ingest stays inside the current object-store seam.
+- [Phase 05-storage-and-ops]: Local filesystem artifact writes now stage through same-directory temp files and os.replace so failed writes do not publish partial blobs.
+- [Phase 05-storage-and-ops]: ArtifactService now shares one traced store-write and row-persistence path for byte and streamed pipeline ingest while preserving source_filename and source_workspace_relative_path metadata.
 
 ### Pending Todos
 
@@ -127,6 +134,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T20:57:06Z
-Stopped at: Phase 05 plans validated
-Resume file: .planning/phases/05-storage-and-ops/05-storage-and-ops-01-PLAN.md
+Last session: 2026-04-17T21:07:46.066Z
+Stopped at: Completed 05-storage-and-ops-02-PLAN.md
+Resume file: None

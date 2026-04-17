@@ -92,8 +92,8 @@ Plans:
 **Plans**: 4 plans
 
 Plans:
-- [ ] 05-01: Make `/v1/worker/health` and `/metrics` expose explicit degraded queue state
-- [ ] 05-02: Add streamed local object-store ingest for pipeline artifact copies
+- [x] 05-01: Make `/v1/worker/health` and `/metrics` expose explicit degraded queue state
+- [x] 05-02: Add streamed local object-store ingest for pipeline artifact copies
 - [ ] 05-03: Add retention schema, policy settings, and the explicit maintenance workflow
 - [ ] 05-04: Add retention-aware artifact delivery semantics and operator documentation
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Worker Resilience | 3/3 | Completed | 2026-04-16 |
 | 3. Secure Defaults | 3/3 | Completed | 2026-04-16 |
 | 4. CI Coverage | 3/3 | Completed | 2026-04-17 |
-| 5. Storage and Ops | 0/4 | Not started | - |
+| 5. Storage and Ops | 2/4 | In Progress | - |
