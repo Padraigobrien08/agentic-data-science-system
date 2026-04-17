@@ -128,6 +128,26 @@ The browser talks to **Next**; Next calls the API using `API_URL` on the server.
 - **Manual dev:** artifact blobs still default to repo `data/artifact_storage/` (created on API startup). Durable run workspaces default to repo `data/runs/`; use the same run-workspace root for every API and worker process on that machine.
 - **Not in this stack:** S3/MinIO — only the **local filesystem** driver is wired for compose.
 
+## Retention maintenance
+
+Retention is an explicit operator workflow, not hidden cleanup during normal API or worker traffic.
+
+Configure these env vars under the `EDGAR_BACKEND_` prefix:
+
+- `EDGAR_BACKEND_RETENTION_RUN_PAYLOAD_DAYS` - age cutoff for trimming persisted analysis-run payload JSON; `0` disables this tier.
+- `EDGAR_BACKEND_RETENTION_MODEL_PAYLOAD_DAYS` - age cutoff for redacting raw model request/response payload JSON; `0` disables this tier.
+- `EDGAR_BACKEND_RETENTION_ARTIFACT_BLOB_DAYS` - age cutoff for pruning stored artifact blobs while keeping the artifact row plus tombstone metadata; `0` disables this tier.
+- `EDGAR_BACKEND_RETENTION_BATCH_SIZE` - max rows/blobs handled per maintenance batch.
+
+Use the maintenance entrypoint from the repo root after migrations are current and the target database is reachable:
+
+```bash
+python -m backend.maintenance.retention --dry-run --json
+python -m backend.maintenance.retention --apply --json
+```
+
+Dry-run reports candidate counts without mutation. Apply mode compacts run payloads, redacts model payloads, and prunes eligible artifact blobs by deleting the stored object and setting `artifacts.blob_deleted_at` so later content requests return an explicit retention-expired response instead of looking like accidental storage loss.
+
 ## Verification (after `docker compose up -d`)
 
 **Automated** (requires curl, docker CLI, Python 3 on the host):

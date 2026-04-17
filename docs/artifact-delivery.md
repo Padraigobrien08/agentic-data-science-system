@@ -16,7 +16,7 @@ Returns the artifact record (id, `role_key`, `kind`, `mime_type`, `byte_size`, `
 
 **404** if the row does not exist.
 
-JSON field names are **snake_case** (Pydantic / OpenAPI).
+JSON field names are **snake_case** (Pydantic / OpenAPI). When retention has pruned the stored blob intentionally, the metadata row keeps the original locator plus `blob_deleted_at` so clients can distinguish policy expiry from unexpected storage loss.
 
 When present, artifact provenance inside `meta_json` uses sanitized keys such as `source_filename` and `source_workspace_relative_path`. Normal artifact metadata does not store or expose absolute filesystem paths.
 
@@ -36,7 +36,9 @@ Typical headers:
 - `ETag` — content SHA-256 when present.
 - `Cache-Control: private, no-cache`, `X-Content-Type-Options: nosniff`.
 
-**404** — unknown artifact, or blob missing in storage. **502** — unsupported URI scheme, invalid key, or I/O errors (generic `detail` strings; no internal paths in JSON).
+**410** — blob was intentionally pruned and the row is tombstoned (`detail = "Artifact content expired by retention policy"`).
+**404** — unknown artifact, or blob missing in storage without a tombstone (treat as real storage loss, not retention).
+**502** — unsupported URI scheme, invalid key, or I/O errors (generic `detail` strings; no internal paths in JSON).
 
 ## Preview: `GET /v1/artifacts/{artifact_id}/preview`
 
@@ -53,7 +55,8 @@ Returns JSON **`ArtifactPreviewResponse`**: bounded UTF-8 text for UI preview (n
 
 **415** — preview is not offered for this artifact; use **`/content`** to fetch bytes.
 
-**404** / **502** — same classes of errors as content (missing blob, storage misconfiguration, read failure).
+**410** — blob was intentionally pruned and the row is tombstoned (`detail = "Artifact content expired by retention policy"`).
+**404** / **502** — same classes of errors as content for untombstoned rows (missing blob, storage misconfiguration, read failure).
 
 ## Previewable artifact types
 
