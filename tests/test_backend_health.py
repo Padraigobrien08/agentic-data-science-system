@@ -6,6 +6,7 @@ Run ``alembic upgrade head`` first so the default SQLite DB exists and
 
 from __future__ import annotations
 
+import math
 import uuid
 
 import pytest
@@ -273,3 +274,26 @@ def test_worker_health_ignores_exhausted_attempts_and_active_lease_blocks_backlo
     assert _metric_value(payload, "edgar_worker_queue_pending_claimable") == 1.0
     assert _metric_value(payload, "edgar_worker_queue_jobs_running_lease_ok") == 1.0
     assert _metric_value(payload, "edgar_worker_queue_jobs_running_stale_lease") == 0.0
+
+
+def test_metrics_report_degraded_queue_observability_with_nan_unknown_values(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _factory = client_and_factory
+
+    def _raise_queue_read_error(self, *, max_attempts: int):
+        raise SQLAlchemyError("queue observability unavailable")
+
+    monkeypatch.setattr(
+        "backend.repositories.run_execution_job_repository.RunExecutionJobRepository.queue_observability_snapshot",
+        _raise_queue_read_error,
+    )
+
+    response = client.get("/metrics", headers=OPS_HEADERS)
+
+    assert response.status_code == 200
+    payload = response.text
+    assert _metric_value(payload, "edgar_worker_queue_observability_up") == 0.0
+    assert math.isnan(_metric_value(payload, "edgar_worker_queue_depth"))
+    assert math.isnan(_metric_value(payload, "edgar_worker_last_terminal_job_unixtime"))
