@@ -11,6 +11,7 @@ import uuid
 import pytest
 from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
+from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -165,6 +166,31 @@ def test_worker_health_json(client_and_factory: tuple[TestClient, sessionmaker[S
     assert "jobs_running_lease_ok" in body
     assert "stale_running_jobs" in body
     assert "backlog_without_active_lease" in body
+
+
+def test_worker_health_reports_degraded_when_queue_observability_read_fails(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _factory = client_and_factory
+
+    def _raise_queue_read_error(self, *, max_attempts: int):
+        raise SQLAlchemyError("queue observability unavailable")
+
+    monkeypatch.setattr(
+        "backend.repositories.run_execution_job_repository.RunExecutionJobRepository.queue_observability_snapshot",
+        _raise_queue_read_error,
+    )
+
+    response = client.get("/v1/worker/health", headers=OPS_HEADERS)
+
+    assert response.status_code == 200
+    body = response.json()
+    assert body["status"] == "degraded"
+    assert body["database"]["ok"] is False
+    assert body["queue_state_known"] is False
+    assert body["queue_depth"] is None
+    assert body["backlog_without_active_lease"] is None
 
 
 def test_worker_health_counts_final_allowed_attempt_and_stale_running_truthfully(
