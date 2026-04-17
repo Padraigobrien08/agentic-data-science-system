@@ -16,7 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 2: Worker Resilience** - Make queued execution lease-safe and retry-safe under overlap and failure
 - [x] **Phase 3: Secure Defaults** - Enforce safe deployment defaults for auth, registration, metrics, and persisted payloads
 - [x] **Phase 4: CI Coverage** - Gate the documented stack and key user flows with automated verification
-- [ ] **Phase 5: Storage and Ops** - Improve storage efficiency, retention policy, and operational truthfulness
+- [x] **Phase 5: Storage and Ops** - Improve storage efficiency, retention policy, and operational truthfulness (completed 2026-04-17)
 
 ## Phase Details
 
@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Worker Resilience | 3/3 | Completed | 2026-04-16 |
 | 3. Secure Defaults | 3/3 | Completed | 2026-04-16 |
 | 4. CI Coverage | 3/3 | Completed | 2026-04-17 |
-| 5. Storage and Ops | 3/4 | In Progress | - |
+| 5. Storage and Ops | 4/4 | Complete   | 2026-04-17 |

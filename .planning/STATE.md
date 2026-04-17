@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to execute
-stopped_at: Completed 05-storage-and-ops-03-PLAN.md
-last_updated: "2026-04-17T21:09:27.137Z"
+status: Phase complete — ready for verification
+stopped_at: Completed 05-storage-and-ops-04-PLAN.md
+last_updated: "2026-04-17T21:21:34.679Z"
 progress:
   total_phases: 5
-  completed_phases: 4
+  completed_phases: 5
   total_plans: 17
-  completed_plans: 16
+  completed_plans: 17
 ---
 
 # Project State
@@ -63,6 +63,7 @@ Plan: 4 of 4
 | Phase 04-ci-coverage P02 | 13min | 2 tasks | 11 files |
 | Phase 05-storage-and-ops P01 | 4min | 2 tasks | 5 files |
 | Phase 05-storage-and-ops P03 | 5min | 2 tasks | 10 files |
+| Phase 05-storage-and-ops P04 | 10min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -126,6 +127,9 @@ Recent decisions affecting current work:
 - [Phase 05-storage-and-ops]: Retention defaults stay disabled until operators set explicit day windows, with one shared batch-size cap for each maintenance tier.
 - [Phase 05-storage-and-ops]: Run and model retention compact or redact payload-heavy fields in place and stamp audit-visible timestamps instead of deleting rows.
 - [Phase 05-storage-and-ops]: This plan only redacts analysis_run_id-backed model history; artifact-blob deletion remains deferred to 05-04.
+- [Phase 05-storage-and-ops]: Artifact blob pruning now stamps artifacts.blob_deleted_at and preserves the row so expired content is auditable instead of looking corrupted.
+- [Phase 05-storage-and-ops]: Artifact content and preview routes treat tombstoned blobs as 410 Artifact content expired by retention policy before touching storage backends.
+- [Phase 05-storage-and-ops]: The retention runbook stays explicit: operators configure EDGAR_BACKEND_RETENTION_* env vars and invoke dry-run or apply maintenance directly.
 
 ### Pending Todos
 
@@ -138,6 +142,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T21:09:27.134Z
-Stopped at: Completed 05-storage-and-ops-03-PLAN.md
+Last session: 2026-04-17T21:21:34.676Z
+Stopped at: Completed 05-storage-and-ops-04-PLAN.md
 Resume file: None
