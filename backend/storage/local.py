@@ -3,7 +3,10 @@
 from __future__ import annotations
 
 import hashlib
+import io
+import os
 import re
+import tempfile
 from collections.abc import Iterator
 from contextlib import contextmanager
 from pathlib import Path
@@ -13,6 +16,7 @@ from urllib.parse import quote, unquote
 from backend.storage.types import InvalidStorageKey, ObjectNotFound, StoredObject
 
 _UNSAFE_KEY = re.compile(r"\.\.|^/|\\\\|^$")
+_STREAM_CHUNK_SIZE = 1024 * 1024
 
 
 def assert_safe_key(key: str) -> str:
@@ -77,14 +81,46 @@ class LocalFilesystemStore:
         *,
         content_type: str | None = None,
     ) -> StoredObject:
+        return self.put_fileobj(
+            key,
+            io.BytesIO(data),
+            content_type=content_type,
+        )
+
+    def put_fileobj(
+        self,
+        key: str,
+        source: BinaryIO,
+        *,
+        content_type: str | None = None,
+    ) -> StoredObject:
         path = self._abs_path(key)
         path.parent.mkdir(parents=True, exist_ok=True)
-        path.write_bytes(data)
-        digest = hashlib.sha256(data).hexdigest()
+        fd, tmp_name = tempfile.mkstemp(
+            dir=str(path.parent),
+            prefix=f".{path.name}.",
+            suffix=".tmp",
+        )
+        digest = hashlib.sha256()
+        byte_size = 0
+        try:
+            with os.fdopen(fd, "wb") as tmp:
+                while True:
+                    chunk = source.read(_STREAM_CHUNK_SIZE)
+                    if not chunk:
+                        break
+                    digest.update(chunk)
+                    tmp.write(chunk)
+                    byte_size += len(chunk)
+            os.replace(tmp_name, path)
+        except Exception:
+            Path(tmp_name).unlink(missing_ok=True)
+            raise
+
         return StoredObject(
             uri=self.make_uri(key),
-            byte_size=len(data),
-            sha256_hex=digest,
+            byte_size=byte_size,
+            sha256_hex=digest.hexdigest(),
             content_type=content_type,
         )
 

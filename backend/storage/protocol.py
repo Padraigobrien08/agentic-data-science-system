@@ -40,6 +40,16 @@ class ArtifactObjectStore(Protocol):
         """Write *data* at *key* (overwrite allowed)."""
         ...
 
+    def put_fileobj(
+        self,
+        key: str,
+        source: BinaryIO,
+        *,
+        content_type: str | None = None,
+    ) -> StoredObject:
+        """Stream bytes from *source* into *key* without preloading them all into memory."""
+        ...
+
     def get(self, key: str) -> bytes:
         """Read full object. Raises :class:`~backend.storage.types.ObjectNotFound` if missing."""
         ...
