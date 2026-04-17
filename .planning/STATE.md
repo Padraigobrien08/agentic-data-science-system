@@ -1,10 +1,10 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.0
-milestone_name: milestone
-status: Milestone complete
-stopped_at: Completed 05-storage-and-ops-04-PLAN.md
-last_updated: "2026-04-17T21:32:13.887Z"
+milestone_name: Hardening
+status: v1.0 archived; awaiting next milestone
+stopped_at: Completed $gsd-complete-milestone for v1.0
+last_updated: "2026-04-17T21:45:13Z"
 progress:
   total_phases: 5
   completed_phases: 5
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Milestone complete — v1.0 hardening
+**Current focus:** Planning the next milestone from the post-v1.0 backlog
 
 ## Current Position
 
-Milestone: v1.0 — COMPLETE
-Next: `$gsd-complete-milestone`
+Milestone: v1.0 — ARCHIVED
+Next: `$gsd-new-milestone`
 
 ## Performance Metrics
 
@@ -139,11 +139,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- All planned v1.0 hardening phases are complete; the only noted follow-up is a non-blocking `runpy` RuntimeWarning from `python -m backend.maintenance.retention` caused by `backend/maintenance/__init__.py` eagerly importing the module
+- v1.0 is archived and shipped; the only noted follow-up from the completed milestone is a non-blocking `runpy` RuntimeWarning from `python -m backend.maintenance.retention` caused by `backend/maintenance/__init__.py` eagerly importing the module
 - The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched unless intentionally incorporated
 
 ## Session Continuity
 
-Last session: 2026-04-17T21:32:13.887Z
-Stopped at: Phase 05 verified and milestone phases complete
-Resume file: .planning/phases/05-storage-and-ops/05-VERIFICATION.md
+Last session: 2026-04-17T21:45:13Z
+Stopped at: Completed milestone archival and retrospective for v1.0
+Resume file: .planning/PROJECT.md

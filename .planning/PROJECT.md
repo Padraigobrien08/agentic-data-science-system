@@ -24,7 +24,9 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- None — the v1.0 hardening milestone scope is complete
+- Live SEC and hybrid evaluation modes should be promoted into a supported validation workflow that the team can run intentionally for freshness and integration confidence
+- Artifact storage should support a remote object-store backend in addition to the current local shared-filesystem contract
+- Large trace and transparency views should be decomposed and optimized for very large run payloads before broader scale-up work
 
 ### Out of Scope
 
@@ -34,9 +36,9 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ## Context
 
-This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map shows that several core platform assumptions still depend on shared filesystem paths, cwd mutation, and large multi-responsibility modules.
+This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map showed that several core platform assumptions still depended on shared filesystem paths, cwd mutation, and large multi-responsibility modules before the v1.0 hardening effort.
 
-The highest-value work in this milestone was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The current project state is therefore a completed v1.0 hardening milestone for an already-valuable system, not a greenfield build.
+The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The next milestone should focus on extending validation coverage into live integrations and lifting the remaining storage and large-payload scaling constraints.
 
 ## Constraints
 
@@ -51,11 +53,11 @@ The highest-value work in this milestone was operational rather than feature-bas
 
 | Decision | Rationale | Outcome |
 |----------|-----------|---------|
-| Treat this as a brownfield hardening project, not a new-feature milestone | The current platform already delivers EDGAR analyses; trust, concurrency, and operability are the blockers to wider use | — Pending |
-| Preserve the deterministic `src/` analysis core and harden the boundaries around it | Rewriting the numerical path would increase risk and distract from the isolation and reliability problems that matter now | — Pending |
-| Prioritize run-scoped artifact contracts before other platform improvements | Shared global artifact paths create the largest correctness risk for concurrent or repeated execution | — Pending |
-| Expand verification around the documented self-hosted stack instead of relying on narrow happy-path tests | The repo already documents API, worker, frontend, and Postgres workflows that are not fully gated today | — Pending |
-| Track project planning artifacts in git | The hardening work touches architecture, security, and operations decisions that should remain auditable alongside code changes | — Pending |
+| Treat this as a brownfield hardening project, not a new-feature milestone | The current platform already delivers EDGAR analyses; trust, concurrency, and operability are the blockers to wider use | ✓ Good |
+| Preserve the deterministic `src/` analysis core and harden the boundaries around it | Rewriting the numerical path would increase risk and distract from the isolation and reliability problems that matter now | ✓ Good |
+| Prioritize run-scoped artifact contracts before other platform improvements | Shared global artifact paths create the largest correctness risk for concurrent or repeated execution | ✓ Good |
+| Expand verification around the documented self-hosted stack instead of relying on narrow happy-path tests | The repo already documents API, worker, frontend, and Postgres workflows that are not fully gated today | ✓ Good |
+| Track project planning artifacts in git | The hardening work touches architecture, security, and operations decisions that should remain auditable alongside code changes | ✓ Good |
 
 ## Evolution
 
@@ -75,4 +77,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after Phase 5 completion*
+*Last updated: 2026-04-17 after v1.0 milestone completion*
