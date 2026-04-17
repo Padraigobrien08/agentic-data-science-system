@@ -108,4 +108,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Worker Resilience | 3/3 | Completed | 2026-04-16 |
 | 3. Secure Defaults | 3/3 | Completed | 2026-04-16 |
 | 4. CI Coverage | 3/3 | Completed | 2026-04-17 |
-| 5. Storage and Ops | 0/3 | Not started | - |
+| 5. Storage and Ops | 0/4 | Not started | - |

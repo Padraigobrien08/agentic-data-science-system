@@ -6,7 +6,13 @@ wave: 2
 depends_on:
   - 05-03
 files_modified:
+  - backend/models/artifact.py
+  - backend/schemas/api_phase_a.py
+  - backend/repositories/artifact_repository.py
+  - backend/maintenance/retention.py
   - backend/api/routes/artifacts.py
+  - alembic/versions/011_storage_ops_artifact_retention.py
+  - tests/test_retention_maintenance.py
   - tests/test_artifact_content_delivery.py
   - docs/local-stack.md
   - docs/artifact-delivery.md
@@ -16,18 +22,29 @@ requirements:
 must_haves:
   truths:
     - "Retention-pruned artifact blobs are distinguishable from accidental storage loss when clients request content or preview."
+    - "Artifact retention is coupled to explicit tombstone metadata and maintenance reporting instead of silent blob deletion."
     - "Operators can find the documented retention env vars and exact dry-run or apply commands in the local stack runbook."
     - "Artifact-delivery docs explain the new retention-expired response instead of treating policy-driven pruning like a generic 404."
   artifacts:
+    - path: backend/maintenance/retention.py
+      provides: "Artifact-blob prune extension for the explicit retention workflow"
+    - path: alembic/versions/011_storage_ops_artifact_retention.py
+      provides: "Artifact blob tombstone schema for retention-aware delivery"
     - path: backend/api/routes/artifacts.py
       provides: "Explicit retention-expired response for pruned artifact content"
     - path: tests/test_artifact_content_delivery.py
       provides: "Regression coverage for retention-pruned artifact delivery semantics"
+    - path: tests/test_retention_maintenance.py
+      provides: "Regression coverage for artifact prune candidates and blob tombstone reporting"
     - path: docs/local-stack.md
       provides: "Operator runbook for retention env vars and maintenance commands"
     - path: docs/artifact-delivery.md
       provides: "Artifact delivery contract that documents retention-pruned content behavior"
   key_links:
+    - from: backend/maintenance/retention.py
+      to: backend/repositories/artifact_repository.py
+      via: "maintenance workflow selects and tombstones artifact blob prune candidates"
+      pattern: "list_blob_prune_candidates|artifact_blobs_pruned|blob_deleted_at"
     - from: backend/api/routes/artifacts.py
       to: backend/models/artifact.py
       via: "artifact delivery checks `blob_deleted_at` before attempting storage reads"
@@ -39,10 +56,10 @@ must_haves:
 ---
 
 <objective>
-Finish the retention user-facing contract by making pruned artifact delivery explicit and documenting the operator workflow.
+Finish the artifact side of the retention contract by adding blob tombstones, retention-aware delivery behavior, and operator documentation.
 
-Purpose: complete `OPER-03` by ensuring policy-driven blob pruning is visible to clients and operators instead of looking like accidental storage corruption.
-Output: retention-aware artifact content semantics, regression coverage, and operator-facing documentation for the new workflow.
+Purpose: complete `OPER-03` by ensuring policy-driven blob pruning is coupled to explicit metadata and visible to clients and operators instead of looking like accidental storage corruption.
+Output: artifact retention schema and maintenance extensions, retention-aware artifact content semantics, regression coverage, and operator-facing documentation for the workflow.
 </objective>
 
 <execution_context>
@@ -59,9 +76,13 @@ Output: retention-aware artifact content semantics, regression coverage, and ope
 @.planning/phases/05-storage-and-ops/05-RESEARCH.md
 @.planning/phases/05-storage-and-ops/05-VALIDATION.md
 @.planning/phases/05-storage-and-ops/05-storage-and-ops-03-PLAN.md
-@backend/api/routes/artifacts.py
 @backend/models/artifact.py
+@backend/schemas/api_phase_a.py
+@backend/repositories/artifact_repository.py
 @backend/maintenance/retention.py
+@backend/api/routes/artifacts.py
+@alembic/versions/010_storage_ops_retention.py
+@tests/test_retention_maintenance.py
 @tests/test_artifact_content_delivery.py
 @docs/local-stack.md
 @docs/artifact-delivery.md
@@ -70,32 +91,52 @@ Output: retention-aware artifact content semantics, regression coverage, and ope
 <tasks>
 
 <task type="auto" tdd="true">
-  <name>Task 1: Make artifact content and preview report retention-pruned blobs explicitly</name>
-  <files>backend/api/routes/artifacts.py
+  <name>Task 1: Add artifact blob tombstones and make delivery report retention-pruned blobs explicitly</name>
+  <files>backend/models/artifact.py
+backend/schemas/api_phase_a.py
+backend/repositories/artifact_repository.py
+backend/maintenance/retention.py
+backend/api/routes/artifacts.py
+alembic/versions/011_storage_ops_artifact_retention.py
+tests/test_retention_maintenance.py
 tests/test_artifact_content_delivery.py</files>
   <read_first>.planning/phases/05-storage-and-ops/05-CONTEXT.md
 .planning/phases/05-storage-and-ops/05-RESEARCH.md
 .planning/phases/05-storage-and-ops/05-VALIDATION.md
 .planning/phases/05-storage-and-ops/05-storage-and-ops-03-PLAN.md
-backend/api/routes/artifacts.py
 backend/models/artifact.py
+backend/schemas/api_phase_a.py
+backend/repositories/artifact_repository.py
+backend/maintenance/retention.py
+backend/api/routes/artifacts.py
+alembic/versions/010_storage_ops_retention.py
+tests/test_retention_maintenance.py
 tests/test_artifact_content_delivery.py</read_first>
   <behavior>
+    - Per D-07, artifact blob cleanup is coupled to explicit tombstone metadata and retention reporting instead of silent deletion.
     - Per D-06 and D-07, `blob_deleted_at` means the blob was intentionally pruned by policy, not accidentally lost.
     - Content and preview routes return `410` with the exact detail `Artifact content expired by retention policy` when the artifact row is tombstoned.
     - Missing blobs without `blob_deleted_at` still follow the current generic missing-storage path so real storage bugs are not masked as retention.
   </behavior>
-  <action>Update `backend/api/routes/artifacts.py` so both `/v1/artifacts/{artifact_id}/content` and `/v1/artifacts/{artifact_id}/preview` check `row.blob_deleted_at` before `_verify_storage_openable(...)` or `open_reader(...)`. When the field is non-null, raise `HTTPException(status_code=410, detail="Artifact content expired by retention policy")`. Keep the existing `404` behavior for untombstoned missing blobs and the existing `502` behavior for unsupported backends or invalid locators. Extend `tests/test_artifact_content_delivery.py` with a tombstoned artifact case that asserts `410`, confirms the exact detail string, and checks that no filesystem path leaks into the error body.</action>
-  <acceptance_criteria>`backend/api/routes/artifacts.py` contains `blob_deleted_at`.
+  <action>Create follow-on migration `alembic/versions/011_storage_ops_artifact_retention.py` that adds nullable `blob_deleted_at` to artifacts plus any supporting selection index needed for blob pruning. Update `backend/models/artifact.py`, `backend/repositories/artifact_repository.py`, and `backend/schemas/api_phase_a.py` so artifact rows can store and surface `blob_deleted_at` additively. Extend `backend/maintenance/retention.py` so artifact blob pruning is now part of the explicit workflow: add `list_blob_prune_candidates`, include `artifact_candidates` and `artifact_blobs_pruned` in the JSON report, call `delete_at_uri()` for selected blobs, and set `artifacts.blob_deleted_at = now` only after delete succeeds. Update `backend/api/routes/artifacts.py` so both `/v1/artifacts/{artifact_id}/content` and `/v1/artifacts/{artifact_id}/preview` check `row.blob_deleted_at` before `_verify_storage_openable(...)` or `open_reader(...)`; when the field is non-null, raise `HTTPException(status_code=410, detail="Artifact content expired by retention policy")`. Keep the existing `404` behavior for untombstoned missing blobs and the existing `502` behavior for unsupported backends or invalid locators. Extend `tests/test_retention_maintenance.py` with artifact prune candidate and tombstone-report coverage, and extend `tests/test_artifact_content_delivery.py` with a tombstoned artifact case that asserts `410`, confirms the exact detail string, and checks that no filesystem path leaks into the error body.</action>
+  <acceptance_criteria>`backend/models/artifact.py` contains `blob_deleted_at`.
+`backend/schemas/api_phase_a.py` contains `blob_deleted_at`.
+`backend/repositories/artifact_repository.py` contains `list_blob_prune_candidates`.
+`backend/maintenance/retention.py` contains `artifact_candidates`.
+`backend/maintenance/retention.py` contains `artifact_blobs_pruned`.
+`backend/maintenance/retention.py` contains `delete_at_uri(`.
 `backend/api/routes/artifacts.py` contains `status_code=410`.
 `backend/api/routes/artifacts.py` contains `Artifact content expired by retention policy`.
+`alembic/versions/011_storage_ops_artifact_retention.py` exists.
+`tests/test_retention_maintenance.py` contains `artifact_candidates`.
+`tests/test_retention_maintenance.py` contains `artifact_blobs_pruned`.
 `tests/test_artifact_content_delivery.py` contains `status_code == 410`.
 `tests/test_artifact_content_delivery.py` contains `Artifact content expired by retention policy`.
 `tests/test_artifact_content_delivery.py` contains `blob_deleted_at`.</acceptance_criteria>
   <verify>
-    <automated>python3 -m pytest tests/test_artifact_content_delivery.py -q --tb=short</automated>
+    <automated>python3 -m pytest tests/test_retention_maintenance.py tests/test_artifact_content_delivery.py -q --tb=short</automated>
   </verify>
-  <done>Client-facing artifact delivery now distinguishes retention-pruned content from accidental storage loss.</done>
+  <done>Artifact blob pruning is now coupled to explicit tombstone metadata, maintenance reporting, and retention-aware delivery semantics.</done>
 </task>
 
 <task type="auto">
@@ -134,7 +175,7 @@ backend/api/routes/artifacts.py</read_first>
 </tasks>
 
 <verification>
-Run `python3 -m pytest tests/test_artifact_content_delivery.py -q --tb=short` after Task 1, then use the `rg` verification command in Task 2 so the delivery contract and docs stay aligned.
+Run `python3 -m pytest tests/test_retention_maintenance.py tests/test_artifact_content_delivery.py -q --tb=short` after Task 1, then use the `rg` verification command in Task 2 so the delivery contract and docs stay aligned.
 </verification>
 
 <success_criteria>
