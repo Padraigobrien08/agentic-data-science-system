@@ -32,7 +32,7 @@
 
 - [x] **OPER-01**: Health and metrics surfaces report dependency degradation explicitly instead of silently zeroing queue and worker state
 - [x] **OPER-02**: Artifact ingestion avoids full in-memory copies for large files when moving outputs into managed storage
-- [ ] **OPER-03**: Run history and model payload retention can be bounded by policy without losing the audit trail required for supported use cases
+- [x] **OPER-03**: Run history and model payload retention can be bounded by policy without losing the audit trail required for supported use cases
 
 ## v2 Requirements
 
@@ -71,7 +71,7 @@
 | QUAL-03 | Phase 4 | Pending |
 | OPER-01 | Phase 5 | Complete |
 | OPER-02 | Phase 5 | Complete |
-| OPER-03 | Phase 5 | Pending |
+| OPER-03 | Phase 5 | Complete |
 
 **Coverage:**
 - v1 requirements: 14 total

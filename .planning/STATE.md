@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
-stopped_at: Completed 05-storage-and-ops-02-PLAN.md
-last_updated: "2026-04-17T21:09:20.379Z"
+stopped_at: Completed 05-storage-and-ops-03-PLAN.md
+last_updated: "2026-04-17T21:09:27.137Z"
 progress:
   total_phases: 5
   completed_phases: 4
@@ -125,6 +125,7 @@ Recent decisions affecting current work:
 - [Phase 05-storage-and-ops]: ArtifactService now shares one traced store-write and row-persistence path for byte and streamed pipeline ingest while preserving source_filename and source_workspace_relative_path metadata.
 - [Phase 05-storage-and-ops]: Retention defaults stay disabled until operators set explicit day windows, with one shared batch-size cap for each maintenance tier.
 - [Phase 05-storage-and-ops]: Run and model retention compact or redact payload-heavy fields in place and stamp audit-visible timestamps instead of deleting rows.
+- [Phase 05-storage-and-ops]: This plan only redacts analysis_run_id-backed model history; artifact-blob deletion remains deferred to 05-04.
 
 ### Pending Todos
 
@@ -137,6 +138,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-17T21:07:46.066Z
-Stopped at: Completed 05-storage-and-ops-02-PLAN.md
+Last session: 2026-04-17T21:09:27.134Z
+Stopped at: Completed 05-storage-and-ops-03-PLAN.md
 Resume file: None
