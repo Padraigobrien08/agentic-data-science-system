@@ -129,6 +129,56 @@ def test_artifact_service_ingest_and_load(analysis_run_row) -> None:
     assert keys[0].startswith(f"artifacts/analysis_runs/{run.id}/")
 
 
+def test_artifact_service_ingest_pipeline_file_streams_without_read_bytes(
+    analysis_run_row,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session, run, settings = analysis_run_row
+    svc = ArtifactService(session, settings=settings)
+    src = settings.artifact_storage_root.parent / "report.md"
+    content = "# streamed report\n"
+    src.write_text(content, encoding="utf-8")
+
+    def _fail_read_bytes(self) -> bytes:  # pragma: no cover - exercised through monkeypatch
+        raise AssertionError("read_bytes should not be called")
+
+    monkeypatch.setattr(Path, "read_bytes", _fail_read_bytes)
+
+    art = svc.ingest_pipeline_file(src, role_key="report_md", analysis_run_id=run.id)
+    session.commit()
+
+    assert art.kind == ArtifactKind.document
+    assert art.byte_size == len(content.encode("utf-8"))
+    assert art.meta_json == {"source_filename": "report.md"}
+
+    store = LocalFilesystemStore(settings.artifact_storage_root)
+    stored_path = settings.artifact_storage_root / store.key_from_uri(art.storage_uri)
+    with stored_path.open("rb") as fh:
+        assert fh.read() == content.encode("utf-8")
+
+
+def test_artifact_service_ingest_pipeline_file_cleans_temp_files_on_store_failure(
+    analysis_run_row,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    session, run, settings = analysis_run_row
+    svc = ArtifactService(session, settings=settings)
+    src = settings.artifact_storage_root.parent / "panel.csv"
+    src.write_text("value\n1\n", encoding="utf-8")
+
+    def _fail_replace(_src: str, _dest: Path) -> None:
+        raise OSError("replace failed")
+
+    monkeypatch.setattr("backend.storage.local.os.replace", _fail_replace)
+
+    with pytest.raises(OSError, match="replace failed"):
+        svc.ingest_pipeline_file(src, role_key="panel_csv", analysis_run_id=run.id)
+
+    target_dir = settings.artifact_storage_root / "artifacts" / "analysis_runs" / str(run.id)
+    tmp_files = list(target_dir.glob(".*.tmp"))
+    assert not tmp_files, f"leftover temp files: {tmp_files}"
+
+
 def test_ingest_pipeline_paths_and_json(analysis_run_row) -> None:
     session, run, settings = analysis_run_row
     svc = ArtifactService(session, settings=settings)
