@@ -1,0 +1,59 @@
+name: Postgres Regressions
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  postgres-regressions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: edgar
+          POSTGRES_PASSWORD: edgar
+          POSTGRES_DB: edgar
+        options: >-
+          --health-cmd "pg_isready -U edgar -d edgar"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements.txt
+            requirements-backend.txt
+            requirements-dev.txt
+
+      - name: Install dependencies
+        run: pip install --upgrade pip && pip install -r requirements-dev.txt
+
+      - name: Run Postgres regressions
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: |
+          mkdir -p .tmp
+          export EDGAR_TEST_POSTGRES_URL=postgresql+psycopg2://edgar:edgar@127.0.0.1:5432/edgar
+          set -o pipefail
+          bash scripts/ci-postgres-regressions.sh 2>&1 | tee .tmp/postgres-regressions.log
+
+      - name: Upload regression log
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-regressions-log
+          path: .tmp/postgres-regressions.log
+          if-no-files-found: ignore
