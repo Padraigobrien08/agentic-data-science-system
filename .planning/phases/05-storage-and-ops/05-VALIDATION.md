@@ -33,8 +33,9 @@ created: 2026-04-17
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
 | 05-01 | 01 | 1 | OPER-01 | integration | `python -m pytest tests/test_backend_health.py -q --tb=short` | ✅ | ⬜ pending |
-| 05-02 | 02 | 2 | OPER-02 | integration | `python -m pytest tests/test_artifact_storage.py -q --tb=short` | ✅ | ⬜ pending |
-| 05-03 | 03 | 3 | OPER-03 | unit/integration | `python -m pytest tests/test_retention_maintenance.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
+| 05-02 | 02 | 1 | OPER-02 | integration | `python -m pytest tests/test_artifact_storage.py -q --tb=short` | ✅ | ⬜ pending |
+| 05-03 | 03 | 1 | OPER-03 | unit/integration | `python -m pytest tests/test_retention_maintenance.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
+| 05-04 | 04 | 2 | OPER-03 | integration/docs | `python -m pytest tests/test_artifact_content_delivery.py -q --tb=short` | ✅ | ⬜ pending |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
 

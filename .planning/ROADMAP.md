@@ -89,12 +89,13 @@ Plans:
   1. Health and metrics endpoints signal dependency failures explicitly instead of reporting misleading zero state
   2. Artifact ingestion handles large files without unnecessary full-memory copies
   3. Operators can bound retained run and model payload history with a documented policy that preserves required auditability
-**Plans**: 3 plans
+**Plans**: 4 plans
 
 Plans:
 - [ ] 05-01: Make `/v1/worker/health` and `/metrics` expose explicit degraded queue state
 - [ ] 05-02: Add streamed local object-store ingest for pipeline artifact copies
-- [ ] 05-03: Add explicit retention maintenance, audit tombstones, and operator docs
+- [ ] 05-03: Add retention schema, policy settings, and the explicit maintenance workflow
+- [ ] 05-04: Add retention-aware artifact delivery semantics and operator documentation
 
 ## Progress
 
