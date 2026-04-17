@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to Plan Phase 05
-stopped_at: Phase 05 context gathered
-last_updated: "2026-04-17T19:47:06Z"
+status: Ready to Execute Phase 05
+stopped_at: Phase 05 plans validated
+last_updated: "2026-04-17T20:57:06Z"
 progress:
   total_phases: 5
   completed_phases: 4
-  total_plans: 13
+  total_plans: 17
   completed_plans: 13
 ---
 
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 05 (storage-and-ops) — CONTEXT GATHERED
-Next: `$gsd-plan-phase 5`
+Phase: 05 (storage-and-ops) — PLANNED
+Next: `$gsd-execute-phase 5`
 
 ## Performance Metrics
 
@@ -122,11 +122,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 5 context is now locked around truthful degraded-state reporting, streamed artifact ingest, and explicit retention maintenance
+- Phase 5 storage-and-ops is now planned as four execution units: degraded-state observability, streamed ingest, retention maintenance, and retention-aware artifact delivery/docs
 - The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched unless intentionally incorporated
 
 ## Session Continuity
 
-Last session: 2026-04-17T19:47:06Z
-Stopped at: Phase 05 context gathered
-Resume file: .planning/phases/05-storage-and-ops/05-CONTEXT.md
+Last session: 2026-04-17T20:57:06Z
+Stopped at: Phase 05 plans validated
+Resume file: .planning/phases/05-storage-and-ops/05-storage-and-ops-01-PLAN.md
