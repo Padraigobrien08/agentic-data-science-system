@@ -19,10 +19,10 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Every run now uses an explicit run-scoped workspace and artifact-path contract, so overlapping execution no longer depends on shared repo-global outputs — validated in Phase 1
 - ✓ Background execution is now lease-safe, retry-safe, and auditable on one persisted run identity — validated in Phase 2
 - ✓ Deployment defaults now fail closed for JWT secrets, self-service registration, ops telemetry, and raw payload exposure — validated in Phase 3
+- ✓ Pull requests now gate the documented Compose stack, seeded browser run workflows, and focused Postgres regressions instead of relying on narrow backend/frontend checks alone — validated in Phase 4
 
 ### Active
 
-- [ ] Expand automated verification so the documented backend, worker, frontend, and concurrency paths are gated in CI
 - [ ] Add storage and retention controls so artifact ingestion, payload growth, and operational history scale without corrupting trust
 
 ### Out of Scope
@@ -35,7 +35,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map shows that several core platform assumptions still depend on shared filesystem paths, cwd mutation, and large multi-responsibility modules.
 
-The highest-value current concerns are operational rather than feature-based. The first three trust-boundary phases are now complete: run outputs are isolated, worker attempts are lease-safe and auditable, and insecure auth/ops defaults have been removed. The next major gap is verification depth: the documented product stack is still not fully exercised in pull-request CI, and authenticated frontend plus concurrency regressions are not yet gated automatically. The active project therefore remains a production-hardening milestone for an already-valuable system, not a greenfield build.
+The highest-value current concerns are operational rather than feature-based. The first four trust-boundary phases are now complete: run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth/ops defaults have been removed, and pull-request CI now exercises the documented stack, seeded browser workflows, and focused Postgres regressions. The next major gap is storage and retention behavior under sustained usage. The active project therefore remains a production-hardening milestone for an already-valuable system, not a greenfield build.
 
 ## Constraints
 
@@ -74,4 +74,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-16 after Phase 3 completion*
+*Last updated: 2026-04-17 after Phase 4 completion*
