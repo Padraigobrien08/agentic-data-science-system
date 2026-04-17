@@ -56,6 +56,7 @@ class AnalysisRunSummary(BaseModel):
 class AnalysisRunDetailResponse(AnalysisRunSummary):
     """Single run with optional large JSON fields (gated by query param in the route)."""
 
+    compacted_at: datetime | None = None
     input_payload_json: dict | list | None = None
     output_payload_json: dict | list | None = None
     meta_json: dict | list | None = None
@@ -86,6 +87,7 @@ def analysis_run_to_detail(
     if not include_payloads:
         return AnalysisRunDetailResponse(
             **base.model_dump(),
+            compacted_at=row.compacted_at,
             input_payload_json=None,
             output_payload_json=None,
             meta_json=None,
@@ -93,6 +95,7 @@ def analysis_run_to_detail(
         )
     return AnalysisRunDetailResponse(
         **base.model_dump(),
+        compacted_at=row.compacted_at,
         input_payload_json=row.input_payload_json,
         output_payload_json=row.output_payload_json,
         meta_json=row.meta_json,
@@ -216,6 +219,7 @@ class ModelCallApiItem(BaseModel):
     finished_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
+    payloads_redacted_at: datetime | None = None
     request_payload_json: dict | list | None = None
     response_payload_json: dict | list | None = None
 
@@ -239,6 +243,7 @@ def model_call_to_api_item(row: ModelCall, *, include_payloads: bool) -> ModelCa
         finished_at=row.finished_at,
         created_at=row.created_at,
         updated_at=row.updated_at,
+        payloads_redacted_at=row.payloads_redacted_at,
         request_payload_json=row.request_payload_json if include_payloads else None,
         response_payload_json=row.response_payload_json if include_payloads else None,
     )

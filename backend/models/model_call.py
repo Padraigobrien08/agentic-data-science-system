@@ -62,6 +62,7 @@ class ModelCall(Base):
 
     request_payload_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
     response_payload_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
+    payloads_redacted_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     error_detail: Mapped[str | None] = mapped_column(Text, nullable=True)
 
     started_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
@@ -71,6 +72,7 @@ class ModelCall(Base):
         DateTime(timezone=True),
         nullable=False,
         server_default=func.now(),
+        index=True,
     )
     updated_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

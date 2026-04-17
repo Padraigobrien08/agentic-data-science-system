@@ -1,18 +1,15 @@
 """Liveness and dependency checks."""
 
-from datetime import datetime, timezone
-
 from fastapi import APIRouter, status
 from fastapi.responses import JSONResponse
 from sqlalchemy import text
-from sqlalchemy.exc import SQLAlchemyError
 
 from backend import __version__
 from backend.api.auth_deps import OpsTokenDep
 from backend.api.deps import DbSession
 from backend.config.settings import get_settings
 from backend.llm.factory import describe_llm_runtime
-from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
+from backend.observability.worker_queue import get_worker_queue_observability
 from backend.schemas.health import DatabaseHealth, HealthResponse, LlmHealth, WorkerHealthResponse
 
 router = APIRouter()
@@ -62,32 +59,39 @@ def worker_health(db: DbSession, _ops_token: OpsTokenDep) -> WorkerHealthRespons
     for a prolonged period suggests the worker is not making progress.
     """
     settings = get_settings()
-    repo = RunExecutionJobRepository(db)
-    try:
-        snap = repo.queue_observability_snapshot(max_attempts=settings.run_job_max_attempts)
-        last_at = repo.last_terminal_job_activity_at()
-    except SQLAlchemyError:
-        return WorkerHealthResponse(
-            queue_depth=0,
-            jobs_running_lease_ok=0,
-            jobs_running_stale_lease=0,
-            open_jobs_on_cancelled_run=0,
-            last_terminal_job_at=None,
-            age_seconds_since_last_terminal_job=None,
-            stale_running_jobs=False,
-            backlog_without_active_lease=False,
-        )
-    age: float | None = None
-    if last_at is not None:
-        la = last_at if last_at.tzinfo is not None else last_at.replace(tzinfo=timezone.utc)
-        age = (datetime.now(timezone.utc) - la).total_seconds()
+    result = get_worker_queue_observability(
+        db,
+        max_attempts=settings.run_job_max_attempts,
+    )
     return WorkerHealthResponse(
-        queue_depth=snap.pending_claimable,
-        jobs_running_lease_ok=snap.jobs_running_lease_ok,
-        jobs_running_stale_lease=snap.jobs_running_stale_lease,
-        open_jobs_on_cancelled_run=snap.open_jobs_on_cancelled_run,
-        last_terminal_job_at=last_at,
-        age_seconds_since_last_terminal_job=age,
-        stale_running_jobs=snap.jobs_running_stale_lease > 0,
-        backlog_without_active_lease=snap.pending_claimable > 0 and snap.jobs_running_lease_ok == 0,
+        status="ok" if result.database_ok else "degraded",
+        database=DatabaseHealth(
+            ok=result.database_ok,
+            detail=result.database_detail,
+        ),
+        queue_state_known=result.queue_state_known,
+        queue_depth=(
+            result.snapshot.pending_claimable
+            if result.snapshot is not None
+            else None
+        ),
+        jobs_running_lease_ok=(
+            result.snapshot.jobs_running_lease_ok
+            if result.snapshot is not None
+            else None
+        ),
+        jobs_running_stale_lease=(
+            result.snapshot.jobs_running_stale_lease
+            if result.snapshot is not None
+            else None
+        ),
+        open_jobs_on_cancelled_run=(
+            result.snapshot.open_jobs_on_cancelled_run
+            if result.snapshot is not None
+            else None
+        ),
+        last_terminal_job_at=result.last_terminal_job_at,
+        age_seconds_since_last_terminal_job=result.age_seconds_since_last_terminal_job,
+        stale_running_jobs=result.stale_running_jobs,
+        backlog_without_active_lease=result.backlog_without_active_lease,
     )

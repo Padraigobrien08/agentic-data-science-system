@@ -83,6 +83,36 @@ class Settings(BaseSettings):
         default=_REPO_ROOT / "data" / "runs",
         description="Filesystem root for durable per-run processed/artifacts workspaces",
     )
+    retention_run_payload_days: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Retention window for analysis-run input/output payload JSON. "
+            "0 disables run-payload compaction."
+        ),
+    )
+    retention_model_payload_days: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Retention window for raw model request/response payload JSON. "
+            "0 disables model-payload redaction."
+        ),
+    )
+    retention_artifact_blob_days: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Retention window for stored artifact blobs. "
+            "0 disables artifact-blob cleanup."
+        ),
+    )
+    retention_batch_size: int = Field(
+        default=500,
+        ge=1,
+        le=10_000,
+        description="Max run or model rows handled per retention maintenance batch.",
+    )
 
     worker_poll_interval_s: float = Field(
         default=2.0,
