@@ -92,9 +92,9 @@ Plans:
 **Plans**: 3 plans
 
 Plans:
-- [ ] 05-01: Harden observability surfaces so degraded dependencies are visible
-- [ ] 05-02: Improve artifact-ingest and storage movement strategy for large outputs
-- [ ] 05-03: Add retention controls, documentation, and tests for payload and artifact lifecycle management
+- [ ] 05-01: Make `/v1/worker/health` and `/metrics` expose explicit degraded queue state
+- [ ] 05-02: Add streamed local object-store ingest for pipeline artifact copies
+- [ ] 05-03: Add explicit retention maintenance, audit tombstones, and operator docs
 
 ## Progress
 
