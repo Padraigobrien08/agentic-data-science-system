@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to Execute Phase 04
-stopped_at: Phase 04 plans validated
-last_updated: "2026-04-16T22:33:48Z"
+status: Awaiting human-action checkpoint
+stopped_at: Phase 04 plan 03 required-check checkpoint
+last_updated: "2026-04-17T07:48:37Z"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-16)
 
 ## Current Position
 
-Phase: 04 (ci-coverage) — PLANNED
-Next: `$gsd-execute-phase 4`
+Phase: 04 (ci-coverage) — CHECKPOINT
+Plan: 3 of 3 (awaiting GitHub required checks)
 
 ## Performance Metrics
 
@@ -114,7 +114,7 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 4 CI coverage is now planned; the next open trust boundary is implementing the new workflows, Playwright fixture path, and required-check checkpoint without destabilizing the current stack
+- Phase 4 implementation is complete in code, but the repository-level required-check checkpoint is still pending for `Full Stack / full-stack` and `Postgres Regressions / postgres-regressions`
 - The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched during Phase 4 execution unless intentionally incorporated
 
 ## Session Continuity
