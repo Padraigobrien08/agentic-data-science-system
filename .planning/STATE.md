@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Ready to discuss Phase 05
-stopped_at: Phase 04 completed
-last_updated: "2026-04-17T19:43:21Z"
+status: Ready to Plan Phase 05
+stopped_at: Phase 05 context gathered
+last_updated: "2026-04-17T19:47:06Z"
 progress:
   total_phases: 5
   completed_phases: 4
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 
 ## Current Position
 
-Phase: 05 (storage-and-ops) — READY
-Plan: discuss phase
+Phase: 05 (storage-and-ops) — CONTEXT GATHERED
+Next: `$gsd-plan-phase 5`
 
 ## Performance Metrics
 
@@ -111,6 +111,10 @@ Recent decisions affecting current work:
 - [Phase 04-ci-coverage]: The CI plan splits into a secure-default full-stack Compose gate, a seeded Playwright browser path, and a separate Postgres regression workflow instead of one monolithic integration job.
 - [Phase 04-ci-coverage]: The full-stack smoke flow must use fixed admin credentials so bootstrap reruns remain login-capable after `409 Bootstrap already completed`.
 - [Phase 04-ci-coverage]: Required merge gating needs an explicit GitHub branch-protection/ruleset checkpoint; PR-triggered workflows alone are not enough.
+- [Phase 05-storage-and-ops]: Health and metrics should expose explicit degraded/error state when dependency-backed queue reads fail instead of silently zero-filling.
+- [Phase 05-storage-and-ops]: Artifact ingest should use streamed copy/hash behavior while preserving the current local object-store contract.
+- [Phase 05-storage-and-ops]: Retention policy should bound run history and raw model payload history first while preserving a minimal auditable record.
+- [Phase 05-storage-and-ops]: Retention should run as an explicit maintenance workflow/job with dry-run and reporting, not implicit request-path deletion.
 
 ### Pending Todos
 
@@ -118,11 +122,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 4 is complete: PR CI now covers the documented full stack, seeded browser flows, and focused Postgres regressions
+- Phase 5 context is now locked around truthful degraded-state reporting, streamed artifact ingest, and explicit retention maintenance
 - The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched unless intentionally incorporated
 
 ## Session Continuity
 
-Last session: 2026-04-16T22:33:48Z
-Stopped at: Phase 04 completed
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-17T19:47:06Z
+Stopped at: Phase 05 context gathered
+Resume file: .planning/phases/05-storage-and-ops/05-CONTEXT.md
