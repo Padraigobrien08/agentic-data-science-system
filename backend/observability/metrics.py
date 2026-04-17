@@ -8,12 +8,14 @@ Prometheus metrics (``prometheus_client``).
 
 from __future__ import annotations
 
+import math
 import time
 
 import structlog
 from prometheus_client import Counter, Gauge, Histogram
-from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
+from backend.observability.worker_queue import get_worker_queue_observability
 
 _log = structlog.get_logger(__name__)
 
@@ -96,6 +98,14 @@ WORKER_QUEUE_JOBS_RUNNING_STALE_LEASE = Gauge(
 WORKER_QUEUE_OPEN_ON_CANCELLED_RUN = Gauge(
     "edgar_worker_queue_open_jobs_on_cancelled_run",
     "Open jobs (pending/running) tied to a cancelled run (cleanup backlog)",
+)
+WORKER_QUEUE_OBSERVABILITY_UP = Gauge(
+    "edgar_worker_queue_observability_up",
+    "1 when DB-backed worker queue observability is current, 0 when queue state is unknown",
+)
+WORKER_QUEUE_OBSERVABILITY_LAST_ERROR_UNIXTIME = Gauge(
+    "edgar_worker_queue_observability_last_error_unixtime",
+    "Unix time of the most recent worker queue observability refresh failure",
 )
 
 # Emitted from the worker process (scrape worker metrics port when enabled, or zero on API-only scrape).
@@ -180,18 +190,15 @@ def observe_worker_job_claimed() -> None:
 
 def refresh_worker_queue_gauges_from_db(session: Session, *, max_attempts: int) -> None:
     """Update queue depth gauges from the database (call during ``GET /metrics``)."""
-    from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
-
-    repo = RunExecutionJobRepository(session)
-    try:
-        snap = repo.queue_observability_snapshot(max_attempts=max_attempts)
-    except SQLAlchemyError as exc:
+    result = get_worker_queue_observability(session, max_attempts=max_attempts)
+    if not result.queue_state_known or result.snapshot is None:
         _log.warning(
             "worker_queue_gauges_refresh_failed",
             worker_event="worker_queue_gauges_refresh_failed",
-            exc_type=type(exc).__name__,
-            error=str(exc),
+            error=result.database_detail,
         )
+        WORKER_QUEUE_OBSERVABILITY_UP.set(0)
+        WORKER_QUEUE_OBSERVABILITY_LAST_ERROR_UNIXTIME.set(time.time())
         for g in (
             WORKER_QUEUE_DEPTH,
             WORKER_QUEUE_PENDING_CLAIMABLE,
@@ -200,16 +207,13 @@ def refresh_worker_queue_gauges_from_db(session: Session, *, max_attempts: int) 
             WORKER_QUEUE_OPEN_ON_CANCELLED_RUN,
             WORKER_LAST_TERMINAL_JOB_UNIXTIME,
         ):
-            g.set(0)
+            g.set(math.nan)
         return
-    last_terminal = repo.last_terminal_job_activity_at()
-    if last_terminal is not None:
-        lt = last_terminal
-        if lt.tzinfo is None:
-            from datetime import timezone as _tz
 
-            lt = lt.replace(tzinfo=_tz.utc)
-        WORKER_LAST_TERMINAL_JOB_UNIXTIME.set(lt.timestamp())
+    WORKER_QUEUE_OBSERVABILITY_UP.set(1)
+    snap = result.snapshot
+    if result.last_terminal_job_at is not None:
+        WORKER_LAST_TERMINAL_JOB_UNIXTIME.set(result.last_terminal_job_at.timestamp())
     else:
         WORKER_LAST_TERMINAL_JOB_UNIXTIME.set(0)
     WORKER_QUEUE_DEPTH.set(snap.pending_claimable)
