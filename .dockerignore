@@ -19,6 +19,11 @@ data/backend.db
 data/artifact_storage
 
 tests
+!tests/
+tests/*
+!tests/__init__.py
+!tests/support/
+!tests/support/**
 notebooks
 examples
 evaluation

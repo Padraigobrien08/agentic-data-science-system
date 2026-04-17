@@ -20,6 +20,8 @@ COPY src ./src
 COPY config.py ./
 COPY alembic ./alembic
 COPY alembic.ini ./
+COPY tests/__init__.py ./tests/__init__.py
+COPY tests/support ./tests/support
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh \
     && useradd --create-home --shell /bin/bash --uid 1000 appuser \

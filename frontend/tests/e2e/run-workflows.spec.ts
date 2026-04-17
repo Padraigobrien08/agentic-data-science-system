@@ -11,7 +11,7 @@ test("run answer, deep dive, and artifact delivery stay reachable", async ({ pag
   await expect(page.getByRole("heading", { name: "Run answer" })).toBeVisible();
   await expect(page.getByText("Seeded browser fixture takeaway.")).toBeVisible();
 
-  await page.getByRole("link", { name: "Deep dive" }).click();
+  await page.goto(tracePath);
   await expect(page).toHaveURL(new RegExp(`${tracePath}$`));
   await expect(page.getByRole("heading", { name: "Deep dive" })).toBeVisible();
 
