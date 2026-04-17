@@ -4,12 +4,12 @@ milestone: v1.0
 milestone_name: milestone
 status: Ready to execute
 stopped_at: Completed 05-storage-and-ops-02-PLAN.md
-last_updated: "2026-04-17T21:07:46.070Z"
+last_updated: "2026-04-17T21:09:20.379Z"
 progress:
   total_phases: 5
   completed_phases: 4
   total_plans: 17
-  completed_plans: 15
+  completed_plans: 16
 ---
 
 # Project State
@@ -24,7 +24,7 @@ See: .planning/PROJECT.md (updated 2026-04-17)
 ## Current Position
 
 Phase: 05 (storage-and-ops) — EXECUTING
-Plan: 3 of 4
+Plan: 4 of 4
 
 ## Performance Metrics
 
@@ -62,6 +62,7 @@ Plan: 3 of 4
 | Phase 04-ci-coverage P03 | 1min | 2 tasks | 2 files |
 | Phase 04-ci-coverage P02 | 13min | 2 tasks | 11 files |
 | Phase 05-storage-and-ops P01 | 4min | 2 tasks | 5 files |
+| Phase 05-storage-and-ops P03 | 5min | 2 tasks | 10 files |
 
 ## Accumulated Context
 
@@ -122,6 +123,8 @@ Recent decisions affecting current work:
 - [Phase 05-storage-and-ops]: Extended the existing storage protocol with put_fileobj so streamed ingest stays inside the current object-store seam.
 - [Phase 05-storage-and-ops]: Local filesystem artifact writes now stage through same-directory temp files and os.replace so failed writes do not publish partial blobs.
 - [Phase 05-storage-and-ops]: ArtifactService now shares one traced store-write and row-persistence path for byte and streamed pipeline ingest while preserving source_filename and source_workspace_relative_path metadata.
+- [Phase 05-storage-and-ops]: Retention defaults stay disabled until operators set explicit day windows, with one shared batch-size cap for each maintenance tier.
+- [Phase 05-storage-and-ops]: Run and model retention compact or redact payload-heavy fields in place and stamp audit-visible timestamps instead of deleting rows.
 
 ### Pending Todos
 
