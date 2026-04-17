@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
 from sqlalchemy import select
@@ -44,6 +45,22 @@ class ArtifactRepository:
                 select(Artifact)
                 .where(Artifact.evaluation_run_id == evaluation_run_id)
                 .order_by(Artifact.created_at, Artifact.role_key)
+            ).all()
+        )
+
+    def list_blob_prune_candidates(
+        self,
+        *,
+        created_before: datetime,
+        limit: int,
+    ) -> list[Artifact]:
+        return list(
+            self._session.scalars(
+                select(Artifact)
+                .where(Artifact.created_at < created_before)
+                .where(Artifact.blob_deleted_at.is_(None))
+                .order_by(Artifact.created_at.asc(), Artifact.id.asc())
+                .limit(limit)
             ).all()
         )
 

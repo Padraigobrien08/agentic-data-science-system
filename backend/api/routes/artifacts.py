@@ -33,6 +33,12 @@ router = APIRouter(prefix="/artifacts", tags=["artifacts"])
 
 _PREVIEW_MAX_BYTES = 512 * 1024
 _STREAM_CHUNK = 64 * 1024
+_RETENTION_EXPIRED_DETAIL = "Artifact content expired by retention policy"
+
+
+def _raise_if_blob_deleted(row: Artifact) -> None:
+    if row.blob_deleted_at is not None:
+        raise HTTPException(status_code=410, detail=_RETENTION_EXPIRED_DETAIL)
 
 
 def _verify_storage_openable(row: Artifact, *, settings: Settings) -> None:
@@ -88,6 +94,7 @@ def get_artifact_content(
     Uses :func:`backend.storage.resolver.open_reader` — no raw filesystem paths in the response.
     """
     row = require_artifact_readable(db, art_svc, artifact_id, user.id)
+    _raise_if_blob_deleted(row)
     settings = art_svc.settings
     _verify_storage_openable(row, settings=settings)
 
@@ -132,6 +139,7 @@ def get_artifact_preview(
     Returns **415** when the artifact is not treated as text-previewable (e.g. binary).
     """
     row = require_artifact_readable(db, art_svc, artifact_id, user.id)
+    _raise_if_blob_deleted(row)
     if not artifact_previewable(row):
         raise HTTPException(
             status_code=415,

@@ -1,4 +1,4 @@
-"""Explicit retention maintenance workflow for run and model payload history."""
+"""Explicit retention maintenance workflow for run, model, and artifact retention."""
 
 from __future__ import annotations
 
@@ -13,7 +13,9 @@ from sqlalchemy.orm import Session
 from backend.config.settings import Settings, get_settings
 from backend.db.session import SessionLocal
 from backend.repositories.analysis_run_repository import AnalysisRunRepository
+from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.model_call_repository import ModelCallRepository
+from backend.storage import delete_at_uri
 
 
 def _positive_int(raw: str) -> int:
@@ -32,8 +34,10 @@ def _empty_report(*, dry_run: bool) -> dict[str, Any]:
         "dry_run": dry_run,
         "run_candidates": 0,
         "model_call_candidates": 0,
+        "artifact_candidates": 0,
         "runs_compacted": 0,
         "model_calls_redacted": 0,
+        "artifact_blobs_pruned": 0,
         "errors": [],
     }
 
@@ -86,6 +90,7 @@ def run_retention_maintenance(
     report = _empty_report(dry_run=dry_run)
     runs = AnalysisRunRepository(session)
     model_calls = ModelCallRepository(session)
+    artifacts = ArtifactRepository(session)
 
     try:
         run_candidates = []
@@ -104,6 +109,14 @@ def run_retention_maintenance(
             )
         report["model_call_candidates"] = len(model_call_candidates)
 
+        artifact_candidates = []
+        if cfg.retention_artifact_blob_days > 0:
+            artifact_candidates = artifacts.list_blob_prune_candidates(
+                created_before=current_time - timedelta(days=cfg.retention_artifact_blob_days),
+                limit=batch_limit,
+            )
+        report["artifact_candidates"] = len(artifact_candidates)
+
         if dry_run:
             return report
 
@@ -117,9 +130,20 @@ def run_retention_maintenance(
             row.response_payload_json = None
             row.payloads_redacted_at = current_time
 
+        artifact_blobs_pruned = 0
+        for row in artifact_candidates:
+            try:
+                delete_at_uri(row.storage_uri, settings=cfg)
+            except Exception as exc:  # noqa: BLE001
+                report["errors"].append(f"Artifact {row.id}: {type(exc).__name__}: {exc}")
+                continue
+            row.blob_deleted_at = current_time
+            artifact_blobs_pruned += 1
+
         session.commit()
         report["runs_compacted"] = len(run_candidates)
         report["model_calls_redacted"] = len(model_call_candidates)
+        report["artifact_blobs_pruned"] = artifact_blobs_pruned
         return report
     except Exception as exc:  # noqa: BLE001
         session.rollback()
@@ -135,8 +159,10 @@ def format_retention_report(report: dict[str, Any], *, json_output: bool) -> str
         f"dry_run={report['dry_run']}",
         f"run_candidates={report['run_candidates']}",
         f"model_call_candidates={report['model_call_candidates']}",
+        f"artifact_candidates={report['artifact_candidates']}",
         f"runs_compacted={report['runs_compacted']}",
         f"model_calls_redacted={report['model_calls_redacted']}",
+        f"artifact_blobs_pruned={report['artifact_blobs_pruned']}",
     ]
     errors = report.get("errors") or []
     if errors:

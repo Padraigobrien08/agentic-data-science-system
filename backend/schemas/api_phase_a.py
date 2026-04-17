@@ -175,6 +175,7 @@ class ArtifactMetadata(BaseModel):
     byte_size: int | None = None
     content_sha256: str | None = None
     storage_uri: str = Field(description="Backend-specific object locator (e.g. local:…)")
+    blob_deleted_at: datetime | None = None
     created_at: datetime
     updated_at: datetime
 

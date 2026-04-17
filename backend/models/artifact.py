@@ -66,6 +66,11 @@ class Artifact(Base):
     content_sha256: Mapped[str | None] = mapped_column(String(64), nullable=True, index=True)
 
     meta_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
+    blob_deleted_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True),
+        nullable=True,
+        doc="When set, the blob was intentionally pruned by retention policy.",
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
