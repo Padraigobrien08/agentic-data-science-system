@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import hashlib
+import io
 import uuid
 from pathlib import Path
 
@@ -62,6 +64,43 @@ def test_local_store_put_get_list_delete(tmp_path) -> None:
     store.delete("a/b/c.txt")
     with pytest.raises(ObjectNotFound):
         store.get("a/b/c.txt")
+
+
+def test_local_store_put_fileobj_streams_and_preserves_digest(tmp_path) -> None:
+    store = LocalFilesystemStore(tmp_path)
+    payload = (b"0123456789abcdef" * 80_000) + b"tail"
+
+    stored = store.put_fileobj(
+        "a/b/payload.bin",
+        io.BytesIO(payload),
+        content_type="application/octet-stream",
+    )
+
+    assert stored.uri.startswith("local:")
+    assert stored.byte_size == len(payload)
+    assert stored.sha256_hex == hashlib.sha256(payload).hexdigest()
+    assert stored.content_type == "application/octet-stream"
+    assert store.get("a/b/payload.bin") == payload
+
+
+def test_local_store_put_fileobj_removes_temp_file_on_failure(tmp_path) -> None:
+    store = LocalFilesystemStore(tmp_path)
+
+    class BrokenStream:
+        def __init__(self) -> None:
+            self._reads = 0
+
+        def read(self, _size: int = -1) -> bytes:
+            self._reads += 1
+            if self._reads == 1:
+                return b"partial"
+            raise OSError("stream failure")
+
+    with pytest.raises(OSError, match="stream failure"):
+        store.put_fileobj("a/b/payload.bin", BrokenStream())
+
+    assert not store.exists("a/b/payload.bin")
+    assert not list((tmp_path / "a" / "b").glob(".payload.bin.*.tmp"))
 
 
 def test_assert_safe_key_rejects_traversal() -> None:
