@@ -7,9 +7,9 @@
 
 ### Execution Isolation
 
-- [ ] **EXEC-01**: User can run multiple analyses concurrently without one run overwriting another run's processed files or artifacts
-- [ ] **EXEC-02**: User can inspect a completed run and trust that every artifact and report was generated from that run's explicit input/output paths
-- [ ] **EXEC-03**: Operator can rerun or resume a run without depending on process-global cwd changes or repo-root default artifact locations
+- [x] **EXEC-01**: User can run multiple analyses concurrently without one run overwriting another run's processed files or artifacts
+- [x] **EXEC-02**: User can inspect a completed run and trust that every artifact and report was generated from that run's explicit input/output paths
+- [x] **EXEC-03**: Operator can rerun or resume a run without depending on process-global cwd changes or repo-root default artifact locations
 
 ### Worker Reliability
 
@@ -24,9 +24,9 @@
 
 ### Verification
 
-- [ ] **QUAL-01**: Pull request CI exercises the documented Postgres + API + worker + frontend stack instead of only a narrow backend subset
-- [ ] **QUAL-02**: Authenticated frontend flows, artifact delivery, and run-trace navigation are covered by automated tests
-- [ ] **QUAL-03**: Concurrency, artifact-collision, and lease-expiry regressions are covered by automated tests
+- [x] **QUAL-01**: Pull request CI exercises the documented Postgres + API + worker + frontend stack instead of only a narrow backend subset
+- [x] **QUAL-02**: Authenticated frontend flows, artifact delivery, and run-trace navigation are covered by automated tests
+- [x] **QUAL-03**: Concurrency, artifact-collision, and lease-expiry regressions are covered by automated tests
 
 ### Storage and Operations
 
@@ -58,17 +58,17 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| EXEC-01 | Phase 1 | In Progress |
-| EXEC-02 | Phase 1 | In Progress |
-| EXEC-03 | Phase 1 | In Progress |
+| EXEC-01 | Phase 1 | Complete |
+| EXEC-02 | Phase 1 | Complete |
+| EXEC-03 | Phase 1 | Complete |
 | WORK-01 | Phase 2 | Complete |
 | WORK-02 | Phase 2 | Complete |
 | SECU-01 | Phase 3 | Complete |
 | SECU-02 | Phase 3 | Complete |
 | SECU-03 | Phase 3 | Complete |
-| QUAL-01 | Phase 4 | Pending |
-| QUAL-02 | Phase 4 | Pending |
-| QUAL-03 | Phase 4 | Pending |
+| QUAL-01 | Phase 4 | Complete |
+| QUAL-02 | Phase 4 | Complete |
+| QUAL-03 | Phase 4 | Complete |
 | OPER-01 | Phase 5 | Complete |
 | OPER-02 | Phase 5 | Complete |
 | OPER-03 | Phase 5 | Complete |
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-15*
-*Last updated: 2026-04-16 after Phase 3 completion*
+*Last updated: 2026-04-17 after Phase 5 completion*

@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
-status: Phase complete — ready for verification
+status: Milestone complete
 stopped_at: Completed 05-storage-and-ops-04-PLAN.md
-last_updated: "2026-04-17T21:21:34.679Z"
+last_updated: "2026-04-17T21:32:13.887Z"
 progress:
   total_phases: 5
   completed_phases: 5
@@ -19,20 +19,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-17)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 05 — storage-and-ops
+**Current focus:** Milestone complete — v1.0 hardening
 
 ## Current Position
 
-Phase: 05 (storage-and-ops) — EXECUTING
-Plan: 4 of 4
+Milestone: v1.0 — COMPLETE
+Next: `$gsd-complete-milestone`
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 13
+- Total plans completed: 17
 - Average duration: 11 min
-- Total execution time: 2.4 hours
+- Total execution time: 2.9 hours
 
 **By Phase:**
 
@@ -42,11 +42,12 @@ Plan: 4 of 4
 | 02-worker-resilience | 3 | 44min | 15min |
 | 03-secure-defaults | 3 | 22min | 7min |
 | 04-ci-coverage | 3 | 42min | 14min |
+| 05-storage-and-ops | 4 | 27min | 7min |
 
 **Recent Trend:**
 
-- Last 5 plans: 03-secure-defaults-02 (7min), 03-secure-defaults-03 (9min), 04-ci-coverage-01 (28min), 04-ci-coverage-03 (1min), 04-ci-coverage-02 (13min)
-- Trend: Higher variance from full-stack/browser verification work
+- Last 5 plans: 04-ci-coverage-03 (1min), 05-storage-and-ops-01 (4min), 05-storage-and-ops-02 (8min), 05-storage-and-ops-03 (5min), 05-storage-and-ops-04 (10min)
+- Trend: Lower variance with focused backend hardening work
 
 | Phase 01-run-isolation P01 | 14min | 3 tasks | 12 files |
 | Phase 01-run-isolation P02 | 20min | 2 tasks | 15 files |
@@ -62,6 +63,7 @@ Plan: 4 of 4
 | Phase 04-ci-coverage P03 | 1min | 2 tasks | 2 files |
 | Phase 04-ci-coverage P02 | 13min | 2 tasks | 11 files |
 | Phase 05-storage-and-ops P01 | 4min | 2 tasks | 5 files |
+| Phase 05-storage-and-ops P02 | 8min | 2 tasks | 4 files |
 | Phase 05-storage-and-ops P03 | 5min | 2 tasks | 10 files |
 | Phase 05-storage-and-ops P04 | 10min | 2 tasks | 10 files |
 
@@ -137,11 +139,11 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 5 storage-and-ops is now planned as four execution units: degraded-state observability, streamed ingest, retention maintenance, and retention-aware artifact delivery/docs
+- All planned v1.0 hardening phases are complete; the only noted follow-up is a non-blocking `runpy` RuntimeWarning from `python -m backend.maintenance.retention` caused by `backend/maintenance/__init__.py` eagerly importing the module
 - The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched unless intentionally incorporated
 
 ## Session Continuity
 
-Last session: 2026-04-17T21:21:34.676Z
-Stopped at: Completed 05-storage-and-ops-04-PLAN.md
-Resume file: None
+Last session: 2026-04-17T21:32:13.887Z
+Stopped at: Phase 05 verified and milestone phases complete
+Resume file: .planning/phases/05-storage-and-ops/05-VERIFICATION.md

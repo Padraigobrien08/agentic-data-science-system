@@ -95,7 +95,7 @@ Plans:
 - [x] 05-01: Make `/v1/worker/health` and `/metrics` expose explicit degraded queue state
 - [x] 05-02: Add streamed local object-store ingest for pipeline artifact copies
 - [x] 05-03: Add retention schema, policy settings, and the explicit maintenance workflow
-- [ ] 05-04: Add retention-aware artifact delivery semantics and operator documentation
+- [x] 05-04: Add retention-aware artifact delivery semantics and operator documentation
 
 ## Progress
 
