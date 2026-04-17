@@ -10,6 +10,7 @@ from __future__ import annotations
 import uuid
 from collections.abc import Iterator
 from dataclasses import dataclass
+from datetime import datetime, timezone
 from typing import Any
 
 import pytest
@@ -367,6 +368,36 @@ def test_content_404_when_blob_deleted_but_row_exists(
     text = str(payload).lower()
     assert "artifact_storage_root" not in text
     assert str(delivery_harness.settings.artifact_storage_root).lower() not in text
+
+
+def test_tombstoned_artifact_returns_410_before_any_storage_read(
+    delivery_harness: ContentDeliveryHarness,
+) -> None:
+    aid = delivery_harness.save_artifact(
+        body=b"expired",
+        role_key="expired-report",
+        filename_suffix=".txt",
+        mime_type="text/plain",
+    )
+    db = delivery_harness.factory()
+    try:
+        row = db.get(Artifact, aid)
+        assert row is not None
+        row.blob_deleted_at = datetime(2026, 4, 17, tzinfo=timezone.utc)
+        row.storage_uri = "s3:secret-bucket/internal/path/expired-report.txt"
+        db.commit()
+    finally:
+        db.close()
+
+    for path in ("content", "preview"):
+        response = delivery_harness.api_get(f"/v1/artifacts/{aid}/{path}")
+        assert response.status_code == 410
+        payload = response.json()
+        assert payload["detail"] == "Artifact content expired by retention policy"
+        text = str(payload).lower()
+        assert "secret-bucket" not in text
+        assert "internal/path" not in text
+        assert "s3:" not in text
 
 
 def test_content_502_unsupported_uri_scheme_generic_detail(

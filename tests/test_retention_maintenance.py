@@ -15,18 +15,24 @@ import backend.models  # noqa: F401
 from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
+from backend.models.artifact import Artifact
 from backend.models.enums import AnalysisRunStatus, ModelCallStatus
+from backend.models.enums import ArtifactKind
 from backend.models.model_call import ModelCall
 from backend.models.project import Project
 from backend.models.user import User
 from backend.repositories.analysis_run_repository import AnalysisRunRepository
+from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.model_call_repository import ModelCallRepository
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
+    ArtifactDetailResponse,
     ModelCallApiItem,
     analysis_run_to_detail,
+    artifact_to_detail,
     model_call_to_api_item,
 )
+from backend.storage.local import LocalFilesystemStore
 
 SECURE_JWT_SECRET = "secure-jwt-secret-minimum-32-characters-long"
 BOOTSTRAP_TOKEN = "pytest-bootstrap-token"
@@ -51,14 +57,16 @@ def _assert_same_utc_instant(actual: datetime | None, expected: datetime) -> Non
 
 
 @pytest.fixture
-def retention_session() -> tuple[Session, Settings]:
+def retention_session(tmp_path) -> tuple[Session, Settings]:
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
     session = factory()
     settings = _retention_settings(
+        artifact_storage_root=tmp_path / "artifact_storage",
         retention_run_payload_days=30,
         retention_model_payload_days=30,
+        retention_artifact_blob_days=30,
         retention_batch_size=100,
     )
     try:
@@ -67,7 +75,7 @@ def retention_session() -> tuple[Session, Settings]:
         session.close()
 
 
-def _seed_retention_history(session: Session) -> dict[str, uuid.UUID]:
+def _seed_retention_history(session: Session, *, settings: Settings) -> dict[str, uuid.UUID]:
     user = User(email=f"retention-{uuid.uuid4().hex[:8]}@example.com")
     session.add(user)
     session.flush()
@@ -137,6 +145,42 @@ def _seed_retention_history(session: Session) -> dict[str, uuid.UUID]:
         updated_at=old_timestamp,
     )
     session.add_all([eligible_model_call, fresh_model_call, unscoped_model_call])
+
+    store = LocalFilesystemStore(settings.artifact_storage_root)
+    eligible_blob = store.put(
+        "retention/eligible-report.txt",
+        b"eligible artifact blob",
+        content_type="text/plain",
+    )
+    fresh_blob = store.put(
+        "retention/fresh-report.txt",
+        b"fresh artifact blob",
+        content_type="text/plain",
+    )
+
+    eligible_artifact = Artifact(
+        analysis_run_id=eligible_run.id,
+        role_key="eligible_report",
+        kind=ArtifactKind.document,
+        storage_uri=eligible_blob.uri,
+        mime_type="text/plain",
+        byte_size=eligible_blob.byte_size,
+        content_sha256=eligible_blob.sha256_hex,
+        created_at=old_timestamp,
+        updated_at=old_timestamp,
+    )
+    fresh_artifact = Artifact(
+        analysis_run_id=fresh_run.id,
+        role_key="fresh_report",
+        kind=ArtifactKind.document,
+        storage_uri=fresh_blob.uri,
+        mime_type="text/plain",
+        byte_size=fresh_blob.byte_size,
+        content_sha256=fresh_blob.sha256_hex,
+        created_at=fresh_timestamp,
+        updated_at=fresh_timestamp,
+    )
+    session.add_all([eligible_artifact, fresh_artifact])
     session.commit()
 
     return {
@@ -146,6 +190,8 @@ def _seed_retention_history(session: Session) -> dict[str, uuid.UUID]:
         "eligible_model_call_id": eligible_model_call.id,
         "fresh_model_call_id": fresh_model_call.id,
         "unscoped_model_call_id": unscoped_model_call.id,
+        "eligible_artifact_id": eligible_artifact.id,
+        "fresh_artifact_id": fresh_artifact.id,
     }
 
 
@@ -161,6 +207,7 @@ def test_retention_settings_fields_exist() -> None:
 def test_retention_schema_columns_exist() -> None:
     assert "compacted_at" in AnalysisRun.__table__.columns.keys()
     assert "payloads_redacted_at" in ModelCall.__table__.columns.keys()
+    assert "blob_deleted_at" in Artifact.__table__.columns.keys()
 
 
 def test_retention_serializer_surfaces_run_and_model_timestamps() -> None:
@@ -206,6 +253,24 @@ def test_retention_serializer_surfaces_run_and_model_timestamps() -> None:
     assert call_hidden_payloads.request_payload_json is None
     assert call_hidden_payloads.response_payload_json is None
 
+    artifact = Artifact(
+        id=uuid.uuid4(),
+        analysis_run_id=run.id,
+        role_key="report",
+        kind=ArtifactKind.document,
+        storage_uri="local:retention/report.txt",
+        mime_type="text/plain",
+        blob_deleted_at=timestamp,
+        created_at=created_at,
+        updated_at=created_at,
+    )
+    artifact_validated = ArtifactDetailResponse.model_validate(artifact)
+    artifact_hidden_meta = artifact_to_detail(artifact, include_meta=False)
+
+    assert artifact_validated.blob_deleted_at == timestamp
+    assert artifact_hidden_meta.blob_deleted_at == timestamp
+    assert artifact_hidden_meta.meta_json is None
+
 
 def test_retention_dry_run_reports_candidates_without_mutation(
     retention_session: tuple[Session, Settings],
@@ -213,7 +278,7 @@ def test_retention_dry_run_reports_candidates_without_mutation(
     from backend.maintenance.retention import format_retention_report, run_retention_maintenance
 
     session, settings = retention_session
-    seeded = _seed_retention_history(session)
+    seeded = _seed_retention_history(session, settings=settings)
 
     report = run_retention_maintenance(
         session,
@@ -226,15 +291,19 @@ def test_retention_dry_run_reports_candidates_without_mutation(
         "dry_run",
         "run_candidates",
         "model_call_candidates",
+        "artifact_candidates",
         "runs_compacted",
         "model_calls_redacted",
+        "artifact_blobs_pruned",
         "errors",
     ]
     assert report["dry_run"] is True
     assert report["run_candidates"] == 1
     assert report["model_call_candidates"] == 1
+    assert report["artifact_candidates"] == 1
     assert report["runs_compacted"] == 0
     assert report["model_calls_redacted"] == 0
+    assert report["artifact_blobs_pruned"] == 0
     assert report["errors"] == []
 
     eligible_run = session.get(AnalysisRun, seeded["eligible_run_id"])
@@ -247,6 +316,9 @@ def test_retention_dry_run_reports_candidates_without_mutation(
     assert eligible_model_call.request_payload_json == {"messages": ["eligible"]}
     assert eligible_model_call.response_payload_json == {"output": "eligible"}
     assert eligible_model_call.payloads_redacted_at is None
+    eligible_artifact = session.get(Artifact, seeded["eligible_artifact_id"])
+    assert eligible_artifact is not None
+    assert eligible_artifact.blob_deleted_at is None
 
     report_json = format_retention_report(report, json_output=True)
     assert json.loads(report_json) == report
@@ -258,9 +330,10 @@ def test_retention_apply_mode_compacts_runs_and_redacts_model_payloads(
     from backend.maintenance.retention import run_retention_maintenance
 
     session, settings = retention_session
-    seeded = _seed_retention_history(session)
+    seeded = _seed_retention_history(session, settings=settings)
     runs = AnalysisRunRepository(session)
     model_calls = ModelCallRepository(session)
+    artifacts = ArtifactRepository(session)
     cutoff = datetime(2026, 3, 18, tzinfo=timezone.utc)
 
     assert [row.id for row in runs.list_compaction_candidates(finished_before=cutoff, limit=10)] == [
@@ -269,6 +342,9 @@ def test_retention_apply_mode_compacts_runs_and_redacts_model_payloads(
     assert [
         row.id for row in model_calls.list_payload_redaction_candidates(created_before=cutoff, limit=10)
     ] == [seeded["eligible_model_call_id"]]
+    assert [row.id for row in artifacts.list_blob_prune_candidates(created_before=cutoff, limit=10)] == [
+        seeded["eligible_artifact_id"]
+    ]
 
     report = run_retention_maintenance(
         session,
@@ -280,16 +356,21 @@ def test_retention_apply_mode_compacts_runs_and_redacts_model_payloads(
     assert report["dry_run"] is False
     assert report["run_candidates"] == 1
     assert report["model_call_candidates"] == 1
+    assert report["artifact_candidates"] == 1
     assert report["runs_compacted"] == 1
     assert report["model_calls_redacted"] == 1
+    assert report["artifact_blobs_pruned"] == 1
     assert report["errors"] == []
 
+    store = LocalFilesystemStore(settings.artifact_storage_root)
     eligible_run = session.get(AnalysisRun, seeded["eligible_run_id"])
     fresh_run = session.get(AnalysisRun, seeded["fresh_run_id"])
     active_run = session.get(AnalysisRun, seeded["active_run_id"])
     eligible_model_call = session.get(ModelCall, seeded["eligible_model_call_id"])
     fresh_model_call = session.get(ModelCall, seeded["fresh_model_call_id"])
     unscoped_model_call = session.get(ModelCall, seeded["unscoped_model_call_id"])
+    eligible_artifact = session.get(Artifact, seeded["eligible_artifact_id"])
+    fresh_artifact = session.get(Artifact, seeded["fresh_artifact_id"])
 
     assert eligible_run is not None
     assert eligible_run.input_payload_json is None
@@ -318,6 +399,15 @@ def test_retention_apply_mode_compacts_runs_and_redacts_model_payloads(
     assert unscoped_model_call is not None
     assert unscoped_model_call.request_payload_json == {"messages": ["skip"]}
     assert unscoped_model_call.payloads_redacted_at is None
+    assert eligible_artifact is not None
+    _assert_same_utc_instant(
+        eligible_artifact.blob_deleted_at,
+        datetime(2026, 4, 17, tzinfo=timezone.utc),
+    )
+    assert store.exists(store.key_from_uri(eligible_artifact.storage_uri)) is False
+    assert fresh_artifact is not None
+    assert fresh_artifact.blob_deleted_at is None
+    assert store.exists(store.key_from_uri(fresh_artifact.storage_uri)) is True
 
 
 def test_retention_apply_mode_is_idempotent_on_second_run(
@@ -326,7 +416,7 @@ def test_retention_apply_mode_is_idempotent_on_second_run(
     from backend.maintenance.retention import run_retention_maintenance
 
     session, settings = retention_session
-    _seed_retention_history(session)
+    _seed_retention_history(session, settings=settings)
 
     first_report = run_retention_maintenance(
         session,
@@ -343,10 +433,13 @@ def test_retention_apply_mode_is_idempotent_on_second_run(
 
     assert first_report["runs_compacted"] == 1
     assert first_report["model_calls_redacted"] == 1
+    assert first_report["artifact_blobs_pruned"] == 1
     assert second_report["run_candidates"] == 0
     assert second_report["model_call_candidates"] == 0
+    assert second_report["artifact_candidates"] == 0
     assert second_report["runs_compacted"] == 0
     assert second_report["model_calls_redacted"] == 0
+    assert second_report["artifact_blobs_pruned"] == 0
     assert second_report["errors"] == []
 
 
