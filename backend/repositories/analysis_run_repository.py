@@ -2,13 +2,23 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from uuid import UUID
 
-from sqlalchemy import select
+from sqlalchemy import or_, select
 from sqlalchemy.orm import Session
 
 from backend.models.analysis_run import AnalysisRun
+from backend.models.enums import AnalysisRunStatus
 from backend.models.project import Project
+
+_COMPACTION_ELIGIBLE_STATUSES: tuple[AnalysisRunStatus, ...] = (
+    AnalysisRunStatus.success,
+    AnalysisRunStatus.partial_success,
+    AnalysisRunStatus.no_data,
+    AnalysisRunStatus.error,
+    AnalysisRunStatus.cancelled,
+)
 
 
 class AnalysisRunRepository:
@@ -43,6 +53,29 @@ class AnalysisRunRepository:
                 .join(Project, AnalysisRun.project_id == Project.id)
                 .where(Project.owner_user_id == owner_user_id)
                 .order_by(AnalysisRun.created_at.desc())
+            ).all()
+        )
+
+    def list_compaction_candidates(
+        self,
+        *,
+        finished_before: datetime,
+        limit: int,
+    ) -> list[AnalysisRun]:
+        payload_present = or_(
+            AnalysisRun.input_payload_json.is_not(None),
+            AnalysisRun.output_payload_json.is_not(None),
+        )
+        return list(
+            self._session.scalars(
+                select(AnalysisRun)
+                .where(AnalysisRun.status.in_(_COMPACTION_ELIGIBLE_STATUSES))
+                .where(AnalysisRun.finished_at.is_not(None))
+                .where(AnalysisRun.finished_at < finished_before)
+                .where(AnalysisRun.compacted_at.is_(None))
+                .where(payload_present)
+                .order_by(AnalysisRun.finished_at.asc(), AnalysisRun.id.asc())
+                .limit(limit)
             ).all()
         )
 

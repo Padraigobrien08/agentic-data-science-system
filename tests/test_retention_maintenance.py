@@ -43,6 +43,13 @@ def _retention_settings(**overrides: object) -> Settings:
     return Settings(**defaults)
 
 
+def _assert_same_utc_instant(actual: datetime | None, expected: datetime) -> None:
+    assert actual is not None
+    if actual.tzinfo is None:
+        actual = actual.replace(tzinfo=timezone.utc)
+    assert actual == expected
+
+
 @pytest.fixture
 def retention_session() -> tuple[Session, Settings]:
     engine = create_engine("sqlite:///:memory:")
@@ -287,7 +294,10 @@ def test_retention_apply_mode_compacts_runs_and_redacts_model_payloads(
     assert eligible_run is not None
     assert eligible_run.input_payload_json is None
     assert eligible_run.output_payload_json is None
-    assert eligible_run.compacted_at == datetime(2026, 4, 17, tzinfo=timezone.utc)
+    _assert_same_utc_instant(
+        eligible_run.compacted_at,
+        datetime(2026, 4, 17, tzinfo=timezone.utc),
+    )
     assert fresh_run is not None
     assert fresh_run.input_payload_json == {"goal": "fresh"}
     assert fresh_run.compacted_at is None
@@ -298,7 +308,10 @@ def test_retention_apply_mode_compacts_runs_and_redacts_model_payloads(
     assert eligible_model_call is not None
     assert eligible_model_call.request_payload_json is None
     assert eligible_model_call.response_payload_json is None
-    assert eligible_model_call.payloads_redacted_at == datetime(2026, 4, 17, tzinfo=timezone.utc)
+    _assert_same_utc_instant(
+        eligible_model_call.payloads_redacted_at,
+        datetime(2026, 4, 17, tzinfo=timezone.utc),
+    )
     assert fresh_model_call is not None
     assert fresh_model_call.request_payload_json == {"messages": ["fresh"]}
     assert fresh_model_call.payloads_redacted_at is None
