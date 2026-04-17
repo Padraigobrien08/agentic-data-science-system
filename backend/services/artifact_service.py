@@ -5,7 +5,7 @@ from __future__ import annotations
 import json
 import re
 import uuid
-from collections.abc import Iterator, Mapping
+from collections.abc import Callable, Iterator, Mapping
 from contextlib import contextmanager
 from pathlib import Path
 from typing import BinaryIO
@@ -22,7 +22,8 @@ from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.run_step_repository import RunStepRepository
 from backend.storage import delete_at_uri, open_reader, read_bytes
 from backend.storage.factory import get_local_object_store
-from backend.storage.local import LocalFilesystemStore
+from backend.storage.protocol import ArtifactObjectStore
+from backend.storage.types import StoredObject
 
 _SUFFIX_TO_KIND_MIME: dict[str, tuple[ArtifactKind, str]] = {
     ".csv": (ArtifactKind.tabular, "text/csv"),
@@ -60,7 +61,7 @@ class ArtifactService:
         self,
         session: Session,
         *,
-        store: LocalFilesystemStore | None = None,
+        store: ArtifactObjectStore | None = None,
         settings: Settings | None = None,
         artifacts: ArtifactRepository | None = None,
         run_steps: RunStepRepository | None = None,
@@ -92,6 +93,94 @@ class ArtifactService:
             return f"artifacts/evaluation_runs/{evaluation_run_id}/{artifact_id}_{safe}.{ext}"
         raise ValueError("analysis_run_id or evaluation_run_id is required")
 
+    def _prepare_artifact_write(
+        self,
+        *,
+        role_key: str,
+        analysis_run_id: UUID | None,
+        evaluation_run_id: UUID | None,
+        run_step_id: UUID | None,
+        kind: ArtifactKind | None,
+        mime_type: str | None,
+        filename_suffix: str | None,
+    ) -> tuple[UUID, str, ArtifactKind, str]:
+        if (analysis_run_id is None) == (evaluation_run_id is None):
+            raise ValueError("Provide exactly one of analysis_run_id or evaluation_run_id")
+        if run_step_id is not None and analysis_run_id is None:
+            raise ValueError("run_step_id requires analysis_run_id")
+
+        suffix = filename_suffix or "bin"
+        artifact_id = uuid.uuid4()
+        key = self._build_object_key(
+            artifact_id=artifact_id,
+            role_key=role_key,
+            file_suffix=suffix,
+            analysis_run_id=analysis_run_id,
+            evaluation_run_id=evaluation_run_id,
+        )
+        resolved_kind = kind if kind is not None else ArtifactKind.other
+        resolved_mime_type = (
+            mime_type if mime_type is not None else "application/octet-stream"
+        )
+        return artifact_id, key, resolved_kind, resolved_mime_type
+
+    def _write_artifact_object(
+        self,
+        *,
+        key: str,
+        role_key: str,
+        kind: ArtifactKind,
+        mime_type: str,
+        analysis_run_id: UUID | None,
+        evaluation_run_id: UUID | None,
+        writer: Callable[[str, str], StoredObject],
+    ) -> StoredObject:
+        art_tr = get_tracer("backend.artifacts")
+        attrs: dict[str, str | int | bool] = {
+            "artifact.role": role_key,
+            "artifact.kind": kind.value,
+        }
+        if analysis_run_id is not None:
+            attrs["analysis.run.id"] = str(analysis_run_id)
+        if evaluation_run_id is not None:
+            attrs["evaluation.run.id"] = str(evaluation_run_id)
+        with art_tr.start_as_current_span("artifact.persist", attributes=attrs) as span:
+            stored = writer(key, mime_type)
+            span.set_attribute("artifact.byte_size", int(stored.byte_size))
+            uri = stored.uri
+            span.set_attribute("artifact.storage.uri", uri[:512] if len(uri) > 512 else uri)
+        return stored
+
+    def _insert_artifact_row(
+        self,
+        *,
+        artifact_id: UUID,
+        role_key: str,
+        run_step_id: UUID | None,
+        kind: ArtifactKind,
+        mime_type: str,
+        meta_json: dict | list | None,
+        analysis_run_id: UUID | None,
+        evaluation_run_id: UUID | None,
+        stored: StoredObject,
+    ) -> Artifact:
+        row = Artifact(
+            id=artifact_id,
+            analysis_run_id=analysis_run_id,
+            evaluation_run_id=evaluation_run_id,
+            run_step_id=run_step_id,
+            role_key=role_key,
+            kind=kind,
+            storage_uri=stored.uri,
+            mime_type=mime_type,
+            byte_size=stored.byte_size,
+            content_sha256=stored.sha256_hex,
+            meta_json=meta_json,
+        )
+        self._artifacts.add(row)
+        self._artifacts.flush()
+        return row
+
     def save_bytes(
         self,
         data: bytes,
@@ -110,53 +199,39 @@ class ArtifactService:
 
         Exactly one of ``analysis_run_id`` or ``evaluation_run_id`` must be set.
         """
-        if (analysis_run_id is None) == (evaluation_run_id is None):
-            raise ValueError("Provide exactly one of analysis_run_id or evaluation_run_id")
-        if run_step_id is not None and analysis_run_id is None:
-            raise ValueError("run_step_id requires analysis_run_id")
-
-        suffix = filename_suffix or "bin"
-        artifact_id = uuid.uuid4()
-        key = self._build_object_key(
-            artifact_id=artifact_id,
+        artifact_id, key, resolved_kind, resolved_mime_type = self._prepare_artifact_write(
             role_key=role_key,
-            file_suffix=suffix,
-            analysis_run_id=analysis_run_id,
-            evaluation_run_id=evaluation_run_id,
-        )
-        k = kind if kind is not None else ArtifactKind.other
-        mt = mime_type if mime_type is not None else "application/octet-stream"
-        art_tr = get_tracer("backend.artifacts")
-        attrs: dict[str, str | int | bool] = {
-            "artifact.role": role_key,
-            "artifact.kind": k.value,
-        }
-        if analysis_run_id is not None:
-            attrs["analysis.run.id"] = str(analysis_run_id)
-        if evaluation_run_id is not None:
-            attrs["evaluation.run.id"] = str(evaluation_run_id)
-        with art_tr.start_as_current_span("artifact.persist", attributes=attrs) as span:
-            stored = self._store.put(key, data, content_type=mt)
-            span.set_attribute("artifact.byte_size", int(stored.byte_size))
-            uri = stored.uri
-            span.set_attribute("artifact.storage.uri", uri[:512] if len(uri) > 512 else uri)
-
-        row = Artifact(
-            id=artifact_id,
             analysis_run_id=analysis_run_id,
             evaluation_run_id=evaluation_run_id,
             run_step_id=run_step_id,
-            role_key=role_key,
-            kind=k,
-            storage_uri=stored.uri,
-            mime_type=mt,
-            byte_size=stored.byte_size,
-            content_sha256=stored.sha256_hex,
-            meta_json=meta_json,
+            kind=kind,
+            mime_type=mime_type,
+            filename_suffix=filename_suffix,
         )
-        self._artifacts.add(row)
-        self._artifacts.flush()
-        return row
+        stored = self._write_artifact_object(
+            key=key,
+            role_key=role_key,
+            kind=resolved_kind,
+            mime_type=resolved_mime_type,
+            analysis_run_id=analysis_run_id,
+            evaluation_run_id=evaluation_run_id,
+            writer=lambda object_key, content_type: self._store.put(
+                object_key,
+                data,
+                content_type=content_type,
+            ),
+        )
+        return self._insert_artifact_row(
+            artifact_id=artifact_id,
+            role_key=role_key,
+            run_step_id=run_step_id,
+            kind=resolved_kind,
+            mime_type=resolved_mime_type,
+            meta_json=meta_json,
+            analysis_run_id=analysis_run_id,
+            evaluation_run_id=evaluation_run_id,
+            stored=stored,
+        )
 
     def attach_to_analysis_run(
         self,
@@ -252,7 +327,6 @@ class ArtifactService:
         path = Path(source_path).expanduser().resolve()
         if not path.is_file():
             raise FileNotFoundError(str(path))
-        data = path.read_bytes()
         kind, mime = infer_artifact_kind_and_mime(path)
         provenance_meta = self._pipeline_source_provenance(
             path=path,
@@ -265,8 +339,7 @@ class ArtifactService:
             merged_meta = {**meta_json, **provenance_meta}
         else:
             merged_meta = meta_json
-        return self.save_bytes(
-            data,
+        artifact_id, key, _, _ = self._prepare_artifact_write(
             role_key=role_key,
             analysis_run_id=analysis_run_id,
             evaluation_run_id=evaluation_run_id,
@@ -274,7 +347,31 @@ class ArtifactService:
             kind=kind,
             mime_type=mime,
             filename_suffix=path.suffix,
+        )
+        with path.open("rb") as fh:
+            stored = self._write_artifact_object(
+                key=key,
+                role_key=role_key,
+                kind=kind,
+                mime_type=mime,
+                analysis_run_id=analysis_run_id,
+                evaluation_run_id=evaluation_run_id,
+                writer=lambda object_key, content_type: self._store.put_fileobj(
+                    object_key,
+                    fh,
+                    content_type=content_type,
+                ),
+            )
+        return self._insert_artifact_row(
+            artifact_id=artifact_id,
+            role_key=role_key,
+            run_step_id=run_step_id,
+            kind=kind,
+            mime_type=mime,
             meta_json=merged_meta,
+            analysis_run_id=analysis_run_id,
+            evaluation_run_id=evaluation_run_id,
+            stored=stored,
         )
 
     def ingest_pipeline_paths(
