@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Live Validation and Scale
-status: Ready to Discuss Phase 09
-stopped_at: Phase 08 execution complete
-last_updated: "2026-04-18T16:08:00Z"
+status: Ready to Plan Phase 09
+stopped_at: Phase 09 context gathered
+last_updated: "2026-04-18T16:25:00Z"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -23,7 +23,7 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 ## Current Position
 
-Phase: 09 (evaluation-control-plane) — READY TO DISCUSS
+Phase: 09 (evaluation-control-plane) — READY TO PLAN
 Plan: N/A
 
 ## Performance Metrics
@@ -75,6 +75,10 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 8-summary-first-large-trace-views]: Privileged raw payloads should be fetched on demand per item, not page-wide through initial `include_payloads=true` loads.
 - [Phase 8-summary-first-large-trace-views]: The step timeline remains the organizing spine, and artifacts/model calls should link back to it via phase, role, and status cues.
 - [Phase 8-summary-first-large-trace-views]: Legacy inspector panels can remain available as long as they route users back into the summary-first surface for bounded raw drill-down.
+- [Phase 9-evaluation-control-plane]: Supported evaluation workflows should be API-backed first, with the CLI retained only as a compatibility path.
+- [Phase 9-evaluation-control-plane]: Supported evaluation launches should use curated suite IDs or approved manifests rather than arbitrary repo file paths.
+- [Phase 9-evaluation-control-plane]: Evaluation ownership should be project-scoped by default rather than introducing a global operator-only auth model.
+- [Phase 9-evaluation-control-plane]: Reopened evaluation history should expose persisted run summary plus explicit per-case results, not just a `results_json` blob.
 
 ### Pending Todos
 
@@ -82,12 +86,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- Decide whether the supported evaluation control plane should land API-first, CLI-first, or with an operator UI in the same phase boundary.
 - Phase 09 needs to promote evaluation runs and case results into first-class persisted records without bypassing the run identity, artifact, and raw-access boundaries already established.
+- Planning must decide the exact persistence seam for case results while preserving curated suite identity and project-scoped auth.
 - Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T16:08:00Z
-Stopped at: Phase 08 execution complete
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-18T16:25:00Z
+Stopped at: Phase 09 context gathered
+Resume file: .planning/phases/09-evaluation-control-plane/09-CONTEXT.md
