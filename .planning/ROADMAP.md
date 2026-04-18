@@ -87,7 +87,7 @@
 | 4. CI Coverage | 3/3 | Complete | 2026-04-17 |
 | 5. Storage and Ops | 4/4 | Complete | 2026-04-17 |
 | 6. Validation Boundaries and Policy | 3/3 | Complete | 2026-04-18 |
-| 7. Remote Artifact Storage Contract | 0/TBD | Not started | - |
+| 7. Remote Artifact Storage Contract | 1/3 | In Progress|  |
 | 8. Summary-First Large Trace Views | 0/TBD | Not started | - |
 | 9. Evaluation Control Plane | 0/TBD | Not started | - |
 | 10. Live/Hybrid Execution Hardening | 0/TBD | Not started | - |
