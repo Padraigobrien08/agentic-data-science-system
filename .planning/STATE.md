@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: live-validation-and-scale
-status: phase 8 ui-spec approved; ready to plan
-stopped_at: Phase 8 UI-SPEC approved
-last_updated: "2026-04-18T14:10:26Z"
+status: ready to execute phase 08
+stopped_at: Phase 08 planning complete
+last_updated: "2026-04-18T14:18:36Z"
 progress:
   total_phases: 10
   completed_phases: 7
-  total_plans: 23
+  total_plans: 26
   completed_plans: 23
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 08 planning for summary-first large trace views in v1.1
+**Current focus:** Phase 08 execution for summary-first large trace views in v1.1
 
 ## Current Position
 
 Phase: 08 (summary-first-large-trace-views) — READY
-Plan: UI-SPEC approved; ready to plan
+Plan: 3 execute plans across 3 waves
 
 ## Performance Metrics
 
@@ -86,11 +86,11 @@ None yet.
 ### Blockers/Concerns
 
 - Decide whether the v1.1 evaluation control plane stays API or CLI-first or includes a dedicated operator UI beyond current surfaces.
-- Phase 8 planning must move the trace first-load boundary to typed summaries without losing drill-down auditability for privileged users.
+- Phase 8 execution must move the trace first-load boundary to typed summaries without losing drill-down auditability for privileged users.
 - Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T14:10:26Z
-Stopped at: Phase 8 UI-SPEC approved
-Resume file: .planning/phases/08-summary-first-large-trace-views/08-UI-SPEC.md
+Last session: 2026-04-18T14:18:36Z
+Stopped at: Phase 08 planning complete
+Resume file: .planning/phases/08-summary-first-large-trace-views/08-summary-first-large-trace-views-01-PLAN.md
