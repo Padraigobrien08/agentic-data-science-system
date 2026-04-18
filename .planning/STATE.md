@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: live-validation-and-scale
-status: phase 8 research captured; awaiting ui-spec decision
-stopped_at: Captured research and validation for Phase 8 Summary-First Large Trace Views
-last_updated: "2026-04-18T14:08:00Z"
+status: phase 8 ui-spec approved; ready to plan
+stopped_at: Phase 8 UI-SPEC approved
+last_updated: "2026-04-18T14:10:26Z"
 progress:
   total_phases: 10
   completed_phases: 7
@@ -23,8 +23,8 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 ## Current Position
 
-Phase: 08 (summary-first-large-trace-views) — RESEARCHED
-Plan: research and validation captured; awaiting UI-SPEC gate decision
+Phase: 08 (summary-first-large-trace-views) — READY
+Plan: UI-SPEC approved; ready to plan
 
 ## Performance Metrics
 
@@ -91,6 +91,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T14:08:00Z
-Stopped at: Captured research and validation for Phase 8 Summary-First Large Trace Views
-Resume file: .planning/phases/08-summary-first-large-trace-views/08-RESEARCH.md
+Last session: 2026-04-18T14:10:26Z
+Stopped at: Phase 8 UI-SPEC approved
+Resume file: .planning/phases/08-summary-first-large-trace-views/08-UI-SPEC.md
