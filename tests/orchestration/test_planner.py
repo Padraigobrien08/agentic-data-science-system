@@ -108,6 +108,27 @@ def test_unsupported_goal_returns_error() -> None:
         )
     )
     assert not out.ok
+    assert out.routing_source == "deterministic"
+    assert out.effective_tickers == ["AAPL"]
+    assert len(out.rewrite_suggestions) >= 2
+    assert out.errors[0].code == CODE_ORCH_UNSUPPORTED_GOAL
+
+
+def test_out_of_scope_ticker_returns_scope_guidance() -> None:
+    p = Planner()
+    out = p.build_plan(
+        OrchestrationInput(
+            tickers=["AAPL", "MSFT"],
+            analysis_goal="Analyze TSLA over the last 8 quarters for margin pressure",
+            refresh=False,
+        )
+    )
+
+    assert not out.ok
+    assert out.routing_source == "deterministic"
+    assert out.out_of_scope_tickers == ["TSLA"]
+    assert out.effective_tickers == ["AAPL", "MSFT"]
+    assert any("TSLA" in suggestion for suggestion in out.rewrite_suggestions)
     assert out.errors[0].code == CODE_ORCH_UNSUPPORTED_GOAL
 
 
