@@ -29,7 +29,10 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- No active milestone is open. Use `$gsd-new-milestone` to define the next requirement set and roadmap.
+- [ ] Chat becomes the primary surface for reading completed analysis answers instead of the standalone run page
+- [ ] Users can navigate from a chat answer to report, evidence, artifacts, critic, and trace surfaces through one compact navigation area
+- [ ] Normal analyst phrasing in chat routes to supported analysis paths or returns actionable rewrite guidance instead of dead-end intent failures
+- [ ] Chat-triggered runs complete reliably in the documented local stack, including run-workspace creation and background execution delivery
 
 ### Out of Scope
 
@@ -40,20 +43,32 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Shipped:** `v1.1 Live Validation and Scale` on 2026-04-18
-**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, and clean archive-grade planning traceability.
+**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, and clean archive-grade planning traceability. Fresh hands-on testing also exposed the next product bottleneck: the answer experience still lives mostly on a fragmented run page instead of in chat, while worker startup and prompt routing still fail on realistic local usage paths.
 
-## Next Milestone Goals
+## Current Milestone: v1.2 Chat-First Analysis Experience
 
+**Goal:** Make workspace chat the primary place where users receive, inspect, and continue analysis answers, while fixing the runtime and prompt-handling issues that currently break that experience.
+
+**Target features:**
+- Deliver completed run answers directly into workspace chat with stable linkage back to the underlying run
+- Attach one compact evidence-navigation area to the chat answer for report, evidence, artifacts, critic output, and trace views
+- Accept normal analyst phrasing in chat for common deterioration, anomaly, and peer-comparison requests, or return helpful rewrite guidance
+- Keep the documented Compose stack reliable enough for chat-native delivery, including run-workspace writes and background execution
+
+## Future Milestone Candidates
+
+- Environment-aware onboarding so secure-default deployments do not present dead-end registration flows
 - Scheduled live canary suites with alerting and explicit request-budget controls
 - Promotion of failing live or hybrid cases into deterministic fixture regressions
-- Brokered short-lived delivery URLs for very large artifacts when proxy delivery becomes a bottleneck
 - Cross-run evidence-coverage and weak-evidence summaries for operator review
 
 ## Context
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map showed that several core platform assumptions still depended on shared filesystem paths, cwd mutation, and large multi-responsibility modules before the v1.0 hardening effort.
 
-The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability. The milestone is now archived and the repo is ready for next-milestone planning.
+The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability.
+
+The next milestone comes directly from local product testing after the `v1.1` ship. The current answer-reading flow still pushes users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result is the workspace chat that launched the run. The same testing also surfaced two supporting failures that block trust in a chat-first experience: ordinary analyst wording can still miss the deterministic intent matcher, and the background worker still fails to boot in Compose because of a circular import. `v1.2` therefore needs to move the answer into chat while fixing the delivery seams that make that experience brittle today.
 
 ## Constraints
 
@@ -94,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after v1.1 milestone archive*
+*Last updated: 2026-04-18 after starting v1.2 milestone planning*

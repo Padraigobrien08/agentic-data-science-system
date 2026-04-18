@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.1
-milestone_name: Live Validation and Scale
-status: Milestone complete
-stopped_at: v1.1 archived and ready for next milestone planning
-last_updated: "2026-04-18T19:12:00Z"
+milestone: v1.2
+milestone_name: Chat-First Analysis Experience
+status: Defining requirements
+stopped_at: milestone initialized; defining requirements and roadmap
+last_updated: "2026-04-18T20:15:00Z"
 progress:
-  total_phases: 6
-  completed_phases: 6
-  total_plans: 18
-  completed_plans: 18
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -19,13 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Plan the next milestone from the archived `v1.1 Live Validation and Scale` baseline.
+**Current focus:** Define `v1.2 Chat-First Analysis Experience` from the freshly tested product gaps around chat delivery, evidence navigation, prompt handling, and runtime reliability.
 
 ## Current Position
 
-Phase: none
-Plan: none
-Milestone: `v1.1` — archived
+Phase: Not started (defining requirements)
+Plan: —
+Milestone: `v1.2 Chat-First Analysis Experience`
+Status: Defining requirements
+Last activity: 2026-04-18 — Milestone `v1.2` started from hands-on product testing feedback
 
 ## Performance Metrics
 
@@ -90,6 +92,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-18T19:12:00Z
-Stopped at: v1.1 archived and ready for next milestone planning
+Last session: 2026-04-18T20:15:00Z
+Stopped at: milestone initialized; defining requirements and roadmap
 Resume file: .planning/PROJECT.md
