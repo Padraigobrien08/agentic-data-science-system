@@ -190,3 +190,61 @@ def test_worker_process_next_job_mocked(
         assert jobs[0].status == RunExecutionJobStatus.completed
     finally:
         s.close()
+
+
+def test_run_status_moves_off_pending_after_worker_claim(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, h, factory = api_client
+    created = client.post(
+        "/v1/runs",
+        headers=h,
+        json={
+            "project_id": project_id,
+            "orchestration_goal_text": "find unusual financial changes",
+            "input_payload_json": {
+                "tickers": ["MSFT"],
+                "analysis_goal": "find unusual financial changes",
+            },
+            "enqueue_execution": True,
+        },
+    )
+    assert created.status_code == 201
+    run_id = created.json()["id"]
+
+    initial = client.get(f"/v1/runs/{run_id}/status", headers=h)
+    assert initial.status_code == 200
+    initial_body = initial.json()
+    assert initial_body["status"] == "queued"
+    assert initial_body["has_open_execution_job"] is True
+    assert initial_body["latest_execution_job"]["status"] == "pending"
+
+    def _fake_out() -> OrchestrationOutput:
+        return OrchestrationOutput(
+            status=OrchestrationRunStatus.success,
+            message="ok",
+            interpreted_goal=InterpretedGoal(
+                code=InterpretedGoalCode.full_pipeline,
+                description="d",
+                user_goal_text="g",
+            ),
+            artifact_paths={},
+        )
+
+    from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
+
+    def _fake_traceable(_session, _analysis_run_id, _orch_in, **_: object) -> TraceableEdgarPipelineResult:
+        return TraceableEdgarPipelineResult(_fake_out(), {})
+
+    with patch(
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        _fake_traceable,
+    ):
+        assert process_next_job(factory) is True
+
+    after = client.get(f"/v1/runs/{run_id}/status", headers=h)
+    assert after.status_code == 200
+    after_body = after.json()
+    assert after_body["status"] == "success"
+    assert after_body["has_open_execution_job"] is False
+    assert after_body["latest_execution_job"]["status"] == "completed"

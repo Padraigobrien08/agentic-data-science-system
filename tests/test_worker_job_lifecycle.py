@@ -23,6 +23,12 @@ from backend.models.user import User
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.exceptions import WorkerLeaseLostError
 from backend.worker.loop import process_next_job
+from edgar_project.orchestration.schemas import (
+    InterpretedGoal,
+    InterpretedGoalCode,
+    OrchestrationOutput,
+    OrchestrationRunStatus,
+)
 
 
 @pytest.fixture
@@ -239,6 +245,56 @@ def test_renew_lease_rejects_stale_claim_token(session_factory: sessionmaker[Ses
 
         with pytest.raises(WorkerLeaseLostError):
             repo.renew_lease(job.id, "stale-token", lease_seconds=120.0)
+    finally:
+        db.close()
+
+
+def test_successful_process_next_job_completes_single_attempt(
+    session_factory: sessionmaker[Session],
+) -> None:
+    from unittest.mock import patch
+
+    run_id, _ = _seed_queued_job(session_factory)
+
+    def fake_traceable(_session: Session, _analysis_run_id: uuid.UUID, _orch_in: object, **_: object):
+        from backend.agents.traceable_analysis_pipeline import TraceableEdgarPipelineResult
+
+        return TraceableEdgarPipelineResult(
+            OrchestrationOutput(
+                status=OrchestrationRunStatus.success,
+                message="ok",
+                interpreted_goal=InterpretedGoal(
+                    code=InterpretedGoalCode.full_pipeline,
+                    description="full",
+                    user_goal_text="goal",
+                ),
+                artifact_paths={},
+            ),
+            {},
+        )
+
+    with patch(
+        "backend.services.edgar_pipeline_execution_service.run_traceable_edgar_pipeline",
+        fake_traceable,
+    ):
+        assert process_next_job(session_factory, lease_seconds=600.0, max_attempts=3) is True
+
+    db = session_factory()
+    try:
+        rows = list(
+            db.scalars(
+                select(RunExecutionJob)
+                .where(RunExecutionJob.analysis_run_id == run_id)
+                .order_by(RunExecutionJob.attempt_count.asc(), RunExecutionJob.created_at.asc())
+            ).all()
+        )
+        assert len(rows) == 1
+        assert rows[0].status == RunExecutionJobStatus.completed
+        assert rows[0].attempt_count == 1
+
+        run = db.get(AnalysisRun, run_id)
+        assert run is not None
+        assert run.status == AnalysisRunStatus.success
     finally:
         db.close()
 

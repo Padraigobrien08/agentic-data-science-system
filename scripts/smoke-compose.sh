@@ -12,6 +12,7 @@ API_PORT="${API_PORT:-8000}"
 WEB_PORT="${WEB_PORT:-3000}"
 API_BASE="${API_BASE:-http://127.0.0.1:${API_PORT}}"
 WEB_BASE="${WEB_BASE:-http://127.0.0.1:${WEB_PORT}}"
+SMOKE_WORKER_TIMEOUT="${SMOKE_WORKER_TIMEOUT:-120}"
 
 die() { echo "smoke: $*" >&2; exit 1; }
 
@@ -83,6 +84,7 @@ worker_running="$(docker inspect -f '{{.State.Running}}' "$worker_id" 2>/dev/nul
 
 echo "==> Bootstrap admin + login + authenticated project list"
 API_BASE="$API_BASE" \
+SMOKE_WORKER_TIMEOUT="$SMOKE_WORKER_TIMEOUT" \
 EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN="$EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN" \
 EDGAR_SMOKE_ADMIN_EMAIL="$EDGAR_SMOKE_ADMIN_EMAIL" \
 EDGAR_SMOKE_ADMIN_PASSWORD="$EDGAR_SMOKE_ADMIN_PASSWORD" \
@@ -90,6 +92,7 @@ python3 <<'PY'
 import json
 import os
 import sys
+import time
 import urllib.error
 import urllib.request
 
@@ -97,6 +100,8 @@ api = os.environ["API_BASE"].rstrip("/")
 bootstrap_token = os.environ["EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN"]
 email = os.environ["EDGAR_SMOKE_ADMIN_EMAIL"]
 password = os.environ["EDGAR_SMOKE_ADMIN_PASSWORD"]
+smoke_worker_timeout = float(os.environ["SMOKE_WORKER_TIMEOUT"])
+goal = "find unusual financial changes"
 
 
 class RequestFailure(RuntimeError):
@@ -127,6 +132,12 @@ def jreq(
             return json.loads(body.decode())
     except urllib.error.HTTPError as e:
         raise RequestFailure(e.code, path, e.read().decode() or str(e)) from e
+
+
+def ensure_no_permission_denied(label: str, payload: object) -> None:
+    if "Permission denied" in json.dumps(payload, sort_keys=True):
+        print(f"smoke: {label} surfaced Permission denied", file=sys.stderr)
+        raise SystemExit(1)
 
 
 try:
@@ -164,6 +175,110 @@ if not isinstance(projects, list):
     raise SystemExit(1)
 
 print(f"smoke: authenticated project list ok ({len(projects)} projects)")
+
+auth_headers = {"Authorization": f"Bearer {token}"}
+project = next((p for p in projects if p.get("slug") == "smoke-runtime"), None)
+if project is None:
+    project = jreq(
+        "POST",
+        "/v1/projects",
+        {
+            "name": "Smoke Runtime",
+            "slug": "smoke-runtime",
+            "tickers": ["MSFT"],
+        },
+        headers=auth_headers,
+    )
+elif "MSFT" not in (project.get("tickers") or []):
+    project = jreq(
+        "PATCH",
+        f"/v1/projects/{project['id']}",
+        {"tickers": ["MSFT"]},
+        headers=auth_headers,
+    )
+
+project_id = project["id"]
+print(f"smoke: using project {project_id}")
+
+sync_run = jreq(
+    "POST",
+    "/v1/runs",
+    {
+        "project_id": project_id,
+        "orchestration_goal_text": goal,
+        "input_payload_json": {
+            "tickers": ["MSFT"],
+            "analysis_goal": goal,
+        },
+    },
+    headers=auth_headers,
+)
+ensure_no_permission_denied("sync run create", sync_run)
+
+sync_execute = jreq(
+    "POST",
+    f"/v1/runs/{sync_run['id']}/execute",
+    {},
+    headers=auth_headers,
+)
+ensure_no_permission_denied("sync run execute", sync_execute)
+if sync_execute.get("db_status") == "error":
+    print(f"smoke: sync run errored: {sync_execute}", file=sys.stderr)
+    raise SystemExit(1)
+
+sync_status = jreq(
+    "GET",
+    f"/v1/runs/{sync_run['id']}/status",
+    headers=auth_headers,
+)
+ensure_no_permission_denied("sync run status", sync_status)
+if sync_status.get("status") == "error":
+    print(f"smoke: sync run status errored: {sync_status}", file=sys.stderr)
+    raise SystemExit(1)
+
+queued_run = jreq(
+    "POST",
+    "/v1/runs",
+    {
+        "project_id": project_id,
+        "orchestration_goal_text": goal,
+        "input_payload_json": {
+            "tickers": ["MSFT"],
+            "analysis_goal": goal,
+        },
+        "enqueue_execution": True,
+    },
+    headers=auth_headers,
+)
+ensure_no_permission_denied("queued run create", queued_run)
+
+deadline = time.monotonic() + smoke_worker_timeout
+while True:
+    queued_status = jreq(
+        "GET",
+        f"/v1/runs/{queued_run['id']}/status",
+        headers=auth_headers,
+    )
+    ensure_no_permission_denied("queued run status", queued_status)
+    run_status = queued_status.get("status")
+    latest_job = queued_status.get("latest_execution_job") or {}
+    latest_job_status = latest_job.get("status")
+
+    if run_status == "error":
+        print(f"smoke: queued run errored: {queued_status}", file=sys.stderr)
+        raise SystemExit(1)
+    if latest_job_status in {"failed", "cancelled"}:
+        print(f"smoke: queued worker job failed before claim succeeded: {queued_status}", file=sys.stderr)
+        raise SystemExit(1)
+    if run_status not in {"queued", "pending"} or latest_job_status not in {None, "pending"}:
+        print(
+            f"smoke: queued run left initial state ({run_status=}, {latest_job_status=})"
+        )
+        break
+    if time.monotonic() >= deadline:
+        print("smoke: queued run never left initial queued/pending state", file=sys.stderr)
+        raise SystemExit(1)
+    time.sleep(2)
 PY
 
 echo "smoke: OK"
