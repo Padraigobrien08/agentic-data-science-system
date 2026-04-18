@@ -42,6 +42,8 @@ _DETERIORATION: Final[tuple[str, ...]] = (
     "compressing",
     "compression",
     "margin pressure",
+    "cash flow quality",
+    "slipping",
     "underperformance",
 )
 
@@ -69,6 +71,10 @@ _PEER: Final[tuple[str, ...]] = (
     "against peers",
     "industry",
     "relative to",
+    "weaker",
+    "stronger",
+    "underperform",
+    "outperform",
     "benchmark",
 )
 
@@ -130,6 +136,8 @@ _RECENT_TIME: Final[tuple[str, ...]] = (
     "recent quarter",
     "recent quarters",
     "last few quarter",
+    "last 8 quarters",
+    "last eight quarters",
     "past few quarter",
     "trailing",
     "yoy",
@@ -145,6 +153,7 @@ _FULL_HISTORY: Final[tuple[str, ...]] = (
 )
 
 _METRIC_PATTERNS: Final[tuple[tuple[re.Pattern[str], MetricPriority, str], ...]] = (
+    (re.compile(r"\bcash\s+flow\s+quality\b"), MetricPriority.cash_flow, "metric:cash_flow_quality"),
     (re.compile(r"\bmargins?\b"), MetricPriority.margins, "metric:margins"),
     (re.compile(r"\brevenue\s+growth\b"), MetricPriority.revenue_growth, "metric:revenue_growth"),
     (re.compile(r"\brevenue\b"), MetricPriority.revenue_growth, "metric:revenue"),
