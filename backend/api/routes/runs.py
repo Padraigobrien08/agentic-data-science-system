@@ -49,10 +49,13 @@ from backend.schemas.llm_usage import (
 from backend.schemas.run_transparency import build_run_transparency_summary
 from backend.schemas.run_transparency import RunTransparencySummary
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
+from backend.schemas.prompt_routing import PromptRoutingPreviewRequest, PromptRoutingPreviewResponse
 from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
 from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.services.run_lifecycle_service import RunLifecycleService
 from backend.services.run_queue_service import RunQueueService
+from edgar_project.orchestration.planner import Planner
+from edgar_project.orchestration.schemas import PlanningOutcome, OrchestrationInput
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 
@@ -86,6 +89,43 @@ def _artifact_ids_by_step(artifacts: list[Artifact]) -> dict[UUID, list[UUID]]:
         if artifact.run_step_id is not None:
             by_step.setdefault(artifact.run_step_id, []).append(artifact.id)
     return by_step
+
+
+def _to_prompt_routing_preview_response(outcome: PlanningOutcome) -> PromptRoutingPreviewResponse:
+    interpreted_goal = outcome.interpreted_goal
+    return PromptRoutingPreviewResponse(
+        supported=outcome.ok,
+        routing_source=outcome.routing_source,
+        effective_tickers=list(outcome.effective_tickers),
+        out_of_scope_tickers=list(outcome.out_of_scope_tickers),
+        rewrite_suggestions=list(outcome.rewrite_suggestions),
+        reason=None if outcome.ok else (outcome.errors[0].message if outcome.errors else None),
+        intent=interpreted_goal.intent if interpreted_goal is not None else None,
+        goal_code=interpreted_goal.code if interpreted_goal is not None else None,
+        plan_template_id=(
+            interpreted_goal.plan_template.template_id
+            if interpreted_goal is not None and interpreted_goal.plan_template is not None
+            else None
+        ),
+    )
+
+
+@router.post("/route-preview", response_model=PromptRoutingPreviewResponse)
+def route_preview(
+    body: PromptRoutingPreviewRequest,
+    db: DbSession,
+    user: CurrentUserDep,
+) -> PromptRoutingPreviewResponse:
+    """Preview deterministic routing for a project-scoped prompt without creating a run."""
+    require_project_owned(db, body.project_id, user.id)
+    outcome = Planner().build_plan(
+        OrchestrationInput(
+            tickers=body.tickers,
+            analysis_goal=body.analysis_goal,
+            refresh=body.refresh,
+        )
+    )
+    return _to_prompt_routing_preview_response(outcome)
 
 
 @router.post("", response_model=AnalysisRunSummary, status_code=201)
