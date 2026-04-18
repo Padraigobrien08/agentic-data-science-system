@@ -15,6 +15,9 @@ import structlog
 from prometheus_client import Counter, Gauge, Histogram
 from sqlalchemy.orm import Session
 
+from backend.observability.evaluation_validation import (
+    get_evaluation_validation_observability,
+)
 from backend.observability.worker_queue import get_worker_queue_observability
 
 _log = structlog.get_logger(__name__)
@@ -106,6 +109,22 @@ WORKER_QUEUE_OBSERVABILITY_UP = Gauge(
 WORKER_QUEUE_OBSERVABILITY_LAST_ERROR_UNIXTIME = Gauge(
     "edgar_worker_queue_observability_last_error_unixtime",
     "Unix time of the most recent worker queue observability refresh failure",
+)
+EVALUATION_DEPENDENCY_OBSERVABILITY_UP = Gauge(
+    "edgar_evaluation_dependency_observability_up",
+    "1 when DB-backed evaluation dependency observability is current, 0 when dependency state is unknown",
+)
+EVALUATION_SEC_DEPENDENCY_UP = Gauge(
+    "edgar_evaluation_sec_dependency_up",
+    "1 when recent evaluation SEC dependency state is healthy, 0 when degraded",
+)
+EVALUATION_STORAGE_DEPENDENCY_UP = Gauge(
+    "edgar_evaluation_storage_dependency_up",
+    "1 when recent evaluation storage dependency state is healthy, 0 when degraded",
+)
+EVALUATION_RECENT_DEGRADED_CASES = Gauge(
+    "edgar_evaluation_recent_degraded_cases",
+    "Recent live or hybrid evaluation cases carrying SEC or storage degradation evidence",
 )
 
 # Emitted from the worker process (scrape worker metrics port when enabled, or zero on API-only scrape).
@@ -221,6 +240,38 @@ def refresh_worker_queue_gauges_from_db(session: Session, *, max_attempts: int) 
     WORKER_QUEUE_JOBS_RUNNING_LEASE_OK.set(snap.jobs_running_lease_ok)
     WORKER_QUEUE_JOBS_RUNNING_STALE_LEASE.set(snap.jobs_running_stale_lease)
     WORKER_QUEUE_OPEN_ON_CANCELLED_RUN.set(snap.open_jobs_on_cancelled_run)
+
+
+def refresh_evaluation_validation_gauges_from_db(
+    session: Session,
+    *,
+    lookback_hours: int = 24,
+) -> None:
+    """Update evaluation dependency gauges from the database."""
+
+    result = get_evaluation_validation_observability(
+        session,
+        lookback_hours=lookback_hours,
+    )
+    if not result.state_known:
+        _log.warning(
+            "evaluation_validation_gauges_refresh_failed",
+            worker_event="evaluation_validation_gauges_refresh_failed",
+            error=result.detail,
+        )
+        EVALUATION_DEPENDENCY_OBSERVABILITY_UP.set(0)
+        for gauge in (
+            EVALUATION_SEC_DEPENDENCY_UP,
+            EVALUATION_STORAGE_DEPENDENCY_UP,
+            EVALUATION_RECENT_DEGRADED_CASES,
+        ):
+            gauge.set(math.nan)
+        return
+
+    EVALUATION_DEPENDENCY_OBSERVABILITY_UP.set(1)
+    EVALUATION_SEC_DEPENDENCY_UP.set(1 if result.sec_dependency_ok else 0)
+    EVALUATION_STORAGE_DEPENDENCY_UP.set(1 if result.storage_dependency_ok else 0)
+    EVALUATION_RECENT_DEGRADED_CASES.set(result.recent_degraded_case_count or 0)
 
 
 def observe_worker_attempt_complete(

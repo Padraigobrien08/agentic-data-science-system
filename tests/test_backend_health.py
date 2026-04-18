@@ -24,6 +24,8 @@ from backend.db.session import get_db
 from backend.main import create_app
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
+from backend.models.evaluation_case_result import EvaluationCaseResult
+from backend.models.evaluation_run import EvaluationRun
 from backend.models.project import Project
 from backend.models.run_execution_job import RunExecutionJob
 from backend.models.user import User
@@ -102,6 +104,70 @@ def _seed_run_with_job(
         db.close()
 
 
+def _seed_evaluation_case_with_run(
+    factory: sessionmaker[Session],
+    *,
+    degradation_class: str,
+    metadata_json: dict[str, object],
+    latest_run_status: AnalysisRunStatus,
+    case_status: str = "error",
+    input_mode: str = "live",
+) -> None:
+    db = factory()
+    try:
+        user_id = uuid.uuid4()
+        project_id = uuid.uuid4()
+        evaluation_run_id = uuid.uuid4()
+        analysis_run_id = uuid.uuid4()
+        db.add(
+            User(
+                id=user_id,
+                email=f"evaluation-{evaluation_run_id.hex[:8]}@example.test",
+                is_active=True,
+            )
+        )
+        project = Project(
+            id=project_id,
+            owner_user_id=user_id,
+            name=f"evaluation-project-{evaluation_run_id.hex[:8]}",
+        )
+        db.add(project)
+        evaluation_run = EvaluationRun(
+            id=evaluation_run_id,
+            project_id=project_id,
+            initiated_by_user_id=user_id,
+            suite_id="suite_smoke" if input_mode == "live" else "suite_hybrid_smoke_v1",
+            status="running",
+        )
+        db.add(evaluation_run)
+        child_run = AnalysisRun(
+            id=analysis_run_id,
+            project_id=project_id,
+            initiated_by_user_id=user_id,
+            status=latest_run_status,
+            orchestration_goal_text="evaluation run",
+            error_summary=str(metadata_json.get("analysis_run_error_summary") or "dependency degraded"),
+        )
+        db.add(child_run)
+        db.add(
+            EvaluationCaseResult(
+                evaluation_run_id=evaluation_run_id,
+                case_id=f"case-{analysis_run_id.hex[:8]}",
+                input_mode=input_mode,
+                status=case_status,
+                degradation_class=degradation_class,
+                run_goal="goal",
+                message="dependency degraded",
+                metadata_json=metadata_json,
+                latest_analysis_run_id=analysis_run_id,
+                latest_analysis_run_status=latest_run_status.value,
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+
 def _metric_value(payload: str, metric_name: str) -> float:
     prefix = f"{metric_name} "
     for line in payload.splitlines():
@@ -123,7 +189,12 @@ def test_health_returns_ok_and_version(client_and_factory: tuple[TestClient, ses
         llm = body["llm"]
         assert llm["provider"] in ("off", "openai")
         assert isinstance(llm["ready"], bool)
-        assert llm["message"]  # never null — explains status or confirms ready
+        assert llm["message"]
+        evaluation = body["evaluation"]
+        assert evaluation["state_known"] is True
+        assert evaluation["sec_dependency_ok"] is True
+        assert evaluation["storage_dependency_ok"] is True
+        assert evaluation["recent_degraded_case_count"] == 0
 
 
 def test_ready_returns_ready_when_db_ok(
@@ -156,6 +227,10 @@ def test_metrics_prometheus_text(client_and_factory: tuple[TestClient, sessionma
     assert b"edgar_worker_queue_depth" in r.content
     assert b"edgar_worker_queue_pending_claimable" in r.content
     assert b"edgar_worker_last_terminal_job_unixtime" in r.content
+    assert b"edgar_evaluation_dependency_observability_up" in r.content
+    assert b"edgar_evaluation_sec_dependency_up" in r.content
+    assert b"edgar_evaluation_storage_dependency_up" in r.content
+    assert b"edgar_evaluation_recent_degraded_cases" in r.content
 
 
 def test_worker_health_json(client_and_factory: tuple[TestClient, sessionmaker[Session]]) -> None:
@@ -167,6 +242,76 @@ def test_worker_health_json(client_and_factory: tuple[TestClient, sessionmaker[S
     assert "jobs_running_lease_ok" in body
     assert "stale_running_jobs" in body
     assert "backlog_without_active_lease" in body
+    assert "evaluation" in body
+    assert body["evaluation"]["state_known"] is True
+
+
+def test_health_routes_report_recent_sec_and_storage_evaluation_degradation(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+) -> None:
+    client, factory = client_and_factory
+    _seed_evaluation_case_with_run(
+        factory,
+        degradation_class="upstream_sec_degraded",
+        metadata_json={"upstream_error_code": "sec_rate_limited"},
+        latest_run_status=AnalysisRunStatus.error,
+    )
+    _seed_evaluation_case_with_run(
+        factory,
+        degradation_class="product_regression",
+        metadata_json={"storage_error_code": "artifact_storage_unavailable"},
+        latest_run_status=AnalysisRunStatus.error,
+        input_mode="hybrid",
+    )
+
+    health = client.get("/health")
+    assert health.status_code == 200
+    body = health.json()
+    assert body["status"] == "degraded"
+    assert body["evaluation"]["state_known"] is True
+    assert body["evaluation"]["sec_dependency_ok"] is False
+    assert body["evaluation"]["storage_dependency_ok"] is False
+    assert body["evaluation"]["recent_degraded_case_count"] == 2
+    assert "SEC degradation" in body["evaluation"]["detail"]
+    assert "storage degradation" in body["evaluation"]["detail"]
+
+    worker = client.get("/v1/worker/health", headers=OPS_HEADERS)
+    assert worker.status_code == 200
+    worker_body = worker.json()
+    assert worker_body["status"] == "degraded"
+    assert worker_body["evaluation"]["recent_degraded_case_count"] == 2
+    assert worker_body["evaluation"]["sec_dependency_ok"] is False
+    assert worker_body["evaluation"]["storage_dependency_ok"] is False
+
+
+def test_health_routes_report_degraded_when_evaluation_observability_read_fails(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _factory = client_and_factory
+
+    def _raise_scalars(self, *args, **kwargs):
+        raise SQLAlchemyError("evaluation observability unavailable")
+
+    monkeypatch.setattr("sqlalchemy.orm.session.Session.scalars", _raise_scalars)
+
+    health = client.get("/health")
+    assert health.status_code == 200
+    body = health.json()
+    assert body["status"] == "degraded"
+    assert body["database"]["ok"] is True
+    assert body["evaluation"]["state_known"] is False
+    assert body["evaluation"]["sec_dependency_ok"] is None
+    assert body["evaluation"]["storage_dependency_ok"] is None
+    assert body["evaluation"]["recent_degraded_case_count"] is None
+
+    worker = client.get("/v1/worker/health", headers=OPS_HEADERS)
+    assert worker.status_code == 200
+    worker_body = worker.json()
+    assert worker_body["status"] == "degraded"
+    assert worker_body["database"]["ok"] is True
+    assert worker_body["evaluation"]["state_known"] is False
+    assert worker_body["evaluation"]["detail"] == "evaluation observability unavailable"
 
 
 def test_worker_health_reports_degraded_when_queue_observability_read_fails(
@@ -297,3 +442,52 @@ def test_metrics_report_degraded_queue_observability_with_nan_unknown_values(
     assert _metric_value(payload, "edgar_worker_queue_observability_up") == 0.0
     assert math.isnan(_metric_value(payload, "edgar_worker_queue_depth"))
     assert math.isnan(_metric_value(payload, "edgar_worker_last_terminal_job_unixtime"))
+
+
+def test_metrics_report_evaluation_dependency_gauges_for_sec_and_storage_degradation(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+) -> None:
+    client, factory = client_and_factory
+    _seed_evaluation_case_with_run(
+        factory,
+        degradation_class="upstream_sec_degraded",
+        metadata_json={"upstream_error_code": "sec_rate_limited"},
+        latest_run_status=AnalysisRunStatus.error,
+    )
+    _seed_evaluation_case_with_run(
+        factory,
+        degradation_class="product_regression",
+        metadata_json={"storage_error_code": "artifact_storage_unavailable"},
+        latest_run_status=AnalysisRunStatus.error,
+        input_mode="hybrid",
+    )
+
+    response = client.get("/metrics", headers=OPS_HEADERS)
+
+    assert response.status_code == 200
+    payload = response.text
+    assert _metric_value(payload, "edgar_evaluation_dependency_observability_up") == 1.0
+    assert _metric_value(payload, "edgar_evaluation_sec_dependency_up") == 0.0
+    assert _metric_value(payload, "edgar_evaluation_storage_dependency_up") == 0.0
+    assert _metric_value(payload, "edgar_evaluation_recent_degraded_cases") == 2.0
+
+
+def test_metrics_report_degraded_evaluation_observability_with_nan_unknown_values(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _factory = client_and_factory
+
+    def _raise_scalars(self, *args, **kwargs):
+        raise SQLAlchemyError("evaluation observability unavailable")
+
+    monkeypatch.setattr("sqlalchemy.orm.session.Session.scalars", _raise_scalars)
+
+    response = client.get("/metrics", headers=OPS_HEADERS)
+
+    assert response.status_code == 200
+    payload = response.text
+    assert _metric_value(payload, "edgar_evaluation_dependency_observability_up") == 0.0
+    assert math.isnan(_metric_value(payload, "edgar_evaluation_sec_dependency_up"))
+    assert math.isnan(_metric_value(payload, "edgar_evaluation_storage_dependency_up"))
+    assert math.isnan(_metric_value(payload, "edgar_evaluation_recent_degraded_cases"))

@@ -63,6 +63,10 @@ python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmark
 
 `evaluate` defaults to the supported fixture suite id and still supports direct local JSON-output execution. The primary supported workflow is API-backed and project-scoped via `--project-id`; `--suite` is now a developer fallback for raw manifest paths rather than the default product contract. Live or hybrid validation is operator-invoked, fair-access-sensitive work and requires `--allow-live`; it remains non-merge-blocking by default. Use `evaluate -v` for an extended table. `run -v` / `run --json` — orchestration logs or full `OrchestrationOutput`. `main.py` is unchanged.
 
+## Supported evaluation ops
+
+Supported live or hybrid evaluation case results expose `latest_analysis_run_id` on the `/v1/evaluations/{evaluation_run_id}/cases` API so operators can jump straight into the canonical child run. If `/health`, `/v1/worker/health`, or `/metrics` report degraded evaluation SEC or storage state, follow the linked run through `/v1/runs/{run_id}` first, then use the existing run trace and artifact routes to inspect the underlying failure.
+
 ## Notebook demo
 
 Interactive walkthrough (fixture run, tables, one bar chart): open [`notebooks/demo_edgar_pipeline.ipynb`](notebooks/demo_edgar_pipeline.ipynb). From the repo root:

@@ -24,6 +24,30 @@ class LlmHealth(BaseModel):
     )
 
 
+class EvaluationDependencyHealth(BaseModel):
+    """Recent live/hybrid evaluation dependency truth."""
+
+    state_known: bool = Field(
+        description="True when recent evaluation dependency state was read successfully from the database",
+    )
+    sec_dependency_ok: bool | None = Field(
+        default=None,
+        description="True when no recent SEC dependency degradation is observed, false when degraded, null when unknown",
+    )
+    storage_dependency_ok: bool | None = Field(
+        default=None,
+        description="True when no recent storage dependency degradation is observed, false when degraded, null when unknown",
+    )
+    recent_degraded_case_count: int | None = Field(
+        default=None,
+        description="Recent live/hybrid evaluation cases carrying SEC or storage degradation evidence",
+    )
+    detail: str | None = Field(
+        default=None,
+        description="Operator-facing explanation when evaluation dependency state is degraded or unknown",
+    )
+
+
 class HealthResponse(BaseModel):
     """Service health — suitable for load balancers and ops dashboards."""
 
@@ -33,6 +57,9 @@ class HealthResponse(BaseModel):
     llm: LlmHealth = Field(
         description="LLM agent configuration in this API process (worker has its own env — check logs / same vars)",
     )
+    evaluation: EvaluationDependencyHealth = Field(
+        description="Recent supported-evaluation dependency state derived from child-run-backed case results",
+    )
 
 
 class WorkerHealthResponse(BaseModel):
@@ -40,6 +67,9 @@ class WorkerHealthResponse(BaseModel):
 
     status: str = Field(default="ok", description="Overall worker queue observability status")
     database: DatabaseHealth = Field(description="Database dependency status for queue observability")
+    evaluation: EvaluationDependencyHealth = Field(
+        description="Recent supported-evaluation dependency state derived from child-run-backed case results",
+    )
     queue_state_known: bool = Field(
         description="True when queue counts and flags come from a successful DB-backed read",
     )

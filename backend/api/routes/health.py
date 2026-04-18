@@ -9,10 +9,33 @@ from backend.api.auth_deps import OpsTokenDep
 from backend.api.deps import DbSession
 from backend.config.settings import get_settings
 from backend.llm.factory import describe_llm_runtime
+from backend.observability.evaluation_validation import (
+    get_evaluation_validation_observability,
+)
 from backend.observability.worker_queue import get_worker_queue_observability
-from backend.schemas.health import DatabaseHealth, HealthResponse, LlmHealth, WorkerHealthResponse
+from backend.schemas.health import (
+    DatabaseHealth,
+    EvaluationDependencyHealth,
+    HealthResponse,
+    LlmHealth,
+    WorkerHealthResponse,
+)
 
 router = APIRouter()
+
+
+def _health_status_for_evaluation(
+    *,
+    database_ok: bool,
+    evaluation: EvaluationDependencyHealth,
+) -> str:
+    if not database_ok:
+        return "degraded"
+    if not evaluation.state_known:
+        return "degraded"
+    if evaluation.sec_dependency_ok is False or evaluation.storage_dependency_ok is False:
+        return "degraded"
+    return "ok"
 
 
 @router.get("/ready")
@@ -42,11 +65,20 @@ def health(db: DbSession) -> HealthResponse:
         detail = str(exc)
     settings = get_settings()
     lk, lr, lm = describe_llm_runtime(settings)
+    evaluation_result = get_evaluation_validation_observability(db)
+    evaluation = EvaluationDependencyHealth(
+        state_known=evaluation_result.state_known,
+        sec_dependency_ok=evaluation_result.sec_dependency_ok,
+        storage_dependency_ok=evaluation_result.storage_dependency_ok,
+        recent_degraded_case_count=evaluation_result.recent_degraded_case_count,
+        detail=evaluation_result.detail,
+    )
     return HealthResponse(
-        status="ok" if db_ok else "degraded",
+        status=_health_status_for_evaluation(database_ok=db_ok, evaluation=evaluation),
         version=__version__,
         database=DatabaseHealth(ok=db_ok, detail=detail),
         llm=LlmHealth(provider=lk, ready=lr, message=lm),
+        evaluation=evaluation,
     )
 
 
@@ -63,12 +95,24 @@ def worker_health(db: DbSession, _ops_token: OpsTokenDep) -> WorkerHealthRespons
         db,
         max_attempts=settings.run_job_max_attempts,
     )
+    evaluation_result = get_evaluation_validation_observability(db)
+    evaluation = EvaluationDependencyHealth(
+        state_known=evaluation_result.state_known,
+        sec_dependency_ok=evaluation_result.sec_dependency_ok,
+        storage_dependency_ok=evaluation_result.storage_dependency_ok,
+        recent_degraded_case_count=evaluation_result.recent_degraded_case_count,
+        detail=evaluation_result.detail,
+    )
     return WorkerHealthResponse(
-        status="ok" if result.database_ok else "degraded",
+        status=_health_status_for_evaluation(
+            database_ok=result.database_ok,
+            evaluation=evaluation,
+        ),
         database=DatabaseHealth(
             ok=result.database_ok,
             detail=result.database_detail,
         ),
+        evaluation=evaluation,
         queue_state_known=result.queue_state_known,
         queue_depth=(
             result.snapshot.pending_claimable
