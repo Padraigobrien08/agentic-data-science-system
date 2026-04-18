@@ -425,7 +425,11 @@ export function RunTraceExperience({
         ) : (
           <div className="grid gap-2 sm:grid-cols-2">
             {modelCalls.map((c) => (
-              <ModelCallSummaryCard key={c.id} call={c} />
+              <ModelCallSummaryCard
+                key={c.id}
+                call={c}
+                inspectHref={`/projects/${projectId}/runs/${runId}/trace?collection=model-calls&focus=${c.id}#trace-collection`}
+              />
             ))}
           </div>
         )}

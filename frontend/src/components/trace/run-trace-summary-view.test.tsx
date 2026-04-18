@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { RunTraceSummaryView } from "@/components/trace/run-trace-summary-view";
-import type { RunTraceShell } from "@/lib/api/types";
+import type { RunTraceRawDetail, RunTraceShell } from "@/lib/api/types";
 
 const shell: RunTraceShell = {
   run: {
@@ -129,5 +129,40 @@ describe("RunTraceSummaryView", () => {
 
     expect(screen.getAllByText("No trace details yet").length).toBeGreaterThan(0);
     expect(screen.getByText("Trace details couldn't load.")).toBeTruthy();
+  });
+
+  it("keeps the overview visible while one selected raw detail surface is open", () => {
+    const rawDetail: RunTraceRawDetail = {
+      kind: "step",
+      selectedId: "step-1",
+      item: shell.timeline_preview[0],
+      closeHref: "/projects/project-1/runs/run-1/trace?collection=steps#trace-collection",
+    };
+
+    render(
+      <RunTraceSummaryView
+        projectId="project-1"
+        runId="run-1"
+        shell={shell}
+        activeCollection="steps"
+        runAnswerHref="/projects/project-1/runs/run-1"
+        rawDetail={rawDetail}
+        collectionPanel={{
+          projectId: "project-1",
+          runId: "run-1",
+          collection: "steps",
+          items: shell.timeline_preview,
+          limit: 5,
+          offset: 0,
+          hasMore: false,
+          selectedId: "step-1",
+        }}
+      />,
+    );
+
+    expect(screen.getByText(/Audit the run without loading every raw blob first/i)).toBeTruthy();
+    expect(screen.getByText("The step spine stays primary")).toBeTruthy();
+    expect(screen.getAllByText("Open raw payload").length).toBeGreaterThan(0);
+    expect(screen.getAllByRole("link", { name: "Close" }).length).toBeGreaterThan(0);
   });
 });

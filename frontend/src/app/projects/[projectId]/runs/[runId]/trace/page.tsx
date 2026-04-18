@@ -9,6 +9,8 @@ import { AgenticTraceView } from "@/components/trace/agentic-trace-view";
 import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
 import {
+  getRunModelCall,
+  getRunStep,
   getRunTraceSummary,
   listRunArtifacts,
   listRunModelCalls,
@@ -19,6 +21,7 @@ import type {
   ArtifactMetadata,
   ModelCallApiItem,
   ModelCallStatus,
+  RunTraceRawDetail,
   RunStepDetail,
   RunStepStatus,
   TraceCollectionKey,
@@ -51,6 +54,28 @@ function parseOffset(value: string | undefined): number {
   const parsed = Number.parseInt(value ?? "", 10);
   if (!Number.isFinite(parsed) || parsed < 0) return 0;
   return parsed;
+}
+
+function buildTraceHref(
+  projectId: string,
+  runId: string,
+  searchParams: Record<string, string | string[] | undefined>,
+  overrides: Record<string, string | null | undefined>,
+): string {
+  const params = new URLSearchParams();
+  for (const [key, value] of Object.entries(searchParams)) {
+    const normalized = firstValue(value);
+    if (normalized) params.set(key, normalized);
+  }
+  for (const [key, value] of Object.entries(overrides)) {
+    if (!value) {
+      params.delete(key);
+      continue;
+    }
+    params.set(key, value);
+  }
+  const query = params.toString();
+  return `/projects/${projectId}/runs/${runId}/trace${query ? `?${query}` : ""}#trace-collection`;
 }
 
 export default async function RunTracePage({
@@ -106,6 +131,7 @@ export default async function RunTracePage({
   let stepItems: RunStepDetail[] = [];
   let artifactItems: ArtifactMetadata[] = [];
   let modelCallItems: ModelCallApiItem[] = [];
+  let rawDetail: RunTraceRawDetail | null = null;
 
   try {
     if (activeCollection === "steps") {
@@ -144,6 +170,52 @@ export default async function RunTracePage({
     collectionError = e instanceof ApiError ? e.body || e.message : "Unknown error";
   }
 
+  if (!collectionError && focus && activeCollection !== "artifacts") {
+    const closeHref = buildTraceHref(projectId, runId, qp, { focus: null });
+    if (activeCollection === "steps") {
+      try {
+        const item = await getRunStep(runId, focus, {
+          includePayloads: true,
+          includeTransparency: true,
+        });
+        rawDetail = {
+          kind: "step",
+          selectedId: focus,
+          item,
+          closeHref,
+        };
+      } catch (e) {
+        rawDetail = {
+          kind: "step",
+          selectedId: focus,
+          item: null,
+          closeHref,
+          errorMessage: e instanceof ApiError ? e.body || e.message : "Unknown error",
+        };
+      }
+    } else {
+      try {
+        const item = await getRunModelCall(runId, focus, {
+          includePayloads: true,
+        });
+        rawDetail = {
+          kind: "model-call",
+          selectedId: focus,
+          item,
+          closeHref,
+        };
+      } catch (e) {
+        rawDetail = {
+          kind: "model-call",
+          selectedId: focus,
+          item: null,
+          closeHref,
+          errorMessage: e instanceof ApiError ? e.body || e.message : "Unknown error",
+        };
+      }
+    }
+  }
+
   const collectionPanel =
     activeCollection === "steps"
       ? {
@@ -160,6 +232,7 @@ export default async function RunTracePage({
           offset,
           hasMore: stepItems.length === limit,
           selectedId: focus,
+          rawDetail,
         }
       : activeCollection === "artifacts"
         ? {
@@ -190,6 +263,7 @@ export default async function RunTracePage({
             offset,
             hasMore: modelCallItems.length === limit,
             selectedId: focus,
+            rawDetail,
           };
 
   const runAnswerHref = `/projects/${projectId}/runs/${runId}`;
@@ -268,6 +342,7 @@ export default async function RunTracePage({
         runAnswerHref={runAnswerHref}
         activeCollection={activeCollection}
         collectionError={collectionError}
+        rawDetail={rawDetail}
       />
     </div>
   );

@@ -41,6 +41,8 @@ describe("ModelCallSummaryCard", () => {
   it("shows payload omission note when JSON not loaded", () => {
     render(<ModelCallSummaryCard call={baseCall} />);
     expect(screen.getByText(/Payloads omitted/i)).toBeTruthy();
+    expect(screen.getByText("Inspect model call")).toBeTruthy();
+    expect(screen.getAllByText(/Open raw payload/i).length).toBeGreaterThan(0);
   });
 
   it("surfaces failed model call status in the card header", () => {
@@ -55,5 +57,21 @@ describe("ModelCallSummaryCard", () => {
     );
     expect(screen.getByText("failed")).toBeTruthy();
     expect(screen.getByText(/context length exceeded/)).toBeTruthy();
+  });
+
+  it("keeps raw payloads bounded behind the explicit raw toggle when they are present", () => {
+    render(
+      <ModelCallSummaryCard
+        call={{
+          ...baseCall,
+          request_payload_json: { prompt: "hello" },
+          response_payload_json: { output: "world" },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByText(/Open raw payload/i).length).toBeGreaterThan(0);
+    expect(screen.getByText("request_payload_json")).toBeTruthy();
+    expect(screen.getByText("response_payload_json")).toBeTruthy();
   });
 });

@@ -15,6 +15,8 @@ type Props = {
  * listed here; use the Content section to preview or download via the API proxy.
  */
 export function ArtifactDetailPanel({ row, runHref }: Props) {
+  const traceHref = runHref ? `${runHref}/trace?collection=artifacts&focus=${row.id}#trace-collection` : null;
+
   return (
     <div className="space-y-6">
       <Section
@@ -63,6 +65,15 @@ export function ArtifactDetailPanel({ row, runHref }: Props) {
           </MetaRow>
           <MetaRow label="run_step_id">{row.run_step_id ?? "—"}</MetaRow>
           <MetaRow label="evaluation_run_id">{row.evaluation_run_id ?? "—"}</MetaRow>
+          <MetaRow label="trace_link">
+            {traceHref ? (
+              <Link href={traceHref} className="underline">
+                Open artifact preview in run trace
+              </Link>
+            ) : (
+              "—"
+            )}
+          </MetaRow>
         </div>
         <p className="mt-3 text-xs text-[var(--muted)]">
           <code>meta_json</code> often includes <code>orchestration_run_id</code> and{" "}

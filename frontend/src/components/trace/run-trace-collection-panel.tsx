@@ -5,11 +5,13 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { TraceRawDetailSheet } from "@/components/trace/trace-raw-detail-sheet";
 import type {
   ArtifactKind,
   ArtifactMetadata,
   ModelCallApiItem,
   ModelCallStatus,
+  RunTraceRawDetail,
   RunStepDetail,
   RunStepStatus,
   TraceCollectionKey,
@@ -25,6 +27,7 @@ type BaseCollectionProps = {
   hasMore: boolean;
   q?: string;
   selectedId?: string | null;
+  rawDetail?: RunTraceRawDetail | null;
 };
 
 type StepPanelProps = BaseCollectionProps & {
@@ -92,6 +95,26 @@ export function RunTraceCollectionPanel(props: RunTraceCollectionPanelProps) {
     });
   const prevOffset = Math.max(props.offset - props.limit, 0);
   const nextOffset = props.offset + props.limit;
+  const hasDesktopRawDetail =
+    props.rawDetail &&
+    ((props.rawDetail.kind === "step" && props.collection === "steps") ||
+      (props.rawDetail.kind === "model-call" && props.collection === "model-calls"));
+
+  const renderMobileRawDetail = (selectedId: string) => {
+    if (!props.rawDetail || props.rawDetail.selectedId !== selectedId) return null;
+    if (
+      (props.rawDetail.kind === "step" && props.collection !== "steps") ||
+      (props.rawDetail.kind === "model-call" && props.collection !== "model-calls")
+    ) {
+      return null;
+    }
+
+    return (
+      <div className="mt-4 lg:hidden">
+        <TraceRawDetailSheet {...props.rawDetail} />
+      </div>
+    );
+  };
 
   return (
     <Card id="trace-collection" className="rounded-[28px]">
@@ -224,120 +247,138 @@ export function RunTraceCollectionPanel(props: RunTraceCollectionPanelProps) {
         </div>
       </CardHeader>
       <Separator />
-      <CardContent className="space-y-4 pt-6">
-        {props.items.length === 0 ? (
-          <div className="rounded-[20px] border border-dashed border-[var(--border)] bg-white/55 px-5 py-8">
-            <p className="text-base font-semibold text-[var(--foreground)]">No trace details yet</p>
-            <p className="mt-2 max-w-prose text-sm leading-6 text-[var(--muted)]">
-              This run has not produced trace records yet. Wait for execution to finish, reopen the run answer, or retry the run if it is stuck.
-            </p>
+      <CardContent className="pt-6">
+        <div
+          className={
+            hasDesktopRawDetail
+              ? "space-y-4 lg:grid lg:grid-cols-[minmax(0,1fr)_22rem] lg:gap-6 lg:space-y-0"
+              : "space-y-4"
+          }
+        >
+          <div className="space-y-4">
+            {props.items.length === 0 ? (
+              <div className="rounded-[20px] border border-dashed border-[var(--border)] bg-white/55 px-5 py-8">
+                <p className="text-base font-semibold text-[var(--foreground)]">No trace details yet</p>
+                <p className="mt-2 max-w-prose text-sm leading-6 text-[var(--muted)]">
+                  This run has not produced trace records yet. Wait for execution to finish, reopen the run answer, or retry the run if it is stuck.
+                </p>
+              </div>
+            ) : null}
+
+            {props.collection === "steps"
+              ? props.items.map((step) => {
+                  const isSelected = props.selectedId === step.id;
+                  return (
+                    <div key={step.id} className={rowClass(isSelected)}>
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="muted">Step {step.step_index + 1}</Badge>
+                            <Badge variant={step.status === "success" ? "success" : "default"}>
+                              {step.status}
+                            </Badge>
+                            {step.transparency?.trace ? <Badge variant="muted">{step.transparency.trace}</Badge> : null}
+                          </div>
+                          <p className="text-base font-semibold text-[var(--foreground)]">
+                            {step.label ?? step.planned_tool_name ?? "Unnamed step"}
+                          </p>
+                          {step.detail ? (
+                            <p className="max-w-prose text-sm leading-6 text-[var(--muted)]">{step.detail}</p>
+                          ) : null}
+                          <p className="font-mono text-[11px] text-[var(--muted)]">
+                            {formatDate(step.started_at)} → {formatDate(step.finished_at)}
+                          </p>
+                        </div>
+                        <Button asChild variant={isSelected ? "default" : "outline"} size="sm">
+                          <Link href={baseHref({ focus: step.id })}>Inspect step details</Link>
+                        </Button>
+                      </div>
+                      {renderMobileRawDetail(step.id)}
+                    </div>
+                  );
+                })
+              : null}
+
+            {props.collection === "artifacts"
+              ? props.items.map((artifact) => {
+                  const isSelected = props.selectedId === artifact.id;
+                  return (
+                    <div key={artifact.id} className={rowClass(isSelected)}>
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant="muted">{artifact.role_key}</Badge>
+                            <Badge variant="default">{artifact.kind}</Badge>
+                            {artifact.run_step_id ? <Badge variant="muted">Linked step</Badge> : null}
+                          </div>
+                          <p className="text-base font-semibold text-[var(--foreground)]">{artifact.mime_type ?? artifact.role_key}</p>
+                          <p className="font-mono text-[11px] text-[var(--muted)]">
+                            {formatBytes(artifact.byte_size)} · {formatDate(artifact.created_at)}
+                          </p>
+                        </div>
+                        <Button asChild variant="outline" size="sm">
+                          <Link href={`/artifacts/${artifact.id}`}>Open artifact preview</Link>
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })
+              : null}
+
+            {props.collection === "model-calls"
+              ? props.items.map((call) => {
+                  const isSelected = props.selectedId === call.id;
+                  return (
+                    <div key={call.id} className={rowClass(isSelected)}>
+                      <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                        <div className="space-y-2">
+                          <div className="flex flex-wrap items-center gap-2">
+                            <Badge variant={call.status === "success" ? "success" : "default"}>
+                              {call.status}
+                            </Badge>
+                            {call.prompt_version ? <Badge variant="muted">{call.prompt_version}</Badge> : null}
+                          </div>
+                          <p className="text-base font-semibold text-[var(--foreground)]">{call.model_name}</p>
+                          <p className="text-sm text-[var(--muted)]">
+                            {call.provider}
+                            {call.prompt_id ? ` · ${call.prompt_id}` : ""}
+                            {call.latency_ms != null ? ` · ${call.latency_ms}ms` : ""}
+                          </p>
+                        </div>
+                        <Button asChild variant={isSelected ? "default" : "outline"} size="sm">
+                          <Link href={baseHref({ focus: call.id })}>Inspect model call</Link>
+                        </Button>
+                      </div>
+                      {renderMobileRawDetail(call.id)}
+                    </div>
+                  );
+                })
+              : null}
+
+            <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
+              <p className="text-sm text-[var(--muted)]">
+                Showing {props.offset + 1}-{props.offset + props.items.length} for {props.collection}.
+              </p>
+              <div className="flex gap-2">
+                <Button asChild variant="outline" size="sm">
+                  <Link aria-disabled={props.offset === 0} href={baseHref({ offset: prevOffset })}>
+                    Previous
+                  </Link>
+                </Button>
+                <Button asChild variant="outline" size="sm">
+                  <Link aria-disabled={!props.hasMore} href={baseHref({ offset: nextOffset })}>
+                    Next
+                  </Link>
+                </Button>
+              </div>
+            </div>
           </div>
-        ) : null}
 
-        {props.collection === "steps"
-          ? props.items.map((step) => {
-              const isSelected = props.selectedId === step.id;
-              return (
-                <div key={step.id} className={rowClass(isSelected)}>
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="muted">Step {step.step_index + 1}</Badge>
-                        <Badge variant={step.status === "success" ? "success" : "default"}>
-                          {step.status}
-                        </Badge>
-                        {step.transparency?.trace ? <Badge variant="muted">{step.transparency.trace}</Badge> : null}
-                      </div>
-                      <p className="text-base font-semibold text-[var(--foreground)]">
-                        {step.label ?? step.planned_tool_name ?? "Unnamed step"}
-                      </p>
-                      {step.detail ? (
-                        <p className="max-w-prose text-sm leading-6 text-[var(--muted)]">{step.detail}</p>
-                      ) : null}
-                      <p className="font-mono text-[11px] text-[var(--muted)]">
-                        {formatDate(step.started_at)} → {formatDate(step.finished_at)}
-                      </p>
-                    </div>
-                    <Button asChild variant={isSelected ? "default" : "outline"} size="sm">
-                      <Link href={baseHref({ focus: step.id })}>Inspect step details</Link>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
-          : null}
-
-        {props.collection === "artifacts"
-          ? props.items.map((artifact) => {
-              const isSelected = props.selectedId === artifact.id;
-              return (
-                <div key={artifact.id} className={rowClass(isSelected)}>
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant="muted">{artifact.role_key}</Badge>
-                        <Badge variant="default">{artifact.kind}</Badge>
-                        {artifact.run_step_id ? <Badge variant="muted">Linked step</Badge> : null}
-                      </div>
-                      <p className="text-base font-semibold text-[var(--foreground)]">{artifact.mime_type ?? artifact.role_key}</p>
-                      <p className="font-mono text-[11px] text-[var(--muted)]">
-                        {formatBytes(artifact.byte_size)} · {formatDate(artifact.created_at)}
-                      </p>
-                    </div>
-                    <Button asChild variant="outline" size="sm">
-                      <Link href={`/artifacts/${artifact.id}`}>Open artifact preview</Link>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
-          : null}
-
-        {props.collection === "model-calls"
-          ? props.items.map((call) => {
-              const isSelected = props.selectedId === call.id;
-              return (
-                <div key={call.id} className={rowClass(isSelected)}>
-                  <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="space-y-2">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <Badge variant={call.status === "success" ? "success" : "default"}>
-                          {call.status}
-                        </Badge>
-                        {call.prompt_version ? <Badge variant="muted">{call.prompt_version}</Badge> : null}
-                      </div>
-                      <p className="text-base font-semibold text-[var(--foreground)]">{call.model_name}</p>
-                      <p className="text-sm text-[var(--muted)]">
-                        {call.provider}
-                        {call.prompt_id ? ` · ${call.prompt_id}` : ""}
-                        {call.latency_ms != null ? ` · ${call.latency_ms}ms` : ""}
-                      </p>
-                    </div>
-                    <Button asChild variant={isSelected ? "default" : "outline"} size="sm">
-                      <Link href={baseHref({ focus: call.id })}>Inspect model call</Link>
-                    </Button>
-                  </div>
-                </div>
-              );
-            })
-          : null}
-
-        <div className="flex flex-wrap items-center justify-between gap-3 pt-2">
-          <p className="text-sm text-[var(--muted)]">
-            Showing {props.offset + 1}-{props.offset + props.items.length} for {props.collection}.
-          </p>
-          <div className="flex gap-2">
-            <Button asChild variant="outline" size="sm">
-              <Link aria-disabled={props.offset === 0} href={baseHref({ offset: prevOffset })}>
-                Previous
-              </Link>
-            </Button>
-            <Button asChild variant="outline" size="sm">
-              <Link aria-disabled={!props.hasMore} href={baseHref({ offset: nextOffset })}>
-                Next
-              </Link>
-            </Button>
-          </div>
+          {hasDesktopRawDetail && props.rawDetail ? (
+            <div className="hidden lg:block">
+              <TraceRawDetailSheet {...props.rawDetail} />
+            </div>
+          ) : null}
         </div>
       </CardContent>
     </Card>

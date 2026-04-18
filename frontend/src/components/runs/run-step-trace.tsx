@@ -1,4 +1,5 @@
-import { JsonPanel } from "@/components/ui/technical";
+import Link from "next/link";
+
 import type { RunStepDetail } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
 
@@ -33,7 +34,17 @@ function stepLane(s: RunStepDetail): { lane: string; trace: string } {
   return { lane: "—", trace: "" };
 }
 
-export function RunStepTrace({ steps }: { steps: RunStepDetail[] }) {
+type Props = {
+  steps: RunStepDetail[];
+  projectId?: string;
+  runId?: string;
+};
+
+function buildInspectHref(projectId: string, runId: string, stepId: string) {
+  return `/projects/${projectId}/runs/${runId}/trace?collection=steps&focus=${stepId}#trace-collection`;
+}
+
+export function RunStepTrace({ steps, projectId, runId }: Props) {
   if (steps.length === 0) {
     return (
       <p className="text-sm text-[var(--muted)]">
@@ -100,22 +111,23 @@ export function RunStepTrace({ steps }: { steps: RunStepDetail[] }) {
             <p className="mt-1 font-mono text-[10px] text-[var(--muted)]">
               {formatDate(s.started_at)} → {formatDate(s.finished_at)}
             </p>
-            {s.planner_tool_input_json ? (
-              <div className="mt-2">
-                <p className="mb-1 text-[10px] font-semibold uppercase text-[var(--muted)]">
-                  Planner / tool request (planner_tool_input_json)
+            <div className="mt-3 flex flex-wrap items-center gap-3">
+              {projectId && runId ? (
+                <Link
+                  href={buildInspectHref(projectId, runId, s.id)}
+                  className="text-xs font-medium text-[var(--foreground)] underline underline-offset-4"
+                >
+                  Inspect step details
+                </Link>
+              ) : (
+                <span className="text-xs font-medium text-[var(--foreground)]">Inspect step details</span>
+              )}
+              {(s.planner_tool_input_json || s.meta_json) ? (
+                <p className="text-[10px] text-[var(--muted)]">
+                  Open raw payload from the summary-first trace view when you need planner inputs or persisted step metadata.
                 </p>
-                <JsonPanel value={s.planner_tool_input_json} />
-              </div>
-            ) : null}
-            {s.meta_json ? (
-              <div className="mt-2">
-                <p className="mb-1 text-[10px] font-semibold uppercase text-[var(--muted)]">
-                  Step meta (RunStep.meta_json)
-                </p>
-                <JsonPanel value={s.meta_json} />
-              </div>
-            ) : null}
+              ) : null}
+            </div>
           </li>
         );
       })}

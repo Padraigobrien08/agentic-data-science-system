@@ -229,6 +229,22 @@ export interface RunTraceShell {
 
 export type TraceCollectionKey = "steps" | "artifacts" | "model-calls";
 
+export type RunTraceRawDetail =
+  | {
+      kind: "step";
+      selectedId: string;
+      item: RunStepDetail | null;
+      closeHref: string;
+      errorMessage?: string | null;
+    }
+  | {
+      kind: "model-call";
+      selectedId: string;
+      item: ModelCallApiItem | null;
+      closeHref: string;
+      errorMessage?: string | null;
+    };
+
 export interface RunPayloadQueryOptions {
   includePayloads?: boolean;
   includeTransparency?: boolean;

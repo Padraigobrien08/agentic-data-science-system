@@ -13,6 +13,7 @@ import type {
   ArtifactMetadata,
   ModelCallApiItem,
   RunStepDetail,
+  RunTraceRawDetail,
   RunTraceShell,
 } from "@/lib/api/types";
 
@@ -24,6 +25,7 @@ type Props = {
   runAnswerHref: string;
   activeCollection: "steps" | "artifacts" | "model-calls";
   collectionError?: string | null;
+  rawDetail?: RunTraceRawDetail | null;
 };
 
 const SUMMARY_NAV: DeepDiveNavItem[] = [
@@ -82,6 +84,7 @@ export function AgenticTraceView({
   runAnswerHref,
   activeCollection,
   collectionError,
+  rawDetail,
 }: Props) {
   const legacy = deriveLegacyCollections(shell, collectionPanel);
   const includeLlmUsageAnchor = !!shell.transparency;
@@ -97,6 +100,7 @@ export function AgenticTraceView({
           collectionPanel={collectionPanel}
           runAnswerHref={runAnswerHref}
           errorMessage={collectionError}
+          rawDetail={rawDetail}
         />
       </DeepDiveLayout>
 
@@ -133,7 +137,7 @@ export function AgenticTraceView({
               <PlannerOutputPanel orch={null} ai={null} />
               <ToolSequencePanel orch={null} />
               <AgentModelStepsPanel ai={null} />
-              <SectionPersistedSteps steps={legacy.steps} />
+              <SectionPersistedSteps projectId={projectId} runId={runId} steps={legacy.steps} />
               <ArtifactsMetadataPanel
                 projectId={projectId}
                 runId={runId}
@@ -148,7 +152,15 @@ export function AgenticTraceView({
   );
 }
 
-function SectionPersistedSteps({ steps }: { steps: RunStepDetail[] }) {
+function SectionPersistedSteps({
+  projectId,
+  runId,
+  steps,
+}: {
+  projectId: string;
+  runId: string;
+  steps: RunStepDetail[];
+}) {
   return (
     <div className="rounded-[24px] border border-[var(--border)] bg-white/60">
       <header className="border-b border-[var(--border)] px-4 py-3">
@@ -160,7 +172,7 @@ function SectionPersistedSteps({ steps }: { steps: RunStepDetail[] }) {
         </p>
       </header>
       <div className="p-4">
-        <RunStepTrace steps={steps} />
+        <RunStepTrace projectId={projectId} runId={runId} steps={steps} />
       </div>
     </div>
   );

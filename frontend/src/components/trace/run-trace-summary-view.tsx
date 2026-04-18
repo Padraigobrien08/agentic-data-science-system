@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
-import type { RunTraceShell, TraceCollectionKey } from "@/lib/api/types";
+import type { RunTraceRawDetail, RunTraceShell, TraceCollectionKey } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
 
 type Props = {
@@ -16,6 +16,7 @@ type Props = {
   collectionPanel: RunTraceCollectionPanelProps;
   runAnswerHref: string;
   errorMessage?: string | null;
+  rawDetail?: RunTraceRawDetail | null;
 };
 
 function collectionHref(projectId: string, runId: string, collection: TraceCollectionKey) {
@@ -30,6 +31,7 @@ export function RunTraceSummaryView({
   collectionPanel,
   runAnswerHref,
   errorMessage,
+  rawDetail,
 }: Props) {
   const hasAnyTrace =
     shell.steps.total > 0 || shell.artifacts.total > 0 || shell.model_calls.total > 0;
@@ -175,7 +177,7 @@ export function RunTraceSummaryView({
           </Card>
         ) : null}
 
-        <RunTraceCollectionPanel {...collectionPanel} />
+        <RunTraceCollectionPanel {...collectionPanel} rawDetail={rawDetail} />
       </section>
 
       <section id="trace-inspector" className="space-y-4">

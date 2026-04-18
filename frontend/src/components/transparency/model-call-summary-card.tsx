@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 import { JsonPanel, MetaRow } from "@/components/ui/technical";
 import type { ModelCallApiItem } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
@@ -24,12 +26,15 @@ export function ModelCallInlineSummary({ call }: { call: ModelCallApiItem }) {
   );
 }
 
-type Props = { call: ModelCallApiItem };
+type Props = {
+  call: ModelCallApiItem;
+  inspectHref?: string;
+};
 
 /**
  * One persisted LLM invocation: model, prompt version, tokens, latency — payloads behind a details toggle.
  */
-export function ModelCallSummaryCard({ call }: Props) {
+export function ModelCallSummaryCard({ call, inspectHref }: Props) {
   const title = modelCallLabel(call);
   const tokens = formatTokenTotal(call);
 
@@ -86,27 +91,41 @@ export function ModelCallSummaryCard({ call }: Props) {
             </MetaRow>
           ) : null}
         </div>
-        {call.request_payload_json != null || call.response_payload_json != null ? (
-          <details className="mt-2">
-            <summary className="cursor-pointer font-mono text-[10px] text-[var(--muted)]">
-              Request / response JSON
-            </summary>
-            <div className="mt-2 space-y-2">
-              {call.request_payload_json != null ? (
-                <JsonPanel title="request_payload_json" value={call.request_payload_json} />
-              ) : null}
-              {call.response_payload_json != null ? (
-                <JsonPanel title="response_payload_json" value={call.response_payload_json} />
-              ) : null}
-            </div>
-          </details>
-        ) : (
-          <p className="mt-2 font-mono text-[10px] text-[var(--muted)]">
-            Payloads omitted. Re-fetch with{" "}
-            <code className="text-[var(--foreground)]">include_payloads=true</code> when supported in
-            UI.
-          </p>
-        )}
+        <div className="mt-3 space-y-3 border-t border-[var(--border)] pt-3">
+          <div className="flex flex-wrap items-center gap-3">
+            {inspectHref ? (
+              <Link
+                href={inspectHref}
+                className="text-xs font-medium text-[var(--foreground)] underline underline-offset-4"
+              >
+                Inspect model call
+              </Link>
+            ) : (
+              <span className="text-xs font-medium text-[var(--foreground)]">Inspect model call</span>
+            )}
+            <p className="font-mono text-[10px] text-[var(--muted)]">Open raw payload only for this one call.</p>
+          </div>
+
+          {call.request_payload_json != null || call.response_payload_json != null ? (
+            <details>
+              <summary className="cursor-pointer font-mono text-[10px] text-[var(--muted)]">
+                Open raw payload
+              </summary>
+              <div className="mt-2 space-y-2">
+                {call.request_payload_json != null ? (
+                  <JsonPanel title="request_payload_json" value={call.request_payload_json} />
+                ) : null}
+                {call.response_payload_json != null ? (
+                  <JsonPanel title="response_payload_json" value={call.response_payload_json} />
+                ) : null}
+              </div>
+            </details>
+          ) : (
+            <p className="font-mono text-[10px] text-[var(--muted)]">
+              Payloads omitted. Open raw payload from the summary-first trace view when privileged access is available.
+            </p>
+          )}
+        </div>
       </div>
     </div>
   );
