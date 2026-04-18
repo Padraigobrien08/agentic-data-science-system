@@ -153,6 +153,22 @@ def test_planning_outcome_json_round_trip() -> None:
     assert d["plan"]["steps"][0]["tool_name"] == TOOL_RUN_PIPELINE
 
 
+def test_prompt_named_in_scope_subset_narrows_effective_tickers() -> None:
+    p = Planner()
+    out = p.build_plan(
+        OrchestrationInput(
+            tickers=["AAPL", "MSFT", "NVDA"],
+            analysis_goal="Analyze MSFT over the last 8 quarters",
+            refresh=False,
+        )
+    )
+
+    assert out.ok and out.plan is not None
+    assert len(out.plan.steps) == 1
+    assert out.plan.steps[0].tool_name == TOOL_RUN_PIPELINE
+    assert out.plan.steps[0].tool_input["tickers"] == ["MSFT"]
+
+
 EXAMPLE_DETERIORATION_GOAL = (
     "Detect any signs of financial deterioration in the selected companies over recent quarters. "
     "Focus on declining margins, slowing revenue growth, and weakening cash flow. "
