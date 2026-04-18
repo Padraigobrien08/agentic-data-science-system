@@ -21,10 +21,12 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Deployment defaults now fail closed for JWT secrets, self-service registration, ops telemetry, and raw payload exposure — validated in Phase 3
 - ✓ Pull requests now gate the documented Compose stack, seeded browser run workflows, and focused Postgres regressions instead of relying on narrow backend/frontend checks alone — validated in Phase 4
 - ✓ Storage and operations now surface degraded dependency state truthfully, stream artifact ingest without full-memory copies, and support explicit audit-preserving retention workflows — validated in Phase 5
+- ✓ Validation outcomes now expose explicit degradation classes, and live or hybrid evaluation stays operator-invoked and non-default behind explicit policy plus `--allow-live` guardrails — validated in Phase 6
 
 ### Active
 
-- Live SEC and hybrid evaluation modes should be promoted into a supported validation workflow that the team can run intentionally for freshness and integration confidence
+- Supported evaluation runs should become first-class persisted workflows instead of remaining CLI- and file-output-driven
+- Live and hybrid validation should execute through canonical child runs so artifacts, workers, and audit trails stay unified
 - Artifact storage should support a remote object-store backend in addition to the current local shared-filesystem contract
 - Large trace and transparency views should be decomposed and optimized for very large run payloads before broader scale-up work
 
@@ -86,4 +88,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after starting milestone v1.1 Live Validation and Scale*
+*Last updated: 2026-04-18 after Phase 6 completion*

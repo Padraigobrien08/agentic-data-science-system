@@ -18,7 +18,7 @@
 
 ## Phases
 
-- [ ] **Phase 6: Validation Boundaries and Policy** - Define validation verdicts and safe live-use guardrails before broader rollout.
+- [x] **Phase 6: Validation Boundaries and Policy** - Define validation verdicts and safe live-use guardrails before broader rollout.
 - [ ] **Phase 7: Remote Artifact Storage Contract** - Add one S3-compatible artifact backend behind the existing artifact contract.
 - [ ] **Phase 8: Summary-First Large Trace Views** - Make large trace inspection fast, bounded, and summary-first.
 - [ ] **Phase 9: Evaluation Control Plane** - Promote evaluation runs and case results into supported persisted workflows.
@@ -34,7 +34,7 @@
   1. Operator can inspect a validation case and tell whether it degraded because of SEC freshness or availability issues or because the product regressed.
   2. Live SEC validation requires explicit fair-access policy and does not become the default merge-blocking or normal user-run path.
   3. Validation outcomes surface enough policy and degradation context for an operator to decide whether follow-up belongs to upstream monitoring or product debugging.
-**Plans**: TBD
+**Plans**: 3 (completed 2026-04-18)
 
 ### Phase 7: Remote Artifact Storage Contract
 **Goal**: Users and operators can use remote artifact storage without changing artifact identity, authorization, or audit semantics.
@@ -86,7 +86,7 @@
 | 3. Secure Defaults | 3/3 | Complete | 2026-04-16 |
 | 4. CI Coverage | 3/3 | Complete | 2026-04-17 |
 | 5. Storage and Ops | 4/4 | Complete | 2026-04-17 |
-| 6. Validation Boundaries and Policy | 3/3 | In Progress|  |
+| 6. Validation Boundaries and Policy | 3/3 | Complete | 2026-04-18 |
 | 7. Remote Artifact Storage Contract | 0/TBD | Not started | - |
 | 8. Summary-First Large Trace Views | 0/TBD | Not started | - |
 | 9. Evaluation Control Plane | 0/TBD | Not started | - |

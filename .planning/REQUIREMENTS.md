@@ -8,8 +8,8 @@
 ### Validation Workflows
 
 - [ ] **VALID-01**: Operator can start fixture, hybrid, and live evaluation runs through a supported workflow with mode-specific policy and persisted observation metadata
-- [ ] **VALID-02**: Operator can inspect case-level validation outcomes with explicit degradation classes that distinguish upstream SEC freshness or availability issues from product regressions
-- [ ] **VALID-03**: Live SEC validation enforces explicit fair-access controls and does not become a default merge-blocking or user-run path
+- [x] **VALID-02**: Operator can inspect case-level validation outcomes with explicit degradation classes that distinguish upstream SEC freshness or availability issues from product regressions
+- [x] **VALID-03**: Live SEC validation enforces explicit fair-access controls and does not become a default merge-blocking or user-run path
 
 ### Artifact Storage
 
@@ -61,8 +61,8 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | VALID-01 | Phase 9 | Pending |
-| VALID-02 | Phase 6 | Pending |
-| VALID-03 | Phase 6 | Pending |
+| VALID-02 | Phase 6 | Complete |
+| VALID-03 | Phase 6 | Complete |
 | STOR-01 | Phase 7 | Pending |
 | STOR-02 | Phase 7 | Pending |
 | TRACE-01 | Phase 8 | Pending |
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after roadmap creation*
+*Last updated: 2026-04-18 after Phase 6 completion*

@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: Live Validation and Scale
-status: phase 6 planned; ready to execute
-stopped_at: Planned Phase 6 Validation Boundaries and Policy
-last_updated: "2026-04-18T10:18:00Z"
+milestone_name: live-validation-and-scale
+status: Ready to discuss Phase 07
+stopped_at: Phase 06 completed
+last_updated: "2026-04-18T10:35:00Z"
 progress:
   total_phases: 10
-  completed_phases: 5
+  completed_phases: 6
   total_plans: 20
-  completed_plans: 17
+  completed_plans: 20
 ---
 
 # Project State
@@ -19,22 +19,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 6 execution for validation boundaries and policy in v1.1
+**Current focus:** Phase 07 — remote-artifact-storage-contract
 
 ## Current Position
 
-Phase: 6 of 10 (Validation Boundaries and Policy)
-Plan: 3 plans in 3 waves
-Status: Ready to execute
-Last activity: 2026-04-18 — Completed research, validation strategy, and plan set for Phase 6 Validation Boundaries and Policy
-Progress: [#####-----] 50%
+Phase: 07 (remote-artifact-storage-contract) — READY
+Plan: discuss phase
 
 ## Performance Metrics
 
 **Velocity:**
-- Total plans completed: 17
-- Average duration: 11 min
-- Total execution time: 2.9 hours
+
+- Total plans completed: 20
+- Average duration: 9 min
+- Total execution time: 3.1 hours
 
 **By Phase:**
 
@@ -45,10 +43,12 @@ Progress: [#####-----] 50%
 | 03-secure-defaults | 3 | 22min | 7min |
 | 04-ci-coverage | 3 | 42min | 14min |
 | 05-storage-and-ops | 4 | 27min | 7min |
+| 06-validation-boundaries-and-policy | 3 | 13min | 4min |
 
 **Recent Trend:**
-- Last 5 plans: 04-ci-coverage-03 (1min), 05-storage-and-ops-01 (4min), 05-storage-and-ops-02 (8min), 05-storage-and-ops-03 (5min), 05-storage-and-ops-04 (10min)
-- Trend: Stable; v1.0 closed with shorter, focused hardening plans
+
+- Last 5 plans: 05-storage-and-ops-03 (5min), 05-storage-and-ops-04 (10min), 06-validation-boundaries-and-policy-01 (4min), 06-validation-boundaries-and-policy-02 (4min), 06-validation-boundaries-and-policy-03 (5min)
+- Trend: Stable; Phase 06 stayed short and additive while establishing the v1.1 validation policy seam
 
 ## Accumulated Context
 
@@ -65,6 +65,8 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 6-validation-boundaries-and-policy]: Validation outcomes must distinguish `product_regression`, `upstream_sec_degraded`, `stale_source`, and `policy_skipped`.
 - [Phase 6-validation-boundaries-and-policy]: Fixture and mocked evaluation remain the default path; `live` and `hybrid` stay explicit operator-invoked and non-merge-blocking by default.
 - [Phase 6-validation-boundaries-and-policy]: `live` and `hybrid` are judged on invariants and freshness windows, not exact-value equality.
+- [Phase 6-validation-boundaries-and-policy]: Validation entrypoints now require explicit `--allow-live` acknowledgement before a live or hybrid suite can avoid `policy_skipped`.
+- [Phase 6-validation-boundaries-and-policy]: Operator-facing summaries and example outputs now surface degradation routing context instead of relying on free-form skip or failure messages alone.
 
 ### Pending Todos
 
@@ -78,6 +80,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T10:18:00Z
-Stopped at: Planned Phase 6 Validation Boundaries and Policy; next step is `/gsd:execute-phase 6`
-Resume file: .planning/phases/06-validation-boundaries-and-policy/06-validation-boundaries-and-policy-01-PLAN.md
+Last session: 2026-04-18T10:35:00Z
+Stopped at: Phase 06 completed
+Resume file: .planning/ROADMAP.md
