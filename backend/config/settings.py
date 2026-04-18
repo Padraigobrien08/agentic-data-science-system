@@ -79,6 +79,38 @@ class Settings(BaseSettings):
         default=_REPO_ROOT / "data" / "artifact_storage",
         description="Filesystem root for LocalFilesystemStore object keys",
     )
+    artifact_storage_backend: str = Field(
+        default="local",
+        description='Artifact blob backend: "local" or "s3".',
+    )
+    artifact_storage_s3_bucket: str | None = Field(
+        default=None,
+        description="Required bucket name when artifact storage backend is s3.",
+    )
+    artifact_storage_s3_region: str = Field(
+        default="us-east-1",
+        description="AWS region for the S3-compatible artifact store.",
+    )
+    artifact_storage_s3_prefix: str = Field(
+        default="",
+        description="Optional object-key prefix prepended inside the configured S3 bucket.",
+    )
+    artifact_storage_s3_endpoint_url: str | None = Field(
+        default=None,
+        description="Optional S3-compatible endpoint URL override (for non-AWS providers).",
+    )
+    artifact_storage_s3_access_key_id: str | None = Field(
+        default=None,
+        description="Optional explicit access key for the S3-compatible artifact store.",
+    )
+    artifact_storage_s3_secret_access_key: SecretStr | None = Field(
+        default=None,
+        description="Optional explicit secret access key for the S3-compatible artifact store.",
+    )
+    artifact_storage_s3_force_path_style: bool = Field(
+        default=False,
+        description="Force path-style S3 addressing for compatible endpoints that require it.",
+    )
     run_workspace_root: Path = Field(
         default=_REPO_ROOT / "data" / "runs",
         description="Filesystem root for durable per-run processed/artifacts workspaces",
@@ -312,6 +344,28 @@ class Settings(BaseSettings):
             return v.strip()
         return v
 
+    @field_validator(
+        "artifact_storage_backend",
+        "artifact_storage_s3_bucket",
+        "artifact_storage_s3_region",
+        "artifact_storage_s3_prefix",
+        "artifact_storage_s3_endpoint_url",
+        "artifact_storage_s3_access_key_id",
+        mode="before",
+    )
+    @classmethod
+    def _normalize_artifact_storage_fields(cls, v: object, info) -> object:
+        if isinstance(v, str):
+            normalized = v.strip()
+            if info.field_name == "artifact_storage_backend":
+                return normalized.lower()
+            if info.field_name == "artifact_storage_s3_prefix":
+                return normalized.strip("/")
+            if normalized == "":
+                return None
+            return normalized
+        return v
+
     @model_validator(mode="after")
     def _openai_api_key_from_unprefixed_env(self) -> Settings:
         """Accept ``OPENAI_API_KEY`` when ``EDGAR_BACKEND_OPENAI_API_KEY`` is unset (common convention)."""
@@ -328,6 +382,11 @@ class Settings(BaseSettings):
         jwt_secret_value = self.jwt_secret.get_secret_value()
         bootstrap_token = self.bootstrap_admin_token.get_secret_value() if self.bootstrap_admin_token else ""
         ops_token = self.ops_api_token.get_secret_value() if self.ops_api_token else ""
+        s3_secret = (
+            self.artifact_storage_s3_secret_access_key.get_secret_value()
+            if self.artifact_storage_s3_secret_access_key
+            else ""
+        )
         if not self.debug and len(jwt_secret_value) < 32:
             raise ValueError(
                 "EDGAR_BACKEND_JWT_SECRET must be at least 32 characters when EDGAR_BACKEND_DEBUG is false.",
@@ -345,6 +404,21 @@ class Settings(BaseSettings):
             raise ValueError(
                 "EDGAR_BACKEND_OPS_API_TOKEN must be set to a non-empty value.",
             )
+        if self.artifact_storage_backend not in {"local", "s3"}:
+            raise ValueError(
+                "EDGAR_BACKEND_ARTIFACT_STORAGE_BACKEND must be either 'local' or 's3'.",
+            )
+        if self.artifact_storage_backend == "s3":
+            if not (self.artifact_storage_s3_bucket or "").strip():
+                raise ValueError(
+                    "EDGAR_BACKEND_ARTIFACT_STORAGE_S3_BUCKET must be set when "
+                    "EDGAR_BACKEND_ARTIFACT_STORAGE_BACKEND is 's3'.",
+                )
+            if self.artifact_storage_s3_access_key_id and not s3_secret.strip():
+                raise ValueError(
+                    "EDGAR_BACKEND_ARTIFACT_STORAGE_S3_SECRET_ACCESS_KEY must be set when "
+                    "EDGAR_BACKEND_ARTIFACT_STORAGE_S3_ACCESS_KEY_ID is provided.",
+                )
         if not self.allow_sqlite:
             driver = make_url(self.database_url).drivername
             if driver == "sqlite":
