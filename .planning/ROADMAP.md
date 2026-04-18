@@ -87,7 +87,7 @@
   1. Phase 09 and Phase 10 summary frontmatter records the milestone requirement IDs that their verification reports already satisfy.
   2. Phase 06 through Phase 10 `*-VALIDATION.md` files reflect executed Nyquist bookkeeping instead of stale planned or researched status.
   3. Re-running the milestone audit no longer reports planning metadata drift as open tech debt.
-**Plans**: 0 (not started)
+**Plans**: 3 (planned 2026-04-18)
 
 ## Progress
 
@@ -103,4 +103,4 @@
 | 8. Summary-First Large Trace Views | 3/3 | Complete | 2026-04-18 |
 | 9. Evaluation Control Plane | 3/3 | Complete | 2026-04-18 |
 | 10. Live/Hybrid Execution Hardening | 3/3 | Complete | 2026-04-18 |
-| 11. Milestone Audit Traceability Cleanup | 0/0 | Not started | - |
+| 11. Milestone Audit Traceability Cleanup | 0/3 | Planned | - |
