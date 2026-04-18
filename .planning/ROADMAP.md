@@ -21,7 +21,7 @@
 - [x] **Phase 6: Validation Boundaries and Policy** - Define validation verdicts and safe live-use guardrails before broader rollout.
 - [x] **Phase 7: Remote Artifact Storage Contract** - Add one S3-compatible artifact backend behind the existing artifact contract.
 - [x] **Phase 8: Summary-First Large Trace Views** - Make large trace inspection fast, bounded, and summary-first.
-- [ ] **Phase 9: Evaluation Control Plane** - Promote evaluation runs and case results into supported persisted workflows.
+- [x] **Phase 9: Evaluation Control Plane** - Promote evaluation runs and case results into supported persisted workflows.
 - [ ] **Phase 10: Live/Hybrid Execution Hardening** - Link live and hybrid validation to canonical runs and truthful ops reporting.
 
 ## Phase Details
@@ -65,7 +65,7 @@
   1. Operator can start fixture, hybrid, and live evaluation runs through a supported workflow with mode-specific policy and persisted observation metadata.
   2. Operator can list and reopen evaluation runs and their case results as first-class persisted records instead of relying on ad hoc script output.
   3. Operator can revisit stored evaluation history later and still see the run mode, observation metadata, and case-level outcomes captured at execution time.
-**Plans**: TBD
+**Plans**: 3 (completed 2026-04-18)
 
 ### Phase 10: Live/Hybrid Execution Hardening
 **Goal**: Live and hybrid validation execute through the canonical run infrastructure and report upstream or storage degradation truthfully.
@@ -89,5 +89,5 @@
 | 6. Validation Boundaries and Policy | 3/3 | Complete | 2026-04-18 |
 | 7. Remote Artifact Storage Contract | 3/3 | Complete | 2026-04-18 |
 | 8. Summary-First Large Trace Views | 3/3 | Complete | 2026-04-18 |
-| 9. Evaluation Control Plane | 0/TBD | Not started | - |
+| 9. Evaluation Control Plane | 3/3 | Complete | 2026-04-18 |
 | 10. Live/Hybrid Execution Hardening | 0/TBD | Not started | - |

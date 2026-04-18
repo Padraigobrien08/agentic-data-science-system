@@ -7,7 +7,7 @@
 
 ### Validation Workflows
 
-- [ ] **VALID-01**: Operator can start fixture, hybrid, and live evaluation runs through a supported workflow with mode-specific policy and persisted observation metadata
+- [x] **VALID-01**: Operator can start fixture, hybrid, and live evaluation runs through a supported workflow with mode-specific policy and persisted observation metadata
 - [x] **VALID-02**: Operator can inspect case-level validation outcomes with explicit degradation classes that distinguish upstream SEC freshness or availability issues from product regressions
 - [x] **VALID-03**: Live SEC validation enforces explicit fair-access controls and does not become a default merge-blocking or user-run path
 
@@ -24,7 +24,7 @@
 
 ### Evaluation Control Plane
 
-- [ ] **EVAL-01**: Operator can manage supported evaluation runs and case results as first-class persisted records instead of ad hoc script output
+- [x] **EVAL-01**: Operator can manage supported evaluation runs and case results as first-class persisted records instead of ad hoc script output
 - [ ] **EVAL-02**: Live and hybrid validation cases execute through linked child analysis runs so existing run audit trails, workers, and artifacts remain canonical
 
 ### Delivery and Ops
@@ -60,7 +60,7 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VALID-01 | Phase 9 | Pending |
+| VALID-01 | Phase 9 | Complete |
 | VALID-02 | Phase 6 | Complete |
 | VALID-03 | Phase 6 | Complete |
 | STOR-01 | Phase 7 | Complete |
@@ -68,7 +68,7 @@
 | TRACE-01 | Phase 8 | Complete |
 | TRACE-02 | Phase 8 | Complete |
 | TRACE-03 | Phase 8 | Complete |
-| EVAL-01 | Phase 9 | Pending |
+| EVAL-01 | Phase 9 | Complete |
 | EVAL-02 | Phase 10 | Pending |
 | OPS-01 | Phase 10 | Pending |
 | OPS-02 | Phase 7 | Complete |
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after Phase 8 completion*
+*Last updated: 2026-04-18 after Phase 9 completion*
