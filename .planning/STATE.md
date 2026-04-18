@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Live Validation and Scale
-status: roadmap created; phase 6 ready to plan
-stopped_at: Created roadmap for phases 6-10 and updated requirement traceability
-last_updated: "2026-04-18T09:17:21Z"
+status: phase 6 context captured; ready to plan
+stopped_at: Captured context for Phase 6 Validation Boundaries and Policy
+last_updated: "2026-04-18T09:26:28Z"
 progress:
   total_phases: 10
   completed_phases: 5
@@ -25,8 +25,8 @@ See: .planning/PROJECT.md (updated 2026-04-18)
 
 Phase: 6 of 10 (Validation Boundaries and Policy)
 Plan: —
-Status: Ready to plan
-Last activity: 2026-04-18 — Created the v1.1 roadmap and mapped all 12 milestone requirements to Phases 6-10
+Status: Context gathered; ready to plan
+Last activity: 2026-04-18 — Captured context for Phase 6 Validation Boundaries and Policy
 Progress: [#####-----] 50%
 
 ## Performance Metrics
@@ -61,6 +61,10 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Milestone v1.1]: Keep v1.1 as five phases: validation boundaries, remote storage contract, summary-first trace views, evaluation control plane, and live-hybrid execution hardening.
 - [Milestone v1.1]: Treat the supported evaluation workflow as a separate control plane from real live or hybrid execution so SEC traffic lands only after storage and trace seams are safe.
 - [Milestone v1.1]: Make large-trace work API-first and summary-first rather than trying to solve scale only in the frontend.
+- [Phase 6-validation-boundaries-and-policy]: Validation must stay policy-distinct from normal user work, even before later phases add child analysis-run linkage or richer evaluation workflows.
+- [Phase 6-validation-boundaries-and-policy]: Validation outcomes must distinguish `product_regression`, `upstream_sec_degraded`, `stale_source`, and `policy_skipped`.
+- [Phase 6-validation-boundaries-and-policy]: Fixture and mocked evaluation remain the default path; `live` and `hybrid` stay explicit operator-invoked and non-merge-blocking by default.
+- [Phase 6-validation-boundaries-and-policy]: `live` and `hybrid` are judged on invariants and freshness windows, not exact-value equality.
 
 ### Pending Todos
 
