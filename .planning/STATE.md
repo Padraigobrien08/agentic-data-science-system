@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to discuss Phase 13
-stopped_at: Phase 12 complete; ready to discuss Phase 13
-last_updated: "2026-04-18T21:38:44Z"
+status: Ready to plan Phase 13
+stopped_at: Phase 13 context captured; ready to plan
+last_updated: "2026-04-18T22:04:42Z"
 progress:
   total_phases: 5
   completed_phases: 1
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Discuss Phase 13 of `v1.2 Chat-First Analysis Experience`, focusing on broader analyst prompt routing now that the runtime and onboarding blockers are repaired.
+**Current focus:** Plan Phase 13 of `v1.2 Chat-First Analysis Experience`, focused on broader analyst prompt routing, prompt-scoped ticker narrowing, and actionable unsupported guidance.
 
 ## Current Position
 
 Phase: 13
-Plan: not yet discussed
+Plan: ready for planning
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to discuss Phase 13
-Last activity: 2026-04-18 — Completed Phase 12 runtime reliability, sync-first chat delivery, and onboarding cleanup
+Status: Ready to plan Phase 13
+Last activity: 2026-04-18 — Captured Phase 13 prompt-routing decisions and LLM rescue boundary
 
 ## Performance Metrics
 
@@ -85,6 +85,10 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 12-runtime-reliability-for-chat-delivery]: Phase 12 may pull in auth/onboarding fixes found during live testing if they materially block first-run chat delivery.
 - [Phase 12-runtime-reliability-for-chat-delivery]: The planned implementation is split into 3 sequential waves: worker/runtime foundation, sync-first chat runtime contract, and auth/onboarding cleanup.
 - [Phase 12-runtime-reliability-for-chat-delivery]: The documented stack now satisfies `RUN-01`, `RUN-02`, and `RUN-03`, so the next milestone bottleneck is request routing and chat-native answer delivery rather than runtime boot or onboarding.
+- [Phase 13-analyst-prompt-routing]: Broad analyst theses should map to the closest supported deterioration/trend route when there are enough business cues; users should not need anomaly-specific wording.
+- [Phase 13-analyst-prompt-routing]: Broader peer-relative language is allowed, but multiple tickers alone must not force peer mode.
+- [Phase 13-analyst-prompt-routing]: Prompt text may narrow to a subset already in the workspace scope, but must not silently expand scope to outside symbols.
+- [Phase 13-analyst-prompt-routing]: Unsupported routing should return concrete rewrite suggestions, and any LLM rescue path must remain explicit, gated, and auditable.
 
 ### Pending Todos
 
@@ -92,12 +96,12 @@ None.
 
 ### Blockers/Concerns
 
-- Prompt routing still rejects normal analyst phrasing too often, which blocks the next chat-first milestone step even though runtime delivery is now stable.
+- Prompt routing still rejects normal analyst phrasing too often, which is now the primary active milestone bottleneck.
 - Completed analyses still read primarily through the standalone run page rather than the chat surface that launched them.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T21:38:44Z
-Stopped at: Phase 12 complete; ready to discuss Phase 13
+Last session: 2026-04-18T22:04:42Z
+Stopped at: Phase 13 context captured; ready to plan
 Resume file: .planning/PROJECT.md
