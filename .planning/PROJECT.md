@@ -29,7 +29,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- `v1.1 Live Validation and Scale` is complete through Phase 11 and ready to archive.
+- No active milestone is open. Use `$gsd-new-milestone` to define the next requirement set and roadmap.
 
 ### Out of Scope
 
@@ -37,21 +37,23 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - Mobile or native clients — the existing web, CLI, and MCP surfaces are sufficient until the platform core is production-safe
 - Multi-region or managed-cloud deployment work — the current target remains the documented self-hosted stack until isolation and ops basics are solid
 
-## Current Milestone: v1.1 Live Validation and Scale
+## Current State
 
-**Goal:** Extend the hardened platform into a more production-credible system by supporting intentional live validation workflows and removing the biggest remaining storage and large-payload scale constraints.
-**Status:** Product work and audit traceability cleanup are complete through Phase 11; the milestone is ready to archive.
+**Shipped:** `v1.1 Live Validation and Scale` on 2026-04-18
+**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, and clean archive-grade planning traceability.
 
-**Target features:**
-- Supported live SEC and hybrid evaluation workflows for freshness and integration confidence
-- Scalable trace and transparency views for very large run payloads — delivered in Phase 8
-- Remote object-store support alongside the current local shared-filesystem artifact contract — delivered in Phase 7
+## Next Milestone Goals
+
+- Scheduled live canary suites with alerting and explicit request-budget controls
+- Promotion of failing live or hybrid cases into deterministic fixture regressions
+- Brokered short-lived delivery URLs for very large artifacts when proxy delivery becomes a bottleneck
+- Cross-run evidence-coverage and weak-evidence summaries for operator review
 
 ## Context
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map showed that several core platform assumptions still depended on shared filesystem paths, cwd mutation, and large multi-responsibility modules before the v1.0 hardening effort.
 
-The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability. The milestone is now ready to archive.
+The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability. The milestone is now archived and the repo is ready for next-milestone planning.
 
 ## Constraints
 
@@ -92,4 +94,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 11 completion*
+*Last updated: 2026-04-18 after v1.1 milestone archive*

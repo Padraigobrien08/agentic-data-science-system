@@ -39,6 +39,45 @@
 
 ---
 
+## Milestone: v1.1 — Live Validation and Scale
+
+**Shipped:** 2026-04-18
+**Phases:** 6 | **Plans:** 18 | **Sessions:** 1
+
+### What Was Built
+- Explicit live-validation policy boundaries, freshness-aware degradation classes, and guarded operator entrypoints
+- One S3-compatible remote artifact backend with app-owned delivery, reconciliation-aware deletes, and retention-safe behavior
+- Summary-first large-trace inspection with bounded collections, SSR navigation, and item-scoped raw expansion
+- A persisted evaluation control plane with suite cataloging, case review, canonical child-run execution, and truthful SEC or storage ops reporting
+- A final audit-traceability cleanup phase that restored clean milestone archival metadata
+
+### What Worked
+- Carrying the hardening baseline into scale work let each phase build on a stable contract rather than reopening earlier trust boundaries.
+- The summary, validation, verification, and audit files made the cleanup phase fast because the required evidence already existed in structured form.
+- Keeping artifact, trace, evaluation, and ops work in separate phases prevented the milestone from collapsing into one opaque “platform” change set.
+
+### What Was Inefficient
+- The archive and phase-complete helpers still regressed `STATE.md` milestone fields, so live state repair was needed more than once.
+- The default milestone archive helper produced a raw snapshot, not the final curated archive shape, so the archive docs still needed manual interpretation and cleanup.
+- Milestone-closeout documentation remains more manual than execution and verification, especially around roadmap slimming and retrospective curation.
+
+### Patterns Established
+- Treat validation policy, storage topology, trace browsing, and evaluation control-plane surfaces as separate product contracts with their own verification loops.
+- Use summary-frontmatter and validation metadata as archive-time machine inputs, not just as human-readable documentation.
+- Close milestone audit debt immediately with a small explicit cleanup phase instead of carrying bookkeeping ambiguity into the next milestone.
+
+### Key Lessons
+1. When planning artifacts are treated as product-grade interfaces, milestone audit cleanup becomes a narrow repair instead of a broad archaeology task.
+2. Summary-first UX work is safer after artifact-delivery and auth boundaries are already stable.
+3. Live-validation scale work benefits from keeping policy, storage, UI, control-plane, and ops truthfulness in distinct phases even when shipped in one day.
+
+### Cost Observations
+- Model mix: not tracked in repository metadata for this milestone
+- Sessions: 1 visible GSD execution session
+- Notable: 18 plans and 33 tasks shipped in a single day because each phase remained contract-driven and verification-heavy
+
+---
+
 ## Cross-Milestone Trends
 
 ### Process Evolution
@@ -46,14 +85,16 @@
 | Milestone | Sessions | Phases | Key Change |
 |-----------|----------|--------|------------|
 | v1.0 | 1 | 5 | Introduced trust-boundary phases, archived planning artifacts, and regression-first execution |
+| v1.1 | 1 | 6 | Extended the hardened base into live-validation scale features and added an explicit archive-traceability cleanup phase |
 
 ### Cumulative Quality
 
 | Milestone | Tests | Coverage | Zero-Dep Additions |
 |-----------|-------|----------|-------------------|
 | v1.0 | 57 prior-phase regression tests green at milestone closeout plus 13/13 Phase 5 must-haves | Broad backend, worker, browser, and Compose workflow gating | 0 |
+| v1.1 | 66 backend audit-slice tests plus 8 frontend trace tests green at milestone closeout | Validation policy, remote storage, large traces, evaluation control plane, child-run reconciliation, and ops truthfulness | 0 |
 
 ### Top Lessons (Verified Across Milestones)
 
-1. Initial milestone establishes the baseline; no cross-milestone lesson is verified yet.
-2. Keep archived requirements and milestone summaries lean so the live planning docs stay small.
+1. Contract-driven milestones stay executable at speed when each phase owns one trust boundary or operator surface.
+2. Archive helpers still need manual curation; treat milestone completion as a documentation pass, not just a file move.
