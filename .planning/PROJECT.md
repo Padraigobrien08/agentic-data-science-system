@@ -27,12 +27,12 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Supported evaluation runs and case results are now first-class persisted project-scoped records with stored case metadata, reopenable case routes, and CLI compatibility through curated suite IDs — validated in Phase 9
 - ✓ Live and hybrid evaluation now executes through linked canonical child runs, and health plus metrics surfaces report evaluation SEC or storage degradation truthfully — validated in Phase 10
 - ✓ The documented local stack now boots the worker cleanly, executes chat-triggered runs reliably, surfaces sync-first background-delivery truth in chat, and no longer presents a dead-end secure-default registration path — validated in Phase 12
+- ✓ Normal analyst phrasing in chat now routes to supported deterioration, anomaly, and peer-comparison flows, and unsupported prompts return rewrite guidance before failed run creation — validated in Phase 13
 
 ### Active
 
 - [ ] Chat becomes the primary surface for reading completed analysis answers instead of the standalone run page
 - [ ] Users can navigate from a chat answer to report, evidence, artifacts, critic, and trace surfaces through one compact navigation area
-- [ ] Normal analyst phrasing in chat routes to supported analysis paths or returns actionable rewrite guidance instead of dead-end intent failures
 
 ### Out of Scope
 
@@ -43,7 +43,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Shipped:** `v1.1 Live Validation and Scale` on 2026-04-18
-**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, clean archive-grade planning traceability, and a repaired sync-first chat runtime in the documented local stack. Fresh hands-on testing still shows the next product bottlenecks clearly: ordinary analyst phrasing remains too brittle, and the primary answer-reading experience still lives on a fragmented run page instead of in chat.
+**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, clean archive-grade planning traceability, a repaired sync-first chat runtime in the documented local stack, and deterministic analyst-language routing with inline rewrite guidance in chat. Fresh hands-on testing now points more narrowly at the remaining product gap: the primary answer-reading experience still lives on a fragmented run page instead of in chat.
 
 ## Current Milestone: v1.2 Chat-First Analysis Experience
 
@@ -68,7 +68,7 @@ This repo is a layered brownfield monorepo with a deterministic EDGAR analysis c
 
 The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability.
 
-The next milestone comes directly from local product testing after the `v1.1` ship. The current answer-reading flow still pushes users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result is the workspace chat that launched the run. The same testing also surfaced two supporting failures that block trust in a chat-first experience: ordinary analyst wording can still miss the deterministic intent matcher, and the background worker still fails to boot in Compose because of a circular import. `v1.2` therefore needs to move the answer into chat while fixing the delivery seams that make that experience brittle today.
+The next milestone comes directly from local product testing after the `v1.1` ship. The current answer-reading flow still pushes users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result is the workspace chat that launched the run. Phase 12 already repaired the documented runtime and onboarding seams, and Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat. `v1.2` therefore now centers on the remaining product gap: moving the answer itself into chat and consolidating evidence navigation there so the run page becomes secondary.
 
 ## Constraints
 
@@ -90,6 +90,7 @@ The next milestone comes directly from local product testing after the `v1.1` sh
 | Track project planning artifacts in git | The hardening work touches architecture, security, and operations decisions that should remain auditable alongside code changes | ✓ Good |
 | Roll out remote artifact storage as configured-write plus mixed-read behind opaque `s3:` locators | Brownfield deployments need remote storage without bucket exposure or forced migration of existing `local:` artifacts | ✓ Good |
 | Treat blob-store and database divergence as explicit reconciliation state, not hidden transactional success | Remote object storage is a separate system, so deletes and retention must surface repairable drift instead of pretending they are atomic | ✓ Good |
+| Keep prompt routing deterministic-first and expose unsupported guidance before run creation | Analyst trust depends on predictable routing behavior and actionable chat guidance rather than opaque fallback behavior | ✓ Good |
 
 ## Evolution
 
@@ -109,4 +110,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 12 completion*
+*Last updated: 2026-04-18 after Phase 13 completion*
