@@ -155,7 +155,10 @@ def get_artifact_preview(
     except ObjectNotFound as exc:
         raise HTTPException(status_code=404, detail="Artifact content not found in storage") from exc
     except UnsupportedStorageUri as exc:
-        raise HTTPException(status_code=502, detail="Storage backend not available") from exc
+        raise HTTPException(
+            status_code=502,
+            detail="Storage backend is not configured for this artifact",
+        ) from exc
     except InvalidStorageKey as exc:
         raise HTTPException(status_code=502, detail="Invalid stored object locator") from exc
     except OSError as exc:

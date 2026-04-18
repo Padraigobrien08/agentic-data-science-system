@@ -120,13 +120,37 @@ npm run dev
 
 The browser talks to **Next**; Next calls the API using `API_URL` on the server.
 
-## Artifact storage (local deployment)
+## Artifact storage
 
 - **Backend** stores blob paths as `local:` URIs under a single filesystem root: **`EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT`** (`backend/storage`, `open_reader`).
 - **Compose:** `api` and **worker** mount the same named Docker volume **`artifacts`** at `/var/lib/edgar/artifacts`. The worker writes blobs; the API serves `GET /v1/artifacts/.../content`. Both must see the **same** directory (or volume).
 - **Run workspaces:** `api` and **worker** also mount the shared named Docker volume **`run_workspaces`** at `/var/lib/edgar/run_workspaces`, and `EDGAR_BACKEND_RUN_WORKSPACE_ROOT` points there. Both processes must see the same run-workspace root or persisted runs will not resolve their own outputs correctly.
 - **Manual dev:** artifact blobs still default to repo `data/artifact_storage/` (created on API startup). Durable run workspaces default to repo `data/runs/`; use the same run-workspace root for every API and worker process on that machine.
-- **Not in this stack:** S3/MinIO — only the **local filesystem** driver is wired for compose.
+- **Optional remote storage:** set `EDGAR_BACKEND_ARTIFACT_STORAGE_BACKEND=s3` plus the `EDGAR_BACKEND_ARTIFACT_STORAGE_S3_*` vars in `.env` to point the API and worker at one external **S3-compatible** object store. The app still serves artifact bytes through `/v1/artifacts/*`; clients do not talk to the bucket directly.
+- **Still not in this stack:** MinIO or another bundled object store. Compose only passes through external S3-compatible settings when you opt in.
+
+### Optional remote artifact storage
+
+To keep the default local filesystem store, do nothing beyond the standard `artifacts` volume setup above.
+
+To opt into one remote S3-compatible backend, add these vars to `.env` before `docker compose up` or `docker compose up -d --force-recreate api worker`:
+
+```bash
+EDGAR_BACKEND_ARTIFACT_STORAGE_BACKEND=s3
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_BUCKET=your-artifact-bucket
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_REGION=us-east-1
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_PREFIX=
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_ENDPOINT_URL=
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_ACCESS_KEY_ID=
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_SECRET_ACCESS_KEY=
+EDGAR_BACKEND_ARTIFACT_STORAGE_S3_FORCE_PATH_STYLE=false
+```
+
+Notes:
+
+- Existing `local:` artifacts remain readable in a deployment configured for S3; rollout is mixed-read, not bulk migration.
+- `storage_uri` values remain logical app-owned locators such as `local:...` or `s3:...`; they are not raw bucket or object identifiers.
+- This stack still does not add MinIO. Point the settings at an external S3-compatible service if you need remote blob storage.
 
 ## Retention maintenance
 

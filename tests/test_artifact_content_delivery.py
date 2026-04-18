@@ -16,6 +16,7 @@ from typing import Any
 import pytest
 from fastapi import Depends
 from fastapi.testclient import TestClient
+from pydantic import SecretStr
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -32,8 +33,13 @@ from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
 from backend.models.enums import AnalysisRunStatus, ArtifactKind
 from backend.services.artifact_service import ArtifactService
+from backend.storage.factory import get_s3_object_store
 from backend.storage.local import LocalFilesystemStore
 from tests.api_auth import register_project_and_headers
+
+SECURE_JWT_SECRET = "secure-jwt-secret-minimum-32-characters-long"
+BOOTSTRAP_TOKEN = "pytest-bootstrap-token"
+OPS_TOKEN = "pytest-ops-token"
 
 
 @dataclass
@@ -86,6 +92,19 @@ class ContentDeliveryHarness:
             db.close()
 
 
+def _delivery_settings(tmp_path, **overrides: object) -> Settings:
+    blob_root = tmp_path / "artifact_blobs"
+    blob_root.mkdir(exist_ok=True)
+    defaults: dict[str, object] = {
+        "artifact_storage_root": blob_root,
+        "jwt_secret": SecretStr(SECURE_JWT_SECRET),
+        "bootstrap_admin_token": SecretStr(BOOTSTRAP_TOKEN),
+        "ops_api_token": SecretStr(OPS_TOKEN),
+    }
+    defaults.update(overrides)
+    return Settings(**defaults)
+
+
 @pytest.fixture
 def delivery_harness(tmp_path) -> Iterator[ContentDeliveryHarness]:
     engine = create_engine(
@@ -96,9 +115,7 @@ def delivery_harness(tmp_path) -> Iterator[ContentDeliveryHarness]:
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
 
-    blob_root = tmp_path / "artifact_blobs"
-    blob_root.mkdir()
-    settings = Settings(artifact_storage_root=blob_root)
+    settings = _delivery_settings(tmp_path)
 
     def override_get_db() -> Iterator[Session]:
         db = factory()
@@ -124,6 +141,56 @@ def delivery_harness(tmp_path) -> Iterator[ContentDeliveryHarness]:
             auth_headers=auth_headers,
         )
     app.dependency_overrides.clear()
+
+
+@pytest.fixture
+def delivery_harness_s3(tmp_path) -> Iterator[ContentDeliveryHarness]:
+    boto3 = pytest.importorskip("boto3")
+    moto = pytest.importorskip("moto")
+
+    with moto.mock_aws():
+        engine = create_engine(
+            "sqlite://",
+            connect_args={"check_same_thread": False},
+            poolclass=StaticPool,
+        )
+        Base.metadata.create_all(engine)
+        factory = sessionmaker(bind=engine, expire_on_commit=False)
+
+        settings = _delivery_settings(
+            tmp_path,
+            artifact_storage_backend="s3",
+            artifact_storage_s3_bucket="artifact-bucket",
+            artifact_storage_s3_region="us-east-1",
+        )
+        boto3.client("s3", region_name=settings.artifact_storage_s3_region).create_bucket(
+            Bucket=settings.artifact_storage_s3_bucket,
+        )
+
+        def override_get_db() -> Iterator[Session]:
+            db = factory()
+            try:
+                yield db
+            finally:
+                db.close()
+
+        def _artifact_service(db: Session = Depends(get_db)) -> ArtifactService:
+            return ArtifactService(db, settings=settings)
+
+        app = create_app()
+        app.dependency_overrides[get_db] = override_get_db
+        app.dependency_overrides[api_deps.get_artifact_service] = _artifact_service
+
+        with TestClient(app) as client:
+            project_id_str, auth_headers = register_project_and_headers(client)
+            yield ContentDeliveryHarness(
+                client=client,
+                project_id=uuid.UUID(project_id_str),
+                factory=factory,
+                settings=settings,
+                auth_headers=auth_headers,
+            )
+        app.dependency_overrides.clear()
 
 
 # --- 1–3: content body, Content-Type, Content-Disposition ---
@@ -425,3 +492,70 @@ def test_content_502_unsupported_uri_scheme_generic_detail(
     assert "bucket" not in str(payload)
     assert "secret" not in str(payload)
     assert "s3:" not in str(payload)
+
+    preview = delivery_harness.api_get(f"/v1/artifacts/{aid}/preview")
+    assert preview.status_code == 502
+    preview_payload = preview.json()
+    assert preview_payload.get("detail") == "Storage backend is not configured for this artifact"
+    assert "bucket" not in str(preview_payload)
+    assert "secret" not in str(preview_payload)
+    assert "s3:" not in str(preview_payload)
+
+
+def test_s3_artifact_metadata_content_and_preview_use_same_routes(
+    delivery_harness_s3: ContentDeliveryHarness,
+) -> None:
+    aid = delivery_harness_s3.save_artifact(
+        body=b"remote body",
+        role_key="remote_notes",
+        filename_suffix=".txt",
+        mime_type="text/plain",
+        kind=ArtifactKind.document,
+    )
+
+    metadata = delivery_harness_s3.api_get(f"/v1/artifacts/{aid}")
+    assert metadata.status_code == 200
+    body = metadata.json()
+    assert body["id"] == str(aid)
+    assert body["role_key"] == "remote_notes"
+    assert body["storage_uri"].startswith("s3:")
+    assert delivery_harness_s3.settings.artifact_storage_s3_bucket not in body["storage_uri"]
+
+    content = delivery_harness_s3.api_get(f"/v1/artifacts/{aid}/content")
+    assert content.status_code == 200
+    assert content.content == b"remote body"
+
+    preview = delivery_harness_s3.api_get(f"/v1/artifacts/{aid}/preview")
+    assert preview.status_code == 200
+    assert preview.json()["text"] == "remote body"
+
+
+def test_s3_content_404_when_remote_blob_missing_but_row_exists(
+    delivery_harness_s3: ContentDeliveryHarness,
+) -> None:
+    aid = delivery_harness_s3.save_artifact(
+        body=b"gone remote",
+        role_key="remote_missing",
+        filename_suffix=".txt",
+        mime_type="text/plain",
+        kind=ArtifactKind.document,
+    )
+    db = delivery_harness_s3.factory()
+    try:
+        row = db.get(Artifact, aid)
+        assert row is not None
+        uri = row.storage_uri
+    finally:
+        db.close()
+
+    store = get_s3_object_store(delivery_harness_s3.settings)
+    store.delete(store.key_from_uri(uri))
+
+    for path in ("content", "preview"):
+        response = delivery_harness_s3.api_get(f"/v1/artifacts/{aid}/{path}")
+        assert response.status_code == 404
+        payload = response.json()
+        assert payload.get("detail") == "Artifact content not found in storage"
+        text = str(payload).lower()
+        assert "artifact-bucket" not in text
+        assert "s3:" not in text

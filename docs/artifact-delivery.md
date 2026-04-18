@@ -16,13 +16,13 @@ Returns the artifact record (id, `role_key`, `kind`, `mime_type`, `byte_size`, `
 
 **404** if the row does not exist.
 
-JSON field names are **snake_case** (Pydantic / OpenAPI). When retention has pruned the stored blob intentionally, the metadata row keeps the original locator plus `blob_deleted_at` so clients can distinguish policy expiry from unexpected storage loss.
+JSON field names are **snake_case** (Pydantic / OpenAPI). `storage_uri` is a backend-specific **logical locator** such as `local:artifacts/.../report.md` or `s3:artifacts/.../report.md`; it is not a raw filesystem path, bucket name, or object identifier for clients to interpret directly. When retention has pruned the stored blob intentionally, the metadata row keeps the original locator plus `blob_deleted_at` so clients can distinguish policy expiry from unexpected storage loss.
 
 When present, artifact provenance inside `meta_json` uses sanitized keys such as `source_filename` and `source_workspace_relative_path`. Normal artifact metadata does not store or expose absolute filesystem paths.
 
 ## Content: `GET /v1/artifacts/{artifact_id}/content`
 
-Streams the raw object bytes from storage via `open_reader` (e.g. `local:` URIs). Responses do not embed filesystem paths; use this route (or the preview route) instead of interpreting `storage_uri` in clients.
+Streams the raw object bytes from storage via `open_reader` (for example `local:` or `s3:` locators). Responses do not embed filesystem paths, bucket names, or object keys; use this route (or the preview route) instead of interpreting `storage_uri` in clients.
 
 | Query | Default | Meaning |
 |-------|---------|---------|
