@@ -1,8 +1,9 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import { AuthEntryGuidance } from "@/components/auth/auth-entry-guidance";
 import { LoginForm } from "@/components/auth/login-form";
 import { getCurrentUser } from "@/lib/auth/session";
+import { getAuthCapabilities } from "@/lib/api/runs";
 
 export const dynamic = "force-dynamic";
 
@@ -12,10 +13,16 @@ export default async function LoginPage({
   searchParams: Promise<{ next?: string }>;
 }>) {
   const { next } = await searchParams;
+  const nextPath = next?.startsWith("/") && !next.startsWith("//") ? next : "/projects";
   const user = await getCurrentUser();
   if (user) {
-    redirect(next?.startsWith("/") && !next.startsWith("//") ? next : "/projects");
+    redirect(nextPath);
   }
+  const capabilities = await getAuthCapabilities().catch(() => ({
+    allow_open_registration: false,
+    bootstrap_required: false,
+    bootstrap_completed: true,
+  }));
 
   return (
     <div className="mx-auto max-w-md space-y-6">
@@ -26,17 +33,8 @@ export default async function LoginPage({
           HttpOnly cookie for server-side API calls.
         </p>
       </div>
-      <LoginForm nextPath={next?.startsWith("/") && !next.startsWith("//") ? next : "/projects"} />
-      <p className="text-xs text-[var(--muted)]">
-        No account?{" "}
-        <Link href="/register" className="font-mono underline">
-          Create one
-        </Link>{" "}
-        (or <code className="text-[var(--foreground)]">POST /v1/auth/register</code>).
-      </p>
-      <Link href="/" className="block font-mono text-xs underline">
-        ← Home
-      </Link>
+      <LoginForm nextPath={nextPath} />
+      <AuthEntryGuidance capabilities={capabilities} nextPath={nextPath} />
     </div>
   );
 }

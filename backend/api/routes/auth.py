@@ -13,12 +13,29 @@ from backend.api.deps import DbSession
 from backend.auth.tokens import create_access_token
 from backend.config.settings import get_settings
 from backend.models.user import User
-from backend.schemas.auth import AccessTokenResponse, AuthBootstrapBody, AuthLoginBody, AuthRegisterBody
+from backend.schemas.auth import (
+    AccessTokenResponse,
+    AuthBootstrapBody,
+    AuthCapabilitiesResponse,
+    AuthLoginBody,
+    AuthRegisterBody,
+)
 from backend.schemas.user import UserRead
 from backend.security.passwords import hash_password, verify_password
 from backend.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+
+@router.get("/capabilities", response_model=AuthCapabilitiesResponse)
+def capabilities(db: DbSession) -> AuthCapabilitiesResponse:
+    settings = get_settings()
+    bootstrap_completed = db.scalar(select(User.id).where(User.is_admin.is_(True)).limit(1)) is not None
+    return AuthCapabilitiesResponse(
+        allow_open_registration=settings.allow_open_registration,
+        bootstrap_required=not settings.allow_open_registration and not bootstrap_completed,
+        bootstrap_completed=bootstrap_completed,
+    )
 
 
 @router.post("/register", response_model=UserRead, status_code=201)

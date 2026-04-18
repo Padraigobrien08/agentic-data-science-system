@@ -5,6 +5,7 @@ import { redirect } from "next/navigation";
 
 import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 import { getApiBaseUrl } from "@/lib/api/config";
+import type { AuthCapabilitiesResponse } from "@/lib/api/types";
 
 function safeNextPath(raw: string | null): string {
   if (!raw || !raw.startsWith("/") || raw.startsWith("//")) {
@@ -22,6 +23,39 @@ function parseDetail(text: string): string {
     /* ignore */
   }
   return text.slice(0, 200) || "Request failed";
+}
+
+const FALLBACK_AUTH_CAPABILITIES: AuthCapabilitiesResponse = {
+  allow_open_registration: false,
+  bootstrap_required: false,
+  bootstrap_completed: true,
+};
+
+async function fetchAuthCapabilities(): Promise<AuthCapabilitiesResponse> {
+  const base = getApiBaseUrl();
+  const res = await fetch(`${base}/v1/auth/capabilities`, {
+    method: "GET",
+    headers: { Accept: "application/json" },
+    cache: "no-store",
+  });
+  if (!res.ok) {
+    return FALLBACK_AUTH_CAPABILITIES;
+  }
+  try {
+    return (await res.json()) as AuthCapabilitiesResponse;
+  } catch {
+    return FALLBACK_AUTH_CAPABILITIES;
+  }
+}
+
+function registrationDisabledMessage(capabilities: AuthCapabilitiesResponse): string {
+  if (capabilities.bootstrap_required) {
+    return "Registration is disabled until an operator completes bootstrap with the configured bootstrap token.";
+  }
+  if (capabilities.bootstrap_completed) {
+    return "Registration is disabled for this environment. Bootstrap is already complete, so use Sign in or ask an operator to explicitly enable open registration.";
+  }
+  return "Registration is disabled. Ask an operator to complete bootstrap or explicitly enable open registration.";
 }
 
 export type LoginState = { error?: string };
@@ -108,10 +142,7 @@ export async function registerAction(
   if (!reg.ok) {
     const detail = parseDetail(regText);
     if (detail === "Registration is disabled") {
-      return {
-        error:
-          "Registration is disabled. Ask an operator to use the bootstrap admin token or explicitly enable open registration.",
-      };
+      return { error: registrationDisabledMessage(await fetchAuthCapabilities()) };
     }
     return { error: detail };
   }

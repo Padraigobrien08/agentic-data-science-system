@@ -35,6 +35,13 @@ export interface CurrentUser {
   updated_at: string;
 }
 
+/** ``GET /v1/auth/capabilities`` */
+export interface AuthCapabilitiesResponse {
+  allow_open_registration: boolean;
+  bootstrap_required: boolean;
+  bootstrap_completed: boolean;
+}
+
 export type BackgroundDeliveryMode = "sync_only" | "background_ready" | "background_degraded";
 
 export interface BackgroundDeliveryHealth {

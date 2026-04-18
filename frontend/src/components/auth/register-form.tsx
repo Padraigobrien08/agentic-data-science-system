@@ -31,8 +31,15 @@ export function RegisterForm({ nextPath }: Props) {
   return (
     <form action={formAction} className="space-y-4 rounded border border-[var(--border)] p-4">
       <input type="hidden" name="next" value={nextPath} />
+      <p className="text-xs text-[var(--muted)]">
+        Self-registration is enabled for this environment right now. If that changes, this screen
+        will switch back to bootstrap or sign-in guidance instead of accepting new accounts.
+      </p>
       {state.error ? (
-        <p className="rounded border border-red-300 bg-red-50 px-2 py-1 font-mono text-xs text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100">
+        <p
+          role="alert"
+          className="rounded border border-red-300 bg-red-50 px-2 py-1 font-mono text-xs text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100"
+        >
           {state.error}
         </p>
       ) : null}

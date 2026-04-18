@@ -21,7 +21,10 @@ from tests.api_auth import TEST_PASSWORD, bootstrap_admin_and_headers, register_
 
 
 @pytest.fixture
-def auth_api_client() -> Iterator[TestClient]:
+def auth_api_client(monkeypatch: pytest.MonkeyPatch) -> Iterator[TestClient]:
+    monkeypatch.setenv("EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION", "true")
+    get_settings.cache_clear()
+
     engine = create_engine(
         "sqlite://",
         connect_args={"check_same_thread": False},
@@ -42,6 +45,7 @@ def auth_api_client() -> Iterator[TestClient]:
     with TestClient(app) as client:
         yield client
     app.dependency_overrides.clear()
+    get_settings.cache_clear()
 
 
 @pytest.fixture
@@ -182,6 +186,16 @@ def test_register_login_me(auth_api_client: TestClient) -> None:
     )
     assert r3.status_code == 200
     assert r3.json()["email"] == email
+
+
+def test_auth_capabilities_report_open_registration(auth_api_client: TestClient) -> None:
+    response = auth_api_client.get("/v1/auth/capabilities")
+    assert response.status_code == 200
+    assert response.json() == {
+        "allow_open_registration": True,
+        "bootstrap_required": False,
+        "bootstrap_completed": False,
+    }
 
 
 def test_register_returns_403_when_registration_closed(

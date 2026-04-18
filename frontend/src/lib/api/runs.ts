@@ -5,6 +5,7 @@ import type {
   AnalysisRunCreateBody,
   AnalysisRunDetail,
   AnalysisRunSummary,
+  AuthCapabilitiesResponse,
   ArtifactQueryOptions,
   ArtifactMetadata,
   ExecuteRunOverrides,
@@ -154,6 +155,10 @@ export async function getRunLlmUsage(runId: string): Promise<LlmRunUsageSummary>
 export async function getBackgroundDeliveryHealth(): Promise<BackgroundDeliveryHealth> {
   const health = await apiGet<HealthResponse>("/v1/health");
   return health.background_delivery;
+}
+
+export async function getAuthCapabilities(): Promise<AuthCapabilitiesResponse> {
+  return apiGet<AuthCapabilitiesResponse>("/v1/auth/capabilities");
 }
 
 export async function createRun(body: AnalysisRunCreateBody): Promise<AnalysisRunSummary> {

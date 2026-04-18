@@ -226,6 +226,32 @@ def test_secure_defaults_bootstrap_registration_ops_and_provenance_flow(
     assert "source_path" not in meta_json
 
 
+def test_secure_defaults_auth_capabilities_require_bootstrap(
+    secure_defaults_client: TestClient,
+) -> None:
+    response = secure_defaults_client.get("/v1/auth/capabilities")
+    assert response.status_code == 200
+    assert response.json() == {
+        "allow_open_registration": False,
+        "bootstrap_required": True,
+        "bootstrap_completed": False,
+    }
+
+
+def test_secure_defaults_auth_capabilities_switch_to_sign_in_only_after_bootstrap(
+    secure_defaults_client: TestClient,
+) -> None:
+    bootstrap_admin_and_headers(secure_defaults_client)
+
+    response = secure_defaults_client.get("/v1/auth/capabilities")
+    assert response.status_code == 200
+    assert response.json() == {
+        "allow_open_registration": False,
+        "bootstrap_required": False,
+        "bootstrap_completed": True,
+    }
+
+
 @pytest.mark.parametrize("path", ["/health", "/v1/health", "/ready", "/v1/ready"])
 def test_public_health_routes_remain_public_under_secure_defaults(
     secure_defaults_client: TestClient,

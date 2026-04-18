@@ -28,3 +28,11 @@ class AccessTokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
     expires_in: int = Field(description="Access token lifetime in seconds.")
+
+
+class AuthCapabilitiesResponse(BaseModel):
+    """Coarse public auth state for truthful onboarding surfaces."""
+
+    allow_open_registration: bool
+    bootstrap_required: bool
+    bootstrap_completed: bool
