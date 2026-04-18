@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to execute Phase 12
-stopped_at: Phase 12 planned; ready to execute
-last_updated: "2026-04-18T21:45:00Z"
+status: Ready to discuss Phase 13
+stopped_at: Phase 12 complete; ready to discuss Phase 13
+last_updated: "2026-04-18T21:38:44Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 1
   total_plans: 3
-  completed_plans: 0
+  completed_plans: 3
 ---
 
 # Project State
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Execute Phase 12 of `v1.2 Chat-First Analysis Experience`, using the research-backed 3-plan set for runtime repair, sync-first chat delivery, and onboarding cleanup.
+**Current focus:** Discuss Phase 13 of `v1.2 Chat-First Analysis Experience`, focusing on broader analyst prompt routing now that the runtime and onboarding blockers are repaired.
 
 ## Current Position
 
-Phase: 12
-Plan: 12-01 through 12-03
+Phase: 13
+Plan: not yet discussed
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to execute Phase 12
-Last activity: 2026-04-18 — Planned Phase 12 into 3 execute-ready plans
+Status: Ready to discuss Phase 13
+Last activity: 2026-04-18 — Completed Phase 12 runtime reliability, sync-first chat delivery, and onboarding cleanup
 
 ## Performance Metrics
 
@@ -84,6 +84,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 12-runtime-reliability-for-chat-delivery]: If background delivery is unavailable, chat may automatically fall back to synchronous execution, but that fallback must still be visible in workspace and per-message status.
 - [Phase 12-runtime-reliability-for-chat-delivery]: Phase 12 may pull in auth/onboarding fixes found during live testing if they materially block first-run chat delivery.
 - [Phase 12-runtime-reliability-for-chat-delivery]: The planned implementation is split into 3 sequential waves: worker/runtime foundation, sync-first chat runtime contract, and auth/onboarding cleanup.
+- [Phase 12-runtime-reliability-for-chat-delivery]: The documented stack now satisfies `RUN-01`, `RUN-02`, and `RUN-03`, so the next milestone bottleneck is request routing and chat-native answer delivery rather than runtime boot or onboarding.
 
 ### Pending Todos
 
@@ -91,13 +92,12 @@ None.
 
 ### Blockers/Concerns
 
-- Worker background execution is currently blocked by a circular import around `backend.observability.metrics` and `backend.services.recorded_chat_completion_service`.
-- Chat currently exposes `Queue for worker` without worker-health awareness, which conflicts with the chosen truthful delivery posture.
-- First-run auth/onboarding in secure-default local runs is now explicitly in scope for Phase 12 if it blocks chat usage.
+- Prompt routing still rejects normal analyst phrasing too often, which blocks the next chat-first milestone step even though runtime delivery is now stable.
+- Completed analyses still read primarily through the standalone run page rather than the chat surface that launched them.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T21:45:00Z
-Stopped at: Phase 12 planned; ready to execute
+Last session: 2026-04-18T21:38:44Z
+Stopped at: Phase 12 complete; ready to discuss Phase 13
 Resume file: .planning/PROJECT.md

@@ -17,9 +17,10 @@
 
 ### Phase 12: Runtime Reliability for Chat Delivery
 
-**Goal**: Users can rely on the documented local stack to create run workspaces, execute runs, and report background-delivery degradation truthfully before chat becomes the primary answer surface.  
+**Goal**: Users can rely on the documented local stack to create run workspaces, execute runs, report background-delivery degradation truthfully, and enter the product through capability-aware onboarding before chat becomes the primary answer surface.  
 **Depends on**: Phase 11 milestone archive baseline  
-**Plans**: 3 planned
+**Plans**: 3/3 completed  
+**Completed**: 2026-04-18
 
 **Details:**
 - Requirements: `RUN-01`, `RUN-02`, `RUN-03`
@@ -27,6 +28,7 @@
   1. Compose-backed run execution no longer fails on run-workspace creation or other local runtime setup gaps.
   2. The worker process starts cleanly and can claim queued work in the documented stack.
   3. The UI and health surfaces report background-delivery degradation clearly instead of implying queued chat delivery still works.
+  4. Secure-default local auth surfaces tell users whether to register, bootstrap, or sign in instead of pointing them into a dead-end create-account path.
 
 ### Phase 13: Analyst Prompt Routing
 
@@ -91,4 +93,4 @@
 |-----------|--------|-------|--------|---------|
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
-| v1.2 Chat-First Analysis Experience | 12-16 | 0 | Active | — |
+| v1.2 Chat-First Analysis Experience | 12-16 | 3 | Active | — |

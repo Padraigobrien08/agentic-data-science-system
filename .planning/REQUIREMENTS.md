@@ -25,9 +25,9 @@
 
 ### Runtime Reliability
 
-- [ ] **RUN-01**: User can launch a chat-driven run in the documented Compose stack without run-workspace permission failures
-- [ ] **RUN-02**: User can rely on queued/background execution in the documented Compose stack because the worker starts cleanly and can claim work
-- [ ] **RUN-03**: User can see truthful chat-visible status when background delivery is degraded or unavailable
+- [x] **RUN-01**: User can launch a chat-driven run in the documented Compose stack without run-workspace permission failures
+- [x] **RUN-02**: User can rely on queued/background execution in the documented Compose stack because the worker starts cleanly and can claim work
+- [x] **RUN-03**: User can see truthful chat-visible status when background delivery is degraded or unavailable
 
 ## v2 Requirements
 
@@ -65,9 +65,9 @@
 | PROMPT-01 | Phase 13 | Pending |
 | PROMPT-02 | Phase 13 | Pending |
 | PROMPT-03 | Phase 13 | Pending |
-| RUN-01 | Phase 12 | Pending |
-| RUN-02 | Phase 12 | Pending |
-| RUN-03 | Phase 12 | Pending |
+| RUN-01 | Phase 12 | Complete |
+| RUN-02 | Phase 12 | Complete |
+| RUN-03 | Phase 12 | Complete |
 
 **Coverage:**
 - v1 requirements: 12 total
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after roadmap creation*
+*Last updated: 2026-04-18 after Phase 12 completion*

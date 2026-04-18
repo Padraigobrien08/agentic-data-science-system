@@ -1,10 +1,11 @@
 ---
 phase: 12
 slug: runtime-reliability-for-chat-delivery
-status: planned
+status: completed
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-18
+verified: 2026-04-18T21:38:44Z
 ---
 
 # Phase 12 - Validation Strategy
@@ -17,8 +18,8 @@ created: 2026-04-18
 |----------|-------|
 | **Framework** | `pytest 8.4.2` + `vitest` |
 | **Config file** | `pytest.ini` and `frontend/vitest.config.ts` |
-| **Quick run command** | `python3 -m pytest tests/test_backend_health.py tests/test_worker_lease_heartbeat.py tests/test_auth_api.py tests/test_secure_defaults_api.py -q --tb=short && cd frontend && npm run test -- src/components/chat-shell/chat-composer.test.tsx src/components/chat-shell/chat-shell.test.tsx src/components/auth/register-form.test.tsx` |
-| **Full suite command** | `python3 -m pytest tests/test_backend_health.py tests/test_worker_lease_heartbeat.py tests/test_worker_job_lifecycle.py tests/test_async_run_queue.py tests/test_auth_api.py tests/test_secure_defaults_api.py -q --tb=short && cd frontend && npm run test -- src/components/chat-shell/chat-composer.test.tsx src/components/chat-shell/chat-shell.test.tsx src/components/chat-shell/chat-message-list.test.tsx src/components/auth/register-form.test.tsx && npm run build` |
+| **Quick run command** | `python3 -m pytest tests/test_backend_health.py tests/test_auth_api.py tests/test_secure_defaults_api.py -q --tb=short && cd frontend && npm run test -- src/components/chat-shell/chat-composer.test.tsx src/components/auth/auth-entry-guidance.test.tsx` |
+| **Full suite command** | `python3 -m pytest tests/test_worker_runtime_boot.py tests/test_worker_lease_heartbeat.py tests/test_async_run_queue.py tests/test_worker_job_lifecycle.py tests/test_backend_health.py tests/test_auth_api.py tests/test_secure_defaults_api.py -q --tb=short && bash -n scripts/smoke-compose.sh && EDGAR_BACKEND_JWT_SECRET=... EDGAR_BACKEND_OPS_API_TOKEN=... EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN=... EDGAR_SMOKE_ADMIN_EMAIL=smoke-admin@example.com EDGAR_SMOKE_ADMIN_PASSWORD=Smokepass12! ./scripts/smoke-compose.sh && cd frontend && npm run test -- src/components/chat-shell/chat-composer.test.tsx src/components/chat-shell/chat-shell.test.tsx src/components/chat-shell/chat-message-list.test.tsx src/components/auth/auth-entry-guidance.test.tsx && npm run build` |
 | **Estimated runtime** | ~20 seconds quick, ~60 seconds full |
 
 ## Sampling Rate
@@ -32,20 +33,20 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 12-01 | 01 | 1 | RUN-01, RUN-02 | backend/runtime | `python3 -m pytest tests/test_worker_lease_heartbeat.py tests/test_async_run_queue.py tests/test_worker_job_lifecycle.py -q --tb=short` | ⚠️ extend existing | ⬜ pending |
-| 12-02 | 02 | 2 | RUN-03 | frontend/backend | `python3 -m pytest tests/test_backend_health.py -q --tb=short && cd frontend && npm run test -- src/components/chat-shell/chat-composer.test.tsx src/components/chat-shell/chat-shell.test.tsx src/components/chat-shell/chat-message-list.test.tsx` | ❌ Wave 0 | ⬜ pending |
-| 12-03 | 03 | 3 | RUN-03 | auth/frontend | `python3 -m pytest tests/test_auth_api.py tests/test_secure_defaults_api.py -q --tb=short && cd frontend && npm run test -- src/components/auth/register-form.test.tsx` | ⚠️ extend existing / ❌ Wave 0 | ⬜ pending |
+| 12-01 | 01 | 1 | RUN-01, RUN-02 | backend/runtime | `python3 -m pytest tests/test_worker_runtime_boot.py tests/test_worker_lease_heartbeat.py tests/test_async_run_queue.py tests/test_worker_job_lifecycle.py -q --tb=short` | ✅ added / extended | ✅ green |
+| 12-02 | 02 | 2 | RUN-03 | frontend/backend | `python3 -m pytest tests/test_backend_health.py -q --tb=short && cd frontend && npm run test -- src/components/chat-shell/chat-composer.test.tsx src/components/chat-shell/chat-shell.test.tsx src/components/chat-shell/chat-message-list.test.tsx` | ✅ Wave 0 closed | ✅ green |
+| 12-03 | 03 | 3 | RUN-03 | auth/frontend | `python3 -m pytest tests/test_auth_api.py tests/test_secure_defaults_api.py -q --tb=short && cd frontend && npm run test -- src/components/auth/auth-entry-guidance.test.tsx` | ✅ extend existing / ✅ Wave 0 closed | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_worker_lease_heartbeat.py` or a new worker boot smoke test — explicit regression for the circular-import startup path
-- [ ] `tests/test_async_run_queue.py` / `tests/test_worker_job_lifecycle.py` — queue claim still works after the import-boundary repair
-- [ ] `tests/test_backend_health.py` — public coarse background-delivery status plus existing ops truthfulness
-- [ ] `frontend/src/components/chat-shell/chat-composer.test.tsx` — sync-only/default behavior and hidden/de-emphasized queue affordance
-- [ ] `frontend/src/components/chat-shell/chat-shell.test.tsx` and/or `chat-message-list.test.tsx` — workspace-level and per-message fallback/degraded-state rendering
-- [ ] `frontend/src/components/auth/register-form.test.tsx` — environment-aware registration/bootstrap guidance
+- [x] `tests/test_worker_runtime_boot.py` plus `tests/test_worker_lease_heartbeat.py` — explicit regression for the circular-import startup path and worker lease behavior
+- [x] `tests/test_async_run_queue.py` / `tests/test_worker_job_lifecycle.py` — queue claim still works after the import-boundary repair
+- [x] `tests/test_backend_health.py` — public coarse background-delivery status plus existing ops truthfulness
+- [x] `frontend/src/components/chat-shell/chat-composer.test.tsx` — sync-only/default behavior and hidden/de-emphasized queue affordance
+- [x] `frontend/src/components/chat-shell/chat-shell.test.tsx` and `chat-message-list.test.tsx` — workspace-level and per-message fallback/degraded-state rendering
+- [x] `frontend/src/components/auth/auth-entry-guidance.test.tsx` — environment-aware registration/bootstrap guidance
 
 ## Manual-Only Verifications
 
@@ -61,4 +62,4 @@ created: 2026-04-18
 - [x] No watch-mode flags
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** planned
+**Approval:** completed

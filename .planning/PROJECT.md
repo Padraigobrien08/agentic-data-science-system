@@ -26,13 +26,13 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Large trace views now open on typed summaries, bounded collections, and item-scoped raw drill-downs instead of first-load payload hydration — validated in Phase 8
 - ✓ Supported evaluation runs and case results are now first-class persisted project-scoped records with stored case metadata, reopenable case routes, and CLI compatibility through curated suite IDs — validated in Phase 9
 - ✓ Live and hybrid evaluation now executes through linked canonical child runs, and health plus metrics surfaces report evaluation SEC or storage degradation truthfully — validated in Phase 10
+- ✓ The documented local stack now boots the worker cleanly, executes chat-triggered runs reliably, surfaces sync-first background-delivery truth in chat, and no longer presents a dead-end secure-default registration path — validated in Phase 12
 
 ### Active
 
 - [ ] Chat becomes the primary surface for reading completed analysis answers instead of the standalone run page
 - [ ] Users can navigate from a chat answer to report, evidence, artifacts, critic, and trace surfaces through one compact navigation area
 - [ ] Normal analyst phrasing in chat routes to supported analysis paths or returns actionable rewrite guidance instead of dead-end intent failures
-- [ ] Chat-triggered runs complete reliably in the documented local stack, including run-workspace creation and background execution delivery
 
 ### Out of Scope
 
@@ -43,7 +43,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Shipped:** `v1.1 Live Validation and Scale` on 2026-04-18
-**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, and clean archive-grade planning traceability. Fresh hands-on testing also exposed the next product bottleneck: the answer experience still lives mostly on a fragmented run page instead of in chat, while worker startup and prompt routing still fail on realistic local usage paths.
+**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, clean archive-grade planning traceability, and a repaired sync-first chat runtime in the documented local stack. Fresh hands-on testing still shows the next product bottlenecks clearly: ordinary analyst phrasing remains too brittle, and the primary answer-reading experience still lives on a fragmented run page instead of in chat.
 
 ## Current Milestone: v1.2 Chat-First Analysis Experience
 
@@ -109,4 +109,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after starting v1.2 milestone planning*
+*Last updated: 2026-04-18 after Phase 12 completion*
