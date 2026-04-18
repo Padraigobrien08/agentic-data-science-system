@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
 milestone: v1.1
-milestone_name: live-validation-and-scale
-status: ready to execute phase 08
-stopped_at: Phase 08 planning complete
-last_updated: "2026-04-18T14:18:36Z"
+milestone_name: Live Validation and Scale
+status: Ready to Discuss Phase 09
+stopped_at: Phase 08 execution complete
+last_updated: "2026-04-18T16:08:00Z"
 progress:
-  total_phases: 10
-  completed_phases: 7
-  total_plans: 26
-  completed_plans: 23
+  total_phases: 5
+  completed_phases: 3
+  total_plans: 9
+  completed_plans: 9
 ---
 
 # Project State
@@ -19,20 +19,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 08 execution for summary-first large trace views in v1.1
+**Current focus:** Phase 09 — evaluation-control-plane
 
 ## Current Position
 
-Phase: 08 (summary-first-large-trace-views) — READY
-Plan: 3 execute plans across 3 waves
+Phase: 09 (evaluation-control-plane) — READY TO DISCUSS
+Plan: N/A
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 23
-- Average duration: 9 min
-- Total execution time: 3.5 hours
+- Total plans completed: 26
+- Average duration: 8 min
+- Total execution time: 3.7 hours
 
 **By Phase:**
 
@@ -45,11 +45,12 @@ Plan: 3 execute plans across 3 waves
 | 05-storage-and-ops | 4 | 27min | 7min |
 | 06-validation-boundaries-and-policy | 3 | 13min | 4min |
 | 07-remote-artifact-storage-contract | 3 | 21min | 7min |
+| 08-summary-first-large-trace-views | 3 | 29min | 10min |
 
 **Recent Trend:**
 
-- Last 5 plans: 06-validation-boundaries-and-policy-02 (4min), 06-validation-boundaries-and-policy-03 (5min), 07-remote-artifact-storage-contract-01 (14min), 07-remote-artifact-storage-contract-02 (4min), 07-remote-artifact-storage-contract-03 (3min)
-- Trend: Stable; Phase 07 had one heavier storage-foundation wave, then two short integration and documentation follow-ups
+- Last 5 plans: 07-remote-artifact-storage-contract-02 (4min), 07-remote-artifact-storage-contract-03 (3min), 08-summary-first-large-trace-views-01 (14min), 08-summary-first-large-trace-views-02 (12min), 08-summary-first-large-trace-views-03 (11min)
+- Trend: Stable; Phase 08 had a heavier frontend migration wave followed by bounded raw-detail polish and regression hardening
 
 ## Accumulated Context
 
@@ -57,11 +58,6 @@ Plan: 3 execute plans across 3 waves
 
 Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecting current work:
 
-- [Phase 5]: Artifact delivery already preserves app-owned authorization and tombstone semantics, so v1.1 storage work must stay behind the existing artifact contract.
-- [Milestone v1.1]: Continue phase numbering from Phase 6 to keep one continuous roadmap across shipped and planned milestones.
-- [Milestone v1.1]: Keep v1.1 as five phases: validation boundaries, remote storage contract, summary-first trace views, evaluation control plane, and live-hybrid execution hardening.
-- [Milestone v1.1]: Treat the supported evaluation workflow as a separate control plane from real live or hybrid execution so SEC traffic lands only after storage and trace seams are safe.
-- [Milestone v1.1]: Make large-trace work API-first and summary-first rather than trying to solve scale only in the frontend.
 - [Phase 6-validation-boundaries-and-policy]: Validation must stay policy-distinct from normal user work, even before later phases add child analysis-run linkage or richer evaluation workflows.
 - [Phase 6-validation-boundaries-and-policy]: Validation outcomes must distinguish `product_regression`, `upstream_sec_degraded`, `stale_source`, and `policy_skipped`.
 - [Phase 6-validation-boundaries-and-policy]: Fixture and mocked evaluation remain the default path; `live` and `hybrid` stay explicit operator-invoked and non-merge-blocking by default.
@@ -77,7 +73,8 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 8-summary-first-large-trace-views]: Large traces should open on a compact overview with separate summary panels rather than the current full deep-dive stack.
 - [Phase 8-summary-first-large-trace-views]: Steps, artifacts, and model calls stay as separate navigable collections instead of one mixed event stream.
 - [Phase 8-summary-first-large-trace-views]: Privileged raw payloads should be fetched on demand per item, not page-wide through initial `include_payloads=true` loads.
-- [Phase 8-summary-first-large-trace-views]: The step timeline remains the organizing spine, and artifacts/model calls should link back to it via phase/role/status cues.
+- [Phase 8-summary-first-large-trace-views]: The step timeline remains the organizing spine, and artifacts/model calls should link back to it via phase, role, and status cues.
+- [Phase 8-summary-first-large-trace-views]: Legacy inspector panels can remain available as long as they route users back into the summary-first surface for bounded raw drill-down.
 
 ### Pending Todos
 
@@ -85,12 +82,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- Decide whether the v1.1 evaluation control plane stays API or CLI-first or includes a dedicated operator UI beyond current surfaces.
-- Phase 8 execution must move the trace first-load boundary to typed summaries without losing drill-down auditability for privileged users.
+- Decide whether the supported evaluation control plane should land API-first, CLI-first, or with an operator UI in the same phase boundary.
+- Phase 09 needs to promote evaluation runs and case results into first-class persisted records without bypassing the run identity, artifact, and raw-access boundaries already established.
 - Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T14:18:36Z
-Stopped at: Phase 08 planning complete
-Resume file: .planning/phases/08-summary-first-large-trace-views/08-summary-first-large-trace-views-01-PLAN.md
+Last session: 2026-04-18T16:08:00Z
+Stopped at: Phase 08 execution complete
+Resume file: .planning/ROADMAP.md

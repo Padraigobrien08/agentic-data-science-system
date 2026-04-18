@@ -23,12 +23,12 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Storage and operations now surface degraded dependency state truthfully, stream artifact ingest without full-memory copies, and support explicit audit-preserving retention workflows — validated in Phase 5
 - ✓ Validation outcomes now expose explicit degradation classes, and live or hybrid evaluation stays operator-invoked and non-default behind explicit policy plus `--allow-live` guardrails — validated in Phase 6
 - ✓ Artifact storage now supports a configured S3-compatible backend behind the same opaque artifact IDs, authorized delivery routes, and reconciliation-visible retention semantics as local storage — validated in Phase 7
+- ✓ Large trace views now open on typed summaries, bounded collections, and item-scoped raw drill-downs instead of first-load payload hydration — validated in Phase 8
 
 ### Active
 
 - Supported evaluation runs should become first-class persisted workflows instead of remaining CLI- and file-output-driven
 - Live and hybrid validation should execute through canonical child runs so artifacts, workers, and audit trails stay unified
-- Large trace and transparency views should be decomposed and optimized for very large run payloads before broader scale-up work
 
 ### Out of Scope
 
@@ -42,14 +42,14 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 **Target features:**
 - Supported live SEC and hybrid evaluation workflows for freshness and integration confidence
-- Scalable trace and transparency views for very large run payloads
+- Scalable trace and transparency views for very large run payloads — delivered in Phase 8
 - Remote object-store support alongside the current local shared-filesystem artifact contract — delivered in Phase 7
 
 ## Context
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map showed that several core platform assumptions still depended on shared filesystem paths, cwd mutation, and large multi-responsibility modules before the v1.0 hardening effort.
 
-The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The current milestone has now locked explicit live-validation policy boundaries and a remote object-store contract behind the same artifact and auth surfaces. The remaining v1.1 work focuses on scaling trace inspection and promoting evaluation workflows into first-class persisted control-plane flows without undoing the trust boundaries that v1.0 established.
+The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The current milestone has now locked explicit live-validation policy boundaries, a remote object-store contract, and a summary-first large-trace experience behind the same artifact and auth surfaces. The remaining v1.1 work is now concentrated in promoting evaluation workflows into first-class persisted control-plane flows and linking live or hybrid execution back into the canonical run infrastructure without undoing the trust boundaries that earlier phases established.
 
 ## Constraints
 
@@ -90,4 +90,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 7 completion*
+*Last updated: 2026-04-18 after Phase 8 completion*

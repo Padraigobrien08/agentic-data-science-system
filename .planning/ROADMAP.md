@@ -20,7 +20,7 @@
 
 - [x] **Phase 6: Validation Boundaries and Policy** - Define validation verdicts and safe live-use guardrails before broader rollout.
 - [x] **Phase 7: Remote Artifact Storage Contract** - Add one S3-compatible artifact backend behind the existing artifact contract.
-- [ ] **Phase 8: Summary-First Large Trace Views** - Make large trace inspection fast, bounded, and summary-first.
+- [x] **Phase 8: Summary-First Large Trace Views** - Make large trace inspection fast, bounded, and summary-first.
 - [ ] **Phase 9: Evaluation Control Plane** - Promote evaluation runs and case results into supported persisted workflows.
 - [ ] **Phase 10: Live/Hybrid Execution Hardening** - Link live and hybrid validation to canonical runs and truthful ops reporting.
 
@@ -54,7 +54,7 @@
   1. User can open a large run trace and receive a typed summary view before raw step, artifact, or model-call payloads are fetched.
   2. User can search, filter, paginate, or jump through large step, artifact, and model-call collections without overwhelming the browser or API.
   3. Privileged users can fetch bounded raw payload sections on demand, while standard trace loads stay summary-first by default.
-**Plans**: TBD
+**Plans**: 3 (completed 2026-04-18)
 **UI hint**: yes
 
 ### Phase 9: Evaluation Control Plane
@@ -88,6 +88,6 @@
 | 5. Storage and Ops | 4/4 | Complete | 2026-04-17 |
 | 6. Validation Boundaries and Policy | 3/3 | Complete | 2026-04-18 |
 | 7. Remote Artifact Storage Contract | 3/3 | Complete | 2026-04-18 |
-| 8. Summary-First Large Trace Views | 0/TBD | Not started | - |
+| 8. Summary-First Large Trace Views | 3/3 | Complete | 2026-04-18 |
 | 9. Evaluation Control Plane | 0/TBD | Not started | - |
 | 10. Live/Hybrid Execution Hardening | 0/TBD | Not started | - |

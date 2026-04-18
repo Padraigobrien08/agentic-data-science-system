@@ -18,9 +18,9 @@
 
 ### Trace and Transparency
 
-- [ ] **TRACE-01**: User can open large run trace views that load typed summaries first without default full-payload hydration
-- [ ] **TRACE-02**: User can search, filter, paginate, or jump through large step, artifact, and model-call collections without overwhelming the browser or API
-- [ ] **TRACE-03**: Privileged users can fetch raw payload sections on demand in bounded views instead of receiving all raw trace blobs by default
+- [x] **TRACE-01**: User can open large run trace views that load typed summaries first without default full-payload hydration
+- [x] **TRACE-02**: User can search, filter, paginate, or jump through large step, artifact, and model-call collections without overwhelming the browser or API
+- [x] **TRACE-03**: Privileged users can fetch raw payload sections on demand in bounded views instead of receiving all raw trace blobs by default
 
 ### Evaluation Control Plane
 
@@ -65,9 +65,9 @@
 | VALID-03 | Phase 6 | Complete |
 | STOR-01 | Phase 7 | Complete |
 | STOR-02 | Phase 7 | Complete |
-| TRACE-01 | Phase 8 | Pending |
-| TRACE-02 | Phase 8 | Pending |
-| TRACE-03 | Phase 8 | Pending |
+| TRACE-01 | Phase 8 | Complete |
+| TRACE-02 | Phase 8 | Complete |
+| TRACE-03 | Phase 8 | Complete |
 | EVAL-01 | Phase 9 | Pending |
 | EVAL-02 | Phase 10 | Pending |
 | OPS-01 | Phase 10 | Pending |
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after Phase 7 completion*
+*Last updated: 2026-04-18 after Phase 8 completion*
