@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Live Validation and Scale
-status: ready to discuss phase 10
-stopped_at: Phase 09 execution complete
-last_updated: "2026-04-18T16:22:13Z"
+status: ready to plan phase 10
+stopped_at: Phase 10 context captured
+last_updated: "2026-04-18T17:24:42Z"
 progress:
   total_phases: 5
   completed_phases: 4
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 10 discussion for live-hybrid execution hardening in v1.1
+**Current focus:** Phase 10 planning for live-hybrid execution hardening in v1.1
 
 ## Current Position
 
 Phase: 10 (live-hybrid-execution-hardening) — READY
-Plan: Phase 09 complete; one remaining milestone phase
+Plan: Context captured; ready to create execute plans
 
 ## Performance Metrics
 
@@ -71,6 +71,10 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 9-evaluation-control-plane]: Supported evaluation launches should use curated suite IDs or approved manifests rather than arbitrary repo file paths.
 - [Phase 9-evaluation-control-plane]: Evaluation ownership should be project-scoped by default rather than introducing a global operator-only auth model.
 - [Phase 9-evaluation-control-plane]: Reopened evaluation history should expose persisted run summary plus explicit per-case results, not just a `results_json` blob.
+- [Phase 10-live-hybrid-execution-hardening]: Live or hybrid evaluation starts should enqueue canonical child analysis runs and return immediately instead of executing inline.
+- [Phase 10-live-hybrid-execution-hardening]: Each live or hybrid evaluation case should link directly to child `AnalysisRun` records, with latest-run pointer plus bounded prior history.
+- [Phase 10-live-hybrid-execution-hardening]: Evaluation case verdicts should be derived from linked `AnalysisRun` terminal status plus existing degradation taxonomy rather than a parallel lifecycle.
+- [Phase 10-live-hybrid-execution-hardening]: Existing `/health`, `/v1/worker/health`, and `/metrics` surfaces should expose evaluation-specific SEC or storage degradation explicitly.
 
 ### Pending Todos
 
@@ -84,6 +88,6 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-04-18T16:22:13Z
-Stopped at: Phase 09 execution complete
-Resume file: .planning/phases/09-evaluation-control-plane/09-VERIFICATION.md
+Last session: 2026-04-18T17:24:42Z
+Stopped at: Phase 10 context captured
+Resume file: .planning/phases/10-live-hybrid-execution-hardening/10-CONTEXT.md
