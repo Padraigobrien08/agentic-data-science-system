@@ -21,7 +21,9 @@ PYTHONPATH=. python3 -m edgar_project.cli demo --fixtures
 
 **What you should see:** A labeled block for benchmark outputs under `data/evaluation/` (suite JSON + per-case folders), then a tip pointing at `data/README.md`. Same fixture suite as `python3 -m edgar_project.cli evaluate`.
 
-**Benchmarks only (no `demo`):** `PYTHONPATH=. python3 -m edgar_project.cli evaluate` — short pass/fail summary and paths to `*_results.json`. This defaults to the offline fixture suite; live or hybrid manifests are operator-invoked and require `--allow-live`.
+**Benchmarks only (no `demo`):** `PYTHONPATH=. python3 -m edgar_project.cli evaluate` — short pass/fail summary and paths to `*_results.json`. This defaults to the supported fixture suite id `suite_fixtures_v1`; live or hybrid manifests are operator-invoked and require `--allow-live`.
+
+**Project-scoped persisted evaluation compatibility path:** `PYTHONPATH=. python3 -m edgar_project.cli evaluate --project-id <project_uuid>` — creates and executes a stored evaluation run through the API-backed control-plane contract, then prints the resulting `evaluation_run_id` and terminal status.
 
 **Live (network, SEC + cache)** — curated tickers and goals from `edgar_project/demo/scenarios.json`:
 
@@ -54,11 +56,12 @@ From repo root (`PYTHONPATH=.`):
 ```bash
 python3 -m edgar_project.cli run --tickers AAPL MSFT --goal "find unusual financial changes"
 python3 -m edgar_project.cli evaluate
+python3 -m edgar_project.cli evaluate --suite-id suite_smoke --allow-live
+python3 -m edgar_project.cli evaluate --project-id <project_uuid>
 python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmarks/suite_orchestration_mocked_v1.json
-python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmarks/suite_smoke.json --allow-live
 ```
 
-`evaluate` defaults to the offline fixture suite; prints case counts, failing IDs, and paths to JSON. Live or hybrid validation is operator-invoked, fair-access-sensitive work and requires `--allow-live`; it remains non-merge-blocking by default. Use `evaluate -v` for an extended table. `run -v` / `run --json` — orchestration logs or full `OrchestrationOutput`. `main.py` is unchanged.
+`evaluate` defaults to the supported fixture suite id and still supports direct local JSON-output execution. The primary supported workflow is API-backed and project-scoped via `--project-id`; `--suite` is now a developer fallback for raw manifest paths rather than the default product contract. Live or hybrid validation is operator-invoked, fair-access-sensitive work and requires `--allow-live`; it remains non-merge-blocking by default. Use `evaluate -v` for an extended table. `run -v` / `run --json` — orchestration logs or full `OrchestrationOutput`. `main.py` is unchanged.
 
 ## Notebook demo
 

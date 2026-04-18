@@ -39,13 +39,32 @@ This is **not** end-to-end validation against real EDGAR responses unless you in
 
 ## How to run
 
+The supported product workflow is **API-backed and project-scoped**. The FastAPI control plane stores one `EvaluationRun` plus explicit per-case records, and the CLI now acts as a **compatibility path** onto that model when you provide `--project-id`.
+
 **CLI (short summary on stdout):**
 
 ```bash
 PYTHONPATH=. python3 -m edgar_project.cli evaluate
 ```
 
-The default `evaluate` path is the offline fixture suite. Live or hybrid suites are fair-access-sensitive, operator-invoked flows and require `--allow-live`.
+This defaults to the supported fixture suite id `suite_fixtures_v1`. Live or hybrid suites are fair-access-sensitive, operator-invoked flows and require `--allow-live`.
+
+**Persisted compatibility path (project-scoped):**
+
+```bash
+PYTHONPATH=. python3 -m edgar_project.cli evaluate --project-id <project_uuid>
+PYTHONPATH=. python3 -m edgar_project.cli evaluate --project-id <project_uuid> --suite-id suite_smoke --allow-live
+```
+
+That path resolves a curated suite id, creates a stored evaluation row, executes through the shared control-plane service, and prints the resulting `evaluation_run_id` plus terminal status.
+
+**Developer fallback (raw manifest path):**
+
+```bash
+PYTHONPATH=. python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmarks/suite_fixtures_v1.json
+```
+
+`--suite` remains a lower-level developer fallback for direct manifest execution. It is not the primary control-plane contract.
 
 **Script (same runner, more flags by default):**
 
@@ -58,6 +77,8 @@ To run a live or hybrid manifest intentionally, pass `--allow-live` on either en
 
 Useful flags:
 
+- `--suite-id` — Supported suite id for the API-backed or local compatibility workflow.
+- `--project-id` — Switches `evaluate` into the API-backed, project-scoped compatibility path.
 - `--rubric` — Rubric JSON (default under `fixtures/`).
 - `--write-markdown` — Also writes `<suite_id>_report.md` under `output_dir`.
 - `--quiet` — Less console noise.
@@ -70,7 +91,7 @@ Outputs:
 
 Exit code **1** if any case is `failed` or `error`.
 
-Programmatic use: `BenchmarkSuite.model_validate_json(...)`, `EvaluationRunner(suite=..., update_regression_goldens=...)`, `run_suite()`.
+Programmatic use: `BenchmarkSuite.model_validate_json(...)`, `EvaluationRunner(suite=..., update_regression_goldens=...)`, `run_suite()`. Product-facing persisted starts should prefer the API-backed workflow or the CLI compatibility path with `--project-id`.
 
 ## Adding a new benchmark case
 

@@ -269,3 +269,88 @@ def test_start_route_returns_409_for_non_pending_evaluation_run(
         json={},
     )
     assert second.status_code == 409
+
+
+def test_list_fixture_case_results_and_reopen_one_case(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, _factory = api_client
+
+    created = client.post(
+        "/v1/evaluations",
+        headers=headers,
+        json={"project_id": project_id, "suite_id": "suite_fixtures_v1"},
+    )
+    assert created.status_code == 201, created.text
+    evaluation_run_id = created.json()["id"]
+
+    started = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={},
+    )
+    assert started.status_code == 200, started.text
+
+    listed = client.get(
+        f"/v1/evaluations/{evaluation_run_id}/cases?input_mode=fixture",
+        headers=headers,
+    )
+    assert listed.status_code == 200, listed.text
+    listed_body = listed.json()
+    assert len(listed_body) == 5
+    assert {row["input_mode"] for row in listed_body} == {"fixture"}
+
+    case_id = listed_body[0]["case_id"]
+    detail = client.get(
+        f"/v1/evaluations/{evaluation_run_id}/cases/{case_id}",
+        headers=headers,
+    )
+    assert detail.status_code == 200, detail.text
+    detail_body = detail.json()
+    assert detail_body["case_id"] == case_id
+    assert detail_body["checks_json"] is not None
+
+
+def test_filter_policy_skipped_case_results_and_enforce_owner_scope(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, _factory = api_client
+    _other_project_id, other_headers = register_project_and_headers(client)
+
+    created = client.post(
+        "/v1/evaluations",
+        headers=headers,
+        json={"project_id": project_id, "suite_id": "suite_smoke"},
+    )
+    assert created.status_code == 201, created.text
+    evaluation_run_id = created.json()["id"]
+
+    started = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={},
+    )
+    assert started.status_code == 200, started.text
+
+    filtered = client.get(
+        f"/v1/evaluations/{evaluation_run_id}/cases?degradation_class=policy_skipped",
+        headers=headers,
+    )
+    assert filtered.status_code == 200, filtered.text
+    filtered_body = filtered.json()
+    assert len(filtered_body) == 1
+    assert filtered_body[0]["degradation_class"] == "policy_skipped"
+    assert filtered_body[0]["policy_json"] is not None
+    case_id = filtered_body[0]["case_id"]
+
+    other_list = client.get(
+        f"/v1/evaluations/{evaluation_run_id}/cases",
+        headers=other_headers,
+    )
+    assert other_list.status_code == 404
+
+    other_detail = client.get(
+        f"/v1/evaluations/{evaluation_run_id}/cases/{case_id}",
+        headers=other_headers,
+    )
+    assert other_detail.status_code == 404

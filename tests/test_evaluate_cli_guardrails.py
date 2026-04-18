@@ -15,7 +15,8 @@ def test_root_evaluate_parser_defaults_to_fixture_suite_without_live_opt_in() ->
     args = build_parser().parse_args(["evaluate"])
 
     assert args.allow_live is False
-    assert args.suite == Path("edgar_project/evaluation/benchmarks/suite_fixtures_v1.json")
+    assert args.suite_id == "suite_fixtures_v1"
+    assert args.suite is None
 
 
 def test_root_evaluate_parser_accepts_explicit_live_opt_in() -> None:
@@ -45,10 +46,14 @@ def test_docs_keep_live_validation_operator_only() -> None:
     assert "--allow-live" in evaluation_readme
     assert "operator-invoked" in evaluation_readme
     assert "non-merge-blocking" in evaluation_readme
+    assert "API-backed" in evaluation_readme
+    assert "compatibility path" in evaluation_readme
 
     assert "evaluate" in root_readme
     assert "--allow-live" in root_readme
     assert "offline fixture suite" in root_readme
+    assert "--suite-id" in root_readme
+    assert "developer fallback" in root_readme
 
     assert "evaluation/" in data_readme
     assert "not normal user-run histories" in data_readme

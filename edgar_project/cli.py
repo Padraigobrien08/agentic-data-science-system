@@ -16,13 +16,19 @@ import json
 import logging
 import sys
 from pathlib import Path
+from uuid import UUID
 
 from edgar_project.repo_layout import REPO_ROOT, ensure_repo_root_on_syspath
 
 ensure_repo_root_on_syspath()
 
+from backend.db.session import SessionLocal
+from backend.models.evaluation_run import EvaluationRun
+from backend.models.enums import EvaluationRunStatus
+from backend.services.evaluation_control_plane_service import EvaluationControlPlaneService
 from edgar_project.console_digest import print_run_digest_stdout
 from edgar_project.demo import DemoScenario, get_demo_scenario, list_demo_scenario_ids, load_demo_catalog
+from edgar_project.evaluation.catalog import get_supported_evaluation_suite
 from edgar_project.evaluation.rubric import Rubric
 from edgar_project.evaluation.runner import EvaluationRunner
 from edgar_project.evaluation.schemas import BenchmarkSuite, EvaluationStatus
@@ -245,7 +251,51 @@ def _cmd_demo(args: argparse.Namespace) -> int:
 
 
 def _cmd_evaluate(args: argparse.Namespace) -> int:
-    suite_path = Path(args.suite)
+    try:
+        supported_suite = get_supported_evaluation_suite(args.suite_id)
+    except KeyError as exc:
+        print(str(exc), file=sys.stderr)
+        return 2
+
+    if args.project_id and args.suite is not None:
+        print(
+            "--suite is a developer fallback only; persisted control-plane runs must use --suite-id.",
+            file=sys.stderr,
+        )
+        return 2
+
+    if args.project_id:
+        try:
+            project_id = UUID(str(args.project_id))
+        except ValueError:
+            print(f"Invalid project id: {args.project_id!r}", file=sys.stderr)
+            return 2
+
+        with SessionLocal() as db:
+            manifest_rel = str(supported_suite.manifest_path.relative_to(REPO_ROOT))
+            row = EvaluationRun(
+                project_id=project_id,
+                suite_id=supported_suite.suite_id,
+                suite_manifest_path=manifest_rel,
+                status=EvaluationRunStatus.pending,
+                notes="CLI compatibility path",
+            )
+            db.add(row)
+            db.flush()
+            service = EvaluationControlPlaneService(db)
+            row = service.start_evaluation_run(row.id, allow_live=args.allow_live)
+            db.commit()
+            db.refresh(row)
+            case_count = service.count_case_results(row.id)
+
+        print("Persisted evaluation run")
+        print(f"  evaluation_run_id: {row.id}")
+        print(f"  suite_id:          {row.suite_id}")
+        print(f"  status:            {row.status.value}")
+        print(f"  case_count:        {case_count}")
+        return 1 if row.status in {EvaluationRunStatus.failed, EvaluationRunStatus.error} else 0
+
+    suite_path = Path(args.suite) if args.suite is not None else supported_suite.manifest_path
     if not suite_path.is_absolute():
         suite_path = (REPO_ROOT / suite_path).resolve()
     rubric_path = Path(args.rubric)
@@ -372,10 +422,20 @@ def build_parser() -> argparse.ArgumentParser:
         help="Print extended case table (in addition to the short summary)",
     )
     pe.add_argument(
+        "--suite-id",
+        default="suite_fixtures_v1",
+        help="Supported evaluation suite id (default: suite_fixtures_v1)",
+    )
+    pe.add_argument(
         "--suite",
         type=Path,
-        default=Path("edgar_project/evaluation/benchmarks/suite_fixtures_v1.json"),
-        help="Benchmark suite JSON manifest",
+        default=None,
+        help="Developer fallback benchmark suite JSON manifest",
+    )
+    pe.add_argument(
+        "--project-id",
+        default=None,
+        help="Project-scoped persisted evaluation run; enables the API-backed compatibility path",
     )
     pe.add_argument(
         "--rubric",

@@ -13,6 +13,10 @@ from backend.api.deps import DbSession, EvaluationControlPlaneServiceDep
 from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.evaluation_run import EvaluationRun
 from backend.models.enums import EvaluationRunStatus
+from backend.schemas.evaluation_case_result import (
+    EvaluationCaseResultRead,
+    evaluation_case_result_to_read,
+)
 from backend.schemas.evaluation_run import (
     EvaluationRunCreate,
     EvaluationRunRead,
@@ -23,6 +27,11 @@ from backend.schemas.evaluation_run import (
 from edgar_project.evaluation.catalog import (
     get_supported_evaluation_suite,
     list_supported_evaluation_suites,
+)
+from edgar_project.evaluation.schemas import (
+    EvaluationStatus,
+    InputMode,
+    ValidationDegradationClass,
 )
 from edgar_project.repo_layout import REPO_ROOT
 
@@ -106,6 +115,58 @@ def get_evaluation_run(
 ) -> EvaluationRunRead:
     row = require_evaluation_run_owned(db, evaluation_run_id, user.id)
     return evaluation_run_to_read(row, case_count=_case_count(db, row.id))
+
+
+@router.get(
+    "/{evaluation_run_id}/cases",
+    response_model=list[EvaluationCaseResultRead],
+)
+def list_evaluation_case_results(
+    evaluation_run_id: UUID,
+    db: DbSession,
+    user: CurrentUserDep,
+    status: EvaluationStatus | None = Query(default=None),
+    input_mode: InputMode | None = Query(default=None),
+    degradation_class: ValidationDegradationClass | None = Query(default=None),
+) -> list[EvaluationCaseResultRead]:
+    require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    stmt = (
+        select(EvaluationCaseResult)
+        .where(EvaluationCaseResult.evaluation_run_id == evaluation_run_id)
+        .order_by(EvaluationCaseResult.case_id.asc())
+    )
+    if status is not None:
+        stmt = stmt.where(EvaluationCaseResult.status == status.value)
+    if input_mode is not None:
+        stmt = stmt.where(EvaluationCaseResult.input_mode == input_mode.value)
+    if degradation_class is not None:
+        stmt = stmt.where(
+            EvaluationCaseResult.degradation_class == degradation_class.value
+        )
+    rows = list(db.scalars(stmt).all())
+    return [evaluation_case_result_to_read(row) for row in rows]
+
+
+@router.get(
+    "/{evaluation_run_id}/cases/{case_id}",
+    response_model=EvaluationCaseResultRead,
+)
+def get_evaluation_case_result(
+    evaluation_run_id: UUID,
+    case_id: str,
+    db: DbSession,
+    user: CurrentUserDep,
+) -> EvaluationCaseResultRead:
+    require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    row = db.scalar(
+        select(EvaluationCaseResult).where(
+            EvaluationCaseResult.evaluation_run_id == evaluation_run_id,
+            EvaluationCaseResult.case_id == case_id,
+        )
+    )
+    if row is None:
+        raise HTTPException(status_code=404, detail="Evaluation case result not found.")
+    return evaluation_case_result_to_read(row)
 
 
 @router.post("/{evaluation_run_id}/start", response_model=EvaluationRunRead)
