@@ -12,75 +12,9 @@ MCP I/O lives in :class:`Executor`; planning in :class:`Planner`. Both are expor
 
 from __future__ import annotations
 
-from pydantic import JsonValue
+from importlib import import_module
 
-from edgar_project.orchestration.agent import (
-    AnalysisAgent,
-    run_analysis,
-    run_analysis_agent,
-    run_analysis_agent_returning_state,
-)
-from edgar_project.orchestration.execution_contract import ExecutionRequest, ExecutionResult
-from edgar_project.orchestration.executor import Executor
-from edgar_project.orchestration.constants import (
-    DEFAULT_TICKERS_WHEN_INPUT_EMPTY,
-    ORCH_RUN_STATE_CONTRACT_VERSION,
-    ORCH_STATUS_ERROR,
-    ORCH_STATUS_NO_DATA,
-    ORCH_STATUS_PARTIAL_SUCCESS,
-    ORCH_STATUS_SUCCESS,
-    STEP_STATUS_MCP_ERROR,
-    STEP_STATUS_MCP_NO_DATA,
-    STEP_STATUS_MCP_SUCCESS,
-    STEP_STATUS_SKIPPED,
-    TOOL_BUILD_PANEL,
-    TOOL_COMPUTE_FEATURES,
-    TOOL_DETECT_ANOMALIES,
-    TOOL_FETCH_COMPANY_DATA,
-    TOOL_GENERATE_REPORT,
-    TOOL_RESOLVE_COMPANY,
-    TOOL_RUN_PIPELINE,
-)
-from edgar_project.orchestration.goal_preferences import parse_goal_preferences, prefer_run_pipeline_over_granular
-from edgar_project.orchestration.plan_templates import (
-    build_plan_template_snapshot,
-    get_plan_template_snapshot,
-    interpreted_goal_code_for,
-    select_plan_template,
-)
-from edgar_project.orchestration.intent import IntentInterpretation, interpret_goal_intent
-from edgar_project.orchestration.planner import Planner
-from edgar_project.orchestration.run_logging import log_run_finished, logger as orchestration_logger, tool_summary_line
-from edgar_project.orchestration.schemas import (
-    CODE_ORCH_DISPATCH,
-    CODE_ORCH_UNSUPPORTED_GOAL,
-    CODE_ORCH_VALIDATION,
-    GoalPreferences,
-    IntentAssistancePayload,
-    InterpretedGoal,
-    InterpretedGoalCode,
-    JsonDict,
-    MetricPriority,
-    OrchestrationIntent,
-    PlanTemplateId,
-    PlanTemplateSnapshot,
-    OrchestrationError,
-    OrchestrationInput,
-    OrchestrationOutput,
-    OrchestrationPlan,
-    OrchestrationRunStatus,
-    OrchestrationWarning,
-    PlannedStep,
-    PlanningOutcome,
-    PrimaryAnalysisMode,
-    ResolvedCompany,
-    StepRecord,
-    StepStatusEntry,
-    ToolCallStep,
-    ToolParamValue,
-    ToolResultSummary,
-)
-from edgar_project.orchestration.state import OrchestrationRunState
+from pydantic import JsonValue
 
 __all__ = [
     "AnalysisAgent",
@@ -149,3 +83,78 @@ __all__ = [
     "orchestration_logger",
     "tool_summary_line",
 ]
+
+_EXPORT_MODULES = {
+    "AnalysisAgent": "edgar_project.orchestration.agent",
+    "run_analysis": "edgar_project.orchestration.agent",
+    "run_analysis_agent": "edgar_project.orchestration.agent",
+    "run_analysis_agent_returning_state": "edgar_project.orchestration.agent",
+    "ExecutionRequest": "edgar_project.orchestration.execution_contract",
+    "ExecutionResult": "edgar_project.orchestration.execution_contract",
+    "Executor": "edgar_project.orchestration.executor",
+    "DEFAULT_TICKERS_WHEN_INPUT_EMPTY": "edgar_project.orchestration.constants",
+    "ORCH_RUN_STATE_CONTRACT_VERSION": "edgar_project.orchestration.constants",
+    "ORCH_STATUS_ERROR": "edgar_project.orchestration.constants",
+    "ORCH_STATUS_NO_DATA": "edgar_project.orchestration.constants",
+    "ORCH_STATUS_PARTIAL_SUCCESS": "edgar_project.orchestration.constants",
+    "ORCH_STATUS_SUCCESS": "edgar_project.orchestration.constants",
+    "STEP_STATUS_MCP_ERROR": "edgar_project.orchestration.constants",
+    "STEP_STATUS_MCP_NO_DATA": "edgar_project.orchestration.constants",
+    "STEP_STATUS_MCP_SUCCESS": "edgar_project.orchestration.constants",
+    "STEP_STATUS_SKIPPED": "edgar_project.orchestration.constants",
+    "TOOL_BUILD_PANEL": "edgar_project.orchestration.constants",
+    "TOOL_COMPUTE_FEATURES": "edgar_project.orchestration.constants",
+    "TOOL_DETECT_ANOMALIES": "edgar_project.orchestration.constants",
+    "TOOL_FETCH_COMPANY_DATA": "edgar_project.orchestration.constants",
+    "TOOL_GENERATE_REPORT": "edgar_project.orchestration.constants",
+    "TOOL_RESOLVE_COMPANY": "edgar_project.orchestration.constants",
+    "TOOL_RUN_PIPELINE": "edgar_project.orchestration.constants",
+    "parse_goal_preferences": "edgar_project.orchestration.goal_preferences",
+    "prefer_run_pipeline_over_granular": "edgar_project.orchestration.goal_preferences",
+    "build_plan_template_snapshot": "edgar_project.orchestration.plan_templates",
+    "get_plan_template_snapshot": "edgar_project.orchestration.plan_templates",
+    "interpreted_goal_code_for": "edgar_project.orchestration.plan_templates",
+    "select_plan_template": "edgar_project.orchestration.plan_templates",
+    "IntentInterpretation": "edgar_project.orchestration.intent",
+    "interpret_goal_intent": "edgar_project.orchestration.intent",
+    "Planner": "edgar_project.orchestration.planner",
+    "log_run_finished": "edgar_project.orchestration.run_logging",
+    "orchestration_logger": "edgar_project.orchestration.run_logging",
+    "tool_summary_line": "edgar_project.orchestration.run_logging",
+    "CODE_ORCH_DISPATCH": "edgar_project.orchestration.schemas",
+    "CODE_ORCH_UNSUPPORTED_GOAL": "edgar_project.orchestration.schemas",
+    "CODE_ORCH_VALIDATION": "edgar_project.orchestration.schemas",
+    "GoalPreferences": "edgar_project.orchestration.schemas",
+    "IntentAssistancePayload": "edgar_project.orchestration.schemas",
+    "InterpretedGoal": "edgar_project.orchestration.schemas",
+    "InterpretedGoalCode": "edgar_project.orchestration.schemas",
+    "JsonDict": "edgar_project.orchestration.schemas",
+    "MetricPriority": "edgar_project.orchestration.schemas",
+    "OrchestrationIntent": "edgar_project.orchestration.schemas",
+    "PlanTemplateId": "edgar_project.orchestration.schemas",
+    "PlanTemplateSnapshot": "edgar_project.orchestration.schemas",
+    "OrchestrationError": "edgar_project.orchestration.schemas",
+    "OrchestrationInput": "edgar_project.orchestration.schemas",
+    "OrchestrationOutput": "edgar_project.orchestration.schemas",
+    "OrchestrationPlan": "edgar_project.orchestration.schemas",
+    "OrchestrationRunStatus": "edgar_project.orchestration.schemas",
+    "OrchestrationWarning": "edgar_project.orchestration.schemas",
+    "PlannedStep": "edgar_project.orchestration.schemas",
+    "PlanningOutcome": "edgar_project.orchestration.schemas",
+    "PrimaryAnalysisMode": "edgar_project.orchestration.schemas",
+    "ResolvedCompany": "edgar_project.orchestration.schemas",
+    "StepRecord": "edgar_project.orchestration.schemas",
+    "StepStatusEntry": "edgar_project.orchestration.schemas",
+    "ToolCallStep": "edgar_project.orchestration.schemas",
+    "ToolParamValue": "edgar_project.orchestration.schemas",
+    "ToolResultSummary": "edgar_project.orchestration.schemas",
+    "OrchestrationRunState": "edgar_project.orchestration.state",
+}
+
+
+def __getattr__(name: str):
+    module_name = _EXPORT_MODULES.get(name)
+    if module_name is None:
+        raise AttributeError(name)
+    module = import_module(module_name)
+    return getattr(module, name)
