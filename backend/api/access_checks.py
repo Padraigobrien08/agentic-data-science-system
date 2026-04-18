@@ -10,6 +10,7 @@ from sqlalchemy.orm import Session
 from backend.auth.resource_access import get_owned_project, get_run_for_owner, user_can_access_artifact
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
+from backend.models.evaluation_run import EvaluationRun
 from backend.models.project import Project
 from backend.services.artifact_service import ArtifactService
 
@@ -25,6 +26,16 @@ def require_analysis_run_owned(db: Session, run_id: UUID, user_id: UUID) -> Anal
     row = get_run_for_owner(db, run_id, user_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Run not found")
+    return row
+
+
+def require_evaluation_run_owned(db: Session, evaluation_run_id: UUID, user_id: UUID) -> EvaluationRun:
+    row = db.get(EvaluationRun, evaluation_run_id)
+    if row is None or row.project_id is None:
+        raise HTTPException(status_code=404, detail="Evaluation run not found")
+    proj = get_owned_project(db, row.project_id, user_id)
+    if proj is None:
+        raise HTTPException(status_code=404, detail="Evaluation run not found")
     return row
 
 

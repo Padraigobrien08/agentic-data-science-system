@@ -3,6 +3,7 @@
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
+from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.enums import (
     AnalysisRunStatus,
     ArtifactKind,
@@ -26,6 +27,7 @@ __all__ = [
     "Artifact",
     "ArtifactKind",
     "Base",
+    "EvaluationCaseResult",
     "EvaluationRun",
     "EvaluationRunStatus",
     "ModelCall",

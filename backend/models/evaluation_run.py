@@ -15,6 +15,7 @@ from backend.models.types import str_enum_column
 
 if TYPE_CHECKING:
     from backend.models.artifact import Artifact
+    from backend.models.evaluation_case_result import EvaluationCaseResult
     from backend.models.model_call import ModelCall
     from backend.models.project import Project
     from backend.models.user import User
@@ -86,4 +87,10 @@ class EvaluationRun(Base):
         "ModelCall",
         back_populates="evaluation_run",
         cascade="all, delete-orphan",
+    )
+    case_results: Mapped[list[EvaluationCaseResult]] = relationship(
+        "EvaluationCaseResult",
+        back_populates="evaluation_run",
+        cascade="all, delete-orphan",
+        order_by="EvaluationCaseResult.case_id",
     )

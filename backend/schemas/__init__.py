@@ -1,6 +1,13 @@
 from backend.schemas.analysis_run import AnalysisRunCreate, AnalysisRunRead, AnalysisRunUpdate
 from backend.schemas.artifact import ArtifactCreate, ArtifactRead, ArtifactUpdate
-from backend.schemas.evaluation_run import EvaluationRunCreate, EvaluationRunRead, EvaluationRunUpdate
+from backend.schemas.evaluation_case_result import EvaluationCaseResultRead
+from backend.schemas.evaluation_run import (
+    EvaluationRunCreate,
+    EvaluationRunRead,
+    EvaluationRunStartRequest,
+    EvaluationRunUpdate,
+    SupportedEvaluationSuiteRead,
+)
 from backend.schemas.health import HealthResponse
 from backend.schemas.model_call import ModelCallCreate, ModelCallRead, ModelCallUpdate
 from backend.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
@@ -15,8 +22,10 @@ __all__ = [
     "ArtifactCreate",
     "ArtifactRead",
     "ArtifactUpdate",
+    "EvaluationCaseResultRead",
     "EvaluationRunCreate",
     "EvaluationRunRead",
+    "EvaluationRunStartRequest",
     "EvaluationRunUpdate",
     "HealthResponse",
     "ModelCallCreate",
@@ -28,6 +37,7 @@ __all__ = [
     "RunStepCreate",
     "RunStepRead",
     "RunStepUpdate",
+    "SupportedEvaluationSuiteRead",
     "ToolCallCreate",
     "ToolCallRead",
     "ToolCallUpdate",

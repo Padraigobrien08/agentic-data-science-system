@@ -1,0 +1,33 @@
+{
+  "suite_id": "suite_hybrid_smoke_v1",
+  "output_dir": "data/evaluation",
+  "cases": [
+    {
+      "case_id": "hybrid_smoke_aapl_msft",
+      "description": "Minimal hybrid smoke benchmark scaffold for supported control-plane persistence.",
+      "tags": ["smoke", "hybrid", "validation"],
+      "input": {
+        "mode": "hybrid",
+        "tickers": ["AAPL", "MSFT"],
+        "goal": "Record a supported hybrid validation smoke run with explicit policy metadata.",
+        "refresh": false,
+        "policy": {
+          "requires_explicit_live_opt_in": true,
+          "fair_access_policy": "sec_fair_access_operator_invoked",
+          "allow_merge_blocking": false,
+          "normal_user_visible": false,
+          "freshness_window_seconds": 300
+        }
+      },
+      "max_runtime_seconds": 120.0,
+      "expected_artifacts": {
+        "expected_statuses": ["passed", "skipped"],
+        "required_keys": ["panel_csv", "features_csv", "anomalies_csv", "report_md"]
+      },
+      "expected_metrics": {
+        "runtime_seconds": {"minimum": 0, "maximum": 120}
+      },
+      "notes": "Hybrid policy scaffold for the supported evaluation control plane; execution may remain skipped until child-run linkage lands in the next phase."
+    }
+  ]
+}
