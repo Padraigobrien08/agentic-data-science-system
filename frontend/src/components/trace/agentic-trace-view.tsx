@@ -2,94 +2,146 @@ import { RunStepTrace } from "@/components/runs/run-step-trace";
 import { AgentModelStepsPanel } from "@/components/trace/agent-model-steps-panel";
 import { ArtifactsMetadataPanel } from "@/components/trace/artifacts-metadata-panel";
 import { DeepDiveLayout } from "@/components/trace/deep-dive-layout";
+import type { DeepDiveNavItem } from "@/components/trace/deep-dive-nav-config";
 import { PlannerOutputPanel } from "@/components/trace/planner-output-panel";
+import { RunTraceCollectionPanelProps } from "@/components/trace/run-trace-collection-panel";
 import { RunTraceExperience } from "@/components/trace/run-trace-experience";
+import { RunTraceSummaryView } from "@/components/trace/run-trace-summary-view";
 import { ToolSequencePanel } from "@/components/trace/tool-sequence-panel";
 import type {
   AnalysisRunStatus,
   ArtifactMetadata,
   ModelCallApiItem,
   RunStepDetail,
-  RunTransparencySummary,
+  RunTraceShell,
 } from "@/lib/api/types";
-import { parseAiAgents } from "@/lib/ai-agents-meta";
-import {
-  parseOrchestrationOutput,
-  type UserFacingReport,
-} from "@/lib/orchestration-output";
 
 type Props = {
   projectId: string;
   runId: string;
-  outputPayload: unknown;
-  metaJson: unknown;
+  shell: RunTraceShell;
+  collectionPanel: RunTraceCollectionPanelProps;
+  runAnswerHref: string;
+  activeCollection: "steps" | "artifacts" | "model-calls";
+  collectionError?: string | null;
+};
+
+const SUMMARY_NAV: DeepDiveNavItem[] = [
+  { href: "#trace-overview", label: "Overview" },
+  { href: "#trace-timeline", label: "Timeline" },
+  { href: "#trace-collections", label: "Collections" },
+  { href: "#trace-inspector", label: "Inspector" },
+  { href: "#legacy-audit-stack", label: "Legacy stack" },
+];
+
+function mergeById<T extends { id: string }>(primary: T[], secondary: T[]): T[] {
+  const merged = new Map<string, T>();
+  for (const item of primary) merged.set(item.id, item);
+  for (const item of secondary) {
+    if (!merged.has(item.id)) merged.set(item.id, item);
+  }
+  return [...merged.values()];
+}
+
+function deriveLegacyCollections(
+  shell: RunTraceShell,
+  collectionPanel: RunTraceCollectionPanelProps,
+): {
   steps: RunStepDetail[];
   artifacts: ArtifactMetadata[];
   modelCalls: ModelCallApiItem[];
-  userFacingReport: UserFacingReport | null;
-  /** Omit “full trace view” link in step timeline when already on /trace. */
-  compactTraceLink?: boolean;
-  runStatus?: AnalysisRunStatus;
-  runErrorSummary?: string | null;
-  runTransparency?: RunTransparencySummary | null;
-};
+} {
+  const stepItems =
+    collectionPanel.collection === "steps"
+      ? collectionPanel.items
+      : shell.steps.items;
+  const artifactItems =
+    collectionPanel.collection === "artifacts"
+      ? collectionPanel.items
+      : shell.artifacts.items;
+  const modelCallItems =
+    collectionPanel.collection === "model-calls"
+      ? collectionPanel.items
+      : shell.model_calls.items;
+
+  return {
+    steps: mergeById(shell.timeline_preview, stepItems as RunStepDetail[]),
+    artifacts: mergeById(shell.artifacts.items, artifactItems as ArtifactMetadata[]),
+    modelCalls: mergeById(shell.model_calls.items, modelCallItems as ModelCallApiItem[]),
+  };
+}
 
 /**
- * Deep-dive transparency stack: audit narrative in {@link RunTraceExperience} + {@link DeepDiveLayout},
- * then collapsible technical inspector (raw planner, tools, steps, artifact paths).
+ * Summary-first trace surface with the dense legacy audit stack pushed below the fold.
  */
 export function AgenticTraceView({
   projectId,
   runId,
-  outputPayload,
-  metaJson,
-  steps,
-  artifacts,
-  modelCalls,
-  userFacingReport,
-  compactTraceLink,
-  runStatus,
-  runErrorSummary,
-  runTransparency,
+  shell,
+  collectionPanel,
+  runAnswerHref,
+  activeCollection,
+  collectionError,
 }: Props) {
-  const orch = parseOrchestrationOutput(outputPayload);
-  const ai = parseAiAgents(metaJson);
-  const includeLlmUsageAnchor = !!runTransparency;
+  const legacy = deriveLegacyCollections(shell, collectionPanel);
+  const includeLlmUsageAnchor = !!shell.transparency;
 
   return (
-    <div className="space-y-4">
-      <DeepDiveLayout includeLlmUsageAnchor={includeLlmUsageAnchor}>
-        <RunTraceExperience
+    <div className="space-y-8">
+      <DeepDiveLayout includeLlmUsageAnchor={false} navItems={SUMMARY_NAV}>
+        <RunTraceSummaryView
           projectId={projectId}
           runId={runId}
-          orch={orch}
-          ai={ai}
-          steps={steps}
-          artifacts={artifacts}
-          modelCalls={modelCalls}
-          userFacingReport={userFacingReport}
-          compactTraceLink={compactTraceLink}
-          runStatus={runStatus}
-          runErrorSummary={runErrorSummary}
-          runTransparency={runTransparency}
+          shell={shell}
+          activeCollection={activeCollection}
+          collectionPanel={collectionPanel}
+          runAnswerHref={runAnswerHref}
+          errorMessage={collectionError}
         />
       </DeepDiveLayout>
 
-      <details className="rounded border border-[var(--border)]">
-        <summary className="cursor-pointer select-none border-b border-[var(--border)] bg-neutral-50 px-3 py-2 text-xs font-semibold uppercase tracking-wide dark:bg-neutral-900/50">
-          Technical inspector — planner JSON, tool sequence, agent meta, persisted steps, artifact paths
+      <details
+        id="legacy-audit-stack"
+        className="rounded-[28px] border border-[var(--border)] bg-[var(--surface-strong)]"
+      >
+        <summary className="cursor-pointer select-none border-b border-[var(--border)] px-5 py-4 text-sm font-semibold text-[var(--foreground)]">
+          Legacy audit stack and technical inspector
         </summary>
-        <div className="space-y-4 p-3">
-          <PlannerOutputPanel orch={orch} ai={ai} />
-          <ToolSequencePanel orch={orch} />
-          <AgentModelStepsPanel ai={ai} />
-          <SectionPersistedSteps steps={steps} />
-          <ArtifactsMetadataPanel
-            projectId={projectId}
-            runId={runId}
-            artifacts={artifacts}
-            orchestrationPaths={orch?.artifact_paths ?? null}
-          />
+        <div className="space-y-6 p-5">
+          <DeepDiveLayout includeLlmUsageAnchor={includeLlmUsageAnchor}>
+            <RunTraceExperience
+              projectId={projectId}
+              runId={runId}
+              orch={null}
+              ai={null}
+              steps={legacy.steps}
+              artifacts={legacy.artifacts}
+              modelCalls={legacy.modelCalls}
+              userFacingReport={null}
+              compactTraceLink
+              runStatus={shell.run.status as AnalysisRunStatus}
+              runErrorSummary={shell.run.error_summary}
+              runTransparency={shell.transparency}
+            />
+          </DeepDiveLayout>
+
+          <details className="rounded-[24px] border border-[var(--border)] bg-white/60">
+            <summary className="cursor-pointer select-none border-b border-[var(--border)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground)]">
+              Technical inspector
+            </summary>
+            <div className="space-y-4 p-4">
+              <PlannerOutputPanel orch={null} ai={null} />
+              <ToolSequencePanel orch={null} />
+              <AgentModelStepsPanel ai={null} />
+              <SectionPersistedSteps steps={legacy.steps} />
+              <ArtifactsMetadataPanel
+                projectId={projectId}
+                runId={runId}
+                artifacts={legacy.artifacts}
+                orchestrationPaths={null}
+              />
+            </div>
+          </details>
         </div>
       </details>
     </div>
@@ -98,17 +150,16 @@ export function AgenticTraceView({
 
 function SectionPersistedSteps({ steps }: { steps: RunStepDetail[] }) {
   return (
-    <div className="border border-[var(--border)] rounded">
-      <header className="border-b border-[var(--border)] bg-neutral-50 px-3 py-2 dark:bg-neutral-900/50">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--foreground)]">
+    <div className="rounded-[24px] border border-[var(--border)] bg-white/60">
+      <header className="border-b border-[var(--border)] px-4 py-3">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground)]">
           Persisted run steps
         </h2>
-        <p className="mt-0.5 text-xs text-[var(--muted)]">
-          GET /v1/runs/&#123;id&#125;/steps — MCP executor steps (envelopes in DB) and LLM phases
-          (critic / report) with model_call_id in meta.
+        <p className="mt-1 text-xs text-[var(--muted)]">
+          Slim step rows stay available here for lower-level inspection without making them the first-load experience.
         </p>
       </header>
-      <div className="p-3">
+      <div className="p-4">
         <RunStepTrace steps={steps} />
       </div>
     </div>

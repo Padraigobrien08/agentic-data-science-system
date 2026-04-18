@@ -1,13 +1,14 @@
-import { deepDiveNavItems } from "@/components/trace/deep-dive-nav-config";
+import { deepDiveNavItems, type DeepDiveNavItem } from "@/components/trace/deep-dive-nav-config";
 
 type Props = {
   /** Sticky horizontal bar (mobile / narrow) or vertical rail (aside). */
   variant?: "bar" | "rail";
   includeLlmUsageAnchor?: boolean;
+  items?: DeepDiveNavItem[];
 };
 
-export function RunTraceJumpNav({ variant = "bar", includeLlmUsageAnchor = false }: Props) {
-  const links = deepDiveNavItems(includeLlmUsageAnchor);
+export function RunTraceJumpNav({ variant = "bar", includeLlmUsageAnchor = false, items }: Props) {
+  const links = items ?? deepDiveNavItems(includeLlmUsageAnchor);
 
   if (variant === "rail") {
     return (

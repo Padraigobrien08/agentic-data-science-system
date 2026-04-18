@@ -156,6 +156,16 @@ export interface RunStepDetail {
   transparency?: RunStepTransparencyView | null;
 }
 
+export interface RunTraceCollectionSummary {
+  total: number;
+  limit: number;
+  has_more: boolean;
+}
+
+export interface RunTraceStepPreview extends RunTraceCollectionSummary {
+  items: RunStepDetail[];
+}
+
 export interface ArtifactMetadata {
   id: string;
   analysis_run_id: string | null;
@@ -169,6 +179,10 @@ export interface ArtifactMetadata {
   storage_uri: string;
   created_at: string;
   updated_at: string;
+}
+
+export interface RunTraceArtifactPreview extends RunTraceCollectionSummary {
+  items: ArtifactMetadata[];
 }
 
 export interface ArtifactDetail extends ArtifactMetadata {
@@ -198,6 +212,51 @@ export interface ModelCallApiItem {
   updated_at: string;
   request_payload_json: Record<string, unknown> | unknown[] | null;
   response_payload_json: Record<string, unknown> | unknown[] | null;
+}
+
+export interface RunTraceModelCallPreview extends RunTraceCollectionSummary {
+  items: ModelCallApiItem[];
+}
+
+export interface RunTraceShell {
+  run: AnalysisRunSummary;
+  transparency: RunTransparencySummary | null;
+  timeline_preview: RunStepDetail[];
+  steps: RunTraceStepPreview;
+  artifacts: RunTraceArtifactPreview;
+  model_calls: RunTraceModelCallPreview;
+}
+
+export type TraceCollectionKey = "steps" | "artifacts" | "model-calls";
+
+export interface RunPayloadQueryOptions {
+  includePayloads?: boolean;
+  includeTransparency?: boolean;
+}
+
+export interface RunStepQueryOptions extends RunPayloadQueryOptions {
+  status?: RunStepStatus;
+  trace?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ArtifactQueryOptions {
+  roleKey?: string;
+  kind?: ArtifactKind;
+  includeDeleted?: boolean;
+  limit?: number;
+  offset?: number;
+}
+
+export interface ModelCallQueryOptions {
+  includePayloads?: boolean;
+  status?: ModelCallStatus;
+  promptId?: string;
+  q?: string;
+  limit?: number;
+  offset?: number;
 }
 
 /** GET /v1/artifacts/{id}/preview */
