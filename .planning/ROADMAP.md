@@ -19,7 +19,7 @@
 
 **Goal**: Users can rely on the documented local stack to create run workspaces, execute runs, and report background-delivery degradation truthfully before chat becomes the primary answer surface.  
 **Depends on**: Phase 11 milestone archive baseline  
-**Plans**: 0 planned
+**Plans**: 3 planned
 
 **Details:**
 - Requirements: `RUN-01`, `RUN-02`, `RUN-03`

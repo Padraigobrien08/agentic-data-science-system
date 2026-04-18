@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to plan Phase 12
-stopped_at: Phase 12 context captured; ready to plan
-last_updated: "2026-04-18T21:05:00Z"
+status: Ready to execute Phase 12
+stopped_at: Phase 12 planned; ready to execute
+last_updated: "2026-04-18T21:45:00Z"
 progress:
   total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 3
   completed_plans: 0
 ---
 
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Plan Phase 12 of `v1.2 Chat-First Analysis Experience`, using the captured runtime and onboarding decisions from live product testing.
+**Current focus:** Execute Phase 12 of `v1.2 Chat-First Analysis Experience`, using the research-backed 3-plan set for runtime repair, sync-first chat delivery, and onboarding cleanup.
 
 ## Current Position
 
 Phase: 12
-Plan: —
+Plan: 12-01 through 12-03
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to plan Phase 12
-Last activity: 2026-04-18 — Captured Phase 12 runtime-reliability context and discussion choices
+Status: Ready to execute Phase 12
+Last activity: 2026-04-18 — Planned Phase 12 into 3 execute-ready plans
 
 ## Performance Metrics
 
@@ -83,6 +83,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 12-runtime-reliability-for-chat-delivery]: Chat should force synchronous execution for now; background queueing should not remain a co-equal default while the worker path is unreliable.
 - [Phase 12-runtime-reliability-for-chat-delivery]: If background delivery is unavailable, chat may automatically fall back to synchronous execution, but that fallback must still be visible in workspace and per-message status.
 - [Phase 12-runtime-reliability-for-chat-delivery]: Phase 12 may pull in auth/onboarding fixes found during live testing if they materially block first-run chat delivery.
+- [Phase 12-runtime-reliability-for-chat-delivery]: The planned implementation is split into 3 sequential waves: worker/runtime foundation, sync-first chat runtime contract, and auth/onboarding cleanup.
 
 ### Pending Todos
 
@@ -97,6 +98,6 @@ None.
 
 ## Session Continuity
 
-Last session: 2026-04-18T21:05:00Z
-Stopped at: Phase 12 context captured; ready to plan
+Last session: 2026-04-18T21:45:00Z
+Stopped at: Phase 12 planned; ready to execute
 Resume file: .planning/PROJECT.md
