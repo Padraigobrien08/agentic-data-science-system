@@ -1,9 +1,9 @@
 ---
 phase: 09
 slug: evaluation-control-plane
-status: planned
+status: complete
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-18
 ---
 
@@ -32,17 +32,17 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 09-01 | 01 | 1 | EVAL-01 | API/contract | `python3 -m pytest tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 09-02 | 02 | 2 | VALID-01, EVAL-01 | service/integration | `python3 -m pytest tests/test_evaluation_control_plane_service.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 09-03 | 03 | 3 | VALID-01, EVAL-01 | API/CLI/docs | `python3 -m pytest tests/test_evaluation_control_plane_api.py tests/test_evaluation_control_plane_service.py tests/test_evaluation_cli_compat.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
+| 09-01 | 01 | 1 | EVAL-01 | API/contract | `python3 -m pytest tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 09-02 | 02 | 2 | VALID-01, EVAL-01 | service/integration | `python3 -m pytest tests/test_evaluation_control_plane_service.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 09-03 | 03 | 3 | VALID-01, EVAL-01 | API/CLI/docs | `python3 -m pytest tests/test_evaluation_control_plane_api.py tests/test_evaluation_control_plane_service.py tests/test_evaluation_cli_compat.py -q --tb=short` | ❌ Wave 0 | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
+*Status: ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_evaluation_control_plane_api.py` — supported suite catalog, project-scoped create/list/detail, start flow, and case review route coverage
-- [ ] `tests/test_evaluation_control_plane_service.py` — lifecycle transitions, case-result persistence, and policy/observation/degradation storage coverage
-- [ ] `tests/test_evaluation_cli_compat.py` — supported `--suite-id` compatibility path and service-delegation coverage
+- [x] `tests/test_evaluation_control_plane_api.py` — supported suite catalog, project-scoped create/list/detail, start flow, and case review route coverage
+- [x] `tests/test_evaluation_control_plane_service.py` — lifecycle transitions, case-result persistence, and policy/observation/degradation storage coverage
+- [x] `tests/test_evaluation_cli_compat.py` — supported `--suite-id` compatibility path and service-delegation coverage
 
 ## Manual-Only Verifications
 
@@ -56,4 +56,4 @@ created: 2026-04-18
 - [x] No watch-mode flags
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** planned
+**Approval:** complete

@@ -1,9 +1,9 @@
 ---
 phase: 08
 slug: summary-first-large-trace-views
-status: researched
+status: complete
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-18
 ---
 
@@ -32,19 +32,19 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 08-01 | 01 | 1 | TRACE-01 | backend contract | `python3 -m pytest tests/test_trace_summary_api.py tests/test_sprint3_transparency_api.py tests/test_run_transparency_builders.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 08-02 | 02 | 2 | TRACE-01, TRACE-02 | frontend render/query-state | `cd frontend && npm run test -- run-trace-summary-view.test.tsx run-step-trace.test.tsx` | ❌ Wave 0 | ⬜ pending |
-| 08-03 | 03 | 3 | TRACE-02, TRACE-03 | auth-bound raw expansion | `python3 -m pytest tests/test_trace_summary_api.py tests/test_sprint3_transparency_api.py -q --tb=short && cd frontend && npm run test -- model-call-summary-card.test.tsx run-step-trace.test.tsx` | ⚠️ extend + Wave 0 | ⬜ pending |
+| 08-01 | 01 | 1 | TRACE-01 | backend contract | `python3 -m pytest tests/test_trace_summary_api.py tests/test_sprint3_transparency_api.py tests/test_run_transparency_builders.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 08-02 | 02 | 2 | TRACE-01, TRACE-02 | frontend render/query-state | `cd frontend && npm run test -- run-trace-summary-view.test.tsx run-step-trace.test.tsx` | ❌ Wave 0 | ✅ green |
+| 08-03 | 03 | 3 | TRACE-02, TRACE-03 | auth-bound raw expansion | `python3 -m pytest tests/test_trace_summary_api.py tests/test_sprint3_transparency_api.py -q --tb=short && cd frontend && npm run test -- model-call-summary-card.test.tsx run-step-trace.test.tsx` | ⚠️ extend + Wave 0 | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
+*Status: ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_trace_summary_api.py` — trace-shell response, bounded collection query params, and item-scoped raw gating
-- [ ] Extend `tests/test_sprint3_transparency_api.py` — compatibility checks for existing slim transparency responses after the new summary-first contract lands
-- [ ] `frontend/src/components/trace/run-trace-summary-view.test.tsx` — overview-first rendering, collection separation, and timeline-spine expectations
-- [ ] `frontend/src/components/runs/run-step-trace.test.tsx` — step JSON stays collapsed until explicit interaction or raw fetch state
-- [ ] Extend `frontend/src/components/transparency/__tests__/model-call-summary-card.test.tsx` — bounded raw payload rendering still stays opt-in and local to one model-call card
+- [x] `tests/test_trace_summary_api.py` — trace-shell response, bounded collection query params, and item-scoped raw gating
+- [x] Extend `tests/test_sprint3_transparency_api.py` — compatibility checks for existing slim transparency responses after the new summary-first contract lands
+- [x] `frontend/src/components/trace/run-trace-summary-view.test.tsx` — overview-first rendering, collection separation, and timeline-spine expectations
+- [x] `frontend/src/components/runs/run-step-trace.test.tsx` — step JSON stays collapsed until explicit interaction or raw fetch state
+- [x] Extend `frontend/src/components/transparency/__tests__/model-call-summary-card.test.tsx` — bounded raw payload rendering still stays opt-in and local to one model-call card
 
 ## Manual-Only Verifications
 
@@ -60,5 +60,4 @@ created: 2026-04-18
 - [x] No watch-mode flags
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** researched
-
+**Approval:** complete

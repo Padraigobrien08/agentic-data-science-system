@@ -1,9 +1,9 @@
 ---
 phase: 06
 slug: validation-boundaries-and-policy
-status: planned
+status: complete
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-18
 ---
 
@@ -32,17 +32,17 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 06-01 | 01 | 1 | VALID-02, VALID-03 | unit/schema | `python3 -m pytest tests/test_evaluation_policy_contract.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 06-02 | 02 | 2 | VALID-02 | unit/integration | `python3 -m pytest tests/test_evaluation_runner_policy.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 06-03 | 03 | 3 | VALID-03 | CLI/docs | `python3 -m pytest tests/test_evaluate_cli_guardrails.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
+| 06-01 | 01 | 1 | VALID-02, VALID-03 | unit/schema | `python3 -m pytest tests/test_evaluation_policy_contract.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 06-02 | 02 | 2 | VALID-02 | unit/integration | `python3 -m pytest tests/test_evaluation_runner_policy.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 06-03 | 03 | 3 | VALID-03 | CLI/docs | `python3 -m pytest tests/test_evaluate_cli_guardrails.py -q --tb=short` | ❌ Wave 0 | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ flaky*
+*Status: ✅ green · ❌ red · ⚠️ flaky*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_evaluation_policy_contract.py` — schema defaults, explicit live-policy validation, backward compatibility for fixture and mocked cases
-- [ ] `tests/test_evaluation_runner_policy.py` — degradation classification, summary counts, and report output assertions
-- [ ] `tests/test_evaluate_cli_guardrails.py` — default fixture suite behavior, `--allow-live`, and policy-skip CLI semantics
+- [x] `tests/test_evaluation_policy_contract.py` — schema defaults, explicit live-policy validation, backward compatibility for fixture and mocked cases
+- [x] `tests/test_evaluation_runner_policy.py` — degradation classification, summary counts, and report output assertions
+- [x] `tests/test_evaluate_cli_guardrails.py` — default fixture suite behavior, `--allow-live`, and policy-skip CLI semantics
 
 ## Manual-Only Verifications
 
@@ -56,4 +56,4 @@ All phase behaviors have automated verification.
 - [x] No watch-mode flags
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** planned
+**Approval:** complete

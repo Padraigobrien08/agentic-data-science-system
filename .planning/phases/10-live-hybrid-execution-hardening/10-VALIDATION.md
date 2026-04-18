@@ -1,9 +1,9 @@
 ---
 phase: 10
 slug: live-hybrid-execution-hardening
-status: planned
+status: complete
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-18
 ---
 
@@ -32,17 +32,17 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 10-01 | 01 | 1 | EVAL-02 | service/API | `python3 -m pytest tests/test_evaluation_live_hybrid_execution.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 10-02 | 02 | 2 | EVAL-02 | service/API/integration | `python3 -m pytest tests/test_evaluation_live_hybrid_execution.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 10-03 | 03 | 3 | OPS-01, EVAL-02 | ops/API | `python3 -m pytest tests/test_backend_health.py tests/test_evaluation_live_hybrid_execution.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
+| 10-01 | 01 | 1 | EVAL-02 | service/API | `python3 -m pytest tests/test_evaluation_live_hybrid_execution.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 10-02 | 02 | 2 | EVAL-02 | service/API/integration | `python3 -m pytest tests/test_evaluation_live_hybrid_execution.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 10-03 | 03 | 3 | OPS-01, EVAL-02 | ops/API | `python3 -m pytest tests/test_backend_health.py tests/test_evaluation_live_hybrid_execution.py tests/test_evaluation_control_plane_api.py -q --tb=short` | ❌ Wave 0 | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
+*Status: ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_evaluation_live_hybrid_execution.py` — child-run enqueue, linkage, reconciliation, and aggregate evaluation status coverage
-- [ ] `tests/test_evaluation_control_plane_api.py` — case-to-run navigation, linked-run refresh, and bounded history response coverage
-- [ ] `tests/test_backend_health.py` — evaluation dependency degradation on `/health`, `/v1/worker/health`, and `/metrics`
+- [x] `tests/test_evaluation_live_hybrid_execution.py` — child-run enqueue, linkage, reconciliation, and aggregate evaluation status coverage
+- [x] `tests/test_evaluation_control_plane_api.py` — case-to-run navigation, linked-run refresh, and bounded history response coverage
+- [x] `tests/test_backend_health.py` — evaluation dependency degradation on `/health`, `/v1/worker/health`, and `/metrics`
 
 ## Manual-Only Verifications
 
@@ -56,4 +56,4 @@ created: 2026-04-18
 - [x] No watch-mode flags
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** planned
+**Approval:** complete

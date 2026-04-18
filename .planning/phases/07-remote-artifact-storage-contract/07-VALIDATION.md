@@ -1,9 +1,9 @@
 ---
 phase: 07
 slug: remote-artifact-storage-contract
-status: planned
+status: complete
 nyquist_compliant: true
-wave_0_complete: false
+wave_0_complete: true
 created: 2026-04-18
 ---
 
@@ -32,18 +32,18 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 07-01 | 01 | 1 | STOR-01 | integration/contract | `python3 -m pytest tests/test_artifact_storage_s3.py tests/test_artifact_storage.py -q --tb=short` | ❌ Wave 0 | ⬜ pending |
-| 07-02 | 02 | 2 | STOR-02 | service/retention | `python3 -m pytest tests/test_artifact_storage.py tests/test_retention_maintenance.py -q --tb=short` | ⚠️ extend | ⬜ pending |
-| 07-03 | 03 | 3 | STOR-01, OPS-02 | API/docs | `python3 -m pytest tests/test_artifact_content_delivery.py tests/test_artifact_storage_s3.py -q --tb=short` | ⚠️ extend | ⬜ pending |
+| 07-01 | 01 | 1 | STOR-01 | integration/contract | `python3 -m pytest tests/test_artifact_storage_s3.py tests/test_artifact_storage.py -q --tb=short` | ❌ Wave 0 | ✅ green |
+| 07-02 | 02 | 2 | STOR-02 | service/retention | `python3 -m pytest tests/test_artifact_storage.py tests/test_retention_maintenance.py -q --tb=short` | ⚠️ extend | ✅ green |
+| 07-03 | 03 | 3 | STOR-01, OPS-02 | API/docs | `python3 -m pytest tests/test_artifact_content_delivery.py tests/test_artifact_storage_s3.py -q --tb=short` | ⚠️ extend | ✅ green |
 
-*Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
+*Status: ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/test_artifact_storage_s3.py` — S3 backend contract, logical `s3:` URI shape, and configured-write mixed-read resolver coverage
-- [ ] Extend `tests/test_artifact_storage.py` — artifact-service S3 writes, cleanup on row-insert failure, and delete repair-state behavior
-- [ ] Extend `tests/test_retention_maintenance.py` — remote prune success and failure semantics with tombstone or reconciliation assertions
-- [ ] Extend `tests/test_artifact_content_delivery.py` — remote-backed content, preview, and metadata route behavior with no bucket or key leakage
+- [x] `tests/test_artifact_storage_s3.py` — S3 backend contract, logical `s3:` URI shape, and configured-write mixed-read resolver coverage
+- [x] Extend `tests/test_artifact_storage.py` — artifact-service S3 writes, cleanup on row-insert failure, and delete repair-state behavior
+- [x] Extend `tests/test_retention_maintenance.py` — remote prune success and failure semantics with tombstone or reconciliation assertions
+- [x] Extend `tests/test_artifact_content_delivery.py` — remote-backed content, preview, and metadata route behavior with no bucket or key leakage
 
 ## Manual-Only Verifications
 
@@ -57,4 +57,4 @@ created: 2026-04-18
 - [x] No watch-mode flags
 - [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** planned
+**Approval:** complete
