@@ -92,6 +92,8 @@ export function ChatShell({ projectId, tickers, backgroundDelivery }: Props) {
         id: `assist-${reply.requestId}`,
         role: "assistant",
         content: reply.content,
+        rewriteSuggestions: reply.rewriteSuggestions,
+        routingReason: reply.routingReason,
         runHref: reply.runHref,
         deepDiveHref: reply.deepDiveHref,
         runsHref: reply.runsHref,

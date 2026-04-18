@@ -72,6 +72,25 @@ export function ChatMessageList({ messages }: Props) {
                   Assistant
                 </p>
                 <div className="mt-1 whitespace-pre-wrap text-[var(--foreground)]">{m.content}</div>
+                {m.routingReason ? (
+                  <p className="mt-2 rounded-lg border border-[var(--border)] bg-neutral-50/70 px-3 py-2 text-[11px] text-[var(--muted)] dark:bg-neutral-950/30">
+                    {m.routingReason}
+                  </p>
+                ) : null}
+                {m.rewriteSuggestions?.length ? (
+                  <div className="mt-2 rounded-lg border border-[var(--border)] bg-neutral-50/70 px-3 py-2 dark:bg-neutral-950/30">
+                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                      Try one of these rewrites
+                    </p>
+                    <ul className="mt-2 space-y-1.5 text-[11px] text-[var(--foreground)]">
+                      {m.rewriteSuggestions.map((suggestion) => (
+                        <li key={suggestion} className="list-inside list-disc">
+                          {suggestion}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                ) : null}
                 {note ? <p className="mt-2 text-[10px] text-[var(--muted)]">{note}</p> : null}
                 {m.pending ? (
                   <p className="mt-2 text-[10px] text-[var(--muted)]">Working…</p>

@@ -11,7 +11,7 @@ export const ANALYSIS_EXAMPLES: AnalysisExample[] = [
   {
     label: "Peer comparison",
     goal:
-      "Compare AAPL and MSFT to peers on operating margin and free cash flow margin; highlight relative pressure over the last eight quarters.",
+      "AAPL versus MSFT: which company is weaker on operating margin and free cash flow margin over the last eight quarters?",
     tickers: "AAPL, MSFT",
   },
   {
@@ -23,13 +23,13 @@ export const ANALYSIS_EXAMPLES: AnalysisExample[] = [
   {
     label: "Deterioration trend",
     goal:
-      "Detect persistent negative profitability trends; prioritize sustained patterns over one-off spikes and note magnitude vs peers.",
+      "Assess whether margin pressure is temporary or structural for NVDA over the last eight quarters; prioritize sustained patterns over one-off spikes.",
     tickers: "NVDA",
   },
   {
     label: "Cash flow quality",
     goal:
-      "Assess cash conversion vs net income and capex intensity; call out working-capital swings and whether FCF quality improved or worsened year over year.",
+      "Assess cash conversion versus net income and capex intensity; call out working-capital swings and whether cash flow quality improved or worsened year over year.",
     tickers: "AAPL",
   },
 ];

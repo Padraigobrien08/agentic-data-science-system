@@ -18,7 +18,7 @@ type Props = {
 };
 
 const GOAL_PLACEHOLDER =
-  "Ask in plain language — e.g. how margins evolved vs peers, whether cash flow quality is slipping, or what looks anomalous in recent quarters.";
+  "Ask in plain language — e.g. whether margin pressure is temporary or structural, which company is weaker, or what looks anomalous in recent quarters.";
 
 function addToGoal(prev: string, fragment: string): string {
   const t = fragment.trim();
@@ -144,7 +144,8 @@ export function AnalysisComposerFields({ variant = "landing", idPrefix = "analys
           <strong className="font-medium text-[var(--foreground)]">time horizon</strong>,{" "}
           <strong className="font-medium text-[var(--foreground)]">peers or relative comparisons</strong>, and{" "}
           <strong className="font-medium text-[var(--foreground)]">what to down-rank</strong> (noise, one-offs) tend to
-          produce sharper runs.
+          produce sharper runs. Phrasing like <em>whether margin pressure is temporary or structural</em> or{" "}
+          <em>which company is weaker</em> now maps cleanly onto the supported deterministic routes.
         </p>
         <div className="mt-2 flex flex-wrap gap-1.5">
           {GOAL_SNIPPETS.map((s) => (
