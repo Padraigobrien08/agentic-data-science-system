@@ -34,7 +34,7 @@
 
 **Goal**: Normal analyst phrasing in chat maps to supported deterioration, anomaly, and peer-comparison flows, and unsupported prompts fail with guidance instead of dead ends.  
 **Depends on**: Phase 12  
-**Plans**: 0 planned
+**Plans**: 3 planned
 
 **Details:**
 - Requirements: `PROMPT-01`, `PROMPT-02`, `PROMPT-03`
@@ -93,4 +93,4 @@
 |-----------|--------|-------|--------|---------|
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
-| v1.2 Chat-First Analysis Experience | 12-16 | 3 | Active | — |
+| v1.2 Chat-First Analysis Experience | 12-16 | 6 | Active | — |

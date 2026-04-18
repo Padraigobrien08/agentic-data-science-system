@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to plan Phase 13
-stopped_at: Phase 13 context captured; ready to plan
-last_updated: "2026-04-18T22:04:42Z"
+status: Ready to execute Phase 13
+stopped_at: Phase 13 planned; ready to execute
+last_updated: "2026-04-18T22:55:00Z"
 progress:
   total_phases: 5
   completed_phases: 1
-  total_plans: 3
+  total_plans: 6
   completed_plans: 3
 ---
 
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Plan Phase 13 of `v1.2 Chat-First Analysis Experience`, focused on broader analyst prompt routing, prompt-scoped ticker narrowing, and actionable unsupported guidance.
+**Current focus:** Execute Phase 13 of `v1.2 Chat-First Analysis Experience`, focused on deterministic analyst-language routing, prompt preview/guidance, and chat-side integration of that routing contract.
 
 ## Current Position
 
 Phase: 13
-Plan: ready for planning
+Plan: 3 planned
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to plan Phase 13
-Last activity: 2026-04-18 — Captured Phase 13 prompt-routing decisions and LLM rescue boundary
+Status: Ready to execute Phase 13
+Last activity: 2026-04-18 — Researched Phase 13 and created 3 execute plans covering deterministic routing expansion, route preview guidance, and chat/example alignment
 
 ## Performance Metrics
 
@@ -89,6 +89,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 13-analyst-prompt-routing]: Broader peer-relative language is allowed, but multiple tickers alone must not force peer mode.
 - [Phase 13-analyst-prompt-routing]: Prompt text may narrow to a subset already in the workspace scope, but must not silently expand scope to outside symbols.
 - [Phase 13-analyst-prompt-routing]: Unsupported routing should return concrete rewrite suggestions, and any LLM rescue path must remain explicit, gated, and auditable.
+- [Phase 13-analyst-prompt-routing]: The planned implementation is split into 3 sequential waves: deterministic routing foundation, deterministic preview/guidance contract, and chat/example alignment.
 
 ### Pending Todos
 
@@ -98,10 +99,11 @@ None.
 
 - Prompt routing still rejects normal analyst phrasing too often, which is now the primary active milestone bottleneck.
 - Completed analyses still read primarily through the standalone run page rather than the chat surface that launched them.
+- Phase 13 is now planned, but unsupported prompts still create failed runs until the preview-before-create contract is implemented.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 13 context captured; ready to plan
+Stopped at: Phase 13 planned; ready to execute
 Resume file: .planning/PROJECT.md
