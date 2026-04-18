@@ -25,11 +25,11 @@
 ### Evaluation Control Plane
 
 - [x] **EVAL-01**: Operator can manage supported evaluation runs and case results as first-class persisted records instead of ad hoc script output
-- [ ] **EVAL-02**: Live and hybrid validation cases execute through linked child analysis runs so existing run audit trails, workers, and artifacts remain canonical
+- [x] **EVAL-02**: Live and hybrid validation cases execute through linked child analysis runs so existing run audit trails, workers, and artifacts remain canonical
 
 ### Delivery and Ops
 
-- [ ] **OPS-01**: Health and metrics surfaces report SEC upstream or remote-storage degradation truthfully for supported validation and artifact flows
+- [x] **OPS-01**: Health and metrics surfaces report SEC upstream or remote-storage degradation truthfully for supported validation and artifact flows
 - [x] **OPS-02**: Users can retrieve large retained artifacts through an authorized delivery path that remains compatible with remote storage without exposing raw bucket or object identifiers
 
 ## v2 Requirements
@@ -69,8 +69,8 @@
 | TRACE-02 | Phase 8 | Complete |
 | TRACE-03 | Phase 8 | Complete |
 | EVAL-01 | Phase 9 | Complete |
-| EVAL-02 | Phase 10 | Pending |
-| OPS-01 | Phase 10 | Pending |
+| EVAL-02 | Phase 10 | Complete |
+| OPS-01 | Phase 10 | Complete |
 | OPS-02 | Phase 7 | Complete |
 
 **Coverage:**
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after Phase 9 completion*
+*Last updated: 2026-04-18 after Phase 10 completion*

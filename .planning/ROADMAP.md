@@ -3,7 +3,7 @@
 ## Milestones
 
 - [x] **v1.0 Hardening** - Phases 1-5 (shipped 2026-04-17)
-- [ ] **v1.1 Live Validation and Scale** - Phases 6-10 (planned 2026-04-18)
+- [x] **v1.1 Live Validation and Scale** - Phases 6-10 (completed 2026-04-18; ready to archive)
 
 <details>
 <summary>[x] v1.0 Hardening (Phases 1-5) - SHIPPED 2026-04-17</summary>
@@ -22,7 +22,7 @@
 - [x] **Phase 7: Remote Artifact Storage Contract** - Add one S3-compatible artifact backend behind the existing artifact contract.
 - [x] **Phase 8: Summary-First Large Trace Views** - Make large trace inspection fast, bounded, and summary-first.
 - [x] **Phase 9: Evaluation Control Plane** - Promote evaluation runs and case results into supported persisted workflows.
-- [ ] **Phase 10: Live/Hybrid Execution Hardening** - Link live and hybrid validation to canonical runs and truthful ops reporting.
+- [x] **Phase 10: Live/Hybrid Execution Hardening** - Link live and hybrid validation to canonical runs and truthful ops reporting.
 
 ## Phase Details
 
@@ -75,7 +75,7 @@
   1. Live and hybrid validation cases execute through linked child analysis runs, and operators can inspect those child runs through the existing run audit trail, workers, and artifacts.
   2. Operator can move from an evaluation case result to its linked child analysis run without relying on separate opaque execution logs.
   3. Health and metrics surfaces report SEC upstream or remote-storage degradation truthfully for supported validation and artifact flows instead of showing false green state.
-**Plans**: TBD
+**Plans**: 3 (completed 2026-04-18)
 
 ## Progress
 
@@ -90,4 +90,4 @@
 | 7. Remote Artifact Storage Contract | 3/3 | Complete | 2026-04-18 |
 | 8. Summary-First Large Trace Views | 3/3 | Complete | 2026-04-18 |
 | 9. Evaluation Control Plane | 3/3 | Complete | 2026-04-18 |
-| 10. Live/Hybrid Execution Hardening | 0/TBD | Not started | - |
+| 10. Live/Hybrid Execution Hardening | 3/3 | Complete | 2026-04-18 |
