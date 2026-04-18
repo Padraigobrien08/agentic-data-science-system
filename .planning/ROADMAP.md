@@ -3,7 +3,7 @@
 ## Milestones
 
 - [x] **v1.0 Hardening** - Phases 1-5 (shipped 2026-04-17)
-- [ ] **v1.1 Live Validation and Scale** - Phases 6-11 (Phase 11 closes milestone audit traceability debt before archive)
+- [ ] **v1.1 Live Validation and Scale** - Phases 6-11 (all phases complete; ready to archive)
 
 <details>
 <summary>[x] v1.0 Hardening (Phases 1-5) - SHIPPED 2026-04-17</summary>
@@ -23,7 +23,7 @@
 - [x] **Phase 8: Summary-First Large Trace Views** - Make large trace inspection fast, bounded, and summary-first.
 - [x] **Phase 9: Evaluation Control Plane** - Promote evaluation runs and case results into supported persisted workflows.
 - [x] **Phase 10: Live/Hybrid Execution Hardening** - Link live and hybrid validation to canonical runs and truthful ops reporting.
-- [ ] **Phase 11: Milestone Audit Traceability Cleanup** - Align summary, validation, and audit bookkeeping so `v1.1` can archive cleanly.
+- [x] **Phase 11: Milestone Audit Traceability Cleanup** - Align summary, validation, and audit bookkeeping so `v1.1` can archive cleanly. (completed 2026-04-18)
 
 ## Phase Details
 
@@ -87,7 +87,7 @@
   1. Phase 09 and Phase 10 summary frontmatter records the milestone requirement IDs that their verification reports already satisfy.
   2. Phase 06 through Phase 10 `*-VALIDATION.md` files reflect executed Nyquist bookkeeping instead of stale planned or researched status.
   3. Re-running the milestone audit no longer reports planning metadata drift as open tech debt.
-**Plans**: 3 (planned 2026-04-18)
+**Plans**: 3 (completed 2026-04-18)
 
 ## Progress
 
@@ -103,4 +103,4 @@
 | 8. Summary-First Large Trace Views | 3/3 | Complete | 2026-04-18 |
 | 9. Evaluation Control Plane | 3/3 | Complete | 2026-04-18 |
 | 10. Live/Hybrid Execution Hardening | 3/3 | Complete | 2026-04-18 |
-| 11. Milestone Audit Traceability Cleanup | 0/3 | Planned | - |
+| 11. Milestone Audit Traceability Cleanup | 3/3 | Complete | 2026-04-18 |
