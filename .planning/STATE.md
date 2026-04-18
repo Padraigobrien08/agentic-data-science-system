@@ -1,15 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.0
-milestone_name: milestone
-status: Executing Phase 07
-stopped_at: Planning complete for Phase 7 Remote Artifact Storage Contract
-last_updated: "2026-04-18T13:02:49.171Z"
+milestone: v1.1
+milestone_name: live-validation-and-scale
+status: Ready to discuss Phase 08
+stopped_at: Phase 07 completed
+last_updated: "2026-04-18T13:09:17Z"
 progress:
-  total_phases: 5
-  completed_phases: 1
-  total_plans: 6
-  completed_plans: 5
+  total_phases: 10
+  completed_phases: 7
+  total_plans: 23
+  completed_plans: 23
 ---
 
 # Project State
@@ -19,20 +19,20 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 07 — remote-artifact-storage-contract
+**Current focus:** Phase 08 — summary-first-large-trace-views
 
 ## Current Position
 
-Phase: 07 (remote-artifact-storage-contract) — EXECUTING
-Plan: 1 of 3
+Phase: 08 (summary-first-large-trace-views) — READY
+Plan: discuss phase
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 20
+- Total plans completed: 23
 - Average duration: 9 min
-- Total execution time: 3.1 hours
+- Total execution time: 3.5 hours
 
 **By Phase:**
 
@@ -44,14 +44,12 @@ Plan: 1 of 3
 | 04-ci-coverage | 3 | 42min | 14min |
 | 05-storage-and-ops | 4 | 27min | 7min |
 | 06-validation-boundaries-and-policy | 3 | 13min | 4min |
+| 07-remote-artifact-storage-contract | 3 | 21min | 7min |
 
 **Recent Trend:**
 
-- Last 5 plans: 05-storage-and-ops-03 (5min), 05-storage-and-ops-04 (10min), 06-validation-boundaries-and-policy-01 (4min), 06-validation-boundaries-and-policy-02 (4min), 06-validation-boundaries-and-policy-03 (5min)
-- Trend: Stable; Phase 06 stayed short and additive while establishing the v1.1 validation policy seam
-
-| Phase 7 P1 | 14min | 2 tasks | 7 files |
-| Phase 7 P2 | 4min | 2 tasks | 4 files |
+- Last 5 plans: 06-validation-boundaries-and-policy-02 (4min), 06-validation-boundaries-and-policy-03 (5min), 07-remote-artifact-storage-contract-01 (14min), 07-remote-artifact-storage-contract-02 (4min), 07-remote-artifact-storage-contract-03 (3min)
+- Trend: Stable; Phase 07 had one heavier storage-foundation wave, then two short integration and documentation follow-ups
 
 ## Accumulated Context
 
@@ -74,6 +72,8 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 7-remote-artifact-storage-contract]: Phase 7 should roll out as configured-write plus mixed-read rather than forcing immediate migration of existing `local:` artifacts.
 - [Phase 7-remote-artifact-storage-contract]: `storage_uri` remains an app-owned opaque locator and normal artifact delivery stays behind application-owned authorized routes.
 - [Phase 7-remote-artifact-storage-contract]: Postgres and blob storage must be treated as separate systems with explicit reconciliation or repairable divergence states.
+- [Phase 7-remote-artifact-storage-contract]: Remote artifact delivery stays on the same `/v1/artifacts/*` route surface for local and S3-backed blobs; no bucket-direct or signed-URL path was added in this phase.
+- [Phase 7-remote-artifact-storage-contract]: Remote delete or retention failures are surfaced as `meta_json.storage_reconciliation` repair debt instead of hidden drift or false tombstones.
 
 ### Pending Todos
 
@@ -81,12 +81,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- If the eventual deployment target differs materially from AWS S3 semantics, validate versioning, delete, checksum, and endpoint behavior before implementing beyond the canonical S3 contract.
 - Decide whether the v1.1 evaluation control plane stays API or CLI-first or includes a dedicated operator UI beyond current surfaces.
+- Decide how Phase 8 should expose summary-first trace slices at the API boundary before widening the frontend.
 - Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T13:15:00Z
-Stopped at: Planning complete for Phase 7 Remote Artifact Storage Contract
-Resume file: .planning/phases/07-remote-artifact-storage-contract/07-remote-artifact-storage-contract-01-PLAN.md
+Last session: 2026-04-18T13:09:17Z
+Stopped at: Phase 07 completed
+Resume file: .planning/ROADMAP.md

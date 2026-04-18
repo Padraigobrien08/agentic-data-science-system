@@ -22,12 +22,12 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Pull requests now gate the documented Compose stack, seeded browser run workflows, and focused Postgres regressions instead of relying on narrow backend/frontend checks alone — validated in Phase 4
 - ✓ Storage and operations now surface degraded dependency state truthfully, stream artifact ingest without full-memory copies, and support explicit audit-preserving retention workflows — validated in Phase 5
 - ✓ Validation outcomes now expose explicit degradation classes, and live or hybrid evaluation stays operator-invoked and non-default behind explicit policy plus `--allow-live` guardrails — validated in Phase 6
+- ✓ Artifact storage now supports a configured S3-compatible backend behind the same opaque artifact IDs, authorized delivery routes, and reconciliation-visible retention semantics as local storage — validated in Phase 7
 
 ### Active
 
 - Supported evaluation runs should become first-class persisted workflows instead of remaining CLI- and file-output-driven
 - Live and hybrid validation should execute through canonical child runs so artifacts, workers, and audit trails stay unified
-- Artifact storage should support a remote object-store backend in addition to the current local shared-filesystem contract
 - Large trace and transparency views should be decomposed and optimized for very large run payloads before broader scale-up work
 
 ### Out of Scope
@@ -42,14 +42,14 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 **Target features:**
 - Supported live SEC and hybrid evaluation workflows for freshness and integration confidence
-- Remote object-store support alongside the current local shared-filesystem artifact contract
 - Scalable trace and transparency views for very large run payloads
+- Remote object-store support alongside the current local shared-filesystem artifact contract — delivered in Phase 7
 
 ## Context
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map showed that several core platform assumptions still depended on shared filesystem paths, cwd mutation, and large multi-responsibility modules before the v1.0 hardening effort.
 
-The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The current milestone now focuses on extending validation coverage into live integrations and lifting the remaining storage and large-payload scaling constraints without undoing the trust boundaries that v1.0 established.
+The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The current milestone has now locked explicit live-validation policy boundaries and a remote object-store contract behind the same artifact and auth surfaces. The remaining v1.1 work focuses on scaling trace inspection and promoting evaluation workflows into first-class persisted control-plane flows without undoing the trust boundaries that v1.0 established.
 
 ## Constraints
 
@@ -69,6 +69,8 @@ The highest-value work in v1.0 was operational rather than feature-based, and al
 | Prioritize run-scoped artifact contracts before other platform improvements | Shared global artifact paths create the largest correctness risk for concurrent or repeated execution | ✓ Good |
 | Expand verification around the documented self-hosted stack instead of relying on narrow happy-path tests | The repo already documents API, worker, frontend, and Postgres workflows that are not fully gated today | ✓ Good |
 | Track project planning artifacts in git | The hardening work touches architecture, security, and operations decisions that should remain auditable alongside code changes | ✓ Good |
+| Roll out remote artifact storage as configured-write plus mixed-read behind opaque `s3:` locators | Brownfield deployments need remote storage without bucket exposure or forced migration of existing `local:` artifacts | ✓ Good |
+| Treat blob-store and database divergence as explicit reconciliation state, not hidden transactional success | Remote object storage is a separate system, so deletes and retention must surface repairable drift instead of pretending they are atomic | ✓ Good |
 
 ## Evolution
 
@@ -88,4 +90,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 6 completion*
+*Last updated: 2026-04-18 after Phase 7 completion*

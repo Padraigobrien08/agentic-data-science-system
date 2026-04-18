@@ -13,8 +13,8 @@
 
 ### Artifact Storage
 
-- [ ] **STOR-01**: Operator can configure one S3-compatible remote object-store backend for artifact blobs without changing artifact IDs, authorization rules, or opaque storage URIs in product surfaces
-- [ ] **STOR-02**: Artifact writes, reads, deletes, and retention workflows preserve checksums, lineage, and audit-visible tombstone or reconciliation state across local and remote backends
+- [x] **STOR-01**: Operator can configure one S3-compatible remote object-store backend for artifact blobs without changing artifact IDs, authorization rules, or opaque storage URIs in product surfaces
+- [x] **STOR-02**: Artifact writes, reads, deletes, and retention workflows preserve checksums, lineage, and audit-visible tombstone or reconciliation state across local and remote backends
 
 ### Trace and Transparency
 
@@ -30,7 +30,7 @@
 ### Delivery and Ops
 
 - [ ] **OPS-01**: Health and metrics surfaces report SEC upstream or remote-storage degradation truthfully for supported validation and artifact flows
-- [ ] **OPS-02**: Users can retrieve large retained artifacts through an authorized delivery path that remains compatible with remote storage without exposing raw bucket or object identifiers
+- [x] **OPS-02**: Users can retrieve large retained artifacts through an authorized delivery path that remains compatible with remote storage without exposing raw bucket or object identifiers
 
 ## v2 Requirements
 
@@ -63,15 +63,15 @@
 | VALID-01 | Phase 9 | Pending |
 | VALID-02 | Phase 6 | Complete |
 | VALID-03 | Phase 6 | Complete |
-| STOR-01 | Phase 7 | Pending |
-| STOR-02 | Phase 7 | Pending |
+| STOR-01 | Phase 7 | Complete |
+| STOR-02 | Phase 7 | Complete |
 | TRACE-01 | Phase 8 | Pending |
 | TRACE-02 | Phase 8 | Pending |
 | TRACE-03 | Phase 8 | Pending |
 | EVAL-01 | Phase 9 | Pending |
 | EVAL-02 | Phase 10 | Pending |
 | OPS-01 | Phase 10 | Pending |
-| OPS-02 | Phase 7 | Pending |
+| OPS-02 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 12 total
@@ -80,4 +80,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after Phase 6 completion*
+*Last updated: 2026-04-18 after Phase 7 completion*
