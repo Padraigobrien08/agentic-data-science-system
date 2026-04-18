@@ -86,7 +86,7 @@
 | 3. Secure Defaults | 3/3 | Complete | 2026-04-16 |
 | 4. CI Coverage | 3/3 | Complete | 2026-04-17 |
 | 5. Storage and Ops | 4/4 | Complete | 2026-04-17 |
-| 6. Validation Boundaries and Policy | 0/TBD | Not started | - |
+| 6. Validation Boundaries and Policy | 1/3 | In Progress|  |
 | 7. Remote Artifact Storage Contract | 0/TBD | Not started | - |
 | 8. Summary-First Large Trace Views | 0/TBD | Not started | - |
 | 9. Evaluation Control Plane | 0/TBD | Not started | - |
