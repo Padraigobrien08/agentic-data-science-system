@@ -21,7 +21,7 @@ PYTHONPATH=. python3 -m edgar_project.cli demo --fixtures
 
 **What you should see:** A labeled block for benchmark outputs under `data/evaluation/` (suite JSON + per-case folders), then a tip pointing at `data/README.md`. Same fixture suite as `python3 -m edgar_project.cli evaluate`.
 
-**Benchmarks only (no `demo`):** `PYTHONPATH=. python3 -m edgar_project.cli evaluate` — short pass/fail summary and paths to `*_results.json`.
+**Benchmarks only (no `demo`):** `PYTHONPATH=. python3 -m edgar_project.cli evaluate` — short pass/fail summary and paths to `*_results.json`. This defaults to the offline fixture suite; live or hybrid manifests are operator-invoked and require `--allow-live`.
 
 **Live (network, SEC + cache)** — curated tickers and goals from `edgar_project/demo/scenarios.json`:
 
@@ -55,9 +55,10 @@ From repo root (`PYTHONPATH=.`):
 python3 -m edgar_project.cli run --tickers AAPL MSFT --goal "find unusual financial changes"
 python3 -m edgar_project.cli evaluate
 python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmarks/suite_orchestration_mocked_v1.json
+python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmarks/suite_smoke.json --allow-live
 ```
 
-`evaluate` defaults to the offline fixture suite; prints case counts, failing IDs, and paths to JSON. Use `evaluate -v` for an extended table. `run -v` / `run --json` — orchestration logs or full `OrchestrationOutput`. `main.py` is unchanged.
+`evaluate` defaults to the offline fixture suite; prints case counts, failing IDs, and paths to JSON. Live or hybrid validation is operator-invoked, fair-access-sensitive work and requires `--allow-live`; it remains non-merge-blocking by default. Use `evaluate -v` for an extended table. `run -v` / `run --json` — orchestration logs or full `OrchestrationOutput`. `main.py` is unchanged.
 
 ## Notebook demo
 

@@ -25,7 +25,7 @@ When `expected_artifacts.enforce_schema` is true, `artifact_checks.REQUIRED_COLU
 
 - **`fixture`** — Runs `src.*` helpers on CSVs from `input.fixture_paths` (e.g. `features_csv`, optional `trend_break_signals_csv`). Writes per-case artifacts under `<output_dir>/<suite_id>/<case_id>/`. Fully implemented; no SEC or MCP.
 - **`orchestration_mocked`** — Runs `run_analysis_agent` with patched MCP tools (`orchestration_mocks`). Validates coordinator behavior and declared outputs without live SEC.
-- **`live` / `hybrid`** — **Not implemented** for analytical execution. Cases with these modes are **skipped** with an explicit message (reserved for future pipeline/MCP integration).
+- **`live` / `hybrid`** — Operator-invoked only. These suites require explicit `--allow-live`, remain non-merge-blocking by default, and are judged on invariants plus freshness windows rather than exact-value snapshots. Without `--allow-live`, the runner records `policy_skipped` instead of silently treating live SEC validation as normal regression traffic.
 
 ## What is being evaluated
 
@@ -35,7 +35,7 @@ When `expected_artifacts.enforce_schema` is true, `artifact_checks.REQUIRED_COLU
 - **Coordinator mocks**: orchestration status, tool calls, and artifact map shape—not LLM quality.
 - **Selected regressions**: compact fingerprints (category distributions, overlap summary, trust-artifact flags, data-quality categories) where `regression_golden` is set.
 
-This is **not** end-to-end validation against real EDGAR responses unless you add and implement a live/hybrid runner path.
+This is **not** end-to-end validation against real EDGAR responses unless you intentionally opt into a live or hybrid operator workflow.
 
 ## How to run
 
@@ -45,12 +45,16 @@ This is **not** end-to-end validation against real EDGAR responses unless you ad
 PYTHONPATH=. python3 -m edgar_project.cli evaluate
 ```
 
+The default `evaluate` path is the offline fixture suite. Live or hybrid suites are fair-access-sensitive, operator-invoked flows and require `--allow-live`.
+
 **Script (same runner, more flags by default):**
 
 ```bash
 PYTHONPATH=. python3 edgar_project/evaluation/scripts/run_suite.py \
   --suite edgar_project/evaluation/benchmarks/suite_fixtures_v1.json
 ```
+
+To run a live or hybrid manifest intentionally, pass `--allow-live` on either entrypoint.
 
 Useful flags:
 

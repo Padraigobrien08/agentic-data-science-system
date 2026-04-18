@@ -11,7 +11,7 @@ from edgar_project.evaluation.schemas import BenchmarkSuite, EvaluationStatus
 from edgar_project.evaluation.summary_report import format_console_report
 
 
-def parse_args() -> argparse.Namespace:
+def parse_args(argv: list[str] | None = None) -> argparse.Namespace:
     parser = argparse.ArgumentParser(description="Run deterministic EDGAR evaluation suite")
     parser.add_argument(
         "--suite",
@@ -40,7 +40,15 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Rewrite regression golden JSON files from current fixture outputs (cases with regression_golden set)",
     )
-    return parser.parse_args()
+    parser.add_argument(
+        "--allow-live",
+        action="store_true",
+        help=(
+            "Allow live/hybrid suites to run instead of policy-skipping them; "
+            "operator-invoked only and non-merge-blocking by default"
+        ),
+    )
+    return parser.parse_args(argv)
 
 
 def main() -> int:
@@ -52,6 +60,7 @@ def main() -> int:
     runner = EvaluationRunner(
         suite=suite,
         rubric=rubric,
+        allow_live_cases=args.allow_live,
         update_regression_goldens=args.update_regression_goldens,
     )
     results = runner.run_suite()

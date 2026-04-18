@@ -258,6 +258,7 @@ def _cmd_evaluate(args: argparse.Namespace) -> int:
     runner = EvaluationRunner(
         suite=suite,
         rubric=rubric,
+        allow_live_cases=args.allow_live,
         update_regression_goldens=args.update_regression_goldens,
     )
     results = runner.run_suite()
@@ -381,6 +382,14 @@ def build_parser() -> argparse.ArgumentParser:
         type=Path,
         default=Path("edgar_project/evaluation/fixtures/rubric_baseline_v1.json"),
         help="Rubric JSON",
+    )
+    pe.add_argument(
+        "--allow-live",
+        action="store_true",
+        help=(
+            "Allow live/hybrid suites to run instead of policy-skipping them; "
+            "operator-invoked only and non-merge-blocking by default"
+        ),
     )
     pe.add_argument("--write-markdown", action="store_true", help="Write suite markdown report")
     pe.add_argument(
