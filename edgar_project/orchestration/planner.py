@@ -58,6 +58,7 @@ from edgar_project.orchestration.schemas import (
     GoalPreferences,
     InterpretedGoal,
     InterpretedGoalCode,
+    MetricPriority,
     OrchestrationError,
     OrchestrationInput,
     OrchestrationIntent,
@@ -69,6 +70,25 @@ from edgar_project.orchestration.schemas import (
 from edgar_project.orchestration.prompt_scope import extract_prompt_scope
 
 _MAX_TICKERS: Final[int] = 5
+_COMPARISON_CUES: Final[tuple[str, ...]] = (
+    "compare",
+    "comparison",
+    "versus",
+    " vs ",
+    "relative to",
+    "weaker",
+    "stronger",
+    "underperform",
+    "outperform",
+    "peer",
+)
+_METRIC_SUGGESTION_LABELS: Final[dict[MetricPriority, str]] = {
+    MetricPriority.margins: "operating margin",
+    MetricPriority.revenue_growth: "revenue growth",
+    MetricPriority.cash_flow: "cash flow quality",
+    MetricPriority.liquidity: "liquidity",
+    MetricPriority.leverage: "leverage",
+}
 
 
 def _effective_tickers(request: OrchestrationInput) -> list[str]:
@@ -98,6 +118,7 @@ def _validation_failure(message: str, *, detail: str | None = None) -> PlanningO
                 detail=detail,
             )
         ],
+        routing_source="deterministic",
     )
 
 
@@ -194,6 +215,91 @@ def _plan_for_template(template_id: PlanTemplateId, tickers: list[str], refresh:
     return _run_pipeline_plan(tickers, refresh)
 
 
+def _human_join(items: list[str]) -> str:
+    if not items:
+        return ""
+    if len(items) == 1:
+        return items[0]
+    if len(items) == 2:
+        return f"{items[0]} and {items[1]}"
+    return f"{', '.join(items[:-1])}, and {items[-1]}"
+
+
+def _metric_focus_text(prefs: GoalPreferences) -> str:
+    labels = [
+        _METRIC_SUGGESTION_LABELS[metric]
+        for metric in prefs.priority_metrics[:3]
+        if metric in _METRIC_SUGGESTION_LABELS
+    ]
+    if not labels:
+        return "operating margin, revenue growth, and cash flow quality"
+    return _human_join(labels)
+
+
+def _single_company_suggestion(*, ticker: str, prefs: GoalPreferences) -> str:
+    return (
+        f"Analyze {ticker} over the last eight quarters for financial deterioration. "
+        f"Focus on {_metric_focus_text(prefs)} and call out whether the pressure looks temporary or structural."
+    )
+
+
+def _anomaly_suggestion(*, ticker: str, prefs: GoalPreferences) -> str:
+    return (
+        f"Detect unusual quarterly changes in {ticker}. "
+        f"Focus on {_metric_focus_text(prefs)} and explain whether the move looks one-off or persistent."
+    )
+
+
+def _comparison_suggestion(*, tickers: list[str], prefs: GoalPreferences) -> str:
+    pair_text = _human_join(tickers[:2])
+    return (
+        f"Compare {pair_text} on {_metric_focus_text(prefs)} over the last eight quarters, "
+        "and highlight which company shows weaker trends."
+    )
+
+
+def _scope_guidance_suggestion(*, effective_tickers: list[str], out_of_scope_tickers: list[str]) -> str:
+    return (
+        f"Your workspace scope is {_human_join(effective_tickers)}. "
+        f"Either update the workspace to include {_human_join(out_of_scope_tickers)} "
+        "or rewrite the question using the current symbols."
+    )
+
+
+def _build_rewrite_suggestions(
+    *,
+    analysis_goal: str,
+    effective_tickers: list[str],
+    out_of_scope_tickers: list[str],
+    prefs: GoalPreferences,
+) -> list[str]:
+    suggestions: list[str] = []
+
+    if effective_tickers and out_of_scope_tickers:
+        suggestions.append(
+            _scope_guidance_suggestion(
+                effective_tickers=effective_tickers,
+                out_of_scope_tickers=out_of_scope_tickers,
+            )
+        )
+
+    goal_text = analysis_goal.lower()
+    compare_shaped = any(cue in goal_text for cue in _COMPARISON_CUES)
+    primary_ticker = effective_tickers[0] if effective_tickers else "the selected company"
+    if len(effective_tickers) >= 2 and (compare_shaped or len(effective_tickers) == 2):
+        suggestions.append(_comparison_suggestion(tickers=effective_tickers, prefs=prefs))
+        suggestions.append(_single_company_suggestion(ticker=primary_ticker, prefs=prefs))
+    else:
+        suggestions.append(_single_company_suggestion(ticker=primary_ticker, prefs=prefs))
+        suggestions.append(_anomaly_suggestion(ticker=primary_ticker, prefs=prefs))
+
+    deduped: list[str] = []
+    for suggestion in suggestions:
+        if suggestion not in deduped:
+            deduped.append(suggestion)
+    return deduped[:3]
+
+
 def _planning_success(
     *,
     tickers: list[str],
@@ -217,11 +323,22 @@ def _planning_success(
         goal_preferences=prefs,
         plan_template=template_snap,
     )
-    return PlanningOutcome(ok=True, plan=plan, interpreted_goal=ig, errors=[])
+    return PlanningOutcome(
+        ok=True,
+        plan=plan,
+        interpreted_goal=ig,
+        errors=[],
+        routing_source="deterministic",
+        effective_tickers=list(tickers),
+    )
 
 
 def _unsupported_goal_failure(
     *,
+    analysis_goal: str,
+    effective_tickers: list[str],
+    out_of_scope_tickers: list[str],
+    prefs: GoalPreferences,
     message: str = "Unsupported analysis_goal; no supported intent matched.",
     detail: str | None = None,
 ) -> PlanningOutcome:
@@ -240,6 +357,15 @@ def _unsupported_goal_failure(
                 detail=combined_detail,
             )
         ],
+        routing_source="deterministic",
+        effective_tickers=list(effective_tickers),
+        out_of_scope_tickers=list(out_of_scope_tickers),
+        rewrite_suggestions=_build_rewrite_suggestions(
+            analysis_goal=analysis_goal,
+            effective_tickers=effective_tickers,
+            out_of_scope_tickers=out_of_scope_tickers,
+            prefs=prefs,
+        ),
     )
 
 
@@ -282,8 +408,16 @@ class Planner:
             )
 
         prompt_scope = extract_prompt_scope(request.analysis_goal, tickers)
+        if request.intent_assistance is not None:
+            prefs = request.intent_assistance.goal_preferences
+        else:
+            prefs = parse_goal_preferences(request.analysis_goal)
         if prompt_scope.out_of_scope_tickers:
             return _unsupported_goal_failure(
+                analysis_goal=request.analysis_goal,
+                effective_tickers=list(prompt_scope.effective_tickers),
+                out_of_scope_tickers=list(prompt_scope.out_of_scope_tickers),
+                prefs=prefs,
                 message="Requested tickers fall outside the current workspace scope.",
                 detail=(
                     "Out-of-scope symbols: "
@@ -294,13 +428,14 @@ class Planner:
             )
         tickers = list(prompt_scope.effective_tickers)
 
-        if request.intent_assistance is not None:
-            prefs = request.intent_assistance.goal_preferences
-        else:
-            prefs = parse_goal_preferences(request.analysis_goal)
         interpretation = interpret_goal_intent(request.analysis_goal)
         if interpretation is None:
-            return _unsupported_goal_failure()
+            return _unsupported_goal_failure(
+                analysis_goal=request.analysis_goal,
+                effective_tickers=list(tickers),
+                out_of_scope_tickers=[],
+                prefs=prefs,
+            )
 
         user_text = request.analysis_goal.strip()
         template_id, template_rules = select_plan_template(prefs, interpretation)

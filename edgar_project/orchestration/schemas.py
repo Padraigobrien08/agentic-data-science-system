@@ -547,6 +547,22 @@ class PlanningOutcome(BaseModel):
     plan: OrchestrationPlan | None = None
     interpreted_goal: InterpretedGoal | None = None
     errors: list[OrchestrationError] = Field(default_factory=list)
+    routing_source: Literal["deterministic"] = Field(
+        default="deterministic",
+        description="Routing provenance for Phase 13 preview and guidance surfaces.",
+    )
+    effective_tickers: list[str] = Field(
+        default_factory=list,
+        description="Ticker scope the deterministic planner actually used for routing.",
+    )
+    out_of_scope_tickers: list[str] = Field(
+        default_factory=list,
+        description="Prompt-named symbols outside the current workspace scope.",
+    )
+    rewrite_suggestions: list[str] = Field(
+        default_factory=list,
+        description="Deterministic rewrite suggestions for unsupported prompts.",
+    )
 
     model_config = {"extra": "forbid"}
 
