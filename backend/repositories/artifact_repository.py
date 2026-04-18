@@ -8,6 +8,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.models.enums import ArtifactKind
 from backend.models.artifact import Artifact
 
 
@@ -29,6 +30,29 @@ class ArtifactRepository:
                 .order_by(Artifact.created_at, Artifact.role_key)
             ).all()
         )
+
+    def list_for_analysis_run_window(
+        self,
+        analysis_run_id: UUID,
+        *,
+        role_key: str | None = None,
+        kind: ArtifactKind | None = None,
+        include_deleted: bool = True,
+        limit: int | None = None,
+        offset: int = 0,
+    ) -> list[Artifact]:
+        rows = self.list_for_analysis_run(analysis_run_id)
+        if role_key is not None:
+            rows = [row for row in rows if row.role_key == role_key]
+        if kind is not None:
+            rows = [row for row in rows if row.kind == kind]
+        if not include_deleted:
+            rows = [row for row in rows if row.blob_deleted_at is None]
+        if offset > 0:
+            rows = rows[offset:]
+        if limit is not None:
+            rows = rows[:limit]
+        return rows
 
     def list_for_run_step(self, run_step_id: UUID) -> list[Artifact]:
         return list(

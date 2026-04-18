@@ -248,3 +248,34 @@ def model_call_to_api_item(row: ModelCall, *, include_payloads: bool) -> ModelCa
         request_payload_json=row.request_payload_json if include_payloads else None,
         response_payload_json=row.response_payload_json if include_payloads else None,
     )
+
+
+class RunTraceCollectionSummary(BaseModel):
+    """Bounded preview metadata for one trace collection."""
+
+    total: int = Field(..., ge=0)
+    limit: int = Field(..., ge=0)
+    has_more: bool
+
+
+class RunTraceStepPreview(RunTraceCollectionSummary):
+    items: list[RunStepDetailItem] = Field(default_factory=list)
+
+
+class RunTraceArtifactPreview(RunTraceCollectionSummary):
+    items: list[ArtifactMetadata] = Field(default_factory=list)
+
+
+class RunTraceModelCallPreview(RunTraceCollectionSummary):
+    items: list[ModelCallApiItem] = Field(default_factory=list)
+
+
+class RunTraceShellResponse(BaseModel):
+    """Typed first-load trace contract without raw payload blobs."""
+
+    run: AnalysisRunSummary
+    transparency: RunTransparencySummary | None = None
+    timeline_preview: list[RunStepDetailItem] = Field(default_factory=list)
+    steps: RunTraceStepPreview
+    artifacts: RunTraceArtifactPreview
+    model_calls: RunTraceModelCallPreview

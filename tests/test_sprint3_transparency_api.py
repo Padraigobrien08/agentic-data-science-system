@@ -342,3 +342,94 @@ def test_schema_run_step_transparency_matches_orm_row() -> None:
     assert osum.key_takeaway_count == 2
     assert osum.markdown_char_count == 1200
     assert osum.artifact_roles == ["report_md"]
+
+
+def test_run_steps_limit_query_keeps_transparency_shape(
+    sprint3_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, factory = sprint3_client
+    run_id = _create_run(client, project_id, headers)
+    db = factory()
+    try:
+        db.add_all(
+            [
+                RunStep(
+                    id=uuid4(),
+                    analysis_run_id=run_id,
+                    step_index=0,
+                    status=RunStepStatus.success,
+                    label="critic one",
+                    meta_json={
+                        "trace": "critic_agent",
+                        "phase": "llm",
+                        "phase_output": {"phase_status": "degraded", "issue_count": 1},
+                    },
+                ),
+                RunStep(
+                    id=uuid4(),
+                    analysis_run_id=run_id,
+                    step_index=1,
+                    status=RunStepStatus.success,
+                    label="critic two",
+                    meta_json={
+                        "trace": "critic_agent",
+                        "phase": "llm",
+                        "phase_output": {"phase_status": "ok", "issue_count": 0},
+                    },
+                ),
+            ]
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.get(
+        f"/v1/runs/{run_id}/steps",
+        params={"include_transparency": "true", "limit": "1"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert len(body) == 1
+    assert body[0]["transparency"]["trace"] == "critic_agent"
+    assert body[0]["transparency"]["output_summary"]["phase_status"] in {"degraded", "ok"}
+
+
+def test_step_item_route_preserves_slim_transparency_behavior(
+    sprint3_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, factory = sprint3_client
+    run_id = _create_run(client, project_id, headers)
+    step_id = uuid4()
+    db = factory()
+    try:
+        db.add(
+            RunStep(
+                id=step_id,
+                analysis_run_id=run_id,
+                step_index=0,
+                status=RunStepStatus.success,
+                label="report agent",
+                planner_tool_input_json={"format": "markdown"},
+                meta_json={
+                    "trace": "report_agent",
+                    "phase": "llm",
+                    "phase_output": {"markdown_char_count": 200},
+                },
+            )
+        )
+        db.commit()
+    finally:
+        db.close()
+
+    response = client.get(
+        f"/v1/runs/{run_id}/steps/{step_id}",
+        params={"include_transparency": "true"},
+        headers=headers,
+    )
+    assert response.status_code == 200
+    body = response.json()
+    assert body["planner_tool_input_json"] is None
+    assert body["meta_json"] is None
+    assert body["transparency"]["trace"] == "report_agent"
+    assert body["transparency"]["output_summary"]["markdown_char_count"] == 200
