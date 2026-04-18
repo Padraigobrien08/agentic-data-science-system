@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to execute Phase 13
-stopped_at: Phase 13 planned; ready to execute
-last_updated: "2026-04-18T22:55:00Z"
+status: Ready to discuss Phase 14
+stopped_at: Phase 13 completed; ready to discuss Phase 14
+last_updated: "2026-04-19T00:16:00Z"
 progress:
   total_phases: 5
-  completed_phases: 1
+  completed_phases: 2
   total_plans: 6
-  completed_plans: 3
+  completed_plans: 6
 ---
 
 # Project State
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Execute Phase 13 of `v1.2 Chat-First Analysis Experience`, focused on deterministic analyst-language routing, prompt preview/guidance, and chat-side integration of that routing contract.
+**Current focus:** Discuss Phase 14 of `v1.2 Chat-First Analysis Experience`, focused on making completed run answers first-class chat messages with stable run linkage.
 
 ## Current Position
 
-Phase: 13
-Plan: 3 planned
+Phase: 14
+Plan: Not started
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to execute Phase 13
-Last activity: 2026-04-18 — Researched Phase 13 and created 3 execute plans covering deterministic routing expansion, route preview guidance, and chat/example alignment
+Status: Ready to discuss Phase 14
+Last activity: 2026-04-18 — Completed Phase 13 with deterministic routing expansion, route previews, rewrite guidance, and chat/example alignment
 
 ## Performance Metrics
 
@@ -52,11 +52,13 @@ Last activity: 2026-04-18 — Researched Phase 13 and created 3 execute plans co
 | 09-evaluation-control-plane | 3 | 46min | 15min |
 | 10-live-hybrid-execution-hardening | 3 | 45min | 15min |
 | 11-milestone-audit-traceability-cleanup | 3 | 13min | 4min |
+| 12-runtime-reliability-for-chat-delivery | 3 | 19min | 6min |
+| 13-analyst-prompt-routing | 3 | 23min | 8min |
 
 **Recent Trend:**
 
-- Last 5 plans: 10-live-hybrid-execution-hardening-02 (18min), 10-live-hybrid-execution-hardening-03 (15min), 11-milestone-audit-traceability-cleanup-01 (4min), 11-milestone-audit-traceability-cleanup-02 (4min), 11-milestone-audit-traceability-cleanup-03 (5min)
-- Trend: Stable; the milestone closed with lightweight documentation reconciliation and a fresh clean audit run.
+- Last 5 plans: 12-runtime-reliability-for-chat-delivery-02 (7min), 12-runtime-reliability-for-chat-delivery-03 (6min), 13-analyst-prompt-routing-01 (7min), 13-analyst-prompt-routing-02 (8min), 13-analyst-prompt-routing-03 (8min)
+- Trend: Stable; runtime reliability is restored and the next bottleneck has moved to chat-native answer delivery rather than request routing.
 
 ## Accumulated Context
 
@@ -90,6 +92,7 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 13-analyst-prompt-routing]: Prompt text may narrow to a subset already in the workspace scope, but must not silently expand scope to outside symbols.
 - [Phase 13-analyst-prompt-routing]: Unsupported routing should return concrete rewrite suggestions, and any LLM rescue path must remain explicit, gated, and auditable.
 - [Phase 13-analyst-prompt-routing]: The planned implementation is split into 3 sequential waves: deterministic routing foundation, deterministic preview/guidance contract, and chat/example alignment.
+- [Phase 13-analyst-prompt-routing]: Planner guidance stays on PlanningOutcome so preview callers return the exact deterministic routing result instead of re-deriving suggestions in the API layer.
 
 ### Pending Todos
 
@@ -97,13 +100,13 @@ None.
 
 ### Blockers/Concerns
 
-- Prompt routing still rejects normal analyst phrasing too often, which is now the primary active milestone bottleneck.
 - Completed analyses still read primarily through the standalone run page rather than the chat surface that launched them.
-- Phase 13 is now planned, but unsupported prompts still create failed runs until the preview-before-create contract is implemented.
+- Chat does not yet have a first-class result contract, so the conversation still loses the completed answer as a primary artifact.
+- Evidence navigation is still fragmented across run-page sections instead of one compact chat-attached surface.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 13 planned; ready to execute
+Stopped at: Phase 13 completed; ready to discuss Phase 14
 Resume file: .planning/PROJECT.md

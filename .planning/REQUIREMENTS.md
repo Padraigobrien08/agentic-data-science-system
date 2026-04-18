@@ -19,9 +19,9 @@
 
 ### Request Handling
 
-- [ ] **PROMPT-01**: User can submit common single-company deterioration or anomaly requests in normal analyst phrasing without unsupported-intent failures
-- [ ] **PROMPT-02**: User can submit common peer-comparison requests in normal analyst phrasing without unsupported-intent failures
-- [ ] **PROMPT-03**: When a request still cannot map to a supported analysis path, user sees actionable rewrite guidance instead of a dead-end error
+- [x] **PROMPT-01**: User can submit common single-company deterioration or anomaly requests in normal analyst phrasing without unsupported-intent failures
+- [x] **PROMPT-02**: User can submit common peer-comparison requests in normal analyst phrasing without unsupported-intent failures
+- [x] **PROMPT-03**: When a request still cannot map to a supported analysis path, user sees actionable rewrite guidance instead of a dead-end error
 
 ### Runtime Reliability
 
@@ -62,9 +62,9 @@
 | NAV-01 | Phase 15 | Pending |
 | NAV-02 | Phase 15 | Pending |
 | NAV-03 | Phase 16 | Pending |
-| PROMPT-01 | Phase 13 | Pending |
-| PROMPT-02 | Phase 13 | Pending |
-| PROMPT-03 | Phase 13 | Pending |
+| PROMPT-01 | Phase 13 | Complete |
+| PROMPT-02 | Phase 13 | Complete |
+| PROMPT-03 | Phase 13 | Complete |
 | RUN-01 | Phase 12 | Complete |
 | RUN-02 | Phase 12 | Complete |
 | RUN-03 | Phase 12 | Complete |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after Phase 12 completion*
+*Last updated: 2026-04-18 after Phase 13 completion*
