@@ -3,6 +3,8 @@
  * they are containers for structured output (implemented in a follow-up).
  */
 
+import type { BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
+
 export type ChatUserMessage = {
   id: string;
   role: "user";
@@ -25,6 +27,9 @@ export type ChatAssistantMessage = {
   deepDiveHref?: string;
   runsHref?: string;
   pending?: boolean;
+  deliveryMode?: BackgroundDeliveryMode;
+  deliveryDetail?: string;
+  reroutedFromBackground?: boolean;
   createdAt: string;
 };
 
@@ -35,3 +40,5 @@ export type ChatSessionStub = {
   title: string;
   updatedAt: string;
 };
+
+export type ChatBackgroundDelivery = BackgroundDeliveryHealth;

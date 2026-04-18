@@ -6,6 +6,20 @@ import { redirect } from "next/navigation";
 import { ApiError } from "@/lib/api/errors";
 import { createRun, executeRun } from "@/lib/api/runs";
 
+type DeliveryMode = "sync_only" | "background_ready" | "background_degraded";
+
+type ChatReply = {
+  requestId: string;
+  content: string;
+  runId: string;
+  runHref: string;
+  deepDiveHref: string;
+  runsHref: string;
+  deliveryMode: DeliveryMode;
+  deliveryDetail?: string;
+  reroutedFromBackground?: boolean;
+};
+
 function parseTickers(raw: string): string[] {
   return raw
     .split(/[\n,]+/)
@@ -17,42 +31,24 @@ export async function createAnalysisRunFromChat(
   projectId: string,
   _prev: {
     error?: string;
-    reply?: {
-      requestId: string;
-      content: string;
-      runId: string;
-      runHref: string;
-      deepDiveHref: string;
-      runsHref: string;
-    };
+    reply?: ChatReply;
   },
   formData: FormData,
 ): Promise<{
   error?: string;
-  reply?: {
-    requestId: string;
-    content: string;
-    runId: string;
-    runHref: string;
-    deepDiveHref: string;
-    runsHref: string;
-  };
+  reply?: ChatReply;
 }> {
   const goal = String(formData.get("goal") ?? "").trim();
   const requestId = String(formData.get("request_id") ?? "").trim() || "local";
   const tickers = parseTickers(String(formData.get("tickers") ?? ""));
   const refresh = formData.get("refresh") === "on";
-  const executeNow = formData.get("execute_now") === "on";
-  const enqueueExecution = formData.get("enqueue_execution") === "on";
+  const reroutedFromBackground = formData.get("enqueue_execution") === "on";
 
   if (!goal) {
     return { error: "Analysis goal is required." };
   }
   if (tickers.length === 0) {
     return { error: "This workspace has no tickers configured. Add tickers in workspace settings." };
-  }
-  if (executeNow && enqueueExecution) {
-    return { error: "Choose either execute now or queue for worker, not both." };
   }
 
   let run;
@@ -65,7 +61,7 @@ export async function createAnalysisRunFromChat(
         analysis_goal: goal,
         refresh,
       },
-      enqueue_execution: enqueueExecution,
+      enqueue_execution: false,
     });
   } catch (e) {
     if (e instanceof ApiError) {
@@ -74,21 +70,27 @@ export async function createAnalysisRunFromChat(
     return { error: e instanceof Error ? e.message : "Request failed." };
   }
 
-  if (executeNow && !enqueueExecution) {
-    try {
-      await executeRun(run.id, {});
-    } catch (e) {
-      if (e instanceof ApiError) {
-        return { error: e.body || e.message };
-      }
-      return { error: e instanceof Error ? e.message : "Execution failed." };
+  let execution;
+  try {
+    execution = await executeRun(run.id, {});
+  } catch (e) {
+    if (e instanceof ApiError) {
+      return { error: e.body || e.message };
     }
+    return { error: e instanceof Error ? e.message : "Execution failed." };
   }
 
   revalidatePath(`/projects/${projectId}/runs`);
   revalidatePath(`/projects/${projectId}/runs/${run.id}`);
   revalidatePath(`/projects/${projectId}/runs/${run.id}/trace`);
-  const mode = enqueueExecution ? "queued for worker" : executeNow ? "executed" : "created";
+  const deliveryMode: DeliveryMode = "sync_only";
+  const deliveryDetail = reroutedFromBackground
+    ? "Background delivery was rerouted to immediate execution for this chat request."
+    : "Workspace chat is executing synchronously right now.";
+  const content =
+    execution.db_status === "error"
+      ? `Run finished with an error for ${tickers.join(", ")}. Open run answer or deep dive for details.`
+      : `Analysis completed for ${tickers.join(", ")}. Open run answer or deep dive when ready.`;
   return {
     reply: {
       requestId,
@@ -96,7 +98,10 @@ export async function createAnalysisRunFromChat(
       runHref: `/projects/${projectId}/runs/${run.id}`,
       deepDiveHref: `/projects/${projectId}/runs/${run.id}/trace`,
       runsHref: `/projects/${projectId}/runs`,
-      content: `Run ${mode} for ${tickers.join(", ")}. Open run answer or deep dive when ready.`,
+      content,
+      deliveryMode,
+      deliveryDetail,
+      reroutedFromBackground,
     },
   };
 }

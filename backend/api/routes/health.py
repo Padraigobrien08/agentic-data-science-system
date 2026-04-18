@@ -14,6 +14,7 @@ from backend.observability.evaluation_validation import (
 )
 from backend.observability.worker_queue import get_worker_queue_observability
 from backend.schemas.health import (
+    BackgroundDeliveryHealth,
     DatabaseHealth,
     EvaluationDependencyHealth,
     HealthResponse,
@@ -36,6 +37,42 @@ def _health_status_for_evaluation(
     if evaluation.sec_dependency_ok is False or evaluation.storage_dependency_ok is False:
         return "degraded"
     return "ok"
+
+
+def _background_delivery_health(
+    *,
+    settings,
+    queue_result,
+) -> BackgroundDeliveryHealth:
+    if settings.chat_force_synchronous:
+        return BackgroundDeliveryHealth(
+            delivery_mode="sync_only",
+            background_available=False,
+            detail="Workspace chat is running synchronously while background delivery remains a secondary path.",
+        )
+    if not queue_result.queue_state_known:
+        return BackgroundDeliveryHealth(
+            delivery_mode="background_degraded",
+            background_available=False,
+            detail="Background delivery status is currently unavailable.",
+        )
+    if queue_result.stale_running_jobs:
+        return BackgroundDeliveryHealth(
+            delivery_mode="background_degraded",
+            background_available=False,
+            detail="Background delivery is degraded because a worker lease is stale.",
+        )
+    if queue_result.backlog_without_active_lease:
+        return BackgroundDeliveryHealth(
+            delivery_mode="background_degraded",
+            background_available=False,
+            detail="Background delivery is degraded because work is queued without an active worker lease.",
+        )
+    return BackgroundDeliveryHealth(
+        delivery_mode="background_ready",
+        background_available=True,
+        detail=None,
+    )
 
 
 @router.get("/ready")
@@ -65,6 +102,10 @@ def health(db: DbSession) -> HealthResponse:
         detail = str(exc)
     settings = get_settings()
     lk, lr, lm = describe_llm_runtime(settings)
+    queue_result = get_worker_queue_observability(
+        db,
+        max_attempts=settings.run_job_max_attempts,
+    )
     evaluation_result = get_evaluation_validation_observability(db)
     evaluation = EvaluationDependencyHealth(
         state_known=evaluation_result.state_known,
@@ -79,6 +120,10 @@ def health(db: DbSession) -> HealthResponse:
         database=DatabaseHealth(ok=db_ok, detail=detail),
         llm=LlmHealth(provider=lk, ready=lr, message=lm),
         evaluation=evaluation,
+        background_delivery=_background_delivery_health(
+            settings=settings,
+            queue_result=queue_result,
+        ),
     )
 
 

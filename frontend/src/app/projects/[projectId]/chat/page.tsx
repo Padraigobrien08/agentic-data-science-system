@@ -3,6 +3,8 @@ import { ChatShell } from "@/components/chat-shell/chat-shell";
 import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { ApiError } from "@/lib/api/errors";
 import { getProject } from "@/lib/api/projects";
+import { getBackgroundDeliveryHealth } from "@/lib/api/runs";
+import type { BackgroundDeliveryHealth } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
 
@@ -18,6 +20,11 @@ export default async function ProjectChatPage({
   const { projectId } = await params;
 
   let project;
+  let backgroundDelivery: BackgroundDeliveryHealth = {
+    delivery_mode: "background_degraded",
+    background_available: false,
+    detail: "Background delivery status is currently unavailable.",
+  };
   try {
     project = await getProject(projectId);
   } catch (e) {
@@ -31,18 +38,27 @@ export default async function ProjectChatPage({
     }
     throw e;
   }
+  try {
+    backgroundDelivery = await getBackgroundDeliveryHealth();
+  } catch {
+    // Keep the fallback degraded posture so chat never implies background delivery is healthy.
+  }
 
   return (
     <div className="space-y-4">
       <div>
         <h1 className="text-lg font-semibold">Workspace chat</h1>
         <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-          Ask questions against this workspace’s ticker scope. Each message creates a run; use Run answer / Deep dive
-          to review results and evidence.
+          Ask questions against this workspace’s ticker scope. Each message runs immediately here first, with run
+          answer and deep dive links for follow-up inspection.
         </p>
       </div>
       <ProjectWorkspaceNav projectId={projectId} current="chat" />
-      <ChatShell projectId={projectId} tickers={project.tickers ?? []} />
+      <ChatShell
+        projectId={projectId}
+        tickers={project.tickers ?? []}
+        backgroundDelivery={backgroundDelivery}
+      />
     </div>
   );
 }

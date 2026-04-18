@@ -9,6 +9,8 @@ import type {
   ArtifactMetadata,
   ExecuteRunOverrides,
   ExecuteRunResponse,
+  BackgroundDeliveryHealth,
+  HealthResponse,
   LlmRunUsageSummary,
   ModelCallQueryOptions,
   ModelCallApiItem,
@@ -147,6 +149,11 @@ export async function getRunModelCall(
 /** Per-phase token, latency, and optional cost rollup (same aggregation as ``transparency.llm_usage``). */
 export async function getRunLlmUsage(runId: string): Promise<LlmRunUsageSummary> {
   return apiGet<LlmRunUsageSummary>(`/v1/runs/${runId}/llm-usage`);
+}
+
+export async function getBackgroundDeliveryHealth(): Promise<BackgroundDeliveryHealth> {
+  const health = await apiGet<HealthResponse>("/v1/health");
+  return health.background_delivery;
 }
 
 export async function createRun(body: AnalysisRunCreateBody): Promise<AnalysisRunSummary> {

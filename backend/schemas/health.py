@@ -48,6 +48,21 @@ class EvaluationDependencyHealth(BaseModel):
     )
 
 
+class BackgroundDeliveryHealth(BaseModel):
+    """User-safe runtime delivery posture for workspace chat."""
+
+    delivery_mode: str = Field(
+        description="Coarse chat delivery mode: sync_only, background_ready, or background_degraded",
+    )
+    background_available: bool = Field(
+        description="True when chat can rely on background delivery as a healthy path",
+    )
+    detail: str | None = Field(
+        default=None,
+        description="Human-readable explanation for the current chat delivery posture",
+    )
+
+
 class HealthResponse(BaseModel):
     """Service health — suitable for load balancers and ops dashboards."""
 
@@ -59,6 +74,9 @@ class HealthResponse(BaseModel):
     )
     evaluation: EvaluationDependencyHealth = Field(
         description="Recent supported-evaluation dependency state derived from child-run-backed case results",
+    )
+    background_delivery: BackgroundDeliveryHealth = Field(
+        description="User-safe chat delivery posture derived from runtime policy plus queue health",
     )
 
 

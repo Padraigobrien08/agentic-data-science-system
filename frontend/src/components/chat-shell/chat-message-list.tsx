@@ -7,6 +7,19 @@ type Props = {
   messages: ChatMessage[];
 };
 
+function deliveryNote(message: Extract<ChatMessage, { role: "assistant" }>): string | null {
+  if (message.reroutedFromBackground) {
+    return message.deliveryDetail ?? "Background delivery was rerouted to immediate execution.";
+  }
+  if (message.deliveryMode === "background_degraded") {
+    return message.deliveryDetail ?? "Background delivery is degraded in this workspace.";
+  }
+  if (message.deliveryMode === "sync_only") {
+    return message.deliveryDetail ?? "This workspace is currently running chat requests synchronously.";
+  }
+  return message.deliveryDetail ?? null;
+}
+
 function SystemStrip({ content }: { content: string }) {
   return (
     <div className="rounded-lg border border-[var(--border)] bg-neutral-100/60 px-3 py-2 text-center text-[11px] text-[var(--muted)] dark:bg-neutral-900/40">
@@ -51,6 +64,7 @@ export function ChatMessageList({ messages }: Props) {
           if (m.role === "system") {
             return <SystemStrip key={m.id} content={m.content} />;
           }
+          const note = deliveryNote(m);
           return (
             <article key={m.id} className="flex w-full justify-start">
               <div className="max-w-[min(100%,38rem)] rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm">
@@ -58,6 +72,7 @@ export function ChatMessageList({ messages }: Props) {
                   Assistant
                 </p>
                 <div className="mt-1 whitespace-pre-wrap text-[var(--foreground)]">{m.content}</div>
+                {note ? <p className="mt-2 text-[10px] text-[var(--muted)]">{note}</p> : null}
                 {m.pending ? (
                   <p className="mt-2 text-[10px] text-[var(--muted)]">Working…</p>
                 ) : m.runHref || m.deepDiveHref || m.runsHref ? (

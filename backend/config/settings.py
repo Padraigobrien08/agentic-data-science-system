@@ -174,6 +174,12 @@ class Settings(BaseSettings):
         le=86400.0,
         description="While a job is running, lease_expires_at must stay in the future or the job becomes reclaimable.",
     )
+    chat_force_synchronous: bool = Field(
+        default=True,
+        description=(
+            "When true, workspace chat always executes runs synchronously and publicly reports sync-only delivery."
+        ),
+    )
 
     # LLM (chat completions) — see ``backend.llm``
     llm_provider: str = Field(

@@ -35,6 +35,36 @@ export interface CurrentUser {
   updated_at: string;
 }
 
+export type BackgroundDeliveryMode = "sync_only" | "background_ready" | "background_degraded";
+
+export interface BackgroundDeliveryHealth {
+  delivery_mode: BackgroundDeliveryMode;
+  background_available: boolean;
+  detail: string | null;
+}
+
+export interface HealthResponse {
+  status: string;
+  version: string;
+  database: {
+    ok: boolean;
+    detail: string | null;
+  };
+  llm: {
+    provider: string;
+    ready: boolean;
+    message: string;
+  };
+  evaluation: {
+    state_known: boolean;
+    sec_dependency_ok: boolean | null;
+    storage_dependency_ok: boolean | null;
+    recent_degraded_case_count: number | null;
+    detail: string | null;
+  };
+  background_delivery: BackgroundDeliveryHealth;
+}
+
 export interface ProjectRead {
   id: string;
   owner_user_id: string;

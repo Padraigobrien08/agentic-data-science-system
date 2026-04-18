@@ -195,6 +195,58 @@ def test_health_returns_ok_and_version(client_and_factory: tuple[TestClient, ses
         assert evaluation["sec_dependency_ok"] is True
         assert evaluation["storage_dependency_ok"] is True
         assert evaluation["recent_degraded_case_count"] == 0
+        background_delivery = body["background_delivery"]
+        assert background_delivery["delivery_mode"] == "sync_only"
+        assert background_delivery["background_available"] is False
+        assert background_delivery["detail"]
+
+
+def test_health_can_report_background_delivery_ready(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, _factory = client_and_factory
+    monkeypatch.setenv("EDGAR_BACKEND_CHAT_FORCE_SYNCHRONOUS", "false")
+
+    from backend.config.settings import get_settings
+
+    get_settings.cache_clear()
+    try:
+        r = client.get("/v1/health")
+    finally:
+        get_settings.cache_clear()
+    assert r.status_code == 200
+    body = r.json()
+    assert body["background_delivery"]["delivery_mode"] == "background_ready"
+    assert body["background_delivery"]["background_available"] is True
+    assert body["background_delivery"]["detail"] is None
+
+
+def test_health_can_report_background_delivery_degraded(
+    client_and_factory: tuple[TestClient, sessionmaker[Session]],
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    client, factory = client_and_factory
+    _seed_run_with_job(
+        factory,
+        run_status=AnalysisRunStatus.queued,
+        job_status=RunExecutionJobStatus.pending,
+        attempt_count=1,
+    )
+    monkeypatch.setenv("EDGAR_BACKEND_CHAT_FORCE_SYNCHRONOUS", "false")
+
+    from backend.config.settings import get_settings
+
+    get_settings.cache_clear()
+    try:
+        r = client.get("/v1/health")
+    finally:
+        get_settings.cache_clear()
+    assert r.status_code == 200
+    body = r.json()
+    assert body["background_delivery"]["delivery_mode"] == "background_degraded"
+    assert body["background_delivery"]["background_available"] is False
+    assert "queued without an active worker lease" in body["background_delivery"]["detail"]
 
 
 def test_ready_returns_ready_when_db_ok(

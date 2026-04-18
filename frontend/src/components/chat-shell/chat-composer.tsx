@@ -2,10 +2,13 @@
 
 import { useCallback, useRef, useState, type KeyboardEvent } from "react";
 
+import type { ChatBackgroundDelivery } from "./types";
+
 type Props = {
   disabled?: boolean;
   placeholder?: string;
   tickers: string[];
+  backgroundDelivery: ChatBackgroundDelivery;
   error?: string;
   action: (payload: FormData) => void;
   onSend?: (text: string, requestId: string) => void;
@@ -18,16 +21,16 @@ export function ChatComposer({
   disabled = false,
   placeholder = "Describe your analysis goal…",
   tickers,
+  backgroundDelivery,
   error,
   action,
   onSend,
 }: Props) {
   const [value, setValue] = useState("");
   const [refresh, setRefresh] = useState(false);
-  const [executeNow, setExecuteNow] = useState(true);
-  const [enqueueExecution, setEnqueueExecution] = useState(false);
   const [requestId, setRequestId] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
+  const requestIdRef = useRef<HTMLInputElement | null>(null);
 
   const submit = useCallback(() => {
     const t = value.trim();
@@ -37,9 +40,30 @@ export function ChatComposer({
         ? crypto.randomUUID()
         : `rq-${Date.now()}`;
     setRequestId(id);
+    if (requestIdRef.current) {
+      requestIdRef.current.value = id;
+    }
     onSend?.(t, id);
     formRef.current?.requestSubmit();
   }, [value, disabled, onSend]);
+
+  const statusTitle =
+    backgroundDelivery.delivery_mode === "background_ready"
+      ? "Background delivery ready"
+      : backgroundDelivery.delivery_mode === "background_degraded"
+        ? "Background delivery degraded"
+        : "Sync only";
+  const statusDetail =
+    backgroundDelivery.detail ??
+    (backgroundDelivery.background_available
+      ? "Queued background delivery is healthy."
+      : "Chat requests execute immediately in this workspace.");
+  const statusTone =
+    backgroundDelivery.delivery_mode === "background_ready"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-900"
+      : backgroundDelivery.delivery_mode === "background_degraded"
+        ? "border-amber-200 bg-amber-50 text-amber-900"
+        : "border-blue-200 bg-blue-50 text-blue-900";
 
   const onKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -56,10 +80,14 @@ export function ChatComposer({
     >
       <input type="hidden" name="tickers" value={tickers.join(",")} />
       <input type="hidden" name="goal" value={value} />
-      <input type="hidden" name="request_id" value={requestId} />
+      <input ref={requestIdRef} type="hidden" name="request_id" value={requestId} readOnly />
       <input type="hidden" name="refresh" value={refresh ? "on" : "off"} />
-      <input type="hidden" name="execute_now" value={executeNow ? "on" : "off"} />
-      <input type="hidden" name="enqueue_execution" value={enqueueExecution ? "on" : "off"} />
+      <input type="hidden" name="execute_now" value="on" />
+      <input type="hidden" name="enqueue_execution" value="off" />
+      <div className={`mx-auto mb-2 max-w-4xl rounded-xl border px-3 py-2 text-xs ${statusTone}`}>
+        <p className="font-semibold uppercase tracking-[0.18em]">{statusTitle}</p>
+        <p className="mt-1 leading-5">{statusDetail}</p>
+      </div>
       <div className="mx-auto flex max-w-4xl gap-2 rounded-xl border border-[var(--border)] bg-neutral-50 p-2 dark:bg-neutral-950">
         <textarea
           value={value}
@@ -89,32 +117,7 @@ export function ChatComposer({
           />
           <span>Refresh SEC cache</span>
         </label>
-        <label className="inline-flex items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={executeNow}
-            onChange={(e) => {
-              const checked = e.target.checked;
-              setExecuteNow(checked);
-              if (checked) setEnqueueExecution(false);
-            }}
-            className="rounded border-[var(--border)]"
-          />
-          <span>Execute now</span>
-        </label>
-        <label className="inline-flex items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={enqueueExecution}
-            onChange={(e) => {
-              const checked = e.target.checked;
-              setEnqueueExecution(checked);
-              if (checked) setExecuteNow(false);
-            }}
-            className="rounded border-[var(--border)]"
-          />
-          <span>Queue for worker</span>
-        </label>
+        <span>Chat runs execute immediately in this phase.</span>
       </div>
       {error ? (
         <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[10px] text-red-700 dark:text-red-400">

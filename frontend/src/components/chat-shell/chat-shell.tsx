@@ -5,7 +5,13 @@ import { useActionState, useEffect, useMemo, useState } from "react";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
-import type { ChatAssistantMessage, ChatMessage, ChatSessionStub, ChatSystemMessage } from "./types";
+import type {
+  ChatAssistantMessage,
+  ChatBackgroundDelivery,
+  ChatMessage,
+  ChatSessionStub,
+  ChatSystemMessage,
+} from "./types";
 import { updateWorkspaceScopeAction } from "@/actions/projects";
 import { createAnalysisRunFromChat } from "@/actions/runs";
 
@@ -39,13 +45,14 @@ function initialMessages(): ChatMessage[] {
 type Props = {
   projectId: string;
   tickers: string[];
+  backgroundDelivery: ChatBackgroundDelivery;
 };
 
 /**
  * Chatbot UI–style workspace: sidebar + message column + composer.
  * Assistant turns are structured frames only (no default prose rendering).
  */
-export function ChatShell({ projectId, tickers }: Props) {
+export function ChatShell({ projectId, tickers, backgroundDelivery }: Props) {
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
   const [isEditingScope, setIsEditingScope] = useState(false);
   const [sessions, setSessions] = useState<ChatSessionStub[]>(() => [
@@ -88,6 +95,9 @@ export function ChatShell({ projectId, tickers }: Props) {
         runHref: reply.runHref,
         deepDiveHref: reply.deepDiveHref,
         runsHref: reply.runsHref,
+        deliveryMode: reply.deliveryMode,
+        deliveryDetail: reply.deliveryDetail,
+        reroutedFromBackground: reply.reroutedFromBackground,
         createdAt: nowIso(),
       };
       if (idx >= 0) {
@@ -130,6 +140,9 @@ export function ChatShell({ projectId, tickers }: Props) {
       role: "assistant",
       content: "Running analysis...",
       pending: true,
+      deliveryMode: backgroundDelivery.delivery_mode,
+      deliveryDetail: backgroundDelivery.detail ?? undefined,
+      reroutedFromBackground: false,
       createdAt: nowIso(),
     };
     setMessagesBySession((prev) => ({
@@ -200,6 +213,7 @@ export function ChatShell({ projectId, tickers }: Props) {
         <ChatMessageList messages={messages} />
         <ChatComposer
           action={formAction}
+          backgroundDelivery={backgroundDelivery}
           error={state.error}
           tickers={scopeTickers}
           onSend={onSend}
