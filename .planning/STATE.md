@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Live Validation and Scale
-status: Ready to Plan Phase 09
-stopped_at: Phase 09 context gathered
-last_updated: "2026-04-18T16:25:00Z"
+status: ready to execute phase 09
+stopped_at: Phase 09 planning complete
+last_updated: "2026-04-18T15:53:23Z"
 progress:
   total_phases: 5
   completed_phases: 3
-  total_plans: 9
+  total_plans: 12
   completed_plans: 9
 ---
 
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 09 — evaluation-control-plane
+**Current focus:** Phase 09 execution for evaluation-control-plane in v1.1
 
 ## Current Position
 
-Phase: 09 (evaluation-control-plane) — READY TO PLAN
-Plan: N/A
+Phase: 09 (evaluation-control-plane) — READY
+Plan: 3 execute plans across 3 waves
 
 ## Performance Metrics
 
@@ -86,12 +86,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- Phase 09 needs to promote evaluation runs and case results into first-class persisted records without bypassing the run identity, artifact, and raw-access boundaries already established.
-- Planning must decide the exact persistence seam for case results while preserving curated suite identity and project-scoped auth.
+- Phase 09 execution must promote evaluation runs and case results into first-class persisted records without bypassing the project-scoped auth, artifact, and raw-access boundaries already established.
+- Phase 09 execution must keep curated suite identity as the supported launch contract while leaving raw manifest paths as an explicit compatibility escape hatch only.
 - Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T16:25:00Z
-Stopped at: Phase 09 context gathered
-Resume file: .planning/phases/09-evaluation-control-plane/09-CONTEXT.md
+Last session: 2026-04-18T15:53:23Z
+Stopped at: Phase 09 planning complete
+Resume file: .planning/phases/09-evaluation-control-plane/09-evaluation-control-plane-01-PLAN.md
