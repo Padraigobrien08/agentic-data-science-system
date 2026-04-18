@@ -56,24 +56,24 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHAT-01 | TBD | Pending |
-| CHAT-02 | TBD | Pending |
-| CHAT-03 | TBD | Pending |
-| NAV-01 | TBD | Pending |
-| NAV-02 | TBD | Pending |
-| NAV-03 | TBD | Pending |
-| PROMPT-01 | TBD | Pending |
-| PROMPT-02 | TBD | Pending |
-| PROMPT-03 | TBD | Pending |
-| RUN-01 | TBD | Pending |
-| RUN-02 | TBD | Pending |
-| RUN-03 | TBD | Pending |
+| CHAT-01 | Phase 14 | Pending |
+| CHAT-02 | Phase 15 | Pending |
+| CHAT-03 | Phase 14 | Pending |
+| NAV-01 | Phase 15 | Pending |
+| NAV-02 | Phase 15 | Pending |
+| NAV-03 | Phase 16 | Pending |
+| PROMPT-01 | Phase 13 | Pending |
+| PROMPT-02 | Phase 13 | Pending |
+| PROMPT-03 | Phase 13 | Pending |
+| RUN-01 | Phase 12 | Pending |
+| RUN-02 | Phase 12 | Pending |
+| RUN-03 | Phase 12 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0 ✓
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after initial definition*
+*Last updated: 2026-04-18 after roadmap creation*
