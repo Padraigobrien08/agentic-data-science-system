@@ -93,7 +93,7 @@ def test_start_fixture_suite_persists_passed_case_rows(
     assert all(case.observation_json is None for case in case_rows)
 
 
-def test_start_live_suite_without_opt_in_persists_policy_skipped_case(
+def test_start_live_suite_without_opt_in_enqueues_pending_child_run_case(
     session_factory: sessionmaker[Session],
 ) -> None:
     evaluation_run_id = _seed_evaluation_run(
@@ -112,17 +112,20 @@ def test_start_live_suite_without_opt_in_persists_policy_skipped_case(
             )
         )
 
-    assert row.status.value == "skipped"
+    assert row.status.value == "running"
+    assert row.finished_at is None
     assert case_row is not None
-    assert case_row.status == "skipped"
-    assert case_row.degradation_class == ValidationDegradationClass.policy_skipped.value
+    assert case_row.status == "pending"
+    assert case_row.degradation_class == ValidationDegradationClass.none.value
+    assert case_row.latest_analysis_run_id is not None
+    assert case_row.latest_analysis_run_status == "queued"
     assert case_row.policy_json is not None
     assert case_row.policy_json["requires_explicit_live_opt_in"] is True
     assert case_row.observation_json is not None
     assert case_row.observation_json["freshness_window_seconds"] == 300
 
 
-def test_start_hybrid_suite_with_opt_in_persists_policy_and_observation_json(
+def test_start_hybrid_suite_with_opt_in_enqueues_pending_child_run_case(
     session_factory: sessionmaker[Session],
 ) -> None:
     evaluation_run_id = _seed_evaluation_run(
@@ -141,9 +144,13 @@ def test_start_hybrid_suite_with_opt_in_persists_policy_and_observation_json(
             )
         )
 
-    assert row.status.value == "skipped"
+    assert row.status.value == "running"
+    assert row.finished_at is None
     assert case_row is not None
     assert case_row.input_mode == "hybrid"
+    assert case_row.status == "pending"
+    assert case_row.latest_analysis_run_id is not None
+    assert case_row.latest_analysis_run_status == "queued"
     assert case_row.policy_json is not None
     assert case_row.observation_json is not None
     assert case_row.observation_json["freshness_window_seconds"] == 300

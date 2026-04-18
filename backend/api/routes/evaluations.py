@@ -112,8 +112,10 @@ def get_evaluation_run(
     evaluation_run_id: UUID,
     db: DbSession,
     user: CurrentUserDep,
+    service: EvaluationControlPlaneServiceDep,
 ) -> EvaluationRunRead:
-    row = require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    row = service.refresh_linked_case_results(evaluation_run_id)
     return evaluation_run_to_read(row, case_count=_case_count(db, row.id))
 
 
@@ -125,11 +127,13 @@ def list_evaluation_case_results(
     evaluation_run_id: UUID,
     db: DbSession,
     user: CurrentUserDep,
+    service: EvaluationControlPlaneServiceDep,
     status: EvaluationStatus | None = Query(default=None),
     input_mode: InputMode | None = Query(default=None),
     degradation_class: ValidationDegradationClass | None = Query(default=None),
 ) -> list[EvaluationCaseResultRead]:
     require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    service.refresh_linked_case_results(evaluation_run_id)
     stmt = (
         select(EvaluationCaseResult)
         .where(EvaluationCaseResult.evaluation_run_id == evaluation_run_id)
@@ -156,8 +160,10 @@ def get_evaluation_case_result(
     case_id: str,
     db: DbSession,
     user: CurrentUserDep,
+    service: EvaluationControlPlaneServiceDep,
 ) -> EvaluationCaseResultRead:
     require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    service.refresh_linked_case_results(evaluation_run_id)
     row = db.scalar(
         select(EvaluationCaseResult).where(
             EvaluationCaseResult.evaluation_run_id == evaluation_run_id,

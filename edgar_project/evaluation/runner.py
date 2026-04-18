@@ -32,6 +32,41 @@ _PROJECT_ROOT = Path(__file__).resolve().parents[2]
 _TRUST_ARTIFACT_KEYS = frozenset({"data_quality_csv", "metric_coverage_summary_csv", "manual_validation_csv"})
 
 
+def classify_degradation_class_for_case(
+    case: BenchmarkCase,
+    result: EvaluationResult,
+    *,
+    allow_live_cases: bool,
+) -> ValidationDegradationClass:
+    """Route one case result onto the shared degradation taxonomy."""
+
+    if case.input.mode in {InputMode.live, InputMode.hybrid} and not allow_live_cases:
+        return ValidationDegradationClass.policy_skipped
+
+    upstream_error_code = str(result.metadata.get("upstream_error_code") or "")
+    if upstream_error_code in {
+        "sec_rate_limited",
+        "sec_access_denied",
+        "sec_unavailable",
+        "upstream_unavailable",
+    }:
+        return ValidationDegradationClass.upstream_sec_degraded
+
+    observation = result.observation
+    if (
+        observation is not None
+        and observation.source_age_seconds is not None
+        and observation.freshness_window_seconds is not None
+        and observation.source_age_seconds > observation.freshness_window_seconds
+    ):
+        return ValidationDegradationClass.stale_source
+
+    if result.status in {EvaluationStatus.failed, EvaluationStatus.error}:
+        return ValidationDegradationClass.product_regression
+
+    return ValidationDegradationClass.none
+
+
 class EvaluationRunner:
     """
     Run benchmark cases against the current analytical stack.
@@ -665,31 +700,11 @@ class EvaluationRunner:
         case: BenchmarkCase,
         result: EvaluationResult,
     ) -> ValidationDegradationClass:
-        if case.input.mode in {InputMode.live, InputMode.hybrid} and not self.allow_live_cases:
-            return ValidationDegradationClass.policy_skipped
-
-        upstream_error_code = str(result.metadata.get("upstream_error_code") or "")
-        if upstream_error_code in {
-            "sec_rate_limited",
-            "sec_access_denied",
-            "sec_unavailable",
-            "upstream_unavailable",
-        }:
-            return ValidationDegradationClass.upstream_sec_degraded
-
-        observation = result.observation
-        if (
-            observation is not None
-            and observation.source_age_seconds is not None
-            and observation.freshness_window_seconds is not None
-            and observation.source_age_seconds > observation.freshness_window_seconds
-        ):
-            return ValidationDegradationClass.stale_source
-
-        if result.status in {EvaluationStatus.failed, EvaluationStatus.error}:
-            return ValidationDegradationClass.product_regression
-
-        return ValidationDegradationClass.none
+        return classify_degradation_class_for_case(
+            case,
+            result,
+            allow_live_cases=self.allow_live_cases,
+        )
 
     @staticmethod
     def _derive_finding_categories(

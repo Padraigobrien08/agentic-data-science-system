@@ -3,12 +3,12 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import datetime, timezone
 from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlalchemy import select
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
 
@@ -18,7 +18,10 @@ import backend.models  # noqa: F401
 from backend.db.base import Base
 from backend.db.session import get_db
 from backend.main import create_app
+from backend.models.analysis_run import AnalysisRun
+from backend.models.enums import AnalysisRunStatus
 from backend.models.evaluation_case_result import EvaluationCaseResult
+from backend.models.evaluation_run import EvaluationRun
 from tests.api_auth import register_project_and_headers
 
 
@@ -173,7 +176,7 @@ def test_start_fixture_evaluation_run_persists_case_rows(
     assert len(case_rows) == 5
 
 
-def test_start_live_evaluation_run_without_allow_live_persists_policy_skipped_case(
+def test_start_live_evaluation_run_without_allow_live_enqueues_child_run_and_returns_running(
     api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
 ) -> None:
     client, project_id, headers, factory = api_client
@@ -193,7 +196,7 @@ def test_start_live_evaluation_run_without_allow_live_persists_policy_skipped_ca
     )
     assert started.status_code == 200, started.text
     started_body = started.json()
-    assert started_body["status"] == "skipped"
+    assert started_body["status"] == "running"
     assert started_body["case_count"] == 1
 
     with factory() as db:
@@ -203,11 +206,15 @@ def test_start_live_evaluation_run_without_allow_live_persists_policy_skipped_ca
             )
         )
     assert case_row is not None
-    assert case_row.degradation_class == "policy_skipped"
+    assert case_row.status == "pending"
+    assert case_row.latest_analysis_run_id is not None
+    assert case_row.latest_analysis_run_status == "queued"
     assert case_row.policy_json is not None
+    assert case_row.observation_json is not None
+    assert case_row.observation_json["freshness_window_seconds"] == 300
 
 
-def test_start_hybrid_evaluation_run_with_allow_live_persists_case_and_policy_metadata(
+def test_start_hybrid_evaluation_run_with_allow_live_enqueues_child_run_and_returns_running(
     api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
 ) -> None:
     client, project_id, headers, factory = api_client
@@ -227,7 +234,7 @@ def test_start_hybrid_evaluation_run_with_allow_live_persists_case_and_policy_me
     )
     assert started.status_code == 200, started.text
     started_body = started.json()
-    assert started_body["status"] == "skipped"
+    assert started_body["status"] == "running"
     assert started_body["case_count"] == 1
 
     with factory() as db:
@@ -238,6 +245,9 @@ def test_start_hybrid_evaluation_run_with_allow_live_persists_case_and_policy_me
         )
     assert case_row is not None
     assert case_row.input_mode == "hybrid"
+    assert case_row.status == "pending"
+    assert case_row.latest_analysis_run_id is not None
+    assert case_row.latest_analysis_run_status == "queued"
     assert case_row.policy_json is not None
     assert case_row.observation_json is not None
     assert case_row.observation_json["freshness_window_seconds"] == 300
@@ -311,10 +321,10 @@ def test_list_fixture_case_results_and_reopen_one_case(
     assert detail_body["checks_json"] is not None
 
 
-def test_filter_policy_skipped_case_results_and_enforce_owner_scope(
+def test_case_routes_refresh_linked_child_run_truth_and_allow_run_navigation(
     api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
 ) -> None:
-    client, project_id, headers, _factory = api_client
+    client, project_id, headers, factory = api_client
     _other_project_id, other_headers = register_project_and_headers(client)
 
     created = client.post(
@@ -332,16 +342,47 @@ def test_filter_policy_skipped_case_results_and_enforce_owner_scope(
     )
     assert started.status_code == 200, started.text
 
-    filtered = client.get(
-        f"/v1/evaluations/{evaluation_run_id}/cases?degradation_class=policy_skipped",
+    with factory() as db:
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == UUID(evaluation_run_id)
+            )
+        )
+        assert case_row is not None
+        child_run = db.get(AnalysisRun, case_row.latest_analysis_run_id)
+        assert child_run is not None
+        child_run.status = AnalysisRunStatus.error
+        child_run.error_summary = "SEC rate limit while reading recent filings"
+        child_run.started_at = datetime.now(timezone.utc)
+        child_run.finished_at = datetime.now(timezone.utc)
+        child_run.meta_json = {
+            **(child_run.meta_json if isinstance(child_run.meta_json, dict) else {}),
+            "upstream_error_code": "sec_rate_limited",
+        }
+        db.commit()
+        latest_analysis_run_id = child_run.id
+
+    detail = client.get(f"/v1/evaluations/{evaluation_run_id}", headers=headers)
+    assert detail.status_code == 200, detail.text
+    detail_body = detail.json()
+    assert detail_body["status"] == "error"
+    assert detail_body["case_count"] == 1
+
+    listed = client.get(
+        f"/v1/evaluations/{evaluation_run_id}/cases?status=error",
         headers=headers,
     )
-    assert filtered.status_code == 200, filtered.text
-    filtered_body = filtered.json()
-    assert len(filtered_body) == 1
-    assert filtered_body[0]["degradation_class"] == "policy_skipped"
-    assert filtered_body[0]["policy_json"] is not None
-    case_id = filtered_body[0]["case_id"]
+    assert listed.status_code == 200, listed.text
+    listed_body = listed.json()
+    assert len(listed_body) == 1
+    assert listed_body[0]["latest_analysis_run_id"] == str(latest_analysis_run_id)
+    assert listed_body[0]["latest_analysis_run_status"] == "error"
+    assert listed_body[0]["degradation_class"] == "upstream_sec_degraded"
+    assert listed_body[0]["metadata_json"]["upstream_error_code"] == "sec_rate_limited"
+
+    run_detail = client.get(f"/v1/runs/{latest_analysis_run_id}", headers=headers)
+    assert run_detail.status_code == 200, run_detail.text
+    assert run_detail.json()["id"] == str(latest_analysis_run_id)
 
     other_list = client.get(
         f"/v1/evaluations/{evaluation_run_id}/cases",
@@ -350,7 +391,7 @@ def test_filter_policy_skipped_case_results_and_enforce_owner_scope(
     assert other_list.status_code == 404
 
     other_detail = client.get(
-        f"/v1/evaluations/{evaluation_run_id}/cases/{case_id}",
+        f"/v1/evaluations/{evaluation_run_id}/cases/{listed_body[0]['case_id']}",
         headers=other_headers,
     )
     assert other_detail.status_code == 404

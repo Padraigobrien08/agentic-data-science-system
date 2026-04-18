@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from collections.abc import Iterator
+from datetime import datetime, timedelta, timezone
 from uuid import UUID
 
 import pytest
@@ -18,6 +19,7 @@ from backend.db.base import Base
 from backend.db.session import get_db
 from backend.main import create_app
 from backend.models.analysis_run import AnalysisRun
+from backend.models.enums import AnalysisRunStatus
 from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.evaluation_run import EvaluationRun
 from backend.models.project import Project
@@ -154,6 +156,181 @@ def test_enqueue_live_or_hybrid_case_run_creates_child_run_and_pending_job(
         assert case_row.analysis_run_history_json[-1]["status"] == "queued"
 
 
+@pytest.mark.parametrize(
+    ("suite_id", "allow_live", "expected_mode"),
+    [
+        ("suite_smoke", False, "live"),
+        ("suite_hybrid_smoke_v1", True, "hybrid"),
+    ],
+)
+def test_start_async_supported_evaluation_suite_returns_running_with_pending_child_case(
+    session_factory: sessionmaker[Session],
+    *,
+    suite_id: str,
+    allow_live: bool,
+    expected_mode: str,
+) -> None:
+    evaluation_run_id = _seed_evaluation_run(session_factory, suite_id=suite_id)
+
+    with session_factory() as db:
+        service = EvaluationControlPlaneService(db)
+        row = service.start_evaluation_run(evaluation_run_id, allow_live=allow_live)
+        db.commit()
+        db.refresh(row)
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == row.id
+            )
+        )
+        assert case_row is not None
+        child_run = db.get(AnalysisRun, case_row.latest_analysis_run_id)
+        job = db.scalar(
+            select(RunExecutionJob).where(
+                RunExecutionJob.analysis_run_id == case_row.latest_analysis_run_id
+            )
+        )
+
+    assert row.status.value == "running"
+    assert row.started_at is not None
+    assert row.finished_at is None
+    assert row.results_json is not None
+    assert row.results_json["case_count"] == 1
+    assert row.results_json["results"][0]["status"] == "pending"
+    assert row.summary_json is not None
+    assert row.summary_json["pending_cases"] == 1
+
+    assert case_row.status == "pending"
+    assert case_row.input_mode == expected_mode
+    assert case_row.latest_analysis_run_id is not None
+    assert case_row.latest_analysis_run_status == "queued"
+    assert case_row.policy_json is not None
+    assert case_row.observation_json is not None
+    assert case_row.observation_json["freshness_window_seconds"] == 300
+    assert case_row.analysis_run_history_json[-1]["status"] == "queued"
+
+    assert child_run is not None
+    assert child_run.status == AnalysisRunStatus.queued
+    assert job is not None
+    assert job.status.value == "pending"
+
+
+def test_refresh_linked_case_results_reconciles_terminal_child_run_truth(
+    session_factory: sessionmaker[Session],
+) -> None:
+    evaluation_run_id = _seed_evaluation_run(session_factory, suite_id="suite_smoke")
+
+    with session_factory() as db:
+        service = EvaluationControlPlaneService(db)
+        row = service.start_evaluation_run(evaluation_run_id)
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == row.id
+            )
+        )
+        assert case_row is not None
+        child_run = db.get(AnalysisRun, case_row.latest_analysis_run_id)
+        assert child_run is not None
+        child_run.status = AnalysisRunStatus.success
+        child_run.started_at = datetime.now(timezone.utc) - timedelta(seconds=8)
+        child_run.finished_at = datetime.now(timezone.utc)
+        child_run.output_payload_json = {
+            "source_observed_at": (
+                datetime.now(timezone.utc) - timedelta(seconds=30)
+            ).isoformat()
+        }
+
+        refreshed = service.refresh_linked_case_results(row.id)
+        db.commit()
+        db.refresh(refreshed)
+        db.refresh(case_row)
+
+    assert refreshed.status.value == "passed"
+    assert refreshed.finished_at is not None
+    assert refreshed.results_json is not None
+    assert refreshed.results_json["results"][0]["status"] == "passed"
+    assert refreshed.summary_json is not None
+    assert refreshed.summary_json["pending_cases"] == 0
+
+    assert case_row.status == "passed"
+    assert case_row.degradation_class == "none"
+    assert case_row.latest_analysis_run_status == "success"
+    assert case_row.message == "passed via linked analysis run"
+    assert case_row.metadata_json is not None
+    assert case_row.metadata_json["analysis_run_id"] == str(case_row.latest_analysis_run_id)
+    assert case_row.metadata_json["analysis_run_status"] == "success"
+    assert case_row.analysis_run_history_json[-1]["status"] == "success"
+    assert case_row.observation_json is not None
+    assert case_row.observation_json["freshness_window_seconds"] == 300
+    assert case_row.observation_json["source_age_seconds"] >= 0
+
+
+@pytest.mark.parametrize(
+    ("error_summary", "meta_patch", "expected_degradation", "expected_metadata_key", "expected_metadata_value"),
+    [
+        (
+            "SEC rate limit while reading recent filings",
+            {"upstream_error_code": "sec_rate_limited"},
+            "upstream_sec_degraded",
+            "upstream_error_code",
+            "sec_rate_limited",
+        ),
+        (
+            "Could not read artifact from storage",
+            {"storage_error_code": "artifact_storage_unavailable"},
+            "product_regression",
+            "storage_error_code",
+            "artifact_storage_unavailable",
+        ),
+    ],
+)
+def test_refresh_linked_case_results_captures_sec_and_storage_failure_evidence(
+    session_factory: sessionmaker[Session],
+    *,
+    error_summary: str,
+    meta_patch: dict[str, str],
+    expected_degradation: str,
+    expected_metadata_key: str,
+    expected_metadata_value: str,
+) -> None:
+    evaluation_run_id = _seed_evaluation_run(session_factory, suite_id="suite_smoke")
+
+    with session_factory() as db:
+        service = EvaluationControlPlaneService(db)
+        row = service.start_evaluation_run(evaluation_run_id)
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == row.id
+            )
+        )
+        assert case_row is not None
+        child_run = db.get(AnalysisRun, case_row.latest_analysis_run_id)
+        assert child_run is not None
+        child_run.status = AnalysisRunStatus.error
+        child_run.started_at = datetime.now(timezone.utc) - timedelta(seconds=4)
+        child_run.finished_at = datetime.now(timezone.utc)
+        child_run.error_summary = error_summary
+        child_run.meta_json = {
+            **(child_run.meta_json if isinstance(child_run.meta_json, dict) else {}),
+            **meta_patch,
+        }
+
+        refreshed = service.refresh_linked_case_results(row.id)
+        db.commit()
+        db.refresh(refreshed)
+        db.refresh(case_row)
+
+    assert refreshed.status.value == "error"
+    assert refreshed.results_json is not None
+    assert refreshed.results_json["results"][0]["status"] == "error"
+    assert case_row.status == "error"
+    assert case_row.degradation_class == expected_degradation
+    assert case_row.latest_analysis_run_status == "error"
+    assert case_row.message == error_summary
+    assert case_row.metadata_json is not None
+    assert case_row.metadata_json[expected_metadata_key] == expected_metadata_value
+    assert case_row.analysis_run_history_json[-1]["status"] == "error"
+
+
 def test_case_routes_serialize_linked_analysis_run_fields(
     api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
 ) -> None:
@@ -174,7 +351,7 @@ def test_case_routes_serialize_linked_analysis_run_fields(
             project_id=evaluation_run.project_id,
             initiated_by_user_id=evaluation_run.initiated_by_user_id,
             orchestration_goal_text="fixture linked run",
-            status="queued",
+            status=AnalysisRunStatus.queued,
         )
         db.add(child_run)
         db.flush()
