@@ -36,6 +36,17 @@ class EvaluationCaseResult(Base):
     checks_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
     metadata_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
     artifacts_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
+    latest_analysis_run_id: Mapped[uuid.UUID | None] = mapped_column(
+        Uuid(as_uuid=True),
+        ForeignKey("analysis_runs.id", ondelete="SET NULL"),
+        nullable=True,
+        index=True,
+    )
+    latest_analysis_run_status: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+    )
+    analysis_run_history_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),
         nullable=False,

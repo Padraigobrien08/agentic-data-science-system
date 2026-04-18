@@ -9,6 +9,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import EvaluationRunStatus
 from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.evaluation_run import EvaluationRun
@@ -16,6 +17,8 @@ from backend.repositories.evaluation_case_result_repository import (
     EvaluationCaseResultRepository,
 )
 from backend.repositories.evaluation_run_repository import EvaluationRunRepository
+from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.run_queue_service import RunQueueService
 from edgar_project.evaluation.catalog import (
     SupportedEvaluationSuite,
     get_supported_evaluation_suite,
@@ -29,6 +32,8 @@ from edgar_project.evaluation.schemas import (
 )
 from edgar_project.evaluation.summary_report import summary_json_blob
 
+_MAX_CASE_RUN_HISTORY = 5
+
 
 class EvaluationControlPlaneService:
     def __init__(
@@ -37,6 +42,8 @@ class EvaluationControlPlaneService:
         *,
         runs: EvaluationRunRepository | None = None,
         case_results: EvaluationCaseResultRepository | None = None,
+        analysis_runs: AnalysisRunService | None = None,
+        run_queue: RunQueueService | None = None,
         suite_lookup=get_supported_evaluation_suite,
     ) -> None:
         self._session = session
@@ -46,6 +53,10 @@ class EvaluationControlPlaneService:
             if case_results is not None
             else EvaluationCaseResultRepository(session)
         )
+        self._analysis_runs = (
+            analysis_runs if analysis_runs is not None else AnalysisRunService(session)
+        )
+        self._run_queue = run_queue if run_queue is not None else RunQueueService(session)
         self._suite_lookup = suite_lookup
 
     def count_case_results(self, evaluation_run_id: UUID) -> int:
@@ -176,3 +187,52 @@ class EvaluationControlPlaneService:
                 )
             )
         return rows
+
+    def _enqueue_live_or_hybrid_case_run(
+        self,
+        evaluation_run: EvaluationRun,
+        case_row: EvaluationCaseResult,
+        case,
+        *,
+        trace_carrier: dict[str, str] | None = None,
+    ) -> UUID:
+        if evaluation_run.project_id is None:
+            raise ValueError("Evaluation run must be project-scoped before child runs can be enqueued")
+
+        input_payload_json = {
+            "tickers": list(case.input.tickers),
+            "analysis_goal": case.input.goal,
+            "refresh": case.input.refresh,
+        }
+        meta_json = {
+            "evaluation_case_link": {
+                "evaluation_run_id": str(evaluation_run.id),
+                "case_id": case.case_id,
+                "suite_id": evaluation_run.suite_id,
+                "input_mode": case.input.mode.value,
+            }
+        }
+        child_run = self._analysis_runs.create(
+            evaluation_run.project_id,
+            initiated_by_user_id=evaluation_run.initiated_by_user_id,
+            orchestration_goal_text=case.input.goal,
+            input_payload_json=input_payload_json,
+            meta_json=meta_json,
+        )
+        self._run_queue.enqueue_after_create(
+            child_run.id,
+            input_payload_json,
+            trace_carrier=trace_carrier,
+        )
+        self._case_results.update_linked_analysis_run(
+            case_row,
+            latest_analysis_run_id=child_run.id,
+            latest_analysis_run_status="queued",
+            history_item={
+                "analysis_run_id": str(child_run.id),
+                "status": "queued",
+                "created_at": datetime.now(timezone.utc).isoformat(),
+            },
+            max_history_entries=_MAX_CASE_RUN_HISTORY,
+        )
+        return child_run.id

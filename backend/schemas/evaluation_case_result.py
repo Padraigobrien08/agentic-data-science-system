@@ -27,6 +27,9 @@ class EvaluationCaseResultRead(TimestampedRead):
     checks_json: dict | list | None = None
     metadata_json: dict | list | None = None
     artifacts_json: dict | list | None = None
+    latest_analysis_run_id: UUID | None = None
+    latest_analysis_run_status: str | None = None
+    analysis_run_history_json: dict | list | None = None
 
 
 def evaluation_case_result_to_read(row) -> EvaluationCaseResultRead:
@@ -44,6 +47,9 @@ def evaluation_case_result_to_read(row) -> EvaluationCaseResultRead:
         checks_json=row.checks_json,
         metadata_json=row.metadata_json,
         artifacts_json=row.artifacts_json,
+        latest_analysis_run_id=row.latest_analysis_run_id,
+        latest_analysis_run_status=row.latest_analysis_run_status,
+        analysis_run_history_json=row.analysis_run_history_json,
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
