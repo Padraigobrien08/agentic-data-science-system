@@ -7,11 +7,13 @@ import re
 import uuid
 from collections.abc import Callable, Iterator, Mapping
 from contextlib import contextmanager
+from datetime import datetime, timezone
 from pathlib import Path
 from typing import BinaryIO
 from uuid import UUID
 
 from sqlalchemy.orm import Session
+import structlog
 
 from backend.config.settings import Settings, get_settings
 from backend.observability.tracing import get_tracer
@@ -21,7 +23,7 @@ from backend.models.enums import ArtifactKind
 from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.run_step_repository import RunStepRepository
 from backend.storage import delete_at_uri, open_reader, read_bytes
-from backend.storage.factory import get_local_object_store
+from backend.storage.factory import get_object_store
 from backend.storage.protocol import ArtifactObjectStore
 from backend.storage.types import StoredObject
 
@@ -35,6 +37,7 @@ _SUFFIX_TO_KIND_MIME: dict[str, tuple[ArtifactKind, str]] = {
     ".markdown": (ArtifactKind.document, "text/markdown"),
     ".txt": (ArtifactKind.document, "text/plain"),
 }
+logger = structlog.get_logger(__name__)
 
 
 def infer_artifact_kind_and_mime(path: Path) -> tuple[ArtifactKind, str]:
@@ -67,7 +70,7 @@ class ArtifactService:
         run_steps: RunStepRepository | None = None,
     ) -> None:
         self._settings = settings if settings is not None else get_settings()
-        self._store = store if store is not None else get_local_object_store(self._settings)
+        self._store = store if store is not None else get_object_store(self._settings)
         self._artifacts = artifacts if artifacts is not None else ArtifactRepository(session)
         self._run_steps = run_steps if run_steps is not None else RunStepRepository(session)
 
@@ -181,6 +184,79 @@ class ArtifactService:
         self._artifacts.flush()
         return row
 
+    @staticmethod
+    def _storage_reconciliation_patch(*, operation: str, uri: str) -> dict[str, object]:
+        uri_scheme = uri.split(":", 1)[0] if ":" in uri else "unknown"
+        return {
+            "storage_reconciliation": {
+                "status": "repair_required",
+                "operation": operation,
+                "uri_scheme": uri_scheme,
+                "updated_at": datetime.now(timezone.utc).isoformat(),
+            }
+        }
+
+    @staticmethod
+    def _merge_reconciliation_meta(
+        meta_json: dict | list | None,
+        *,
+        operation: str | None,
+        uri: str,
+    ) -> dict | list | None:
+        if not isinstance(meta_json, dict):
+            if operation is None:
+                return meta_json
+            return ArtifactService._storage_reconciliation_patch(operation=operation, uri=uri)
+        updated = dict(meta_json)
+        if operation is None:
+            updated.pop("storage_reconciliation", None)
+            return updated or None
+        updated["storage_reconciliation"] = ArtifactService._storage_reconciliation_patch(
+            operation=operation,
+            uri=uri,
+        )["storage_reconciliation"]
+        return updated
+
+    def _insert_artifact_row_with_cleanup(
+        self,
+        *,
+        artifact_id: UUID,
+        role_key: str,
+        run_step_id: UUID | None,
+        kind: ArtifactKind,
+        mime_type: str,
+        meta_json: dict | list | None,
+        analysis_run_id: UUID | None,
+        evaluation_run_id: UUID | None,
+        stored: StoredObject,
+    ) -> Artifact:
+        try:
+            return self._insert_artifact_row(
+                artifact_id=artifact_id,
+                role_key=role_key,
+                run_step_id=run_step_id,
+                kind=kind,
+                mime_type=mime_type,
+                meta_json=meta_json,
+                analysis_run_id=analysis_run_id,
+                evaluation_run_id=evaluation_run_id,
+                stored=stored,
+            )
+        except Exception:
+            try:
+                delete_at_uri(stored.uri, settings=self._settings)
+            except Exception as cleanup_exc:  # noqa: BLE001
+                logger.exception(
+                    "artifact_row_insert_cleanup_failed",
+                    operation="insert_cleanup",
+                    storage_uri=stored.uri,
+                    uri_scheme=stored.uri.split(":", 1)[0] if ":" in stored.uri else "unknown",
+                    artifact_id=str(artifact_id),
+                    role_key=role_key,
+                    cleanup_error=type(cleanup_exc).__name__,
+                )
+            raise
+
     def save_bytes(
         self,
         data: bytes,
@@ -221,7 +297,7 @@ class ArtifactService:
                 content_type=content_type,
             ),
         )
-        return self._insert_artifact_row(
+        return self._insert_artifact_row_with_cleanup(
             artifact_id=artifact_id,
             role_key=role_key,
             run_step_id=run_step_id,
@@ -362,7 +438,7 @@ class ArtifactService:
                     content_type=content_type,
                 ),
             )
-        return self._insert_artifact_row(
+        return self._insert_artifact_row_with_cleanup(
             artifact_id=artifact_id,
             role_key=role_key,
             run_step_id=run_step_id,
@@ -496,6 +572,15 @@ class ArtifactService:
         if row is None:
             return
         uri = row.storage_uri
+        try:
+            delete_at_uri(uri, settings=self._settings)
+        except Exception:  # noqa: BLE001
+            row.meta_json = self._merge_reconciliation_meta(
+                row.meta_json,
+                operation="delete",
+                uri=uri,
+            )
+            self._artifacts.flush()
+            raise
         self._artifacts.delete(row)
         self._artifacts.flush()
-        delete_at_uri(uri, settings=self._settings)

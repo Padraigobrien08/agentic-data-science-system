@@ -29,6 +29,37 @@ def _utc_now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def _storage_reconciliation_meta(
+    meta_json: dict | list | None,
+    *,
+    operation: str | None,
+    uri: str,
+    now: datetime,
+) -> dict | list | None:
+    if not isinstance(meta_json, dict):
+        if operation is None:
+            return meta_json
+        return {
+            "storage_reconciliation": {
+                "status": "repair_required",
+                "operation": operation,
+                "uri_scheme": uri.split(":", 1)[0] if ":" in uri else "unknown",
+                "updated_at": now.isoformat(),
+            }
+        }
+    updated = dict(meta_json)
+    if operation is None:
+        updated.pop("storage_reconciliation", None)
+        return updated or None
+    updated["storage_reconciliation"] = {
+        "status": "repair_required",
+        "operation": operation,
+        "uri_scheme": uri.split(":", 1)[0] if ":" in uri else "unknown",
+        "updated_at": now.isoformat(),
+    }
+    return updated
+
+
 def _empty_report(*, dry_run: bool) -> dict[str, Any]:
     return {
         "dry_run": dry_run,
@@ -136,8 +167,20 @@ def run_retention_maintenance(
                 delete_at_uri(row.storage_uri, settings=cfg)
             except Exception as exc:  # noqa: BLE001
                 report["errors"].append(f"Artifact {row.id}: {type(exc).__name__}: {exc}")
+                row.meta_json = _storage_reconciliation_meta(
+                    row.meta_json,
+                    operation="retention_prune",
+                    uri=row.storage_uri,
+                    now=current_time,
+                )
                 continue
             row.blob_deleted_at = current_time
+            row.meta_json = _storage_reconciliation_meta(
+                row.meta_json,
+                operation=None,
+                uri=row.storage_uri,
+                now=current_time,
+            )
             artifact_blobs_pruned += 1
 
         session.commit()

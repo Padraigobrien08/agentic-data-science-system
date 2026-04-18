@@ -6,8 +6,8 @@ import json
 import uuid
 from datetime import datetime, timezone
 
-from pydantic import SecretStr
 import pytest
+from pydantic import SecretStr
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 
@@ -24,6 +24,7 @@ from backend.models.user import User
 from backend.repositories.analysis_run_repository import AnalysisRunRepository
 from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.model_call_repository import ModelCallRepository
+from backend.storage.factory import get_s3_object_store
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
     ArtifactDetailResponse,
@@ -193,6 +194,24 @@ def _seed_retention_history(session: Session, *, settings: Settings) -> dict[str
         "eligible_artifact_id": eligible_artifact.id,
         "fresh_artifact_id": fresh_artifact.id,
     }
+
+
+def _retention_s3_settings(tmp_path, **overrides: object) -> Settings:
+    defaults: dict[str, object] = {
+        "artifact_storage_root": tmp_path / "artifact_storage",
+        "artifact_storage_backend": "s3",
+        "artifact_storage_s3_bucket": "artifact-bucket",
+        "artifact_storage_s3_region": "us-east-1",
+        "retention_run_payload_days": 30,
+        "retention_model_payload_days": 30,
+        "retention_artifact_blob_days": 30,
+        "retention_batch_size": 100,
+        "jwt_secret": SecretStr(SECURE_JWT_SECRET),
+        "bootstrap_admin_token": SecretStr(BOOTSTRAP_TOKEN),
+        "ops_api_token": SecretStr(OPS_TOKEN),
+    }
+    defaults.update(overrides)
+    return Settings(**defaults)
 
 
 def test_retention_settings_fields_exist() -> None:
@@ -459,3 +478,151 @@ def test_retention_cli_parser_accepts_dry_run_apply_limit_and_json() -> None:
     assert applied.limit == 7
     assert applied.json_output is True
     assert dry_run.dry_run is True
+
+
+def test_retention_apply_mode_prunes_remote_blob_and_clears_stale_reconciliation(tmp_path) -> None:
+    boto3 = pytest.importorskip("boto3")
+    moto = pytest.importorskip("moto")
+
+    with moto.mock_aws():
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        factory = sessionmaker(bind=engine, expire_on_commit=False)
+        session = factory()
+        settings = _retention_s3_settings(tmp_path)
+        try:
+            boto3.client("s3", region_name=settings.artifact_storage_s3_region).create_bucket(
+                Bucket=settings.artifact_storage_s3_bucket,
+            )
+            store = get_s3_object_store(settings)
+            user = User(email=f"retention-s3-{uuid.uuid4().hex[:8]}@example.com")
+            session.add(user)
+            session.flush()
+            project = Project(owner_user_id=user.id, name="Retention S3")
+            session.add(project)
+            session.flush()
+            old_timestamp = datetime(2025, 1, 1, tzinfo=timezone.utc)
+            run = AnalysisRun(
+                project_id=project.id,
+                status=AnalysisRunStatus.success,
+                finished_at=old_timestamp,
+                created_at=old_timestamp,
+                updated_at=old_timestamp,
+            )
+            session.add(run)
+            session.flush()
+            stored = store.put("retention/remote-report.txt", b"remote")
+            artifact = Artifact(
+                analysis_run_id=run.id,
+                role_key="remote_report",
+                kind=ArtifactKind.document,
+                storage_uri=stored.uri,
+                mime_type="text/plain",
+                byte_size=stored.byte_size,
+                content_sha256=stored.sha256_hex,
+                meta_json={
+                    "storage_reconciliation": {
+                        "status": "repair_required",
+                        "operation": "retention_prune",
+                    }
+                },
+                created_at=old_timestamp,
+                updated_at=old_timestamp,
+            )
+            session.add(artifact)
+            session.commit()
+
+            from backend.maintenance.retention import run_retention_maintenance
+
+            report = run_retention_maintenance(
+                session,
+                settings=settings,
+                dry_run=False,
+                now=datetime(2026, 4, 17, tzinfo=timezone.utc),
+            )
+
+            session.refresh(artifact)
+            assert report["artifact_blobs_pruned"] == 1
+            assert report["errors"] == []
+            assert artifact.blob_deleted_at is not None
+            assert store.exists(store.key_from_uri(artifact.storage_uri)) is False
+            assert isinstance(artifact.meta_json, dict) or artifact.meta_json is None
+            if isinstance(artifact.meta_json, dict):
+                assert "storage_reconciliation" not in artifact.meta_json
+        finally:
+            session.close()
+
+
+def test_retention_apply_mode_remote_delete_failure_marks_reconciliation(tmp_path, monkeypatch) -> None:
+    boto3 = pytest.importorskip("boto3")
+    moto = pytest.importorskip("moto")
+
+    with moto.mock_aws():
+        engine = create_engine("sqlite:///:memory:")
+        Base.metadata.create_all(engine)
+        factory = sessionmaker(bind=engine, expire_on_commit=False)
+        session = factory()
+        settings = _retention_s3_settings(tmp_path)
+        try:
+            boto3.client("s3", region_name=settings.artifact_storage_s3_region).create_bucket(
+                Bucket=settings.artifact_storage_s3_bucket,
+            )
+            store = get_s3_object_store(settings)
+            user = User(email=f"retention-s3-fail-{uuid.uuid4().hex[:8]}@example.com")
+            session.add(user)
+            session.flush()
+            project = Project(owner_user_id=user.id, name="Retention S3 Failure")
+            session.add(project)
+            session.flush()
+            old_timestamp = datetime(2025, 1, 1, tzinfo=timezone.utc)
+            run = AnalysisRun(
+                project_id=project.id,
+                status=AnalysisRunStatus.success,
+                finished_at=old_timestamp,
+                created_at=old_timestamp,
+                updated_at=old_timestamp,
+            )
+            session.add(run)
+            session.flush()
+            stored = store.put("retention/remote-report-fail.txt", b"remote")
+            artifact = Artifact(
+                analysis_run_id=run.id,
+                role_key="remote_report",
+                kind=ArtifactKind.document,
+                storage_uri=stored.uri,
+                mime_type="text/plain",
+                byte_size=stored.byte_size,
+                content_sha256=stored.sha256_hex,
+                created_at=old_timestamp,
+                updated_at=old_timestamp,
+            )
+            session.add(artifact)
+            session.commit()
+
+            def _delete_fail(_uri: str, *, settings: Settings | None = None) -> None:
+                raise OSError("remote prune failed")
+
+            monkeypatch.setattr("backend.maintenance.retention.delete_at_uri", _delete_fail)
+
+            from backend.maintenance.retention import run_retention_maintenance
+
+            report = run_retention_maintenance(
+                session,
+                settings=settings,
+                dry_run=False,
+                now=datetime(2026, 4, 17, tzinfo=timezone.utc),
+            )
+
+            session.refresh(artifact)
+            assert report["artifact_blobs_pruned"] == 0
+            assert len(report["errors"]) == 1
+            assert "remote prune failed" in report["errors"][0]
+            assert artifact.blob_deleted_at is None
+            assert store.exists(store.key_from_uri(artifact.storage_uri)) is True
+            assert isinstance(artifact.meta_json, dict)
+            reconciliation = artifact.meta_json["storage_reconciliation"]
+            assert reconciliation["status"] == "repair_required"
+            assert reconciliation["operation"] == "retention_prune"
+            assert reconciliation["uri_scheme"] == "s3"
+        finally:
+            session.close()
