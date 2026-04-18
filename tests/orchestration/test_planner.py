@@ -169,6 +169,21 @@ def test_prompt_named_in_scope_subset_narrows_effective_tickers() -> None:
     assert out.plan.steps[0].tool_input["tickers"] == ["MSFT"]
 
 
+def test_multiple_tickers_without_relative_language_do_not_force_peer_report() -> None:
+    p = Planner()
+    out = p.build_plan(
+        OrchestrationInput(
+            tickers=["AAPL", "MSFT"],
+            analysis_goal="Analyze AAPL and MSFT over the last 8 quarters for margin pressure",
+            refresh=False,
+        )
+    )
+
+    assert out.ok and out.interpreted_goal is not None
+    assert out.interpreted_goal.intent == OrchestrationIntent.anomaly_analysis
+    assert out.interpreted_goal.code == InterpretedGoalCode.trend_deterioration
+
+
 EXAMPLE_DETERIORATION_GOAL = (
     "Detect any signs of financial deterioration in the selected companies over recent quarters. "
     "Focus on declining margins, slowing revenue growth, and weakening cash flow. "

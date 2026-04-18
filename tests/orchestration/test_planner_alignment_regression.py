@@ -36,6 +36,14 @@ GOAL_PEER_UNDERPERFORMERS = (
 
 GOAL_MIXED_DETERIORATION_AND_ANOMALIES = "Find persistent deterioration and any unusual anomalies."
 
+GOAL_ANALYST_MARGIN_PRESSURE = (
+    "Analyze MSFT over the last 8 quarters and tell me whether margin pressure is temporary or structural"
+)
+
+GOAL_PEER_WEAKER_COMPANY = (
+    "Which company is weaker, AAPL or MSFT, on free cash flow quality?"
+)
+
 
 def test_regression_deterioration_not_anomaly_only_pipeline() -> None:
     """Persistent / negative / deterioration — not the granular anomaly-only template."""
@@ -125,3 +133,41 @@ def test_regression_mixed_trend_and_anomaly_template() -> None:
     # "persistent" in the goal text wins signal-style classification; template still mixes workflows.
     assert gp.preferred_signal_style == PreferredSignalStyle.persistent
     assert gp.time_focus == TimeFocus.mixed
+
+
+def test_regression_analyst_phrase_routes_to_trend_deterioration() -> None:
+    p = Planner()
+    out = p.build_plan(
+        OrchestrationInput(
+            tickers=["AAPL", "MSFT", "NVDA"],
+            analysis_goal=GOAL_ANALYST_MARGIN_PRESSURE,
+            refresh=False,
+        )
+    )
+
+    assert out.ok and out.plan and out.interpreted_goal
+    ig = out.interpreted_goal
+    assert ig.intent == OrchestrationIntent.anomaly_analysis
+    assert ig.code == InterpretedGoalCode.trend_deterioration
+    assert ig.plan_template is not None
+    assert ig.plan_template.template_id == PlanTemplateId.trend_deterioration
+    assert out.plan.steps[0].tool_input["tickers"] == ["MSFT"]
+
+
+def test_regression_peer_relative_phrase_routes_to_peer_comparison() -> None:
+    p = Planner()
+    out = p.build_plan(
+        OrchestrationInput(
+            tickers=["AAPL", "MSFT", "NVDA"],
+            analysis_goal=GOAL_PEER_WEAKER_COMPANY,
+            refresh=False,
+        )
+    )
+
+    assert out.ok and out.plan and out.interpreted_goal
+    ig = out.interpreted_goal
+    assert ig.intent == OrchestrationIntent.peer_report
+    assert ig.code == InterpretedGoalCode.peer_comparison
+    assert ig.plan_template is not None
+    assert ig.plan_template.template_id == PlanTemplateId.peer_comparison
+    assert out.plan.steps[0].tool_input["tickers"] == ["AAPL", "MSFT"]

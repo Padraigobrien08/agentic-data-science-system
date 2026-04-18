@@ -38,3 +38,25 @@ def test_priority_full_pipeline_over_anomaly_keywords() -> None:
     x = interpret_goal_intent("run the pipeline and check for anomalies")
     assert x is not None
     assert x.intent == OrchestrationIntent.full_pipeline_run
+
+
+def test_analyst_language_routes_to_anomaly_intent() -> None:
+    interpretation = interpret_goal_intent(
+        "Analyze MSFT over the last 8 quarters and tell me whether margin pressure is temporary or structural"
+    )
+    assert interpretation is not None
+    assert interpretation.intent == OrchestrationIntent.anomaly_analysis
+    assert any("margin_pressure" in rule or "temporary_or_structural" in rule for rule in interpretation.rules_matched)
+
+
+def test_peer_relative_language_routes_to_peer_intent() -> None:
+    prompts = (
+        "AAPL vs MSFT on operating margins",
+        "Compare AAPL versus MSFT on operating margins",
+        "Which company is weaker, AAPL or MSFT, on free cash flow quality?",
+    )
+
+    for prompt in prompts:
+        interpretation = interpret_goal_intent(prompt)
+        assert interpretation is not None
+        assert interpretation.intent == OrchestrationIntent.peer_report
