@@ -66,6 +66,7 @@ from edgar_project.orchestration.schemas import (
     PlanTemplateId,
     PlanningOutcome,
 )
+from edgar_project.orchestration.prompt_scope import extract_prompt_scope
 
 _MAX_TICKERS: Final[int] = 5
 
@@ -219,7 +220,13 @@ def _planning_success(
     return PlanningOutcome(ok=True, plan=plan, interpreted_goal=ig, errors=[])
 
 
-def _unsupported_goal_failure() -> PlanningOutcome:
+def _unsupported_goal_failure(
+    *,
+    message: str = "Unsupported analysis_goal; no supported intent matched.",
+    detail: str | None = None,
+) -> PlanningOutcome:
+    supported = f"Supported intent ids: {supported_intents_summary()}."
+    combined_detail = supported if detail is None else f"{detail} {supported}"
     return PlanningOutcome(
         ok=False,
         plan=None,
@@ -227,10 +234,10 @@ def _unsupported_goal_failure() -> PlanningOutcome:
         errors=[
             OrchestrationError(
                 code=CODE_ORCH_UNSUPPORTED_GOAL,
-                message="Unsupported analysis_goal; no supported intent matched.",
+                message=message,
                 source_tool=None,
                 mcp_error_code=None,
-                detail=f"Supported intent ids: {supported_intents_summary()}.",
+                detail=combined_detail,
             )
         ],
     )
@@ -273,6 +280,19 @@ class Planner:
                 "No tickers available after normalization.",
                 detail="Provide at least one ticker or rely on default tickers when the list is empty.",
             )
+
+        prompt_scope = extract_prompt_scope(request.analysis_goal, tickers)
+        if prompt_scope.out_of_scope_tickers:
+            return _unsupported_goal_failure(
+                message="Requested tickers fall outside the current workspace scope.",
+                detail=(
+                    "Out-of-scope symbols: "
+                    f"{', '.join(prompt_scope.out_of_scope_tickers)}. "
+                    f"Workspace scope: {', '.join(tickers)}. "
+                    "The planner did not expand scope automatically."
+                ),
+            )
+        tickers = list(prompt_scope.effective_tickers)
 
         if request.intent_assistance is not None:
             prefs = request.intent_assistance.goal_preferences

@@ -158,7 +158,7 @@ def test_prompt_named_in_scope_subset_narrows_effective_tickers() -> None:
     out = p.build_plan(
         OrchestrationInput(
             tickers=["AAPL", "MSFT", "NVDA"],
-            analysis_goal="Analyze MSFT over the last 8 quarters",
+            analysis_goal="Detect any signs of financial deterioration in MSFT over recent quarters",
             refresh=False,
         )
     )
