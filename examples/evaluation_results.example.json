@@ -12,6 +12,7 @@
         "findings_total_count_in_range": true,
         "regression_golden": true
       },
+      "degradation_class": "none",
       "elapsed_seconds": 0.21,
       "finding_counts": {
         "category::deterioration": 1,
@@ -24,6 +25,8 @@
         "input_mode": "fixture",
         "output_dir": "<repo>/data/evaluation/EXAMPLE_ONLY/case_alpha"
       },
+      "observation": null,
+      "policy": null,
       "qualitative_notes": [],
       "rubric_score": null,
       "run_goal": "Example goal string",
@@ -33,11 +36,25 @@
       "artifacts": {},
       "case_id": "example_case_beta",
       "checks": {},
+      "degradation_class": "policy_skipped",
       "elapsed_seconds": 0.01,
       "finding_counts": {},
-      "message": "skipped: input mode 'live' not implemented yet (use fixture or orchestration_mocked).",
+      "message": "policy skipped: live/hybrid validation requires explicit --allow-live opt-in and remains non-merge-blocking by default.",
       "metadata": {
         "input_mode": "live"
+      },
+      "observation": {
+        "freshness_window_seconds": 300,
+        "observed_at": null,
+        "source_age_seconds": null,
+        "source_observed_at": null
+      },
+      "policy": {
+        "allow_merge_blocking": false,
+        "fair_access_policy": "sec_fair_access_operator_invoked",
+        "freshness_window_seconds": 300,
+        "normal_user_visible": false,
+        "requires_explicit_live_opt_in": true
       },
       "qualitative_notes": [],
       "rubric_score": null,

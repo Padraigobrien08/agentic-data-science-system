@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Any
 
-from .schemas import EvaluationResult, EvaluationStatus, EvaluationSummary
+from .schemas import EvaluationResult, EvaluationStatus, EvaluationSummary, ValidationDegradationClass
 
 
 def failure_reason_short(message: str, *, max_len: int = 200) -> str:
@@ -27,6 +27,16 @@ def failure_reason_short(message: str, *, max_len: int = 200) -> str:
 
 def total_elapsed_seconds(results: list[EvaluationResult]) -> float:
     return float(sum((r.elapsed_seconds or 0.0) for r in results))
+
+
+def degradation_counts(results: list[EvaluationResult]) -> dict[str, int]:
+    counts: dict[str, int] = {}
+    for result in results:
+        key = result.degradation_class.value
+        if key == ValidationDegradationClass.none.value:
+            continue
+        counts[key] = counts.get(key, 0) + 1
+    return counts
 
 
 def format_benchmark_cli_summary(
@@ -50,6 +60,10 @@ def format_benchmark_cli_summary(
         f"  skipped:        {summary.skipped_cases}",
         f"  errors:         {summary.error_cases}",
     ]
+    degraded = degradation_counts(results)
+    if degraded:
+        counts = ", ".join(f"{name}={count}" for name, count in sorted(degraded.items()))
+        lines.append(f"  degradation:    {counts}")
     failing = [
         r.case_id
         for r in results
@@ -84,16 +98,22 @@ def format_console_report(summary: EvaluationSummary, results: list[EvaluationRe
     if summary.generated_at:
         lines.append(f"Finished (UTC): {summary.generated_at}")
 
-    non_ok = [r for r in results if r.status not in {EvaluationStatus.passed, EvaluationStatus.skipped}]
-    if non_ok:
+    routed = [
+        r
+        for r in results
+        if r.status != EvaluationStatus.passed or r.degradation_class != ValidationDegradationClass.none
+    ]
+    if routed:
         lines.append("")
-        lines.append("Non-passing cases:")
-        for r in non_ok:
+        lines.append("Cases needing follow-up:")
+        for r in routed:
             reason = failure_reason_short(r.message)
-            lines.append(f"  • [{r.status.value}] {r.case_id}: {reason}")
+            lines.append(
+                f"  • [{r.status.value} / {r.degradation_class.value}] {r.case_id}: {reason}"
+            )
     else:
         lines.append("")
-        lines.append("No failed or errored cases.")
+        lines.append("No failed, skipped, or degraded cases.")
 
     lines.append(sep)
     return "\n".join(lines)
@@ -111,7 +131,19 @@ def render_markdown_report(summary: EvaluationSummary, results: list[EvaluationR
     ]
     if summary.total_elapsed_seconds is not None:
         rows.append(f"- **Sum of case times:** {summary.total_elapsed_seconds:.3f}s")
-    rows.extend(["", "## Case outcomes", "", "| case_id | status | time (s) | note |", "|---|---:|---:|---|"])
+    degraded = degradation_counts(results)
+    if degraded:
+        counts = ", ".join(f"`{name}`: {count}" for name, count in sorted(degraded.items()))
+        rows.append(f"- **Degradation counts:** {counts}")
+    rows.extend(
+        [
+            "",
+            "## Case outcomes",
+            "",
+            "| case_id | status | degradation | time (s) | note |",
+            "|---|---:|---|---:|---|",
+        ]
+    )
     for r in results:
         t = f"{r.elapsed_seconds:.4f}" if r.elapsed_seconds is not None else "—"
         note = ""
@@ -119,13 +151,15 @@ def render_markdown_report(summary: EvaluationSummary, results: list[EvaluationR
             note = failure_reason_short(r.message).replace("|", "\\|")
         elif r.status == EvaluationStatus.skipped:
             note = failure_reason_short(r.message).replace("|", "\\|")
-        rows.append(f"| `{r.case_id}` | {r.status.value} | {t} | {note} |")
+        rows.append(
+            f"| `{r.case_id}` | {r.status.value} | {r.degradation_class.value} | {t} | {note} |"
+        )
 
     failed = [r for r in results if r.status in {EvaluationStatus.failed, EvaluationStatus.error}]
     if failed:
         rows.extend(["", "## Failure detail (short)", ""])
         for r in failed:
-            rows.append(f"### `{r.case_id}` ({r.status.value})")
+            rows.append(f"### `{r.case_id}` ({r.status.value} / {r.degradation_class.value})")
             rows.append("")
             rows.append(f"```\n{r.message}\n```")
             rows.append("")
@@ -136,6 +170,12 @@ def render_markdown_report(summary: EvaluationSummary, results: list[EvaluationR
     return "\n".join(rows)
 
 
-def summary_json_blob(summary: EvaluationSummary) -> dict[str, Any]:
+def summary_json_blob(summary: EvaluationSummary, results: list[EvaluationResult]) -> dict[str, Any]:
     """Structured dict for writing ``*_summary.json`` (includes brief failure list)."""
-    return summary.model_dump(mode="json")
+    payload = summary.model_dump(mode="json")
+    payload["degradation_counts"] = degradation_counts(results)
+    degradation_by_case = {r.case_id: r.degradation_class.value for r in results}
+    for brief in payload.get("failed_case_briefs", []):
+        case_id = brief.get("case_id")
+        brief["degradation_class"] = degradation_by_case.get(case_id, ValidationDegradationClass.none.value)
+    return payload

@@ -1,4 +1,7 @@
 {
+  "degradation_counts": {
+    "policy_skipped": 1
+  },
   "error_cases": 0,
   "failed_case_briefs": [],
   "failed_cases": 0,

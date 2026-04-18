@@ -22,6 +22,8 @@ from .schemas import (
     EvaluationStatus,
     EvaluationSummary,
     InputMode,
+    ValidationDegradationClass,
+    ValidationObservation,
     ValueRange,
 )
 from .summary_report import failure_reason_short, render_markdown_report, summary_json_blob
@@ -46,10 +48,12 @@ class EvaluationRunner:
         suite: BenchmarkSuite,
         rubric: Rubric | None = None,
         *,
+        allow_live_cases: bool = False,
         update_regression_goldens: bool = False,
     ) -> None:
         self.suite = suite
         self.rubric = rubric
+        self.allow_live_cases = allow_live_cases
         self.update_regression_goldens = update_regression_goldens
         self.latest_summary: EvaluationSummary | None = None
         self.latest_markdown_path: Path | None = None
@@ -60,13 +64,19 @@ class EvaluationRunner:
         case_file: str | Path,
         rubric: Rubric | None = None,
         *,
+        allow_live_cases: bool = False,
         update_regression_goldens: bool = False,
     ) -> EvaluationRunner:
         """Convenience constructor for one-case local runs."""
 
         case = BenchmarkCase.model_validate_json(Path(case_file).read_text(encoding="utf-8"))
         suite = BenchmarkSuite(suite_id=f"single_case::{case.case_id}", cases=[case])
-        return cls(suite=suite, rubric=rubric, update_regression_goldens=update_regression_goldens)
+        return cls(
+            suite=suite,
+            rubric=rubric,
+            allow_live_cases=allow_live_cases,
+            update_regression_goldens=update_regression_goldens,
+        )
 
     def run_suite(self) -> list[EvaluationResult]:
         """Execute all cases sequentially and persist a results summary."""
@@ -87,7 +97,12 @@ class EvaluationRunner:
         """
 
         started = time.perf_counter()
-        result = EvaluationResult(case_id=case.case_id, run_goal=case.input.goal)
+        result = EvaluationResult(
+            case_id=case.case_id,
+            run_goal=case.input.goal,
+            policy=case.input.policy,
+            observation=self._build_observation(case),
+        )
         failures: list[str] = []
         checks: dict[str, bool] = {}
 
@@ -95,10 +110,16 @@ class EvaluationRunner:
             case_dir = self._case_output_dir(case.case_id)
             if case.input.mode in {InputMode.live, InputMode.hybrid}:
                 result.status = EvaluationStatus.skipped
-                result.message = (
-                    f"skipped: input mode {case.input.mode.value!r} not implemented yet "
-                    "(use fixture or orchestration_mocked)."
-                )
+                if not self.allow_live_cases:
+                    result.message = (
+                        "policy skipped: live/hybrid validation requires explicit --allow-live "
+                        "opt-in and remains non-merge-blocking by default."
+                    )
+                else:
+                    result.message = (
+                        f"skipped: input mode {case.input.mode.value!r} not implemented yet "
+                        "(use fixture or orchestration_mocked)."
+                    )
                 result.checks = checks
                 result.metadata = {
                     "input_mode": case.input.mode.value,
@@ -266,6 +287,7 @@ class EvaluationRunner:
                 "tags": case.tags,
             }
         finally:
+            result.degradation_class = self._classify_degradation_class(case, result)
             result.elapsed_seconds = round(time.perf_counter() - started, 6)
             # Pandas/numpy may produce numpy.bool_ in checks; JSON serialization requires built-in bool.
             result.checks = {k: bool(v) for k, v in result.checks.items()}
@@ -604,7 +626,7 @@ class EvaluationRunner:
         results_file.write_text(json.dumps(results_payload, indent=2, sort_keys=True), encoding="utf-8")
         summary_file = output_dir / f"{self.suite.suite_id}_summary.json"
         summary_file.write_text(
-            json.dumps(summary_json_blob(summary), indent=2, sort_keys=True),
+            json.dumps(summary_json_blob(summary, results), indent=2, sort_keys=True),
             encoding="utf-8",
         )
         self.latest_markdown_path = None
@@ -630,6 +652,44 @@ class EvaluationRunner:
         if expected.maximum is not None and value > expected.maximum:
             return False
         return True
+
+    def _build_observation(self, case: BenchmarkCase) -> ValidationObservation | None:
+        if case.input.policy is None:
+            return None
+        return ValidationObservation(
+            freshness_window_seconds=case.input.policy.freshness_window_seconds,
+        )
+
+    def _classify_degradation_class(
+        self,
+        case: BenchmarkCase,
+        result: EvaluationResult,
+    ) -> ValidationDegradationClass:
+        if case.input.mode in {InputMode.live, InputMode.hybrid} and not self.allow_live_cases:
+            return ValidationDegradationClass.policy_skipped
+
+        upstream_error_code = str(result.metadata.get("upstream_error_code") or "")
+        if upstream_error_code in {
+            "sec_rate_limited",
+            "sec_access_denied",
+            "sec_unavailable",
+            "upstream_unavailable",
+        }:
+            return ValidationDegradationClass.upstream_sec_degraded
+
+        observation = result.observation
+        if (
+            observation is not None
+            and observation.source_age_seconds is not None
+            and observation.freshness_window_seconds is not None
+            and observation.source_age_seconds > observation.freshness_window_seconds
+        ):
+            return ValidationDegradationClass.stale_source
+
+        if result.status in {EvaluationStatus.failed, EvaluationStatus.error}:
+            return ValidationDegradationClass.product_regression
+
+        return ValidationDegradationClass.none
 
     @staticmethod
     def _derive_finding_categories(
