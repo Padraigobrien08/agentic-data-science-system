@@ -15,6 +15,8 @@ import type {
   LlmRunUsageSummary,
   ModelCallQueryOptions,
   ModelCallApiItem,
+  PromptRoutingPreviewRequest,
+  PromptRoutingPreviewResponse,
   RunPayloadQueryOptions,
   RunStepQueryOptions,
   RunStepDetail,
@@ -163,6 +165,12 @@ export async function getAuthCapabilities(): Promise<AuthCapabilitiesResponse> {
 
 export async function createRun(body: AnalysisRunCreateBody): Promise<AnalysisRunSummary> {
   return apiPost<AnalysisRunSummary>("/v1/runs", body);
+}
+
+export async function getPromptRoutingPreview(
+  body: PromptRoutingPreviewRequest,
+): Promise<PromptRoutingPreviewResponse> {
+  return apiPost<PromptRoutingPreviewResponse>("/v1/runs/route-preview", body);
 }
 
 export async function executeRun(

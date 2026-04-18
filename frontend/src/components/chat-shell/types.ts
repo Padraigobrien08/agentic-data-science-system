@@ -23,6 +23,8 @@ export type ChatAssistantMessage = {
   id: string;
   role: "assistant";
   content: string;
+  rewriteSuggestions?: string[];
+  routingReason?: string;
   runHref?: string;
   deepDiveHref?: string;
   runsHref?: string;

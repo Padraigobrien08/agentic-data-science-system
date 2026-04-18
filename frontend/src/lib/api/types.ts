@@ -337,6 +337,46 @@ export interface ExecuteRunOverrides {
   refresh?: boolean | null;
 }
 
+export type PromptRoutingSource = "deterministic";
+
+export type PromptRoutingIntent = "anomaly_analysis" | "peer_report" | "full_pipeline_run";
+
+export type PromptRoutingGoalCode =
+  | "anomaly_unusual_changes"
+  | "anomaly_for_companies"
+  | "peer_comparison"
+  | "full_pipeline"
+  | "trend_deterioration"
+  | "mixed_trend_and_anomaly"
+  | "resolve_only"
+  | "fetch_raw"
+  | "planning_failed";
+
+export type PromptRoutingPlanTemplateId =
+  | "anomaly_unusual_changes"
+  | "trend_deterioration"
+  | "peer_comparison"
+  | "mixed_trend_and_anomaly";
+
+export interface PromptRoutingPreviewRequest {
+  project_id: string;
+  analysis_goal: string;
+  tickers: string[];
+  refresh?: boolean;
+}
+
+export interface PromptRoutingPreviewResponse {
+  supported: boolean;
+  routing_source: PromptRoutingSource;
+  effective_tickers: string[];
+  out_of_scope_tickers: string[];
+  rewrite_suggestions: string[];
+  reason: string | null;
+  intent: PromptRoutingIntent | null;
+  goal_code: PromptRoutingGoalCode | null;
+  plan_template_id: PromptRoutingPlanTemplateId | null;
+}
+
 export interface ExecuteRunResponse {
   analysis_run_id: string;
   orchestration_run_id: string;

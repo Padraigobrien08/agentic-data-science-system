@@ -4,20 +4,22 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { ApiError } from "@/lib/api/errors";
-import { createRun, executeRun } from "@/lib/api/runs";
+import { createRun, executeRun, getPromptRoutingPreview } from "@/lib/api/runs";
 
 type DeliveryMode = "sync_only" | "background_ready" | "background_degraded";
 
 type ChatReply = {
   requestId: string;
   content: string;
-  runId: string;
-  runHref: string;
-  deepDiveHref: string;
-  runsHref: string;
-  deliveryMode: DeliveryMode;
+  runId?: string;
+  runHref?: string;
+  deepDiveHref?: string;
+  runsHref?: string;
+  deliveryMode?: DeliveryMode;
   deliveryDetail?: string;
   reroutedFromBackground?: boolean;
+  rewriteSuggestions?: string[];
+  routingReason?: string;
 };
 
 function parseTickers(raw: string): string[] {
@@ -52,12 +54,31 @@ export async function createAnalysisRunFromChat(
   }
 
   let run;
+  let effectiveTickers = tickers;
   try {
+    const preview = await getPromptRoutingPreview({
+      project_id: projectId,
+      analysis_goal: goal,
+      tickers,
+      refresh,
+    });
+    if (!preview.supported) {
+      return {
+        reply: {
+          requestId,
+          content: "I couldn't route that request yet.",
+          rewriteSuggestions: preview.rewrite_suggestions,
+          routingReason: preview.reason ?? undefined,
+        },
+      };
+    }
+
+    effectiveTickers = preview.effective_tickers;
     run = await createRun({
       project_id: projectId,
       orchestration_goal_text: goal,
       input_payload_json: {
-        tickers,
+        tickers: effectiveTickers,
         analysis_goal: goal,
         refresh,
       },
@@ -89,8 +110,8 @@ export async function createAnalysisRunFromChat(
     : "Workspace chat is executing synchronously right now.";
   const content =
     execution.db_status === "error"
-      ? `Run finished with an error for ${tickers.join(", ")}. Open run answer or deep dive for details.`
-      : `Analysis completed for ${tickers.join(", ")}. Open run answer or deep dive when ready.`;
+      ? `Run finished with an error for ${effectiveTickers.join(", ")}. Open run answer or deep dive for details.`
+      : `Analysis completed for ${effectiveTickers.join(", ")}. Open run answer or deep dive when ready.`;
   return {
     reply: {
       requestId,
