@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: live-validation-and-scale
-status: Ready to discuss Phase 08
-stopped_at: Phase 07 completed
-last_updated: "2026-04-18T13:09:17Z"
+status: phase 8 context captured; ready to plan
+stopped_at: Captured context for Phase 8 Summary-First Large Trace Views
+last_updated: "2026-04-18T13:41:21Z"
 progress:
   total_phases: 10
   completed_phases: 7
@@ -19,12 +19,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 08 — summary-first-large-trace-views
+**Current focus:** Phase 08 planning for summary-first large trace views in v1.1
 
 ## Current Position
 
 Phase: 08 (summary-first-large-trace-views) — READY
-Plan: discuss phase
+Plan: context gathered; ready to plan
 
 ## Performance Metrics
 
@@ -74,6 +74,10 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 7-remote-artifact-storage-contract]: Postgres and blob storage must be treated as separate systems with explicit reconciliation or repairable divergence states.
 - [Phase 7-remote-artifact-storage-contract]: Remote artifact delivery stays on the same `/v1/artifacts/*` route surface for local and S3-backed blobs; no bucket-direct or signed-URL path was added in this phase.
 - [Phase 7-remote-artifact-storage-contract]: Remote delete or retention failures are surfaced as `meta_json.storage_reconciliation` repair debt instead of hidden drift or false tombstones.
+- [Phase 8-summary-first-large-trace-views]: Large traces should open on a compact overview with separate summary panels rather than the current full deep-dive stack.
+- [Phase 8-summary-first-large-trace-views]: Steps, artifacts, and model calls stay as separate navigable collections instead of one mixed event stream.
+- [Phase 8-summary-first-large-trace-views]: Privileged raw payloads should be fetched on demand per item, not page-wide through initial `include_payloads=true` loads.
+- [Phase 8-summary-first-large-trace-views]: The step timeline remains the organizing spine, and artifacts/model calls should link back to it via phase/role/status cues.
 
 ### Pending Todos
 
@@ -82,11 +86,11 @@ None yet.
 ### Blockers/Concerns
 
 - Decide whether the v1.1 evaluation control plane stays API or CLI-first or includes a dedicated operator UI beyond current surfaces.
-- Decide how Phase 8 should expose summary-first trace slices at the API boundary before widening the frontend.
+- Phase 8 planning must move the trace first-load boundary to typed summaries without losing drill-down auditability for privileged users.
 - Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T13:09:17Z
-Stopped at: Phase 07 completed
-Resume file: .planning/ROADMAP.md
+Last session: 2026-04-18T13:41:21Z
+Stopped at: Captured context for Phase 8 Summary-First Large Trace Views
+Resume file: .planning/phases/08-summary-first-large-trace-views/08-CONTEXT.md
