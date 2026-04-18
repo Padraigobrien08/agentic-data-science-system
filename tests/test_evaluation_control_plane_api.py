@@ -7,6 +7,7 @@ from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
+from sqlalchemy import select
 from sqlalchemy import create_engine
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import StaticPool
@@ -17,6 +18,7 @@ import backend.models  # noqa: F401
 from backend.db.base import Base
 from backend.db.session import get_db
 from backend.main import create_app
+from backend.models.evaluation_case_result import EvaluationCaseResult
 from tests.api_auth import register_project_and_headers
 
 
@@ -135,3 +137,135 @@ def test_evaluation_run_detail_is_owner_scoped(
     assert listed.status_code == 404
 
     assert UUID(evaluation_run_id)
+
+
+def test_start_fixture_evaluation_run_persists_case_rows(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, factory = api_client
+
+    created = client.post(
+        "/v1/evaluations",
+        headers=headers,
+        json={"project_id": project_id, "suite_id": "suite_fixtures_v1"},
+    )
+    assert created.status_code == 201, created.text
+    evaluation_run_id = created.json()["id"]
+
+    started = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={},
+    )
+    assert started.status_code == 200, started.text
+    started_body = started.json()
+    assert started_body["status"] == "passed"
+    assert started_body["case_count"] == 5
+
+    with factory() as db:
+        case_rows = list(
+            db.scalars(
+                select(EvaluationCaseResult).where(
+                    EvaluationCaseResult.evaluation_run_id == UUID(evaluation_run_id)
+                )
+            ).all()
+        )
+    assert len(case_rows) == 5
+
+
+def test_start_live_evaluation_run_without_allow_live_persists_policy_skipped_case(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, factory = api_client
+
+    created = client.post(
+        "/v1/evaluations",
+        headers=headers,
+        json={"project_id": project_id, "suite_id": "suite_smoke"},
+    )
+    assert created.status_code == 201, created.text
+    evaluation_run_id = created.json()["id"]
+
+    started = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={},
+    )
+    assert started.status_code == 200, started.text
+    started_body = started.json()
+    assert started_body["status"] == "skipped"
+    assert started_body["case_count"] == 1
+
+    with factory() as db:
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == UUID(evaluation_run_id)
+            )
+        )
+    assert case_row is not None
+    assert case_row.degradation_class == "policy_skipped"
+    assert case_row.policy_json is not None
+
+
+def test_start_hybrid_evaluation_run_with_allow_live_persists_case_and_policy_metadata(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, factory = api_client
+
+    created = client.post(
+        "/v1/evaluations",
+        headers=headers,
+        json={"project_id": project_id, "suite_id": "suite_hybrid_smoke_v1"},
+    )
+    assert created.status_code == 201, created.text
+    evaluation_run_id = created.json()["id"]
+
+    started = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={"allow_live": True},
+    )
+    assert started.status_code == 200, started.text
+    started_body = started.json()
+    assert started_body["status"] == "skipped"
+    assert started_body["case_count"] == 1
+
+    with factory() as db:
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == UUID(evaluation_run_id)
+            )
+        )
+    assert case_row is not None
+    assert case_row.input_mode == "hybrid"
+    assert case_row.policy_json is not None
+    assert case_row.observation_json is not None
+    assert case_row.observation_json["freshness_window_seconds"] == 300
+
+
+def test_start_route_returns_409_for_non_pending_evaluation_run(
+    api_client: tuple[TestClient, str, dict[str, str], sessionmaker[Session]],
+) -> None:
+    client, project_id, headers, _factory = api_client
+
+    created = client.post(
+        "/v1/evaluations",
+        headers=headers,
+        json={"project_id": project_id, "suite_id": "suite_smoke"},
+    )
+    assert created.status_code == 201, created.text
+    evaluation_run_id = created.json()["id"]
+
+    first = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={},
+    )
+    assert first.status_code == 200, first.text
+
+    second = client.post(
+        f"/v1/evaluations/{evaluation_run_id}/start",
+        headers=headers,
+        json={},
+    )
+    assert second.status_code == 409

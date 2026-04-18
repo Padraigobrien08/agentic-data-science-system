@@ -4,18 +4,19 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, Body, HTTPException, Query
 from sqlalchemy import func, select
 
 from backend.api.access_checks import require_evaluation_run_owned, require_project_owned
 from backend.api.auth_deps import CurrentUserDep
-from backend.api.deps import DbSession
+from backend.api.deps import DbSession, EvaluationControlPlaneServiceDep
 from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.evaluation_run import EvaluationRun
 from backend.models.enums import EvaluationRunStatus
 from backend.schemas.evaluation_run import (
     EvaluationRunCreate,
     EvaluationRunRead,
+    EvaluationRunStartRequest,
     SupportedEvaluationSuiteRead,
     evaluation_run_to_read,
 )
@@ -105,3 +106,27 @@ def get_evaluation_run(
 ) -> EvaluationRunRead:
     row = require_evaluation_run_owned(db, evaluation_run_id, user.id)
     return evaluation_run_to_read(row, case_count=_case_count(db, row.id))
+
+
+@router.post("/{evaluation_run_id}/start", response_model=EvaluationRunRead)
+def start_evaluation_run(
+    evaluation_run_id: UUID,
+    db: DbSession,
+    user: CurrentUserDep,
+    service: EvaluationControlPlaneServiceDep,
+    body: EvaluationRunStartRequest = Body(default_factory=EvaluationRunStartRequest),
+) -> EvaluationRunRead:
+    row = require_evaluation_run_owned(db, evaluation_run_id, user.id)
+    if row.status != EvaluationRunStatus.pending:
+        raise HTTPException(status_code=409, detail="Evaluation run is not pending.")
+
+    updated = service.start_evaluation_run(
+        evaluation_run_id,
+        allow_live=body.allow_live,
+    )
+    db.commit()
+    db.refresh(updated)
+    return evaluation_run_to_read(
+        updated,
+        case_count=service.count_case_results(updated.id),
+    )
