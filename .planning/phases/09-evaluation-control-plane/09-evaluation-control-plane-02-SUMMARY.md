@@ -30,7 +30,7 @@ key-decisions:
 patterns-established:
   - "Persisted evaluation workflows should treat `EvaluationRun` as the aggregate state and `EvaluationCaseResult` as the case review surface."
   - "Live and hybrid opt-in stays explicit at the API boundary through `allow_live`, even when the runner still returns skipped outcomes."
-requirements-completed: []
+requirements-completed: [VALID-01, EVAL-01]
 duration: 18min
 completed: 2026-04-18
 ---

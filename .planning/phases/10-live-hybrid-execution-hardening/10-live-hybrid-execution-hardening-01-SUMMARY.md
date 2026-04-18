@@ -28,7 +28,7 @@ key-decisions:
 patterns-established:
   - "Evaluation-side resources should point into canonical run infrastructure, not shadow it."
   - "Queue-backed evaluation execution starts with explicit linkage metadata on the child run."
-requirements-completed: []
+requirements-completed: [EVAL-02]
 duration: 12min
 completed: 2026-04-18
 ---

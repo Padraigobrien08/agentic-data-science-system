@@ -30,7 +30,7 @@ key-decisions:
 patterns-established:
   - "Operator-facing evaluation review should always flow through aggregate-plus-child resources."
   - "Supported evaluation launches should use stable suite IDs even when a lower-level raw manifest path remains available for dev work."
-requirements-completed: []
+requirements-completed: [VALID-01, EVAL-01]
 duration: 14min
 completed: 2026-04-18
 ---

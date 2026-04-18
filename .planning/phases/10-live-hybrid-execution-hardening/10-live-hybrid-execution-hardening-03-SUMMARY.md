@@ -30,7 +30,7 @@ key-decisions:
 patterns-established:
   - "Health and metrics surfaces should share one DB-backed helper for new dependency slices."
   - "Operator docs should point degraded health signals back into canonical run APIs instead of bespoke debug paths."
-requirements-completed: []
+requirements-completed: [EVAL-02, OPS-01]
 duration: 15min
 completed: 2026-04-18
 ---

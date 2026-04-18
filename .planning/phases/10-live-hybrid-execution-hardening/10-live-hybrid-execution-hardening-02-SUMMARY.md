@@ -29,7 +29,7 @@ key-decisions:
 patterns-established:
   - "Evaluation reads refresh child-run-backed case truth before serializing operator-facing responses."
   - "The shared validation degradation taxonomy is reused from the runner through a pure helper rather than duplicated in the control plane."
-requirements-completed: []
+requirements-completed: [EVAL-02]
 duration: 18min
 completed: 2026-04-18
 ---

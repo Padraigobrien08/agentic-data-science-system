@@ -35,7 +35,7 @@ key-decisions:
 patterns-established:
   - "Evaluation workflows should mirror the existing product model: persisted aggregate row first, execution logic later."
   - "Supported suite identity is a catalog concern, not a free-form path passed through API requests."
-requirements-completed: []
+requirements-completed: [EVAL-01]
 duration: 14min
 completed: 2026-04-18
 ---
