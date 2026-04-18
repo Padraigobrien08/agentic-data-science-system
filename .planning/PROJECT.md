@@ -34,11 +34,20 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - Mobile or native clients — the existing web, CLI, and MCP surfaces are sufficient until the platform core is production-safe
 - Multi-region or managed-cloud deployment work — the current target remains the documented self-hosted stack until isolation and ops basics are solid
 
+## Current Milestone: v1.1 Live Validation and Scale
+
+**Goal:** Extend the hardened platform into a more production-credible system by supporting intentional live validation workflows and removing the biggest remaining storage and large-payload scale constraints.
+
+**Target features:**
+- Supported live SEC and hybrid evaluation workflows for freshness and integration confidence
+- Remote object-store support alongside the current local shared-filesystem artifact contract
+- Scalable trace and transparency views for very large run payloads
+
 ## Context
 
 This repo is a layered brownfield monorepo with a deterministic EDGAR analysis core in `src/`, an orchestration and MCP layer in `edgar_project/`, a persistence and API shell in `backend/`, and a Next.js frontend in `frontend/`. The existing system already proves value by producing SEC-based analysis artifacts, exposing traceable runs, and supporting authenticated project/run workflows, but the codebase map showed that several core platform assumptions still depended on shared filesystem paths, cwd mutation, and large multi-responsibility modules before the v1.0 hardening effort.
 
-The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The next milestone should focus on extending validation coverage into live integrations and lifting the remaining storage and large-payload scaling constraints.
+The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The current milestone now focuses on extending validation coverage into live integrations and lifting the remaining storage and large-payload scaling constraints without undoing the trust boundaries that v1.0 established.
 
 ## Constraints
 
@@ -77,4 +86,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-17 after v1.0 milestone completion*
+*Last updated: 2026-04-18 after starting milestone v1.1 Live Validation and Scale*
