@@ -60,24 +60,24 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| VALID-01 | — | Pending |
-| VALID-02 | — | Pending |
-| VALID-03 | — | Pending |
-| STOR-01 | — | Pending |
-| STOR-02 | — | Pending |
-| TRACE-01 | — | Pending |
-| TRACE-02 | — | Pending |
-| TRACE-03 | — | Pending |
-| EVAL-01 | — | Pending |
-| EVAL-02 | — | Pending |
-| OPS-01 | — | Pending |
-| OPS-02 | — | Pending |
+| VALID-01 | Phase 9 | Pending |
+| VALID-02 | Phase 6 | Pending |
+| VALID-03 | Phase 6 | Pending |
+| STOR-01 | Phase 7 | Pending |
+| STOR-02 | Phase 7 | Pending |
+| TRACE-01 | Phase 8 | Pending |
+| TRACE-02 | Phase 8 | Pending |
+| TRACE-03 | Phase 8 | Pending |
+| EVAL-01 | Phase 9 | Pending |
+| EVAL-02 | Phase 10 | Pending |
+| OPS-01 | Phase 10 | Pending |
+| OPS-02 | Phase 7 | Pending |
 
 **Coverage:**
 - v1 requirements: 12 total
-- Mapped to phases: 0
-- Unmapped: 12 ⚠️
+- Mapped to phases: 12
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after initial milestone definition*
+*Last updated: 2026-04-18 after roadmap creation*

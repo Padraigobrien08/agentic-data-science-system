@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.1
 milestone_name: Live Validation and Scale
-status: defining requirements for v1.1
-stopped_at: Started $gsd-new-milestone for v1.1 Live Validation and Scale
-last_updated: "2026-04-18T08:44:56Z"
+status: roadmap created; phase 6 ready to plan
+stopped_at: Created roadmap for phases 6-10 and updated requirement traceability
+last_updated: "2026-04-18T09:17:21Z"
 progress:
-  total_phases: 0
-  completed_phases: 0
-  total_plans: 0
-  completed_plans: 0
+  total_phases: 10
+  completed_phases: 5
+  total_plans: 17
+  completed_plans: 17
 ---
 
 # Project State
@@ -19,19 +19,19 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Defining milestone v1.1 requirements for live validation workflows and post-hardening scale constraints
+**Current focus:** Phase 6 planning for validation boundaries and policy in v1.1
 
 ## Current Position
 
-Phase: Not started (defining requirements)
+Phase: 6 of 10 (Validation Boundaries and Policy)
 Plan: —
-Status: Defining requirements
-Last activity: 2026-04-18 — Milestone v1.1 Live Validation and Scale started
+Status: Ready to plan
+Last activity: 2026-04-18 — Created the v1.1 roadmap and mapped all 12 milestone requirements to Phases 6-10
+Progress: [#####-----] 50%
 
 ## Performance Metrics
 
 **Velocity:**
-
 - Total plans completed: 17
 - Average duration: 11 min
 - Total execution time: 2.9 hours
@@ -47,93 +47,20 @@ Last activity: 2026-04-18 — Milestone v1.1 Live Validation and Scale started
 | 05-storage-and-ops | 4 | 27min | 7min |
 
 **Recent Trend:**
-
 - Last 5 plans: 04-ci-coverage-03 (1min), 05-storage-and-ops-01 (4min), 05-storage-and-ops-02 (8min), 05-storage-and-ops-03 (5min), 05-storage-and-ops-04 (10min)
-- Trend: Lower variance with focused backend hardening work
-
-| Phase 01-run-isolation P01 | 14min | 3 tasks | 12 files |
-| Phase 01-run-isolation P02 | 20min | 2 tasks | 15 files |
-| Phase 01-run-isolation P03 | 3min | 2 tasks | 10 files |
-| Phase 01-run-isolation P04 | 1min | 2 tasks | 7 files |
-| Phase 02 P01 | 17min | 2 tasks | 12 files |
-| Phase 02 P02 | 10min | 2 tasks | 12 files |
-| Phase 02 P03 | 17min | 2 tasks | 5 files |
-| Phase 03-secure-defaults P01 | 6min | 2 tasks | 11 files |
-| Phase 03-secure-defaults P02 | 7min | 2 tasks | 14 files |
-| Phase 03-secure-defaults P03 | 9min | 2 tasks | 9 files |
-| Phase 04-ci-coverage P01 | 28min | 2 tasks | 3 files |
-| Phase 04-ci-coverage P03 | 1min | 2 tasks | 2 files |
-| Phase 04-ci-coverage P02 | 13min | 2 tasks | 11 files |
-| Phase 05-storage-and-ops P01 | 4min | 2 tasks | 5 files |
-| Phase 05-storage-and-ops P02 | 8min | 2 tasks | 4 files |
-| Phase 05-storage-and-ops P03 | 5min | 2 tasks | 10 files |
-| Phase 05-storage-and-ops P04 | 10min | 2 tasks | 10 files |
+- Trend: Stable; v1.0 closed with shorter, focused hardening plans
 
 ## Accumulated Context
 
 ### Decisions
 
-Decisions are logged in PROJECT.md Key Decisions table.
-Recent decisions affecting current work:
+Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecting current work:
 
-- Initialization: Treat the repo as a brownfield hardening effort, not a greenfield rebuild
-- Initialization: Prioritize run isolation and trust boundaries before feature expansion
-- Initialization: Keep planning docs in git so architecture and operations decisions remain auditable
-- [Phase 01-run-isolation]: Model run isolation with a frozen RunWorkspace contract that keeps manual_validation_csv as an explicit shared input.
-- [Phase 01-run-isolation]: Expose run_workspace as a serialized orchestration context payload before runtime adoption changes land.
-- [Phase 01-run-isolation]: Keep remaining shared-path report behavior behind an explicit MCP legacy flag instead of a hidden zero-arg fallback.
-- [Phase 01-run-isolation]: Normal Phase 1 execution now resolves writers, reports, and trustworthiness lookups from explicit workspace paths instead of repo-global defaults.
-- [Phase 01-run-isolation]: The orchestration executor injects upstream artifact paths and run_workspace payloads into later MCP steps when the planner leaves path placeholders empty.
-- [Phase 01-run-isolation]: Persisted backend runs now store one `analysis_run_id`-anchored workspace payload across execution context, run metadata, and ingested artifact provenance.
-- [Phase 01-run-isolation]: CLI, `main.py`, and deployment docs now treat `data/runs/<run_scoped_id>` or `/var/lib/edgar/run_workspaces` as the normal execution root and avoid cwd mutation.
-- [Phase 01-run-isolation]: Overlap safety is now locked by a real dual-workspace artifact-write regression instead of a skipped seed.
-- [Phase 01-run-isolation]: Shared artifact footer/default-path expectations remain covered only through explicit legacy opt-in tests; normal regressions use run-scoped paths.
-- [Phase 02-worker-resilience]: Active jobs should renew their lease with a heartbeat instead of relying on static long leases.
-- [Phase 02-worker-resilience]: Lease expiry should automatically requeue the same persisted run up to attempt limits rather than creating a new run identity.
-- [Phase 02-worker-resilience]: Retry attempts should remain attached to the same run but stay explicitly visible in job/status history.
-- [Phase 02-worker-resilience]: Cancellation during active execution is best-effort at safe checkpoints and cancelled runs never auto-retry.
-- [Phase 02-worker-resilience]: Worker ownership is now fenced by per-claim `claim_token` compare-and-set checks instead of relying only on row-lock timing.
-- [Phase 02-worker-resilience]: Long-running worker attempts now renew leases in the background and check ownership before orchestration dispatch and persistence boundaries.
-- [Phase 02-worker-resilience]: `WorkerLeaseLostError` now rolls back in-flight execution state instead of persisting a stale run error after ownership is gone.
-- [Phase 02-worker-resilience]: Execution job history is now one durable row per attempt, starting at attempt `1`, instead of a single mutable retry row.
-- [Phase 02-worker-resilience]: Transient retry and stale-running reclaim now preserve the failed attempt row and create the next pending row only when attempts remain.
-- [Phase 02-worker-resilience]: `/v1/runs/{run_id}/status` keeps `latest_execution_job` for compatibility and adds ordered `execution_job_history` for operator truthfulness.
-- [Phase 02-worker-resilience]: Cancelled runs now surface cancelled execution history and never auto-create a replacement pending attempt.
-- [Phase 02-worker-resilience]: Postgres claim/reclaim locking is now verified with isolated temporary databases instead of relying on SQLite-only confidence.
-- [Phase 02-worker-resilience]: `/v1/worker/health` and `/metrics` are now pinned to the same claimability and stale-lease truth conditions by regression tests.
-- [Phase 02-worker-resilience]: Attempt history is now regression-covered across transient retry, stale-running reclaim, manual retry, and lease-loss finalize reporting.
-- [Phase 03-secure-defaults]: Built-in JWT secrets must fail startup unless an explicit insecure-dev override is enabled.
-- [Phase 03-secure-defaults]: Registration is planned to be closed by default, with first-admin onboarding moved to an explicit bootstrap route.
-- [Phase 03-secure-defaults]: `/metrics` and `/v1/worker/health` are planned to require a dedicated ops token, while raw payload/meta expansions are planned to require privileged access and sanitized artifact provenance.
-- [Phase 03-secure-defaults]: Reject the built-in JWT secret by exact value unless EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT=true is set explicitly.
-- [Phase 03-secure-defaults]: Close self-service registration by default and require a dedicated X-EDGAR-Bootstrap-Token flow for the first admin.
-- [Phase 03-secure-defaults]: Persist is_admin on users now so later Phase 3 plans can gate privileged payload and ops access without redesigning auth.
-- [Phase 03-secure-defaults]: Keep owner-scoped run and artifact routes summary-first, but require admin privilege before honoring raw payload or meta expansion flags.
-- [Phase 03-secure-defaults]: Require the documented compose stack to source JWT, bootstrap, and ops secrets from .env instead of shipping insecure fallbacks.
-- [Phase 03-secure-defaults]: Keep the register page available, but make its copy and error handling point users to the operator-controlled bootstrap path when registration is closed.
-- [Phase 04-ci-coverage]: Add a PR-required full-stack gate for the documented Postgres + API + worker + web stack alongside the current faster CI jobs rather than replacing them.
-- [Phase 04-ci-coverage]: CI should validate the secure-default bootstrap-admin and ops-token flows instead of weakening auth for tests.
-- [Phase 04-ci-coverage]: Authenticated frontend run-answer, trace, and artifact-delivery paths should be covered by a narrow browser-level flow.
-- [Phase 04-ci-coverage]: Collision, lease, and Postgres queue regressions should be promoted into PR-required targeted test slices for faster failure isolation.
-- [Phase 04-ci-coverage]: The CI plan splits into a secure-default full-stack Compose gate, a seeded Playwright browser path, and a separate Postgres regression workflow instead of one monolithic integration job.
-- [Phase 04-ci-coverage]: The full-stack smoke flow must use fixed admin credentials so bootstrap reruns remain login-capable after `409 Bootstrap already completed`.
-- [Phase 04-ci-coverage]: Required merge gating needs an explicit GitHub branch-protection/ruleset checkpoint; PR-triggered workflows alone are not enough.
-- [Phase 05-storage-and-ops]: Health and metrics should expose explicit degraded/error state when dependency-backed queue reads fail instead of silently zero-filling.
-- [Phase 05-storage-and-ops]: Artifact ingest should use streamed copy/hash behavior while preserving the current local object-store contract.
-- [Phase 05-storage-and-ops]: Retention policy should bound run history and raw model payload history first while preserving a minimal auditable record.
-- [Phase 05-storage-and-ops]: Retention should run as an explicit maintenance workflow/job with dry-run and reporting, not implicit request-path deletion.
-- [Phase 05-storage-and-ops]: Shared worker-health JSON and Prometheus refreshes now reuse one queue observability helper so degraded-state truth cannot drift between ops surfaces.
-- [Phase 05-storage-and-ops]: Unknown worker queue state is now explicit: nullable JSON counts and booleans plus NaN Prometheus gauges replace synthetic zeroes on DB-backed observability failure.
-- [Phase 05-storage-and-ops]: Worker queue degradation remains additive: `/metrics` route shape stays unchanged while `/v1/worker/health` adds database and queue_state_known fields for operator truthfulness.
-- [Phase 05-storage-and-ops]: Extended the existing storage protocol with put_fileobj so streamed ingest stays inside the current object-store seam.
-- [Phase 05-storage-and-ops]: Local filesystem artifact writes now stage through same-directory temp files and os.replace so failed writes do not publish partial blobs.
-- [Phase 05-storage-and-ops]: ArtifactService now shares one traced store-write and row-persistence path for byte and streamed pipeline ingest while preserving source_filename and source_workspace_relative_path metadata.
-- [Phase 05-storage-and-ops]: Retention defaults stay disabled until operators set explicit day windows, with one shared batch-size cap for each maintenance tier.
-- [Phase 05-storage-and-ops]: Run and model retention compact or redact payload-heavy fields in place and stamp audit-visible timestamps instead of deleting rows.
-- [Phase 05-storage-and-ops]: This plan only redacts analysis_run_id-backed model history; artifact-blob deletion remains deferred to 05-04.
-- [Phase 05-storage-and-ops]: Artifact blob pruning now stamps artifacts.blob_deleted_at and preserves the row so expired content is auditable instead of looking corrupted.
-- [Phase 05-storage-and-ops]: Artifact content and preview routes treat tombstoned blobs as 410 Artifact content expired by retention policy before touching storage backends.
-- [Phase 05-storage-and-ops]: The retention runbook stays explicit: operators configure EDGAR_BACKEND_RETENTION_* env vars and invoke dry-run or apply maintenance directly.
+- [Phase 5]: Artifact delivery already preserves app-owned authorization and tombstone semantics, so v1.1 storage work must stay behind the existing artifact contract.
+- [Milestone v1.1]: Continue phase numbering from Phase 6 to keep one continuous roadmap across shipped and planned milestones.
+- [Milestone v1.1]: Keep v1.1 as five phases: validation boundaries, remote storage contract, summary-first trace views, evaluation control plane, and live-hybrid execution hardening.
+- [Milestone v1.1]: Treat the supported evaluation workflow as a separate control plane from real live or hybrid execution so SEC traffic lands only after storage and trace seams are safe.
+- [Milestone v1.1]: Make large-trace work API-first and summary-first rather than trying to solve scale only in the frontend.
 
 ### Pending Todos
 
@@ -141,11 +68,12 @@ None yet.
 
 ### Blockers/Concerns
 
-- v1.0 is archived and shipped; the only noted follow-up from the completed milestone is a non-blocking `runpy` RuntimeWarning from `python -m backend.maintenance.retention` caused by `backend/maintenance/__init__.py` eagerly importing the module
-- The separate `.gitignore` and `.planning/config.json` edits remain outside the planning commits and should stay untouched unless intentionally incorporated
+- Confirm the first S3-compatible target semantics before Phase 7 planning: AWS S3 vs R2 vs MinIO-style behavior affects checksum, delete, and presign assumptions.
+- Decide whether the v1.1 evaluation control plane stays API or CLI-first or includes a dedicated operator UI beyond current surfaces.
+- Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` RuntimeWarning because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-17T21:45:13Z
-Stopped at: Completed milestone archival and retrospective for v1.0
-Resume file: .planning/PROJECT.md
+Last session: 2026-04-18T09:17:21Z
+Stopped at: Created the v1.1 roadmap; next step is `/gsd:plan-phase 6`
+Resume file: .planning/ROADMAP.md
