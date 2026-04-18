@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to discuss Phase 12
-stopped_at: v1.2 initialized and ready to discuss Phase 12
-last_updated: "2026-04-18T20:20:00Z"
+status: Ready to plan Phase 12
+stopped_at: Phase 12 context captured; ready to plan
+last_updated: "2026-04-18T21:05:00Z"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Start Phase 12 of `v1.2 Chat-First Analysis Experience`, beginning with runtime reliability for chat delivery.
+**Current focus:** Plan Phase 12 of `v1.2 Chat-First Analysis Experience`, using the captured runtime and onboarding decisions from live product testing.
 
 ## Current Position
 
 Phase: 12
 Plan: —
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to discuss Phase 12
-Last activity: 2026-04-18 — Milestone `v1.2` initialized with phases 12-16
+Status: Ready to plan Phase 12
+Last activity: 2026-04-18 — Captured Phase 12 runtime-reliability context and discussion choices
 
 ## Performance Metrics
 
@@ -80,6 +80,9 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 10-live-hybrid-execution-hardening]: Each live or hybrid evaluation case should link directly to child `AnalysisRun` records, with latest-run pointer plus bounded prior history.
 - [Phase 10-live-hybrid-execution-hardening]: Evaluation case verdicts should be derived from linked `AnalysisRun` terminal status plus existing degradation taxonomy rather than a parallel lifecycle.
 - [Phase 10-live-hybrid-execution-hardening]: Existing `/health`, `/v1/worker/health`, and `/metrics` surfaces should expose evaluation-specific SEC or storage degradation explicitly.
+- [Phase 12-runtime-reliability-for-chat-delivery]: Chat should force synchronous execution for now; background queueing should not remain a co-equal default while the worker path is unreliable.
+- [Phase 12-runtime-reliability-for-chat-delivery]: If background delivery is unavailable, chat may automatically fall back to synchronous execution, but that fallback must still be visible in workspace and per-message status.
+- [Phase 12-runtime-reliability-for-chat-delivery]: Phase 12 may pull in auth/onboarding fixes found during live testing if they materially block first-run chat delivery.
 
 ### Pending Todos
 
@@ -87,11 +90,13 @@ None.
 
 ### Blockers/Concerns
 
-- No open blockers are carried into the next milestone from `v1.1`.
-- Non-blocking: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
+- Worker background execution is currently blocked by a circular import around `backend.observability.metrics` and `backend.services.recorded_chat_completion_service`.
+- Chat currently exposes `Queue for worker` without worker-health awareness, which conflicts with the chosen truthful delivery posture.
+- First-run auth/onboarding in secure-default local runs is now explicitly in scope for Phase 12 if it blocks chat usage.
+- Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
-Last session: 2026-04-18T20:20:00Z
-Stopped at: v1.2 initialized and ready to discuss Phase 12
+Last session: 2026-04-18T21:05:00Z
+Stopped at: Phase 12 context captured; ready to plan
 Resume file: .planning/PROJECT.md
