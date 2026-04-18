@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from datetime import datetime
 from enum import Enum
 from typing import Any
 
@@ -27,6 +28,35 @@ class InputMode(str, Enum):
     orchestration_mocked = "orchestration_mocked"
 
 
+class ValidationDegradationClass(str, Enum):
+    """Why a validation case degraded, if it degraded at all."""
+
+    none = "none"
+    product_regression = "product_regression"
+    upstream_sec_degraded = "upstream_sec_degraded"
+    stale_source = "stale_source"
+    policy_skipped = "policy_skipped"
+
+
+class ValidationPolicy(BaseModel):
+    """Policy contract for live or hybrid evaluation cases."""
+
+    requires_explicit_live_opt_in: bool = False
+    fair_access_policy: str | None = None
+    allow_merge_blocking: bool = False
+    normal_user_visible: bool = False
+    freshness_window_seconds: int | None = Field(default=None, ge=0)
+
+
+class ValidationObservation(BaseModel):
+    """Observed freshness and source timing context for a case result."""
+
+    observed_at: datetime | None = None
+    source_observed_at: datetime | None = None
+    source_age_seconds: float | None = None
+    freshness_window_seconds: int | None = Field(default=None, ge=0)
+
+
 class ValueRange(BaseModel):
     """Inclusive range for count- or metric-style expectations."""
 
@@ -47,10 +77,11 @@ class BenchmarkInput(BaseModel):
     Supports fixture-based and live-pipeline scenarios.
     """
 
-    mode: InputMode = InputMode.live
+    mode: InputMode = InputMode.fixture
     tickers: list[str] = Field(default_factory=list, description="Input tickers for pipeline scenarios")
     goal: str = Field(default="", description="Human-readable goal for the run")
     refresh: bool = Field(default=False, description="Bypass cache where supported")
+    policy: ValidationPolicy | None = None
     peer_set_label: str | None = Field(
         default=None,
         description="Optional named peer-set scenario label",
@@ -68,6 +99,24 @@ class BenchmarkInput(BaseModel):
         description="Mock MCP scenario id when mode is orchestration_mocked (see orchestration_mocks.ORCHESTRATION_MOCK_SCENARIOS)",
     )
     notes: str = Field(default="")
+
+    @model_validator(mode="after")
+    def validate_live_policy(self) -> BenchmarkInput:
+        if self.mode not in {InputMode.live, InputMode.hybrid}:
+            return self
+        if self.policy is None:
+            raise ValueError("live and hybrid inputs require a policy block")
+        if not self.policy.requires_explicit_live_opt_in:
+            raise ValueError("live and hybrid policy must require explicit live opt-in")
+        if not (self.policy.fair_access_policy or "").strip():
+            raise ValueError("live and hybrid policy must declare fair_access_policy")
+        if self.policy.allow_merge_blocking:
+            raise ValueError("live and hybrid policy must remain non-merge-blocking")
+        if self.policy.normal_user_visible:
+            raise ValueError("live and hybrid policy must keep cases out of normal user-visible paths")
+        if self.policy.freshness_window_seconds is None:
+            raise ValueError("live and hybrid policy must declare freshness_window_seconds")
+        return self
 
 
 class ExpectedArtifactItem(BaseModel):
@@ -299,6 +348,7 @@ class EvaluationResult(BaseModel):
 
     case_id: str
     status: EvaluationStatus = EvaluationStatus.pending
+    degradation_class: ValidationDegradationClass = ValidationDegradationClass.none
     elapsed_seconds: float | None = None
     message: str = ""
     run_goal: str = Field(default="", description="Copied from benchmark input for traceability")
@@ -313,6 +363,8 @@ class EvaluationResult(BaseModel):
         description="Evaluator notes for qualitative expectations",
     )
     rubric_score: RubricScore | None = None
+    policy: ValidationPolicy | None = None
+    observation: ValidationObservation | None = None
     metadata: dict[str, Any] = Field(default_factory=dict)
 
 

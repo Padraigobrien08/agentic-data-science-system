@@ -10,7 +10,14 @@
         "mode": "live",
         "tickers": ["AAPL", "MSFT"],
         "goal": "Run anomaly analysis for a core peer set and produce baseline artifacts.",
-        "refresh": false
+        "refresh": false,
+        "policy": {
+          "requires_explicit_live_opt_in": true,
+          "fair_access_policy": "sec_fair_access_operator_invoked",
+          "allow_merge_blocking": false,
+          "normal_user_visible": false,
+          "freshness_window_seconds": 300
+        }
       },
       "max_runtime_seconds": 120.0,
       "expected_artifacts": {
@@ -43,7 +50,7 @@
       "qualitative_expectations": [
         "Output report remains readable and includes a findings section."
       ],
-      "notes": "Scaffold case: execution logic will be wired in runner TODOs."
+      "notes": "Policy scaffold for operator-invoked live validation; execution logic remains wired in runner TODOs and this suite is not the default regression path."
     }
   ]
 }
