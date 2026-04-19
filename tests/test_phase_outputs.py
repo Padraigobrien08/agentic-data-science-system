@@ -92,8 +92,13 @@ def test_critic_and_report_phase_outputs() -> None:
     r = ReportAgentLLMOutput(
         user_report_markdown="# Hi\n\n" + "x" * 600,
         key_takeaways=["a"],
+        narrative_thesis="Revenue growth is weakening, but the signal is still cautious rather than decisive.",
+        narrative_whats_happening="Recent quarterly summaries flag repeated revenue-growth deterioration.",
+        narrative_why_we_think_that="The summarized findings point to consecutive weak Q1 shifts in the loaded periods.",
+        narrative_what_weakens_claim="Peer validation is thin, so the trend should be treated cautiously.",
     )
     ro = build_report_phase_output(r, {"panel_csv": "/tmp/panel.csv"})
     assert ro["artifact_refs"][0]["role"] == "panel_csv"
     assert ro["artifact_refs"][0]["basename"] == "panel.csv"
     assert ro["markdown_char_count"] > 600
+    assert ro["narrative_answer"]["thesis"].startswith("Revenue growth is weakening")

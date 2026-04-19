@@ -140,6 +140,22 @@ class ReportAgentLLMOutput(BaseModel):
         default_factory=list,
         description="3–7 short bullets summarizing the headline conclusions.",
     )
+    narrative_thesis: str = Field(
+        ...,
+        description="Single lead thesis sentence for the chat-safe narrative preview.",
+    )
+    narrative_whats_happening: str = Field(
+        ...,
+        description="Short prose section describing the strongest observed pattern.",
+    )
+    narrative_why_we_think_that: str = Field(
+        ...,
+        description="Short prose section describing the supporting evidence for the thesis.",
+    )
+    narrative_what_weakens_claim: str = Field(
+        ...,
+        description="Short prose section describing the most important caveats or evidence limits.",
+    )
 
 
 class PlanningAgentLLMOutput(BaseModel):

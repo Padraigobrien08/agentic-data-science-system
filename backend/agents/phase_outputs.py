@@ -216,6 +216,12 @@ def build_report_phase_output(
     return {
         "contract_version": PHASE_OUTPUT_CONTRACT_VERSION,
         "key_takeaways": report.key_takeaways[:_MAX_TAKEAWAYS],
+        "narrative_answer": {
+            "thesis": _trunc(report.narrative_thesis, prose_max := _DEFAULT_PROSE_EXCERPT),
+            "whats_happening": _trunc(report.narrative_whats_happening, prose_max),
+            "why_we_think_that": _trunc(report.narrative_why_we_think_that, prose_max),
+            "what_weakens_claim": _trunc(report.narrative_what_weakens_claim, prose_max),
+        },
         "markdown_preview": _trunc(report.user_report_markdown, markdown_preview_len),
         "markdown_char_count": len(report.user_report_markdown or ""),
         "artifact_refs": refs,

@@ -56,6 +56,18 @@ def _parse_role_to_uuid_map(raw: Any) -> dict[str, UUID]:
     return out
 
 
+def _parse_string_list(raw: Any, *, limit: int | None = None) -> list[str]:
+    if not isinstance(raw, list):
+        return []
+    out: list[str] = []
+    for item in raw:
+        if isinstance(item, str) and item.strip():
+            out.append(item.strip())
+            if limit is not None and len(out) >= limit:
+                break
+    return out
+
+
 class RunTransparencySummary(BaseModel):
     """Cross-run audit fields extracted without requiring clients to parse ``meta_json``."""
 
@@ -81,6 +93,75 @@ class RunTransparencySummary(BaseModel):
         None,
         description="Per-phase token/latency/cost rollup when computed (see GET .../llm-usage).",
     )
+    report_key_takeaways_preview: list[str] = Field(
+        default_factory=list,
+        description="Safe report-preview takeaways from ``ai_agents.traceability.report.key_takeaways_preview``.",
+    )
+    critic_blocking_caveats: list[str] = Field(
+        default_factory=list,
+        description="Safe critic caveats from ``ai_agents.traceability.critic.blocking_caveats``.",
+    )
+    critic_overall_confidence: str | None = Field(
+        None,
+        description="Critic confidence label from ``ai_agents.traceability.critic.overall_confidence``.",
+    )
+    critic_phase_status: str | None = Field(
+        None,
+        description="Critic phase status from ``ai_agents.traceability.critic.phase_status``.",
+    )
+    report_phase_status: str | None = Field(
+        None,
+        description="Report phase status from ``ai_agents.traceability.report.phase_status``.",
+    )
+    narrative_answer: "NarrativeAnswerPreview | None" = Field(
+        None,
+        description="Safe narrative preview from ``ai_agents.traceability.report.narrative_answer``.",
+    )
+
+
+class NarrativeAnswerSectionPreview(BaseModel):
+    """One bounded prose block in the safe narrative preview."""
+
+    heading: str
+    body: str
+
+
+class NarrativeAnswerPreview(BaseModel):
+    """Chat-safe narrative answer contract derived from traceability."""
+
+    mode: str
+    thesis: str
+    sections: list[NarrativeAnswerSectionPreview] = Field(default_factory=list)
+    fallback_reason: str | None = None
+
+
+def _parse_narrative_answer(raw: Any) -> NarrativeAnswerPreview | None:
+    if not isinstance(raw, dict):
+        return None
+    thesis = raw.get("thesis")
+    if not isinstance(thesis, str) or not thesis.strip():
+        return None
+    mode = raw.get("mode")
+    if not isinstance(mode, str) or not mode.strip():
+        return None
+    sections: list[NarrativeAnswerSectionPreview] = []
+    for item in raw.get("sections") or []:
+        if not isinstance(item, dict):
+            continue
+        heading = item.get("heading")
+        body = item.get("body")
+        if not isinstance(heading, str) or not heading.strip():
+            continue
+        if not isinstance(body, str) or not body.strip():
+            continue
+        sections.append(NarrativeAnswerSectionPreview(heading=heading.strip(), body=body.strip()))
+    fallback_reason = raw.get("fallback_reason")
+    return NarrativeAnswerPreview(
+        mode=mode.strip(),
+        thesis=thesis.strip(),
+        sections=sections,
+        fallback_reason=fallback_reason.strip() if isinstance(fallback_reason, str) and fallback_reason.strip() else None,
+    )
 
 
 def build_run_transparency_summary(
@@ -94,6 +175,12 @@ def build_run_transparency_summary(
     prompt_versions: dict[str, str] | None = None
     evidence_ids: list[UUID] | None = None
     by_role: dict[str, UUID] | None = None
+    report_key_takeaways_preview: list[str] = []
+    critic_blocking_caveats: list[str] = []
+    critic_overall_confidence: str | None = None
+    critic_phase_status: str | None = None
+    report_phase_status: str | None = None
+    narrative_answer: NarrativeAnswerPreview | None = None
 
     if meta:
         ai = meta.get("ai_agents")
@@ -109,6 +196,25 @@ def build_run_transparency_summary(
                     evidence_ids = _parse_uuid_list(tr.get("evidence_artifact_ids"))
                 if "evidence_artifacts_by_role" in tr:
                     by_role = _parse_role_to_uuid_map(tr.get("evidence_artifacts_by_role"))
+                critic = tr.get("critic")
+                if isinstance(critic, dict):
+                    critic_blocking_caveats = _parse_string_list(
+                        critic.get("blocking_caveats"),
+                        limit=6,
+                    )
+                    oc = critic.get("overall_confidence")
+                    critic_overall_confidence = str(oc).strip() if isinstance(oc, str) and str(oc).strip() else None
+                    cps = critic.get("phase_status")
+                    critic_phase_status = str(cps).strip() if isinstance(cps, str) and str(cps).strip() else None
+                report = tr.get("report")
+                if isinstance(report, dict):
+                    report_key_takeaways_preview = _parse_string_list(
+                        report.get("key_takeaways_preview"),
+                        limit=8,
+                    )
+                    narrative_answer = _parse_narrative_answer(report.get("narrative_answer"))
+                    rps = report.get("phase_status")
+                    report_phase_status = str(rps).strip() if isinstance(rps, str) and str(rps).strip() else None
 
     if evidence_ids is None:
         evidence_ids = [a.id for a in artifacts]
@@ -121,6 +227,12 @@ def build_run_transparency_summary(
         prompt_versions=prompt_versions,
         model_call_count=model_call_count,
         llm_usage=llm_usage,
+        report_key_takeaways_preview=report_key_takeaways_preview,
+        critic_blocking_caveats=critic_blocking_caveats,
+        critic_overall_confidence=critic_overall_confidence,
+        critic_phase_status=critic_phase_status,
+        report_phase_status=report_phase_status,
+        narrative_answer=narrative_answer,
     )
 
 

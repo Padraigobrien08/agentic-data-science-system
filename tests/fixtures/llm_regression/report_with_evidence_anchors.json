@@ -3,5 +3,9 @@
   "key_takeaways": [
     "Peer-relative underperformance is supported by summarized metrics where cohorts are dense.",
     "Treat z-scores cautiously when baseline windows are short."
-  ]
+  ],
+  "narrative_thesis": "The summarized evidence supports a cautious peer-relative underperformance thesis, but only where the peer cohort is dense enough to trust the comparison.",
+  "narrative_whats_happening": "Cross-sectional margins and cash conversion summaries point to weaker relative performance in the loaded peer comparison, with the strongest signal appearing in the summarized findings and panel views.",
+  "narrative_why_we_think_that": "The report can anchor that thesis in concrete summarized roles, including findings_summary and panel-level metrics, rather than relying on generic process language.",
+  "narrative_what_weakens_claim": "The claim weakens where artifact-summary roles are missing or cohort density drops, so the result should be treated as directional rather than definitive."
 }

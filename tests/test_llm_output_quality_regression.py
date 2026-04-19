@@ -114,6 +114,10 @@ def test_regression_report_fixture_has_title_evidence_and_limitations() -> None:
     assert "findings" in lowered or "panel" in lowered
     assert len(r.key_takeaways) >= 2
     assert all(len(t.strip()) >= 20 for t in r.key_takeaways)
+    assert len(r.narrative_thesis.strip()) >= 20
+    assert len(r.narrative_whats_happening.strip()) >= 20
+    assert len(r.narrative_why_we_think_that.strip()) >= 20
+    assert len(r.narrative_what_weakens_claim.strip()) >= 20
 
 
 # --- 5. Context builders: budgets + truncation metadata ---

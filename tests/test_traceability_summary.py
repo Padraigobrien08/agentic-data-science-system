@@ -76,6 +76,10 @@ def test_build_runtime_traceability_bundle_shape() -> None:
         "result": {
             "user_report_markdown": "# Hi",
             "key_takeaways": ["One", "Two"],
+            "narrative_thesis": "A cautious deterioration signal is present in revenue growth.",
+            "narrative_whats_happening": "Multiple periods show weaker revenue-growth rows in the summarized evidence.",
+            "narrative_why_we_think_that": "The report ties the thesis to repeated period-level deterioration signals.",
+            "narrative_what_weakens_claim": "Peer support is limited, so the claim is directional rather than conclusive.",
         },
     }
     full, c_step, r_step = build_runtime_traceability_bundle(
@@ -96,6 +100,8 @@ def test_build_runtime_traceability_bundle_shape() -> None:
     assert full["planning"]["planning_transparency"]["present"] is True
     assert full["critic"]["plan_alignment_findings"] == []
     assert full["critic"]["plan_alignment_codes"] == []
+    assert full["report"]["narrative_answer"]["mode"] == "full"
+    assert full["report"]["narrative_answer"]["sections"][0]["heading"] == "What's happening"
     assert full["step_indices"]["critic"] == 1
     assert full["evidence_artifact_refs"][0]["role"] == "panel_csv"
     assert c_step["blocking_caveats"] == []

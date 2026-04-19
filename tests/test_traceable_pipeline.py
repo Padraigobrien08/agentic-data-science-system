@@ -111,7 +111,7 @@ def test_traceable_persists_mcp_skipped_and_llm_run_steps_without_llm(
     settings = Settings(
         agent_completion_model="stub",
         agent_critic_prompt_version="1.1.0",
-        agent_report_prompt_version="1.1.0",
+        agent_report_prompt_version="1.2.0",
     )
     traced = run_traceable_edgar_pipeline(
         session,
@@ -170,6 +170,10 @@ class _CriticReportStubProvider:
             body = {
                 "user_report_markdown": "# Analysis\n\nThis is the user-facing summary.",
                 "key_takeaways": ["Takeaway one"],
+                "narrative_thesis": "The evidence supports a cautious narrative takeaway.",
+                "narrative_whats_happening": "The summarized rows show a pattern worth surfacing to the user.",
+                "narrative_why_we_think_that": "The supporting metrics and findings summaries point in the same direction.",
+                "narrative_what_weakens_claim": "The conclusion still depends on limited summarized evidence.",
             }
         else:
             body = {
@@ -206,7 +210,7 @@ def test_traceable_critic_and_report_with_stub_llm(
     settings = Settings(
         agent_completion_model="stub",
         agent_critic_prompt_version="1.1.0",
-        agent_report_prompt_version="1.1.0",
+        agent_report_prompt_version="1.2.0",
     )
     traced = run_traceable_edgar_pipeline(
         session,
@@ -240,6 +244,7 @@ def test_traceable_critic_and_report_with_stub_llm(
     assert tr2["critic"]["ran"] is True
     assert tr2["report"]["ran"] is True
     assert tr2["report"]["key_takeaways_preview"]
+    assert tr2["report"]["narrative_answer"]["mode"] == "full"
 
     out_json = row.output_payload_json if isinstance(row.output_payload_json, dict) else {}
     ufr = out_json.get("user_facing_report") or {}
@@ -260,5 +265,5 @@ def test_traceable_critic_and_report_with_stub_llm(
     roles = {m.request_payload_json.get("agent", {}).get("role") for m in mcs}
     assert roles == {"critic", "report"}
     assert {m.prompt_id for m in mcs} == {"edgar.agent.critic", "edgar.agent.report"}
-    assert all(m.prompt_version == "1.1.0" for m in mcs)
+    assert {m.prompt_version for m in mcs} == {"1.1.0", "1.2.0"}
     assert all(m.provider == "stub" and m.model_name == "stub" for m in mcs)

@@ -26,6 +26,7 @@ _MAX_INTENT_SUMMARY = 280
 _MAX_CAVEAT_ITEMS = 12
 _MAX_TAKEAWAY_PREVIEW = 5
 _MAX_ARTIFACT_REFS = 24
+_MAX_NARRATIVE_SECTIONS = 3
 
 
 def _trunc(text: str | None, max_len: int) -> str:
@@ -70,6 +71,94 @@ def _blocking_caveats_from_critic_patch(patch: dict[str, Any]) -> tuple[list[str
     if conf == "low":
         issues = ["overall_confidence: low"] + issues
     return issues[:_MAX_CAVEAT_ITEMS], str(conf) if isinstance(conf, str) else None
+
+
+def _safe_text(value: Any, *, max_len: int = 360) -> str:
+    return _trunc(str(value), max_len) if isinstance(value, str) and value.strip() else ""
+
+
+def _build_narrative_sections(
+    *,
+    whats_happening: str,
+    why_we_think_that: str,
+    what_weakens_claim: str,
+) -> list[dict[str, str]]:
+    rows = [
+        ("What's happening", whats_happening),
+        ("Why we think that", why_we_think_that),
+        ("What weakens the claim", what_weakens_claim),
+    ]
+    sections: list[dict[str, str]] = []
+    for heading, body in rows:
+        clean = _safe_text(body)
+        if not clean:
+            continue
+        sections.append({"heading": heading, "body": clean})
+        if len(sections) >= _MAX_NARRATIVE_SECTIONS:
+            break
+    return sections
+
+
+def _fallback_thesis_from_report(
+    *,
+    report_res: dict[str, Any],
+    blocking_caveats: list[str],
+) -> str:
+    takeaways = [str(x).strip() for x in (report_res.get("key_takeaways") or []) if str(x).strip()]
+    if takeaways:
+        return _trunc(takeaways[0], 320)
+    if blocking_caveats:
+        return "The run completed, but the evidence is too limited to support a full narrative answer."
+    return "The run completed, but the report phase did not produce a usable narrative preview."
+
+
+def _build_report_narrative_preview(
+    *,
+    report_patch: dict[str, Any],
+    blocking_caveats: list[str],
+) -> dict[str, Any]:
+    phase_status = str(report_patch.get("phase_status") or "")
+    report_res = report_patch.get("result") if isinstance(report_patch.get("result"), dict) else {}
+    thesis = _safe_text(report_res.get("narrative_thesis"))
+    sections = _build_narrative_sections(
+        whats_happening=_safe_text(report_res.get("narrative_whats_happening")),
+        why_we_think_that=_safe_text(report_res.get("narrative_why_we_think_that")),
+        what_weakens_claim=_safe_text(report_res.get("narrative_what_weakens_claim")),
+    )
+    if phase_status == PHASE_SUCCESS and thesis and sections:
+        return {
+            "mode": "full",
+            "thesis": thesis,
+            "sections": sections,
+            "fallback_reason": None,
+        }
+
+    fallback_reason = (
+        "limited_evidence"
+        if phase_status == PHASE_SUCCESS
+        else "report_unavailable"
+    )
+    weakens = blocking_caveats[0] if blocking_caveats else ""
+    if not weakens:
+        weakens = (
+            "The report phase could not support a full narrative answer with the currently summarized evidence."
+            if fallback_reason == "limited_evidence"
+            else "The report phase did not return enough structured narrative detail to support a full answer."
+        )
+    partial_sections = _build_narrative_sections(
+        whats_happening="",
+        why_we_think_that="",
+        what_weakens_claim=weakens,
+    )
+    return {
+        "mode": "partial",
+        "thesis": _fallback_thesis_from_report(
+            report_res=report_res,
+            blocking_caveats=blocking_caveats,
+        ),
+        "sections": partial_sections,
+        "fallback_reason": fallback_reason,
+    }
 
 
 def build_runtime_traceability_bundle(
@@ -150,6 +239,10 @@ def build_runtime_traceability_bundle(
         report_rationale = (
             f"Report not generated: {report_patch.get('reason', 'skipped')}."
         )
+    narrative_answer = _build_report_narrative_preview(
+        report_patch=report_patch,
+        blocking_caveats=blocking,
+    )
 
     full: dict[str, Any] = {
         "contract_version": TRACEABILITY_CONTRACT_VERSION,
@@ -184,6 +277,7 @@ def build_runtime_traceability_bundle(
             "phase_status": report_patch.get("phase_status"),
             "rationale_summary": report_rationale,
             "key_takeaways_preview": takeaways,
+            "narrative_answer": narrative_answer,
             "ran": report_ran,
         },
         "step_indices": {
@@ -206,6 +300,7 @@ def build_runtime_traceability_bundle(
     report_step_meta = {
         "rationale_summary": _trunc(report_rationale, 400),
         "key_takeaways_preview": takeaways[:3],
+        "narrative_answer_mode": narrative_answer["mode"],
         "traceability_doc": "Full cross-phase record: meta_json.ai_agents.traceability",
     }
 
