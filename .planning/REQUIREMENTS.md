@@ -7,9 +7,9 @@
 
 ### Chat Experience
 
-- [ ] **CHAT-01**: User can receive the completed analysis answer as a workspace chat message instead of using the standalone run page as the primary place to read the result
+- [x] **CHAT-01**: User can receive the completed analysis answer as a workspace chat message instead of using the standalone run page as the primary place to read the result
 - [ ] **CHAT-02**: User can read top findings, confidence, and caveats inline within the chat-delivered answer
-- [ ] **CHAT-03**: User can continue the workspace conversation after a completed run while retaining visible linkage to the run that produced the answer
+- [x] **CHAT-03**: User can continue the workspace conversation after a completed run while retaining visible linkage to the run that produced the answer
 
 ### Evidence Navigation
 
@@ -56,9 +56,9 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| CHAT-01 | Phase 14 | Pending |
+| CHAT-01 | Phase 14 | Complete |
 | CHAT-02 | Phase 15 | Pending |
-| CHAT-03 | Phase 14 | Pending |
+| CHAT-03 | Phase 14 | Complete |
 | NAV-01 | Phase 15 | Pending |
 | NAV-02 | Phase 15 | Pending |
 | NAV-03 | Phase 16 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-18 after Phase 13 completion*
+*Last updated: 2026-04-19 after Phase 14 completion*

@@ -28,11 +28,13 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Live and hybrid evaluation now executes through linked canonical child runs, and health plus metrics surfaces report evaluation SEC or storage degradation truthfully — validated in Phase 10
 - ✓ The documented local stack now boots the worker cleanly, executes chat-triggered runs reliably, surfaces sync-first background-delivery truth in chat, and no longer presents a dead-end secure-default registration path — validated in Phase 12
 - ✓ Normal analyst phrasing in chat now routes to supported deterioration, anomaly, and peer-comparison flows, and unsupported prompts return rewrite guidance before failed run creation — validated in Phase 13
+- ✓ Workspace chat now hydrates persisted run history and renders completed analyses inline with one compact run-linked answer card, so the standalone run page is no longer the primary reading surface — validated in Phase 14
 
 ### Active
 
-- [ ] Chat becomes the primary surface for reading completed analysis answers instead of the standalone run page
 - [ ] Users can navigate from a chat answer to report, evidence, artifacts, critic, and trace surfaces through one compact navigation area
+- [ ] Users can read top findings, confidence, and caveats inline within the chat-delivered answer
+- [ ] The standalone run page is reduced to a secondary inspection surface focused on verification rather than primary answer reading
 
 ### Out of Scope
 
@@ -43,7 +45,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Shipped:** `v1.1 Live Validation and Scale` on 2026-04-18
-**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live and hybrid evaluation, clean archive-grade planning traceability, a repaired sync-first chat runtime in the documented local stack, and deterministic analyst-language routing with inline rewrite guidance in chat. Fresh hands-on testing now points more narrowly at the remaining product gap: the primary answer-reading experience still lives on a fragmented run page instead of in chat.
+**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live or hybrid evaluation, clean archive-grade planning traceability, a repaired sync-first chat runtime in the documented local stack, deterministic analyst-language routing with inline rewrite guidance in chat, and a chat-native result contract that keeps completed answers inline with stable run linkage. Fresh hands-on testing now points more narrowly at the remaining product gap: findings, caveats, and evidence navigation are still fragmented across the secondary run page instead of attached cleanly to the chat answer.
 
 ## Current Milestone: v1.2 Chat-First Analysis Experience
 
@@ -68,7 +70,7 @@ This repo is a layered brownfield monorepo with a deterministic EDGAR analysis c
 
 The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability.
 
-The next milestone comes directly from local product testing after the `v1.1` ship. The current answer-reading flow still pushes users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result is the workspace chat that launched the run. Phase 12 already repaired the documented runtime and onboarding seams, and Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat. `v1.2` therefore now centers on the remaining product gap: moving the answer itself into chat and consolidating evidence navigation there so the run page becomes secondary.
+The next milestone comes directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, and Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage. `v1.2` is now centered more narrowly on the remaining product gap: attaching findings, caveats, and compact evidence navigation to that inline answer while reducing the run page to a secondary inspection surface.
 
 ## Constraints
 
@@ -110,4 +112,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-18 after Phase 13 completion*
+*Last updated: 2026-04-19 after Phase 14 completion*

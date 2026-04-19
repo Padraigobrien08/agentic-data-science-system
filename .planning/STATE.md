@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to execute Phase 14
-stopped_at: Phase 14 planned; ready to execute
-last_updated: "2026-04-19T09:24:08Z"
+status: Ready to discuss Phase 15
+stopped_at: Phase 14 complete; ready to discuss Phase 15
+last_updated: "2026-04-19T09:43:00Z"
 progress:
   total_phases: 5
-  completed_phases: 2
+  completed_phases: 3
   total_plans: 9
-  completed_plans: 6
+  completed_plans: 9
 ---
 
 # Project State
@@ -19,21 +19,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Execute Phase 14 of `v1.2 Chat-First Analysis Experience`, focused on making completed run answers first-class chat messages with stable run linkage.
+**Current focus:** Discuss Phase 15 of `v1.2 Chat-First Analysis Experience`, focused on attaching findings, caveats, and evidence navigation to the now-stable chat-native answer shell.
 
 ## Current Position
 
-Phase: 14
-Plan: Ready to execute
+Phase: 15
+Plan: Ready to discuss
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to execute Phase 14
-Last activity: 2026-04-19 — Planned Phase 14 as 3 sequential waves: compact answer contract, persisted-run transcript hydration, and run-linkage hardening
+Status: Ready to discuss Phase 15
+Last activity: 2026-04-19 — Completed Phase 14 as 3 sequential waves: compact answer contract, persisted-run transcript hydration, and run-linkage hardening
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 35
+- Total plans completed: 38
 - Average duration: 9 min
 - Total execution time: 5.4 hours
 
@@ -54,11 +54,12 @@ Last activity: 2026-04-19 — Planned Phase 14 as 3 sequential waves: compact an
 | 11-milestone-audit-traceability-cleanup | 3 | 13min | 4min |
 | 12-runtime-reliability-for-chat-delivery | 3 | 19min | 6min |
 | 13-analyst-prompt-routing | 3 | 23min | 8min |
+| 14-chat-native-result-contract | 3 | 45min | 15min |
 
 **Recent Trend:**
 
-- Last 5 plans: 12-runtime-reliability-for-chat-delivery-02 (7min), 12-runtime-reliability-for-chat-delivery-03 (6min), 13-analyst-prompt-routing-01 (7min), 13-analyst-prompt-routing-02 (8min), 13-analyst-prompt-routing-03 (8min)
-- Trend: Stable; runtime reliability is restored and the next bottleneck has moved to chat-native answer delivery rather than request routing.
+- Last 5 plans: 13-analyst-prompt-routing-02 (8min), 13-analyst-prompt-routing-03 (8min), 14-chat-native-result-contract-01 (15min), 14-chat-native-result-contract-02 (18min), 14-chat-native-result-contract-03 (12min)
+- Trend: Stable; inline chat answer delivery is now in place and the next bottleneck has moved to evidence navigation density rather than answer placement.
 
 ## Accumulated Context
 
@@ -105,13 +106,12 @@ None.
 
 ### Blockers/Concerns
 
-- Completed analyses still read primarily through the standalone run page rather than the chat surface that launched them.
-- Chat does not yet have a first-class result contract, so the conversation still loses the completed answer as a primary artifact.
-- Evidence navigation is still fragmented across run-page sections instead of one compact chat-attached surface.
+- Findings, caveats, and evidence navigation are still fragmented across the run page instead of one compact chat-attached surface.
+- The standalone run page still duplicates too much answer-reading content now that chat has become the primary reading surface.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 14 planned; ready to execute
+Stopped at: Phase 14 complete; ready to discuss Phase 15
 Resume file: .planning/PROJECT.md
