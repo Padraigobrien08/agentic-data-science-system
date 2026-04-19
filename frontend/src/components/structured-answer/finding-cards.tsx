@@ -1,9 +1,15 @@
 import { EvidenceChipRow } from "@/components/structured-answer/evidence-chip-row";
+import Link from "next/link";
 
 import type { FindingCardsProps } from "./types";
 
 /** Plan-alignment / structured finding rows as small cards. */
-export function FindingCards({ findings, className }: FindingCardsProps) {
+export function FindingCards({
+  findings,
+  className,
+  chipMode = "full",
+  secondaryLinkLabel = "Open source",
+}: FindingCardsProps) {
   if (!findings.length) return null;
   return (
     <ul className={className ?? "space-y-2"}>
@@ -14,7 +20,15 @@ export function FindingCards({ findings, className }: FindingCardsProps) {
             <span className="rounded bg-neutral-200 px-1.5 py-0.5 dark:bg-neutral-800">{f.severity}</span>
           </div>
           <p className="mt-1 text-sm text-[var(--foreground)]">{f.detail}</p>
-          <EvidenceChipRow chips={f.chips} />
+          {chipMode === "full" ? <EvidenceChipRow chips={f.chips} /> : null}
+          {chipMode === "secondary" && f.chips[0] ? (
+            <Link
+              href={f.chips[0].href}
+              className="mt-2 inline-flex text-[11px] font-medium text-[var(--muted)] underline underline-offset-4 hover:text-[var(--foreground)]"
+            >
+              {secondaryLinkLabel}
+            </Link>
+          ) : null}
         </li>
       ))}
     </ul>

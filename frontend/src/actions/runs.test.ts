@@ -7,6 +7,7 @@ const {
   executeRunMock,
   getPromptRoutingPreviewMock,
   getRunMock,
+  listRunArtifactsMock,
 } = vi.hoisted(() => ({
   revalidatePathMock: vi.fn(),
   redirectMock: vi.fn(),
@@ -14,6 +15,7 @@ const {
   executeRunMock: vi.fn(),
   getPromptRoutingPreviewMock: vi.fn(),
   getRunMock: vi.fn(),
+  listRunArtifactsMock: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -29,6 +31,7 @@ vi.mock("@/lib/api/runs", () => ({
   executeRun: executeRunMock,
   getPromptRoutingPreview: getPromptRoutingPreviewMock,
   getRun: getRunMock,
+  listRunArtifacts: listRunArtifactsMock,
 }));
 
 import { createAnalysisRunFromChat } from "@/actions/runs";
@@ -131,6 +134,22 @@ describe("createAnalysisRunFromChat", () => {
       meta_json: null,
       transparency: null,
     });
+    listRunArtifactsMock.mockResolvedValue([
+      {
+        id: "report-1",
+        analysis_run_id: "run-1",
+        evaluation_run_id: null,
+        run_step_id: null,
+        role_key: "report_md",
+        kind: "document",
+        mime_type: "text/markdown",
+        byte_size: 100,
+        content_sha256: null,
+        storage_uri: "local://report-1",
+        created_at: "2026-04-19T12:02:00Z",
+        updated_at: "2026-04-19T12:02:00Z",
+      },
+    ]);
 
     const result = await createAnalysisRunFromChat(
       "project-1",
@@ -160,6 +179,7 @@ describe("createAnalysisRunFromChat", () => {
     });
     expect(executeRunMock).toHaveBeenCalledWith("run-1", {});
     expect(getRunMock).toHaveBeenCalledWith("run-1", { includeTransparency: true });
+    expect(listRunArtifactsMock).toHaveBeenCalledWith("run-1");
     expect(result.reply).toMatchObject({
       requestId: "req-1",
       runId: "run-1",
@@ -172,6 +192,12 @@ describe("createAnalysisRunFromChat", () => {
         summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
         orchestrationStatus: "success",
         conclusionRider: null,
+        takeawayRows: [],
+        navigationItems: expect.arrayContaining([
+          expect.objectContaining({ key: "report", href: "/artifacts/report-1" }),
+          expect.objectContaining({ key: "trace", href: "/projects/project-1/runs/run-1/trace" }),
+        ]),
+        caveatOverflowHref: "/projects/project-1/runs/run-1/trace#run-context-transparency",
       },
     });
   });

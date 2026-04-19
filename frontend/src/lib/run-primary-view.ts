@@ -76,6 +76,30 @@ export type CompactChatAnswerView = {
   conclusionRider: { text: string; href: string } | null;
 };
 
+export type ChatEvidenceNavItem = {
+  key: "report" | "evidence" | "artifacts" | "critic" | "trace";
+  label: string;
+  href: string;
+};
+
+export type ChatAnswerCardView = CompactChatAnswerView & {
+  takeawayRows: TakeawayRow[];
+  alignmentFindings: AlignmentFindingCard[];
+  overallConfidence: string | null;
+  blockingCaveats: string[];
+  criticPhaseStatus: string | null;
+  reportPhaseStatus: string | null;
+  weakEvidenceSignals: string[];
+  contextSignals: PrimaryContextSignal[];
+  evidenceLinks: EvidenceLink[];
+  extraArtifactCount: number;
+  reportArtifactId: string | null;
+  evidenceProvenanceHint: string | null;
+  navigationItems: ChatEvidenceNavItem[];
+  traceHref: string | null;
+  caveatOverflowHref: string | null;
+};
+
 function inputGoalText(input: unknown): string | null {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const g = (input as Record<string, unknown>).analysis_goal;
@@ -258,6 +282,24 @@ function buildEvidenceProvenanceHint(
   return null;
 }
 
+function buildChatEvidenceNavigation(
+  nav: PrimaryAnswerNavContext | undefined,
+  reportArtifactId: string | null,
+): ChatEvidenceNavItem[] {
+  if (!nav) return [];
+  const traceHref = `/projects/${nav.projectId}/runs/${nav.runId}/trace`;
+  const artifactHref = tracePath(nav, "#run-artifacts");
+  const criticHref = tracePath(nav, "#run-agents");
+
+  return [
+    { key: "report", label: "Report", href: reportArtifactId ? `/artifacts/${reportArtifactId}` : artifactHref },
+    { key: "evidence", label: "Evidence", href: artifactHref },
+    { key: "artifacts", label: "Artifacts", href: artifactHref },
+    { key: "critic", label: "Critic", href: criticHref },
+    { key: "trace", label: "Trace", href: traceHref },
+  ];
+}
+
 function evidenceFromTraceability(
   tr: TraceabilityWire | undefined,
   artifacts: ArtifactMetadata[],
@@ -396,5 +438,32 @@ export function buildCompactChatAnswerView(view: PrimaryAnswerView): CompactChat
     summaryLine: view.summaryLine,
     orchestrationStatus: view.orchestrationStatus,
     conclusionRider: view.conclusionRider,
+  };
+}
+
+export function buildChatAnswerCardView(
+  view: PrimaryAnswerView,
+  nav?: PrimaryAnswerNavContext,
+): ChatAnswerCardView {
+  return {
+    goalDisplay: view.goalDisplay,
+    summaryLine: view.summaryLine,
+    orchestrationStatus: view.orchestrationStatus,
+    conclusionRider: view.conclusionRider,
+    takeawayRows: view.takeawayRows,
+    alignmentFindings: view.alignmentFindings,
+    overallConfidence: view.overallConfidence,
+    blockingCaveats: view.blockingCaveats,
+    criticPhaseStatus: view.criticPhaseStatus,
+    reportPhaseStatus: view.reportPhaseStatus,
+    weakEvidenceSignals: view.weakEvidenceSignals,
+    contextSignals: view.contextSignals,
+    evidenceLinks: view.evidenceLinks,
+    extraArtifactCount: view.extraArtifactCount,
+    reportArtifactId: view.reportArtifactId,
+    evidenceProvenanceHint: view.evidenceProvenanceHint,
+    navigationItems: buildChatEvidenceNavigation(nav, view.reportArtifactId),
+    traceHref: nav ? `/projects/${nav.projectId}/runs/${nav.runId}/trace` : null,
+    caveatOverflowHref: nav ? tracePath(nav, "#run-context-transparency") : null,
   };
 }

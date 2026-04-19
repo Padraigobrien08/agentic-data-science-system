@@ -4,7 +4,7 @@
  */
 
 import type { AnalysisRunStatus, BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
-import type { CompactChatAnswerView } from "@/lib/run-primary-view";
+import type { ChatAnswerCardView } from "@/lib/run-primary-view";
 
 export type ChatUserMessage = {
   id: string;
@@ -26,7 +26,7 @@ export type ChatAssistantMessage = {
   content: string;
   rewriteSuggestions?: string[];
   routingReason?: string;
-  answerCard?: CompactChatAnswerView;
+  answerCard?: ChatAnswerCardView;
   runId?: string;
   runHref?: string;
   deepDiveHref?: string;

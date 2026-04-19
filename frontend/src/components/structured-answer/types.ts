@@ -19,11 +19,15 @@ export type AnswerSummaryProps = {
 export type TopFindingsListProps = {
   items: TakeawayRow[];
   className?: string;
+  chipMode?: "full" | "hidden" | "secondary";
+  secondaryLinkLabel?: string;
 };
 
 export type FindingCardsProps = {
   findings: AlignmentFindingCard[];
   className?: string;
+  chipMode?: "full" | "hidden" | "secondary";
+  secondaryLinkLabel?: string;
 };
 
 export type ConfidenceStripProps = {
@@ -55,6 +59,8 @@ export type CaveatBadgeGroupProps = {
   maxWeakBadges?: number;
   /** Target for "+N" overflow chip (e.g. deep-dive context panel). */
   overflowHref?: string;
+  blockingHref?: string;
+  secondaryLinkLabel?: string;
   className?: string;
 };
 

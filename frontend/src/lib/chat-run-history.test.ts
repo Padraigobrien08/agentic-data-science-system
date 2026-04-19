@@ -1,13 +1,15 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { listRunsMock, getRunMock } = vi.hoisted(() => ({
+const { listRunsMock, getRunMock, listRunArtifactsMock } = vi.hoisted(() => ({
   listRunsMock: vi.fn(),
   getRunMock: vi.fn(),
+  listRunArtifactsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/api/runs", () => ({
   listRuns: listRunsMock,
   getRun: getRunMock,
+  listRunArtifacts: listRunArtifactsMock,
 }));
 
 import { buildProjectChatHistory } from "@/lib/chat-run-history";
@@ -83,6 +85,22 @@ describe("buildProjectChatHistory", () => {
       meta_json: null,
       transparency: null,
     }));
+    listRunArtifactsMock.mockImplementation(async (runId: string) => [
+      {
+        id: `report-${runId}`,
+        analysis_run_id: runId,
+        evaluation_run_id: null,
+        run_step_id: null,
+        role_key: "report_md",
+        kind: "document",
+        mime_type: "text/markdown",
+        byte_size: 100,
+        content_sha256: null,
+        storage_uri: `local://report-${runId}`,
+        created_at: "2026-04-19T09:02:00Z",
+        updated_at: "2026-04-19T09:02:00Z",
+      },
+    ]);
 
     const result = await buildProjectChatHistory("project-1");
 
@@ -96,6 +114,9 @@ describe("buildProjectChatHistory", () => {
       runHref: "/projects/project-1/runs/run-1",
       answerCard: {
         summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
+        navigationItems: expect.arrayContaining([
+          expect.objectContaining({ key: "report", href: "/artifacts/report-run-1" }),
+        ]),
       },
     });
     expect(result.recentRuns).toHaveLength(2);

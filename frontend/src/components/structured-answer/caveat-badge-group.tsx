@@ -24,6 +24,8 @@ export function CaveatBadgeGroup({
   maxContextBadges = 12,
   maxWeakBadges = 8,
   overflowHref,
+  blockingHref,
+  secondaryLinkLabel = "Open source",
   className,
 }: CaveatBadgeGroupProps) {
   const ctxVisible = contextSignals.slice(0, Math.max(0, maxContextBadges));
@@ -80,6 +82,14 @@ export function CaveatBadgeGroup({
           {blockingCaveats.map((c, i) => (
             <li key={i} className="max-w-prose">
               {c}
+              {blockingHref ? (
+                <>
+                  {" "}
+                  <Link href={blockingHref} className="font-medium underline underline-offset-4">
+                    {secondaryLinkLabel}
+                  </Link>
+                </>
+              ) : null}
             </li>
           ))}
         </ul>

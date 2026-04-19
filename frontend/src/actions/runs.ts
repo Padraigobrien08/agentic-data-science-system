@@ -6,9 +6,9 @@ import { redirect } from "next/navigation";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
 import { ApiError } from "@/lib/api/errors";
 import type { AnalysisRunStatus } from "@/lib/api/types";
-import { createRun, executeRun, getPromptRoutingPreview, getRun } from "@/lib/api/runs";
+import { createRun, executeRun, getPromptRoutingPreview, getRun, listRunArtifacts } from "@/lib/api/runs";
 import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
-import { buildCompactChatAnswerView, buildPrimaryAnswerView, type CompactChatAnswerView } from "@/lib/run-primary-view";
+import { buildChatAnswerCardView, buildPrimaryAnswerView, type ChatAnswerCardView } from "@/lib/run-primary-view";
 
 type DeliveryMode = "sync_only" | "background_ready" | "background_degraded";
 
@@ -17,7 +17,7 @@ type ChatReply = {
   content: string;
   runId?: string;
   runHref?: string;
-  answerCard?: CompactChatAnswerView;
+  answerCard?: ChatAnswerCardView;
   runStatus?: AnalysisRunStatus;
   runCreatedAt?: string;
   runFinishedAt?: string | null;
@@ -99,9 +99,13 @@ export async function createAnalysisRunFromChat(
 
   let execution;
   let hydratedRun;
+  let artifacts;
   try {
     execution = await executeRun(run.id, {});
-    hydratedRun = await getRun(run.id, { includeTransparency: true });
+    [hydratedRun, artifacts] = await Promise.all([
+      getRun(run.id, { includeTransparency: true }),
+      listRunArtifacts(run.id),
+    ]);
   } catch (e) {
     if (e instanceof ApiError) {
       return { error: e.body || e.message };
@@ -112,11 +116,12 @@ export async function createAnalysisRunFromChat(
   const orch = parseOrchestrationOutput(hydratedRun.output_payload_json);
   const userReport = parseUserFacingReport(hydratedRun.output_payload_json);
   const ai = parseAiAgents(hydratedRun.meta_json);
-  const answerView = buildPrimaryAnswerView(hydratedRun, [], orch, userReport, ai, {
+  const nav = {
     projectId,
     runId: run.id,
-  });
-  const answerCard = buildCompactChatAnswerView(answerView);
+  };
+  const answerView = buildPrimaryAnswerView(hydratedRun, artifacts, orch, userReport, ai, nav);
+  const answerCard = buildChatAnswerCardView(answerView, nav);
 
   revalidatePath(`/projects/${projectId}/runs`);
   revalidatePath(`/projects/${projectId}/runs/${run.id}`);

@@ -1,9 +1,9 @@
 import type { ChatAssistantMessage, ChatMessage, ChatRecentRun, ChatUserMessage } from "@/components/chat-shell/types";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
-import { getRun, listRuns } from "@/lib/api/runs";
+import { getRun, listRunArtifacts, listRuns } from "@/lib/api/runs";
 import type { AnalysisRunDetail } from "@/lib/api/types";
 import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
-import { buildCompactChatAnswerView, buildPrimaryAnswerView } from "@/lib/run-primary-view";
+import { buildChatAnswerCardView, buildPrimaryAnswerView } from "@/lib/run-primary-view";
 
 type ProjectChatHistory = {
   messages: ChatMessage[];
@@ -24,15 +24,20 @@ function goalText(run: AnalysisRunDetail): string {
   return "Analysis run";
 }
 
-function buildAssistantMessage(projectId: string, run: AnalysisRunDetail): ChatAssistantMessage {
+function buildAssistantMessage(
+  projectId: string,
+  run: AnalysisRunDetail,
+  artifacts: Awaited<ReturnType<typeof listRunArtifacts>>,
+): ChatAssistantMessage {
   const orch = parseOrchestrationOutput(run.output_payload_json);
   const userReport = parseUserFacingReport(run.output_payload_json);
   const ai = parseAiAgents(run.meta_json);
-  const answerView = buildPrimaryAnswerView(run, [], orch, userReport, ai, {
+  const nav = {
     projectId,
     runId: run.id,
-  });
-  const answerCard = buildCompactChatAnswerView(answerView);
+  };
+  const answerView = buildPrimaryAnswerView(run, artifacts, orch, userReport, ai, nav);
+  const answerCard = buildChatAnswerCardView(answerView, nav);
   const fallbackContent =
     run.error_summary?.trim() ||
     (run.status === "error"
@@ -69,14 +74,20 @@ export async function buildProjectChatHistory(projectId: string, limit = 12): Pr
     .slice(0, limit);
 
   const hydratedRuns = await Promise.all(
-    recentRunsSorted.map((run) => getRun(run.id, { includeTransparency: true })),
+    recentRunsSorted.map(async (run) => ({
+      run: await getRun(run.id, { includeTransparency: true }),
+      artifacts: await listRunArtifacts(run.id),
+    })),
   );
 
   const chronologicalRuns = [...hydratedRuns].sort(
-    (a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
+    (a, b) => new Date(a.run.created_at).getTime() - new Date(b.run.created_at).getTime(),
   );
 
-  const messages = chronologicalRuns.flatMap((run) => [buildUserMessage(run), buildAssistantMessage(projectId, run)]);
+  const messages = chronologicalRuns.flatMap(({ run, artifacts }) => [
+    buildUserMessage(run),
+    buildAssistantMessage(projectId, run, artifacts),
+  ]);
 
   const recentRuns: ChatRecentRun[] = recentRunsSorted.map((run) => ({
     id: run.id,

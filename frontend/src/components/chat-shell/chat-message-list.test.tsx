@@ -16,6 +16,39 @@ describe("ChatMessageList", () => {
           summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
           orchestrationStatus: "success",
           conclusionRider: null,
+          takeawayRows: [
+            {
+              text: "Revenue growth deterioration appears in several recent quarters.",
+              chips: [{ label: "Evidence", href: "/projects/project-1/runs/run-1/trace#run-artifacts" }],
+            },
+          ],
+          alignmentFindings: [
+            {
+              code: "CASHFLOW",
+              severity: "warning",
+              detail: "Cash-flow deterioration is weaker than the revenue signal.",
+              chips: [{ label: "Critic", href: "/projects/project-1/runs/run-1/trace#run-agents" }],
+            },
+          ],
+          overallConfidence: "medium",
+          blockingCaveats: ["Peer coverage is limited for this run."],
+          criticPhaseStatus: "success",
+          reportPhaseStatus: "success",
+          weakEvidenceSignals: ["insufficient_peers_rows"],
+          contextSignals: [],
+          evidenceLinks: [{ role: "report_md", artifactId: "report-1" }],
+          extraArtifactCount: 1,
+          reportArtifactId: "report-1",
+          evidenceProvenanceHint: "Deep dive includes the full artifact inventory.",
+          navigationItems: [
+            { key: "report", label: "Report", href: "/artifacts/report-1" },
+            { key: "evidence", label: "Evidence", href: "/projects/project-1/runs/run-1/trace#run-artifacts" },
+            { key: "artifacts", label: "Artifacts", href: "/projects/project-1/runs/run-1/trace#run-artifacts" },
+            { key: "critic", label: "Critic", href: "/projects/project-1/runs/run-1/trace#run-agents" },
+            { key: "trace", label: "Trace", href: "/projects/project-1/runs/run-1/trace" },
+          ],
+          traceHref: "/projects/project-1/runs/run-1/trace",
+          caveatOverflowHref: "/projects/project-1/runs/run-1/trace#run-context-transparency",
         },
         runId: "run-1",
         runHref: "/projects/project-1/runs/run-1",
@@ -36,8 +69,23 @@ describe("ChatMessageList", () => {
     ).toBeTruthy();
     expect(screen.getByText("Conclusion")).toBeTruthy();
     expect(screen.getByText("Goal")).toBeTruthy();
+    expect(screen.getByText("Top findings")).toBeTruthy();
+    expect(screen.getByText("Confidence & caveats")).toBeTruthy();
+    expect(screen.getByText("Open evidence")).toBeTruthy();
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
     expect(screen.getByText("Assess whether margin pressure is temporary or structural for MSFT")).toBeTruthy();
+    expect(screen.getByText("Revenue growth deterioration appears in several recent quarters.")).toBeTruthy();
+    expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
+    expect(screen.getByText("Evidence strength:")).toBeTruthy();
+    expect(screen.getByText("Peer coverage is limited for this run.")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Report" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Evidence" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Artifacts" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Critic" })).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Trace" })).toBeTruthy();
+    const exactJumpLinks = screen.getAllByRole("link", { name: "Open source" });
+    expect(exactJumpLinks.length).toBeGreaterThanOrEqual(2);
+    expect(exactJumpLinks[0]?.getAttribute("href")).toBe("/projects/project-1/runs/run-1/trace#run-artifacts");
     expect(screen.getByRole("link", { name: "Open run" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: "Run answer" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
