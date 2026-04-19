@@ -51,8 +51,8 @@ export default async function ProjectChatPage({
       <div>
         <h1 className="text-lg font-semibold">Workspace chat</h1>
         <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-          Ask questions against this workspace’s ticker scope. Each message runs immediately here first, with run
-          answer and deep dive links for follow-up inspection.
+          Ask questions against this workspace’s ticker scope. Completed analyses appear inline here first, with the
+          standalone run page reserved for secondary inspection when you need to dig deeper.
         </p>
       </div>
       <ProjectWorkspaceNav projectId={projectId} current="chat" />

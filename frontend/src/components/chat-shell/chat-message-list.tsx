@@ -78,7 +78,14 @@ export function ChatMessageList({ messages }: Props) {
                   </div>
                 ) : m.answerCard ? (
                   <div className="mt-2">
-                    <ChatRunAnswerCard answerCard={m.answerCard} />
+                    <ChatRunAnswerCard
+                      answerCard={m.answerCard}
+                      runId={m.runId}
+                      runHref={m.runHref}
+                      runStatus={m.runStatus}
+                      runCreatedAt={m.runCreatedAt}
+                      runFinishedAt={m.runFinishedAt}
+                    />
                   </div>
                 ) : (
                   <div className="mt-1 max-w-[min(100%,38rem)] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-[var(--foreground)]">

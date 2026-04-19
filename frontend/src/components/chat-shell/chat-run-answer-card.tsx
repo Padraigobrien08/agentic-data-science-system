@@ -1,14 +1,34 @@
 "use client";
 
+import Link from "next/link";
+
+import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
+import { StatusBadge } from "@/components/ui/technical";
+import { formatDate, shortId } from "@/lib/format";
+import type { AnalysisRunStatus } from "@/lib/api/types";
 import type { CompactChatAnswerView } from "@/lib/run-primary-view";
 
 type Props = {
   answerCard: CompactChatAnswerView;
+  runId?: string;
+  runHref?: string;
+  runStatus?: AnalysisRunStatus;
+  runCreatedAt?: string;
+  runFinishedAt?: string | null;
 };
 
-export function ChatRunAnswerCard({ answerCard }: Props) {
+export function ChatRunAnswerCard({
+  answerCard,
+  runId,
+  runHref,
+  runStatus,
+  runCreatedAt,
+  runFinishedAt,
+}: Props) {
+  const runTimestamp = formatDate(runFinishedAt ?? runCreatedAt);
+
   return (
     <Card className="w-full max-w-[min(100%,42rem)] rounded-2xl rounded-bl-md bg-[var(--background)] shadow-none">
       <CardHeader className="gap-1 pb-4">
@@ -37,6 +57,19 @@ export function ChatRunAnswerCard({ answerCard }: Props) {
               </summary>
               <p className="mt-2 text-sm text-[var(--foreground)]">{answerCard.orchestrationStatus}</p>
             </details>
+          </>
+        ) : null}
+        {runId && runHref && runStatus ? (
+          <>
+            <Separator />
+            <div className="flex flex-wrap items-center gap-3 rounded-2xl border border-[var(--border)]/70 bg-neutral-50/60 px-3 py-3 dark:bg-neutral-950/30">
+              <StatusBadge status={runStatus} variant="friendly" />
+              <span className="text-xs text-[var(--muted)]">{runTimestamp}</span>
+              <span className="font-mono text-xs text-[var(--muted)]">{shortId(runId)}</span>
+              <Button asChild size="sm" className="ml-auto">
+                <Link href={runHref}>Open run</Link>
+              </Button>
+            </div>
           </>
         ) : null}
       </CardContent>
