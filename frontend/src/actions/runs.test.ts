@@ -132,7 +132,31 @@ describe("createAnalysisRunFromChat", () => {
         final_summary: "MSFT margin pressure looks cyclical rather than structural.",
       },
       meta_json: null,
-      transparency: null,
+      transparency: {
+        evidence_artifact_ids: ["report-1"],
+        evidence_artifacts_by_role: { report_md: "report-1" },
+        prompt_versions: null,
+        model_call_count: 1,
+        llm_usage: null,
+        narrative_answer: {
+          mode: "full",
+          thesis: "MSFT margin pressure looks cyclical rather than structural.",
+          sections: [
+            {
+              heading: "What's happening",
+              body: "Recent summarized quarters show pressure, but not a persistent structural break.",
+            },
+          ],
+          fallback_reason: null,
+        },
+        report_key_takeaways_preview: [
+          "MSFT margin pressure looks cyclical rather than structural.",
+        ],
+        critic_blocking_caveats: [],
+        critic_overall_confidence: null,
+        critic_phase_status: "success",
+        report_phase_status: "success",
+      },
     });
     listRunArtifactsMock.mockResolvedValue([
       {
@@ -183,16 +207,25 @@ describe("createAnalysisRunFromChat", () => {
     expect(result.reply).toMatchObject({
       requestId: "req-1",
       runId: "run-1",
-      runHref: "/projects/project-1/runs/run-1",
+      runHref: "/projects/project-1/runs/run-1/trace",
       runStatus: "success",
       runCreatedAt: "2026-04-19T12:00:00Z",
       runFinishedAt: "2026-04-19T12:02:00Z",
       answerCard: {
         goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+        narrativeAnswer: {
+          mode: "full",
+          thesis: "MSFT margin pressure looks cyclical rather than structural.",
+          fallbackReason: null,
+        },
         summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
         orchestrationStatus: "success",
         conclusionRider: null,
-        takeawayRows: [],
+        takeawayRows: [
+          expect.objectContaining({
+            text: "MSFT margin pressure looks cyclical rather than structural.",
+          }),
+        ],
         navigationItems: expect.arrayContaining([
           expect.objectContaining({ key: "report", href: "/artifacts/report-1" }),
           expect.objectContaining({ key: "trace", href: "/projects/project-1/runs/run-1/trace" }),
@@ -200,5 +233,6 @@ describe("createAnalysisRunFromChat", () => {
         caveatOverflowHref: "/projects/project-1/runs/run-1/trace#run-context-transparency",
       },
     });
+    expect(result.reply?.content).toBe("MSFT margin pressure looks cyclical rather than structural.");
   });
 });

@@ -13,8 +13,24 @@ describe("ChatMessageList", () => {
         content: "MSFT margin pressure looks cyclical rather than structural.",
         answerCard: {
           goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+          narrativeAnswer: {
+            mode: "full",
+            thesis: "MSFT margin pressure looks cyclical rather than structural.",
+            sections: [
+              {
+                heading: "What's happening",
+                body: "Revenue growth deterioration appears in several recent quarters.",
+              },
+              {
+                heading: "Why we think that",
+                body: "The summarized evidence is directionally consistent.",
+              },
+            ],
+            fallbackReason: null,
+          },
           summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
           orchestrationStatus: "success",
+          emptyStateReason: null,
           conclusionRider: null,
           takeawayRows: [
             {
@@ -51,7 +67,7 @@ describe("ChatMessageList", () => {
           caveatOverflowHref: "/projects/project-1/runs/run-1/trace#run-context-transparency",
         },
         runId: "run-1",
-        runHref: "/projects/project-1/runs/run-1",
+        runHref: "/projects/project-1/runs/run-1/trace",
         runStatus: "success",
         runCreatedAt: "2026-04-18T19:58:00Z",
         runFinishedAt: "2026-04-18T20:00:00Z",
@@ -67,13 +83,13 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Background delivery was rerouted to immediate execution for this chat request."),
     ).toBeTruthy();
-    expect(screen.getByText("Conclusion")).toBeTruthy();
-    expect(screen.getByText("Goal")).toBeTruthy();
-    expect(screen.getByText("Top findings")).toBeTruthy();
-    expect(screen.getByText("Confidence & caveats")).toBeTruthy();
-    expect(screen.getByText("Open evidence")).toBeTruthy();
+    expect(screen.getByText("Answer")).toBeTruthy();
+    expect(screen.getByText("What's happening")).toBeTruthy();
+    expect(screen.getByText("Why we think that")).toBeTruthy();
+    expect(screen.getByText("Findings")).toBeTruthy();
+    expect(screen.getByText("Confidence")).toBeTruthy();
+    expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
-    expect(screen.getByText("Assess whether margin pressure is temporary or structural for MSFT")).toBeTruthy();
     expect(screen.getByText("Revenue growth deterioration appears in several recent quarters.")).toBeTruthy();
     expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
     expect(screen.getByText("Evidence strength:")).toBeTruthy();
@@ -86,10 +102,10 @@ describe("ChatMessageList", () => {
     const exactJumpLinks = screen.getAllByRole("link", { name: "Open source" });
     expect(exactJumpLinks.length).toBeGreaterThanOrEqual(2);
     expect(exactJumpLinks[0]?.getAttribute("href")).toBe("/projects/project-1/runs/run-1/trace#run-artifacts");
-    expect(screen.getByRole("link", { name: "Open run" })).toBeTruthy();
     expect(screen.queryByRole("link", { name: "Run answer" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
     expect(screen.queryByRole("link", { name: "All runs" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Open trace" })).toBeNull();
   });
 
   it("renders the structured pending footprint while analysis is running", () => {
@@ -135,8 +151,8 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Compare AAPL versus MSFT on operating margin over the last eight quarters."),
     ).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Open run" })).toBeNull();
-    expect(screen.queryByText("Conclusion")).toBeNull();
+    expect(screen.queryByRole("link", { name: "Open trace" })).toBeNull();
+    expect(screen.queryByText("Answer")).toBeNull();
     expect(screen.queryByText("Goal")).toBeNull();
   });
 });

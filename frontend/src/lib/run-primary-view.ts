@@ -2,7 +2,7 @@
  * Derive structured “primary answer” view data from existing run payloads (no new API).
  */
 
-import type { ArtifactMetadata } from "@/lib/api/types";
+import type { ArtifactMetadata, RunTransparencySummary } from "@/lib/api/types";
 import type { ParsedAiAgents, PlanAlignmentFindingWire, TraceabilityWire } from "@/lib/ai-agents-meta";
 import {
   collectContextSignals,
@@ -41,10 +41,25 @@ export type PrimaryAnswerNavContext = {
   runId: string;
 };
 
+export type NarrativeAnswerSectionView = {
+  heading: string;
+  body: string;
+};
+
+export type NarrativeAnswerView = {
+  mode: "full" | "partial" | "legacy";
+  thesis: string;
+  sections: NarrativeAnswerSectionView[];
+  fallbackReason: string | null;
+};
+
 export type PrimaryAnswerView = {
   goalDisplay: string;
+  narrativeAnswer: NarrativeAnswerView;
   summaryLine: string | null;
   orchestrationStatus: string | null;
+  /** Explanation when the run finished but no structured summary/findings were surfaced. */
+  emptyStateReason: string | null;
   /** Takeaways with shared trace chips (report / evidence / critic). */
   takeawayRows: TakeawayRow[];
   alignmentFindings: AlignmentFindingCard[];
@@ -71,8 +86,10 @@ export type PrimaryAnswerView = {
 
 export type CompactChatAnswerView = {
   goalDisplay: string;
+  narrativeAnswer: NarrativeAnswerView;
   summaryLine: string | null;
   orchestrationStatus: string | null;
+  emptyStateReason: string | null;
   conclusionRider: { text: string; href: string } | null;
 };
 
@@ -165,6 +182,15 @@ function hasCriticSurface(ai: ParsedAiAgents | null, tr: TraceabilityWire | unde
   }
   if (ai?.critic && typeof ai.critic === "object" && ai.critic.phase_output != null) return true;
   return false;
+}
+
+function hasCriticSurfaceFromTransparency(transparency: RunTransparencySummary | null | undefined): boolean {
+  if (!transparency) return false;
+  return Boolean(
+    transparency.critic_phase_status ||
+      transparency.critic_overall_confidence ||
+      (transparency.critic_blocking_caveats ?? []).length,
+  );
 }
 
 function mergeCriticArtifactRoles(tr: TraceabilityWire | undefined): string[] {
@@ -282,6 +308,63 @@ function buildEvidenceProvenanceHint(
   return null;
 }
 
+function isGenericSuccessSummary(summary: string | null): boolean {
+  if (!summary) return false;
+  return /orchestration completed successfully/i.test(summary);
+}
+
+function buildEmptyStateReason(input: {
+  orchestrationStatus: string | null;
+  orchestrationMessage: string | null;
+  summaryLine: string | null;
+  takeawaysCount: number;
+  alignmentFindingsCount: number;
+  anomalyCount: number | null;
+  panelRowCount: number | null;
+  reportCharacterCount: number | null;
+  reportArtifactId: string | null;
+  evidenceLinkCount: number;
+  extraArtifactCount: number;
+}): string | null {
+  if (input.takeawaysCount > 0 || input.alignmentFindingsCount > 0) {
+    return null;
+  }
+
+  if (input.orchestrationStatus === "no_data") {
+    return input.orchestrationMessage?.trim() || "No usable SEC data was returned for the selected scope.";
+  }
+
+  if (input.panelRowCount === 0) {
+    return "The pipeline completed, but the panel was empty for the selected scope.";
+  }
+
+  if (input.anomalyCount === 0) {
+    return "The pipeline completed, but it did not surface any anomaly rows for this scope.";
+  }
+
+  if ((input.reportCharacterCount ?? 0) > 0 && input.reportArtifactId) {
+    return "The run completed and produced a report, but no structured findings were extracted into this answer card.";
+  }
+
+  if (input.reportArtifactId && input.evidenceLinkCount === 0) {
+    return "The run completed and produced artifacts, but the evidence map for this view is still empty.";
+  }
+
+  if (input.extraArtifactCount > 0 && input.evidenceLinkCount === 0) {
+    return "The run completed and produced artifacts, but none have been mapped into structured evidence for this view yet.";
+  }
+
+  if (input.orchestrationMessage?.trim() && !/completed successfully/i.test(input.orchestrationMessage)) {
+    return input.orchestrationMessage.trim();
+  }
+
+  if (isGenericSuccessSummary(input.summaryLine)) {
+    return "The run completed successfully, but it did not surface a user-facing summary for this request.";
+  }
+
+  return null;
+}
+
 function buildChatEvidenceNavigation(
   nav: PrimaryAnswerNavContext | undefined,
   reportArtifactId: string | null,
@@ -302,9 +385,10 @@ function buildChatEvidenceNavigation(
 
 function evidenceFromTraceability(
   tr: TraceabilityWire | undefined,
+  transparency: RunTransparencySummary | null | undefined,
   artifacts: ArtifactMetadata[],
 ): { links: EvidenceLink[]; reportArtifactId: string | null } {
-  const byRole = tr?.evidence_artifacts_by_role;
+  const byRole = tr?.evidence_artifacts_by_role ?? transparency?.evidence_artifacts_by_role;
   const links: EvidenceLink[] = [];
   if (byRole && typeof byRole === "object") {
     const roles = Object.keys(byRole).sort();
@@ -324,6 +408,34 @@ function evidenceFromTraceability(
   return { links: links.slice(0, 14), reportArtifactId };
 }
 
+function buildLegacyNarrativeAnswer(input: {
+  rawSummaryLine: string | null;
+  takeaways: string[];
+  emptyStateReason: string | null;
+  blockingCaveats: string[];
+}): NarrativeAnswerView {
+  const thesis =
+    (input.rawSummaryLine && !isGenericSuccessSummary(input.rawSummaryLine) ? input.rawSummaryLine : null) ??
+    input.takeaways[0] ??
+    input.emptyStateReason ??
+    "Analysis completed, but the narrative preview is not available for this run.";
+
+  const supportTakeaway = input.takeaways.find((row) => row !== thesis) ?? null;
+  const weakSignal = input.emptyStateReason ?? input.blockingCaveats[0] ?? null;
+  const sectionBody = supportTakeaway ?? weakSignal;
+  const sectionHeading =
+    input.emptyStateReason || input.blockingCaveats.length > 0
+      ? "What weakens the claim"
+      : "Why we think that";
+
+  return {
+    mode: "legacy",
+    thesis,
+    sections: sectionBody ? [{ heading: sectionHeading, body: sectionBody }] : [],
+    fallbackReason: "legacy_summary",
+  };
+}
+
 export function buildPrimaryAnswerView(
   input: {
     orchestration_goal_text: string | null;
@@ -334,6 +446,7 @@ export function buildPrimaryAnswerView(
   orch: ParsedOrchestrationOutput | null,
   userReport: UserFacingReport | null,
   ai: ParsedAiAgents | null,
+  transparency?: RunTransparencySummary | null,
   nav?: PrimaryAnswerNavContext,
 ): PrimaryAnswerView {
   const suggestionGoalText =
@@ -345,7 +458,7 @@ export function buildPrimaryAnswerView(
 
   const inputTickers = parseInputTickers(input.input_payload_json);
 
-  const summaryLine =
+  const rawSummaryLine =
     (orch?.final_summary && orch.final_summary.trim()) ||
     (orch?.message && orch.message.trim()) ||
     null;
@@ -354,7 +467,9 @@ export function buildPrimaryAnswerView(
 
   const tr = ai?.traceability;
   const preview = tr?.report?.key_takeaways_preview;
-  const previewList = Array.isArray(preview) ? preview.filter((x): x is string => typeof x === "string") : [];
+  const previewList = Array.isArray(preview)
+    ? preview.filter((x): x is string => typeof x === "string")
+    : transparency?.report_key_takeaways_preview ?? [];
   const takeaways = dedupeTakeaways([...(userReport?.key_takeaways ?? []), ...previewList], 8);
 
   const alignmentRaw = normalizeFindings(tr?.critic?.plan_alignment_findings);
@@ -369,38 +484,79 @@ export function buildPrimaryAnswerView(
   }));
 
   const overallConfidence =
-    typeof tr?.critic?.overall_confidence === "string" ? tr.critic.overall_confidence : null;
+    typeof tr?.critic?.overall_confidence === "string"
+      ? tr.critic.overall_confidence
+      : transparency?.critic_overall_confidence ?? null;
   const blockingCaveats = Array.isArray(tr?.critic?.blocking_caveats)
     ? tr!.critic!.blocking_caveats!
         .filter((x): x is string => typeof x === "string")
         .map((s) => s.trim())
         .filter(Boolean)
         .slice(0, 5)
-    : [];
+    : (transparency?.critic_blocking_caveats ?? []).slice(0, 5);
 
   const criticPhaseStatus =
     typeof tr?.critic?.phase_status === "string"
       ? tr.critic.phase_status
+      : typeof transparency?.critic_phase_status === "string"
+        ? transparency.critic_phase_status
       : typeof orch?.llm_phases_summary?.critic?.phase_status === "string"
         ? orch.llm_phases_summary!.critic!.phase_status!
         : null;
   const reportPhaseStatus =
     typeof tr?.report?.phase_status === "string"
       ? tr.report.phase_status
+      : typeof transparency?.report_phase_status === "string"
+        ? transparency.report_phase_status
       : typeof orch?.llm_phases_summary?.report?.phase_status === "string"
         ? orch.llm_phases_summary!.report!.phase_status!
         : null;
 
-  const { links, reportArtifactId } = evidenceFromTraceability(tr, artifacts);
+  const { links, reportArtifactId } = evidenceFromTraceability(tr, transparency, artifacts);
   const linkedIds = new Set(links.map((l) => l.artifactId));
   const extraArtifactCount = artifacts.filter((a) => !linkedIds.has(a.id)).length;
 
   const weakEvidenceSignals = extractWeakEvidenceSignals(ai);
   const contextSignals = collectContextSignals(ai, orch);
 
-  const hasCritic = hasCriticSurface(ai, tr);
+  const hasCritic = hasCriticSurface(ai, tr) || hasCriticSurfaceFromTransparency(transparency);
   const takeawayChips = buildTakeawayChips(nav, reportArtifactId, links, artifacts.length, hasCritic, contextSignals);
   const takeawayRows = takeaways.map((text) => ({ text, chips: takeawayChips }));
+
+  const pipelineSummary = orch?.tool_results_summary?.find((row) => row.tool_name === "run_pipeline") ?? null;
+  const emptyStateReasonCandidate = buildEmptyStateReason({
+    orchestrationStatus,
+    orchestrationMessage: orch?.message?.trim() || null,
+    summaryLine: rawSummaryLine,
+    takeawaysCount: takeaways.length,
+    alignmentFindingsCount: alignmentFindings.length,
+    anomalyCount: typeof pipelineSummary?.anomaly_count === "number" ? pipelineSummary.anomaly_count : null,
+    panelRowCount: typeof pipelineSummary?.panel_row_count === "number" ? pipelineSummary.panel_row_count : null,
+    reportCharacterCount:
+      typeof pipelineSummary?.report_character_count === "number" ? pipelineSummary.report_character_count : null,
+    reportArtifactId,
+    evidenceLinkCount: links.length,
+    extraArtifactCount,
+  });
+  const transparencyNarrative = transparency?.narrative_answer;
+  const narrativeAnswer: NarrativeAnswerView = transparencyNarrative
+    ? {
+        mode: transparencyNarrative.mode,
+        thesis: transparencyNarrative.thesis,
+        sections: transparencyNarrative.sections.map((section) => ({
+          heading: section.heading,
+          body: section.body,
+        })),
+        fallbackReason: transparencyNarrative.fallback_reason,
+      }
+    : buildLegacyNarrativeAnswer({
+        rawSummaryLine,
+        takeaways,
+        emptyStateReason: emptyStateReasonCandidate,
+        blockingCaveats,
+      });
+  const summaryLine = narrativeAnswer.thesis;
+  const emptyStateReason = transparencyNarrative ? null : emptyStateReasonCandidate;
 
   const conclusionRider = buildConclusionRider(blockingCaveats, weakEvidenceSignals, nav);
   const evidenceProvenanceHint = buildEvidenceProvenanceHint(
@@ -412,8 +568,10 @@ export function buildPrimaryAnswerView(
 
   return {
     goalDisplay,
+    narrativeAnswer,
     summaryLine,
     orchestrationStatus,
+    emptyStateReason,
     takeawayRows,
     alignmentFindings,
     overallConfidence,
@@ -435,8 +593,10 @@ export function buildPrimaryAnswerView(
 export function buildCompactChatAnswerView(view: PrimaryAnswerView): CompactChatAnswerView {
   return {
     goalDisplay: view.goalDisplay,
+    narrativeAnswer: view.narrativeAnswer,
     summaryLine: view.summaryLine,
     orchestrationStatus: view.orchestrationStatus,
+    emptyStateReason: view.emptyStateReason,
     conclusionRider: view.conclusionRider,
   };
 }
@@ -447,8 +607,10 @@ export function buildChatAnswerCardView(
 ): ChatAnswerCardView {
   return {
     goalDisplay: view.goalDisplay,
+    narrativeAnswer: view.narrativeAnswer,
     summaryLine: view.summaryLine,
     orchestrationStatus: view.orchestrationStatus,
+    emptyStateReason: view.emptyStateReason,
     conclusionRider: view.conclusionRider,
     takeawayRows: view.takeawayRows,
     alignmentFindings: view.alignmentFindings,

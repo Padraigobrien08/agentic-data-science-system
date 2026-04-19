@@ -36,21 +36,29 @@ function buildAssistantMessage(
     projectId,
     runId: run.id,
   };
-  const answerView = buildPrimaryAnswerView(run, artifacts, orch, userReport, ai, nav);
+  const answerView = buildPrimaryAnswerView(
+    run,
+    artifacts,
+    orch,
+    userReport,
+    ai,
+    run.transparency,
+    nav,
+  );
   const answerCard = buildChatAnswerCardView(answerView, nav);
   const fallbackContent =
     run.error_summary?.trim() ||
     (run.status === "error"
       ? "Run ended with an error before a summary was produced."
-      : "Run completed without a summary line.");
+      : answerView.emptyStateReason ?? "Run completed without a narrative preview.");
 
   return {
     id: `assist-${run.id}`,
     role: "assistant",
-    content: answerCard.summaryLine ?? fallbackContent,
+    content: answerCard.narrativeAnswer.thesis ?? answerCard.emptyStateReason ?? fallbackContent,
     answerCard,
     runId: run.id,
-    runHref: `/projects/${projectId}/runs/${run.id}`,
+    runHref: `/projects/${projectId}/runs/${run.id}/trace`,
     runStatus: run.status,
     runCreatedAt: run.created_at,
     runFinishedAt: run.finished_at,
@@ -91,7 +99,7 @@ export async function buildProjectChatHistory(projectId: string, limit = 12): Pr
 
   const recentRuns: ChatRecentRun[] = recentRunsSorted.map((run) => ({
     id: run.id,
-    href: `/projects/${projectId}/runs/${run.id}`,
+    href: `/projects/${projectId}/runs/${run.id}/trace`,
     status: run.status,
     goalDisplay: run.orchestration_goal_text?.trim() || "Analysis run",
     createdAt: run.created_at,

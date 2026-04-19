@@ -120,7 +120,15 @@ export async function createAnalysisRunFromChat(
     projectId,
     runId: run.id,
   };
-  const answerView = buildPrimaryAnswerView(hydratedRun, artifacts, orch, userReport, ai, nav);
+  const answerView = buildPrimaryAnswerView(
+    hydratedRun,
+    artifacts,
+    orch,
+    userReport,
+    ai,
+    hydratedRun.transparency,
+    nav,
+  );
   const answerCard = buildChatAnswerCardView(answerView, nav);
 
   revalidatePath(`/projects/${projectId}/runs`);
@@ -131,7 +139,8 @@ export async function createAnalysisRunFromChat(
     ? "Background delivery was rerouted to immediate execution for this chat request."
     : "Workspace chat is executing synchronously right now.";
   const content =
-    answerCard.summaryLine ??
+    answerCard.narrativeAnswer.thesis ??
+    answerCard.emptyStateReason ??
     (execution.db_status === "error"
       ? `Run finished with an error for ${effectiveTickers.join(", ")}.`
       : `Analysis completed for ${effectiveTickers.join(", ")}.`);
@@ -139,7 +148,7 @@ export async function createAnalysisRunFromChat(
     reply: {
       requestId,
       runId: run.id,
-      runHref: `/projects/${projectId}/runs/${run.id}`,
+      runHref: `/projects/${projectId}/runs/${run.id}/trace`,
       answerCard,
       runStatus: hydratedRun.status,
       runCreatedAt: hydratedRun.created_at,

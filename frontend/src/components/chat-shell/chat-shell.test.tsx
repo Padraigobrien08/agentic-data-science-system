@@ -31,8 +31,15 @@ describe("ChatShell", () => {
         content: "MSFT margin pressure looks cyclical rather than structural.",
         answerCard: {
           goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+          narrativeAnswer: {
+            mode: "legacy",
+            thesis: "MSFT margin pressure looks cyclical rather than structural.",
+            sections: [],
+            fallbackReason: "legacy_summary",
+          },
           summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
           orchestrationStatus: "success",
+          emptyStateReason: null,
           conclusionRider: null,
           takeawayRows: [],
           alignmentFindings: [],
@@ -51,7 +58,7 @@ describe("ChatShell", () => {
           caveatOverflowHref: "/projects/project-1/runs/run-1/trace#run-context-transparency",
         },
         runId: "run-1",
-        runHref: "/projects/project-1/runs/run-1",
+        runHref: "/projects/project-1/runs/run-1/trace",
         runStatus: "success",
         runCreatedAt: "2026-04-18T19:58:00Z",
         runFinishedAt: "2026-04-18T20:00:00Z",
@@ -61,7 +68,7 @@ describe("ChatShell", () => {
     const recentRuns: ChatRecentRun[] = [
       {
         id: "run-1",
-        href: "/projects/project-1/runs/run-1",
+        href: "/projects/project-1/runs/run-1/trace",
         status: "success",
         goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
         createdAt: "2026-04-18T19:58:00Z",
@@ -93,9 +100,9 @@ describe("ChatShell", () => {
     });
     fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
 
-    expect(screen.getAllByText("Detect unusual financial changes for MSFT").length).toBeGreaterThan(1);
+    expect(screen.getAllByText("Detect unusual financial changes for MSFT")).toHaveLength(1);
     expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
-    expect(screen.getAllByText("Workspace chat is executing synchronously right now.").length).toBeGreaterThan(1);
-    expect(screen.getAllByText("Assistant").length).toBe(2);
+    expect(screen.getAllByText("Workspace chat is executing synchronously right now.")).toHaveLength(1);
+    expect(screen.getByText("Answer")).toBeTruthy();
   });
 });

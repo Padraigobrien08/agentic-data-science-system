@@ -111,8 +111,14 @@ describe("buildProjectChatHistory", () => {
     });
     expect(result.messages[1]).toMatchObject({
       role: "assistant",
-      runHref: "/projects/project-1/runs/run-1",
+      content: "MSFT margin pressure looks cyclical rather than structural.",
+      runHref: "/projects/project-1/runs/run-1/trace",
       answerCard: {
+        narrativeAnswer: {
+          mode: "legacy",
+          thesis: "MSFT margin pressure looks cyclical rather than structural.",
+          fallbackReason: "legacy_summary",
+        },
         summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
         navigationItems: expect.arrayContaining([
           expect.objectContaining({ key: "report", href: "/artifacts/report-run-1" }),
@@ -122,7 +128,7 @@ describe("buildProjectChatHistory", () => {
     expect(result.recentRuns).toHaveLength(2);
     expect(result.recentRuns[0]).toMatchObject({
       id: "run-2",
-      href: "/projects/project-1/runs/run-2",
+      href: "/projects/project-1/runs/run-2/trace",
     });
   });
 });

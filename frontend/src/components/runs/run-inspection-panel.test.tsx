@@ -10,8 +10,15 @@ import type { PrimaryAnswerView } from "@/lib/run-primary-view";
 
 const view: PrimaryAnswerView = {
   goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+  narrativeAnswer: {
+    mode: "legacy",
+    thesis: "MSFT margin pressure looks cyclical rather than structural.",
+    sections: [],
+    fallbackReason: "legacy_summary",
+  },
   summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
   orchestrationStatus: "success",
+  emptyStateReason: null,
   takeawayRows: [
     {
       text: "Revenue growth deterioration appears in several recent quarters.",
