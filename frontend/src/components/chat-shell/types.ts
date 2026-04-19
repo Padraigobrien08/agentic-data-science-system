@@ -6,7 +6,6 @@
 import type { AnalysisRunStatus, BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
 import type { CompactChatAnswerView } from "@/lib/run-primary-view";
 
-
 export type ChatUserMessage = {
   id: string;
   role: "user";
@@ -44,10 +43,12 @@ export type ChatAssistantMessage = {
 
 export type ChatMessage = ChatUserMessage | ChatSystemMessage | ChatAssistantMessage;
 
-export type ChatSessionStub = {
+export type ChatRecentRun = {
   id: string;
-  title: string;
-  updatedAt: string;
+  href: string;
+  status: AnalysisRunStatus;
+  goalDisplay: string;
+  createdAt: string;
 };
 
 export type ChatBackgroundDelivery = BackgroundDeliveryHealth;
