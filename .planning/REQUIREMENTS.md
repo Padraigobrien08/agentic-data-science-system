@@ -15,7 +15,7 @@
 
 - [x] **NAV-01**: User can open report, evidence, artifacts, critic output, and trace links from one compact navigation area attached to the chat answer
 - [x] **NAV-02**: User can jump from a finding or caveat in chat to the exact supporting artifact or trace target
-- [ ] **NAV-03**: User can use a simplified run detail page as a secondary inspection surface focused on verification rather than primary answer reading
+- [x] **NAV-03**: User can use a simplified run detail page as a secondary inspection surface focused on verification rather than primary answer reading
 
 ### Request Handling
 
@@ -61,7 +61,7 @@
 | CHAT-03 | Phase 14 | Complete |
 | NAV-01 | Phase 15 | Complete |
 | NAV-02 | Phase 15 | Complete |
-| NAV-03 | Phase 16 | Pending |
+| NAV-03 | Phase 16 | Complete |
 | PROMPT-01 | Phase 13 | Complete |
 | PROMPT-02 | Phase 13 | Complete |
 | PROMPT-03 | Phase 13 | Complete |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-19 after Phase 15 completion*
+*Last updated: 2026-04-19 after Phase 16 completion*

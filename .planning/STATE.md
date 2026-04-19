@@ -2,38 +2,38 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to execute Phase 16
-stopped_at: Phase 16 planning complete; ready to execute
-last_updated: "2026-04-19T11:42:00Z"
+status: Ready to audit milestone v1.2
+stopped_at: Phase 16 complete; ready to audit milestone
+last_updated: "2026-04-19T11:50:00Z"
 progress:
   total_phases: 5
-  completed_phases: 4
-  total_plans: 12
-  completed_plans: 12
+  completed_phases: 5
+  total_plans: 15
+  completed_plans: 15
 ---
 
 # Project State
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-18)
+See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Execute Phase 16 of `v1.2 Chat-First Analysis Experience`, focused on reducing the standalone run page to a secondary verification surface now that chat owns primary answer reading and first-pass evidence navigation.
+**Current focus:** Audit and archive milestone `v1.2 Chat-First Analysis Experience` now that all planned phases and requirements are complete.
 
 ## Current Position
 
-Phase: 16
-Plan: Ready to execute
+Phase: milestone closeout
+Plan: Ready to audit
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to execute Phase 16
-Last activity: 2026-04-19 — Planned Phase 16 around verification-first run-page framing, duplication reduction, and regression hardening
+Status: Ready to audit milestone v1.2
+Last activity: 2026-04-19 — Completed Phase 16 by reducing the standalone run page to a verification-first inspection surface
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 41
+- Total plans completed: 44
 - Average duration: 9 min
 - Total execution time: 5.4 hours
 
@@ -56,11 +56,12 @@ Last activity: 2026-04-19 — Planned Phase 16 around verification-first run-pag
 | 13-analyst-prompt-routing | 3 | 23min | 8min |
 | 14-chat-native-result-contract | 3 | 45min | 15min |
 | 15-evidence-navigation-in-chat | 3 | 25min | 8min |
+| 16-secondary-run-inspection | 3 | 17min | 6min |
 
 **Recent Trend:**
 
-- Last 5 plans: 14-chat-native-result-contract-02 (18min), 14-chat-native-result-contract-03 (12min), 15-evidence-navigation-in-chat-01 (8min), 15-evidence-navigation-in-chat-02 (9min), 15-evidence-navigation-in-chat-03 (8min)
-- Trend: Stable; answer reading and first-pass verification now live in chat, so the remaining milestone bottleneck is standalone run-page duplication rather than missing inline evidence context.
+- Last 5 plans: 15-evidence-navigation-in-chat-02 (9min), 15-evidence-navigation-in-chat-03 (8min), 16-secondary-run-inspection-01 (6min), 16-secondary-run-inspection-02 (5min), 16-secondary-run-inspection-03 (6min)
+- Trend: Stable; the milestone’s product hierarchy is now coherent, and the next work should be chosen at milestone level rather than from leftover chat-flow gaps.
 
 ## Accumulated Context
 
@@ -107,11 +108,10 @@ None.
 
 ### Blockers/Concerns
 
-- The standalone run page still duplicates too much answer-reading content now that chat has become the primary reading and first-pass verification surface.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 16 planning complete; ready to execute
+Stopped at: Phase 16 complete; ready to audit milestone
 Resume file: .planning/PROJECT.md

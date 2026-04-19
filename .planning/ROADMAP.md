@@ -76,7 +76,8 @@
 
 **Goal**: The standalone run page becomes a secondary verification and deep-dive surface instead of the primary place users read the answer.  
 **Depends on**: Phase 15  
-**Plans**: 3 planned
+**Plans**: 3/3 completed
+**Completed**: 2026-04-19
 
 **Details:**
 - Requirements: `NAV-03`
@@ -96,4 +97,4 @@
 |-----------|--------|-------|--------|---------|
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
-| v1.2 Chat-First Analysis Experience | 12-16 | 12 | Active | — |
+| v1.2 Chat-First Analysis Experience | 12-16 | 15 | Active | — |

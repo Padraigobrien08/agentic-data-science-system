@@ -1,9 +1,9 @@
 ---
 phase: 16
 slug: secondary-run-inspection
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-19
 ---
 
@@ -32,15 +32,15 @@ created: 2026-04-19
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 16-01 | 01 | 1 | NAV-03 | component/page framing | `cd frontend && npm run test -- src/components/runs/run-inspection-panel.test.tsx` | ❌ new | ⬜ pending |
-| 16-02 | 02 | 2 | NAV-03 | duplication reduction | `cd frontend && npm run test -- src/components/runs/run-inspection-panel.test.tsx` | ⚠️ extend new | ⬜ pending |
-| 16-03 | 03 | 3 | NAV-03 | regression/build | `cd frontend && npm run test -- src/components/runs/run-inspection-panel.test.tsx src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx && npm run build` | ⚠️ extend new | ⬜ pending |
+| 16-01 | 01 | 1 | NAV-03 | component/page framing | `cd frontend && npm run test -- src/components/runs/run-inspection-panel.test.tsx` | ❌ new | ✅ green |
+| 16-02 | 02 | 2 | NAV-03 | duplication reduction | `cd frontend && npm run test -- src/components/runs/run-inspection-panel.test.tsx` | ⚠️ extend new | ✅ green |
+| 16-03 | 03 | 3 | NAV-03 | regression/build | `cd frontend && npm run test -- src/components/runs/run-inspection-panel.test.tsx src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx && npm run build` | ⚠️ extend new | ✅ green |
 
 ## Wave 0 Requirements
 
-- [ ] Add `frontend/src/components/runs/run-inspection-panel.test.tsx` — verification-first run-page composition and copy
-- [ ] Extend or cover removal of duplicated findings/confidence/evidence reading sections
-- [ ] Close with the frontend production build
+- [x] Add `frontend/src/components/runs/run-inspection-panel.test.tsx` — verification-first run-page composition and copy
+- [x] Extend or cover removal of duplicated findings/confidence/evidence reading sections
+- [x] Close with the frontend production build
 
 ## Manual-Only Verifications
 
@@ -50,11 +50,11 @@ created: 2026-04-19
 
 ## Validation Sign-Off
 
-- [ ] All planned tasks have automated verification commands or explicit Wave 0 gaps
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification
-- [ ] Wave 0 adds run-page component coverage
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 20s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All planned tasks have automated verification commands or explicit Wave 0 gaps
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification
+- [x] Wave 0 adds run-page component coverage
+- [x] No watch-mode flags
+- [x] Feedback latency < 20s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** complete
