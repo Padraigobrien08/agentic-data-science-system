@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Narrative Answers and Visual Evidence
-status: Ready to discuss Phase 17
-stopped_at: v1.3 initialized; requirements and roadmap defined
-last_updated: "2026-04-19T21:55:00Z"
+status: Ready to plan Phase 17
+stopped_at: Phase 17 context gathered
+last_updated: "2026-04-19T22:15:00Z"
 progress:
   total_phases: 5
   completed_phases: 0
@@ -26,8 +26,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 Phase: 17
 Plan: not started
 Milestone: v1.3 Narrative Answers and Visual Evidence
-Status: Ready to discuss Phase 17
-Last activity: 2026-04-19 — started `v1.3 Narrative Answers and Visual Evidence` from live chat UX feedback
+Status: Ready to plan Phase 17
+Last activity: 2026-04-19 — captured Phase 17 narrative-answer context and locked the answer-contract decisions
 
 ## Current Milestone
 
@@ -37,4 +37,4 @@ Last activity: 2026-04-19 — started `v1.3 Narrative Answers and Visual Evidenc
 
 ## Next Command
 
-`$gsd-discuss-phase 17`
+`$gsd-plan-phase 17`
