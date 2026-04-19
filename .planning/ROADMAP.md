@@ -62,7 +62,7 @@
 
 **Goal**: Users can inspect findings, caveats, and linked evidence directly from the chat answer through one coherent navigation surface.  
 **Depends on**: Phase 14  
-**Plans**: 0 planned
+**Plans**: 3 planned
 
 **Details:**
 - Requirements: `CHAT-02`, `NAV-01`, `NAV-02`

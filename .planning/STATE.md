@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to plan Phase 15
-stopped_at: Phase 15 context captured; ready to plan
-last_updated: "2026-04-19T10:00:00Z"
+status: Ready to execute Phase 15
+stopped_at: Phase 15 planning complete; ready to execute
+last_updated: "2026-04-19T11:25:00Z"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Plan Phase 15 of `v1.2 Chat-First Analysis Experience`, focused on attaching findings, caveats, and evidence navigation to the now-stable chat-native answer shell.
+**Current focus:** Execute Phase 15 of `v1.2 Chat-First Analysis Experience`, focused on attaching findings, caveats, and evidence navigation to the now-stable chat-native answer shell.
 
 ## Current Position
 
 Phase: 15
-Plan: Ready to plan
+Plan: Ready to execute
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to plan Phase 15
-Last activity: 2026-04-19 — Captured Phase 15 context around inline findings, confidence/caveats, and compact evidence navigation in chat
+Status: Ready to execute Phase 15
+Last activity: 2026-04-19 — Planned Phase 15 around a richer chat answer contract, inline evidence-reading UI, and exact-jump hardening
 
 ## Performance Metrics
 
@@ -106,12 +106,12 @@ None.
 
 ### Blockers/Concerns
 
-- Findings, caveats, and evidence navigation are still fragmented across the run page instead of one compact chat-attached surface.
+- Findings, caveats, and evidence navigation are still fragmented across the run page instead of one compact chat-attached surface until Phase 15 execution lands.
 - The standalone run page still duplicates too much answer-reading content now that chat has become the primary reading surface.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 15 context captured; ready to plan
+Stopped at: Phase 15 planning complete; ready to execute
 Resume file: .planning/PROJECT.md
