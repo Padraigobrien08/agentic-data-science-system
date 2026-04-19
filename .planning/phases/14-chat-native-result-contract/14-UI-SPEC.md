@@ -1,10 +1,11 @@
 ---
 phase: 14
 slug: chat-native-result-contract
-status: draft
+status: approved
 shadcn_initialized: true
 preset: new-york
 created: 2026-04-19
+reviewed_at: 2026-04-19T09:14:09Z
 ---
 
 # Phase 14 — UI Design Contract
@@ -24,6 +25,30 @@ created: 2026-04-19
 | Font | `"Avenir Next", "Segoe UI", "Helvetica Neue", sans-serif`; display accents `"Iowan Old Style", "Palatino Linotype", serif`; `ui-monospace` for run ids and timestamps |
 
 Source: pre-populated from `frontend/components.json`, `frontend/tailwind.config.ts`, `frontend/src/app/globals.css`, and `npx shadcn info`.
+
+---
+
+## Visual Hierarchy
+
+**Primary focal point:** the latest assistant answer card. The user should land on the conclusion first, not on run links, technical metadata, or transcript chrome.
+
+**Reading order:**
+1. Latest pending or completed assistant answer card
+2. Compact run identity strip attached to that answer
+3. The user prompt that produced the answer
+4. Prior prompt/answer pairs in transcript order
+5. Composer and scope editor
+
+**Layout rules:**
+- Keep one primary transcript column. The sidebar stays secondary navigation, not a competing content region.
+- The assistant answer card must feel like a compact analysis surface, not a generic bubble with utility links.
+- The conclusion block is the first readable content inside the assistant card; goal and technical disclosure sit below it.
+- The run identity strip is supportive metadata at the bottom of the card, never the visual anchor.
+- Pending and terminal answer cards should preserve the same footprint so in-place replacement does not shift the transcript abruptly.
+
+**Icon-only controls:**
+- Avoid icon-only controls in the transcript and composer for this phase.
+- If an icon-only affordance is unavoidable, it must include an `aria-label`, tooltip, and a nearby text equivalent on narrow screens.
 
 ---
 
@@ -70,6 +95,7 @@ Source: normalized from existing chat and run-answer surfaces. Phase 14 is limit
 | Destructive | `hsl(var(--ui-destructive))` / `#dc2626` | Destructive actions only |
 
 Accent reserved for: the per-answer `Open run` button, the global `Send` button, and focus-visible outlines. Do not use accent for secondary links, status badges, timestamps, run ids, or background-delivery notes.
+60/30/10 split is explicit for this phase: transcript canvas is dominant, structured cards are secondary, and accent is constrained to the one primary action plus focus state.
 
 Source: pre-populated from `frontend/src/app/globals.css` and `frontend/src/components/ui/button.tsx`.
 
@@ -152,11 +178,11 @@ Source: pre-populated from `frontend/components.json`, `npx shadcn info`, and in
 
 ## Checker Sign-Off
 
-- [ ] Dimension 1 Copywriting: PASS
-- [ ] Dimension 2 Visuals: PASS
-- [ ] Dimension 3 Color: PASS
-- [ ] Dimension 4 Typography: PASS
-- [ ] Dimension 5 Spacing: PASS
-- [ ] Dimension 6 Registry Safety: PASS
+- [x] Dimension 1 Copywriting: PASS
+- [x] Dimension 2 Visuals: PASS
+- [x] Dimension 3 Color: PASS
+- [x] Dimension 4 Typography: PASS
+- [x] Dimension 5 Spacing: PASS
+- [x] Dimension 6 Registry Safety: PASS
 
-**Approval:** pending
+**Approval:** approved 2026-04-19
