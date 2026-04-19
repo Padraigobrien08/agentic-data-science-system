@@ -1,10 +1,11 @@
 ---
 phase: 14
 slug: chat-native-result-contract
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-19
+verified: 2026-04-19T09:43:00Z
 ---
 
 # Phase 14 - Validation Strategy
@@ -32,18 +33,18 @@ created: 2026-04-19
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 14-01 | 01 | 1 | CHAT-01 | component/view-model | `cd frontend && npm run test -- src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx` | ⚠️ extend existing | ⬜ pending |
-| 14-02 | 02 | 2 | CHAT-01, CHAT-03 | page/action hydration | `cd frontend && npm run test -- src/actions/runs.test.ts src/components/chat-shell/chat-shell.test.tsx` | ⚠️ extend existing | ⬜ pending |
-| 14-03 | 03 | 3 | CHAT-03 | rendering/build | `cd frontend && npm run test -- src/actions/runs.test.ts src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx && npm run build` | ✅ extend existing | ⬜ pending |
+| 14-01 | 01 | 1 | CHAT-01 | component/view-model | `cd frontend && npm run test -- src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx` | ⚠️ extend existing | ✅ green |
+| 14-02 | 02 | 2 | CHAT-01, CHAT-03 | page/action hydration | `cd frontend && npm run test -- src/actions/runs.test.ts src/components/chat-shell/chat-shell.test.tsx` | ⚠️ extend existing | ✅ green |
+| 14-03 | 03 | 3 | CHAT-03 | rendering/build | `cd frontend && npm run test -- src/actions/runs.test.ts src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx && npm run build` | ✅ extend existing | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] Extend `frontend/src/actions/runs.test.ts` — compact answer payload returns on supported runs and still upgrades one assistant slot per request
-- [ ] Extend `frontend/src/components/chat-shell/chat-message-list.test.tsx` — structured answer block and compact run linkage render in completed assistant replies
-- [ ] Extend `frontend/src/components/chat-shell/chat-shell.test.tsx` — hydrated history renders on load and pending assistant rows upgrade in place
-- [ ] Add or extend a compact answer derivation test around the reused `run-primary-view` seam if the phase introduces a chat-specific subset builder
+- [x] Extend `frontend/src/actions/runs.test.ts` — compact answer payload returns on supported runs and still upgrades one assistant slot per request
+- [x] Extend `frontend/src/components/chat-shell/chat-message-list.test.tsx` — structured answer block and compact run linkage render in completed assistant replies
+- [x] Extend `frontend/src/components/chat-shell/chat-shell.test.tsx` — hydrated history renders on load and pending assistant rows upgrade in place
+- [x] Add or extend a compact answer derivation test around the reused `run-primary-view` seam if the phase introduces a chat-specific subset builder
 
 ## Manual-Only Verifications
 
@@ -54,11 +55,11 @@ created: 2026-04-19
 
 ## Validation Sign-Off
 
-- [ ] All planned tasks have automated verification commands or explicit Wave 0 gaps
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification
-- [ ] Wave 0 covers chat rendering, run-action return shape, and hydrated-history behavior
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 20s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All planned tasks have automated verification commands or explicit Wave 0 gaps
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification
+- [x] Wave 0 covers chat rendering, run-action return shape, and hydrated-history behavior
+- [x] No watch-mode flags
+- [x] Feedback latency < 20s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** complete

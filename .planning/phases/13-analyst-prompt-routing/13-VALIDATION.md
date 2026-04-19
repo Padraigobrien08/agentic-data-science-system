@@ -1,10 +1,11 @@
 ---
 phase: 13
 slug: analyst-prompt-routing
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-18
+verified: 2026-04-19T00:16:00Z
 ---
 
 # Phase 13 - Validation Strategy
@@ -32,18 +33,18 @@ created: 2026-04-18
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 13-01 | 01 | 1 | PROMPT-01, PROMPT-02 | orchestration | `python3 -m pytest tests/orchestration/test_intent.py tests/orchestration/test_planner.py tests/orchestration/test_planner_alignment_regression.py tests/orchestration/test_prompt_scope.py -q --tb=short` | ✅ extend existing / ❌ new scope test | ⬜ pending |
-| 13-02 | 02 | 2 | PROMPT-03 | backend/api | `python3 -m pytest tests/orchestration/test_planner.py tests/test_prompt_routing_api.py -q --tb=short` | ✅ extend existing / ❌ new API test | ⬜ pending |
-| 13-03 | 03 | 3 | PROMPT-01, PROMPT-02, PROMPT-03 | frontend | `cd frontend && npm run test -- src/actions/runs.test.ts src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx` | ❌ Wave 0 closes missing action test | ⬜ pending |
+| 13-01 | 01 | 1 | PROMPT-01, PROMPT-02 | orchestration | `python3 -m pytest tests/orchestration/test_intent.py tests/orchestration/test_planner.py tests/orchestration/test_planner_alignment_regression.py tests/orchestration/test_prompt_scope.py -q --tb=short` | ✅ extend existing / ❌ new scope test | ✅ green |
+| 13-02 | 02 | 2 | PROMPT-03 | backend/api | `python3 -m pytest tests/orchestration/test_planner.py tests/test_prompt_routing_api.py -q --tb=short` | ✅ extend existing / ❌ new API test | ✅ green |
+| 13-03 | 03 | 3 | PROMPT-01, PROMPT-02, PROMPT-03 | frontend | `cd frontend && npm run test -- src/actions/runs.test.ts src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx` | ❌ Wave 0 closes missing action test | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] `tests/orchestration/test_prompt_scope.py` — deterministic prompt-scope narrowing and out-of-scope symbol detection
-- [ ] `tests/test_prompt_routing_api.py` — additive `route-preview` API contract and ownership behavior
-- [ ] `frontend/src/actions/runs.test.ts` — unsupported preview path returns guidance and does not create or execute a run
-- [ ] `frontend/src/components/chat-shell/chat-message-list.test.tsx` — rewrite suggestions render inline without run links
+- [x] `tests/orchestration/test_prompt_scope.py` — deterministic prompt-scope narrowing and out-of-scope symbol detection
+- [x] `tests/test_prompt_routing_api.py` — additive `route-preview` API contract and ownership behavior
+- [x] `frontend/src/actions/runs.test.ts` — unsupported preview path returns guidance and does not create or execute a run
+- [x] `frontend/src/components/chat-shell/chat-message-list.test.tsx` — rewrite suggestions render inline without run links
 
 ## Manual-Only Verifications
 
@@ -53,11 +54,11 @@ created: 2026-04-18
 
 ## Validation Sign-Off
 
-- [ ] All planned tasks have automated verification commands or explicit Wave 0 gaps
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification
-- [ ] Wave 0 covers the missing prompt-scope, preview-API, and chat-action references
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 30s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All planned tasks have automated verification commands or explicit Wave 0 gaps
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification
+- [x] Wave 0 covers the missing prompt-scope, preview-API, and chat-action references
+- [x] No watch-mode flags
+- [x] Feedback latency < 30s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** complete
