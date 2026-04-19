@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
 status: Ready to plan Phase 14
-stopped_at: Phase 14 context captured; ready to plan
-last_updated: "2026-04-19T00:32:00Z"
+stopped_at: Phase 14 UI-SPEC approved; ready to plan
+last_updated: "2026-04-19T09:14:09Z"
 progress:
   total_phases: 5
   completed_phases: 2
@@ -27,7 +27,7 @@ Phase: 14
 Plan: Not started
 Milestone: `v1.2 Chat-First Analysis Experience`
 Status: Ready to plan Phase 14
-Last activity: 2026-04-19 — Captured Phase 14 context covering compact inline answer scope, in-place message upgrades, persisted-run history hydration, compact run linkage, and no implicit prior-run context carry-forward
+Last activity: 2026-04-19 — Approved Phase 14 UI-SPEC covering compact chat-native answer cards, reload-safe run-backed history, one in-place assistant upgrade slot, and a single-action run identity strip
 
 ## Performance Metrics
 
@@ -113,5 +113,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 14 context captured; ready to plan
+Stopped at: Phase 14 UI-SPEC approved; ready to plan
 Resume file: .planning/PROJECT.md
