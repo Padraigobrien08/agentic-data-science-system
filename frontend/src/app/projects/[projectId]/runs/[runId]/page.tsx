@@ -4,8 +4,8 @@ import { notFound } from "next/navigation";
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { ExecuteRunButton } from "@/components/runs/execute-run-button";
+import { RunInspectionPanel } from "@/components/runs/run-inspection-panel";
 import { RunPipelinePhaseTrack } from "@/components/runs/run-pipeline-phase-track";
-import { RunPrimaryAnswer } from "@/components/runs/run-primary-answer";
 import { RunStateBanner } from "@/components/runs/run-state-banner";
 import { StatusBadge } from "@/components/ui/technical";
 import { ApiError } from "@/lib/api/errors";
@@ -47,7 +47,7 @@ export default async function RunDetailPage({
     if (e instanceof ApiError && e.status === 401) {
       return (
         <div className="space-y-3">
-          <h1 className="text-lg font-semibold">Run answer</h1>
+          <h1 className="text-lg font-semibold">Run inspection</h1>
           <SignInHint nextPath={`/projects/${projectId}/runs/${runId}`} />
         </div>
       );
@@ -55,7 +55,7 @@ export default async function RunDetailPage({
     const msg = e instanceof ApiError ? e.body || e.message : "Unknown error";
     return (
       <div className="space-y-2">
-        <h1 className="text-lg font-semibold">Run answer</h1>
+        <h1 className="text-lg font-semibold">Run inspection</h1>
         <p className="font-mono text-sm text-red-700 dark:text-red-400">{msg}</p>
       </div>
     );
@@ -81,9 +81,13 @@ export default async function RunDetailPage({
         <header className="flex flex-col gap-4 border-b border-[var(--border)] pb-5 sm:flex-row sm:items-start sm:justify-between">
           <div className="min-w-0 space-y-2">
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
-              Primary summary
+              Inspection surface
             </p>
-            <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Run answer</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Run inspection</h1>
+            <p className="max-w-prose text-xs leading-relaxed text-[var(--foreground)]">
+              Chat is the primary answer surface. Use this page to verify execution, inspect artifacts, and rerun when
+              needed.
+            </p>
             <div className="flex flex-wrap items-center gap-2">
               <StatusBadge status={run.status} variant="friendly" />
               <span className="text-xs text-[var(--muted)]">
@@ -97,6 +101,12 @@ export default async function RunDetailPage({
             </details>
           </div>
           <div className="flex flex-shrink-0 flex-wrap gap-2">
+            <Link
+              href={`/projects/${projectId}/chat`}
+              className="rounded-lg border border-[var(--border)] bg-[var(--foreground)] px-3 py-2 text-sm font-medium text-[var(--background)]"
+            >
+              Back to chat
+            </Link>
             {canExecute ? (
               <ExecuteRunButton projectId={projectId} runId={runId} />
             ) : null}
@@ -104,13 +114,7 @@ export default async function RunDetailPage({
               href={traceHref}
               className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
             >
-              Deep dive
-            </Link>
-            <Link
-              href={`/projects/${projectId}/chat`}
-              className="rounded-lg border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
-            >
-              Chat
+              Open trace
             </Link>
             <Link
               href={`/projects/${projectId}/runs`}
@@ -135,7 +139,7 @@ export default async function RunDetailPage({
           </div>
         ) : null}
 
-        <RunPrimaryAnswer
+        <RunInspectionPanel
           projectId={projectId}
           runId={runId}
           runStatus={run.status}

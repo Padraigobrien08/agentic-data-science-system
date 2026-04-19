@@ -60,7 +60,7 @@ export function RunTraceSummaryView({
           <CardContent className="space-y-6">
             <p className="max-w-2xl text-base leading-8 text-[var(--muted)]">
               {shell.run.orchestration_goal_text ??
-                "This run has no stored orchestration goal text. Use the run answer for the conclusion, then work down the execution spine here."}
+                "This run has no stored orchestration goal text. Use the run inspection for secondary verification, then work down the execution spine here."}
             </p>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-[20px] border border-[var(--border)] bg-white/70 p-4">
@@ -81,7 +81,7 @@ export function RunTraceSummaryView({
                 <Link href={collectionHref(projectId, runId, "steps")}>Inspect step details</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href={runAnswerHref}>Run answer</Link>
+                <Link href={runAnswerHref}>Run inspection</Link>
               </Button>
             </div>
           </CardContent>
@@ -159,7 +159,7 @@ export function RunTraceSummaryView({
               <Badge variant="default">Collection error</Badge>
               <CardTitle className="text-[20px]">Trace details couldn&apos;t load.</CardTitle>
               <CardDescription>
-                Reload this page. If the issue persists, open the run answer or return to the runs list while the backend finishes processing.
+                Reload this page. If the issue persists, open the run inspection or return to the runs list while the backend finishes processing.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -171,7 +171,7 @@ export function RunTraceSummaryView({
               <Badge variant="muted">Empty state</Badge>
               <CardTitle className="text-[20px]">No trace details yet</CardTitle>
               <CardDescription>
-                This run has not produced trace records yet. Wait for execution to finish, reopen the run answer, or retry the run if it is stuck.
+                This run has not produced trace records yet. Wait for execution to finish, reopen the run inspection, or retry the run if it is stuck.
               </CardDescription>
             </CardHeader>
           </Card>

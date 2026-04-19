@@ -266,7 +266,7 @@ export default async function RunTracePage({
             rawDetail,
           };
 
-  const runAnswerHref = `/projects/${projectId}/runs/${runId}`;
+  const runInspectionHref = `/projects/${projectId}/runs/${runId}`;
 
   return (
     <div className="space-y-6">
@@ -284,14 +284,14 @@ export default async function RunTracePage({
             </p>
             <details className="max-w-prose text-[11px] leading-relaxed text-[var(--muted)]">
               <summary className="cursor-pointer font-medium text-[var(--foreground)] underline decoration-dotted underline-offset-2">
-                How this differs from run answer
+                How this differs from run inspection
               </summary>
               <p className="mt-2">
                 This page starts with the execution spine and collection summaries. Use{" "}
-                <Link href={runAnswerHref} className="font-medium text-[var(--foreground)] underline">
-                  run answer
+                <Link href={runInspectionHref} className="font-medium text-[var(--foreground)] underline">
+                  run inspection
                 </Link>{" "}
-                first for the conclusion, then return here to verify the evidence trail.
+                for secondary verification, then work down the execution spine here.
               </p>
             </details>
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
@@ -309,10 +309,10 @@ export default async function RunTracePage({
           </div>
           <div className="flex flex-shrink-0 flex-wrap gap-2">
             <Link
-              href={runAnswerHref}
+              href={runInspectionHref}
               className="rounded-full border border-[var(--border)] bg-[var(--foreground)] px-3 py-2 text-center text-sm font-medium text-[var(--background)]"
             >
-              Run answer
+              Run inspection
             </Link>
             <Link
               href={`/projects/${projectId}/chat`}
@@ -330,7 +330,7 @@ export default async function RunTracePage({
         </div>
       </header>
 
-      <RunStateBanner status={shell.run.status} surface="trace" runAnswerHref={runAnswerHref} />
+      <RunStateBanner status={shell.run.status} surface="trace" runAnswerHref={runInspectionHref} />
 
       <RunPipelinePhaseTrack status={shell.run.status} steps={shell.timeline_preview} />
 
@@ -339,7 +339,7 @@ export default async function RunTracePage({
         runId={runId}
         shell={shell}
         collectionPanel={collectionPanel}
-        runAnswerHref={runAnswerHref}
+        runAnswerHref={runInspectionHref}
         activeCollection={activeCollection}
         collectionError={collectionError}
         rawDetail={rawDetail}

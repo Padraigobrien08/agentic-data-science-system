@@ -260,7 +260,7 @@ export function RunTraceCollectionPanel(props: RunTraceCollectionPanelProps) {
               <div className="rounded-[20px] border border-dashed border-[var(--border)] bg-white/55 px-5 py-8">
                 <p className="text-base font-semibold text-[var(--foreground)]">No trace details yet</p>
                 <p className="mt-2 max-w-prose text-sm leading-6 text-[var(--muted)]">
-                  This run has not produced trace records yet. Wait for execution to finish, reopen the run answer, or retry the run if it is stuck.
+                  This run has not produced trace records yet. Wait for execution to finish, reopen the run inspection, or retry the run if it is stuck.
                 </p>
               </div>
             ) : null}

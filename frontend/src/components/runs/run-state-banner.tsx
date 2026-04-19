@@ -47,12 +47,12 @@ export function RunStateBanner({ status, surface, runAnswerHref }: Props) {
     return null;
   }
 
-  /** Run answer header already links to deep dive — avoid repeating the same CTA. */
+  /** Run inspection header already links to trace — avoid repeating the same CTA. */
   const cta =
     model.showOutcomeCta && surface === "trace" ? (
       <p className="mt-2 text-xs text-[var(--muted)]">
         <Link href={runAnswerHref} className="font-medium text-[var(--foreground)] underline">
-          View run answer
+          View run inspection
         </Link>{" "}
         for the condensed summary.
       </p>

@@ -446,7 +446,7 @@ export function RunTraceExperience({
         <p className="mb-2 text-[10px] leading-snug text-[var(--muted)]">
           The{" "}
           <Link href={`/projects/${projectId}/runs/${runId}`} className="text-[var(--foreground)] underline">
-            run answer
+            run inspection
           </Link>{" "}
           page routes conclusion and finding chips to this roster and to critic/report sections above.
         </p>

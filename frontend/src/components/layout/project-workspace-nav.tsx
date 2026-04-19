@@ -49,7 +49,7 @@ export function ProjectWorkspaceNav({ projectId, runId, current }: Props) {
             ·
           </span>
           <Link href={runBase} className={current === "run" ? activeBtn : navBtn}>
-            Run answer
+            Run inspection
           </Link>
           <span className="text-[var(--muted)]" aria-hidden>
             ·
