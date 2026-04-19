@@ -2,9 +2,9 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to discuss Phase 14
-stopped_at: Phase 13 completed; ready to discuss Phase 14
-last_updated: "2026-04-19T00:16:00Z"
+status: Ready to plan Phase 14
+stopped_at: Phase 14 context captured; ready to plan
+last_updated: "2026-04-19T00:32:00Z"
 progress:
   total_phases: 5
   completed_phases: 2
@@ -19,15 +19,15 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Discuss Phase 14 of `v1.2 Chat-First Analysis Experience`, focused on making completed run answers first-class chat messages with stable run linkage.
+**Current focus:** Plan Phase 14 of `v1.2 Chat-First Analysis Experience`, focused on making completed run answers first-class chat messages with stable run linkage.
 
 ## Current Position
 
 Phase: 14
 Plan: Not started
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to discuss Phase 14
-Last activity: 2026-04-18 — Completed Phase 13 with deterministic routing expansion, route previews, rewrite guidance, and chat/example alignment
+Status: Ready to plan Phase 14
+Last activity: 2026-04-19 — Captured Phase 14 context covering compact inline answer scope, in-place message upgrades, persisted-run history hydration, compact run linkage, and no implicit prior-run context carry-forward
 
 ## Performance Metrics
 
@@ -93,6 +93,11 @@ Decisions are logged in PROJECT.md Key Decisions table. Recent decisions affecti
 - [Phase 13-analyst-prompt-routing]: Unsupported routing should return concrete rewrite suggestions, and any LLM rescue path must remain explicit, gated, and auditable.
 - [Phase 13-analyst-prompt-routing]: The planned implementation is split into 3 sequential waves: deterministic routing foundation, deterministic preview/guidance contract, and chat/example alignment.
 - [Phase 13-analyst-prompt-routing]: Planner guidance stays on PlanningOutcome so preview callers return the exact deterministic routing result instead of re-deriving suggestions in the API layer.
+- [Phase 14-chat-native-result-contract]: Move a compact primary answer block into chat now, while keeping findings, caveats, and navigation depth for Phase 15.
+- [Phase 14-chat-native-result-contract]: Each user prompt should keep one assistant message that upgrades in place from pending to final instead of emitting duplicate completion chatter.
+- [Phase 14-chat-native-result-contract]: Reload-safe chat history should be hydrated from persisted project runs, but Phase 14 should not add full persisted chat-thread infrastructure yet.
+- [Phase 14-chat-native-result-contract]: Completed chat answers should show a compact run identity strip with one primary run action, not the current multi-link sprawl.
+- [Phase 14-chat-native-result-contract]: Follow-up prompts stay as new analyses in the same visible thread, without implicit prior-run context injection.
 
 ### Pending Todos
 
@@ -108,5 +113,5 @@ None.
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 13 completed; ready to discuss Phase 14
+Stopped at: Phase 14 context captured; ready to plan
 Resume file: .planning/PROJECT.md
