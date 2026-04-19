@@ -137,6 +137,18 @@ export interface LlmRunUsageSummary extends LlmRunUsageSummaryWire {
 }
 
 /** ``GET /v1/runs/{id}?include_transparency=true`` */
+export interface NarrativeAnswerSectionPreview {
+  heading: string;
+  body: string;
+}
+
+export interface NarrativeAnswerPreview {
+  mode: "full" | "partial";
+  thesis: string;
+  sections: NarrativeAnswerSectionPreview[];
+  fallback_reason: string | null;
+}
+
 export interface RunTransparencySummary {
   evidence_artifact_ids: string[];
   evidence_artifacts_by_role: Record<string, string>;
@@ -144,6 +156,12 @@ export interface RunTransparencySummary {
   model_call_count: number;
   /** Per-phase token, latency, and optional cost rollup when the API computes it. */
   llm_usage?: LlmRunUsageSummaryWire | null;
+  report_key_takeaways_preview: string[];
+  critic_blocking_caveats: string[];
+  critic_overall_confidence: string | null;
+  critic_phase_status: string | null;
+  report_phase_status: string | null;
+  narrative_answer?: NarrativeAnswerPreview | null;
 }
 
 export interface RunStepOutputSummary {

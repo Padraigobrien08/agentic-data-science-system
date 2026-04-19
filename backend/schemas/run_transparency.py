@@ -6,7 +6,7 @@ Used by :func:`GET /v1/runs/{id}` and :func:`GET /v1/runs/{id}/steps` when ``inc
 
 from __future__ import annotations
 
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
 from pydantic import BaseModel, Field
@@ -129,7 +129,7 @@ class NarrativeAnswerSectionPreview(BaseModel):
 class NarrativeAnswerPreview(BaseModel):
     """Chat-safe narrative answer contract derived from traceability."""
 
-    mode: str
+    mode: Literal["full", "partial"]
     thesis: str
     sections: list[NarrativeAnswerSectionPreview] = Field(default_factory=list)
     fallback_reason: str | None = None
@@ -156,8 +156,11 @@ def _parse_narrative_answer(raw: Any) -> NarrativeAnswerPreview | None:
             continue
         sections.append(NarrativeAnswerSectionPreview(heading=heading.strip(), body=body.strip()))
     fallback_reason = raw.get("fallback_reason")
+    mode_value = mode.strip()
+    if mode_value not in {"full", "partial"}:
+        return None
     return NarrativeAnswerPreview(
-        mode=mode.strip(),
+        mode=mode_value,
         thesis=thesis.strip(),
         sections=sections,
         fallback_reason=fallback_reason.strip() if isinstance(fallback_reason, str) and fallback_reason.strip() else None,

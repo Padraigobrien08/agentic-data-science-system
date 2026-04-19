@@ -229,6 +229,26 @@ def test_run_detail_include_transparency_evidence_and_prompt_versions(
                 "traceability": {
                     "evidence_artifact_ids": [str(art_id)],
                     "evidence_artifacts_by_role": {"panel_csv": str(art_id)},
+                    "critic": {
+                        "phase_status": "success",
+                        "overall_confidence": "medium",
+                        "blocking_caveats": ["Caveat one"],
+                    },
+                    "report": {
+                        "phase_status": "success",
+                        "key_takeaways_preview": ["Takeaway one"],
+                        "narrative_answer": {
+                            "mode": "full",
+                            "thesis": "The evidence supports a cautious deterioration thesis.",
+                            "sections": [
+                                {
+                                    "heading": "What's happening",
+                                    "body": "Recent summarized rows show repeated revenue-growth weakening.",
+                                }
+                            ],
+                            "fallback_reason": None,
+                        },
+                    },
                 },
             },
         }
@@ -268,6 +288,14 @@ def test_run_detail_include_transparency_evidence_and_prompt_versions(
     assert tr["evidence_artifact_ids"] == [str(art_id)]
     assert tr["evidence_artifacts_by_role"] == {"panel_csv": str(art_id)}
     assert tr["prompt_versions"] == {"report": "3.1.0", "critic": "2.0.0"}
+    assert tr["report_key_takeaways_preview"] == ["Takeaway one"]
+    assert tr["narrative_answer"]["mode"] == "full"
+    assert tr["narrative_answer"]["thesis"] == "The evidence supports a cautious deterioration thesis."
+    assert tr["narrative_answer"]["sections"][0]["heading"] == "What's happening"
+    assert tr["critic_blocking_caveats"] == ["Caveat one"]
+    assert tr["critic_overall_confidence"] == "medium"
+    assert tr["critic_phase_status"] == "success"
+    assert tr["report_phase_status"] == "success"
 
 
 def test_run_detail_include_transparency_does_not_mutate_payload_fields(
