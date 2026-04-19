@@ -18,26 +18,36 @@ requirements:
   - ANSR-02
 must_haves:
   truths:
-    - "Live chat replies and hydrated history prefer the backend `narrative_answer` preview instead of summary-line assembly."
-    - "Older runs without the new preview still resolve to a readable narrative-first answer through a legacy compatibility branch."
-    - "Limited-support successful runs produce a stable partial narrative, not generic success copy, in both live and hydrated chat paths."
+    - "The frontend answer builder prefers the new `narrative_answer` preview over `summaryLine` while preserving readable legacy behavior for older runs."
+    - "Live chat replies and persisted history hydration both consume the same narrative-first answer contract."
+    - "Generic success placeholders no longer dominate the primary chat answer path when narrative or partial-answer data exists."
   artifacts:
     - path: frontend/src/lib/run-primary-view.ts
-      provides: "Narrative-first answer builder with full, partial, and legacy compatibility branches."
+      provides: "Narrative-first answer-view derivation with explicit full, partial, and legacy modes"
     - path: frontend/src/actions/runs.ts
-      provides: "Live chat reply payloads sourced from the narrative-first answer contract."
+      provides: "Live chat reply path that returns the narrative-first answer contract for newly completed runs"
     - path: frontend/src/lib/chat-run-history.ts
-      provides: "Persisted run hydration that reuses the same narrative-first answer builder."
+      provides: "Persisted-run transcript hydration that stays compatible with both new and legacy answer shapes"
   key_links:
-    - "frontend/src/actions/runs.ts and frontend/src/lib/chat-run-history.ts both call `buildChatAnswerCardView` so live and hydrated replies stay on the same contract."
-    - "frontend/src/lib/run-primary-view.ts consumes `RunTransparencySummary.narrative_answer` first and only synthesizes a legacy narrative when older runs do not have the new backend preview."
+    - from: frontend/src/lib/run-primary-view.ts
+      to: frontend/src/lib/api/types.ts
+      via: "The answer builder consumes `transparency.narrative_answer` first and only falls back to summary-era fields when needed"
+      pattern: "narrative_answer|mode|fallbackReason|legacy"
+    - from: frontend/src/actions/runs.ts
+      to: frontend/src/lib/run-primary-view.ts
+      via: "Live chat replies reuse the same narrative-first builder as persisted history and the chat card"
+      pattern: "buildPrimaryAnswerView|buildChatAnswerCardView|narrativeAnswer"
+    - from: frontend/src/lib/chat-run-history.ts
+      to: frontend/src/actions/runs.ts
+      via: "Hydrated history and newly executed runs share the same narrative-first assistant payload shape"
+      pattern: "answerCard|narrativeAnswer|fallbackReason"
 ---
 
 <objective>
-Refactor the answer builder, live reply path, and history hydration around the new narrative preview contract.
+Refactor the answer-view derivation and chat data paths so the narrative preview becomes the primary answer contract without breaking persisted history or older runs.
 
-Purpose: satisfy the data-migration half of `ANSR-01` and `ANSR-02` before the renderer changes, while preserving older persisted runs.
-Output: narrative-first `PrimaryAnswerView` / `ChatAnswerCardView` data and identical live-vs-history hydration behavior.
+Purpose: satisfy the migration half of `ANSR-01` and `ANSR-02` by making live replies and hydrated history narrative-first while preserving legacy compatibility.
+Output: narrative-first view models, updated live reply/history paths, and regression coverage around compatibility and fallback states.
 </objective>
 
 <execution_context>
@@ -49,83 +59,97 @@ Output: narrative-first `PrimaryAnswerView` / `ChatAnswerCardView` data and iden
 @.planning/PROJECT.md
 @.planning/ROADMAP.md
 @.planning/REQUIREMENTS.md
+@.planning/STATE.md
 @.planning/phases/17-narrative-answer-contract/17-CONTEXT.md
 @.planning/phases/17-narrative-answer-contract/17-RESEARCH.md
+@.planning/phases/17-narrative-answer-contract/17-VALIDATION.md
 @.planning/phases/17-narrative-answer-contract/17-UI-SPEC.md
+@.planning/phases/17-narrative-answer-contract/17-narrative-answer-contract-01-PLAN.md
 @frontend/src/lib/api/types.ts
 @frontend/src/lib/run-primary-view.ts
 @frontend/src/actions/runs.ts
 @frontend/src/lib/chat-run-history.ts
+@frontend/src/lib/__tests__/run-primary-view.test.ts
+@frontend/src/actions/runs.test.ts
+@frontend/src/lib/chat-run-history.test.ts
 </context>
 
 <tasks>
 
 <task type="auto" tdd="true">
-  <name>Task 1: Make the primary answer builder narrative-first with a legacy compatibility branch</name>
+  <name>Task 1: Make the answer-view builder narrative-first with explicit compatibility modes</name>
   <files>frontend/src/lib/run-primary-view.ts
 frontend/src/lib/__tests__/run-primary-view.test.ts</files>
-  <read_first>.planning/ROADMAP.md
-.planning/REQUIREMENTS.md
-.planning/phases/17-narrative-answer-contract/17-CONTEXT.md
+  <read_first>.planning/phases/17-narrative-answer-contract/17-CONTEXT.md
 .planning/phases/17-narrative-answer-contract/17-RESEARCH.md
 .planning/phases/17-narrative-answer-contract/17-UI-SPEC.md
 frontend/src/lib/api/types.ts
 frontend/src/lib/run-primary-view.ts
-frontend/src/components/chat-shell/chat-run-answer-card.tsx
 frontend/src/lib/__tests__/run-primary-view.test.ts</read_first>
   <behavior>
-    - `buildPrimaryAnswerView` prefers the backend `transparency.narrative_answer` contract from D-03 and D-04.
-    - Full answers keep the D-01 section order and labels; partial answers keep the same footprint with a limitation statement per D-05 and D-06.
-    - Older runs that only have summary/takeaway data still synthesize a compatible narrative so history stays readable after rollout.
+    - The primary answer view must prefer `transparency.narrative_answer` whenever it exists.
+    - The answer builder must preserve an explicit compatibility path for older runs that do not yet carry the new preview.
+    - Full, partial, and legacy answer modes must remain inspectable in tests instead of being hidden behind ad hoc strings.
   </behavior>
-  <action>Add a typed `narrativeAnswer` object to `PrimaryAnswerView` and `ChatAnswerCardView` while keeping existing summary, evidence, confidence, and navigation data available for secondary surfaces. In `buildPrimaryAnswerView`, consume `transparency.narrative_answer` first; when it is missing, synthesize a compatible narrative from the legacy summary/takeaway/caveat data rather than returning a blank or generic success state. Ensure the synthesized legacy path still separates thesis, support, and watchouts, and mark whether the source was `full`, `partial`, or legacy-derived so the renderer can stay deterministic. Update `run-primary-view.test.ts` to cover full preview, partial preview, and legacy-only runs.</action>
-  <acceptance_criteria>`frontend/src/lib/run-primary-view.ts` exports a `narrativeAnswer` field on the answer view with `full` and `partial` mode handling.
-The file contains a legacy compatibility branch that synthesizes a narrative when `transparency.narrative_answer` is absent.
+  <action>In `frontend/src/lib/run-primary-view.ts`, add exact exported types `NarrativeAnswerSectionView` and `NarrativeAnswerView`. `NarrativeAnswerView` must expose exact keys `mode`, `thesis`, `sections`, and `fallbackReason`, where `mode` is the exact union `\"full\" | \"partial\" | \"legacy\"`. Extend `PrimaryAnswerView` and `ChatAnswerCardView` with a required `narrativeAnswer` field of that type. Update `buildPrimaryAnswerView(...)` so it reads `input.transparency?.narrative_answer` first. When a typed preview exists, map it into `narrativeAnswer` directly and stop using `summaryLine` as the primary thesis source. When the preview is absent, create a `legacy` narrative answer using the current summary/takeaway compatibility logic: use the best available `summaryLine` or first takeaway as `thesis`, create at most one compatibility section from the strongest remaining takeaway or empty-state reason, and set `fallbackReason` to the exact string `legacy_summary`. Keep `summaryLine` for migration compatibility, but no downstream caller in this phase should treat it as the primary answer contract. Extend `frontend/src/lib/__tests__/run-primary-view.test.ts` with exact coverage for three cases: `full` preview, `partial` preview with explicit `fallbackReason`, and `legacy` fallback when only summary-era fields exist.</action>
+  <acceptance_criteria>`frontend/src/lib/run-primary-view.ts` contains `export type NarrativeAnswerView`.
+`frontend/src/lib/run-primary-view.ts` contains `export type NarrativeAnswerSectionView`.
+`frontend/src/lib/run-primary-view.ts` contains `mode: "full" | "partial" | "legacy"` or equivalent type union.
+`frontend/src/lib/run-primary-view.ts` contains `narrativeAnswer`.
+`frontend/src/lib/run-primary-view.ts` contains `legacy_summary`.
+`frontend/src/lib/__tests__/run-primary-view.test.ts` contains `full`.
+`frontend/src/lib/__tests__/run-primary-view.test.ts` contains `partial`.
+`frontend/src/lib/__tests__/run-primary-view.test.ts` contains `legacy_summary`.
 `cd frontend && npm run test -- src/lib/__tests__/run-primary-view.test.ts` passes.</acceptance_criteria>
   <verify>
     <automated>cd frontend && npm run test -- src/lib/__tests__/run-primary-view.test.ts</automated>
   </verify>
-  <done>The answer builder produces one narrative-first contract for new and old runs without dropping the existing secondary evidence metadata.</done>
+  <done>The answer-view builder now exposes a stable narrative-first contract with explicit compatibility modes instead of centering `summaryLine`.</done>
 </task>
 
 <task type="auto" tdd="true">
-  <name>Task 2: Reuse the narrative-first contract in live replies and hydrated history</name>
+  <name>Task 2: Move live replies and persisted history onto the narrative-first answer contract</name>
   <files>frontend/src/actions/runs.ts
 frontend/src/lib/chat-run-history.ts
 frontend/src/actions/runs.test.ts
 frontend/src/lib/chat-run-history.test.ts</files>
-  <read_first>.planning/ROADMAP.md
-.planning/REQUIREMENTS.md
-.planning/phases/17-narrative-answer-contract/17-CONTEXT.md
+  <read_first>.planning/phases/17-narrative-answer-contract/17-CONTEXT.md
+.planning/phases/17-narrative-answer-contract/17-RESEARCH.md
+.planning/phases/17-narrative-answer-contract/17-narrative-answer-contract-01-PLAN.md
 frontend/src/actions/runs.ts
 frontend/src/lib/chat-run-history.ts
-frontend/src/lib/run-primary-view.ts
 frontend/src/actions/runs.test.ts
-frontend/src/lib/chat-run-history.test.ts</read_first>
+frontend/src/lib/chat-run-history.test.ts
+frontend/src/lib/run-primary-view.ts</read_first>
   <behavior>
-    - Newly executed runs and persisted chat history must emit the same narrative-first answer-card payload.
-    - Successful partial answers use a thesis/limitation narrative string first, not the old `Analysis completed...` fallback.
-    - Run ordering, run metadata, and unsupported-routing behavior stay unchanged.
+    - Newly completed chat runs and hydrated persisted runs must surface the same narrative-first answer data.
+    - Fallback copy in live replies and history hydration must reflect the explicit narrative mode instead of generic summary strings.
+    - History compatibility must remain intact for older runs that still only expose summary-era fields.
   </behavior>
-  <action>Update `createAnalysisRunFromChat` and `buildProjectChatHistory` so both paths derive their assistant `content` and `answerCard` from `narrativeAnswer` first. Use the thesis as the default plain-text content, append or prefer the limitation statement for `partial` mode, and reserve generic fallback copy for actual error states only. Keep the run-backed history ordering and run metadata exactly as Phase 14 established. Extend the action and hydration tests so they assert full narrative replies, partial limited-support replies, and legacy-history compatibility on the same contract.</action>
-  <acceptance_criteria>`frontend/src/actions/runs.ts` and `frontend/src/lib/chat-run-history.ts` both derive reply content from the narrative-first answer contract before any generic success fallback.
-Both test files assert narrative-first live and hydrated behavior.
-`cd frontend && npm run test -- src/lib/chat-run-history.test.ts src/actions/runs.test.ts` passes.</acceptance_criteria>
+  <action>In `frontend/src/actions/runs.ts`, update the supported-run reply path so the text `content` and `answerCard` are derived from `answerCard.narrativeAnswer`, not from `summaryLine ?? emptyStateReason`. Use `narrativeAnswer.thesis` as the fallback plain-text content for structured messages and keep unsupported rewrite-guidance unchanged. In `frontend/src/lib/chat-run-history.ts`, update hydrated assistant messages to use the same `narrativeAnswer`-first behavior, preserving `legacy` mode when older runs have no backend preview. Do not remove `summaryLine` from the wire in this phase; only stop treating it as the main answer source. Extend `frontend/src/actions/runs.test.ts` and `frontend/src/lib/chat-run-history.test.ts` so one case asserts a `full` narrative preview populates the assistant content with the narrative thesis, another asserts a `partial` preview preserves its `fallbackReason`, and a legacy run still hydrates with `mode: "legacy"` rather than collapsing into generic placeholder text.</action>
+  <acceptance_criteria>`frontend/src/actions/runs.ts` contains `narrativeAnswer`.
+`frontend/src/actions/runs.ts` contains `narrativeAnswer.thesis`.
+`frontend/src/lib/chat-run-history.ts` contains `narrativeAnswer`.
+`frontend/src/lib/chat-run-history.ts` contains `legacy_summary`.
+`frontend/src/actions/runs.test.ts` contains `fallbackReason`.
+`frontend/src/actions/runs.test.ts` contains `narrativeAnswer`.
+`frontend/src/lib/chat-run-history.test.ts` contains `mode: "legacy"` or `legacy`.
+`frontend/src/lib/chat-run-history.test.ts` contains `partial`.
+`cd frontend && npm run test -- src/actions/runs.test.ts src/lib/chat-run-history.test.ts` passes.</acceptance_criteria>
   <verify>
-    <automated>cd frontend && npm run test -- src/lib/chat-run-history.test.ts src/actions/runs.test.ts</automated>
+    <automated>cd frontend && npm run test -- src/actions/runs.test.ts src/lib/chat-run-history.test.ts</automated>
   </verify>
-  <done>Live chat replies and hydrated history produce the same narrative-first assistant payload and stay readable for older runs.</done>
+  <done>Live chat replies and persisted history now share the same narrative-first answer contract, including explicit partial and legacy fallback modes.</done>
 </task>
 
 </tasks>
 
 <verification>
-Run the focused frontend data-path suite after both tasks:
-`cd frontend && npm run test -- src/lib/__tests__/run-primary-view.test.ts src/lib/chat-run-history.test.ts src/actions/runs.test.ts`
+Run `cd frontend && npm run test -- src/lib/__tests__/run-primary-view.test.ts src/actions/runs.test.ts src/lib/chat-run-history.test.ts` after both tasks land.
 </verification>
 
 <success_criteria>
-Chat data no longer depends on summary-line-first assembly. Both live and hydrated answers flow through the backend narrative preview when present and fall back to a stable synthesized narrative when older runs lack the new contract.
+Phase 17 has a sound second wave once the frontend answer builder prefers the backend narrative preview, live replies and persisted history share the same narrative-first contract, and older runs remain readable through an explicit legacy mode.
 </success_criteria>
 
 <output>
