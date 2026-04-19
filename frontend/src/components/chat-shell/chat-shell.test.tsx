@@ -105,4 +105,67 @@ describe("ChatShell", () => {
     expect(screen.getAllByText("Workspace chat is executing synchronously right now.")).toHaveLength(1);
     expect(screen.getByText("Answer")).toBeTruthy();
   });
+
+  it("renders the Phase 17 error shell for failed assistant answers", () => {
+    const initialMessages: ChatMessage[] = [
+      {
+        id: "assist-run-error",
+        role: "assistant",
+        content: "Run failed",
+        answerCard: {
+          goalDisplay: "Is MSFT showing persistent deterioration?",
+          narrativeAnswer: {
+            mode: "legacy",
+            thesis: "Run failed",
+            sections: [],
+            fallbackReason: "legacy_summary",
+          },
+          summaryLine: "Run failed",
+          orchestrationStatus: "error",
+          emptyStateReason: "The pipeline encountered an execution failure.",
+          conclusionRider: null,
+          takeawayRows: [],
+          alignmentFindings: [],
+          overallConfidence: null,
+          blockingCaveats: [],
+          criticPhaseStatus: null,
+          reportPhaseStatus: null,
+          weakEvidenceSignals: [],
+          contextSignals: [],
+          evidenceLinks: [],
+          extraArtifactCount: 0,
+          reportArtifactId: null,
+          evidenceProvenanceHint: null,
+          navigationItems: [{ key: "trace", label: "Trace", href: "/projects/project-1/runs/run-error/trace" }],
+          traceHref: "/projects/project-1/runs/run-error/trace",
+          caveatOverflowHref: null,
+        },
+        runId: "run-error",
+        runHref: "/projects/project-1/runs/run-error/trace",
+        runStatus: "error",
+        runCreatedAt: "2026-04-18T20:40:00Z",
+        runFinishedAt: "2026-04-18T20:41:00Z",
+        createdAt: "2026-04-18T20:41:00Z",
+      },
+    ];
+
+    render(
+      <ChatShell
+        projectId="project-1"
+        tickers={["MSFT"]}
+        backgroundDelivery={{
+          delivery_mode: "sync_only",
+          background_available: false,
+          detail: "Workspace chat is executing synchronously right now.",
+        }}
+        initialMessages={initialMessages}
+        recentRuns={[]}
+      />,
+    );
+
+    expect(screen.getByText("This analysis didn’t finish cleanly.")).toBeTruthy();
+    expect(
+      screen.getByText("Open trace to inspect what failed, then retry with narrower wording or refreshed SEC data."),
+    ).toBeTruthy();
+  });
 });

@@ -25,6 +25,10 @@ describe("ChatMessageList", () => {
                 heading: "Why we think that",
                 body: "The summarized evidence is directionally consistent.",
               },
+              {
+                heading: "What weakens the claim",
+                body: "Peer validation remains limited across the available evidence.",
+              },
             ],
             fallbackReason: null,
           },
@@ -86,11 +90,14 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("Answer")).toBeTruthy();
     expect(screen.getByText("What's happening")).toBeTruthy();
     expect(screen.getByText("Why we think that")).toBeTruthy();
-    expect(screen.getByText("Findings")).toBeTruthy();
+    expect(screen.getByText("What weakens the claim")).toBeTruthy();
+    expect(screen.getByText("Supporting detail")).toBeTruthy();
     expect(screen.getByText("Confidence")).toBeTruthy();
     expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
-    expect(screen.getByText("Revenue growth deterioration appears in several recent quarters.")).toBeTruthy();
+    expect(screen.getAllByText("Revenue growth deterioration appears in several recent quarters.")).toHaveLength(2);
+    expect(screen.getByText("The summarized evidence is directionally consistent.")).toBeTruthy();
+    expect(screen.getByText("Peer validation remains limited across the available evidence.")).toBeTruthy();
     expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
     expect(screen.getByText("Evidence strength:")).toBeTruthy();
     expect(screen.getByText("Peer coverage is limited for this run.")).toBeTruthy();
@@ -106,6 +113,183 @@ describe("ChatMessageList", () => {
     expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
     expect(screen.queryByRole("link", { name: "All runs" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Open trace" })).toBeNull();
+  });
+
+  it("keeps the narrative sections ordered in one centered column without the old right rail", () => {
+    const messages: ChatMessage[] = [
+      {
+        id: "assistant-ordered",
+        role: "assistant",
+        content: "MSFT shows a cautious deterioration pattern.",
+        answerCard: {
+          goalDisplay: "Is MSFT showing persistent deterioration?",
+          narrativeAnswer: {
+            mode: "full",
+            thesis: "MSFT shows a cautious deterioration pattern.",
+            sections: [
+              {
+                heading: "Why we think that",
+                body: "The supporting rows consistently point in the same direction.",
+              },
+              {
+                heading: "What weakens the claim",
+                body: "Peer coverage is incomplete.",
+              },
+              {
+                heading: "What's happening",
+                body: "Revenue growth weakens across several recent periods.",
+              },
+            ],
+            fallbackReason: null,
+          },
+          summaryLine: "MSFT shows a cautious deterioration pattern.",
+          orchestrationStatus: "success",
+          emptyStateReason: null,
+          conclusionRider: null,
+          takeawayRows: [],
+          alignmentFindings: [],
+          overallConfidence: null,
+          blockingCaveats: [],
+          criticPhaseStatus: null,
+          reportPhaseStatus: null,
+          weakEvidenceSignals: [],
+          contextSignals: [],
+          evidenceLinks: [],
+          extraArtifactCount: 0,
+          reportArtifactId: null,
+          evidenceProvenanceHint: null,
+          navigationItems: [],
+          traceHref: "/projects/project-1/runs/run-2/trace",
+          caveatOverflowHref: null,
+        },
+        runId: "run-2",
+        runHref: "/projects/project-1/runs/run-2/trace",
+        runStatus: "success",
+        runCreatedAt: "2026-04-18T20:10:00Z",
+        runFinishedAt: "2026-04-18T20:12:00Z",
+        createdAt: "2026-04-18T20:12:00Z",
+      },
+    ];
+
+    const { container } = render(<ChatMessageList messages={messages} />);
+
+    const whatsHappening = screen.getByText("What's happening");
+    const whyWeThinkThat = screen.getByText("Why we think that");
+    const whatWeakensTheClaim = screen.getByText("What weakens the claim");
+
+    expect(whatsHappening.compareDocumentPosition(whyWeThinkThat) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
+    expect(
+      whyWeThinkThat.compareDocumentPosition(whatWeakensTheClaim) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
+    expect(container.innerHTML).not.toContain("lg:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.95fr)]");
+  });
+
+  it("renders partial answers with explicit limitation language in the narrative shell", () => {
+    const messages: ChatMessage[] = [
+      {
+        id: "assistant-partial",
+        role: "assistant",
+        content: "The evidence is limited, but the loaded summaries still point to weaker revenue growth.",
+        answerCard: {
+          goalDisplay: "Is MSFT showing persistent deterioration?",
+          narrativeAnswer: {
+            mode: "partial",
+            thesis: "The evidence is limited, but the loaded summaries still point to weaker revenue growth.",
+            sections: [
+              {
+                heading: "What weakens the claim",
+                body: "Peer validation is incomplete, so the conclusion is only partial.",
+              },
+            ],
+            fallbackReason: "limited_evidence",
+          },
+          summaryLine: "The evidence is limited, but the loaded summaries still point to weaker revenue growth.",
+          orchestrationStatus: "partial_success",
+          emptyStateReason: null,
+          conclusionRider: null,
+          takeawayRows: [],
+          alignmentFindings: [],
+          overallConfidence: "medium",
+          blockingCaveats: ["Peer validation is incomplete."],
+          criticPhaseStatus: "success",
+          reportPhaseStatus: "success",
+          weakEvidenceSignals: [],
+          contextSignals: [],
+          evidenceLinks: [],
+          extraArtifactCount: 0,
+          reportArtifactId: null,
+          evidenceProvenanceHint: null,
+          navigationItems: [],
+          traceHref: "/projects/project-1/runs/run-3/trace",
+          caveatOverflowHref: "/projects/project-1/runs/run-3/trace#run-context-transparency",
+        },
+        runId: "run-3",
+        runHref: "/projects/project-1/runs/run-3/trace",
+        runStatus: "partial_success",
+        runCreatedAt: "2026-04-18T20:20:00Z",
+        runFinishedAt: "2026-04-18T20:23:00Z",
+        createdAt: "2026-04-18T20:23:00Z",
+      },
+    ];
+
+    render(<ChatMessageList messages={messages} />);
+
+    expect(
+      screen.getByText("This answer is partial because the loaded evidence is limited."),
+    ).toBeTruthy();
+    expect(screen.getByText("Peer validation is incomplete, so the conclusion is only partial.")).toBeTruthy();
+  });
+
+  it("renders the explicit error narrative instead of generic success copy", () => {
+    const messages: ChatMessage[] = [
+      {
+        id: "assistant-error",
+        role: "assistant",
+        content: "Run failed",
+        answerCard: {
+          goalDisplay: "Is MSFT showing persistent deterioration?",
+          narrativeAnswer: {
+            mode: "legacy",
+            thesis: "Run failed",
+            sections: [],
+            fallbackReason: "legacy_summary",
+          },
+          summaryLine: "Run failed",
+          orchestrationStatus: "error",
+          emptyStateReason: "The pipeline encountered an execution failure.",
+          conclusionRider: null,
+          takeawayRows: [],
+          alignmentFindings: [],
+          overallConfidence: null,
+          blockingCaveats: [],
+          criticPhaseStatus: null,
+          reportPhaseStatus: null,
+          weakEvidenceSignals: [],
+          contextSignals: [],
+          evidenceLinks: [],
+          extraArtifactCount: 0,
+          reportArtifactId: null,
+          evidenceProvenanceHint: null,
+          navigationItems: [{ key: "trace", label: "Trace", href: "/projects/project-1/runs/run-4/trace" }],
+          traceHref: "/projects/project-1/runs/run-4/trace",
+          caveatOverflowHref: null,
+        },
+        runId: "run-4",
+        runHref: "/projects/project-1/runs/run-4/trace",
+        runStatus: "error",
+        runCreatedAt: "2026-04-18T20:30:00Z",
+        runFinishedAt: "2026-04-18T20:31:00Z",
+        createdAt: "2026-04-18T20:31:00Z",
+      },
+    ];
+
+    render(<ChatMessageList messages={messages} />);
+
+    expect(screen.getByText("This analysis didn’t finish cleanly.")).toBeTruthy();
+    expect(
+      screen.getByText("Open trace to inspect what failed, then retry with narrower wording or refreshed SEC data."),
+    ).toBeTruthy();
+    expect(screen.queryByText("Run completed without a summary line.")).toBeNull();
   });
 
   it("renders the structured pending footprint while analysis is running", () => {
