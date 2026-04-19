@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: Ready to define next milestone
-stopped_at: v1.2 archived; awaiting next milestone definition
-last_updated: "2026-04-19T11:58:00Z"
+milestone: v1.3
+milestone_name: Narrative Answers and Visual Evidence
+status: Ready to discuss Phase 17
+stopped_at: v1.3 initialized; requirements and roadmap defined
+last_updated: "2026-04-19T21:55:00Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 15
   completed_plans: 0
 ---
 
@@ -19,22 +19,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Define the next milestone after shipping and archiving `v1.2 Chat-First Analysis Experience`.
+**Current focus:** Execute `v1.3 Narrative Answers and Visual Evidence`, starting with Phase 17 `Narrative Answer Contract`.
 
 ## Current Position
 
-Phase: none
-Plan: none
-Milestone: none
-Status: Ready to define next milestone
-Last activity: 2026-04-19 — archived `v1.2 Chat-First Analysis Experience` after a clean milestone audit
+Phase: 17
+Plan: not started
+Milestone: v1.3 Narrative Answers and Visual Evidence
+Status: Ready to discuss Phase 17
+Last activity: 2026-04-19 — started `v1.3 Narrative Answers and Visual Evidence` from live chat UX feedback
 
-## Recently Shipped
+## Current Milestone
 
-- `v1.2 Chat-First Analysis Experience` shipped on 2026-04-19
-- Archive: [/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-ROADMAP.md](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-ROADMAP.md)
-- Audit: [/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-MILESTONE-AUDIT.md](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-MILESTONE-AUDIT.md)
+- `v1.3 Narrative Answers and Visual Evidence`
+- Goal: make the chat answer a fuller analyst reply with inline confidence posture, supplemental evidence disclosure, and deterministic charts
+- Phases: 17-21
 
 ## Next Command
 
-`$gsd-new-milestone`
+`$gsd-discuss-phase 17`

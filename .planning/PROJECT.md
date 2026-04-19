@@ -34,7 +34,10 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- None — `v1.2` is shipped and archived; no new milestone is defined yet
+- **ANSR-01**: User can read a multi-paragraph analyst answer in chat that explains the thesis, support, and watchouts instead of a one-line summary
+- **CONF-01**: User can see evidence strength inline in the answer header and open a compact explainer that shows why it is rated `Good`, `Medium`, `Bad`, or `Not rated`
+- **EVID-01**: User can treat evidence as supplemental by expanding a disclosure below the answer to review slim evidence cards and then jump into detailed artifacts or trace
+- **CHRT-01**: User can see deterministic inline charts in chat when trusted run data supports a visual explanation
 
 ### Out of Scope
 
@@ -44,17 +47,23 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ## Current State
 
-**Shipped:** `v1.2 Chat-First Analysis Experience` on 2026-04-19
-**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live or hybrid evaluation, clean archive-grade planning traceability, a repaired sync-first chat runtime in the documented local stack, deterministic analyst-language routing with inline rewrite guidance in chat, a chat-native result contract with stable run linkage, inline chat-based findings plus evidence navigation, and a standalone run page reduced to verification-first inspection. There is no active milestone at the moment.
+**Current milestone:** `v1.3 Narrative Answers and Visual Evidence`
+**Status:** The platform now has a centered chat-first answer surface, but the primary answer still reads like a compact summary card with supporting evidence panels. `v1.3` upgrades that into a longer narrative analyst reply with inline confidence posture, supplemental evidence disclosure, and deterministic charts rendered directly in chat.
 
-## No Active Milestone
+## Current Milestone: v1.3 Narrative Answers and Visual Evidence
 
-The planning set is between milestones. The shipped `v1.2` archive now captures the full chat-first answer flow, and the next milestone should be chosen from the remaining analyst workflow or evidence-management gaps rather than from unresolved runtime or answer-delivery blockers.
+**Goal:** Turn the chat answer into a full narrative analyst response with supplemental evidence and deterministic visual proof.
+
+**Target features:**
+- Multi-paragraph narrative answers that feel like a substantive analyst reply, not a compressed summary card
+- Inline evidence-strength badge in the answer header with semantic color treatment and a compact explainer for why the score was assigned
+- Supplemental evidence disclosure below the answer with slim supporting cards and compact secondary navigation pills
+- Deterministic inline charts rendered from trusted run data through shadcn/Recharts components
 
 ## Future Milestone Candidates
 
 - Multi-run conversation workflows so analysts can compare or revisit prior runs inside one workspace thread
-- Grouped evidence bundles and saved verification sets built from chat findings
+- Saved evidence bundles and reusable verification sets built from the new supplemental evidence cards
 - Scheduled live canary suites with alerting and explicit request-budget controls
 - Promotion of failing live or hybrid cases into deterministic fixture regressions
 - Cross-run evidence-coverage and weak-evidence summaries for operator review
@@ -65,7 +74,9 @@ This repo is a layered brownfield monorepo with a deterministic EDGAR analysis c
 
 The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability.
 
-The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface. That chat-first answer experience is now shipped, and the next milestone should build on it rather than reopen it.
+The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface.
+
+`v1.3` follows directly from the first live iteration on that new chat surface. The answer card is now in the right place, but it still behaves like a dense summary artifact rather than a full analyst reply. The next step is to promote narrative prose to the primary contract, push evidence into a clearly supplemental disclosure, make evidence strength visible and explorable in the answer header, and add deterministic inline charts so the answer can show trends and comparisons instead of only describing them.
 
 ## Constraints
 
@@ -88,6 +99,8 @@ The `v1.2` milestone came directly from local product testing after the `v1.1` s
 | Roll out remote artifact storage as configured-write plus mixed-read behind opaque `s3:` locators | Brownfield deployments need remote storage without bucket exposure or forced migration of existing `local:` artifacts | ✓ Good |
 | Treat blob-store and database divergence as explicit reconciliation state, not hidden transactional success | Remote object storage is a separate system, so deletes and retention must surface repairable drift instead of pretending they are atomic | ✓ Good |
 | Keep prompt routing deterministic-first and expose unsupported guidance before run creation | Analyst trust depends on predictable routing behavior and actionable chat guidance rather than opaque fallback behavior | ✓ Good |
+| Treat the chat reply as the primary analytical product and move evidence into a clearly secondary disclosure | The current centered answer still reads like a summary card; analysts need a substantive narrative first and supporting proof second | ✓ Good |
+| Render inline charts only from deterministic, backend-safe chart specs derived from trusted run data | Visuals should strengthen trust, not introduce frontend-side inference or chart hallucination risk | ✓ Good |
 
 ## Evolution
 
@@ -107,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-19 after v1.2 archive*
+*Last updated: 2026-04-19 after starting v1.3 Narrative Answers and Visual Evidence*
