@@ -23,9 +23,9 @@
 
 Plans:
 
-- [ ] 17-01: Define a backend-safe narrative answer contract that promotes thesis, support, and watchouts into first-class answer fields
-- [ ] 17-02: Refactor the chat answer builder and renderer around the longer narrative contract instead of a headline-summary fallback
-- [ ] 17-03: Preserve history compatibility and harden fallback states so successful runs never degrade into vague placeholder prose
+- [ ] `17-narrative-answer-contract-01-PLAN.md` — Define a backend-safe narrative answer contract that promotes thesis, support, and watchouts into first-class answer fields
+- [ ] `17-narrative-answer-contract-02-PLAN.md` — Refactor the chat answer builder, live reply path, and history hydration around the longer narrative contract
+- [ ] `17-narrative-answer-contract-03-PLAN.md` — Render the centered narrative-first answer body and harden fallback states so successful runs never degrade into vague placeholder prose
 
 **Details:**
 - Requirements: `ANSR-01`, `ANSR-02`
