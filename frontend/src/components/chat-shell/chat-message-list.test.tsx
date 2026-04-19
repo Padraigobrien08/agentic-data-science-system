@@ -17,7 +17,11 @@ describe("ChatMessageList", () => {
           orchestrationStatus: "success",
           conclusionRider: null,
         },
+        runId: "run-1",
         runHref: "/projects/project-1/runs/run-1",
+        runStatus: "success",
+        runCreatedAt: "2026-04-18T19:58:00Z",
+        runFinishedAt: "2026-04-18T20:00:00Z",
         deliveryMode: "sync_only",
         deliveryDetail: "Background delivery was rerouted to immediate execution for this chat request.",
         reroutedFromBackground: true,
@@ -34,6 +38,10 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("Goal")).toBeTruthy();
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
     expect(screen.getByText("Assess whether margin pressure is temporary or structural for MSFT")).toBeTruthy();
+    expect(screen.getByRole("link", { name: "Open run" })).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Run answer" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "All runs" })).toBeNull();
   });
 
   it("renders the structured pending footprint while analysis is running", () => {
@@ -79,6 +87,7 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Compare AAPL versus MSFT on operating margin over the last eight quarters."),
     ).toBeTruthy();
+    expect(screen.queryByRole("link", { name: "Open run" })).toBeNull();
     expect(screen.queryByText("Conclusion")).toBeNull();
     expect(screen.queryByText("Goal")).toBeNull();
   });

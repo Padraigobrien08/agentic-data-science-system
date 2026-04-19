@@ -79,7 +79,7 @@ describe("ChatShell", () => {
     fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
 
     expect(screen.getAllByText("Detect unusual financial changes for MSFT").length).toBeGreaterThan(1);
-    expect(screen.getByText("Running analysis...")).toBeTruthy();
+    expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
     expect(screen.getAllByText("Workspace chat is executing synchronously right now.").length).toBeGreaterThan(1);
     expect(screen.getAllByText("Assistant").length).toBe(2);
   });
