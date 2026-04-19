@@ -3,7 +3,9 @@
  * they are containers for structured output (implemented in a follow-up).
  */
 
-import type { BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
+import type { AnalysisRunStatus, BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
+import type { CompactChatAnswerView } from "@/lib/run-primary-view";
+
 
 export type ChatUserMessage = {
   id: string;
@@ -25,9 +27,14 @@ export type ChatAssistantMessage = {
   content: string;
   rewriteSuggestions?: string[];
   routingReason?: string;
+  answerCard?: CompactChatAnswerView;
+  runId?: string;
   runHref?: string;
   deepDiveHref?: string;
   runsHref?: string;
+  runStatus?: AnalysisRunStatus;
+  runCreatedAt?: string;
+  runFinishedAt?: string | null;
   pending?: boolean;
   deliveryMode?: BackgroundDeliveryMode;
   deliveryDetail?: string;

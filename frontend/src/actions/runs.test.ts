@@ -6,12 +6,14 @@ const {
   createRunMock,
   executeRunMock,
   getPromptRoutingPreviewMock,
+  getRunMock,
 } = vi.hoisted(() => ({
   revalidatePathMock: vi.fn(),
   redirectMock: vi.fn(),
   createRunMock: vi.fn(),
   executeRunMock: vi.fn(),
   getPromptRoutingPreviewMock: vi.fn(),
+  getRunMock: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -26,6 +28,7 @@ vi.mock("@/lib/api/runs", () => ({
   createRun: createRunMock,
   executeRun: executeRunMock,
   getPromptRoutingPreview: getPromptRoutingPreviewMock,
+  getRun: getRunMock,
 }));
 
 import { createAnalysisRunFromChat } from "@/actions/runs";
@@ -101,6 +104,33 @@ describe("createAnalysisRunFromChat", () => {
       artifact_count: 1,
       db_status: "success",
     });
+    getRunMock.mockResolvedValue({
+      id: "run-1",
+      project_id: "project-1",
+      initiated_by_user_id: "user-1",
+      correlation_id: null,
+      status: "success",
+      orchestration_goal_text: "Assess whether margin pressure is temporary or structural for MSFT",
+      error_summary: null,
+      started_at: "2026-04-19T12:01:00Z",
+      finished_at: "2026-04-19T12:02:00Z",
+      created_at: "2026-04-19T12:00:00Z",
+      updated_at: "2026-04-19T12:02:00Z",
+      current_phase: "finished",
+      total_steps: 5,
+      completed_steps: 5,
+      input_payload_json: {
+        tickers: ["MSFT"],
+        analysis_goal: "Assess whether margin pressure is temporary or structural for MSFT",
+        refresh: true,
+      },
+      output_payload_json: {
+        status: "success",
+        final_summary: "MSFT margin pressure looks cyclical rather than structural.",
+      },
+      meta_json: null,
+      transparency: null,
+    });
 
     const result = await createAnalysisRunFromChat(
       "project-1",
@@ -129,12 +159,20 @@ describe("createAnalysisRunFromChat", () => {
       enqueue_execution: false,
     });
     expect(executeRunMock).toHaveBeenCalledWith("run-1", {});
+    expect(getRunMock).toHaveBeenCalledWith("run-1", { includeTransparency: true });
     expect(result.reply).toMatchObject({
       requestId: "req-1",
       runId: "run-1",
       runHref: "/projects/project-1/runs/run-1",
-      deepDiveHref: "/projects/project-1/runs/run-1/trace",
-      runsHref: "/projects/project-1/runs",
+      runStatus: "success",
+      runCreatedAt: "2026-04-19T12:00:00Z",
+      runFinishedAt: "2026-04-19T12:02:00Z",
+      answerCard: {
+        goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+        summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
+        orchestrationStatus: "success",
+        conclusionRider: null,
+      },
     });
   });
 });

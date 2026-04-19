@@ -3,8 +3,12 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
+import { parseAiAgents } from "@/lib/ai-agents-meta";
 import { ApiError } from "@/lib/api/errors";
-import { createRun, executeRun, getPromptRoutingPreview } from "@/lib/api/runs";
+import type { AnalysisRunStatus } from "@/lib/api/types";
+import { createRun, executeRun, getPromptRoutingPreview, getRun } from "@/lib/api/runs";
+import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
+import { buildCompactChatAnswerView, buildPrimaryAnswerView, type CompactChatAnswerView } from "@/lib/run-primary-view";
 
 type DeliveryMode = "sync_only" | "background_ready" | "background_degraded";
 
@@ -13,8 +17,10 @@ type ChatReply = {
   content: string;
   runId?: string;
   runHref?: string;
-  deepDiveHref?: string;
-  runsHref?: string;
+  answerCard?: CompactChatAnswerView;
+  runStatus?: AnalysisRunStatus;
+  runCreatedAt?: string;
+  runFinishedAt?: string | null;
   deliveryMode?: DeliveryMode;
   deliveryDetail?: string;
   reroutedFromBackground?: boolean;
@@ -92,14 +98,25 @@ export async function createAnalysisRunFromChat(
   }
 
   let execution;
+  let hydratedRun;
   try {
     execution = await executeRun(run.id, {});
+    hydratedRun = await getRun(run.id, { includeTransparency: true });
   } catch (e) {
     if (e instanceof ApiError) {
       return { error: e.body || e.message };
     }
     return { error: e instanceof Error ? e.message : "Execution failed." };
   }
+
+  const orch = parseOrchestrationOutput(hydratedRun.output_payload_json);
+  const userReport = parseUserFacingReport(hydratedRun.output_payload_json);
+  const ai = parseAiAgents(hydratedRun.meta_json);
+  const answerView = buildPrimaryAnswerView(hydratedRun, [], orch, userReport, ai, {
+    projectId,
+    runId: run.id,
+  });
+  const answerCard = buildCompactChatAnswerView(answerView);
 
   revalidatePath(`/projects/${projectId}/runs`);
   revalidatePath(`/projects/${projectId}/runs/${run.id}`);
@@ -109,16 +126,19 @@ export async function createAnalysisRunFromChat(
     ? "Background delivery was rerouted to immediate execution for this chat request."
     : "Workspace chat is executing synchronously right now.";
   const content =
-    execution.db_status === "error"
-      ? `Run finished with an error for ${effectiveTickers.join(", ")}. Open run answer or deep dive for details.`
-      : `Analysis completed for ${effectiveTickers.join(", ")}. Open run answer or deep dive when ready.`;
+    answerCard.summaryLine ??
+    (execution.db_status === "error"
+      ? `Run finished with an error for ${effectiveTickers.join(", ")}.`
+      : `Analysis completed for ${effectiveTickers.join(", ")}.`);
   return {
     reply: {
       requestId,
       runId: run.id,
       runHref: `/projects/${projectId}/runs/${run.id}`,
-      deepDiveHref: `/projects/${projectId}/runs/${run.id}/trace`,
-      runsHref: `/projects/${projectId}/runs`,
+      answerCard,
+      runStatus: hydratedRun.status,
+      runCreatedAt: hydratedRun.created_at,
+      runFinishedAt: hydratedRun.finished_at,
       content,
       deliveryMode,
       deliveryDetail,

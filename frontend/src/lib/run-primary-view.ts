@@ -69,6 +69,13 @@ export type PrimaryAnswerView = {
   inputTickers: string[];
 };
 
+export type CompactChatAnswerView = {
+  goalDisplay: string;
+  summaryLine: string | null;
+  orchestrationStatus: string | null;
+  conclusionRider: { text: string; href: string } | null;
+};
+
 function inputGoalText(input: unknown): string | null {
   if (!input || typeof input !== "object" || Array.isArray(input)) return null;
   const g = (input as Record<string, unknown>).analysis_goal;
@@ -380,5 +387,14 @@ export function buildPrimaryAnswerView(
     evidenceProvenanceHint,
     suggestionGoalText,
     inputTickers,
+  };
+}
+
+export function buildCompactChatAnswerView(view: PrimaryAnswerView): CompactChatAnswerView {
+  return {
+    goalDisplay: view.goalDisplay,
+    summaryLine: view.summaryLine,
+    orchestrationStatus: view.orchestrationStatus,
+    conclusionRider: view.conclusionRider,
   };
 }
