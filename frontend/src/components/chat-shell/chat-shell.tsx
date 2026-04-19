@@ -1,92 +1,50 @@
 "use client";
 
-import { useActionState, useEffect, useMemo, useState } from "react";
+import { useActionState, useEffect, useState } from "react";
 
+import { updateWorkspaceScopeAction } from "@/actions/projects";
+import { createAnalysisRunFromChat } from "@/actions/runs";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
-import type {
-  ChatAssistantMessage,
-  ChatBackgroundDelivery,
-  ChatMessage,
-  ChatSessionStub,
-  ChatSystemMessage,
-} from "./types";
-import { updateWorkspaceScopeAction } from "@/actions/projects";
-import { createAnalysisRunFromChat } from "@/actions/runs";
-
-function newId(): string {
-  if (typeof crypto !== "undefined" && "randomUUID" in crypto) {
-    return crypto.randomUUID();
-  }
-  return `m-${Date.now()}-${Math.random().toString(36).slice(2, 9)}`;
-}
+import type { ChatAssistantMessage, ChatBackgroundDelivery, ChatMessage, ChatRecentRun } from "./types";
 
 function nowIso(): string {
   return new Date().toISOString();
-}
-
-function initialMessages(): ChatMessage[] {
-  const boot: ChatSystemMessage = {
-    id: "local-1-system",
-    role: "system",
-    content: "Describe a goal below — each message creates an analysis run for this workspace.",
-    createdAt: "local",
-  };
-  const slot: ChatAssistantMessage = {
-    id: "local-1-assistant",
-    role: "assistant",
-    content: "I’ll return concise analysis updates here with links to run answer and deep dive.",
-    createdAt: "local",
-  };
-  return [boot, slot];
 }
 
 type Props = {
   projectId: string;
   tickers: string[];
   backgroundDelivery: ChatBackgroundDelivery;
+  initialMessages: ChatMessage[];
+  recentRuns: ChatRecentRun[];
 };
 
 /**
- * Chatbot UI–style workspace: sidebar + message column + composer.
- * Assistant turns are structured frames only (no default prose rendering).
+ * Workspace chat is one visible thread, hydrated from persisted runs and extended in place.
  */
-export function ChatShell({ projectId, tickers, backgroundDelivery }: Props) {
+export function ChatShell({ projectId, tickers, backgroundDelivery, initialMessages, recentRuns }: Props) {
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
   const [isEditingScope, setIsEditingScope] = useState(false);
-  const [sessions, setSessions] = useState<ChatSessionStub[]>(() => [
-    {
-      id: "local-1",
-      title: "New analysis",
-      updatedAt: "local",
-    },
-  ]);
-  const [activeSessionId, setActiveSessionId] = useState<string | null>("local-1");
-
-  const [messagesBySession, setMessagesBySession] = useState<Record<string, ChatMessage[]>>(() => ({
-    "local-1": initialMessages(),
-  }));
-
-  const messages = useMemo(() => {
-    if (!activeSessionId) return [];
-    return messagesBySession[activeSessionId] ?? [];
-  }, [activeSessionId, messagesBySession]);
+  const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
 
   const action = createAnalysisRunFromChat.bind(null, projectId);
   const [state, formAction] = useActionState(action, {});
   const scopeAction = updateWorkspaceScopeAction.bind(null, projectId);
   const [scopeState, scopeFormAction] = useActionState(scopeAction, { tickers });
+
   useEffect(() => {
     if (scopeState.tickers) {
       setScopeTickers(scopeState.tickers);
     }
   }, [scopeState.tickers]);
+
   useEffect(() => {
     const reply = state.reply;
-    if (!reply || !activeSessionId) return;
-    setMessagesBySession((prev) => {
-      const rows = [...(prev[activeSessionId] ?? [])];
+    if (!reply) return;
+    setMessages((prev) => {
+      const rows = [...prev];
       const idx = rows.findIndex((m) => m.role === "assistant" && m.id === `assist-${reply.requestId}`);
       const nextAssistant: ChatAssistantMessage = {
         id: `assist-${reply.requestId}`,
@@ -94,9 +52,12 @@ export function ChatShell({ projectId, tickers, backgroundDelivery }: Props) {
         content: reply.content,
         rewriteSuggestions: reply.rewriteSuggestions,
         routingReason: reply.routingReason,
+        answerCard: reply.answerCard,
+        runId: reply.runId,
         runHref: reply.runHref,
-        deepDiveHref: reply.deepDiveHref,
-        runsHref: reply.runsHref,
+        runStatus: reply.runStatus,
+        runCreatedAt: reply.runCreatedAt,
+        runFinishedAt: reply.runFinishedAt,
         deliveryMode: reply.deliveryMode,
         deliveryDetail: reply.deliveryDetail,
         reroutedFromBackground: reply.reroutedFromBackground,
@@ -107,30 +68,11 @@ export function ChatShell({ projectId, tickers, backgroundDelivery }: Props) {
       } else {
         rows.push(nextAssistant);
       }
-      return { ...prev, [activeSessionId]: rows };
+      return rows;
     });
-  }, [state.reply, activeSessionId]);
+  }, [state.reply]);
 
-  const onNewSession = () => {
-    const id = newId();
-    const stub: ChatSessionStub = {
-      id,
-      title: "New conversation",
-      updatedAt: nowIso().slice(0, 16).replace("T", " "),
-    };
-    setSessions((prev) => [stub, ...prev]);
-    setMessagesBySession((prev) => ({
-      ...prev,
-      [id]: initialMessages(),
-    }));
-    setActiveSessionId(id);
-  };
-
-  const onSelectSession = (id: string) => {
-    setActiveSessionId(id);
-  };
   const onSend = (text: string, requestId: string) => {
-    if (!activeSessionId) return;
     const userMsg: ChatMessage = {
       id: `user-${requestId}`,
       role: "user",
@@ -147,28 +89,12 @@ export function ChatShell({ projectId, tickers, backgroundDelivery }: Props) {
       reroutedFromBackground: false,
       createdAt: nowIso(),
     };
-    setMessagesBySession((prev) => ({
-      ...prev,
-      [activeSessionId]: [...(prev[activeSessionId] ?? []), userMsg, assistantPending],
-    }));
-    setSessions((prev) =>
-      prev.map((s) =>
-        s.id === activeSessionId
-          ? { ...s, title: text.slice(0, 48) || s.title, updatedAt: nowIso().slice(0, 16).replace("T", " ") }
-          : s,
-      ),
-    );
+    setMessages((prev) => [...prev, userMsg, assistantPending]);
   };
 
   return (
     <div className="flex h-[min(calc(100vh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row">
-      <ChatSidebar
-        projectId={projectId}
-        sessions={sessions}
-        activeSessionId={activeSessionId}
-        onNewSession={onNewSession}
-        onSelectSession={onSelectSession}
-      />
+      <ChatSidebar projectId={projectId} recentRuns={recentRuns} />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="border-b border-[var(--border)] px-4 py-3">
           <div className="flex items-start justify-between gap-3">

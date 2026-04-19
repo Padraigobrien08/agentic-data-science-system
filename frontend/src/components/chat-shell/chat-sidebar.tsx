@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-import type { ChatSessionStub } from "./types";
+import { StatusBadge } from "@/components/ui/technical";
+import { formatDate, shortId } from "@/lib/format";
+import type { ChatRecentRun } from "./types";
 
 type Props = {
   projectId: string;
-  sessions: ChatSessionStub[];
-  activeSessionId: string | null;
-  onNewSession: () => void;
-  onSelectSession: (id: string) => void;
+  recentRuns: ChatRecentRun[];
 };
 
 function navClass(href: string, pathname: string | null) {
@@ -27,15 +26,9 @@ function navClass(href: string, pathname: string | null) {
 }
 
 /**
- * Session list + global workspace links (Chatbot UI sidebar pattern, trimmed).
+ * Workspace nav plus a read-only recent-runs rail.
  */
-export function ChatSidebar({
-  projectId,
-  sessions,
-  activeSessionId,
-  onNewSession,
-  onSelectSession,
-}: Props) {
+export function ChatSidebar({ projectId, recentRuns }: Props) {
   const pathname = usePathname();
   const base = `/projects/${projectId}`;
 
@@ -61,30 +54,28 @@ export function ChatSidebar({
         </nav>
       </div>
 
-      <div className="flex items-center gap-2 border-b border-[var(--border)] p-3">
-        <button
-          type="button"
-          onClick={onNewSession}
-          className="flex-1 rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-left text-xs font-medium text-[var(--foreground)]"
-        >
-          New conversation
-        </button>
+      <div className="border-b border-[var(--border)] p-3">
+        <p className="px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+          Recent runs
+        </p>
       </div>
-      <nav className="flex max-h-40 flex-1 flex-col gap-0.5 overflow-y-auto p-2 md:max-h-none" aria-label="Conversations">
-        {sessions.map((s) => (
-          <button
-            key={s.id}
-            type="button"
-            onClick={() => onSelectSession(s.id)}
-            className={`w-full rounded-md px-2 py-2 text-left text-xs ${
-              activeSessionId === s.id
-                ? "bg-neutral-200 font-medium dark:bg-neutral-800"
-                : "text-[var(--muted)] hover:bg-neutral-100 dark:hover:bg-neutral-900"
-            }`}
+      <nav className="flex max-h-40 flex-1 flex-col gap-1 overflow-y-auto p-2 md:max-h-none" aria-label="Recent runs">
+        {recentRuns.length === 0 ? (
+          <p className="px-2 py-2 text-xs text-[var(--muted)]">Completed analyses will appear here.</p>
+        ) : null}
+        {recentRuns.map((run) => (
+          <Link
+            key={run.id}
+            href={run.href}
+            className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-left text-xs hover:bg-neutral-100 dark:hover:bg-neutral-900"
           >
-            <span className="line-clamp-2">{s.title}</span>
-            <span className="mt-0.5 block font-mono text-[10px] text-[var(--muted)]">{s.updatedAt}</span>
-          </button>
+            <span className="line-clamp-2 font-medium text-[var(--foreground)]">{run.goalDisplay}</span>
+            <span className="mt-2 flex flex-wrap items-center gap-2">
+              <StatusBadge status={run.status} variant="friendly" />
+              <span className="text-[10px] text-[var(--muted)]">{formatDate(run.createdAt)}</span>
+            </span>
+            <span className="mt-1 block font-mono text-[10px] text-[var(--muted)]">{shortId(run.id)}</span>
+          </Link>
         ))}
       </nav>
     </aside>

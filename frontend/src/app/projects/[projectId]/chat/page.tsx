@@ -4,6 +4,7 @@ import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { ApiError } from "@/lib/api/errors";
 import { getProject } from "@/lib/api/projects";
 import { getBackgroundDeliveryHealth } from "@/lib/api/runs";
+import { buildProjectChatHistory } from "@/lib/chat-run-history";
 import type { BackgroundDeliveryHealth } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
@@ -43,6 +44,7 @@ export default async function ProjectChatPage({
   } catch {
     // Keep the fallback degraded posture so chat never implies background delivery is healthy.
   }
+  const history = await buildProjectChatHistory(projectId);
 
   return (
     <div className="space-y-4">
@@ -58,6 +60,8 @@ export default async function ProjectChatPage({
         projectId={projectId}
         tickers={project.tickers ?? []}
         backgroundDelivery={backgroundDelivery}
+        initialMessages={history.messages}
+        recentRuns={history.recentRuns}
       />
     </div>
   );
