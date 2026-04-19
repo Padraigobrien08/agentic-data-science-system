@@ -62,7 +62,8 @@
 
 **Goal**: Users can inspect findings, caveats, and linked evidence directly from the chat answer through one coherent navigation surface.  
 **Depends on**: Phase 14  
-**Plans**: 3 planned
+**Plans**: 3/3 completed
+**Completed**: 2026-04-19
 
 **Details:**
 - Requirements: `CHAT-02`, `NAV-01`, `NAV-02`
@@ -95,4 +96,4 @@
 |-----------|--------|-------|--------|---------|
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
-| v1.2 Chat-First Analysis Experience | 12-16 | 9 | Active | — |
+| v1.2 Chat-First Analysis Experience | 12-16 | 12 | Active | — |

@@ -8,13 +8,13 @@
 ### Chat Experience
 
 - [x] **CHAT-01**: User can receive the completed analysis answer as a workspace chat message instead of using the standalone run page as the primary place to read the result
-- [ ] **CHAT-02**: User can read top findings, confidence, and caveats inline within the chat-delivered answer
+- [x] **CHAT-02**: User can read top findings, confidence, and caveats inline within the chat-delivered answer
 - [x] **CHAT-03**: User can continue the workspace conversation after a completed run while retaining visible linkage to the run that produced the answer
 
 ### Evidence Navigation
 
-- [ ] **NAV-01**: User can open report, evidence, artifacts, critic output, and trace links from one compact navigation area attached to the chat answer
-- [ ] **NAV-02**: User can jump from a finding or caveat in chat to the exact supporting artifact or trace target
+- [x] **NAV-01**: User can open report, evidence, artifacts, critic output, and trace links from one compact navigation area attached to the chat answer
+- [x] **NAV-02**: User can jump from a finding or caveat in chat to the exact supporting artifact or trace target
 - [ ] **NAV-03**: User can use a simplified run detail page as a secondary inspection surface focused on verification rather than primary answer reading
 
 ### Request Handling
@@ -57,10 +57,10 @@
 | Requirement | Phase | Status |
 |-------------|-------|--------|
 | CHAT-01 | Phase 14 | Complete |
-| CHAT-02 | Phase 15 | Pending |
+| CHAT-02 | Phase 15 | Complete |
 | CHAT-03 | Phase 14 | Complete |
-| NAV-01 | Phase 15 | Pending |
-| NAV-02 | Phase 15 | Pending |
+| NAV-01 | Phase 15 | Complete |
+| NAV-02 | Phase 15 | Complete |
 | NAV-03 | Phase 16 | Pending |
 | PROMPT-01 | Phase 13 | Complete |
 | PROMPT-02 | Phase 13 | Complete |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-18*
-*Last updated: 2026-04-19 after Phase 14 completion*
+*Last updated: 2026-04-19 after Phase 15 completion*

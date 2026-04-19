@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.2
 milestone_name: Chat-First Analysis Experience
-status: Ready to execute Phase 15
-stopped_at: Phase 15 planning complete; ready to execute
-last_updated: "2026-04-19T11:25:00Z"
+status: Ready to discuss Phase 16
+stopped_at: Phase 15 complete; ready to discuss Phase 16
+last_updated: "2026-04-19T11:28:00Z"
 progress:
   total_phases: 5
-  completed_phases: 3
-  total_plans: 9
-  completed_plans: 9
+  completed_phases: 4
+  total_plans: 12
+  completed_plans: 12
 ---
 
 # Project State
@@ -19,21 +19,21 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-18)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Execute Phase 15 of `v1.2 Chat-First Analysis Experience`, focused on attaching findings, caveats, and evidence navigation to the now-stable chat-native answer shell.
+**Current focus:** Discuss Phase 16 of `v1.2 Chat-First Analysis Experience`, focused on reducing the standalone run page to a secondary verification surface now that chat owns primary answer reading and first-pass evidence navigation.
 
 ## Current Position
 
-Phase: 15
-Plan: Ready to execute
+Phase: 16
+Plan: Ready to discuss
 Milestone: `v1.2 Chat-First Analysis Experience`
-Status: Ready to execute Phase 15
-Last activity: 2026-04-19 — Planned Phase 15 around a richer chat answer contract, inline evidence-reading UI, and exact-jump hardening
+Status: Ready to discuss Phase 16
+Last activity: 2026-04-19 — Completed Phase 15 by moving findings, confidence/caveats, compact evidence navigation, and exact-jump affordances into the chat-native answer
 
 ## Performance Metrics
 
 **Velocity:**
 
-- Total plans completed: 38
+- Total plans completed: 41
 - Average duration: 9 min
 - Total execution time: 5.4 hours
 
@@ -55,11 +55,12 @@ Last activity: 2026-04-19 — Planned Phase 15 around a richer chat answer contr
 | 12-runtime-reliability-for-chat-delivery | 3 | 19min | 6min |
 | 13-analyst-prompt-routing | 3 | 23min | 8min |
 | 14-chat-native-result-contract | 3 | 45min | 15min |
+| 15-evidence-navigation-in-chat | 3 | 25min | 8min |
 
 **Recent Trend:**
 
-- Last 5 plans: 13-analyst-prompt-routing-02 (8min), 13-analyst-prompt-routing-03 (8min), 14-chat-native-result-contract-01 (15min), 14-chat-native-result-contract-02 (18min), 14-chat-native-result-contract-03 (12min)
-- Trend: Stable; inline chat answer delivery is now in place and the next bottleneck has moved to evidence navigation density rather than answer placement.
+- Last 5 plans: 14-chat-native-result-contract-02 (18min), 14-chat-native-result-contract-03 (12min), 15-evidence-navigation-in-chat-01 (8min), 15-evidence-navigation-in-chat-02 (9min), 15-evidence-navigation-in-chat-03 (8min)
+- Trend: Stable; answer reading and first-pass verification now live in chat, so the remaining milestone bottleneck is standalone run-page duplication rather than missing inline evidence context.
 
 ## Accumulated Context
 
@@ -106,12 +107,11 @@ None.
 
 ### Blockers/Concerns
 
-- Findings, caveats, and evidence navigation are still fragmented across the run page instead of one compact chat-attached surface until Phase 15 execution lands.
-- The standalone run page still duplicates too much answer-reading content now that chat has become the primary reading surface.
+- The standalone run page still duplicates too much answer-reading content now that chat has become the primary reading and first-pass verification surface.
 - Non-blocking carry-over: `python -m backend.maintenance.retention` still emits a `runpy` `RuntimeWarning` because `backend/maintenance/__init__.py` eagerly imports the module.
 
 ## Session Continuity
 
 Last session: 2026-04-18T22:04:42Z
-Stopped at: Phase 15 planning complete; ready to execute
+Stopped at: Phase 15 complete; ready to discuss Phase 16
 Resume file: .planning/PROJECT.md

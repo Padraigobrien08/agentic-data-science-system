@@ -1,9 +1,9 @@
 ---
 phase: 15
 slug: evidence-navigation-in-chat
-status: draft
-nyquist_compliant: false
-wave_0_complete: false
+status: complete
+nyquist_compliant: true
+wave_0_complete: true
 created: 2026-04-19
 ---
 
@@ -32,18 +32,18 @@ created: 2026-04-19
 
 | Task ID | Plan | Wave | Requirement | Test Type | Automated Command | File Exists | Status |
 |---------|------|------|-------------|-----------|-------------------|-------------|--------|
-| 15-01 | 01 | 1 | CHAT-02, NAV-01 | action/view-model | `cd frontend && npm run test -- src/actions/runs.test.ts src/lib/chat-run-history.test.ts` | ⚠️ extend existing | ⬜ pending |
-| 15-02 | 02 | 2 | CHAT-02, NAV-01 | component rendering | `cd frontend && npm run test -- src/components/chat-shell/chat-message-list.test.tsx` | ⚠️ extend existing | ⬜ pending |
-| 15-03 | 03 | 3 | NAV-02 | interaction/build | `cd frontend && npm run test -- src/actions/runs.test.ts src/lib/chat-run-history.test.ts src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx && npm run build` | ⚠️ extend existing | ⬜ pending |
+| 15-01 | 01 | 1 | CHAT-02, NAV-01 | action/view-model | `cd frontend && npm run test -- src/actions/runs.test.ts src/lib/chat-run-history.test.ts` | ⚠️ extend existing | ✅ green |
+| 15-02 | 02 | 2 | CHAT-02, NAV-01 | component rendering | `cd frontend && npm run test -- src/components/chat-shell/chat-message-list.test.tsx` | ⚠️ extend existing | ✅ green |
+| 15-03 | 03 | 3 | NAV-02 | interaction/build | `cd frontend && npm run test -- src/actions/runs.test.ts src/lib/chat-run-history.test.ts src/components/chat-shell/chat-message-list.test.tsx src/components/chat-shell/chat-shell.test.tsx && npm run build` | ⚠️ extend existing | ✅ green |
 
 *Status: ⬜ pending · ✅ green · ❌ red · ⚠️ extend existing coverage*
 
 ## Wave 0 Requirements
 
-- [ ] Extend `frontend/src/actions/runs.test.ts` — supported replies include richer answer data for findings, confidence, caveats, and compact nav
-- [ ] Extend `frontend/src/lib/chat-run-history.test.ts` — hydrated history reuses the richer chat answer contract
-- [ ] Extend `frontend/src/components/chat-shell/chat-message-list.test.tsx` — inline findings, confidence/caveats, and compact nav render in chat
-- [ ] Extend `frontend/src/components/chat-shell/chat-shell.test.tsx` — the richer assistant card still upgrades in place and preserves one visible thread
+- [x] Extend `frontend/src/actions/runs.test.ts` — supported replies include richer answer data for findings, confidence, caveats, and compact nav
+- [x] Extend `frontend/src/lib/chat-run-history.test.ts` — hydrated history reuses the richer chat answer contract
+- [x] Extend `frontend/src/components/chat-shell/chat-message-list.test.tsx` — inline findings, confidence/caveats, compact nav, and exact jumps render in chat
+- [x] Extend `frontend/src/components/chat-shell/chat-shell.test.tsx` — the richer assistant card still upgrades in place and preserves one visible thread
 
 ## Manual-Only Verifications
 
@@ -54,11 +54,11 @@ created: 2026-04-19
 
 ## Validation Sign-Off
 
-- [ ] All planned tasks have automated verification commands or explicit Wave 0 gaps
-- [ ] Sampling continuity: no 3 consecutive tasks without automated verification
-- [ ] Wave 0 covers the richer answer contract, hydrated history, and inline rendering
-- [ ] No watch-mode flags
-- [ ] Feedback latency < 20s
-- [ ] `nyquist_compliant: true` set in frontmatter
+- [x] All planned tasks have automated verification commands or explicit Wave 0 gaps
+- [x] Sampling continuity: no 3 consecutive tasks without automated verification
+- [x] Wave 0 covers the richer answer contract, hydrated history, and inline rendering
+- [x] No watch-mode flags
+- [x] Feedback latency < 20s
+- [x] `nyquist_compliant: true` set in frontmatter
 
-**Approval:** pending
+**Approval:** complete
