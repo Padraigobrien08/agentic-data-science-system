@@ -76,7 +76,7 @@
 
 **Goal**: The standalone run page becomes a secondary verification and deep-dive surface instead of the primary place users read the answer.  
 **Depends on**: Phase 15  
-**Plans**: 0 planned
+**Plans**: 3 planned
 
 **Details:**
 - Requirements: `NAV-03`
