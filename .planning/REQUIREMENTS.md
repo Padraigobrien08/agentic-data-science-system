@@ -7,8 +7,8 @@
 
 ### Narrative Answer
 
-- [ ] **ANSR-01**: User can read a multi-paragraph analyst answer in chat that explains the thesis, supporting evidence, and watchouts instead of a one-line summary card
-- [ ] **ANSR-02**: User can receive a stable non-boilerplate fallback answer when evidence is limited, so successful runs never collapse into vague placeholder text
+- [x] **ANSR-01**: User can read a multi-paragraph analyst answer in chat that explains the thesis, supporting evidence, and watchouts instead of a one-line summary card
+- [x] **ANSR-02**: User can receive a stable non-boilerplate fallback answer when evidence is limited, so successful runs never collapse into vague placeholder text
 - [ ] **ANSR-03**: User can treat the narrative answer as the primary reading surface, with findings and supporting detail clearly subordinate to it
 
 ### Confidence Experience
@@ -56,8 +56,8 @@
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| ANSR-01 | Phase 17 | Pending |
-| ANSR-02 | Phase 17 | Pending |
+| ANSR-01 | Phase 17 | Complete |
+| ANSR-02 | Phase 17 | Complete |
 | ANSR-03 | Phase 19 | Pending |
 | CONF-01 | Phase 18 | Pending |
 | CONF-02 | Phase 18 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-19*
-*Last updated: 2026-04-19 after starting v1.3 Narrative Answers and Visual Evidence*
+*Last updated: 2026-04-19 after completing Phase 17 Narrative Answer Contract*

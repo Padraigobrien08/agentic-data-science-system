@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** In planning
+**Status:** Phase 17 complete · Phase 18 next
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -20,12 +20,13 @@
 **Goal**: Replace the short summary-card contract with a fuller narrative analyst answer that can still fail gracefully when support is limited.
 **Depends on**: Phase 16 and shipped `v1.2` chat-first baseline
 **Plans**: 3 plans
+**Status**: Complete — 2026-04-19
 
 Plans:
 
-- [ ] `17-narrative-answer-contract-01-PLAN.md` — Define a backend-safe narrative answer contract that promotes thesis, support, and watchouts into first-class answer fields
-- [ ] `17-narrative-answer-contract-02-PLAN.md` — Refactor the chat answer builder, live reply path, and history hydration around the longer narrative contract
-- [ ] `17-narrative-answer-contract-03-PLAN.md` — Render the centered narrative-first answer body and harden fallback states so successful runs never degrade into vague placeholder prose
+- [x] `17-narrative-answer-contract-01-PLAN.md` — Define a backend-safe narrative answer contract that promotes thesis, support, and watchouts into first-class answer fields
+- [x] `17-narrative-answer-contract-02-PLAN.md` — Refactor the chat answer builder, live reply path, and history hydration around the longer narrative contract
+- [x] `17-narrative-answer-contract-03-PLAN.md` — Render the centered narrative-first answer body and harden fallback states so successful runs never degrade into vague placeholder prose
 
 **Details:**
 - Requirements: `ANSR-01`, `ANSR-02`
@@ -107,4 +108,4 @@ Plans:
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
-| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | In planning | — |
+| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 17 complete | — |
