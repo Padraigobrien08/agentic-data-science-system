@@ -48,7 +48,7 @@
 
 **Goal**: Completed run results become first-class chat answers with stable run linkage so the workspace conversation becomes the primary answer-reading surface.  
 **Depends on**: Phase 13  
-**Plans**: 0 planned
+**Plans**: 3 planned
 
 **Details:**
 - Requirements: `CHAT-01`, `CHAT-03`
@@ -94,4 +94,4 @@
 |-----------|--------|-------|--------|---------|
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
-| v1.2 Chat-First Analysis Experience | 12-16 | 6 | Active | — |
+| v1.2 Chat-First Analysis Experience | 12-16 | 9 | Active | — |
