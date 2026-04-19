@@ -1,5 +1,9 @@
 "use client";
 
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+
 type Props = {
   messageId: string;
   /** Visual hint for empty vs waiting-for-blocks state. */
@@ -12,24 +16,33 @@ type Props = {
  */
 export function AssistantStructuredFrame({ messageId, variant = "empty" }: Props) {
   return (
-    <div
-      className="w-full max-w-[min(100%,42rem)] rounded-2xl rounded-bl-md border border-dashed border-[var(--border)] bg-neutral-50/80 px-4 py-4 dark:bg-neutral-950/50"
+    <Card
+      className="w-full max-w-[min(100%,42rem)] rounded-2xl rounded-bl-md bg-[var(--background)] shadow-none"
       data-message-id={messageId}
       data-assistant-slot="structured"
     >
-      <div className="flex items-center justify-between gap-2">
-        <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-          Response
+      <CardHeader className="gap-1 pb-4">
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+            Conclusion
+          </p>
+          {variant === "pending" ? (
+            <span className="text-[10px] text-[var(--muted)]">Updating…</span>
+          ) : null}
+        </div>
+        <p className="text-base font-semibold tracking-[-0.02em] text-[var(--foreground)]">
+          {variant === "pending" ? "Running analysis..." : "Structured response pending"}
         </p>
-        {variant === "pending" ? (
-          <span className="text-[10px] text-[var(--muted)]">Updating…</span>
-        ) : null}
-      </div>
-      <div className="mt-3 min-h-[4.5rem] rounded-md border border-[var(--border)]/60 bg-[var(--background)] p-3">
-        <p className="text-xs text-[var(--muted)]">
-          Structured blocks (run summary, evidence, actions) mount here — not plain assistant text.
-        </p>
-      </div>
-    </div>
+      </CardHeader>
+      <CardContent className="space-y-4">
+        <Skeleton className="h-12 w-full" />
+        <Separator />
+        <div className="space-y-2">
+          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Goal</p>
+          <Skeleton className="h-5 w-4/5" />
+          <Skeleton className="h-5 w-3/5" />
+        </div>
+      </CardContent>
+    </Card>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
-import Link from "next/link";
+import { AssistantStructuredFrame } from "./assistant-structured-frame";
+import { ChatRunAnswerCard } from "./chat-run-answer-card";
 import type { ChatMessage } from "./types";
 
 type Props = {
@@ -67,11 +68,23 @@ export function ChatMessageList({ messages }: Props) {
           const note = deliveryNote(m);
           return (
             <article key={m.id} className="flex w-full justify-start">
-              <div className="max-w-[min(100%,38rem)] rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-sm">
+              <div className="w-full max-w-[min(100%,42rem)]">
                 <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
                   Assistant
                 </p>
-                <div className="mt-1 whitespace-pre-wrap text-[var(--foreground)]">{m.content}</div>
+                {m.pending ? (
+                  <div className="mt-2">
+                    <AssistantStructuredFrame messageId={m.id} variant="pending" />
+                  </div>
+                ) : m.answerCard ? (
+                  <div className="mt-2">
+                    <ChatRunAnswerCard answerCard={m.answerCard} />
+                  </div>
+                ) : (
+                  <div className="mt-1 max-w-[min(100%,38rem)] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-[var(--foreground)]">
+                    {m.content}
+                  </div>
+                )}
                 {m.routingReason ? (
                   <p className="mt-2 rounded-lg border border-[var(--border)] bg-neutral-50/70 px-3 py-2 text-[11px] text-[var(--muted)] dark:bg-neutral-950/30">
                     {m.routingReason}
@@ -92,15 +105,6 @@ export function ChatMessageList({ messages }: Props) {
                   </div>
                 ) : null}
                 {note ? <p className="mt-2 text-[10px] text-[var(--muted)]">{note}</p> : null}
-                {m.pending ? (
-                  <p className="mt-2 text-[10px] text-[var(--muted)]">Working…</p>
-                ) : m.runHref || m.deepDiveHref || m.runsHref ? (
-                  <div className="mt-2 flex flex-wrap gap-3 text-xs">
-                    {m.runHref ? <Link href={m.runHref} className="underline">Run answer</Link> : null}
-                    {m.deepDiveHref ? <Link href={m.deepDiveHref} className="underline">Deep dive</Link> : null}
-                    {m.runsHref ? <Link href={m.runsHref} className="underline">All runs</Link> : null}
-                  </div>
-                ) : null}
               </div>
             </article>
           );

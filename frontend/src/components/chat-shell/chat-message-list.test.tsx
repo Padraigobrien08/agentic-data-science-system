@@ -5,15 +5,19 @@ import { ChatMessageList } from "@/components/chat-shell/chat-message-list";
 import type { ChatMessage } from "@/components/chat-shell/types";
 
 describe("ChatMessageList", () => {
-  it("renders rerouted delivery notes alongside run navigation links", () => {
+  it("renders a structured answer card for completed assistant replies", () => {
     const messages: ChatMessage[] = [
       {
         id: "assistant-1",
         role: "assistant",
-        content: "Analysis completed for MSFT. Open run answer or deep dive when ready.",
+        content: "MSFT margin pressure looks cyclical rather than structural.",
+        answerCard: {
+          goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+          summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
+          orchestrationStatus: "success",
+          conclusionRider: null,
+        },
         runHref: "/projects/project-1/runs/run-1",
-        deepDiveHref: "/projects/project-1/runs/run-1/trace",
-        runsHref: "/projects/project-1/runs",
         deliveryMode: "sync_only",
         deliveryDetail: "Background delivery was rerouted to immediate execution for this chat request.",
         reroutedFromBackground: true,
@@ -26,9 +30,29 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Background delivery was rerouted to immediate execution for this chat request."),
     ).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Run answer" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "Deep dive" })).toBeTruthy();
-    expect(screen.getByRole("link", { name: "All runs" })).toBeTruthy();
+    expect(screen.getByText("Conclusion")).toBeTruthy();
+    expect(screen.getByText("Goal")).toBeTruthy();
+    expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
+    expect(screen.getByText("Assess whether margin pressure is temporary or structural for MSFT")).toBeTruthy();
+  });
+
+  it("renders the structured pending footprint while analysis is running", () => {
+    const messages: ChatMessage[] = [
+      {
+        id: "assistant-pending",
+        role: "assistant",
+        content: "Running analysis...",
+        pending: true,
+        deliveryMode: "sync_only",
+        deliveryDetail: "Workspace chat is executing synchronously right now.",
+        createdAt: "2026-04-18T20:00:00Z",
+      },
+    ];
+
+    render(<ChatMessageList messages={messages} />);
+
+    expect(screen.getByText("Running analysis...")).toBeTruthy();
+    expect(screen.getByText("Updating…")).toBeTruthy();
   });
 
   it("renders rewriteSuggestions inline without run links for unsupported routing replies", () => {
@@ -55,8 +79,7 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Compare AAPL versus MSFT on operating margin over the last eight quarters."),
     ).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Run answer" })).toBeNull();
-    expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
-    expect(screen.queryByRole("link", { name: "All runs" })).toBeNull();
+    expect(screen.queryByText("Conclusion")).toBeNull();
+    expect(screen.queryByText("Goal")).toBeNull();
   });
 });
