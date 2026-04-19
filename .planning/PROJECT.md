@@ -34,7 +34,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- None — `v1.2` planned scope is complete and awaiting milestone audit/archive
+- None — `v1.2` is shipped and archived; no new milestone is defined yet
 
 ### Out of Scope
 
@@ -44,24 +44,17 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ## Current State
 
-**Shipped:** `v1.1 Live Validation and Scale` on 2026-04-18
-**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live or hybrid evaluation, clean archive-grade planning traceability, a repaired sync-first chat runtime in the documented local stack, deterministic analyst-language routing with inline rewrite guidance in chat, a chat-native result contract with stable run linkage, inline chat-based findings plus evidence navigation, and a standalone run page that has been reduced to verification-first inspection. `v1.2` is complete on planned product scope and is ready for milestone audit and archive.
+**Shipped:** `v1.2 Chat-First Analysis Experience` on 2026-04-19
+**Status:** The platform now supports policy-gated live validation, S3-compatible artifact storage, summary-first large-trace browsing, a persisted evaluation control plane, canonical child-run execution for live or hybrid evaluation, clean archive-grade planning traceability, a repaired sync-first chat runtime in the documented local stack, deterministic analyst-language routing with inline rewrite guidance in chat, a chat-native result contract with stable run linkage, inline chat-based findings plus evidence navigation, and a standalone run page reduced to verification-first inspection. There is no active milestone at the moment.
 
-## Current Milestone: v1.2 Chat-First Analysis Experience
+## No Active Milestone
 
-**Goal:** Make workspace chat the primary place where users receive, inspect, and continue analysis answers, while fixing the runtime and prompt-handling issues that currently break that experience.
-
-**Target features:**
-- Deliver completed run answers directly into workspace chat with stable linkage back to the underlying run
-- Attach one compact evidence-navigation area to the chat answer for report, evidence, artifacts, critic output, and trace views
-- Surface findings, confidence, caveats, and exact evidence jumps inline in the chat-delivered answer
-- Accept normal analyst phrasing in chat for common deterioration, anomaly, and peer-comparison requests, or return helpful rewrite guidance
-- Keep the documented Compose stack reliable enough for chat-native delivery, including run-workspace writes and background execution
-- Reduce the standalone run page to a secondary inspection surface instead of a duplicated answer reader
+The planning set is between milestones. The shipped `v1.2` archive now captures the full chat-first answer flow, and the next milestone should be chosen from the remaining analyst workflow or evidence-management gaps rather than from unresolved runtime or answer-delivery blockers.
 
 ## Future Milestone Candidates
 
-- Environment-aware onboarding so secure-default deployments do not present dead-end registration flows
+- Multi-run conversation workflows so analysts can compare or revisit prior runs inside one workspace thread
+- Grouped evidence bundles and saved verification sets built from chat findings
 - Scheduled live canary suites with alerting and explicit request-budget controls
 - Promotion of failing live or hybrid cases into deterministic fixture regressions
 - Cross-run evidence-coverage and weak-evidence summaries for operator review
@@ -72,7 +65,7 @@ This repo is a layered brownfield monorepo with a deterministic EDGAR analysis c
 
 The highest-value work in v1.0 was operational rather than feature-based, and all five trust-boundary phases are now complete. Run outputs are isolated, worker attempts are lease-safe and auditable, insecure auth and ops defaults are removed, pull-request CI exercises the documented stack and key user flows, and storage or retention behavior now scales more honestly under sustained usage. The project has therefore shipped a v1.0 hardening baseline for an already-valuable system. The v1.1 milestone then added explicit live-validation policy boundaries, a remote object-store contract, a summary-first large-trace experience, a first-class persisted evaluation control plane, canonical child-run execution for live or hybrid validation, truthful evaluation dependency observability on the existing ops surfaces, and the final Phase 11 bookkeeping cleanup that restored clean archival traceability.
 
-The next milestone comes directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface. `v1.2` is now complete on its intended chat-first answer experience.
+The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface. That chat-first answer experience is now shipped, and the next milestone should build on it rather than reopen it.
 
 ## Constraints
 
@@ -114,4 +107,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-19 after Phase 16 completion*
+*Last updated: 2026-04-19 after v1.2 archive*

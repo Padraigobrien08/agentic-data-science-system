@@ -2,6 +2,44 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.2 — Chat-First Analysis Experience
+
+**Shipped:** 2026-04-19
+**Phases:** 5 | **Plans:** 15 | **Sessions:** 1
+
+### What Was Built
+- A repaired sync-first chat runtime with truthful degraded-state reporting and capability-aware secure-default onboarding
+- Deterministic analyst-language routing with prompt previews and actionable rewrite guidance before run creation
+- A chat-native answer contract with persisted run-backed history, inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links
+- A reduced standalone run page that now serves secondary inspection and verification rather than primary answer reading
+
+### What Worked
+- Local product testing produced a concrete next milestone immediately; the phases mapped directly to the real user friction instead of speculative UX work.
+- Fixing runtime and routing before enriching the chat answer kept the later UI phases additive and low-risk.
+- Reusing the existing run-answer derivation path for chat kept the chat and run surfaces aligned instead of creating parallel summary logic.
+
+### What Was Inefficient
+- Milestone-closeout still needed manual planning bookkeeping cleanup for stale validation metadata before the final audit pass.
+- Archive curation remains manual: roadmap slimming, requirement retirement, milestone history, and retrospective updates are still hand-authored.
+- Unrelated local UI exploration remained dirty through the milestone, which reinforced the need to keep archive commits narrowly scoped to planning artifacts.
+
+### Patterns Established
+- Use live product testing to define the next milestone immediately after infrastructure-heavy ships; it exposes the real product seam faster than abstract backlog grooming.
+- Move the primary reading surface first, then simplify the legacy surface after the replacement is already usable.
+- Keep chat delivery deterministic-first and inspectable rather than hiding routing or runtime fallback behavior behind opaque convenience.
+
+### Key Lessons
+1. Chat-first product work only stabilizes quickly when runtime truthfulness and deterministic routing are solved before the UI richness phase.
+2. Reusing existing answer builders is cheaper and safer than inventing a second summary stack for a new surface.
+3. Milestone audit quality improves when validation and summary metadata are closed during phase execution, not at archive time.
+
+### Cost Observations
+- Model mix: not tracked in repository metadata for this milestone
+- Sessions: 1 visible GSD execution session
+- Notable: 15 plans and 27 tasks shipped overnight because the milestone stayed tightly focused on one product hierarchy change
+
+---
+
 ## Milestone: v1.0 — Hardening
 
 **Shipped:** 2026-04-17
@@ -86,6 +124,7 @@
 |-----------|----------|--------|------------|
 | v1.0 | 1 | 5 | Introduced trust-boundary phases, archived planning artifacts, and regression-first execution |
 | v1.1 | 1 | 6 | Extended the hardened base into live-validation scale features and added an explicit archive-traceability cleanup phase |
+| v1.2 | 1 | 5 | Re-centered the product around chat-first answer delivery and demoted the run page to secondary inspection |
 
 ### Cumulative Quality
 
@@ -93,6 +132,7 @@
 |-----------|-------|----------|-------------------|
 | v1.0 | 57 prior-phase regression tests green at milestone closeout plus 13/13 Phase 5 must-haves | Broad backend, worker, browser, and Compose workflow gating | 0 |
 | v1.1 | 66 backend audit-slice tests plus 8 frontend trace tests green at milestone closeout | Validation policy, remote storage, large traces, evaluation control plane, child-run reconciliation, and ops truthfulness | 0 |
+| v1.2 | 84 backend audit-slice tests plus 12 frontend chat/run-page tests green at milestone closeout | Runtime reliability, deterministic routing, chat-native answers, inline evidence navigation, and secondary run inspection | 0 |
 
 ### Top Lessons (Verified Across Milestones)
 

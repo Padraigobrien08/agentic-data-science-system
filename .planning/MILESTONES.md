@@ -1,5 +1,32 @@
 # Project Milestones: Agentic Data Science System
 
+## v1.2 Chat-First Analysis Experience (Shipped: 2026-04-19)
+
+**Delivered:** A chat-first EDGAR analysis experience with dependable local runtime delivery, deterministic analyst-language routing, inline answer and evidence reading in workspace chat, and a simplified secondary run inspection surface.
+
+**Phases completed:** 5 phases, 15 plans, 27 tasks
+
+**Key accomplishments:**
+
+- Repaired the documented stack so chat-triggered runs, worker startup, degraded-state disclosure, and secure-default onboarding no longer block first-run usage.
+- Broadened deterministic prompt routing so normal analyst phrasing works and unsupported prompts return rewrite guidance before failed run creation.
+- Moved completed run answers into workspace chat with persisted run-backed history and one compact run strip instead of link-sprawl footers.
+- Added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links directly to the chat answer.
+- Reduced the standalone run page to a verification-first inspection surface and aligned adjacent run/trace copy to the chat-first model.
+
+**Stats:**
+
+- 130 files created or modified
+- 9,854 insertions and 422 deletions across frontend, backend, orchestration, tests, and planning artifacts
+- 5 phases, 15 plans, 27 tasks, 62 commits
+- Overnight ship from 2026-04-18 to 2026-04-19 (21:25 -> 11:43 local milestone range)
+
+**Git range:** `a50a29c` → `85833e5`
+
+**What's next:** Define the next milestone around multi-run conversation flows, grouped evidence bundles, and richer analyst memory or comparison workflows inside the workspace.
+
+---
+
 ## v1.1 Live Validation and Scale (Shipped: 2026-04-18)
 
 **Delivered:** A scale-ready EDGAR analysis platform with policy-gated live validation, S3-compatible artifact storage, summary-first trace inspection, a persisted evaluation control plane, canonical child-run execution, and clean archival traceability.
