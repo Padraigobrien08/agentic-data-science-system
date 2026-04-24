@@ -155,6 +155,38 @@ export interface ConfidenceExplainerPreview {
   limits: string[];
 }
 
+/** D-04/D-05 safe inline chart previews mirror the backend semantic contract exactly. */
+export interface InlineChartSeriesPreview {
+  key: string;
+  label: string;
+  color_token: "chart-1" | "chart-2" | "chart-3" | "chart-4";
+}
+
+export interface InlineChartRowPreview {
+  x_value: string;
+  values: Record<string, number | null>;
+}
+
+export interface InlineChartMarkerPreview {
+  x_value: string;
+  label: string;
+}
+
+export interface InlineChartPreview {
+  chart_id: string;
+  kind: "line" | "grouped_bar";
+  metric_key: string;
+  metric_label: string;
+  caption: string;
+  x_axis_label: string;
+  y_axis_label: string;
+  value_format: "currency" | "percent" | "ratio" | "count" | "number";
+  series: InlineChartSeriesPreview[];
+  rows: InlineChartRowPreview[];
+  markers: InlineChartMarkerPreview[];
+  source_artifact_roles: string[];
+}
+
 export interface RunTransparencySummary {
   evidence_artifact_ids: string[];
   evidence_artifacts_by_role: Record<string, string>;
@@ -169,6 +201,7 @@ export interface RunTransparencySummary {
   report_phase_status: string | null;
   confidence_explainer?: ConfidenceExplainerPreview | null;
   narrative_answer?: NarrativeAnswerPreview | null;
+  inline_charts?: InlineChartPreview[] | null;
 }
 
 export interface RunStepOutputSummary {

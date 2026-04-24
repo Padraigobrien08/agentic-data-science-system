@@ -9,7 +9,7 @@ from __future__ import annotations
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from backend.models.artifact import Artifact
 from backend.schemas.llm_usage import LlmRunUsageSummaryWire
@@ -121,6 +121,10 @@ class RunTransparencySummary(BaseModel):
         None,
         description="Safe narrative preview from ``ai_agents.traceability.report.narrative_answer``.",
     )
+    inline_charts: list["InlineChartPreview"] = Field(
+        default_factory=list,
+        description="D-04/D-05 safe inline chart previews from ``ai_agents.traceability.report.inline_charts``.",
+    )
 
 
 class NarrativeAnswerSectionPreview(BaseModel):
@@ -145,6 +149,90 @@ class ConfidenceExplainerPreview(BaseModel):
     supports: list[str] = Field(default_factory=list)
     weakens: list[str] = Field(default_factory=list)
     limits: list[str] = Field(default_factory=list)
+
+
+class InlineChartSeriesPreview(BaseModel):
+    """Safe D-04 series metadata for one backend-authored inline chart."""
+
+    key: str
+    label: str
+    color_token: Literal["chart-1", "chart-2", "chart-3", "chart-4"]
+
+
+class InlineChartRowPreview(BaseModel):
+    """Semantic row values for one x-axis bucket without exposing chart-library props."""
+
+    x_value: str
+    values: dict[str, float | int | None] = Field(default_factory=dict)
+
+
+class InlineChartMarkerPreview(BaseModel):
+    """Deterministic D-12 marker annotation already grounded in trusted artifact rows."""
+
+    x_value: str
+    label: str
+
+
+class InlineChartPreview(BaseModel):
+    """Bounded D-04/D-05 inline chart contract for the chat answer."""
+
+    chart_id: str
+    kind: Literal["line", "grouped_bar"]
+    metric_key: str
+    metric_label: str
+    caption: str
+    x_axis_label: str
+    y_axis_label: str
+    value_format: Literal["currency", "percent", "ratio", "count", "number"]
+    series: list[InlineChartSeriesPreview] = Field(default_factory=list)
+    rows: list[InlineChartRowPreview] = Field(default_factory=list)
+    markers: list[InlineChartMarkerPreview] = Field(default_factory=list)
+    source_artifact_roles: list[str] = Field(default_factory=list)
+
+
+def _parse_inline_chart_row(raw: Any) -> InlineChartRowPreview:
+    if not isinstance(raw, dict):
+        raise ValueError("inline chart row must be a dict")
+    x_value = raw.get("x_value")
+    if not isinstance(x_value, str) or not x_value.strip():
+        raise ValueError("inline chart row requires x_value")
+
+    values: dict[str, float | int | None] = {}
+    for key, value in raw.items():
+        if key == "x_value":
+            continue
+        if not isinstance(key, str) or not key.strip():
+            continue
+        if value is None or isinstance(value, (int, float)):
+            values[key] = value
+            continue
+        raise ValueError("inline chart row values must be numeric or null")
+
+    if not values:
+        raise ValueError("inline chart row requires at least one series value")
+    return InlineChartRowPreview(x_value=x_value.strip(), values=values)
+
+
+def _parse_inline_chart_preview(raw: Any) -> InlineChartPreview:
+    if not isinstance(raw, dict):
+        raise ValueError("inline chart preview must be a dict")
+
+    rows = [_parse_inline_chart_row(item) for item in raw.get("rows") or []]
+    payload = dict(raw)
+    payload["rows"] = rows
+    return InlineChartPreview.model_validate(payload)
+
+
+def _parse_inline_charts(raw: Any) -> list[InlineChartPreview]:
+    # D-04/D-05: fail closed so malformed or speculative chart payloads never reach the UI.
+    if raw is None:
+        return []
+    if not isinstance(raw, list):
+        return []
+    try:
+        return [_parse_inline_chart_preview(item) for item in raw]
+    except (ValidationError, ValueError):
+        return []
 
 
 def _parse_narrative_answer(raw: Any) -> NarrativeAnswerPreview | None:
@@ -212,6 +300,7 @@ def build_run_transparency_summary(
     report_phase_status: str | None = None
     confidence_explainer: ConfidenceExplainerPreview | None = None
     narrative_answer: NarrativeAnswerPreview | None = None
+    inline_charts: list[InlineChartPreview] = []
 
     if meta:
         ai = meta.get("ai_agents")
@@ -244,6 +333,7 @@ def build_run_transparency_summary(
                         report.get("key_takeaways_preview"),
                         limit=8,
                     )
+                    inline_charts = _parse_inline_charts(report.get("inline_charts"))
                     narrative_answer = _parse_narrative_answer(report.get("narrative_answer"))
                     rps = report.get("phase_status")
                     report_phase_status = str(rps).strip() if isinstance(rps, str) and str(rps).strip() else None
@@ -266,6 +356,7 @@ def build_run_transparency_summary(
         report_phase_status=report_phase_status,
         confidence_explainer=confidence_explainer,
         narrative_answer=narrative_answer,
+        inline_charts=inline_charts,
     )
 
 
