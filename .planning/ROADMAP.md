@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** Phase 17 complete · Phase 18 next
+**Status:** Phase 18 complete · Phase 19 next
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -37,12 +37,13 @@ Plans:
 **Goal**: Move evidence strength into the answer header and let users understand the rating through a compact explainer instead of a large standalone caveat block.
 **Depends on**: Phase 17
 **Plans**: 3 plans
+**Status**: Complete — 2026-04-24
 
 Plans:
 
-- [ ] 18-01: Extend the answer and transparency contract with explicit confidence rationale fields that explain coverage, caveats, and trust limits
-- [ ] 18-02: Implement the inline evidence-strength badge with semantic color treatment and a responsive shadcn popover/dialog explainer
-- [ ] 18-03: Collapse redundant caveat chrome into the explainer and keep only the most important rider inline with the answer
+- [x] 18-01: Extend the answer and transparency contract with explicit confidence rationale fields that explain coverage, caveats, and trust limits
+- [x] 18-02: Implement the inline evidence-strength badge with semantic color treatment and a responsive shadcn popover/dialog explainer
+- [x] 18-03: Collapse redundant caveat chrome into the explainer and keep only the most important rider inline with the answer
 
 **Details:**
 - Requirements: `CONF-01`, `CONF-02`, `CONF-03`
@@ -108,4 +109,4 @@ Plans:
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
-| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 17 complete | — |
+| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 18 complete | — |

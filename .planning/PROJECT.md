@@ -32,6 +32,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ Workspace chat answers now include inline findings, confidence/caveats, compact evidence navigation, and quiet exact-jump verification links without leaving the transcript — validated in Phase 15
 - ✓ The standalone run page now acts as a secondary inspection surface focused on verification rather than duplicating the primary answer — validated in Phase 16
 - ✓ Workspace chat answers now render as backend-authored narrative replies with explicit full, partial, legacy, and error behavior, so the answer reads like an analyst memo instead of a summary card — validated in Phase 17
+- ✓ Workspace chat answers now surface evidence strength inline in the answer header through one compact semantic pill with a grouped explainer, instead of a large standalone confidence block — validated in Phase 18
 
 ### Active
 
@@ -49,7 +50,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Current milestone:** `v1.3 Narrative Answers and Visual Evidence`
-**Status:** The platform now has a centered narrative chat answer authored from backend-safe preview data, with explicit partial and error fallback behavior. `v1.3` now continues with inline confidence posture, supplemental evidence disclosure, and deterministic charts rendered directly in chat.
+**Status:** The platform now has a centered narrative chat answer with inline evidence-strength posture and a compact grouped confidence explainer. `v1.3` now continues with supplemental evidence disclosure and deterministic charts rendered directly in chat.
 
 ## Current Milestone: v1.3 Narrative Answers and Visual Evidence
 
@@ -77,7 +78,7 @@ The highest-value work in v1.0 was operational rather than feature-based, and al
 
 The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface.
 
-`v1.3` follows directly from the first live iteration on that new chat surface. Phase 17 has now replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, so the answer reads like a short analyst memo instead of a terse status card. The next step is to make evidence strength visible and explorable in the answer header, push evidence further into a clearly supplemental disclosure, and add deterministic inline charts so the answer can show trends and comparisons instead of only describing them.
+`v1.3` follows directly from the first live iteration on that new chat surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, and Phase 18 has now moved evidence strength into a compact header pill backed by a grouped confidence explainer. The next step is to push evidence further into a clearly supplemental disclosure and add deterministic inline charts so the answer can show trends and comparisons instead of only describing them.
 
 ## Constraints
 
@@ -121,4 +122,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-19 after completing Phase 17 Narrative Answer Contract*
+*Last updated: 2026-04-24 after completing Phase 18 Confidence Explainer*

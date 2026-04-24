@@ -13,9 +13,9 @@
 
 ### Confidence Experience
 
-- [ ] **CONF-01**: User can see evidence strength inline in the answer header with semantic status styling for `Good`, `Medium`, `Bad`, and `Not rated`
-- [ ] **CONF-02**: User can open a compact explainer from that header status and understand why the evidence strength received its current rating
-- [ ] **CONF-03**: User can review the main caveat drivers inside the explainer without leaving chat
+- [x] **CONF-01**: User can see evidence strength inline in the answer header with semantic status styling for `Good`, `Medium`, `Bad`, and `Not rated`
+- [x] **CONF-02**: User can open a compact explainer from that header status and understand why the evidence strength received its current rating
+- [x] **CONF-03**: User can review the main caveat drivers inside the explainer without leaving chat
 
 ### Supplemental Evidence
 
@@ -59,9 +59,9 @@
 | ANSR-01 | Phase 17 | Complete |
 | ANSR-02 | Phase 17 | Complete |
 | ANSR-03 | Phase 19 | Pending |
-| CONF-01 | Phase 18 | Pending |
-| CONF-02 | Phase 18 | Pending |
-| CONF-03 | Phase 18 | Pending |
+| CONF-01 | Phase 18 | Complete |
+| CONF-02 | Phase 18 | Complete |
+| CONF-03 | Phase 18 | Complete |
 | EVID-01 | Phase 19 | Pending |
 | EVID-02 | Phase 19 | Pending |
 | EVID-03 | Phase 19 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-19*
-*Last updated: 2026-04-19 after completing Phase 17 Narrative Answer Contract*
+*Last updated: 2026-04-24 after completing Phase 18 Confidence Explainer*
