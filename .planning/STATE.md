@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Narrative Answers and Visual Evidence
-status: Ready to discuss Phase 20
-last_updated: "2026-04-24T23:25:00.000Z"
+status: Ready to plan Phase 20
+last_updated: "2026-04-24T23:55:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 3
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 
 ## Current Position
 
-Phase: 20 (inline-charts-in-chat) — READY TO DISCUSS
-Plan: Phase 19 complete
+Phase: 20 (inline-charts-in-chat) — READY TO PLAN
+Plan: context captured
 
 ## Current Milestone
 
@@ -33,4 +33,4 @@ Plan: Phase 19 complete
 
 ## Next Command
 
-`$gsd-discuss-phase 20`
+`$gsd-plan-phase 20`
