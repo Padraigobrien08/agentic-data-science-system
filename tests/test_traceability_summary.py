@@ -100,6 +100,10 @@ def test_build_runtime_traceability_bundle_shape() -> None:
     assert full["planning"]["planning_transparency"]["present"] is True
     assert full["critic"]["plan_alignment_findings"] == []
     assert full["critic"]["plan_alignment_codes"] == []
+    assert full["critic"]["confidence_explainer"]["supports"]
+    assert "f" in full["critic"]["confidence_explainer"]["supports"]
+    assert full["critic"]["confidence_explainer"]["weakens"] == ["c"]
+    assert full["critic"]["confidence_explainer"]["limits"] == ["t"]
     assert full["report"]["narrative_answer"]["mode"] == "full"
     assert full["report"]["narrative_answer"]["sections"][0]["heading"] == "What's happening"
     assert full["step_indices"]["critic"] == 1

@@ -84,6 +84,11 @@ export type TraceabilityWire = {
     decision_summary?: string;
     blocking_caveats?: string[];
     overall_confidence?: string | null;
+    confidence_explainer?: {
+      supports?: string[];
+      weakens?: string[];
+      limits?: string[];
+    };
     ran?: boolean;
     artifact_summary_roles_used?: string[];
     /** @deprecated Old persisted runs; prefer artifact_summary_roles_used */

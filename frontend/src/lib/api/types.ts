@@ -149,6 +149,12 @@ export interface NarrativeAnswerPreview {
   fallback_reason: string | null;
 }
 
+export interface ConfidenceExplainerPreview {
+  supports: string[];
+  weakens: string[];
+  limits: string[];
+}
+
 export interface RunTransparencySummary {
   evidence_artifact_ids: string[];
   evidence_artifacts_by_role: Record<string, string>;
@@ -161,6 +167,7 @@ export interface RunTransparencySummary {
   critic_overall_confidence: string | null;
   critic_phase_status: string | null;
   report_phase_status: string | null;
+  confidence_explainer?: ConfidenceExplainerPreview | null;
   narrative_answer?: NarrativeAnswerPreview | null;
 }
 

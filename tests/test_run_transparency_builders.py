@@ -39,6 +39,11 @@ def test_build_run_transparency_from_traceability() -> None:
                     "phase_status": "success",
                     "overall_confidence": "medium",
                     "blocking_caveats": ["Caveat one"],
+                    "confidence_explainer": {
+                        "supports": ["Findings align with the stated goal."],
+                        "weakens": ["Peer validation is incomplete."],
+                        "limits": ["Only eight quarters were available for comparison."],
+                    },
                 },
                 "report": {
                     "phase_status": "success",
@@ -77,6 +82,10 @@ def test_build_run_transparency_from_traceability() -> None:
     assert out.critic_overall_confidence == "medium"
     assert out.critic_phase_status == "success"
     assert out.report_phase_status == "success"
+    assert out.confidence_explainer is not None
+    assert out.confidence_explainer.supports == ["Findings align with the stated goal."]
+    assert out.confidence_explainer.weakens == ["Peer validation is incomplete."]
+    assert out.confidence_explainer.limits == ["Only eight quarters were available for comparison."]
 
 
 def test_build_run_transparency_fallback_uses_artifact_table() -> None:

@@ -233,6 +233,11 @@ def test_run_detail_include_transparency_evidence_and_prompt_versions(
                         "phase_status": "success",
                         "overall_confidence": "medium",
                         "blocking_caveats": ["Caveat one"],
+                        "confidence_explainer": {
+                            "supports": ["Structured findings match the deterioration question."],
+                            "weakens": ["Peer validation is incomplete."],
+                            "limits": ["Coverage only spans eight recent quarters."],
+                        },
                     },
                     "report": {
                         "phase_status": "success",
@@ -296,6 +301,9 @@ def test_run_detail_include_transparency_evidence_and_prompt_versions(
     assert tr["critic_overall_confidence"] == "medium"
     assert tr["critic_phase_status"] == "success"
     assert tr["report_phase_status"] == "success"
+    assert tr["confidence_explainer"]["supports"] == ["Structured findings match the deterioration question."]
+    assert tr["confidence_explainer"]["weakens"] == ["Peer validation is incomplete."]
+    assert tr["confidence_explainer"]["limits"] == ["Coverage only spans eight recent quarters."]
 
 
 def test_run_detail_include_transparency_does_not_mutate_payload_fields(

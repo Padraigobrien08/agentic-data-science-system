@@ -27,6 +27,7 @@ _MAX_CAVEAT_ITEMS = 12
 _MAX_TAKEAWAY_PREVIEW = 5
 _MAX_ARTIFACT_REFS = 24
 _MAX_NARRATIVE_SECTIONS = 3
+_MAX_CONFIDENCE_EXPLAINER_ITEMS = 4
 
 
 def _trunc(text: str | None, max_len: int) -> str:
@@ -161,6 +162,81 @@ def _build_report_narrative_preview(
     }
 
 
+def _dedupe_trimmed(items: list[str], *, max_items: int = _MAX_CONFIDENCE_EXPLAINER_ITEMS) -> list[str]:
+    out: list[str] = []
+    seen: set[str] = set()
+    for item in items:
+        clean = _safe_text(item, max_len=280)
+        if not clean:
+            continue
+        key = clean.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        out.append(clean)
+        if len(out) >= max_items:
+            break
+    return out
+
+
+def _build_confidence_explainer(
+    *,
+    critic_patch: dict[str, Any],
+    report_patch: dict[str, Any],
+    blocking_caveats: list[str],
+    critic_summary_roles: list[str],
+    plan_alignment_findings: list[dict[str, Any]],
+) -> dict[str, list[str]]:
+    critic_res = critic_patch.get("result") if isinstance(critic_patch.get("result"), dict) else {}
+    report_res = report_patch.get("result") if isinstance(report_patch.get("result"), dict) else {}
+    supports: list[str] = []
+    weakens: list[str] = []
+    limits: list[str] = []
+
+    findings_assessment = _safe_text(critic_res.get("findings_assessment"))
+    if findings_assessment:
+        supports.append(findings_assessment)
+
+    takeaways = [str(x).strip() for x in (report_res.get("key_takeaways") or []) if str(x).strip()]
+    if takeaways:
+        supports.append(_trunc(takeaways[0], 280))
+
+    if critic_summary_roles:
+        supports.append(
+            f"The critic reviewed summarized evidence from {len(critic_summary_roles)} artifact role(s)."
+        )
+
+    for issue in blocking_caveats:
+        if issue.casefold() == "overall_confidence: low":
+            continue
+        weakens.append(issue)
+
+    caveat_coverage = _safe_text(critic_res.get("caveat_coverage"))
+    if caveat_coverage:
+        weakens.append(caveat_coverage)
+
+    trustworthiness_notes = _safe_text(critic_res.get("trustworthiness_notes"))
+    if trustworthiness_notes:
+        limits.append(trustworthiness_notes)
+
+    for finding in plan_alignment_findings:
+        detail = _safe_text(finding.get("detail"), max_len=240)
+        if detail:
+            limits.append(detail)
+
+    if not critic_summary_roles:
+        limits.append("The critic did not have summarized artifact roles loaded for this run.")
+
+    if report_patch.get("phase_status") != PHASE_SUCCESS:
+        limits.append("The report phase did not complete successfully, so confidence is based on critic and traceability output only.")
+
+    return {
+        "supports": _dedupe_trimmed(supports),
+        "weakens": _dedupe_trimmed(weakens),
+        "limits": _dedupe_trimmed(limits),
+    }
+
+
 def build_runtime_traceability_bundle(
     *,
     interpreted_goal: InterpretedGoal,
@@ -243,6 +319,13 @@ def build_runtime_traceability_bundle(
         report_patch=report_patch,
         blocking_caveats=blocking,
     )
+    confidence_explainer = _build_confidence_explainer(
+        critic_patch=critic_patch,
+        report_patch=report_patch,
+        blocking_caveats=blocking,
+        critic_summary_roles=critic_summary_roles,
+        plan_alignment_findings=plan_align,
+    )
 
     full: dict[str, Any] = {
         "contract_version": TRACEABILITY_CONTRACT_VERSION,
@@ -268,6 +351,7 @@ def build_runtime_traceability_bundle(
             "decision_summary": critic_decision,
             "blocking_caveats": blocking,
             "overall_confidence": conf,
+            "confidence_explainer": confidence_explainer,
             "ran": critic_ran,
             "artifact_summary_roles_used": list(critic_summary_roles),
             "plan_alignment_findings": plan_align,

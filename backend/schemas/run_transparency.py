@@ -113,6 +113,10 @@ class RunTransparencySummary(BaseModel):
         None,
         description="Report phase status from ``ai_agents.traceability.report.phase_status``.",
     )
+    confidence_explainer: "ConfidenceExplainerPreview | None" = Field(
+        None,
+        description="Grouped rationale for the coarse evidence-strength label from ``ai_agents.traceability.critic.confidence_explainer``.",
+    )
     narrative_answer: "NarrativeAnswerPreview | None" = Field(
         None,
         description="Safe narrative preview from ``ai_agents.traceability.report.narrative_answer``.",
@@ -133,6 +137,14 @@ class NarrativeAnswerPreview(BaseModel):
     thesis: str
     sections: list[NarrativeAnswerSectionPreview] = Field(default_factory=list)
     fallback_reason: str | None = None
+
+
+class ConfidenceExplainerPreview(BaseModel):
+    """Grouped rationale behind the coarse evidence-strength label."""
+
+    supports: list[str] = Field(default_factory=list)
+    weakens: list[str] = Field(default_factory=list)
+    limits: list[str] = Field(default_factory=list)
 
 
 def _parse_narrative_answer(raw: Any) -> NarrativeAnswerPreview | None:
@@ -167,6 +179,21 @@ def _parse_narrative_answer(raw: Any) -> NarrativeAnswerPreview | None:
     )
 
 
+def _parse_confidence_explainer(raw: Any) -> ConfidenceExplainerPreview | None:
+    if not isinstance(raw, dict):
+        return None
+    supports = _parse_string_list(raw.get("supports"), limit=6)
+    weakens = _parse_string_list(raw.get("weakens"), limit=6)
+    limits = _parse_string_list(raw.get("limits"), limit=6)
+    if not supports and not weakens and not limits:
+        return None
+    return ConfidenceExplainerPreview(
+        supports=supports,
+        weakens=weakens,
+        limits=limits,
+    )
+
+
 def build_run_transparency_summary(
     meta_json: dict | list | None,
     *,
@@ -183,6 +210,7 @@ def build_run_transparency_summary(
     critic_overall_confidence: str | None = None
     critic_phase_status: str | None = None
     report_phase_status: str | None = None
+    confidence_explainer: ConfidenceExplainerPreview | None = None
     narrative_answer: NarrativeAnswerPreview | None = None
 
     if meta:
@@ -209,6 +237,7 @@ def build_run_transparency_summary(
                     critic_overall_confidence = str(oc).strip() if isinstance(oc, str) and str(oc).strip() else None
                     cps = critic.get("phase_status")
                     critic_phase_status = str(cps).strip() if isinstance(cps, str) and str(cps).strip() else None
+                    confidence_explainer = _parse_confidence_explainer(critic.get("confidence_explainer"))
                 report = tr.get("report")
                 if isinstance(report, dict):
                     report_key_takeaways_preview = _parse_string_list(
@@ -235,6 +264,7 @@ def build_run_transparency_summary(
         critic_overall_confidence=critic_overall_confidence,
         critic_phase_status=critic_phase_status,
         report_phase_status=report_phase_status,
+        confidence_explainer=confidence_explainer,
         narrative_answer=narrative_answer,
     )
 
