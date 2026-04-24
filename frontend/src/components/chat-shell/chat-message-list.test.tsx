@@ -51,6 +51,13 @@ describe("ChatMessageList", () => {
             },
           ],
           overallConfidence: "medium",
+          confidenceExplainer: {
+            label: "Medium",
+            tone: "medium",
+            supports: ["Revenue growth deterioration appears in several recent quarters."],
+            weakens: ["Peer coverage is limited for this run."],
+            limits: [],
+          },
           blockingCaveats: ["Peer coverage is limited for this run."],
           criticPhaseStatus: "success",
           reportPhaseStatus: "success",
@@ -92,7 +99,6 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("Why we think that")).toBeTruthy();
     expect(screen.getByText("What weakens the claim")).toBeTruthy();
     expect(screen.getByText("Supporting detail")).toBeTruthy();
-    expect(screen.getByText("Confidence")).toBeTruthy();
     expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
     expect(screen.getAllByText("Revenue growth deterioration appears in several recent quarters.")).toHaveLength(2);
@@ -100,7 +106,7 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("Peer validation remains limited across the available evidence.")).toBeTruthy();
     expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
     expect(screen.getByText("Evidence strength:")).toBeTruthy();
-    expect(screen.getByText("Peer coverage is limited for this run.")).toBeTruthy();
+    expect(screen.getByText("Medium")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Report" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Evidence" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Artifacts" })).toBeTruthy();
@@ -149,6 +155,13 @@ describe("ChatMessageList", () => {
           takeawayRows: [],
           alignmentFindings: [],
           overallConfidence: null,
+          confidenceExplainer: {
+            label: "Not rated",
+            tone: "neutral",
+            supports: [],
+            weakens: [],
+            limits: [],
+          },
           blockingCaveats: [],
           criticPhaseStatus: null,
           reportPhaseStatus: null,
@@ -210,6 +223,13 @@ describe("ChatMessageList", () => {
           takeawayRows: [],
           alignmentFindings: [],
           overallConfidence: "medium",
+          confidenceExplainer: {
+            label: "Medium",
+            tone: "medium",
+            supports: [],
+            weakens: ["Peer validation is incomplete."],
+            limits: [],
+          },
           blockingCaveats: ["Peer validation is incomplete."],
           criticPhaseStatus: "success",
           reportPhaseStatus: "success",
@@ -261,6 +281,13 @@ describe("ChatMessageList", () => {
           takeawayRows: [],
           alignmentFindings: [],
           overallConfidence: null,
+          confidenceExplainer: {
+            label: "Not rated",
+            tone: "neutral",
+            supports: [],
+            weakens: [],
+            limits: [],
+          },
           blockingCaveats: [],
           criticPhaseStatus: null,
           reportPhaseStatus: null,

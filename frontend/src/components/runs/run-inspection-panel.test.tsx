@@ -27,6 +27,13 @@ const view: PrimaryAnswerView = {
   ],
   alignmentFindings: [],
   overallConfidence: "medium",
+  confidenceExplainer: {
+    label: "Medium",
+    tone: "medium",
+    supports: ["Revenue growth deterioration appears in several recent quarters."],
+    weakens: ["Peer coverage is limited for this run."],
+    limits: [],
+  },
   blockingCaveats: ["Peer coverage is limited for this run."],
   criticPhaseStatus: "success",
   reportPhaseStatus: "success",

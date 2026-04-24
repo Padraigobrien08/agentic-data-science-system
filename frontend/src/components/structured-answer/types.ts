@@ -1,6 +1,6 @@
 import type { AnalysisRunStatus } from "@/lib/api/types";
 import type { PrimaryContextSignal } from "@/lib/primary-answer-signals";
-import type { AlignmentFindingCard, EvidenceLink, TakeawayRow } from "@/lib/run-primary-view";
+import type { AlignmentFindingCard, ConfidenceExplainerView, EvidenceLink, TakeawayRow } from "@/lib/run-primary-view";
 
 export type { TakeawayRow };
 
@@ -32,8 +32,7 @@ export type FindingCardsProps = {
 
 export type ConfidenceStripProps = {
   overallConfidence: string | null;
-  criticPhaseStatus: string | null;
-  reportPhaseStatus: string | null;
+  confidenceExplainer: ConfidenceExplainerView;
   /** Single muted line when budgets / weak evidence imply reduced certainty. */
   reliabilityNote?: string | null;
   className?: string;
@@ -68,6 +67,5 @@ export type DeepDiveActionsProps = {
   traceHref: string;
   reportArtifactId: string | null;
   chatHref: string;
-  runsHref: string;
   className?: string;
 };

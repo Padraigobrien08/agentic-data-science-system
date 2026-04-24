@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 
-import { CaveatBadgeGroup, ConfidenceStrip, FindingCards, TopFindingsList } from "@/components/structured-answer";
+import { ConfidenceStrip, FindingCards, TopFindingsList } from "@/components/structured-answer";
 import { Separator } from "@/components/ui/separator";
 import type { AnalysisRunStatus } from "@/lib/api/types";
 import { contextReliabilityFootnote } from "@/lib/primary-answer-signals";
@@ -68,10 +68,6 @@ export function ChatRunAnswerCard({
       (isNoDataState ? answerCard.emptyStateReason : null);
   const hasSupportSection =
     hasFindings ||
-    Boolean(answerCard.overallConfidence) ||
-    answerCard.blockingCaveats.length > 0 ||
-    answerCard.weakEvidenceSignals.length > 0 ||
-    answerCard.contextSignals.length > 0 ||
     answerCard.navigationItems.length > 0 ||
     Boolean(answerCard.evidenceProvenanceHint) ||
     Boolean(answerCard.orchestrationStatus);
@@ -80,7 +76,14 @@ export function ChatRunAnswerCard({
     <div className="w-full">
       <div className="mx-auto w-full max-w-[54rem] space-y-8">
         <section className="space-y-6 border-b border-[var(--border)]/80 pb-8">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">Answer</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">Answer</p>
+            <ConfidenceStrip
+              overallConfidence={answerCard.overallConfidence}
+              confidenceExplainer={answerCard.confidenceExplainer}
+              reliabilityNote={reliabilityNote}
+            />
+          </div>
           <p className="text-[1.1rem] font-medium leading-[1.65] tracking-[-0.025em] text-[var(--foreground)] sm:text-[1.35rem]">
             {thesis}
           </p>
@@ -125,46 +128,9 @@ export function ChatRunAnswerCard({
               </section>
             ) : null}
 
-            {(Boolean(answerCard.overallConfidence) ||
-              answerCard.blockingCaveats.length > 0 ||
-              answerCard.weakEvidenceSignals.length > 0 ||
-              answerCard.contextSignals.length > 0) ? (
-              <>
-                {hasFindings ? <Separator /> : null}
-                <section className="space-y-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
-                    Confidence
-                  </p>
-                  <ConfidenceStrip
-                    overallConfidence={answerCard.overallConfidence}
-                    criticPhaseStatus={answerCard.criticPhaseStatus}
-                    reportPhaseStatus={answerCard.reportPhaseStatus}
-                    reliabilityNote={reliabilityNote}
-                    className="space-y-3"
-                  />
-                  <CaveatBadgeGroup
-                    blockingCaveats={answerCard.blockingCaveats}
-                    weakEvidenceSignals={answerCard.weakEvidenceSignals}
-                    contextSignals={answerCard.contextSignals}
-                    maxContextBadges={4}
-                    maxWeakBadges={3}
-                    overflowHref={answerCard.caveatOverflowHref ?? undefined}
-                    blockingHref={answerCard.conclusionRider?.href ?? answerCard.caveatOverflowHref ?? undefined}
-                    className="mt-0"
-                  />
-                </section>
-              </>
-            ) : null}
-
             {answerCard.navigationItems.length > 0 || answerCard.evidenceProvenanceHint ? (
               <>
-                {hasFindings ||
-                answerCard.blockingCaveats.length > 0 ||
-                answerCard.weakEvidenceSignals.length > 0 ||
-                answerCard.contextSignals.length > 0 ||
-                Boolean(answerCard.overallConfidence) ? (
-                  <Separator />
-                ) : null}
+                {hasFindings ? <Separator /> : null}
                 <section className="space-y-4">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
                     Evidence
@@ -189,14 +155,7 @@ export function ChatRunAnswerCard({
 
             {answerCard.orchestrationStatus ? (
               <>
-                {hasFindings ||
-                answerCard.navigationItems.length > 0 ||
-                answerCard.blockingCaveats.length > 0 ||
-                answerCard.weakEvidenceSignals.length > 0 ||
-                answerCard.contextSignals.length > 0 ||
-                Boolean(answerCard.overallConfidence) ? (
-                  <Separator />
-                ) : null}
+                {hasFindings || answerCard.navigationItems.length > 0 ? <Separator /> : null}
                 <details className="group rounded-[1.2rem] border border-[var(--border)]/70 bg-neutral-50/65 px-4 py-3 dark:bg-neutral-950/20">
                   <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                     Orchestration status

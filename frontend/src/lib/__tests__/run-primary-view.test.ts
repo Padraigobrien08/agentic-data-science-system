@@ -158,6 +158,11 @@ describe("buildPrimaryAnswerView evidence linking", () => {
         report_key_takeaways_preview: [
           "MSFT shows repeated revenue-growth deterioration across multiple Q1 periods.",
         ],
+        confidence_explainer: {
+          supports: ["Structured findings match the deterioration question."],
+          weakens: ["Peer coverage is insufficient."],
+          limits: ["Coverage only spans eight recent quarters."],
+        },
         critic_blocking_caveats: ["Peer coverage is insufficient."],
         critic_overall_confidence: "medium",
         critic_phase_status: "success",
@@ -175,6 +180,8 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.emptyStateReason).toBeNull();
     expect(view.blockingCaveats).toEqual(["Peer coverage is insufficient."]);
     expect(view.overallConfidence).toBe("medium");
+    expect(view.confidenceExplainer.label).toBe("Medium");
+    expect(view.confidenceExplainer.weakens).toEqual(["Peer coverage is insufficient."]);
   });
 
   it("promotes the first real takeaway when the orchestration summary is generic", () => {

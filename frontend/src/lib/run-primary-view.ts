@@ -2,7 +2,7 @@
  * Derive structured “primary answer” view data from existing run payloads (no new API).
  */
 
-import type { ArtifactMetadata, RunTransparencySummary } from "@/lib/api/types";
+import type { ArtifactMetadata, ConfidenceExplainerPreview, RunTransparencySummary } from "@/lib/api/types";
 import type { ParsedAiAgents, PlanAlignmentFindingWire, TraceabilityWire } from "@/lib/ai-agents-meta";
 import {
   collectContextSignals,
@@ -53,6 +53,16 @@ export type NarrativeAnswerView = {
   fallbackReason: string | null;
 };
 
+export type ConfidenceTone = "good" | "medium" | "bad" | "neutral";
+
+export type ConfidenceExplainerView = {
+  label: "Good" | "Medium" | "Bad" | "Not rated";
+  tone: ConfidenceTone;
+  supports: string[];
+  weakens: string[];
+  limits: string[];
+};
+
 export type PrimaryAnswerView = {
   goalDisplay: string;
   narrativeAnswer: NarrativeAnswerView;
@@ -64,6 +74,7 @@ export type PrimaryAnswerView = {
   takeawayRows: TakeawayRow[];
   alignmentFindings: AlignmentFindingCard[];
   overallConfidence: string | null;
+  confidenceExplainer: ConfidenceExplainerView;
   blockingCaveats: string[];
   criticPhaseStatus: string | null;
   reportPhaseStatus: string | null;
@@ -103,6 +114,7 @@ export type ChatAnswerCardView = CompactChatAnswerView & {
   takeawayRows: TakeawayRow[];
   alignmentFindings: AlignmentFindingCard[];
   overallConfidence: string | null;
+  confidenceExplainer: ConfidenceExplainerView;
   blockingCaveats: string[];
   criticPhaseStatus: string | null;
   reportPhaseStatus: string | null;
@@ -147,6 +159,92 @@ function dedupeTakeaways(rows: string[], max: number): string[] {
     if (out.length >= max) break;
   }
   return out;
+}
+
+function mapConfidenceTone(value: string | null): ConfidenceTone {
+  switch (value) {
+    case "high":
+      return "good";
+    case "medium":
+      return "medium";
+    case "low":
+      return "bad";
+    default:
+      return "neutral";
+  }
+}
+
+function mapConfidenceLabel(value: string | null): ConfidenceExplainerView["label"] {
+  switch (value) {
+    case "high":
+      return "Good";
+    case "medium":
+      return "Medium";
+    case "low":
+      return "Bad";
+    default:
+      return "Not rated";
+  }
+}
+
+function sanitizeExplainerList(items: unknown, max = 4): string[] {
+  if (!Array.isArray(items)) return [];
+  const out: string[] = [];
+  const seen = new Set<string>();
+  for (const item of items) {
+    if (typeof item !== "string" || !item.trim()) continue;
+    const clean = item.trim();
+    const key = clean.toLowerCase();
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(clean);
+    if (out.length >= max) break;
+  }
+  return out;
+}
+
+function buildConfidenceExplainer(
+  overallConfidence: string | null,
+  transparency: RunTransparencySummary | null | undefined,
+  tr: TraceabilityWire | undefined,
+  blockingCaveats: string[],
+  weakEvidenceSignals: string[],
+  contextSignals: PrimaryContextSignal[],
+): ConfidenceExplainerView {
+  const raw: ConfidenceExplainerPreview | null | undefined = transparency?.confidence_explainer
+    ? transparency.confidence_explainer
+    : tr?.critic?.confidence_explainer
+      ? {
+          supports: tr.critic.confidence_explainer.supports ?? [],
+          weakens: tr.critic.confidence_explainer.weakens ?? [],
+          limits: tr.critic.confidence_explainer.limits ?? [],
+        }
+      : null;
+
+  const supports = sanitizeExplainerList(raw?.supports);
+  const weakens = sanitizeExplainerList(raw?.weakens);
+  const limits = sanitizeExplainerList(raw?.limits);
+
+  if (supports.length || weakens.length || limits.length) {
+    return {
+      label: mapConfidenceLabel(overallConfidence),
+      tone: mapConfidenceTone(overallConfidence),
+      supports,
+      weakens,
+      limits,
+    };
+  }
+
+  return {
+    label: mapConfidenceLabel(overallConfidence),
+    tone: mapConfidenceTone(overallConfidence),
+    supports: [],
+    weakens: sanitizeExplainerList(blockingCaveats),
+    limits: sanitizeExplainerList([
+      ...weakEvidenceSignals.map((signal) => signal.replace(/_/g, " ")),
+      ...contextSignals.map((signal) => signal.label),
+    ]),
+  };
 }
 
 type NormalizedAlignment = Omit<AlignmentFindingCard, "chips">;
@@ -266,15 +364,12 @@ function buildConclusionRider(
   if (!nav) return null;
   const criticHref = tracePath(nav, "#run-agents");
   if (blocking.length > 0) {
-    const text =
-      blocking.length === 1 && blocking[0]?.trim()
-        ? truncate(blocking[0]!.trim(), 120)
-        : `${blocking.length} blocking caveats apply — review critic context before relying on this summary.`;
+    const text = truncate(blocking[0]!.trim(), 140);
     return { text, href: criticHref };
   }
   if (weak.length > 0) {
     return {
-      text: "Some conclusions depend on limited or flagged evidence — see critic in deep dive.",
+      text: "Some conclusions depend on limited or flagged evidence.",
       href: criticHref,
     };
   }
@@ -518,6 +613,14 @@ export function buildPrimaryAnswerView(
 
   const weakEvidenceSignals = extractWeakEvidenceSignals(ai);
   const contextSignals = collectContextSignals(ai, orch);
+  const confidenceExplainer = buildConfidenceExplainer(
+    overallConfidence,
+    transparency,
+    tr,
+    blockingCaveats,
+    weakEvidenceSignals,
+    contextSignals,
+  );
 
   const hasCritic = hasCriticSurface(ai, tr) || hasCriticSurfaceFromTransparency(transparency);
   const takeawayChips = buildTakeawayChips(nav, reportArtifactId, links, artifacts.length, hasCritic, contextSignals);
@@ -575,6 +678,7 @@ export function buildPrimaryAnswerView(
     takeawayRows,
     alignmentFindings,
     overallConfidence,
+    confidenceExplainer,
     blockingCaveats,
     criticPhaseStatus,
     reportPhaseStatus,
@@ -615,6 +719,7 @@ export function buildChatAnswerCardView(
     takeawayRows: view.takeawayRows,
     alignmentFindings: view.alignmentFindings,
     overallConfidence: view.overallConfidence,
+    confidenceExplainer: view.confidenceExplainer,
     blockingCaveats: view.blockingCaveats,
     criticPhaseStatus: view.criticPhaseStatus,
     reportPhaseStatus: view.reportPhaseStatus,

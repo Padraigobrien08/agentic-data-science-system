@@ -30,7 +30,6 @@ type Props = {
  */
 export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute }: Props) {
   const traceHref = `/projects/${projectId}/runs/${runId}/trace`;
-  const runsHref = `/projects/${projectId}/runs`;
   const chatHref = `/projects/${projectId}/chat`;
 
   const runInFlight = runStatus === "queued" || runStatus === "running";
@@ -47,7 +46,7 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute
     <article className="space-y-10">
       <AnswerSummary
         goalDisplay={view.goalDisplay}
-        summaryLine={view.summaryLine}
+        summaryLine={view.summaryLine ?? view.emptyStateReason}
         orchestrationStatus={view.orchestrationStatus}
         runStatus={runStatus}
         conclusionRider={view.conclusionRider}
@@ -73,8 +72,8 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute
         <section className="space-y-2">
           <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Top findings</p>
           <p className="text-sm leading-relaxed text-[var(--muted)]">
-            No takeaways or plan-alignment cards yet. Reporting may not have emitted cards, or the run may still be
-            finishing — use deep dive for step detail, then re-run or adjust inputs if needed.
+            {view.emptyStateReason ??
+              "No takeaways or plan-alignment cards yet. Reporting may not have emitted cards, or the run may still be finishing — use deep dive for step detail, then re-run or adjust inputs if needed."}
           </p>
         </section>
       ) : (
@@ -120,8 +119,7 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute
         <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Confidence & caveats</p>
         <ConfidenceStrip
           overallConfidence={view.overallConfidence}
-          criticPhaseStatus={view.criticPhaseStatus}
-          reportPhaseStatus={view.reportPhaseStatus}
+          confidenceExplainer={view.confidenceExplainer}
           reliabilityNote={reliabilityNote}
         />
         <CaveatBadgeGroup
@@ -141,7 +139,6 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute
           traceHref={traceHref}
           reportArtifactId={view.reportArtifactId}
           chatHref={chatHref}
-          runsHref={runsHref}
         />
       </section>
     </article>
