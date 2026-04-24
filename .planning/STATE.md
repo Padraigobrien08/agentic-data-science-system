@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Narrative Answers and Visual Evidence
-status: Ready to execute Phase 20
-last_updated: "2026-04-24T22:20:47.000Z"
+status: Executing Phase 20
+last_updated: "2026-04-24T22:35:23.061Z"
 progress:
   total_phases: 5
   completed_phases: 3
   total_plans: 15
-  completed_plans: 9
+  completed_plans: 10
 ---
 
 # Project State
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 
 ## Current Position
 
-Phase: 20 (inline-charts-in-chat) — READY TO EXECUTE
-Plan: 3 execute plans validated locally; research, validation, and UI-SPEC complete
+Phase: 20 (inline-charts-in-chat) — EXECUTING
+Plan: 2 of 3
 
 ## Current Milestone
 
@@ -34,3 +34,15 @@ Plan: 3 execute plans validated locally; research, validation, and UI-SPEC compl
 ## Next Command
 
 `$gsd-execute-phase 20`
+
+## Recent Decisions
+
+- Inline chart eligibility now stays in backend traceability instead of frontend inference.
+- The safe transparency contract only allows `line` and `grouped_bar` previews, capped to two total charts.
+- Malformed or weak chart inputs collapse to `inline_charts: []` rather than producing speculative visuals.
+
+## Last Session
+
+- Completed `20-inline-charts-in-chat-01-PLAN.md`
+- Duration: 9 min
+- Files changed: 7 code/test files plus plan summary metadata
