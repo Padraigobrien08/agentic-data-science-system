@@ -134,6 +134,107 @@ def test_build_run_transparency_partial_narrative_preview() -> None:
     assert out.narrative_answer.sections[0].heading == "What weakens the claim"
 
 
+def test_build_run_transparency_parses_d04_safe_inline_charts() -> None:
+    meta = {
+        "ai_agents": {
+            "traceability": {
+                "report": {
+                    "inline_charts": [
+                        {
+                            "chart_id": "trend-revenue-growth-line",
+                            "kind": "line",
+                            "metric_key": "revenue_growth_yoy",
+                            "metric_label": "Revenue growth",
+                            "caption": "Revenue growth turned down across the latest four quarters.",
+                            "x_axis_label": "Quarter",
+                            "y_axis_label": "Growth",
+                            "value_format": "percent",
+                            "series": [
+                                {
+                                    "key": "focal_company",
+                                    "label": "Company",
+                                    "color_token": "chart-1",
+                                }
+                            ],
+                            "rows": [
+                                {
+                                    "x_value": "2024-Q1",
+                                    "focal_company": -0.02,
+                                },
+                                {
+                                    "x_value": "2024-Q2",
+                                    "focal_company": -0.06,
+                                },
+                            ],
+                            "markers": [
+                                {
+                                    "x_value": "2024-Q2",
+                                    "label": "Strong shift",
+                                }
+                            ],
+                            "source_artifact_roles": ["features_csv", "trend_break_signals_csv"],
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    out = build_run_transparency_summary(meta, model_call_count=0, artifacts=[])
+    assert len(out.inline_charts) == 1
+    chart = out.inline_charts[0]
+    assert chart.chart_id == "trend-revenue-growth-line"
+    assert chart.kind == "line"
+    assert chart.metric_key == "revenue_growth_yoy"
+    assert chart.metric_label == "Revenue growth"
+    assert chart.caption == "Revenue growth turned down across the latest four quarters."
+    assert chart.x_axis_label == "Quarter"
+    assert chart.y_axis_label == "Growth"
+    assert chart.value_format == "percent"
+    assert chart.series[0].key == "focal_company"
+    assert chart.series[0].label == "Company"
+    assert chart.series[0].color_token == "chart-1"
+    assert chart.rows[0].x_value == "2024-Q1"
+    assert chart.rows[0].values == {"focal_company": -0.02}
+    assert chart.markers[0].x_value == "2024-Q2"
+    assert chart.markers[0].label == "Strong shift"
+    assert chart.source_artifact_roles == ["features_csv", "trend_break_signals_csv"]
+
+
+def test_build_run_transparency_inline_charts_fall_back_to_empty_list_for_malformed_data() -> None:
+    meta = {
+        "ai_agents": {
+            "traceability": {
+                "report": {
+                    "inline_charts": [
+                        {
+                            "chart_id": "peer-margin-bars",
+                            "kind": "scatter",
+                            "metric_key": "gross_margin",
+                            "metric_label": "Gross margin",
+                            "caption": "Unsupported chart kind should be rejected.",
+                            "x_axis_label": "Quarter",
+                            "y_axis_label": "Margin",
+                            "value_format": "percent",
+                            "series": [
+                                {
+                                    "key": "company",
+                                    "label": "Company",
+                                    "color_token": "chart-9",
+                                }
+                            ],
+                            "rows": [{"x_value": "2024-Q1", "company": 0.4}],
+                            "markers": [],
+                            "source_artifact_roles": ["peer_signals_csv"],
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    out = build_run_transparency_summary(meta, model_call_count=0, artifacts=[])
+    assert out.inline_charts == []
+
+
 def test_build_run_step_transparency_critic_phase_output() -> None:
     sid = uuid4()
     meta = {

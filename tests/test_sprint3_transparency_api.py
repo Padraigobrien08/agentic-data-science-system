@@ -242,6 +242,42 @@ def test_run_detail_include_transparency_evidence_and_prompt_versions(
                     "report": {
                         "phase_status": "success",
                         "key_takeaways_preview": ["Takeaway one"],
+                        "inline_charts": [
+                            {
+                                "chart_id": "trend-revenue-growth-line",
+                                "kind": "line",
+                                "metric_key": "revenue_growth_yoy",
+                                "metric_label": "Revenue growth",
+                                "caption": "Revenue growth turned down across the latest four quarters.",
+                                "x_axis_label": "Quarter",
+                                "y_axis_label": "Growth",
+                                "value_format": "percent",
+                                "series": [
+                                    {
+                                        "key": "focal_company",
+                                        "label": "Company",
+                                        "color_token": "chart-1",
+                                    }
+                                ],
+                                "rows": [
+                                    {
+                                        "x_value": "2024-Q1",
+                                        "focal_company": -0.02,
+                                    },
+                                    {
+                                        "x_value": "2024-Q2",
+                                        "focal_company": -0.06,
+                                    },
+                                ],
+                                "markers": [
+                                    {
+                                        "x_value": "2024-Q2",
+                                        "label": "Strong shift",
+                                    }
+                                ],
+                                "source_artifact_roles": ["features_csv", "trend_break_signals_csv"],
+                            }
+                        ],
                         "narrative_answer": {
                             "mode": "full",
                             "thesis": "The evidence supports a cautious deterioration thesis.",
@@ -294,6 +330,42 @@ def test_run_detail_include_transparency_evidence_and_prompt_versions(
     assert tr["evidence_artifacts_by_role"] == {"panel_csv": str(art_id)}
     assert tr["prompt_versions"] == {"report": "3.1.0", "critic": "2.0.0"}
     assert tr["report_key_takeaways_preview"] == ["Takeaway one"]
+    assert tr["inline_charts"] == [
+        {
+            "chart_id": "trend-revenue-growth-line",
+            "kind": "line",
+            "metric_key": "revenue_growth_yoy",
+            "metric_label": "Revenue growth",
+            "caption": "Revenue growth turned down across the latest four quarters.",
+            "x_axis_label": "Quarter",
+            "y_axis_label": "Growth",
+            "value_format": "percent",
+            "series": [
+                {
+                    "key": "focal_company",
+                    "label": "Company",
+                    "color_token": "chart-1",
+                }
+            ],
+            "rows": [
+                {
+                    "x_value": "2024-Q1",
+                    "values": {"focal_company": -0.02},
+                },
+                {
+                    "x_value": "2024-Q2",
+                    "values": {"focal_company": -0.06},
+                },
+            ],
+            "markers": [
+                {
+                    "x_value": "2024-Q2",
+                    "label": "Strong shift",
+                }
+            ],
+            "source_artifact_roles": ["features_csv", "trend_break_signals_csv"],
+        }
+    ]
     assert tr["narrative_answer"]["mode"] == "full"
     assert tr["narrative_answer"]["thesis"] == "The evidence supports a cautious deterioration thesis."
     assert tr["narrative_answer"]["sections"][0]["heading"] == "What's happening"
