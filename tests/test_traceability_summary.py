@@ -163,6 +163,9 @@ def _write_supported_chart_artifacts(
     short_history: bool = False,
     weak_peer_coverage: bool = False,
     extra_candidates: bool = False,
+    trend_signal_type: str = "strong_shift",
+    trend_score: float = 2.8,
+    include_secondary_strong_shift: bool = True,
 ) -> dict[str, str]:
     features_rows = [
         {"cik": 1, "period": "2024-Q1", "revenue_growth_qoq": 0.12, "net_margin": 0.18},
@@ -203,32 +206,35 @@ def _write_supported_chart_artifacts(
             "consecutive_direction": "deteriorating",
             "consecutive_len": 2,
             "short_history_flag": short_history,
-            "trend_score": 2.8,
-            "trend_signal_type": "strong_shift",
+            "trend_score": trend_score,
+            "trend_signal_type": trend_signal_type,
             "explanation": "revenue growth broke lower",
         },
-        {
-            "cik": 1,
-            "period": "2024-Q3",
-            "metric": "revenue_growth_qoq",
-            "value": -0.02,
-            "history_points": 4,
-            "window_prior": 2,
-            "window_recent": 2,
-            "prior_mean": 0.11,
-            "recent_mean": 0.03,
-            "mean_shift": -0.08,
-            "prior_slope": -0.01,
-            "recent_slope": -0.02,
-            "slope_shift": -0.01,
-            "consecutive_direction": "deteriorating",
-            "consecutive_len": 2,
-            "short_history_flag": False,
-            "trend_score": 2.1,
-            "trend_signal_type": "strong_shift",
-            "explanation": "revenue growth already weakened",
-        },
     ]
+    if include_secondary_strong_shift:
+        trend_rows.append(
+            {
+                "cik": 1,
+                "period": "2024-Q3",
+                "metric": "revenue_growth_qoq",
+                "value": -0.02,
+                "history_points": 4,
+                "window_prior": 2,
+                "window_recent": 2,
+                "prior_mean": 0.11,
+                "recent_mean": 0.03,
+                "mean_shift": -0.08,
+                "prior_slope": -0.01,
+                "recent_slope": -0.02,
+                "slope_shift": -0.01,
+                "consecutive_direction": "deteriorating",
+                "consecutive_len": 2,
+                "short_history_flag": False,
+                "trend_score": 2.1,
+                "trend_signal_type": "strong_shift",
+                "explanation": "revenue growth already weakened",
+            }
+        )
     if extra_candidates:
         trend_rows.append(
             {
@@ -304,9 +310,15 @@ def test_build_inline_chart_previews_returns_line_and_grouped_bar(tmp_path: Path
     assert previews[0]["chart_id"] == "trend-revenue_growth_qoq-line"
     assert previews[0]["source_artifact_roles"] == ["features_csv", "trend_break_signals_csv"]
     assert previews[0]["markers"][0]["label"] == "Strong shift"
+    assert previews[0]["caption"]
+    assert "; this matters because " in previews[0]["caption"]
+    assert 90 <= len(previews[0]["caption"]) <= 160
     assert previews[1]["kind"] == "grouped_bar"
     assert previews[1]["chart_id"] == "peer-net_margin-grouped_bar"
     assert previews[1]["source_artifact_roles"] == ["features_csv", "peer_signals_csv"]
+    assert previews[1]["caption"]
+    assert "; this matters because " in previews[1]["caption"]
+    assert 90 <= len(previews[1]["caption"]) <= 160
 
 
 def test_build_inline_chart_previews_caps_results_to_one_per_family(tmp_path: Path) -> None:
@@ -328,6 +340,37 @@ def test_build_inline_chart_previews_suppresses_weak_peer_and_short_history(tmp_
         weak_peer_coverage=True,
     )
     previews = build_inline_chart_previews(artifact_paths)
+    assert previews == []
+
+
+def test_build_inline_chart_previews_filters_weak_peer_coverage_but_keeps_strong_trend(
+    tmp_path: Path,
+) -> None:
+    from backend.agents.inline_chart_preview import build_inline_chart_previews
+
+    artifact_paths = _write_supported_chart_artifacts(
+        tmp_path,
+        weak_peer_coverage=True,
+    )
+    previews = build_inline_chart_previews(artifact_paths)
+
+    assert len(previews) == 1
+    assert previews[0]["kind"] == "line"
+    assert previews[0]["caption"]
+
+
+def test_build_inline_chart_previews_suppresses_non_strong_trend_rows(tmp_path: Path) -> None:
+    from backend.agents.inline_chart_preview import build_inline_chart_previews
+
+    artifact_paths = _write_supported_chart_artifacts(
+        tmp_path,
+        weak_peer_coverage=True,
+        trend_signal_type="moderate_shift",
+        trend_score=1.6,
+        include_secondary_strong_shift=False,
+    )
+    previews = build_inline_chart_previews(artifact_paths)
+
     assert previews == []
 
 
