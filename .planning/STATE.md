@@ -2,13 +2,13 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Narrative Answers and Visual Evidence
-status: Executing Phase 20
-last_updated: "2026-04-24T22:55:33.000Z"
+status: Ready to discuss Phase 21
+last_updated: "2026-04-24T23:06:42.000Z"
 progress:
   total_phases: 5
-  completed_phases: 3
+  completed_phases: 4
   total_plans: 15
-  completed_plans: 11
+  completed_plans: 12
 ---
 
 # Project State
@@ -18,12 +18,12 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 20 — inline-charts-in-chat
+**Current focus:** Phase 21 — narrative-answer-polish
 
 ## Current Position
 
-Phase: 20 (inline-charts-in-chat) — EXECUTING
-Plan: 1 of 3
+Phase: 21 (narrative-answer-polish) — READY TO DISCUSS
+Plan: Phase 20 complete; Phase 21 not yet discussed
 
 ## Current Milestone
 
@@ -33,16 +33,16 @@ Plan: 1 of 3
 
 ## Next Command
 
-`$gsd-execute-phase 20`
+`$gsd-discuss-phase 21`
 
 ## Recent Decisions
 
-- Inline chart eligibility now stays in backend traceability instead of frontend inference.
-- The safe transparency contract only allows `line` and `grouped_bar` previews, capped to two total charts.
-- Malformed or weak chart inputs collapse to `inline_charts: []` rather than producing speculative visuals.
+- Inline chart eligibility stays backend-owned, with only strong deterministic cases surviving into chat.
+- The answer column now renders either trusted inline charts or one explicit chart-preview fallback notice.
+- Phase 21 should polish the shipped answer stack rather than reopen the chart contract.
 
 ## Last Session
 
-- Completed `20-inline-charts-in-chat-02-PLAN.md`
-- Duration: 30 min
-- Files changed: 13 frontend/test files plus plan summary metadata
+- Completed `20-inline-charts-in-chat-03-PLAN.md`
+- Duration: 11 min
+- Files changed: 9 code/test files plus verification and plan summary metadata

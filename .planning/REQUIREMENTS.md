@@ -27,7 +27,7 @@
 
 - [x] **CHRT-01**: User can see deterministic inline charts in chat when trusted run data supports a visual explanation
 - [x] **CHRT-02**: Charts are rendered from explicit backend-safe chart specs derived from trusted run artifacts or metrics, not ad hoc frontend inference
-- [ ] **CHRT-03**: Each inline chart includes a short caption explaining what it shows and why it is relevant to the answer
+- [x] **CHRT-03**: Each inline chart includes a short caption explaining what it shows and why it is relevant to the answer
 
 ## v2 Requirements
 
@@ -67,7 +67,7 @@
 | EVID-03 | Phase 19 | Complete |
 | CHRT-01 | Phase 20 | Complete |
 | CHRT-02 | Phase 20 | Complete |
-| CHRT-03 | Phase 20 | Pending |
+| CHRT-03 | Phase 20 | Complete |
 
 **Coverage:**
 - v1.3 requirements: 12 total
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-19*
-*Last updated: 2026-04-24 after completing Phase 19 Supplemental Evidence Disclosure*
+*Last updated: 2026-04-24 after completing Phase 20 Inline Charts in Chat*

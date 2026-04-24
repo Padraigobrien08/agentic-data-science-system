@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** Phase 19 complete · Phase 20 ready to execute
+**Status:** Phase 20 complete · Phase 21 next
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -71,13 +71,13 @@ Plans:
 **Goal**: Add deterministic inline visual evidence to the chat answer so the system can show trends and comparisons, not only describe them.
 **Depends on**: Phase 19
 **Plans**: 3 plans
-**Status**: Ready to execute
+**Status**: Complete — 2026-04-24
 
 Plans:
 
-- [ ] 20-01: Define backend-safe chart spec generation sourced from trusted run artifacts and metric outputs
-- [ ] 20-02: Render inline charts in chat with shadcn/Recharts components and responsive layout support
-- [ ] 20-03: Gate chart rendering to strong supported cases and attach short captions that explain what each chart shows and why it matters
+- [x] 20-01: Define backend-safe chart spec generation sourced from trusted run artifacts and metric outputs
+- [x] 20-02: Render inline charts in chat with shadcn/Recharts components and responsive layout support
+- [x] 20-03: Gate chart rendering to strong supported cases and attach short captions that explain what each chart shows and why it matters
 
 **Details:**
 - Requirements: `CHRT-01`, `CHRT-02`, `CHRT-03`
@@ -111,4 +111,4 @@ Plans:
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
-| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 19 complete | — |
+| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 20 complete | — |
