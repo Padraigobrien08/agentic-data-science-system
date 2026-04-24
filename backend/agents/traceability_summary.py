@@ -13,6 +13,7 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
+from backend.agents.inline_chart_preview import build_inline_chart_previews
 from edgar_project.orchestration.planning_transparency import build_planning_transparency
 from edgar_project.orchestration.schemas import InterpretedGoal, OrchestrationOutput
 
@@ -326,6 +327,7 @@ def build_runtime_traceability_bundle(
         critic_summary_roles=critic_summary_roles,
         plan_alignment_findings=plan_align,
     )
+    inline_charts = build_inline_chart_previews(orch_out.artifact_paths)
 
     full: dict[str, Any] = {
         "contract_version": TRACEABILITY_CONTRACT_VERSION,
@@ -362,6 +364,7 @@ def build_runtime_traceability_bundle(
             "rationale_summary": report_rationale,
             "key_takeaways_preview": takeaways,
             "narrative_answer": narrative_answer,
+            "inline_charts": inline_charts,
             "ran": report_ran,
         },
         "step_indices": {
