@@ -55,6 +55,7 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.supplementalEvidence[0]?.source).toBe("takeaway");
     expect(view.supplementalEvidence[0]?.jump?.href).toContain("/artifacts/art-1");
     expect(view.supplementalEvidence[1]?.source).toBe("alignment");
+    expect(view.inlineCharts).toEqual([]);
   });
 
   it("omits chips when nav context is omitted", () => {
@@ -74,6 +75,7 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.takeawayRows[0]!.chips).toEqual([]);
     expect(view.supplementalEvidence[0]?.jump).toBeNull();
     expect(view.supplementalEvidenceState.mode).toBe("available");
+    expect(view.inlineCharts).toEqual([]);
   });
 
   it("explains successful runs that produced a report but no structured findings", () => {
@@ -323,5 +325,84 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.supplementalEvidenceState.body).toBe(
       "Artifacts or mapped support were not available for this answer view.",
     );
+    expect(view.inlineCharts).toEqual([]);
+  });
+
+  it("maps trusted inline chart previews and drops malformed chart rows", () => {
+    const view = buildPrimaryAnswerView(
+      {
+        orchestration_goal_text: "Assess whether margin pressure is temporary or structural for MSFT",
+        input_payload_json: { tickers: ["MSFT"], analysis_goal: "Assess whether margin pressure is temporary or structural for MSFT" },
+        output_payload_json: null,
+      },
+      [stubArtifact],
+      null,
+      null,
+      null,
+      {
+        evidence_artifact_ids: ["art-1"],
+        evidence_artifacts_by_role: { report_md: "art-1" },
+        prompt_versions: null,
+        model_call_count: 1,
+        llm_usage: null,
+        narrative_answer: {
+          mode: "full",
+          thesis: "MSFT margin pressure looks cyclical rather than structural.",
+          sections: [],
+          fallback_reason: null,
+        },
+        report_key_takeaways_preview: [],
+        critic_blocking_caveats: [],
+        critic_overall_confidence: "medium",
+        critic_phase_status: "success",
+        report_phase_status: "success",
+        inline_charts: [
+          {
+            chart_id: "trend-msft-margin",
+            kind: "line",
+            metric_key: "operating_margin",
+            metric_label: "Operating margin",
+            caption: "Operating margin compressed in the latest quarters, which supports the cyclical pressure call.",
+            x_axis_label: "Quarter",
+            y_axis_label: "Operating margin",
+            value_format: "percent",
+            series: [{ key: "focal", label: "MSFT", color_token: "chart-1" }],
+            rows: [
+              { x_value: "2025-Q3", values: { focal: 0.41 } },
+              { x_value: "2025-Q4", values: { focal: 0.38 } },
+            ],
+            markers: [{ x_value: "2025-Q4", label: "Shift" }],
+            source_artifact_roles: ["features_csv", "trend_break_signals_csv"],
+          },
+          {
+            chart_id: "ignored-empty",
+            kind: "grouped_bar",
+            metric_key: "peer_gap",
+            metric_label: "Peer gap",
+            caption: "This chart should not render because every row is empty.",
+            x_axis_label: "Quarter",
+            y_axis_label: "Peer gap",
+            value_format: "number",
+            series: [{ key: "focal", label: "MSFT", color_token: "chart-1" }],
+            rows: [{ x_value: "2025-Q4", values: { focal: null } }],
+            markers: [],
+            source_artifact_roles: ["peer_signals_csv"],
+          },
+        ],
+      },
+      { projectId: "p1", runId: "r1" },
+    );
+
+    expect(view.inlineCharts).toHaveLength(1);
+    expect(view.inlineCharts[0]).toMatchObject({
+      chartId: "trend-msft-margin",
+      kind: "line",
+      metricKey: "operating_margin",
+      valueFormat: "percent",
+      caption:
+        "Operating margin compressed in the latest quarters, which supports the cyclical pressure call.",
+    });
+    expect(view.inlineCharts[0]?.series).toEqual([{ key: "focal", label: "MSFT", colorToken: "chart-1" }]);
+    expect(view.inlineCharts[0]?.markers).toEqual([{ xValue: "2025-Q4", label: "Shift" }]);
   });
 });

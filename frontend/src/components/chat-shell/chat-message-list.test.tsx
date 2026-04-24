@@ -84,6 +84,25 @@ describe("ChatMessageList", () => {
           blockingCaveats: ["Peer coverage is limited for this run."],
           criticPhaseStatus: "success",
           reportPhaseStatus: "success",
+          inlineCharts: [
+            {
+              chartId: "trend-msft-margin",
+              kind: "line",
+              metricKey: "operating_margin",
+              metricLabel: "Operating margin",
+              caption:
+                "Operating margin compressed in the latest quarters, which supports the cyclical pressure call.",
+              xAxisLabel: "Quarter",
+              yAxisLabel: "Operating margin",
+              valueFormat: "percent",
+              series: [{ key: "focal", label: "MSFT", colorToken: "chart-1" }],
+              rows: [
+                { xValue: "2025-Q3", values: { focal: 0.41 } },
+                { xValue: "2025-Q4", values: { focal: 0.38 } },
+              ],
+              markers: [{ xValue: "2025-Q4", label: "Shift" }],
+            },
+          ],
           weakEvidenceSignals: ["insufficient_peers_rows"],
           contextSignals: [],
           evidenceLinks: [{ role: "report_md", artifactId: "report-1" }],
@@ -121,6 +140,7 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("What's happening")).toBeTruthy();
     expect(screen.getByText("Why we think that")).toBeTruthy();
     expect(screen.getByText("What weakens the claim")).toBeTruthy();
+    expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
@@ -128,6 +148,11 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("Peer validation remains limited across the available evidence.")).toBeTruthy();
     expect(screen.getByText("Evidence strength:")).toBeTruthy();
     expect(screen.getByText("Medium")).toBeTruthy();
+    const visualEvidence = screen.getByText("Visual evidence");
+    const supportingEvidence = screen.getByText("Show supporting evidence");
+    expect(
+      visualEvidence.compareDocumentPosition(supportingEvidence) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
     expect(screen.getByRole("link", { name: "Report" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Evidence" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Artifacts" })).toBeTruthy();
@@ -200,6 +225,7 @@ describe("ChatMessageList", () => {
           blockingCaveats: [],
           criticPhaseStatus: null,
           reportPhaseStatus: null,
+          inlineCharts: [],
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
@@ -229,6 +255,7 @@ describe("ChatMessageList", () => {
     expect(
       whyWeThinkThat.compareDocumentPosition(whatWeakensTheClaim) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
+    expect(screen.queryByText("Visual evidence")).toBeNull();
     expect(container.innerHTML).not.toContain("lg:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.95fr)]");
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
   });
@@ -277,6 +304,7 @@ describe("ChatMessageList", () => {
           blockingCaveats: ["Peer validation is incomplete."],
           criticPhaseStatus: "success",
           reportPhaseStatus: "success",
+          inlineCharts: [],
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
@@ -346,6 +374,7 @@ describe("ChatMessageList", () => {
           blockingCaveats: [],
           criticPhaseStatus: null,
           reportPhaseStatus: null,
+          inlineCharts: [],
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],

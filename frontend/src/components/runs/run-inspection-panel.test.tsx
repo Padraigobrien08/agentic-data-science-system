@@ -53,6 +53,7 @@ const view: PrimaryAnswerView = {
   blockingCaveats: ["Peer coverage is limited for this run."],
   criticPhaseStatus: "success",
   reportPhaseStatus: "success",
+  inlineCharts: [],
   evidenceLinks: [{ role: "report_md", artifactId: "report-1" }],
   extraArtifactCount: 1,
   reportArtifactId: "report-1",

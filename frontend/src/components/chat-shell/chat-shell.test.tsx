@@ -62,6 +62,25 @@ describe("ChatShell", () => {
           blockingCaveats: [],
           criticPhaseStatus: null,
           reportPhaseStatus: null,
+          inlineCharts: [
+            {
+              chartId: "trend-msft-margin",
+              kind: "line",
+              metricKey: "operating_margin",
+              metricLabel: "Operating margin",
+              caption:
+                "Operating margin compressed in the latest quarters, which supports the cyclical pressure call.",
+              xAxisLabel: "Quarter",
+              yAxisLabel: "Operating margin",
+              valueFormat: "percent",
+              series: [{ key: "focal", label: "MSFT", colorToken: "chart-1" }],
+              rows: [
+                { xValue: "2025-Q3", values: { focal: 0.41 } },
+                { xValue: "2025-Q4", values: { focal: 0.38 } },
+              ],
+              markers: [{ xValue: "2025-Q4", label: "Shift" }],
+            },
+          ],
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
@@ -119,7 +138,13 @@ describe("ChatShell", () => {
     expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
     expect(screen.getAllByText("Workspace chat is executing synchronously right now.")).toHaveLength(1);
     expect(screen.getByText("Answer")).toBeTruthy();
+    expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
+    const visualEvidence = screen.getByText("Visual evidence");
+    const supportingEvidence = screen.getByText("Show supporting evidence");
+    expect(
+      visualEvidence.compareDocumentPosition(supportingEvidence) & Node.DOCUMENT_POSITION_FOLLOWING,
+    ).toBeTruthy();
   });
 
   it("renders the Phase 17 error shell for failed assistant answers", () => {
@@ -161,6 +186,7 @@ describe("ChatShell", () => {
           blockingCaveats: [],
           criticPhaseStatus: null,
           reportPhaseStatus: null,
+          inlineCharts: [],
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
