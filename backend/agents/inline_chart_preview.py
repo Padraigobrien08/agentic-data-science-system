@@ -44,6 +44,9 @@ _VALUE_FORMATS = {
 }
 _TREND_CHART_PERIOD_LIMIT = 6
 _PEER_CHART_PERIOD_LIMIT = 3
+_TREND_SCORE_STRONG_THRESHOLD = 2.0
+_CAPTION_MIN_LENGTH = 90
+_CAPTION_MAX_LENGTH = 160
 
 
 def _read_artifact_csv(artifact_paths: dict[str, str], role_key: str) -> pd.DataFrame | None:
@@ -119,6 +122,27 @@ def _value_format(metric_key: str) -> str:
     return _VALUE_FORMATS.get(metric_key, "number")
 
 
+def _caption_in_range(caption: str) -> bool:
+    length = len(caption)
+    return _CAPTION_MIN_LENGTH <= length <= _CAPTION_MAX_LENGTH
+
+
+def _build_trend_caption(metric_label: str, *, direction: str, period_count: int) -> str | None:
+    caption = (
+        f"{metric_label} moved {direction} across the last {period_count} periods; "
+        "this matters because the change matches a strong deterministic shift."
+    )
+    return caption if _caption_in_range(caption) else None
+
+
+def _build_peer_caption(metric_label: str, *, relation: str, period_count: int) -> str | None:
+    caption = (
+        f"{metric_label} stayed {relation} the peer median across {period_count} shared periods; "
+        "this matters because the gap is broad, not a one-period outlier."
+    )
+    return caption if _caption_in_range(caption) else None
+
+
 def _feature_metric_rows(
     features_df: pd.DataFrame,
     *,
@@ -165,7 +189,13 @@ def _build_trend_line_preview(
     candidate_rows: list[dict[str, Any]] = []
     for row in trend_df.to_dict("records"):
         signal = str(row.get("trend_signal_type") or "")
+        trend_score = _as_float(row.get("trend_score"))
         if signal not in _TREND_SIGNAL_PRIORITY:
+            continue
+        if not (
+            signal == "strong_shift"
+            or (trend_score is not None and trend_score >= _TREND_SCORE_STRONG_THRESHOLD)
+        ):
             continue
         if _as_bool(row.get("short_history_flag")) is not False:
             continue
@@ -211,17 +241,24 @@ def _build_trend_line_preview(
     marker_rows = sorted(marker_rows, key=lambda row: _period_key(row["x_value"]))
 
     row_values = feature_rows[metric_key].tolist()
+    if row_values[-1] == row_values[0]:
+        return None
     direction = "lower" if row_values[-1] < row_values[0] else "higher"
     metric_label = _metric_label(metric_key)
+    caption = _build_trend_caption(
+        metric_label,
+        direction=direction,
+        period_count=len(periods),
+    )
+    if caption is None:
+        return None
 
     return {
         "chart_id": f"trend-{metric_key}-line",
         "kind": "line",
         "metric_key": metric_key,
         "metric_label": metric_label,
-        "caption": (
-            f"{metric_label} moved {direction} across recent periods, supporting the reported trend shift."
-        ),
+        "caption": caption,
         "x_axis_label": "Period",
         "y_axis_label": metric_label,
         "value_format": _value_format(metric_key),
@@ -332,15 +369,21 @@ def _build_peer_grouped_bar_preview(
     alert = str(selected["peer_alert"])
     relation = "above" if alert == "extreme_high" else "below"
     metric_label = _metric_label(metric_key)
+    peer_rows = list(selected["_peer_rows"])
+    caption = _build_peer_caption(
+        metric_label,
+        relation=relation,
+        period_count=len(peer_rows),
+    )
+    if caption is None:
+        return None
 
     return {
         "chart_id": f"peer-{metric_key}-grouped_bar",
         "kind": "grouped_bar",
         "metric_key": metric_key,
         "metric_label": metric_label,
-        "caption": (
-            f"{metric_label} stayed {relation} the peer median across recent common periods, grounding the peer comparison."
-        ),
+        "caption": caption,
         "x_axis_label": "Period",
         "y_axis_label": metric_label,
         "value_format": _value_format(metric_key),
@@ -356,7 +399,7 @@ def _build_peer_grouped_bar_preview(
                 "color_token": "chart-2",
             },
         ],
-        "rows": list(selected["_peer_rows"]),
+        "rows": peer_rows,
         "markers": [],
         "source_artifact_roles": [ARTIFACT_KEY_FEATURES, ARTIFACT_KEY_PEER_SIGNALS],
     }
