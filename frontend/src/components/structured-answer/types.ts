@@ -14,6 +14,41 @@ export type { SupplementalEvidenceRow, SupplementalEvidenceState };
 
 export type { PrimaryContextSignal };
 
+export type InlineEvidenceChartSeries = {
+  key: string;
+  label: string;
+  colorToken: "chart-1" | "chart-2" | "chart-3" | "chart-4";
+};
+
+export type InlineEvidenceChartRow = {
+  xValue: string;
+  values: Record<string, number | null>;
+};
+
+export type InlineEvidenceChartMarker = {
+  xValue: string;
+  label: string;
+};
+
+export type InlineEvidenceChart = {
+  chartId: string;
+  kind: "line" | "grouped_bar";
+  metricKey: string;
+  metricLabel: string;
+  caption: string;
+  xAxisLabel: string;
+  yAxisLabel: string;
+  valueFormat: "currency" | "percent" | "ratio" | "count" | "number";
+  series: InlineEvidenceChartSeries[];
+  rows: InlineEvidenceChartRow[];
+  markers: InlineEvidenceChartMarker[];
+};
+
+export type InlineEvidenceChartsProps = {
+  charts: InlineEvidenceChart[];
+  className?: string;
+};
+
 export type AnswerSummaryProps = {
   goalDisplay: string;
   summaryLine: string | null;

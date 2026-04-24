@@ -5,25 +5,189 @@
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5rem;
+  color-scheme: light;
 }
 
 :root {
-  --foreground: #171717;
-  --background: #ffffff;
-  --muted: #737373;
-  --border: #e5e5e5;
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --foreground: #fafafa;
-    --background: #0a0a0a;
-    --muted: #a3a3a3;
-    --border: #262626;
-  }
+  --foreground: #172033;
+  --background: #f5f7fb;
+  --muted: #5f6b82;
+  --border: rgba(23, 32, 51, 0.12);
+  --surface: rgba(255, 255, 255, 0.88);
+  --surface-strong: rgba(255, 255, 255, 0.97);
+  --accent: #1f6fff;
+  --accent-strong: #0e46b8;
+  --accent-warm: #ff8a5b;
+  --accent-gold: #f2c56d;
+  --shadow-soft: 0 24px 72px -46px rgba(19, 31, 57, 0.28);
 }
 
 body {
   color: var(--foreground);
-  background: var(--background);
+  background:
+    radial-gradient(circle at top left, rgba(31, 111, 255, 0.11), transparent 30%),
+    radial-gradient(circle at top right, rgba(255, 138, 91, 0.09), transparent 28%),
+    linear-gradient(180deg, #f8fbff 0%, #f6f5fb 38%, #eef2f9 100%);
+  font-family:
+    "Avenir Next",
+    "Segoe UI",
+    "Helvetica Neue",
+    sans-serif;
+  min-height: 100vh;
+}
+
+::selection {
+  background: rgba(31, 111, 255, 0.16);
+  color: var(--foreground);
+}
+
+@keyframes landingRevealUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes landingFloat {
+  0%,
+  100% {
+    transform: translate3d(0, 0, 0);
+  }
+  50% {
+    transform: translate3d(0, -10px, 0);
+  }
+}
+
+@keyframes landingPulse {
+  0%,
+  100% {
+    opacity: 0.78;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
+@layer utilities {
+  .font-display {
+    font-family:
+      "Iowan Old Style",
+      "Palatino Linotype",
+      "Book Antiqua",
+      "Times New Roman",
+      serif;
+    letter-spacing: -0.045em;
+  }
+
+  .glass-panel {
+    background: var(--surface);
+    backdrop-filter: blur(12px);
+    -webkit-backdrop-filter: blur(12px);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .surface-panel {
+    background: var(--surface-strong);
+    box-shadow: 0 18px 48px -34px rgba(19, 31, 57, 0.16);
+  }
+
+  .landing-grid {
+    background-image:
+      linear-gradient(rgba(110, 125, 154, 0.065) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(110, 125, 154, 0.065) 1px, transparent 1px);
+    background-size: 44px 44px;
+    background-position: center;
+  }
+
+  .landing-reveal {
+    animation: landingRevealUp 720ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .landing-reveal-delay-1 {
+    animation-delay: 120ms;
+  }
+
+  .landing-reveal-delay-2 {
+    animation-delay: 220ms;
+  }
+
+  .landing-float {
+    animation: landingFloat 8s ease-in-out infinite;
+  }
+
+  .landing-pulse {
+    animation: landingPulse 4s ease-in-out infinite;
+  }
+
+  .scrollbar-hidden {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .scrollbar-hidden::-webkit-scrollbar {
+    display: none;
+  }
+}
+
+@layer base {
+  :root {
+    --ui-background: 220 45% 98%;
+    --ui-foreground: 221 40% 15%;
+    --ui-card: 0 0% 100%;
+    --ui-card-foreground: 221 40% 15%;
+    --ui-popover: 0 0% 100%;
+    --ui-popover-foreground: 221 40% 15%;
+    --ui-primary: 217 91% 55%;
+    --ui-primary-foreground: 210 40% 98%;
+    --ui-secondary: 214 40% 94%;
+    --ui-secondary-foreground: 221 40% 15%;
+    --ui-muted: 214 36% 95%;
+    --ui-muted-foreground: 219 17% 43%;
+    --ui-accent: 214 36% 95%;
+    --ui-accent-foreground: 221 40% 15%;
+    --ui-destructive: 0 72% 51%;
+    --ui-destructive-foreground: 210 40% 98%;
+    --ui-border: 217 23% 88%;
+    --ui-input: 217 23% 88%;
+    --ui-ring: 217 91% 55%;
+    --ui-radius: 0.875rem;
+    --chart-1: #1f6fff;
+    --chart-2: #ff8a5b;
+    --chart-3: #f2c56d;
+    --chart-4: #5f6b82;
+  }
+
+  .dark {
+    --ui-background: 222 45% 11%;
+    --ui-foreground: 210 40% 98%;
+    --ui-card: 222 42% 14%;
+    --ui-card-foreground: 210 40% 98%;
+    --ui-popover: 222 42% 14%;
+    --ui-popover-foreground: 210 40% 98%;
+    --ui-primary: 213 94% 68%;
+    --ui-primary-foreground: 222 47% 11%;
+    --ui-secondary: 217 27% 20%;
+    --ui-secondary-foreground: 210 40% 98%;
+    --ui-muted: 217 27% 20%;
+    --ui-muted-foreground: 215 20% 72%;
+    --ui-accent: 217 27% 20%;
+    --ui-accent-foreground: 210 40% 98%;
+    --ui-destructive: 0 63% 48%;
+    --ui-destructive-foreground: 210 40% 98%;
+    --ui-border: 216 24% 26%;
+    --ui-input: 216 24% 26%;
+    --ui-ring: 213 94% 68%;
+    --chart-1: #63a3ff;
+    --chart-2: #ff9b73;
+    --chart-3: #f2c56d;
+    --chart-4: #8c97ab;
+  }
+
+  * {
+    @apply border-border;
+  }
 }

@@ -7,6 +7,7 @@ export { EvidenceSummary } from "./evidence-summary";
 export { SupplementalEvidenceRow } from "./supplemental-evidence-row";
 export { CaveatBadgeGroup } from "./caveat-badge-group";
 export { DeepDiveActions } from "./deep-dive-actions";
+export { InlineEvidenceCharts } from "./inline-evidence-charts";
 export { humanizeWeakEvidenceSignal } from "./signal-labels";
 export type { PrimaryContextSignal } from "@/lib/primary-answer-signals";
 export type {
@@ -16,6 +17,7 @@ export type {
   DeepDiveActionsProps,
   EvidenceSummaryProps,
   FindingCardsProps,
+  InlineEvidenceChartsProps,
   TakeawayRow,
   TopFindingsListProps,
 } from "./types";
