@@ -3,7 +3,12 @@
 import { useMemo, useState } from "react";
 import { ChevronDown } from "lucide-react";
 
-import { ConfidenceStrip, EvidenceSummary, SupplementalEvidenceRow } from "@/components/structured-answer";
+import {
+  ConfidenceStrip,
+  EvidenceSummary,
+  InlineEvidenceCharts,
+  SupplementalEvidenceRow,
+} from "@/components/structured-answer";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { AnalysisRunStatus } from "@/lib/api/types";
 import { contextReliabilityFootnote } from "@/lib/primary-answer-signals";
@@ -90,6 +95,7 @@ export function ChatRunAnswerCard({
     () => answerCard.supplementalEvidence ?? fallbackSupplementalEvidence(answerCard),
     [answerCard],
   );
+  const inlineCharts = answerCard.inlineCharts;
   const supplementalEvidenceState =
     answerCard.supplementalEvidenceState ??
     (supplementalEvidence.length > 0
@@ -145,6 +151,9 @@ export function ChatRunAnswerCard({
             <p className="max-w-3xl text-[13px] leading-6 text-[var(--muted)]">{supportNote}</p>
           ) : null}
         </section>
+
+        {/* Visual evidence stays between the narrative answer and supporting evidence disclosure. */}
+        {inlineCharts.length > 0 ? <InlineEvidenceCharts charts={inlineCharts} /> : null}
 
         <section className="space-y-4">
           <Collapsible open={evidenceOpen} onOpenChange={setEvidenceOpen}>

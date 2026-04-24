@@ -2,7 +2,11 @@
  * Derive structured “primary answer” view data from existing run payloads (no new API).
  */
 
-import type { ArtifactMetadata, ConfidenceExplainerPreview, RunTransparencySummary } from "@/lib/api/types";
+import type {
+  ArtifactMetadata,
+  ConfidenceExplainerPreview,
+  RunTransparencySummary,
+} from "@/lib/api/types";
 import type { ParsedAiAgents, PlanAlignmentFindingWire, TraceabilityWire } from "@/lib/ai-agents-meta";
 import {
   collectContextSignals,
@@ -84,6 +88,34 @@ export type ConfidenceExplainerView = {
   limits: string[];
 };
 
+export type InlineChartSeriesView = {
+  key: string;
+  label: string;
+  colorToken: "chart-1" | "chart-2" | "chart-3" | "chart-4";
+};
+
+export type InlineChartMarkerView = {
+  xValue: string;
+  label: string;
+};
+
+export type InlineChartView = {
+  chartId: string;
+  kind: "line" | "grouped_bar";
+  metricKey: string;
+  metricLabel: string;
+  caption: string;
+  xAxisLabel: string;
+  yAxisLabel: string;
+  valueFormat: "currency" | "percent" | "ratio" | "count" | "number";
+  series: InlineChartSeriesView[];
+  rows: Array<{
+    xValue: string;
+    values: Record<string, number | null>;
+  }>;
+  markers: InlineChartMarkerView[];
+};
+
 export type PrimaryAnswerView = {
   goalDisplay: string;
   narrativeAnswer: NarrativeAnswerView;
@@ -108,6 +140,7 @@ export type PrimaryAnswerView = {
   weakEvidenceSignals: string[];
   /** Budget / truncation / skip / degradation hints (no raw JSON). */
   contextSignals: PrimaryContextSignal[];
+  inlineCharts: InlineChartView[];
   /** One line under the conclusion when critic blocking or weak evidence warrants it. */
   conclusionRider: { text: string; href: string } | null;
   /** Optional footnote for the evidence block (sampling / truncation / unmapped artifacts). */
@@ -145,6 +178,7 @@ export type ChatAnswerCardView = CompactChatAnswerView & {
   reportPhaseStatus: string | null;
   weakEvidenceSignals: string[];
   contextSignals: PrimaryContextSignal[];
+  inlineCharts: InlineChartView[];
   evidenceLinks: EvidenceLink[];
   extraArtifactCount: number;
   reportArtifactId: string | null;
@@ -658,6 +692,147 @@ function buildLegacyNarrativeAnswer(input: {
   };
 }
 
+const INLINE_CHART_KINDS = new Set<InlineChartView["kind"]>(["line", "grouped_bar"]);
+const INLINE_CHART_COLOR_TOKENS = new Set<InlineChartSeriesView["colorToken"]>([
+  "chart-1",
+  "chart-2",
+  "chart-3",
+  "chart-4",
+]);
+const INLINE_CHART_VALUE_FORMATS = new Set<InlineChartView["valueFormat"]>([
+  "currency",
+  "percent",
+  "ratio",
+  "count",
+  "number",
+]);
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value) && typeof value === "object" && !Array.isArray(value);
+}
+
+function mapInlineCharts(transparency: RunTransparencySummary | null | undefined): InlineChartView[] {
+  // Render only backend-authored transparency.inline_charts previews; never infer charts client-side.
+  const previews = transparency?.inline_charts ?? [];
+
+  if (!Array.isArray(previews)) {
+    return [];
+  }
+
+  const charts: InlineChartView[] = [];
+
+  for (const preview of previews) {
+    if (!preview || !INLINE_CHART_KINDS.has(preview.kind)) {
+      continue;
+    }
+
+    if (!INLINE_CHART_VALUE_FORMATS.has(preview.value_format)) {
+      continue;
+    }
+
+    const chartId = typeof preview.chart_id === "string" ? preview.chart_id.trim() : "";
+    const metricKey = typeof preview.metric_key === "string" ? preview.metric_key.trim() : "";
+    const metricLabel = typeof preview.metric_label === "string" ? preview.metric_label.trim() : "";
+    const caption = typeof preview.caption === "string" ? preview.caption.trim() : "";
+    const xAxisLabel = typeof preview.x_axis_label === "string" ? preview.x_axis_label.trim() : "";
+    const yAxisLabel = typeof preview.y_axis_label === "string" ? preview.y_axis_label.trim() : "";
+
+    if (!chartId || !metricKey || !metricLabel || !caption || !xAxisLabel || !yAxisLabel) {
+      continue;
+    }
+
+    const series = Array.isArray(preview.series)
+      ? preview.series
+          .map((item) => {
+            const key = typeof item.key === "string" ? item.key.trim() : "";
+            const label = typeof item.label === "string" ? item.label.trim() : "";
+            const colorToken = item.color_token;
+
+            if (!key || !label || !INLINE_CHART_COLOR_TOKENS.has(colorToken)) {
+              return null;
+            }
+
+            return {
+              key,
+              label,
+              colorToken,
+            } satisfies InlineChartSeriesView;
+          })
+          .filter((item): item is InlineChartSeriesView => item !== null)
+      : [];
+
+    if (!series.length) {
+      continue;
+    }
+
+    const rows = Array.isArray(preview.rows)
+      ? preview.rows
+          .map((row) => {
+            const xValue = typeof row.x_value === "string" ? row.x_value.trim() : "";
+            if (!xValue || !isRecord(row.values)) {
+              return null;
+            }
+
+            const values = Object.fromEntries(
+              series.map((item) => {
+                const value = row.values[item.key];
+                return [item.key, typeof value === "number" && Number.isFinite(value) ? value : null];
+              }),
+            );
+
+            const hasSeriesValue = Object.values(values).some((value) => typeof value === "number");
+            if (!hasSeriesValue) {
+              return null;
+            }
+
+            return {
+              xValue,
+              values,
+            };
+          })
+          .filter((item): item is InlineChartView["rows"][number] => item !== null)
+      : [];
+
+    if (!rows.length) {
+      continue;
+    }
+
+    const markers = Array.isArray(preview.markers)
+      ? preview.markers
+          .map((marker) => {
+            const xValue = typeof marker.x_value === "string" ? marker.x_value.trim() : "";
+            const label = typeof marker.label === "string" ? marker.label.trim() : "";
+
+            if (!xValue || !label) {
+              return null;
+            }
+
+            return {
+              xValue,
+              label,
+            } satisfies InlineChartMarkerView;
+          })
+          .filter((item): item is InlineChartMarkerView => item !== null)
+      : [];
+
+    charts.push({
+      chartId,
+      kind: preview.kind,
+      metricKey,
+      metricLabel,
+      caption,
+      xAxisLabel,
+      yAxisLabel,
+      valueFormat: preview.value_format,
+      series,
+      rows,
+      markers,
+    });
+  }
+
+  return charts.slice(0, 2);
+}
+
 export function buildPrimaryAnswerView(
   input: {
     orchestration_goal_text: string | null;
@@ -748,6 +923,7 @@ export function buildPrimaryAnswerView(
     weakEvidenceSignals,
     contextSignals,
   );
+  const inlineCharts = mapInlineCharts(transparency);
 
   const hasCritic = hasCriticSurface(ai, tr) || hasCriticSurfaceFromTransparency(transparency);
   const takeawayChips = buildTakeawayChips(nav, reportArtifactId, links, artifacts.length, hasCritic, contextSignals);
@@ -821,6 +997,7 @@ export function buildPrimaryAnswerView(
     blockingCaveats,
     criticPhaseStatus,
     reportPhaseStatus,
+    inlineCharts,
     evidenceLinks: links,
     extraArtifactCount,
     reportArtifactId,
@@ -864,6 +1041,7 @@ export function buildChatAnswerCardView(
     blockingCaveats: view.blockingCaveats,
     criticPhaseStatus: view.criticPhaseStatus,
     reportPhaseStatus: view.reportPhaseStatus,
+    inlineCharts: view.inlineCharts,
     weakEvidenceSignals: view.weakEvidenceSignals,
     contextSignals: view.contextSignals,
     evidenceLinks: view.evidenceLinks,
