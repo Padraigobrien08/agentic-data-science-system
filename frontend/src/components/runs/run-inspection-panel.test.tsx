@@ -26,6 +26,22 @@ const view: PrimaryAnswerView = {
     },
   ],
   alignmentFindings: [],
+  supplementalEvidence: [
+    {
+      id: "support-1",
+      title: "Revenue growth deterioration appears",
+      reason: "Revenue growth deterioration appears in several recent quarters.",
+      jump: { label: "Open source", href: "/projects/project-1/runs/run-1/trace#run-artifacts" },
+      source: "takeaway",
+    },
+  ],
+  supplementalEvidenceState: {
+    mode: "available",
+    closedLabel: "Show supporting evidence",
+    openLabel: "Hide supporting evidence",
+    heading: null,
+    body: null,
+  },
   overallConfidence: "medium",
   confidenceExplainer: {
     label: "Medium",

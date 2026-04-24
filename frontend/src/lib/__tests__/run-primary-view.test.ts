@@ -51,6 +51,10 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.takeawayRows[0]!.chips.some((c) => c.label === "Report")).toBe(true);
     expect(view.takeawayRows[0]!.chips.some((c) => c.href.includes("/trace#run-artifacts"))).toBe(true);
     expect(view.alignmentFindings[0]!.chips[0]!.href).toContain("/trace#run-agents");
+    expect(view.supplementalEvidence).toHaveLength(2);
+    expect(view.supplementalEvidence[0]?.source).toBe("takeaway");
+    expect(view.supplementalEvidence[0]?.jump?.href).toContain("/artifacts/art-1");
+    expect(view.supplementalEvidence[1]?.source).toBe("alignment");
   });
 
   it("omits chips when nav context is omitted", () => {
@@ -68,6 +72,8 @@ describe("buildPrimaryAnswerView evidence linking", () => {
       null,
     );
     expect(view.takeawayRows[0]!.chips).toEqual([]);
+    expect(view.supplementalEvidence[0]?.jump).toBeNull();
+    expect(view.supplementalEvidenceState.mode).toBe("available");
   });
 
   it("explains successful runs that produced a report but no structured findings", () => {
@@ -107,6 +113,9 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.emptyStateReason).toBe(
       "The run completed and produced a report, but no structured findings were extracted into this answer card.",
     );
+    expect(view.supplementalEvidence).toEqual([]);
+    expect(view.supplementalEvidenceState.mode).toBe("limited");
+    expect(view.supplementalEvidenceState.heading).toBe("Supporting evidence is limited");
   });
 
   it("uses transparency takeaways when raw payloads are not available", () => {
@@ -177,6 +186,8 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.narrativeAnswer.mode).toBe("full");
     expect(view.narrativeAnswer.sections[0]?.heading).toBe("What's happening");
     expect(view.takeawayRows).toHaveLength(1);
+    expect(view.supplementalEvidence).toHaveLength(1);
+    expect(view.supplementalEvidence[0]?.title).toContain("MSFT shows repeated revenue-growth");
     expect(view.emptyStateReason).toBeNull();
     expect(view.blockingCaveats).toEqual(["Peer coverage is insufficient."]);
     expect(view.overallConfidence).toBe("medium");
@@ -236,6 +247,9 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.takeawayRows[0]?.text).toBe(
       "MSFT shows repeated revenue-growth deterioration across multiple Q1 periods.",
     );
+    expect(view.supplementalEvidence[0]?.reason).toBe(
+      "MSFT shows repeated revenue-growth deterioration across multiple Q1 periods.",
+    );
   });
 
   it("prefers a partial narrative preview when evidence is limited", () => {
@@ -281,5 +295,33 @@ describe("buildPrimaryAnswerView evidence linking", () => {
       "The evidence is limited, but the loaded summaries still point to weaker revenue growth.",
     );
     expect(view.emptyStateReason).toBeNull();
+    expect(view.supplementalEvidence).toEqual([]);
+    expect(view.supplementalEvidenceState.mode).toBe("limited");
+    expect(view.supplementalEvidenceState.body).toBe(
+      "We checked for supporting evidence, but the mapped support for this answer is limited.",
+    );
+  });
+
+  it("keeps an explicit empty evidence disclosure state when no support surfaces are available", () => {
+    const view = buildPrimaryAnswerView(
+      {
+        orchestration_goal_text: "Find unusual financial changes",
+        input_payload_json: { tickers: ["MSFT"], analysis_goal: "Find unusual financial changes" },
+        output_payload_json: null,
+      },
+      [],
+      null,
+      null,
+      null,
+      null,
+      { projectId: "p1", runId: "r1" },
+    );
+
+    expect(view.supplementalEvidence).toEqual([]);
+    expect(view.supplementalEvidenceState.mode).toBe("empty");
+    expect(view.supplementalEvidenceState.heading).toBe("No mapped support is available");
+    expect(view.supplementalEvidenceState.body).toBe(
+      "Artifacts or mapped support were not available for this answer view.",
+    );
   });
 });

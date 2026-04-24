@@ -4,6 +4,7 @@ export { TopFindingsList } from "./top-findings-list";
 export { FindingCards } from "./finding-cards";
 export { ConfidenceStrip } from "./confidence-strip";
 export { EvidenceSummary } from "./evidence-summary";
+export { SupplementalEvidenceRow } from "./supplemental-evidence-row";
 export { CaveatBadgeGroup } from "./caveat-badge-group";
 export { DeepDiveActions } from "./deep-dive-actions";
 export { humanizeWeakEvidenceSignal } from "./signal-labels";

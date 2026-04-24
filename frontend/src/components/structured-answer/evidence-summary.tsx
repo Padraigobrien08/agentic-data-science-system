@@ -11,10 +11,30 @@ export function EvidenceSummary({
   links,
   extraArtifactCount,
   provenanceHint,
+  navItems,
   deepDiveHref,
   runStatus,
   className,
 }: EvidenceSummaryProps) {
+  if (navItems?.length) {
+    return (
+      <div className={className ?? "space-y-3"}>
+        <div className="flex flex-wrap gap-2">
+          {navItems.map((item) => (
+            <Link
+              key={`${item.label}-${item.href}`}
+              href={item.href}
+              className="inline-flex items-center rounded-full border border-[var(--border)]/80 bg-neutral-50/80 px-3 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:border-[var(--foreground)]/20 hover:text-[var(--foreground)] dark:bg-neutral-950/25"
+            >
+              {item.label}
+            </Link>
+          ))}
+        </div>
+        {provenanceHint ? <p className="text-[11px] leading-5 text-[var(--muted)]">{provenanceHint}</p> : null}
+      </div>
+    );
+  }
+
   const hasLinks = links.length > 0;
   const hasExtras = extraArtifactCount > 0;
 

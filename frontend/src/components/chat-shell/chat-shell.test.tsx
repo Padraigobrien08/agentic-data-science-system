@@ -43,6 +43,14 @@ describe("ChatShell", () => {
           conclusionRider: null,
           takeawayRows: [],
           alignmentFindings: [],
+          supplementalEvidence: [],
+          supplementalEvidenceState: {
+            mode: "empty",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: "No mapped support is available",
+            body: "Artifacts or mapped support were not available for this answer view.",
+          },
           overallConfidence: null,
           confidenceExplainer: {
             label: "Not rated",
@@ -111,6 +119,7 @@ describe("ChatShell", () => {
     expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
     expect(screen.getAllByText("Workspace chat is executing synchronously right now.")).toHaveLength(1);
     expect(screen.getByText("Answer")).toBeTruthy();
+    expect(screen.getByText("Show supporting evidence")).toBeTruthy();
   });
 
   it("renders the Phase 17 error shell for failed assistant answers", () => {
@@ -133,6 +142,14 @@ describe("ChatShell", () => {
           conclusionRider: null,
           takeawayRows: [],
           alignmentFindings: [],
+          supplementalEvidence: [],
+          supplementalEvidenceState: {
+            mode: "empty",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: "No mapped support is available",
+            body: "Artifacts or mapped support were not available for this answer view.",
+          },
           overallConfidence: null,
           confidenceExplainer: {
             label: "Not rated",

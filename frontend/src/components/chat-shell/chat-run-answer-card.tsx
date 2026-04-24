@@ -1,12 +1,14 @@
 "use client";
 
-import Link from "next/link";
+import { useMemo, useState } from "react";
+import { ChevronDown } from "lucide-react";
 
-import { ConfidenceStrip, FindingCards, TopFindingsList } from "@/components/structured-answer";
-import { Separator } from "@/components/ui/separator";
+import { ConfidenceStrip, EvidenceSummary, SupplementalEvidenceRow } from "@/components/structured-answer";
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import type { AnalysisRunStatus } from "@/lib/api/types";
 import { contextReliabilityFootnote } from "@/lib/primary-answer-signals";
-import type { ChatAnswerCardView } from "@/lib/run-primary-view";
+import type { ChatAnswerCardView, SupplementalEvidenceRow as SupplementalEvidenceRowType } from "@/lib/run-primary-view";
+import { cn } from "@/lib/utils";
 
 type Props = {
   answerCard: ChatAnswerCardView;
@@ -45,15 +47,33 @@ function partialLimitation(answerCard: ChatAnswerCardView): string | null {
   }
 }
 
+function fallbackSupplementalEvidence(answerCard: ChatAnswerCardView): SupplementalEvidenceRowType[] {
+  const fromTakeaways = answerCard.takeawayRows.map((row, index) => ({
+    id: `legacy-takeaway-${index}`,
+    title: row.text.split(/[:.;]/)[0]?.trim() || `Supporting signal ${index + 1}`,
+    reason: row.text,
+    jump: row.chips[0] ? { label: "Open source", href: row.chips[0].href } : null,
+    source: "takeaway" as const,
+  }));
+  const fromAlignment = answerCard.alignmentFindings.map((finding, index) => ({
+    id: `legacy-alignment-${finding.code}-${index}`,
+    title: finding.detail.split(/[:.;]/)[0]?.trim() || `Supporting check ${index + 1}`,
+    reason: finding.detail,
+    jump: finding.chips[0] ? { label: "Open source", href: finding.chips[0].href } : null,
+    source: "alignment" as const,
+  }));
+  return [...fromTakeaways, ...fromAlignment];
+}
+
 export function ChatRunAnswerCard({
   answerCard,
   runStatus,
 }: Props) {
-  const hasFindings = answerCard.takeawayRows.length > 0 || answerCard.alignmentFindings.length > 0;
   const reliabilityNote = contextReliabilityFootnote(answerCard.contextSignals, answerCard.weakEvidenceSignals);
   const narrativeSections = sortNarrativeSections(answerCard);
   const isErrorState = runStatus === "error" || answerCard.orchestrationStatus === "error";
   const isNoDataState = !isErrorState && (runStatus === "no_data" || answerCard.orchestrationStatus === "no_data");
+  const [evidenceOpen, setEvidenceOpen] = useState(false);
   const thesis =
     isErrorState
       ? "This analysis didn’t finish cleanly."
@@ -66,11 +86,31 @@ export function ChatRunAnswerCard({
     : partialLimitation(answerCard) ??
       answerCard.conclusionRider?.text ??
       (isNoDataState ? answerCard.emptyStateReason : null);
-  const hasSupportSection =
-    hasFindings ||
-    answerCard.navigationItems.length > 0 ||
-    Boolean(answerCard.evidenceProvenanceHint) ||
-    Boolean(answerCard.orchestrationStatus);
+  const supplementalEvidence = useMemo(
+    () => answerCard.supplementalEvidence ?? fallbackSupplementalEvidence(answerCard),
+    [answerCard],
+  );
+  const supplementalEvidenceState =
+    answerCard.supplementalEvidenceState ??
+    (supplementalEvidence.length > 0
+      ? {
+          mode: "available" as const,
+          closedLabel: "Show supporting evidence",
+          openLabel: "Hide supporting evidence",
+          heading: null,
+          body: null,
+        }
+      : {
+          mode: "limited" as const,
+          closedLabel: "Show supporting evidence",
+          openLabel: "Hide supporting evidence",
+          heading: "Supporting evidence is limited",
+          body:
+            answerCard.evidenceProvenanceHint ??
+            answerCard.emptyStateReason ??
+            "We checked for supporting evidence, but the mapped support for this answer is limited.",
+        });
+  const hasSupportBody = supplementalEvidence.length > 0;
 
   return (
     <div className="w-full">
@@ -106,66 +146,76 @@ export function ChatRunAnswerCard({
           ) : null}
         </section>
 
-        {hasSupportSection ? (
-          <section className="space-y-6 rounded-[1.75rem] border border-[var(--border)]/70 bg-white/70 px-5 py-5 dark:bg-neutral-950/30">
-            {hasFindings ? (
-              <section className="space-y-4">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
-                  Supporting detail
-                </p>
-                <div className="space-y-4">
-                  {answerCard.takeawayRows.length > 0 ? (
-                    <TopFindingsList items={answerCard.takeawayRows} chipMode="secondary" className="space-y-3" />
-                  ) : null}
-                  {answerCard.alignmentFindings.length > 0 ? (
-                    <FindingCards
-                      findings={answerCard.alignmentFindings}
-                      chipMode="secondary"
-                      className="space-y-3"
-                    />
-                  ) : null}
-                </div>
-              </section>
-            ) : null}
-
-            {answerCard.navigationItems.length > 0 || answerCard.evidenceProvenanceHint ? (
-              <>
-                {hasFindings ? <Separator /> : null}
-                <section className="space-y-4">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
-                    Evidence
-                  </p>
-                  <div className="flex flex-wrap gap-2">
-                    {answerCard.navigationItems.map((item) => (
-                      <Link
-                        key={item.key}
-                        href={item.href}
-                        className="inline-flex items-center rounded-full border border-[var(--border)] bg-neutral-50 px-3 py-1.5 text-[11px] font-medium text-[var(--foreground)] transition-colors hover:border-[var(--foreground)]/30 hover:bg-[var(--background)] dark:bg-neutral-950/30"
-                      >
-                        {item.label}
-                      </Link>
-                    ))}
+        <section className="space-y-4">
+          <Collapsible open={evidenceOpen} onOpenChange={setEvidenceOpen}>
+            <div className="rounded-[1.5rem] border border-[var(--border)]/70 bg-white/70 px-4 py-3 dark:bg-neutral-950/25">
+              <CollapsibleTrigger asChild>
+                <button
+                  type="button"
+                  className="flex w-full items-center justify-between gap-4 text-left"
+                  aria-label={evidenceOpen ? supplementalEvidenceState.openLabel : supplementalEvidenceState.closedLabel}
+                >
+                  <div>
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                      {evidenceOpen ? supplementalEvidenceState.openLabel : supplementalEvidenceState.closedLabel}
+                    </p>
+                    {!evidenceOpen && supplementalEvidenceState.mode !== "available" ? (
+                      <p className="mt-1 text-[12px] leading-5 text-[var(--muted)]">
+                        {supplementalEvidenceState.heading}
+                      </p>
+                    ) : null}
                   </div>
-                  {answerCard.evidenceProvenanceHint ? (
-                    <p className="text-[11px] leading-5 text-[var(--muted)]">{answerCard.evidenceProvenanceHint}</p>
-                  ) : null}
-                </section>
-              </>
-            ) : null}
+                  <ChevronDown
+                    className={cn(
+                      "h-4 w-4 shrink-0 text-[var(--muted)] transition-transform duration-200",
+                      evidenceOpen ? "rotate-180" : "",
+                    )}
+                  />
+                </button>
+              </CollapsibleTrigger>
 
-            {answerCard.orchestrationStatus ? (
-              <>
-                {hasFindings || answerCard.navigationItems.length > 0 ? <Separator /> : null}
-                <details className="group rounded-[1.2rem] border border-[var(--border)]/70 bg-neutral-50/65 px-4 py-3 dark:bg-neutral-950/20">
-                  <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                    Orchestration status
-                  </summary>
-                  <p className="mt-3 text-sm leading-6 text-[var(--foreground)]">{answerCard.orchestrationStatus}</p>
-                </details>
-              </>
-            ) : null}
-          </section>
-        ) : null}
+              <CollapsibleContent className="data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down overflow-hidden">
+                <div className="mt-4 space-y-3 border-t border-[var(--border)]/70 pt-4">
+                  {hasSupportBody ? (
+                    supplementalEvidence.map((row) => <SupplementalEvidenceRow key={row.id} row={row} />)
+                  ) : (
+                    <div className="rounded-[1.15rem] border border-dashed border-[var(--border)]/80 bg-neutral-50/70 px-4 py-3 dark:bg-neutral-950/20">
+                      {supplementalEvidenceState.heading ? (
+                        <p className="text-[13px] font-semibold leading-5 text-[var(--foreground)]">
+                          {supplementalEvidenceState.heading}
+                        </p>
+                      ) : null}
+                      {supplementalEvidenceState.body ? (
+                        <p className="mt-1.5 text-[13px] leading-6 text-[var(--muted)]">
+                          {supplementalEvidenceState.body}
+                        </p>
+                      ) : null}
+                    </div>
+                  )}
+                </div>
+              </CollapsibleContent>
+            </div>
+          </Collapsible>
+
+          {answerCard.navigationItems.length > 0 || answerCard.evidenceProvenanceHint ? (
+            <EvidenceSummary
+              links={answerCard.evidenceLinks}
+              extraArtifactCount={answerCard.extraArtifactCount}
+              provenanceHint={answerCard.evidenceProvenanceHint}
+              navItems={answerCard.navigationItems.map((item) => ({ label: item.label, href: item.href }))}
+              runStatus={runStatus}
+            />
+          ) : null}
+
+          {answerCard.orchestrationStatus ? (
+            <details className="group rounded-[1.2rem] border border-[var(--border)]/70 bg-neutral-50/65 px-4 py-3 dark:bg-neutral-950/20">
+              <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Orchestration status
+              </summary>
+              <p className="mt-3 text-sm leading-6 text-[var(--foreground)]">{answerCard.orchestrationStatus}</p>
+            </details>
+          ) : null}
+        </section>
       </div>
     </div>
   );

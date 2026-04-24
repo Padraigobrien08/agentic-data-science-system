@@ -1,8 +1,16 @@
 import type { AnalysisRunStatus } from "@/lib/api/types";
 import type { PrimaryContextSignal } from "@/lib/primary-answer-signals";
-import type { AlignmentFindingCard, ConfidenceExplainerView, EvidenceLink, TakeawayRow } from "@/lib/run-primary-view";
+import type {
+  AlignmentFindingCard,
+  ConfidenceExplainerView,
+  EvidenceLink,
+  SupplementalEvidenceRow,
+  SupplementalEvidenceState,
+  TakeawayRow,
+} from "@/lib/run-primary-view";
 
 export type { TakeawayRow };
+export type { SupplementalEvidenceRow, SupplementalEvidenceState };
 
 export type { PrimaryContextSignal };
 
@@ -42,6 +50,7 @@ export type EvidenceSummaryProps = {
   links: EvidenceLink[];
   extraArtifactCount: number;
   provenanceHint?: string | null;
+  navItems?: { label: string; href: string }[];
   /** Shown with provenance hint as a follow-up action. */
   deepDiveHref?: string;
   /** When set, softens empty copy while the worker is still producing artifacts. */

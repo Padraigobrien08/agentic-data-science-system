@@ -31,6 +31,27 @@ export type AlignmentFindingCard = {
   chips: EvidenceNavChip[];
 };
 
+export type SupplementalEvidenceJump = {
+  label: string;
+  href: string;
+};
+
+export type SupplementalEvidenceRow = {
+  id: string;
+  title: string;
+  reason: string;
+  jump: SupplementalEvidenceJump | null;
+  source: "takeaway" | "alignment";
+};
+
+export type SupplementalEvidenceState = {
+  mode: "available" | "limited" | "empty";
+  closedLabel: string;
+  openLabel: string;
+  heading: string | null;
+  body: string | null;
+};
+
 export type EvidenceLink = {
   role: string;
   artifactId: string;
@@ -73,6 +94,8 @@ export type PrimaryAnswerView = {
   /** Takeaways with shared trace chips (report / evidence / critic). */
   takeawayRows: TakeawayRow[];
   alignmentFindings: AlignmentFindingCard[];
+  supplementalEvidence: SupplementalEvidenceRow[];
+  supplementalEvidenceState: SupplementalEvidenceState;
   overallConfidence: string | null;
   confidenceExplainer: ConfidenceExplainerView;
   blockingCaveats: string[];
@@ -113,6 +136,8 @@ export type ChatEvidenceNavItem = {
 export type ChatAnswerCardView = CompactChatAnswerView & {
   takeawayRows: TakeawayRow[];
   alignmentFindings: AlignmentFindingCard[];
+  supplementalEvidence?: SupplementalEvidenceRow[];
+  supplementalEvidenceState?: SupplementalEvidenceState;
   overallConfidence: string | null;
   confidenceExplainer: ConfidenceExplainerView;
   blockingCaveats: string[];
@@ -146,6 +171,18 @@ function truncate(s: string, max: number): string {
   const t = s.trim();
   if (t.length <= max) return t;
   return `${t.slice(0, max - 1)}…`;
+}
+
+function compactWhitespace(input: string): string {
+  return input.replace(/\s+/g, " ").trim();
+}
+
+function buildEvidenceTitle(input: string, fallback: string): string {
+  const clean = compactWhitespace(input);
+  if (!clean) return fallback;
+  const clause = clean.split(/[:.;]/)[0]?.trim() || clean;
+  const words = clause.split(/\s+/).slice(0, 7).join(" ");
+  return truncate(words || fallback, 52);
 }
 
 function dedupeTakeaways(rows: string[], max: number): string[] {
@@ -401,6 +438,96 @@ function buildEvidenceProvenanceHint(
     return "Several artifacts sit outside the evidence map — deep dive lists the full set.";
   }
   return null;
+}
+
+function selectExactJump(chips: EvidenceNavChip[]): SupplementalEvidenceJump | null {
+  if (!chips.length) return null;
+  const preferred =
+    chips.find((chip) => chip.href.startsWith("/artifacts/")) ??
+    chips.find((chip) => chip.href.includes("#")) ??
+    chips[0];
+  if (!preferred) return null;
+  return { label: "Open source", href: preferred.href };
+}
+
+function buildSupplementalEvidence(
+  takeawayRows: TakeawayRow[],
+  alignmentFindings: AlignmentFindingCard[],
+): SupplementalEvidenceRow[] {
+  const rows: SupplementalEvidenceRow[] = [];
+
+  takeawayRows.forEach((row, index) => {
+    rows.push({
+      id: `takeaway-${index}`,
+      title: buildEvidenceTitle(row.text, `Supporting signal ${index + 1}`),
+      reason: row.text,
+      jump: selectExactJump(row.chips),
+      source: "takeaway",
+    });
+  });
+
+  alignmentFindings.forEach((finding, index) => {
+    rows.push({
+      id: `alignment-${finding.code}-${index}`,
+      title: buildEvidenceTitle(finding.detail, `Supporting check ${index + 1}`),
+      reason: finding.detail,
+      jump: selectExactJump(finding.chips),
+      source: "alignment",
+    });
+  });
+
+  return rows;
+}
+
+function buildSupplementalEvidenceState(input: {
+  supplementalEvidence: SupplementalEvidenceRow[];
+  emptyStateReason: string | null;
+  evidenceProvenanceHint: string | null;
+  evidenceLinkCount: number;
+  extraArtifactCount: number;
+  reportArtifactId: string | null;
+  weakEvidenceSignals: string[];
+}): SupplementalEvidenceState {
+  const closedLabel = "Show supporting evidence";
+  const openLabel = "Hide supporting evidence";
+
+  if (input.supplementalEvidence.length > 0) {
+    return {
+      mode: "available",
+      closedLabel,
+      openLabel,
+      heading: null,
+      body: null,
+    };
+  }
+
+  if (
+    input.evidenceProvenanceHint ||
+    input.emptyStateReason ||
+    input.evidenceLinkCount > 0 ||
+    input.extraArtifactCount > 0 ||
+    input.reportArtifactId ||
+    input.weakEvidenceSignals.length > 0
+  ) {
+    return {
+      mode: "limited",
+      closedLabel,
+      openLabel,
+      heading: "Supporting evidence is limited",
+      body:
+        input.evidenceProvenanceHint ??
+        input.emptyStateReason ??
+        "We checked for supporting evidence, but the mapped support for this answer is limited.",
+    };
+  }
+
+  return {
+    mode: "empty",
+    closedLabel,
+    openLabel,
+    heading: "No mapped support is available",
+    body: "Artifacts or mapped support were not available for this answer view.",
+  };
 }
 
 function isGenericSuccessSummary(summary: string | null): boolean {
@@ -668,6 +795,16 @@ export function buildPrimaryAnswerView(
     extraArtifactCount,
     links.length,
   );
+  const supplementalEvidence = buildSupplementalEvidence(takeawayRows, alignmentFindings);
+  const supplementalEvidenceState = buildSupplementalEvidenceState({
+    supplementalEvidence,
+    emptyStateReason,
+    evidenceProvenanceHint,
+    evidenceLinkCount: links.length,
+    extraArtifactCount,
+    reportArtifactId,
+    weakEvidenceSignals,
+  });
 
   return {
     goalDisplay,
@@ -677,6 +814,8 @@ export function buildPrimaryAnswerView(
     emptyStateReason,
     takeawayRows,
     alignmentFindings,
+    supplementalEvidence,
+    supplementalEvidenceState,
     overallConfidence,
     confidenceExplainer,
     blockingCaveats,
@@ -718,6 +857,8 @@ export function buildChatAnswerCardView(
     conclusionRider: view.conclusionRider,
     takeawayRows: view.takeawayRows,
     alignmentFindings: view.alignmentFindings,
+    supplementalEvidence: view.supplementalEvidence,
+    supplementalEvidenceState: view.supplementalEvidenceState,
     overallConfidence: view.overallConfidence,
     confidenceExplainer: view.confidenceExplainer,
     blockingCaveats: view.blockingCaveats,

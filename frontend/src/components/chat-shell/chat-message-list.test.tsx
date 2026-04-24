@@ -1,4 +1,4 @@
-import { render, screen } from "@testing-library/react";
+import { fireEvent, render, screen } from "@testing-library/react";
 import { describe, expect, it } from "vitest";
 
 import { ChatMessageList } from "@/components/chat-shell/chat-message-list";
@@ -50,6 +50,29 @@ describe("ChatMessageList", () => {
               chips: [{ label: "Critic", href: "/projects/project-1/runs/run-1/trace#run-agents" }],
             },
           ],
+          supplementalEvidence: [
+            {
+              id: "support-1",
+              title: "Revenue growth deterioration appears",
+              reason: "Revenue growth deterioration appears in several recent quarters.",
+              jump: { label: "Open source", href: "/projects/project-1/runs/run-1/trace#run-artifacts" },
+              source: "takeaway",
+            },
+            {
+              id: "support-2",
+              title: "Cash-flow deterioration is weaker",
+              reason: "Cash-flow deterioration is weaker than the revenue signal.",
+              jump: { label: "Open source", href: "/projects/project-1/runs/run-1/trace#run-agents" },
+              source: "alignment",
+            },
+          ],
+          supplementalEvidenceState: {
+            mode: "available",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: null,
+            body: null,
+          },
           overallConfidence: "medium",
           confidenceExplainer: {
             label: "Medium",
@@ -98,13 +121,11 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("What's happening")).toBeTruthy();
     expect(screen.getByText("Why we think that")).toBeTruthy();
     expect(screen.getByText("What weakens the claim")).toBeTruthy();
-    expect(screen.getByText("Supporting detail")).toBeTruthy();
+    expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getAllByText("Evidence").length).toBeGreaterThan(0);
     expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
-    expect(screen.getAllByText("Revenue growth deterioration appears in several recent quarters.")).toHaveLength(2);
     expect(screen.getByText("The summarized evidence is directionally consistent.")).toBeTruthy();
     expect(screen.getByText("Peer validation remains limited across the available evidence.")).toBeTruthy();
-    expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
     expect(screen.getByText("Evidence strength:")).toBeTruthy();
     expect(screen.getByText("Medium")).toBeTruthy();
     expect(screen.getByRole("link", { name: "Report" })).toBeTruthy();
@@ -112,13 +133,19 @@ describe("ChatMessageList", () => {
     expect(screen.getByRole("link", { name: "Artifacts" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Critic" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Trace" })).toBeTruthy();
-    const exactJumpLinks = screen.getAllByRole("link", { name: "Open source" });
-    expect(exactJumpLinks.length).toBeGreaterThanOrEqual(2);
-    expect(exactJumpLinks[0]?.getAttribute("href")).toBe("/projects/project-1/runs/run-1/trace#run-artifacts");
+    expect(screen.queryByRole("link", { name: "Open source" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Run answer" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
     expect(screen.queryByRole("link", { name: "All runs" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Open trace" })).toBeNull();
+
+    fireEvent.click(screen.getByRole("button", { name: "Show supporting evidence" }));
+
+    expect(screen.getByText("Hide supporting evidence")).toBeTruthy();
+    expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
+    const expandedJumpLinks = screen.getAllByRole("link", { name: "Open source" });
+    expect(expandedJumpLinks.length).toBeGreaterThanOrEqual(2);
+    expect(expandedJumpLinks[0]?.getAttribute("href")).toBe("/projects/project-1/runs/run-1/trace#run-artifacts");
   });
 
   it("keeps the narrative sections ordered in one centered column without the old right rail", () => {
@@ -154,6 +181,14 @@ describe("ChatMessageList", () => {
           conclusionRider: null,
           takeawayRows: [],
           alignmentFindings: [],
+          supplementalEvidence: [],
+          supplementalEvidenceState: {
+            mode: "empty",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: "No mapped support is available",
+            body: "Artifacts or mapped support were not available for this answer view.",
+          },
           overallConfidence: null,
           confidenceExplainer: {
             label: "Not rated",
@@ -195,6 +230,7 @@ describe("ChatMessageList", () => {
       whyWeThinkThat.compareDocumentPosition(whatWeakensTheClaim) & Node.DOCUMENT_POSITION_FOLLOWING,
     ).toBeTruthy();
     expect(container.innerHTML).not.toContain("lg:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.95fr)]");
+    expect(screen.getByText("Show supporting evidence")).toBeTruthy();
   });
 
   it("renders partial answers with explicit limitation language in the narrative shell", () => {
@@ -222,6 +258,14 @@ describe("ChatMessageList", () => {
           conclusionRider: null,
           takeawayRows: [],
           alignmentFindings: [],
+          supplementalEvidence: [],
+          supplementalEvidenceState: {
+            mode: "limited",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: "Supporting evidence is limited",
+            body: "We checked for supporting evidence, but the mapped support for this answer is limited.",
+          },
           overallConfidence: "medium",
           confidenceExplainer: {
             label: "Medium",
@@ -254,10 +298,13 @@ describe("ChatMessageList", () => {
 
     render(<ChatMessageList messages={messages} />);
 
-    expect(
-      screen.getByText("This answer is partial because the loaded evidence is limited."),
-    ).toBeTruthy();
+    expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getByText("Peer validation is incomplete, so the conclusion is only partial.")).toBeTruthy();
+    fireEvent.click(screen.getByRole("button", { name: "Show supporting evidence" }));
+    expect(screen.getByText("Supporting evidence is limited")).toBeTruthy();
+    expect(
+      screen.getByText("We checked for supporting evidence, but the mapped support for this answer is limited."),
+    ).toBeTruthy();
   });
 
   it("renders the explicit error narrative instead of generic success copy", () => {
@@ -280,6 +327,14 @@ describe("ChatMessageList", () => {
           conclusionRider: null,
           takeawayRows: [],
           alignmentFindings: [],
+          supplementalEvidence: [],
+          supplementalEvidenceState: {
+            mode: "empty",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: "No mapped support is available",
+            body: "Artifacts or mapped support were not available for this answer view.",
+          },
           overallConfidence: null,
           confidenceExplainer: {
             label: "Not rated",
