@@ -33,12 +33,10 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 - ✓ The standalone run page now acts as a secondary inspection surface focused on verification rather than duplicating the primary answer — validated in Phase 16
 - ✓ Workspace chat answers now render as backend-authored narrative replies with explicit full, partial, legacy, and error behavior, so the answer reads like an analyst memo instead of a summary card — validated in Phase 17
 - ✓ Workspace chat answers now surface evidence strength inline in the answer header through one compact semantic pill with a grouped explainer, instead of a large standalone confidence block — validated in Phase 18
+- ✓ Workspace chat answers now treat evidence as supplemental through a collapsed proof disclosure, slim exact-jump evidence rows, and a quiet secondary navigation strip beneath the answer — validated in Phase 19
 
 ### Active
 
-- **ANSR-03**: User can treat the narrative answer as the primary reading surface, with findings and supporting detail clearly subordinate to it
-- **CONF-01**: User can see evidence strength inline in the answer header and open a compact explainer that shows why it is rated `Good`, `Medium`, `Bad`, or `Not rated`
-- **EVID-01**: User can treat evidence as supplemental by expanding a disclosure below the answer to review slim evidence cards and then jump into detailed artifacts or trace
 - **CHRT-01**: User can see deterministic inline charts in chat when trusted run data supports a visual explanation
 
 ### Out of Scope
@@ -50,7 +48,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Current milestone:** `v1.3 Narrative Answers and Visual Evidence`
-**Status:** The platform now has a centered narrative chat answer with inline evidence-strength posture and a compact grouped confidence explainer. `v1.3` now continues with supplemental evidence disclosure and deterministic charts rendered directly in chat.
+**Status:** The platform now has a centered narrative chat answer with an inline confidence explainer and collapsed supplemental evidence beneath it. `v1.3` now continues with deterministic inline charts rendered directly in chat.
 
 ## Current Milestone: v1.3 Narrative Answers and Visual Evidence
 
@@ -78,7 +76,7 @@ The highest-value work in v1.0 was operational rather than feature-based, and al
 
 The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface.
 
-`v1.3` follows directly from the first live iteration on that new chat surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, and Phase 18 has now moved evidence strength into a compact header pill backed by a grouped confidence explainer. The next step is to push evidence further into a clearly supplemental disclosure and add deterministic inline charts so the answer can show trends and comparisons instead of only describing them.
+`v1.3` follows directly from the first live iteration on that new chat surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, and Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip. The next step is to add deterministic inline charts so the answer can show trends and comparisons instead of only describing them.
 
 ## Constraints
 
@@ -122,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-24 after completing Phase 18 Confidence Explainer*
+*Last updated: 2026-04-24 after completing Phase 19 Supplemental Evidence Disclosure*

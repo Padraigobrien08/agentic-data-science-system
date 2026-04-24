@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** Phase 18 complete · Phase 19 ready to execute
+**Status:** Phase 19 complete · Phase 20 next
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -54,12 +54,13 @@ Plans:
 **Goal**: Make evidence clearly supplemental by moving supporting cards into a disclosure beneath the answer and keeping navigation pills secondary.
 **Depends on**: Phase 18
 **Plans**: 3 plans
+**Status**: Complete — 2026-04-24
 
 Plans:
 
-- [ ] 19-01: Redesign the chat answer layout so narrative prose is central and evidence is disclosed below it instead of competing alongside it
-- [ ] 19-02: Implement long, slim evidence cards with one-line justification and exact-jump links into the relevant artifact or trace target
-- [ ] 19-03: Keep the report/evidence/artifacts/critic/trace pills as a compact secondary strip under the supplemental evidence section
+- [x] 19-01: Redesign the chat answer layout so narrative prose is central and evidence is disclosed below it instead of competing alongside it
+- [x] 19-02: Implement long, slim evidence cards with one-line justification and exact-jump links into the relevant artifact or trace target
+- [x] 19-03: Keep the report/evidence/artifacts/critic/trace pills as a compact secondary strip under the supplemental evidence section
 
 **Details:**
 - Requirements: `ANSR-03`, `EVID-01`, `EVID-02`, `EVID-03`
@@ -109,4 +110,4 @@ Plans:
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
-| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 18 complete | — |
+| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 19 complete | — |

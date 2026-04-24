@@ -9,7 +9,7 @@
 
 - [x] **ANSR-01**: User can read a multi-paragraph analyst answer in chat that explains the thesis, supporting evidence, and watchouts instead of a one-line summary card
 - [x] **ANSR-02**: User can receive a stable non-boilerplate fallback answer when evidence is limited, so successful runs never collapse into vague placeholder text
-- [ ] **ANSR-03**: User can treat the narrative answer as the primary reading surface, with findings and supporting detail clearly subordinate to it
+- [x] **ANSR-03**: User can treat the narrative answer as the primary reading surface, with findings and supporting detail clearly subordinate to it
 
 ### Confidence Experience
 
@@ -19,9 +19,9 @@
 
 ### Supplemental Evidence
 
-- [ ] **EVID-01**: User can expand or collapse supplemental evidence beneath the narrative answer instead of reading evidence cards as the primary response
-- [ ] **EVID-02**: User can scan slim supporting evidence cards that explain why each source matters and jump directly to the relevant artifact or trace target
-- [ ] **EVID-03**: User can still access report, evidence, artifacts, critic output, and trace through one compact secondary navigation strip below the supplemental evidence
+- [x] **EVID-01**: User can expand or collapse supplemental evidence beneath the narrative answer instead of reading evidence cards as the primary response
+- [x] **EVID-02**: User can scan slim supporting evidence cards that explain why each source matters and jump directly to the relevant artifact or trace target
+- [x] **EVID-03**: User can still access report, evidence, artifacts, critic output, and trace through one compact secondary navigation strip below the supplemental evidence
 
 ### Visual Evidence
 
@@ -58,13 +58,13 @@
 |-------------|-------|--------|
 | ANSR-01 | Phase 17 | Complete |
 | ANSR-02 | Phase 17 | Complete |
-| ANSR-03 | Phase 19 | Pending |
+| ANSR-03 | Phase 19 | Complete |
 | CONF-01 | Phase 18 | Complete |
 | CONF-02 | Phase 18 | Complete |
 | CONF-03 | Phase 18 | Complete |
-| EVID-01 | Phase 19 | Pending |
-| EVID-02 | Phase 19 | Pending |
-| EVID-03 | Phase 19 | Pending |
+| EVID-01 | Phase 19 | Complete |
+| EVID-02 | Phase 19 | Complete |
+| EVID-03 | Phase 19 | Complete |
 | CHRT-01 | Phase 20 | Pending |
 | CHRT-02 | Phase 20 | Pending |
 | CHRT-03 | Phase 20 | Pending |
@@ -76,4 +76,4 @@
 
 ---
 *Requirements defined: 2026-04-19*
-*Last updated: 2026-04-24 after completing Phase 18 Confidence Explainer*
+*Last updated: 2026-04-24 after completing Phase 19 Supplemental Evidence Disclosure*
