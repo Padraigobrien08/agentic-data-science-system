@@ -46,6 +46,7 @@ export type InlineEvidenceChart = {
 
 export type InlineEvidenceChartsProps = {
   charts: InlineEvidenceChart[];
+  notice?: string | null;
   className?: string;
 };
 

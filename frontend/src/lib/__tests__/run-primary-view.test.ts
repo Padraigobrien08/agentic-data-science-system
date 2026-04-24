@@ -4,6 +4,9 @@ import type { ArtifactMetadata } from "@/lib/api/types";
 import type { ParsedAiAgents } from "@/lib/ai-agents-meta";
 import { buildPrimaryAnswerView } from "@/lib/run-primary-view";
 
+const INLINE_CHART_NOTICE =
+  "Chart preview unavailable. Read the answer text, then open supporting evidence or trace to inspect the underlying run artifacts.";
+
 const stubArtifact: ArtifactMetadata = {
   id: "art-1",
   analysis_run_id: "r1",
@@ -56,6 +59,7 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.supplementalEvidence[0]?.jump?.href).toContain("/artifacts/art-1");
     expect(view.supplementalEvidence[1]?.source).toBe("alignment");
     expect(view.inlineCharts).toEqual([]);
+    expect(view.inlineChartNotice).toBeNull();
   });
 
   it("omits chips when nav context is omitted", () => {
@@ -76,6 +80,7 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.supplementalEvidence[0]?.jump).toBeNull();
     expect(view.supplementalEvidenceState.mode).toBe("available");
     expect(view.inlineCharts).toEqual([]);
+    expect(view.inlineChartNotice).toBeNull();
   });
 
   it("explains successful runs that produced a report but no structured findings", () => {
@@ -326,9 +331,10 @@ describe("buildPrimaryAnswerView evidence linking", () => {
       "Artifacts or mapped support were not available for this answer view.",
     );
     expect(view.inlineCharts).toEqual([]);
+    expect(view.inlineChartNotice).toBeNull();
   });
 
-  it("maps trusted inline chart previews and drops malformed chart rows", () => {
+  it("maps trusted inline chart previews, keeps captions, and drops malformed chart rows", () => {
     const view = buildPrimaryAnswerView(
       {
         orchestration_goal_text: "Assess whether margin pressure is temporary or structural for MSFT",
@@ -404,5 +410,75 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     });
     expect(view.inlineCharts[0]?.series).toEqual([{ key: "focal", label: "MSFT", colorToken: "chart-1" }]);
     expect(view.inlineCharts[0]?.markers).toEqual([{ xValue: "2025-Q4", label: "Shift" }]);
+    expect(view.inlineChartNotice).toBeNull();
+  });
+
+  it("surfaces a fallback notice when every preview is dropped during mapping", () => {
+    const view = buildPrimaryAnswerView(
+      {
+        orchestration_goal_text: "Assess whether margin pressure is temporary or structural for MSFT",
+        input_payload_json: {
+          tickers: ["MSFT"],
+          analysis_goal: "Assess whether margin pressure is temporary or structural for MSFT",
+        },
+        output_payload_json: null,
+      },
+      [stubArtifact],
+      null,
+      null,
+      null,
+      {
+        evidence_artifact_ids: ["art-1"],
+        evidence_artifacts_by_role: { report_md: "art-1" },
+        prompt_versions: null,
+        model_call_count: 1,
+        llm_usage: null,
+        narrative_answer: {
+          mode: "full",
+          thesis: "MSFT margin pressure looks cyclical rather than structural.",
+          sections: [],
+          fallback_reason: null,
+        },
+        report_key_takeaways_preview: [],
+        critic_blocking_caveats: [],
+        critic_overall_confidence: "medium",
+        critic_phase_status: "success",
+        report_phase_status: "success",
+        inline_charts: [
+          {
+            chart_id: "unsupported-kind",
+            kind: "pie" as never,
+            metric_key: "operating_margin",
+            metric_label: "Operating margin",
+            caption: "This preview should be dropped before it reaches the renderer.",
+            x_axis_label: "Quarter",
+            y_axis_label: "Operating margin",
+            value_format: "percent",
+            series: [{ key: "focal", label: "MSFT", color_token: "chart-1" }],
+            rows: [{ x_value: "2025-Q4", values: { focal: 0.38 } }],
+            markers: [],
+            source_artifact_roles: ["features_csv"],
+          },
+          {
+            chart_id: "missing-caption",
+            kind: "line",
+            metric_key: "operating_margin",
+            metric_label: "Operating margin",
+            caption: "",
+            x_axis_label: "Quarter",
+            y_axis_label: "Operating margin",
+            value_format: "percent",
+            series: [{ key: "focal", label: "MSFT", color_token: "chart-1" }],
+            rows: [{ x_value: "2025-Q4", values: { focal: 0.38 } }],
+            markers: [],
+            source_artifact_roles: ["features_csv"],
+          },
+        ],
+      },
+      { projectId: "p1", runId: "r1" },
+    );
+
+    expect(view.inlineCharts).toEqual([]);
+    expect(view.inlineChartNotice).toBe(INLINE_CHART_NOTICE);
   });
 });

@@ -141,6 +141,7 @@ export type PrimaryAnswerView = {
   /** Budget / truncation / skip / degradation hints (no raw JSON). */
   contextSignals: PrimaryContextSignal[];
   inlineCharts: InlineChartView[];
+  inlineChartNotice: string | null;
   /** One line under the conclusion when critic blocking or weak evidence warrants it. */
   conclusionRider: { text: string; href: string } | null;
   /** Optional footnote for the evidence block (sampling / truncation / unmapped artifacts). */
@@ -179,6 +180,7 @@ export type ChatAnswerCardView = CompactChatAnswerView & {
   weakEvidenceSignals: string[];
   contextSignals: PrimaryContextSignal[];
   inlineCharts: InlineChartView[];
+  inlineChartNotice: string | null;
   evidenceLinks: EvidenceLink[];
   extraArtifactCount: number;
   reportArtifactId: string | null;
@@ -706,17 +708,25 @@ const INLINE_CHART_VALUE_FORMATS = new Set<InlineChartView["valueFormat"]>([
   "count",
   "number",
 ]);
+const INLINE_CHART_NOTICE =
+  "Chart preview unavailable. Read the answer text, then open supporting evidence or trace to inspect the underlying run artifacts.";
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value) && typeof value === "object" && !Array.isArray(value);
 }
 
-function mapInlineCharts(transparency: RunTransparencySummary | null | undefined): InlineChartView[] {
+function mapInlineCharts(transparency: RunTransparencySummary | null | undefined): {
+  charts: InlineChartView[];
+  notice: string | null;
+} {
   // Render only backend-authored transparency.inline_charts previews; never infer charts client-side.
   const previews = transparency?.inline_charts ?? [];
 
   if (!Array.isArray(previews)) {
-    return [];
+    return { charts: [], notice: null };
+  }
+  if (previews.length === 0) {
+    return { charts: [], notice: null };
   }
 
   const charts: InlineChartView[] = [];
@@ -830,7 +840,11 @@ function mapInlineCharts(transparency: RunTransparencySummary | null | undefined
     });
   }
 
-  return charts.slice(0, 2);
+  const boundedCharts = charts.slice(0, 2);
+  return {
+    charts: boundedCharts,
+    notice: boundedCharts.length === 0 ? INLINE_CHART_NOTICE : null,
+  };
 }
 
 export function buildPrimaryAnswerView(
@@ -923,7 +937,7 @@ export function buildPrimaryAnswerView(
     weakEvidenceSignals,
     contextSignals,
   );
-  const inlineCharts = mapInlineCharts(transparency);
+  const { charts: inlineCharts, notice: inlineChartNotice } = mapInlineCharts(transparency);
 
   const hasCritic = hasCriticSurface(ai, tr) || hasCriticSurfaceFromTransparency(transparency);
   const takeawayChips = buildTakeawayChips(nav, reportArtifactId, links, artifacts.length, hasCritic, contextSignals);
@@ -998,6 +1012,7 @@ export function buildPrimaryAnswerView(
     criticPhaseStatus,
     reportPhaseStatus,
     inlineCharts,
+    inlineChartNotice,
     evidenceLinks: links,
     extraArtifactCount,
     reportArtifactId,
@@ -1042,6 +1057,7 @@ export function buildChatAnswerCardView(
     criticPhaseStatus: view.criticPhaseStatus,
     reportPhaseStatus: view.reportPhaseStatus,
     inlineCharts: view.inlineCharts,
+    inlineChartNotice: view.inlineChartNotice,
     weakEvidenceSignals: view.weakEvidenceSignals,
     contextSignals: view.contextSignals,
     evidenceLinks: view.evidenceLinks,

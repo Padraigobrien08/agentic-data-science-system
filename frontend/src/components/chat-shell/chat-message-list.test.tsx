@@ -103,6 +103,7 @@ describe("ChatMessageList", () => {
               markers: [{ xValue: "2025-Q4", label: "Shift" }],
             },
           ],
+          inlineChartNotice: null,
           weakEvidenceSignals: ["insufficient_peers_rows"],
           contextSignals: [],
           evidenceLinks: [{ role: "report_md", artifactId: "report-1" }],
@@ -226,6 +227,7 @@ describe("ChatMessageList", () => {
           criticPhaseStatus: null,
           reportPhaseStatus: null,
           inlineCharts: [],
+          inlineChartNotice: null,
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
@@ -305,6 +307,7 @@ describe("ChatMessageList", () => {
           criticPhaseStatus: "success",
           reportPhaseStatus: "success",
           inlineCharts: [],
+          inlineChartNotice: null,
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
@@ -375,6 +378,7 @@ describe("ChatMessageList", () => {
           criticPhaseStatus: null,
           reportPhaseStatus: null,
           inlineCharts: [],
+          inlineChartNotice: null,
           weakEvidenceSignals: [],
           contextSignals: [],
           evidenceLinks: [],
@@ -449,5 +453,77 @@ describe("ChatMessageList", () => {
     expect(screen.queryByRole("link", { name: "Open trace" })).toBeNull();
     expect(screen.queryByText("Answer")).toBeNull();
     expect(screen.queryByText("Goal")).toBeNull();
+  });
+
+  it("renders a slim fallback notice when chart previews are dropped during mapping", () => {
+    const messages: ChatMessage[] = [
+      {
+        id: "assistant-chart-notice",
+        role: "assistant",
+        content: "MSFT margin pressure looks cyclical rather than structural.",
+        answerCard: {
+          goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+          narrativeAnswer: {
+            mode: "full",
+            thesis: "MSFT margin pressure looks cyclical rather than structural.",
+            sections: [],
+            fallbackReason: null,
+          },
+          summaryLine: "MSFT margin pressure looks cyclical rather than structural.",
+          orchestrationStatus: "success",
+          emptyStateReason: null,
+          conclusionRider: null,
+          takeawayRows: [],
+          alignmentFindings: [],
+          supplementalEvidence: [],
+          supplementalEvidenceState: {
+            mode: "limited",
+            closedLabel: "Show supporting evidence",
+            openLabel: "Hide supporting evidence",
+            heading: "Supporting evidence is limited",
+            body: "We checked for supporting evidence, but the mapped support for this answer is limited.",
+          },
+          overallConfidence: "medium",
+          confidenceExplainer: {
+            label: "Medium",
+            tone: "medium",
+            supports: [],
+            weakens: [],
+            limits: [],
+          },
+          blockingCaveats: [],
+          criticPhaseStatus: "success",
+          reportPhaseStatus: "success",
+          inlineCharts: [],
+          inlineChartNotice:
+            "Chart preview unavailable. Read the answer text, then open supporting evidence or trace to inspect the underlying run artifacts.",
+          weakEvidenceSignals: [],
+          contextSignals: [],
+          evidenceLinks: [],
+          extraArtifactCount: 0,
+          reportArtifactId: null,
+          evidenceProvenanceHint: null,
+          navigationItems: [{ key: "trace", label: "Trace", href: "/projects/project-1/runs/run-5/trace" }],
+          traceHref: "/projects/project-1/runs/run-5/trace",
+          caveatOverflowHref: null,
+        },
+        runId: "run-5",
+        runHref: "/projects/project-1/runs/run-5/trace",
+        runStatus: "success",
+        runCreatedAt: "2026-04-18T20:50:00Z",
+        runFinishedAt: "2026-04-18T20:51:00Z",
+        createdAt: "2026-04-18T20:51:00Z",
+      },
+    ];
+
+    render(<ChatMessageList messages={messages} />);
+
+    expect(screen.getByText("Visual evidence")).toBeTruthy();
+    expect(
+      screen.getByText(
+        "Chart preview unavailable. Read the answer text, then open supporting evidence or trace to inspect the underlying run artifacts.",
+      ),
+    ).toBeTruthy();
+    expect(screen.getByText("Show supporting evidence")).toBeTruthy();
   });
 });

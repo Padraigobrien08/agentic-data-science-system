@@ -54,6 +54,7 @@ const view: PrimaryAnswerView = {
   criticPhaseStatus: "success",
   reportPhaseStatus: "success",
   inlineCharts: [],
+  inlineChartNotice: null,
   evidenceLinks: [{ role: "report_md", artifactId: "report-1" }],
   extraArtifactCount: 1,
   reportArtifactId: "report-1",

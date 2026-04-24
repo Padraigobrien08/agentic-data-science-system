@@ -107,7 +107,7 @@ function renderLineChart(chart: InlineEvidenceChart) {
   return (
     <ChartContainer
       config={buildChartConfig(chart)}
-      className="min-h-[220px] w-full sm:min-h-[240px]"
+      className="h-[220px] w-full min-w-0 sm:h-[240px]"
       aria-label={`${chart.metricLabel}. ${chart.caption}`}
     >
       <LineChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 8 }}>
@@ -153,7 +153,7 @@ function renderGroupedBarChart(chart: InlineEvidenceChart) {
   return (
     <ChartContainer
       config={buildChartConfig(chart)}
-      className="min-h-[220px] w-full sm:min-h-[240px]"
+      className="h-[220px] w-full min-w-0 sm:h-[240px]"
       aria-label={`${chart.metricLabel}. ${chart.caption}`}
     >
       <BarChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 8 }} barGap={10} barCategoryGap="18%">
@@ -209,17 +209,22 @@ function chartCard(chart: InlineEvidenceChart) {
   );
 }
 
-export function InlineEvidenceCharts({ charts, className }: InlineEvidenceChartsProps) {
+export function InlineEvidenceCharts({ charts, notice, className }: InlineEvidenceChartsProps) {
   const visibleCharts = charts.filter((chart) => chart.series.length > 0 && chart.rows.length > 0).slice(0, 2);
 
-  if (!visibleCharts.length) {
+  if (!visibleCharts.length && !notice) {
     return null;
   }
 
   return (
     <section className={cn("space-y-4", className)} aria-label="Visual evidence">
       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">Visual evidence</p>
-      <div className="space-y-6">{visibleCharts.map((chart) => chartCard(chart))}</div>
+      {visibleCharts.length > 0 ? <div className="space-y-6">{visibleCharts.map((chart) => chartCard(chart))}</div> : null}
+      {!visibleCharts.length && notice ? (
+        <div className="rounded-[1.15rem] border border-dashed border-[var(--border)]/80 bg-neutral-50/70 px-4 py-3 dark:bg-neutral-950/20">
+          <p className="text-[13px] leading-6 text-[var(--muted)]">{notice}</p>
+        </div>
+      ) : null}
     </section>
   );
 }

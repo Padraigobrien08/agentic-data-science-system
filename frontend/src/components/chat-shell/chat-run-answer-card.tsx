@@ -96,6 +96,7 @@ export function ChatRunAnswerCard({
     [answerCard],
   );
   const inlineCharts = answerCard.inlineCharts;
+  const inlineChartNotice = answerCard.inlineChartNotice;
   const supplementalEvidenceState =
     answerCard.supplementalEvidenceState ??
     (supplementalEvidence.length > 0
@@ -153,7 +154,9 @@ export function ChatRunAnswerCard({
         </section>
 
         {/* Visual evidence stays between the narrative answer and supporting evidence disclosure. */}
-        {inlineCharts.length > 0 ? <InlineEvidenceCharts charts={inlineCharts} /> : null}
+        {inlineCharts.length > 0 || inlineChartNotice ? (
+          <InlineEvidenceCharts charts={inlineCharts} notice={inlineChartNotice} />
+        ) : null}
 
         <section className="space-y-4">
           <Collapsible open={evidenceOpen} onOpenChange={setEvidenceOpen}>
