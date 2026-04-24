@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** Phase 19 complete · Phase 20 next
+**Status:** Phase 19 complete · Phase 20 ready to execute
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -71,6 +71,7 @@ Plans:
 **Goal**: Add deterministic inline visual evidence to the chat answer so the system can show trends and comparisons, not only describe them.
 **Depends on**: Phase 19
 **Plans**: 3 plans
+**Status**: Ready to execute
 
 Plans:
 
