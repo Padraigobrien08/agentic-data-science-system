@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** Phase 20 complete · Phase 21 next
+**Status:** Phase 21 ready to execute
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -88,6 +88,7 @@ Plans:
 **Goal**: Refine the end-to-end narrative answer experience so it feels intentional across desktop and smaller viewports and leaves the trace as the technical surface.
 **Depends on**: Phase 20
 **Plans**: 3 plans
+**Status**: Ready to execute — 2026-04-25
 
 Plans:
 
@@ -96,7 +97,7 @@ Plans:
 - [ ] 21-03: Align remaining chat/trace wording and navigation so trace stays the technical deep-dive rather than a competing answer reader
 
 **Details:**
-- Requirements: UX polish across all `v1.3` requirements
+- Requirements: UX polish across `ANSR-01` to `CHRT-03`
 - Outcome: the milestone ships as a coherent narrative-first answer experience instead of a collection of incremental UI features
 
 ## Archive Notes
