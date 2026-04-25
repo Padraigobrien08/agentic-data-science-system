@@ -150,6 +150,20 @@ PYTHONPATH=. python3 -m edgar_project.cli demo --fixtures
 PYTHONPATH=. python3 -m edgar_project.cli evaluate
 ```
 
+This defaults to the offline fixture suite, so it is safe as the normal developer fallback and regression path.
+
+If you need a specific local suite:
+
+```bash
+PYTHONPATH=. python3 -m edgar_project.cli evaluate --suite-id suite_fixtures_v1
+```
+
+Live or hybrid validation stays operator-only and requires explicit opt-in:
+
+```bash
+PYTHONPATH=. python3 -m edgar_project.cli evaluate --suite-id suite_smoke --allow-live
+```
+
 ## Trust and inspectability
 
 This repo is strongest when viewed as a system for **auditable financial reasoning**, not just “chat over EDGAR.”
