@@ -2,8 +2,8 @@
 gsd_state_version: 1.0
 milestone: v1.3
 milestone_name: Narrative Answers and Visual Evidence
-status: Ready to discuss Phase 21
-last_updated: "2026-04-24T23:06:42.000Z"
+status: Ready to plan Phase 21
+last_updated: "2026-04-25T09:10:00.000Z"
 progress:
   total_phases: 5
   completed_phases: 4
@@ -22,8 +22,8 @@ See: .planning/PROJECT.md (updated 2026-04-19)
 
 ## Current Position
 
-Phase: 21 (narrative-answer-polish) — READY TO DISCUSS
-Plan: Phase 20 complete; Phase 21 not yet discussed
+Phase: 21 (narrative-answer-polish) — READY TO PLAN
+Plan: Phase 21 context captured; planning not started
 
 ## Current Milestone
 
@@ -33,16 +33,17 @@ Plan: Phase 20 complete; Phase 21 not yet discussed
 
 ## Next Command
 
-`$gsd-discuss-phase 21`
+`$gsd-plan-phase 21`
 
 ## Recent Decisions
 
 - Inline chart eligibility stays backend-owned, with only strong deterministic cases surviving into chat.
 - The answer column now renders either trusted inline charts or one explicit chart-preview fallback notice.
 - Phase 21 should polish the shipped answer stack rather than reopen the chart contract.
+- The final answer polish pass should preserve the narrative-first hierarchy and keep trace as the technical deep-dive surface.
 
 ## Last Session
 
-- Completed `20-inline-charts-in-chat-03-PLAN.md`
-- Duration: 11 min
-- Files changed: 9 code/test files plus verification and plan summary metadata
+- Completed Phase 20 and captured Phase 21 context/discussion defaults
+- Duration: 16 min
+- Files changed: Phase 20 closeout plus new Phase 21 planning-context artifacts
