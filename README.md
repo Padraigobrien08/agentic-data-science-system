@@ -1,5 +1,9 @@
 # EDGAR Analysis
 
+![CI](https://github.com/Padraigobrien08/agentic-data-science-system/actions/workflows/ci.yml/badge.svg)
+![Python](https://img.shields.io/badge/python-3.12%2B-blue)
+![License](https://img.shields.io/badge/license-MIT-green)
+
 EDGAR Analysis is a chat-first financial analysis system built on top of SEC EDGAR data. It combines a deterministic numerical pipeline, a FastAPI control plane, a background worker, and a Next.js interface so you can ask a question like:
 
 > Is MSFT showing persistent deterioration in revenue growth and margin quality over the last 8 quarters?
@@ -14,6 +18,22 @@ and get back:
 The core design goal is simple:
 
 **Every analysis run should be trustworthy, inspectable, and reproducible.**
+
+## Status
+
+This is an actively developed v1.x system.
+
+Stable:
+
+- deterministic EDGAR pipeline
+- chat UI with persisted runs and artifacts
+- evaluation and regression framework
+
+In progress:
+
+- expanded ticker coverage
+- hosted demo environment
+- extended benchmark suites
 
 ## Product Screens
 
@@ -164,6 +184,28 @@ Live or hybrid validation stays operator-only and requires explicit opt-in:
 PYTHONPATH=. python3 -m edgar_project.cli evaluate --suite-id suite_smoke --allow-live
 ```
 
+## Example run
+
+Prompt:
+
+> Show whether MSFT revenue growth has deteriorated over the last 8 quarters.
+
+Output (excerpt):
+
+- Conclusion: deterioration with intermittent recovery
+- Evidence strength: medium
+- Key signal: negative slope shifts in `revenue_growth_qoq`
+
+Artifacts:
+
+- revenue growth panel
+- trend-break detection rows
+
+Inspect:
+
+- full run trace in the UI
+- inline chart evidence in the chat answer
+
 ## Trust and inspectability
 
 This repo is strongest when viewed as a system for **auditable financial reasoning**, not just “chat over EDGAR.”
@@ -231,4 +273,4 @@ See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
 ## License
 
-A repository license is still intentionally pending. I did not add one automatically because that is a legal/product decision, not just documentation polish.
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
