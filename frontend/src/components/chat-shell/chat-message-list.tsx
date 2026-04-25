@@ -23,7 +23,7 @@ function deliveryNote(message: Extract<ChatMessage, { role: "assistant" }>): str
 
 function SystemStrip({ content }: { content: string }) {
   return (
-    <div className="rounded-lg border border-[var(--border)] bg-neutral-100/60 px-3 py-2 text-center text-[11px] text-[var(--muted)] dark:bg-neutral-900/40">
+    <div className="mx-auto max-w-[40rem] rounded-full border border-[var(--border)] bg-neutral-100/60 px-4 py-2 text-center text-[11px] text-[var(--muted)] dark:bg-neutral-900/40">
       {content}
     </div>
   );
@@ -35,7 +35,7 @@ function SystemStrip({ content }: { content: string }) {
 export function ChatMessageList({ messages }: Props) {
   return (
     <div
-      className="flex min-h-0 flex-1 flex-col gap-3 overflow-y-auto px-3 py-4 md:px-6"
+      className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-4 py-6 md:px-6 lg:px-10"
       role="log"
       aria-live="polite"
       aria-relevant="additions"
@@ -44,20 +44,26 @@ export function ChatMessageList({ messages }: Props) {
         <div className="flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
           <p className="text-sm font-medium text-[var(--foreground)]">No messages yet</p>
           <p className="max-w-sm text-xs text-[var(--muted)]">
-            Use the composer to describe a goal. Assistant replies will appear as structured panels, not
-            generic chat prose.
+            Use the composer to describe a goal. Assistant replies will appear as narrative answers with
+            supporting proof beneath them.
           </p>
         </div>
       ) : (
         messages.map((m) => {
           if (m.role === "user") {
             return (
-              <article key={m.id} className="flex w-full justify-end">
-                <div className="max-w-[min(100%,36rem)] rounded-2xl rounded-br-md border border-[var(--border)] bg-neutral-100 px-4 py-2.5 text-sm dark:bg-neutral-900">
-                  <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-                    You
-                  </p>
-                  <div className="mt-1 whitespace-pre-wrap text-[var(--foreground)]">{m.content}</div>
+              <article key={m.id} className="flex w-full justify-center">
+                <div className="w-full max-w-[76rem]">
+                  <div className="flex justify-end">
+                    <div className="max-w-[min(100%,44rem)] rounded-[1.6rem] rounded-tr-[1rem] border border-[var(--border)] bg-white/92 px-5 py-4 text-sm shadow-[0_12px_32px_rgba(15,23,42,0.04)] dark:bg-neutral-950/80">
+                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                        You
+                      </p>
+                      <div className="mt-2 whitespace-pre-wrap text-[15px] leading-7 text-[var(--foreground)]">
+                        {m.content}
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </article>
             );
@@ -67,17 +73,14 @@ export function ChatMessageList({ messages }: Props) {
           }
           const note = deliveryNote(m);
           return (
-            <article key={m.id} className="flex w-full justify-start">
-              <div className="w-full max-w-[min(100%,42rem)]">
-                <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
-                  Assistant
-                </p>
+            <article key={m.id} className="flex w-full justify-center">
+              <div className="w-full max-w-[76rem]">
                 {m.pending ? (
-                  <div className="mt-2">
+                  <div className="mx-auto max-w-[58rem]">
                     <AssistantStructuredFrame messageId={m.id} variant="pending" />
                   </div>
                 ) : m.answerCard ? (
-                  <div className="mt-2">
+                  <div className="mx-auto max-w-[66rem]">
                     <ChatRunAnswerCard
                       answerCard={m.answerCard}
                       runId={m.runId}
@@ -88,21 +91,21 @@ export function ChatMessageList({ messages }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="mt-1 max-w-[min(100%,38rem)] whitespace-pre-wrap rounded-2xl rounded-bl-md border border-[var(--border)] bg-[var(--background)] px-4 py-2.5 text-[var(--foreground)]">
+                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap rounded-[1.75rem] border border-[var(--border)] bg-white/80 px-5 py-4 text-[15px] leading-7 text-[var(--foreground)] shadow-[0_12px_32px_rgba(15,23,42,0.04)] dark:bg-neutral-950/70">
                     {m.content}
                   </div>
                 )}
                 {m.routingReason ? (
-                  <p className="mt-2 rounded-lg border border-[var(--border)] bg-neutral-50/70 px-3 py-2 text-[11px] text-[var(--muted)] dark:bg-neutral-950/30">
+                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-neutral-50/80 px-4 py-3 text-[12px] leading-6 text-[var(--muted)] dark:bg-neutral-950/30">
                     {m.routingReason}
-                  </p>
+                  </div>
                 ) : null}
                 {m.rewriteSuggestions?.length ? (
-                  <div className="mt-2 rounded-lg border border-[var(--border)] bg-neutral-50/70 px-3 py-2 dark:bg-neutral-950/30">
+                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-neutral-50/80 px-4 py-3 dark:bg-neutral-950/30">
                     <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
                       Try one of these rewrites
                     </p>
-                    <ul className="mt-2 space-y-1.5 text-[11px] text-[var(--foreground)]">
+                    <ul className="mt-3 space-y-2 text-[13px] leading-6 text-[var(--foreground)]">
                       {m.rewriteSuggestions.map((suggestion) => (
                         <li key={suggestion} className="list-inside list-disc">
                           {suggestion}
@@ -111,7 +114,9 @@ export function ChatMessageList({ messages }: Props) {
                     </ul>
                   </div>
                 ) : null}
-                {note ? <p className="mt-2 text-[10px] text-[var(--muted)]">{note}</p> : null}
+                {note ? (
+                  <p className="mx-auto mt-3 max-w-[52rem] text-[11px] leading-5 text-[var(--muted)]">{note}</p>
+                ) : null}
               </div>
             </article>
           );

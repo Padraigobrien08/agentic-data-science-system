@@ -266,7 +266,7 @@ export default async function RunTracePage({
             rawDetail,
           };
 
-  const runInspectionHref = `/projects/${projectId}/runs/${runId}`;
+  const chatHref = `/projects/${projectId}/chat`;
 
   return (
     <div className="space-y-6">
@@ -278,20 +278,20 @@ export default async function RunTracePage({
             <p className="text-[10px] font-semibold uppercase tracking-[0.12em] text-[var(--muted)]">
               Audit trail
             </p>
-            <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Deep dive</h1>
+            <h1 className="text-xl font-semibold tracking-tight text-[var(--foreground)]">Technical deep dive</h1>
             <p className="max-w-prose text-xs leading-relaxed text-[var(--foreground)]">
-              Summary-first trace inspection for large runs: open on the timeline, move through one collection at a time, and fetch raw payloads only when you explicitly inspect a single item.
+              Summary-first trace inspection for large runs: keep chat for the answer, then use this page to inspect steps, artifacts, model calls, and raw payloads one layer at a time.
             </p>
             <details className="max-w-prose text-[11px] leading-relaxed text-[var(--muted)]">
               <summary className="cursor-pointer font-medium text-[var(--foreground)] underline decoration-dotted underline-offset-2">
-                How this differs from run inspection
+                How to use this view
               </summary>
               <p className="mt-2">
-                This page starts with the execution spine and collection summaries. Use{" "}
-                <Link href={runInspectionHref} className="font-medium text-[var(--foreground)] underline">
-                  run inspection
+                Chat is now the primary answer surface. Use{" "}
+                <Link href={chatHref} className="font-medium text-[var(--foreground)] underline">
+                  chat
                 </Link>{" "}
-                for secondary verification, then work down the execution spine here.
+                for the narrative answer, then work down the execution spine here when you need technical verification.
               </p>
             </details>
             <div className="flex flex-wrap items-center gap-2 text-xs text-[var(--muted)]">
@@ -309,28 +309,16 @@ export default async function RunTracePage({
           </div>
           <div className="flex flex-shrink-0 flex-wrap gap-2">
             <Link
-              href={runInspectionHref}
+              href={chatHref}
               className="rounded-full border border-[var(--border)] bg-[var(--foreground)] px-3 py-2 text-center text-sm font-medium text-[var(--background)]"
             >
-              Run inspection
-            </Link>
-            <Link
-              href={`/projects/${projectId}/chat`}
-              className="rounded-full border border-[var(--border)] px-3 py-2 text-sm font-medium text-[var(--foreground)]"
-            >
-              Chat
-            </Link>
-            <Link
-              href={`/projects/${projectId}/runs`}
-              className="rounded-full border border-[var(--border)] px-3 py-2 text-sm text-[var(--muted)]"
-            >
-              All runs
+              Back to chat
             </Link>
           </div>
         </div>
       </header>
 
-      <RunStateBanner status={shell.run.status} surface="trace" runAnswerHref={runInspectionHref} />
+      <RunStateBanner status={shell.run.status} surface="trace" runAnswerHref={chatHref} />
 
       <RunPipelinePhaseTrack status={shell.run.status} steps={shell.timeline_preview} />
 
@@ -339,7 +327,7 @@ export default async function RunTracePage({
         runId={runId}
         shell={shell}
         collectionPanel={collectionPanel}
-        runAnswerHref={runInspectionHref}
+        runAnswerHref={chatHref}
         activeCollection={activeCollection}
         collectionError={collectionError}
         rawDetail={rawDetail}

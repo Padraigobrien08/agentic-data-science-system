@@ -121,35 +121,37 @@ export function ChatRunAnswerCard({
 
   return (
     <div className="w-full">
-      <div className="mx-auto w-full max-w-[54rem] space-y-8">
-        <section className="space-y-6 border-b border-[var(--border)]/80 pb-8">
-          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">Answer</p>
+      <div className="mx-auto w-full max-w-[58rem] space-y-8">
+        <section className="space-y-7 border-b border-[var(--border)]/80 pb-9">
+          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">Answer</p>
             <ConfidenceStrip
               overallConfidence={answerCard.overallConfidence}
               confidenceExplainer={answerCard.confidenceExplainer}
               reliabilityNote={reliabilityNote}
             />
           </div>
-          <p className="text-[1.1rem] font-medium leading-[1.65] tracking-[-0.025em] text-[var(--foreground)] sm:text-[1.35rem]">
+          <p className="max-w-[46rem] text-[1.12rem] font-medium leading-[1.72] tracking-[-0.03em] text-[var(--foreground)] sm:text-[1.38rem]">
             {thesis}
           </p>
 
           {!isErrorState && narrativeSections.length > 0 ? (
-            <div className="space-y-5">
+            <div className="max-w-[48rem] space-y-6">
               {narrativeSections.map((section) => (
-                <section key={`${section.heading}-${section.body.slice(0, 24)}`} className="space-y-2">
-                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">
+                <section key={`${section.heading}-${section.body.slice(0, 24)}`} className="space-y-2.5">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]/95">
                     {section.heading}
                   </p>
-                  <p className="text-[15px] leading-7 text-[var(--foreground)]">{section.body}</p>
+                  <p className="text-[15px] leading-[1.82] text-[var(--foreground)]/95 sm:text-[15.5px]">
+                    {section.body}
+                  </p>
                 </section>
               ))}
             </div>
           ) : null}
 
           {supportNote ? (
-            <p className="max-w-3xl text-[13px] leading-6 text-[var(--muted)]">{supportNote}</p>
+            <p className="max-w-[44rem] text-[12.5px] leading-6 text-[var(--muted)]">{supportNote}</p>
           ) : null}
         </section>
 
@@ -160,7 +162,7 @@ export function ChatRunAnswerCard({
 
         <section className="space-y-4">
           <Collapsible open={evidenceOpen} onOpenChange={setEvidenceOpen}>
-            <div className="rounded-[1.5rem] border border-[var(--border)]/70 bg-white/70 px-4 py-3 dark:bg-neutral-950/25">
+            <div className="rounded-[1.4rem] border border-[var(--border)]/70 bg-white/72 px-4 py-3.5 shadow-[0_18px_48px_-42px_rgba(19,31,57,0.28)] dark:bg-neutral-950/25">
               <CollapsibleTrigger asChild>
                 <button
                   type="button"
@@ -168,7 +170,7 @@ export function ChatRunAnswerCard({
                   aria-label={evidenceOpen ? supplementalEvidenceState.openLabel : supplementalEvidenceState.closedLabel}
                 >
                   <div>
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
+                    <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
                       {evidenceOpen ? supplementalEvidenceState.openLabel : supplementalEvidenceState.closedLabel}
                     </p>
                     {!evidenceOpen && supplementalEvidenceState.mode !== "available" ? (
@@ -220,11 +222,13 @@ export function ChatRunAnswerCard({
           ) : null}
 
           {answerCard.orchestrationStatus ? (
-            <details className="group rounded-[1.2rem] border border-[var(--border)]/70 bg-neutral-50/65 px-4 py-3 dark:bg-neutral-950/20">
-              <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                Orchestration status
+            <details className="group rounded-[1.15rem] border border-[var(--border)]/70 bg-neutral-50/65 px-4 py-3 dark:bg-neutral-950/20">
+              <summary className="cursor-pointer list-none text-[10px] font-semibold uppercase tracking-[0.14em] text-[var(--muted)]">
+                Technical status
               </summary>
-              <p className="mt-3 text-sm leading-6 text-[var(--foreground)]">{answerCard.orchestrationStatus}</p>
+              <p className="mt-3 max-w-[42rem] text-sm leading-6 text-[var(--foreground)]">
+                {answerCard.orchestrationStatus}
+              </p>
             </details>
           ) : null}
         </section>

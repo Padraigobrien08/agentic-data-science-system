@@ -18,7 +18,7 @@ export function EvidenceSummary({
 }: EvidenceSummaryProps) {
   if (navItems?.length) {
     return (
-      <div className={className ?? "space-y-3"}>
+      <div className={className ?? "space-y-3.5"}>
         <div className="flex flex-wrap gap-2">
           {navItems.map((item) => (
             <Link
@@ -30,7 +30,7 @@ export function EvidenceSummary({
             </Link>
           ))}
         </div>
-        {provenanceHint ? <p className="text-[11px] leading-5 text-[var(--muted)]">{provenanceHint}</p> : null}
+        {provenanceHint ? <p className="max-w-[42rem] text-[11px] leading-5 text-[var(--muted)]">{provenanceHint}</p> : null}
       </div>
     );
   }

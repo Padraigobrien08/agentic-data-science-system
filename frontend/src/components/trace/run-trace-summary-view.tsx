@@ -41,13 +41,13 @@ export function RunTraceSummaryView({
       <section id="trace-overview" className="grid gap-6 xl:grid-cols-[minmax(0,1.5fr)_minmax(18rem,1fr)]">
         <Card className="overflow-hidden rounded-[32px]">
           <CardHeader className="gap-4">
-            <Badge variant="secondary">Summary-first trace</Badge>
+            <Badge variant="secondary">Technical deep dive</Badge>
             <div className="space-y-3">
               <CardTitle className="text-[clamp(2rem,4vw,3.4rem)] leading-[1.04]">
-                Audit the run without loading every raw blob first.
+                Inspect the execution record without re-reading the answer.
               </CardTitle>
               <CardDescription className="max-w-2xl text-[15px] leading-7">
-                Open on the timeline, move through one collection at a time, and fetch privileged payloads only when you intentionally inspect a single item.
+                Use chat for the narrative answer. Use this surface for steps, artifacts, model calls, and raw payloads when you need technical verification.
               </CardDescription>
             </div>
             <div className="flex flex-wrap gap-2 text-xs">
@@ -60,7 +60,7 @@ export function RunTraceSummaryView({
           <CardContent className="space-y-6">
             <p className="max-w-2xl text-base leading-8 text-[var(--muted)]">
               {shell.run.orchestration_goal_text ??
-                "This run has no stored orchestration goal text. Use the run inspection for secondary verification, then work down the execution spine here."}
+                "This run has no stored orchestration goal text. Return to chat for the answer, then inspect the execution spine here when you need the technical record."}
             </p>
             <div className="grid gap-4 sm:grid-cols-3">
               <div className="rounded-[20px] border border-[var(--border)] bg-white/70 p-4">
@@ -81,7 +81,7 @@ export function RunTraceSummaryView({
                 <Link href={collectionHref(projectId, runId, "steps")}>Inspect step details</Link>
               </Button>
               <Button asChild variant="outline">
-                <Link href={runAnswerHref}>Run inspection</Link>
+                <Link href={runAnswerHref}>Back to chat</Link>
               </Button>
             </div>
           </CardContent>
@@ -90,9 +90,9 @@ export function RunTraceSummaryView({
         <Card id="trace-timeline" className="rounded-[32px]">
           <CardHeader>
             <Badge variant="muted">Timeline preview</Badge>
-            <CardTitle className="text-[22px]">The step spine stays primary</CardTitle>
+            <CardTitle className="text-[22px]">Execution spine</CardTitle>
             <CardDescription>
-              Artifacts and model calls link back to these steps instead of flattening the whole run into one mixed stream.
+              Steps stay primary here. Artifacts and model calls link back to them instead of flattening the run into a second answer page.
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-3">
@@ -159,7 +159,7 @@ export function RunTraceSummaryView({
               <Badge variant="default">Collection error</Badge>
               <CardTitle className="text-[20px]">Trace details couldn&apos;t load.</CardTitle>
               <CardDescription>
-                Reload this page. If the issue persists, open the run inspection or return to the runs list while the backend finishes processing.
+                Reload this page. If the issue persists, return to chat for the answer while the backend finishes processing technical records.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -171,7 +171,7 @@ export function RunTraceSummaryView({
               <Badge variant="muted">Empty state</Badge>
               <CardTitle className="text-[20px]">No trace details yet</CardTitle>
               <CardDescription>
-                This run has not produced trace records yet. Wait for execution to finish, reopen the run inspection, or retry the run if it is stuck.
+                This run has not produced trace records yet. Stay in chat for the answer, then come back here once execution records are available.
               </CardDescription>
             </CardHeader>
           </Card>
@@ -188,7 +188,7 @@ export function RunTraceSummaryView({
               Technical inspector
             </p>
             <p className="mt-1 text-sm text-[var(--muted)]">
-              The denser audit surfaces still live below the summary-first view. Use them after you narrow the question.
+              The denser audit surfaces live below this summary-first layer. Use them when you need payload-level inspection rather than the answer itself.
             </p>
           </div>
           <Button asChild variant="ghost" size="sm">

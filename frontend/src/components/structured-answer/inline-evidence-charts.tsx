@@ -194,7 +194,7 @@ function chartCard(chart: InlineEvidenceChart) {
   return (
     <article
       key={chart.chartId}
-      className="space-y-4 rounded-[1.35rem] border border-[var(--border)]/75 bg-white/72 px-4 py-4 shadow-[0_22px_64px_-46px_rgba(19,31,57,0.28)] backdrop-blur-sm sm:px-6 sm:py-5"
+      className="space-y-4 rounded-[1.35rem] border border-[var(--border)]/75 bg-white/72 px-4 py-4 shadow-[0_22px_64px_-46px_rgba(19,31,57,0.24)] backdrop-blur-sm sm:px-6 sm:py-5"
     >
       {seriesKey(chart)}
       <div className="space-y-1">
@@ -204,7 +204,7 @@ function chartCard(chart: InlineEvidenceChart) {
         </p>
         {chart.kind === "grouped_bar" ? renderGroupedBarChart(chart) : renderLineChart(chart)}
       </div>
-      <p className="text-[13px] leading-6 text-[var(--muted)]">{chart.caption}</p>
+      <p className="max-w-[44rem] text-[12.5px] leading-6 text-[var(--muted)]">{chart.caption}</p>
     </article>
   );
 }
@@ -218,7 +218,7 @@ export function InlineEvidenceCharts({ charts, notice, className }: InlineEviden
 
   return (
     <section className={cn("space-y-4", className)} aria-label="Visual evidence">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-[var(--muted)]">Visual evidence</p>
+      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Visual evidence</p>
       {visibleCharts.length > 0 ? <div className="space-y-6">{visibleCharts.map((chart) => chartCard(chart))}</div> : null}
       {!visibleCharts.length && notice ? (
         <div className="rounded-[1.15rem] border border-dashed border-[var(--border)]/80 bg-neutral-50/70 px-4 py-3 dark:bg-neutral-950/20">

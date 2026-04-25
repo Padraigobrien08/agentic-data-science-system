@@ -26,6 +26,11 @@ const shell: RunTraceShell = {
     evidence_artifacts_by_role: { report_md: "artifact-1" },
     prompt_versions: { report: "1.0.0" },
     model_call_count: 2,
+    report_key_takeaways_preview: [],
+    critic_blocking_caveats: [],
+    critic_overall_confidence: null,
+    critic_phase_status: null,
+    report_phase_status: null,
   },
   timeline_preview: [
     {
@@ -79,7 +84,7 @@ describe("RunTraceSummaryView", () => {
         runId="run-1"
         shell={shell}
         activeCollection="steps"
-        runAnswerHref="/projects/project-1/runs/run-1"
+        runAnswerHref="/projects/project-1/chat"
         collectionPanel={{
           projectId: "project-1",
           runId: "run-1",
@@ -92,8 +97,8 @@ describe("RunTraceSummaryView", () => {
       />,
     );
 
-    expect(screen.getByText(/Audit the run without loading every raw blob first/i)).toBeTruthy();
-    expect(screen.getByText("The step spine stays primary")).toBeTruthy();
+    expect(screen.getByText(/Inspect the execution record without re-reading the answer/i)).toBeTruthy();
+    expect(screen.getByText("Execution spine")).toBeTruthy();
     expect(screen.getByRole("link", { name: "View all steps" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Open artifact preview" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Inspect model call" })).toBeTruthy();
@@ -113,7 +118,7 @@ describe("RunTraceSummaryView", () => {
           timeline_preview: [],
         }}
         activeCollection="steps"
-        runAnswerHref="/projects/project-1/runs/run-1"
+        runAnswerHref="/projects/project-1/chat"
         collectionPanel={{
           projectId: "project-1",
           runId: "run-1",
@@ -129,6 +134,9 @@ describe("RunTraceSummaryView", () => {
 
     expect(screen.getAllByText("No trace details yet").length).toBeGreaterThan(0);
     expect(screen.getByText("Trace details couldn't load.")).toBeTruthy();
+    expect(
+      screen.getByText(/return to chat for the answer while the backend finishes processing technical records/i),
+    ).toBeTruthy();
   });
 
   it("keeps the overview visible while one selected raw detail surface is open", () => {
@@ -145,7 +153,7 @@ describe("RunTraceSummaryView", () => {
         runId="run-1"
         shell={shell}
         activeCollection="steps"
-        runAnswerHref="/projects/project-1/runs/run-1"
+        runAnswerHref="/projects/project-1/chat"
         rawDetail={rawDetail}
         collectionPanel={{
           projectId: "project-1",
@@ -160,8 +168,8 @@ describe("RunTraceSummaryView", () => {
       />,
     );
 
-    expect(screen.getByText(/Audit the run without loading every raw blob first/i)).toBeTruthy();
-    expect(screen.getByText("The step spine stays primary")).toBeTruthy();
+    expect(screen.getByText(/Inspect the execution record without re-reading the answer/i)).toBeTruthy();
+    expect(screen.getByText("Execution spine")).toBeTruthy();
     expect(screen.getAllByText("Open raw payload").length).toBeGreaterThan(0);
     expect(screen.getAllByRole("link", { name: "Close" }).length).toBeGreaterThan(0);
   });
