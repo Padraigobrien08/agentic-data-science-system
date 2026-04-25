@@ -159,11 +159,11 @@ def test_build_run_transparency_parses_d04_safe_inline_charts() -> None:
                             "rows": [
                                 {
                                     "x_value": "2024-Q1",
-                                    "focal_company": -0.02,
+                                    "values": {"focal_company": -0.02},
                                 },
                                 {
                                     "x_value": "2024-Q2",
-                                    "focal_company": -0.06,
+                                    "values": {"focal_company": -0.06},
                                 },
                             ],
                             "markers": [
@@ -198,6 +198,47 @@ def test_build_run_transparency_parses_d04_safe_inline_charts() -> None:
     assert chart.markers[0].x_value == "2024-Q2"
     assert chart.markers[0].label == "Strong shift"
     assert chart.source_artifact_roles == ["features_csv", "trend_break_signals_csv"]
+
+
+def test_build_run_transparency_inline_charts_supports_legacy_top_level_series_rows() -> None:
+    meta = {
+        "ai_agents": {
+            "traceability": {
+                "report": {
+                    "inline_charts": [
+                        {
+                            "chart_id": "trend-revenue-growth-line",
+                            "kind": "line",
+                            "metric_key": "revenue_growth_yoy",
+                            "metric_label": "Revenue growth",
+                            "caption": "Revenue growth turned down across the latest four quarters.",
+                            "x_axis_label": "Quarter",
+                            "y_axis_label": "Growth",
+                            "value_format": "percent",
+                            "series": [
+                                {
+                                    "key": "focal_company",
+                                    "label": "Company",
+                                    "color_token": "chart-1",
+                                }
+                            ],
+                            "rows": [
+                                {
+                                    "x_value": "2024-Q1",
+                                    "focal_company": -0.02,
+                                }
+                            ],
+                            "markers": [],
+                            "source_artifact_roles": ["features_csv", "trend_break_signals_csv"],
+                        }
+                    ]
+                }
+            }
+        }
+    }
+    out = build_run_transparency_summary(meta, model_call_count=0, artifacts=[])
+    assert len(out.inline_charts) == 1
+    assert out.inline_charts[0].rows[0].values == {"focal_company": -0.02}
 
 
 def test_build_run_transparency_inline_charts_fall_back_to_empty_list_for_malformed_data() -> None:

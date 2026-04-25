@@ -124,7 +124,6 @@ export function ChatRunAnswerCard({
       <div className="mx-auto w-full max-w-[58rem] space-y-6">
         <section className="space-y-5 border-b border-[var(--border)]/80 pb-7">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">Answer</p>
             <ConfidenceStrip
               overallConfidence={answerCard.overallConfidence}
               confidenceExplainer={answerCard.confidenceExplainer}

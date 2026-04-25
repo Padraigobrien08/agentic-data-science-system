@@ -1,94 +1,206 @@
-# Agentic data science — EDGAR pipeline
+# EDGAR Analysis
 
-This repo pulls **SEC EDGAR XBRL company facts**, normalizes them into a **quarterly panel**, engineers **metric features**, and scores **self-relative and peer-relative** unusual moves. Outputs are tabular artifacts (panel, features, anomalies, peer signals, trend-break hints) plus a **unified findings** table and a **Markdown report**. A thin **orchestration** layer turns a ticker list and short natural-language goal into a fixed **MCP tool** sequence; there is no LLM in the numerical path.
+EDGAR Analysis is a chat-first financial analysis system built on top of SEC EDGAR data. It combines a deterministic numerical pipeline, a FastAPI control plane, a background worker, and a Next.js interface so you can ask a question like:
 
-**MCP** exposes the same steps for Cursor/CLI; **evaluation** holds JSON-defined benchmark cases (fixtures and optional live stubs) with deterministic checks. All of that lives under `edgar_project/`; Phase 1 numerics remain in `src/` and `main.py`.
+> Is MSFT showing persistent deterioration in revenue growth and margin quality over the last 8 quarters?
 
-## Example outputs (static)
+and get back:
 
-Browse [`examples/`](examples/) for **small, labeled samples** you can open without running anything: `report.example.md`, `unified_findings.example.csv`, `evaluation_summary.example.json`, `evaluation_results.example.json`, and `cli_run_digest.example.txt`. They are **not** produced by the pipeline and do not replace artifacts under `data/` — see [`examples/README.md`](examples/README.md).
+- a readable narrative answer
+- inline evidence and charts
+- traceable artifacts and run history
+- deterministic, inspectable numerical outputs underneath
 
-**Where real files land:** [`data/README.md`](data/README.md) explains `data/raw/`, `data/processed/`, `data/artifacts/`, and `data/evaluation/` so you can tell pipeline output from benchmark output.
+The core design goal is simple:
 
-## Quick demo (skim + run, ~2 minutes)
+**Every analysis run should be trustworthy, inspectable, and reproducible.**
 
-**Offline (no SEC, ~seconds)** — exercises the analytical stack on versioned CSV fixtures:
+## Why this repo matters
+
+Most AI-finance demos stop at “LLM says something plausible.” This repo is different:
+
+- **Deterministic numerical path**: the core EDGAR normalization, feature engineering, anomaly detection, peer signals, and trend-break logic live in [`src/`](src/), not inside a black-box model call.
+- **Traceable answers**: the chat UI is a product surface over persisted runs, artifacts, and transparency metadata, not an unlogged chat transcript.
+- **Evidence-first architecture**: every answer can be traced to stored artifacts, critic/report summaries, and explicit run outputs.
+- **Brownfield-ready stack**: FastAPI, SQLAlchemy, Postgres, background worker, and Next.js are already wired together for a real multi-user product path.
+
+## What the product does
+
+- Ask company-level or peer-relative financial questions in a chat UI
+- Route prompts deterministically into supported EDGAR analysis plans
+- Generate narrative answers with confidence and supporting evidence
+- Render inline charts when the backend has safe, deterministic chart previews
+- Preserve runs, artifacts, traceability, and audit surfaces for later inspection
+
+## Product architecture
+
+```mermaid
+flowchart LR
+    U["User in chat UI"] --> W["Next.js web app"]
+    W --> API["FastAPI API"]
+    API --> ORCH["Orchestration layer"]
+    ORCH --> MCP["MCP tools"]
+    MCP --> PIPE["Deterministic EDGAR pipeline"]
+    PIPE --> ART["Artifacts and run outputs"]
+    API --> DB["Postgres run state"]
+    API --> WORK["Background worker"]
+    ART --> API
+    DB --> API
+    API --> W
+```
+
+## Tech stack
+
+- **Backend**: FastAPI, SQLAlchemy, Alembic, Postgres
+- **Worker**: Python background execution loop with persisted jobs and leases
+- **Frontend**: Next.js App Router, React, Tailwind
+- **Pipeline**: deterministic Python EDGAR processing in [`src/`](src/)
+- **MCP**: shared tool surface in [`edgar_project/mcp/`](edgar_project/mcp/)
+- **Evaluation**: benchmark suites and regression checks in [`edgar_project/evaluation/`](edgar_project/evaluation/)
+
+## 5-minute quickstart
+
+### 1. Configure local secrets
+
+From the repository root:
 
 ```bash
-cd <your-repo-clone>
+cp .env.example .env
+```
+
+Set these values in `.env`:
+
+- `EDGAR_BACKEND_JWT_SECRET`
+- `EDGAR_BACKEND_OPS_API_TOKEN`
+- `EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN`
+
+### 2. Start the full stack
+
+```bash
+docker compose up --build
+```
+
+App endpoints:
+
+- Web: [http://127.0.0.1:3000](http://127.0.0.1:3000)
+- API health: [http://127.0.0.1:8000/v1/health](http://127.0.0.1:8000/v1/health)
+
+### 3. Bootstrap the first admin
+
+```bash
+curl -sS -X POST "http://127.0.0.1:8000/v1/auth/bootstrap" \
+  -H "Content-Type: application/json" \
+  -H "X-EDGAR-Bootstrap-Token: $EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN" \
+  -d '{"email":"admin@local.dev","password":"your-password-here","display_name":"Local Admin"}'
+```
+
+### 4. Sign in to the web app
+
+Open [http://127.0.0.1:3000](http://127.0.0.1:3000), sign in with the bootstrap credentials, create a chat scope, and ask:
+
+```text
+Show whether MSFT revenue growth has deteriorated over the last 8 quarters, explain the trend, and include a chart if it materially strengthens the answer.
+```
+
+### 5. Verify the stack
+
+```bash
+./scripts/smoke-compose.sh
+```
+
+For the full local runbook, see [docs/local-stack.md](docs/local-stack.md).
+
+## Fastest demo paths
+
+### Full product path
+
+Use the web app and a fresh chat run.
+
+Good prompts:
+
+- `Is MSFT showing persistent deterioration in revenue growth and margin quality over the last 8 quarters?`
+- `Compare AAPL, MSFT, and NVDA on margin trend and tell me which looks weakest.`
+- `Show whether MSFT revenue growth has deteriorated over the last 8 quarters, explain the trend, and include a chart if it materially strengthens the answer.`
+
+### Offline numerical demo
+
+If you want to prove the deterministic stack without touching SEC live data:
+
+```bash
 PYTHONPATH=. python3 -m edgar_project.cli demo --fixtures
 ```
 
-**What you should see:** A labeled block for benchmark outputs under `data/evaluation/` (suite JSON + per-case folders), then a tip pointing at `data/README.md`. Same fixture suite as `python3 -m edgar_project.cli evaluate`.
-
-**Benchmarks only (no `demo`):** `PYTHONPATH=. python3 -m edgar_project.cli evaluate` — short pass/fail summary and paths to `*_results.json`. This defaults to the supported fixture suite id `suite_fixtures_v1`; live or hybrid manifests are operator-invoked and require `--allow-live`.
-
-**Project-scoped persisted evaluation compatibility path:** `PYTHONPATH=. python3 -m edgar_project.cli evaluate --project-id <project_uuid>` — creates and executes a stored evaluation run through the API-backed control-plane contract, then prints the resulting `evaluation_run_id` and terminal status.
-
-**Live (network, SEC + cache)** — curated tickers and goals from `edgar_project/demo/scenarios.json`:
+### Evaluation suite
 
 ```bash
-PYTHONPATH=. python3 -m edgar_project.cli demo --list
-PYTHONPATH=. python3 -m edgar_project.cli demo
-# or:  python3 -m edgar_project.cli demo retail_peers
+PYTHONPATH=. python3 -m edgar_project.cli evaluate
 ```
 
-**What you should see:** A **run digest** (status, tickers, output layout, primary file paths, counts, top unified findings). Then scenario-specific bullets. Use `demo -v` for the full artifact list, tool chain, and resolved tickers on stdout; orchestration **INFO** logs go to stderr.
+## Trust and inspectability
 
-**Why it’s worth a look**
+This repo is strongest when viewed as a system for **auditable financial reasoning**, not just “chat over EDGAR.”
 
-- Fixture demo proves the **same detection code** you ship runs on **controlled inputs** with regression-style checks.
-- Live demo shows **peer vs self** signals, **trend-break overlap** metadata, and **one narrative report** without opening every CSV.
-- **Data quality / coverage** artifacts make missingness explicit alongside flags.
-- **Orchestration** is deterministic rule-to-plan mapping over MCP tools (inspectable, no black-box scoring).
+Key trust properties:
 
-## Developer documentation
+- Answers sit on top of persisted runs, not ephemeral model text
+- Artifacts are stored and retrievable through the API
+- Numerical analysis remains deterministic and inspectable
+- Critic/report phases are persisted as explicit surfaces, not hidden
+- Run history, trace, artifacts, and evidence all remain available after the answer is rendered
 
-- **LLM context size compare (offline):** `PYTHONPATH=. python3 -m backend.dev.llm_context_compare --a default --b tight` prints per-phase JSON byte sizes and approximate token reduction between two `ContextBudget` profiles (presets or a JSON file of field overrides). Use `--list-presets` to see names. No API keys required.
-- **Local full stack** (Compose + manual run, migrations, env, artifacts, smoke checks): [`docs/local-stack.md`](docs/local-stack.md) — after `docker compose up -d`, run `./scripts/smoke-compose.sh` or `./scripts/stack smoke`. **Database:** Postgres is the documented default (Compose). Without Docker, the backend defaults to SQLite under `data/backend.db` and logs `database_backend_sqlite` at startup; see `docs/local-stack.md` and `EDGAR_BACKEND_ALLOW_SQLITE` in `.env.example`.
-- **Artifact HTTP API** (metadata, streaming content, text preview): [`docs/artifact-delivery.md`](docs/artifact-delivery.md)
-- **Auth** (register, login, JWT bearer, ownership rules): [`docs/auth-api.md`](docs/auth-api.md)
+Relevant code paths:
 
-## CLI reference
+- Deterministic pipeline: [`src/`](src/)
+- Backend API: [`backend/api/`](backend/api/)
+- Execution services: [`backend/services/`](backend/services/)
+- Orchestration: [`edgar_project/orchestration/`](edgar_project/orchestration/)
+- Chat UI: [`frontend/src/app/projects/[projectId]/chat/page.tsx`](frontend/src/app/projects/[projectId]/chat/page.tsx)
 
-From repo root (`PYTHONPATH=.`):
+## Repository map
 
-```bash
-python3 -m edgar_project.cli run --tickers AAPL MSFT --goal "find unusual financial changes"
-python3 -m edgar_project.cli evaluate
-python3 -m edgar_project.cli evaluate --suite-id suite_smoke --allow-live
-python3 -m edgar_project.cli evaluate --project-id <project_uuid>
-python3 -m edgar_project.cli evaluate --suite edgar_project/evaluation/benchmarks/suite_orchestration_mocked_v1.json
-```
+- [`frontend/`](frontend/): Next.js web app and product UI
+- [`backend/`](backend/): FastAPI API, worker, auth, persistence, artifact serving
+- [`edgar_project/`](edgar_project/): orchestration, MCP, evaluation, CLI
+- [`src/`](src/): deterministic EDGAR computation layer
+- [`tests/`](tests/): backend, orchestration, trust, and regression coverage
+- [`docs/`](docs/): runbooks and API docs
+- [`examples/`](examples/): static example outputs for quick inspection
 
-`evaluate` defaults to the supported fixture suite id and still supports direct local JSON-output execution. The primary supported workflow is API-backed and project-scoped via `--project-id`; `--suite` is now a developer fallback for raw manifest paths rather than the default product contract. Live or hybrid validation is operator-invoked, fair-access-sensitive work and requires `--allow-live`; it remains non-merge-blocking by default. Use `evaluate -v` for an extended table. `run -v` / `run --json` — orchestration logs or full `OrchestrationOutput`. `main.py` is unchanged.
+## Docs
 
-## Supported evaluation ops
+- Local stack: [docs/local-stack.md](docs/local-stack.md)
+- Auth and bootstrap: [docs/auth-api.md](docs/auth-api.md)
+- Artifact delivery: [docs/artifact-delivery.md](docs/artifact-delivery.md)
+- Metric mapping: [docs/metric_mapping.md](docs/metric_mapping.md)
+- Examples: [examples/README.md](examples/README.md)
 
-Supported live or hybrid evaluation case results expose `latest_analysis_run_id` on the `/v1/evaluations/{evaluation_run_id}/cases` API so operators can jump straight into the canonical child run. If `/health`, `/v1/worker/health`, or `/metrics` report degraded evaluation SEC or storage state, follow the linked run through `/v1/runs/{run_id}` first, then use the existing run trace and artifact routes to inspect the underlying failure.
+## Testing and CI
 
-## Notebook demo
+This repo already has meaningful verification depth:
 
-Interactive walkthrough (fixture run, tables, one bar chart): open [`notebooks/demo_edgar_pipeline.ipynb`](notebooks/demo_edgar_pipeline.ipynb). From the repo root:
+- backend pytest suite
+- frontend lint + build checks
+- compose smoke coverage
+- Postgres regression workflow
 
-```bash
-pip install jupyter matplotlib
-jupyter notebook notebooks/demo_edgar_pipeline.ipynb
-```
+CI entrypoints:
 
-Uses the same offline fixture suite as `demo --fixtures` — no SEC credentials required.
+- [`.github/workflows/ci.yml`](.github/workflows/ci.yml)
+- [`.github/workflows/compose-smoke.yml`](.github/workflows/compose-smoke.yml)
+- [`.github/workflows/postgres-regressions.yml`](.github/workflows/postgres-regressions.yml)
 
-## Manual validation (spot checks)
+## Contributing
 
-To record that extracted metrics were checked against SEC sources, use **`validation/README.md`**, append rows to **`validation/manual_validation.csv`**, and optionally keep notes in **`validation/manual_validation.md`**.
+See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-- **Templates & guide:** `validation/template/` (`manual_validation_template.csv`, `HOW_TO_FILL.md`)
-- **Unverified candidates** (from current `panel.csv`): `validation/examples/candidates_from_artifacts_unverified.csv` — not SEC-confirmed until you fill `expected_value` and status.
+## Security
 
-Print candidate rows and companyfacts URLs:
+See [SECURITY.md](SECURITY.md).
 
-```bash
-python3 -m src.manual_validation --panel data/processed/panel.csv --max-rows 20
-```
+## Community
 
-See **`validation/README.md`** for the column schema and workflow details.
+See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
+
+## Remaining high-leverage repo upgrade
+
+The biggest missing public-facing item is still a deliberate license choice. I did not add a `LICENSE` file automatically because that is a legal/product decision, not just packaging.

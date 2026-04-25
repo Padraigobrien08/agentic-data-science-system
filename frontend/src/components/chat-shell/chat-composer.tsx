@@ -27,7 +27,6 @@ export function ChatComposer({
   onSend,
 }: Props) {
   const [value, setValue] = useState("");
-  const [refresh, setRefresh] = useState(false);
   const [requestId, setRequestId] = useState("");
   const formRef = useRef<HTMLFormElement | null>(null);
   const requestIdRef = useRef<HTMLInputElement | null>(null);
@@ -81,7 +80,7 @@ export function ChatComposer({
       <input type="hidden" name="tickers" value={tickers.join(",")} />
       <input type="hidden" name="goal" value={value} />
       <input ref={requestIdRef} type="hidden" name="request_id" value={requestId} readOnly />
-      <input type="hidden" name="refresh" value={refresh ? "on" : "off"} />
+      <input type="hidden" name="refresh" value="off" />
       <input type="hidden" name="execute_now" value="on" />
       <input type="hidden" name="enqueue_execution" value="off" />
       {showStatusBanner ? (
@@ -109,27 +108,11 @@ export function ChatComposer({
           Send
         </button>
       </div>
-      <div className="mx-auto mt-2 flex max-w-4xl flex-wrap items-center gap-3 text-xs text-[var(--muted)]">
-        <label className="inline-flex items-center gap-1.5">
-          <input
-            type="checkbox"
-            checked={refresh}
-            onChange={(e) => setRefresh(e.target.checked)}
-            className="rounded border-[var(--border)]"
-          />
-          <span>Refresh SEC cache</span>
-        </label>
-        <span>Chat runs execute immediately in this conversation.</span>
-      </div>
       {error ? (
         <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[10px] text-red-700 dark:text-red-400">
           {error}
         </p>
-      ) : (
-        <p className="mx-auto mt-2 max-w-4xl text-center text-[10px] text-[var(--muted)]">
-          Press Enter to submit · Shift+Enter for newline
-        </p>
-      )}
+      ) : null}
     </form>
   );
 }

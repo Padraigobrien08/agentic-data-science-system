@@ -15,7 +15,12 @@ from sqlalchemy.orm import Session
 
 from backend.agents.inline_chart_preview import build_inline_chart_previews
 from edgar_project.orchestration.planning_transparency import build_planning_transparency
-from edgar_project.orchestration.schemas import InterpretedGoal, OrchestrationOutput
+from edgar_project.orchestration.schemas import (
+    GoalPreferences,
+    InterpretedGoal,
+    MetricPriority,
+    OrchestrationOutput,
+)
 
 from backend.agents.llm_phase_status import PHASE_DEGRADED, PHASE_FAILED, PHASE_SUCCESS
 from backend.services.analysis_run_service import AnalysisRunService
@@ -29,6 +34,13 @@ _MAX_TAKEAWAY_PREVIEW = 5
 _MAX_ARTIFACT_REFS = 24
 _MAX_NARRATIVE_SECTIONS = 3
 _MAX_CONFIDENCE_EXPLAINER_ITEMS = 4
+_CHART_METRIC_PRIORITY_KEYS: dict[MetricPriority, tuple[str, ...]] = {
+    MetricPriority.revenue_growth: ("revenue_growth_qoq", "revenue_growth_yoy", "revenue"),
+    MetricPriority.margins: ("net_margin",),
+    MetricPriority.cash_flow: ("operating_cash_flow",),
+    MetricPriority.liquidity: ("current_ratio",),
+    MetricPriority.leverage: ("debt_to_assets",),
+}
 
 
 def _trunc(text: str | None, max_len: int) -> str:
@@ -38,6 +50,20 @@ def _trunc(text: str | None, max_len: int) -> str:
     if len(t) <= max_len:
         return t
     return t[: max_len - 1].rstrip() + "…"
+
+
+def _preferred_chart_metric_keys(goal_preferences: GoalPreferences | None) -> list[str]:
+    if goal_preferences is None:
+        return []
+    out: list[str] = []
+    seen: set[str] = set()
+    for metric in goal_preferences.priority_metrics:
+        for metric_key in _CHART_METRIC_PRIORITY_KEYS.get(metric, ()):
+            if metric_key in seen:
+                continue
+            seen.add(metric_key)
+            out.append(metric_key)
+    return out
 
 
 def _evidence_refs(artifact_paths: dict[str, str]) -> list[dict[str, str]]:
@@ -327,7 +353,10 @@ def build_runtime_traceability_bundle(
         critic_summary_roles=critic_summary_roles,
         plan_alignment_findings=plan_align,
     )
-    inline_charts = build_inline_chart_previews(orch_out.artifact_paths)
+    inline_charts = build_inline_chart_previews(
+        orch_out.artifact_paths,
+        preferred_metric_keys=_preferred_chart_metric_keys(ig.goal_preferences),
+    )
 
     full: dict[str, Any] = {
         "contract_version": TRACEABILITY_CONTRACT_VERSION,

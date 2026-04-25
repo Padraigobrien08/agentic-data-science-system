@@ -198,9 +198,16 @@ def _parse_inline_chart_row(raw: Any) -> InlineChartRowPreview:
         raise ValueError("inline chart row requires x_value")
 
     values: dict[str, float | int | None] = {}
-    for key, value in raw.items():
-        if key == "x_value":
-            continue
+    nested_values = raw.get("values")
+    if nested_values is not None:
+        if not isinstance(nested_values, dict):
+            raise ValueError("inline chart row values must be a dict when present")
+        iterator = nested_values.items()
+    else:
+        # Backward compatibility for older row payloads that stored series keys at the top level.
+        iterator = ((key, value) for key, value in raw.items() if key != "x_value")
+
+    for key, value in iterator:
         if not isinstance(key, str) or not key.strip():
             continue
         if value is None or isinstance(value, (int, float)):

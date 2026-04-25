@@ -2,7 +2,7 @@ import Link from "next/link";
 
 import type { DeepDiveActionsProps } from "./types";
 
-export function DeepDiveActions({ traceHref, reportArtifactId, chatHref, runsHref, className }: DeepDiveActionsProps) {
+export function DeepDiveActions({ traceHref, reportArtifactId, chatHref, className }: DeepDiveActionsProps) {
   return (
     <div className={className ?? "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"}>
       <Link
@@ -26,9 +26,6 @@ export function DeepDiveActions({ traceHref, reportArtifactId, chatHref, runsHre
       <div className="hidden h-6 w-px bg-[var(--border)] sm:block" aria-hidden />
       <Link href={chatHref} className="inline-flex items-center justify-center text-sm text-[var(--muted)] underline">
         Chat
-      </Link>
-      <Link href={runsHref} className="inline-flex items-center justify-center text-sm text-[var(--muted)] underline">
-        All runs
       </Link>
     </div>
   );

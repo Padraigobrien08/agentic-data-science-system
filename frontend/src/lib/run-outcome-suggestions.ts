@@ -114,7 +114,6 @@ export function buildOutcomeSuggestions(
   const budget = hasContextBudgetSignal(signals);
   const weak = weakEvidenceCount > 0;
 
-  const newRunHref = `/projects/${projectId}/runs/new`;
   const chatHref = `/projects/${projectId}/chat`;
 
   if (status === "partial_success") {
@@ -142,8 +141,8 @@ export function buildOutcomeSuggestions(
       middle,
       {
         title: "Edit inputs and re-run",
-        detail: "Adjust tickers or goal text on a new run, or re-execute this run if only the pipeline needs another pass.",
-        href: newRunHref,
+        detail: "Adjust tickers or goal text in chat, or re-execute this run if only the pipeline needs another pass.",
+        href: chatHref,
       },
     ];
   }

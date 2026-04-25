@@ -444,11 +444,7 @@ export function RunTraceExperience({
         headerClassName={auditHeader}
       >
         <p className="mb-2 text-[10px] leading-snug text-[var(--muted)]">
-          The{" "}
-          <Link href={`/projects/${projectId}/runs/${runId}`} className="text-[var(--foreground)] underline">
-            run inspection
-          </Link>{" "}
-          page routes conclusion and finding chips to this roster and to critic/report sections above.
+          Chat routes conclusion and finding chips to this roster and to critic/report sections above.
         </p>
         {tr?.evidence_artifact_refs && tr.evidence_artifact_refs.length > 0 ? (
           <div className="mb-2">

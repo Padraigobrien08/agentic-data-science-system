@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { ProjectNav } from "@/components/layout/project-nav";
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ApiError } from "@/lib/api/errors";
 import { getProject } from "@/lib/api/projects";
@@ -36,14 +35,5 @@ export default async function ProjectLayout({
     );
   }
 
-  return (
-    <div className="space-y-4">
-      <div>
-        <p className="text-xs text-[var(--muted)]">Project</p>
-        <p className="break-all font-mono text-sm">{projectId}</p>
-      </div>
-      <ProjectNav projectId={projectId} />
-      {children}
-    </div>
-  );
+  return children;
 }

@@ -122,6 +122,15 @@ def _value_format(metric_key: str) -> str:
     return _VALUE_FORMATS.get(metric_key, "number")
 
 
+def _metric_priority_rank(metric_key: str, preferred_metric_keys: tuple[str, ...]) -> int:
+    if not preferred_metric_keys:
+        return 999
+    try:
+        return preferred_metric_keys.index(metric_key)
+    except ValueError:
+        return len(preferred_metric_keys) + 999
+
+
 def _caption_in_range(caption: str) -> bool:
     length = len(caption)
     return _CAPTION_MIN_LENGTH <= length <= _CAPTION_MAX_LENGTH
@@ -182,6 +191,8 @@ def _trend_sort_key(row: dict[str, Any]) -> tuple[int, float, tuple[int, int], s
 def _build_trend_line_preview(
     features_df: pd.DataFrame | None,
     trend_df: pd.DataFrame | None,
+    *,
+    preferred_metric_keys: tuple[str, ...] = (),
 ) -> dict[str, Any] | None:
     if features_df is None or trend_df is None or trend_df.empty:
         return None
@@ -218,7 +229,13 @@ def _build_trend_line_preview(
     if not candidate_rows:
         return None
 
-    selected = sorted(candidate_rows, key=_trend_sort_key)[0]
+    selected = sorted(
+        candidate_rows,
+        key=lambda row: (
+            _metric_priority_rank(str(row.get("metric") or ""), preferred_metric_keys),
+            *_trend_sort_key(row),
+        ),
+    )[0]
     metric_key = str(selected["metric"])
     cik = int(selected["cik"])
     feature_rows = selected["_feature_rows"]
@@ -339,6 +356,8 @@ def _build_peer_rows(
 def _build_peer_grouped_bar_preview(
     features_df: pd.DataFrame | None,
     peer_df: pd.DataFrame | None,
+    *,
+    preferred_metric_keys: tuple[str, ...] = (),
 ) -> dict[str, Any] | None:
     if features_df is None or peer_df is None or peer_df.empty:
         return None
@@ -364,7 +383,13 @@ def _build_peer_grouped_bar_preview(
     if not candidate_rows:
         return None
 
-    selected = sorted(candidate_rows, key=_peer_sort_key)[0]
+    selected = sorted(
+        candidate_rows,
+        key=lambda row: (
+            _metric_priority_rank(str(row.get("metric") or ""), preferred_metric_keys),
+            *_peer_sort_key(row),
+        ),
+    )[0]
     metric_key = str(selected["metric"])
     alert = str(selected["peer_alert"])
     relation = "above" if alert == "extreme_high" else "below"
@@ -409,6 +434,7 @@ def build_inline_chart_previews(
     artifact_paths: dict[str, str],
     *,
     max_charts: int = 2,
+    preferred_metric_keys: list[str] | tuple[str, ...] | None = None,
 ) -> list[dict[str, Any]]:
     """
     Build at most one D-10 trend line chart and one D-11 grouped peer bar chart.
@@ -424,11 +450,25 @@ def build_inline_chart_previews(
 
     previews: list[dict[str, Any]] = []
 
-    trend_preview = _build_trend_line_preview(features_df, trend_df)
+    preferred = tuple(
+        metric.strip()
+        for metric in (preferred_metric_keys or [])
+        if isinstance(metric, str) and metric.strip()
+    )
+
+    trend_preview = _build_trend_line_preview(
+        features_df,
+        trend_df,
+        preferred_metric_keys=preferred,
+    )
     if trend_preview is not None and len(previews) < max_charts:
         previews.append(trend_preview)
 
-    peer_preview = _build_peer_grouped_bar_preview(features_df, peer_df)
+    peer_preview = _build_peer_grouped_bar_preview(
+        features_df,
+        peer_df,
+        preferred_metric_keys=preferred,
+    )
     if peer_preview is not None and len(previews) < max_charts:
         previews.append(peer_preview)
 

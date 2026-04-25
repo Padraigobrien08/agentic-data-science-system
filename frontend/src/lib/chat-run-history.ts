@@ -66,24 +66,12 @@ function buildAssistantMessage(
   };
 }
 
-function historyTitle(fallbackTitle: string, assistant: ChatAssistantMessage): string {
-  const thesis = assistant.answerCard?.narrativeAnswer.thesis?.trim();
-  if (thesis) {
-    return thesis;
+function compactHistoryTitle(text: string): string {
+  const normalized = text.replace(/\s+/g, " ").trim();
+  if (normalized.length <= 56) {
+    return normalized;
   }
-  return fallbackTitle;
-}
-
-function historyPreview(assistant: ChatAssistantMessage): string | null {
-  const section = assistant.answerCard?.narrativeAnswer.sections[0]?.body?.trim();
-  if (section) {
-    return section;
-  }
-  const rider = assistant.answerCard?.conclusionRider?.text?.trim();
-  if (rider) {
-    return rider;
-  }
-  return null;
+  return `${normalized.slice(0, 53).trimEnd()}...`;
 }
 
 function summaryGoalText(run: Pick<AnalysisRunDetail, "orchestration_goal_text">): string {
@@ -124,17 +112,12 @@ export async function buildProjectChatHistory(projectId: string, limit = 12): Pr
 
   const messages = pairedMessages.flatMap(({ userMessage, assistantMessage }) => [userMessage, assistantMessage]);
 
-  const assistantByRunId = new Map(
-    pairedMessages.map(({ run, assistantMessage }) => [run.id, assistantMessage] as const),
-  );
-
   const recentRuns: ChatRecentRun[] = recentRunsSorted.map((run) => {
-    const assistant = assistantByRunId.get(run.id);
     return {
       id: run.id,
       status: run.status,
-      title: assistant ? historyTitle(summaryGoalText(run), assistant) : summaryGoalText(run),
-      preview: assistant ? historyPreview(assistant) : null,
+      title: compactHistoryTitle(summaryGoalText(run)),
+      preview: null,
       createdAt: run.created_at,
       scrollTargetId: `answer-${run.id}`,
     };

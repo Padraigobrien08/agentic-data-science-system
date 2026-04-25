@@ -3,6 +3,7 @@
 import { useActionState, useEffect, useState } from "react";
 
 import { startConversationFromScopeAction, updateWorkspaceScopeAction } from "@/actions/projects";
+import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createAnalysisRunFromChat } from "@/actions/runs";
 import { cn } from "@/lib/utils";
 import { ChatComposer } from "./chat-composer";
@@ -103,9 +104,9 @@ export function ChatShell({
   };
 
   return (
-    <div
+    <SidebarProvider
       className={cn(
-        "flex h-[min(calc(100dvh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row",
+        "h-[min(calc(100dvh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row",
         className,
       )}
     >
@@ -114,20 +115,9 @@ export function ChatShell({
         newConversationAction={newConversationAction}
         recentRuns={recentRuns}
       />
-      <div className="flex min-h-0 min-w-0 flex-1 flex-col">
-        <header className="border-b border-[var(--border)] px-4 py-3">
-          <div className="flex items-start justify-between gap-3">
-            <div className="space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                Conversation
-              </p>
-              <div className="flex flex-wrap items-center gap-2">
-                <span className="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Scope</span>
-                <span className="rounded-full border border-[var(--border)] bg-neutral-50 px-2.5 py-1 font-mono text-[10px] text-[var(--foreground)] dark:bg-neutral-950/60">
-                  {scopeTickers.length ? scopeTickers.join(", ") : "No tickers yet"}
-                </span>
-              </div>
-            </div>
+      <SidebarInset className="bg-[var(--background)]">
+        <header className="border-b border-[var(--border)] px-4 py-2.5">
+          <div className="flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsEditingScope((v) => !v)}
@@ -169,7 +159,7 @@ export function ChatShell({
           tickers={scopeTickers}
           onSend={onSend}
         />
-      </div>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 }

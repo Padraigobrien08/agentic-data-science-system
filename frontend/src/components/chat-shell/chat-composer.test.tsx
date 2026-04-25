@@ -11,16 +11,18 @@ describe("ChatComposer", () => {
         tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",
-        background_available: false,
-        detail: "This chat is executing synchronously right now.",
-      }}
+          background_available: false,
+          detail: "This chat is executing synchronously right now.",
+        }}
       />,
     );
 
     expect(screen.queryByText("Sync only")).toBeNull();
     expect(screen.queryByText("This chat is executing synchronously right now.")).toBeNull();
     expect(screen.queryByText("Queue for worker")).toBeNull();
-    expect(screen.getByText("Chat runs execute immediately in this conversation.")).toBeTruthy();
+    expect(screen.queryByText("Refresh SEC cache")).toBeNull();
+    expect(screen.queryByText("Chat runs execute immediately in this conversation.")).toBeNull();
+    expect(screen.queryByText("Press Enter to submit · Shift+Enter for newline")).toBeNull();
   });
 
   it("clears the input after sending a message", () => {
@@ -36,9 +38,9 @@ describe("ChatComposer", () => {
         tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",
-        background_available: false,
-        detail: "This chat is executing synchronously right now.",
-      }}
+          background_available: false,
+          detail: "This chat is executing synchronously right now.",
+        }}
       />,
     );
 

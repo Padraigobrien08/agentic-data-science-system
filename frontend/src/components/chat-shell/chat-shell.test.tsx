@@ -140,11 +140,13 @@ describe("ChatShell", () => {
     expect(screen.getAllByText("Detect unusual financial changes for MSFT")).toHaveLength(1);
     expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
     expect(screen.getAllByText("This chat is executing synchronously right now.")).toHaveLength(1);
-    expect(screen.getByText("Answer")).toBeTruthy();
     expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getByRole("button", { name: "New chat" })).toBeTruthy();
-    expect(screen.getByText("History")).toBeTruthy();
+    expect(screen.getAllByText("History").length).toBeGreaterThan(0);
+    expect(screen.queryByText("Home")).toBeNull();
+    expect(screen.queryByText("Workspace")).toBeNull();
+    expect(screen.queryByText("Recent analyses")).toBeNull();
     const visualEvidence = screen.getByText("Visual evidence");
     const supportingEvidence = screen.getByText("Show supporting evidence");
     expect(

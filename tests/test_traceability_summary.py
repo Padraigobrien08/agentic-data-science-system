@@ -6,8 +6,10 @@ from pathlib import Path
 
 import pandas as pd
 from edgar_project.orchestration.schemas import (
+    GoalPreferences,
     InterpretedGoal,
     InterpretedGoalCode,
+    MetricPriority,
     OrchestrationOutput,
     OrchestrationRunStatus,
     StepStatusEntry,
@@ -331,6 +333,19 @@ def test_build_inline_chart_previews_caps_results_to_one_per_family(tmp_path: Pa
     assert [preview["kind"] for preview in previews] == ["line", "grouped_bar"]
 
 
+def test_build_inline_chart_previews_prefers_requested_metric_family(tmp_path: Path) -> None:
+    from backend.agents.inline_chart_preview import build_inline_chart_previews
+
+    artifact_paths = _write_supported_chart_artifacts(tmp_path, extra_candidates=True)
+    previews = build_inline_chart_previews(
+        artifact_paths,
+        preferred_metric_keys=["revenue_growth_qoq"],
+    )
+
+    assert len(previews) == 2
+    assert previews[0]["chart_id"] == "trend-revenue_growth_qoq-line"
+
+
 def test_build_inline_chart_previews_suppresses_weak_peer_and_short_history(tmp_path: Path) -> None:
     from backend.agents.inline_chart_preview import build_inline_chart_previews
 
@@ -376,6 +391,7 @@ def test_build_inline_chart_previews_suppresses_non_strong_trend_rows(tmp_path: 
 
 def test_build_runtime_traceability_bundle_persists_inline_charts(tmp_path: Path) -> None:
     ig, tools, critic_patch, report_patch = _base_traceability_inputs()
+    ig.goal_preferences = GoalPreferences(priority_metrics=[MetricPriority.revenue_growth])
     artifact_paths = _write_supported_chart_artifacts(tmp_path)
     out = OrchestrationOutput(
         status=OrchestrationRunStatus.success,
@@ -401,4 +417,5 @@ def test_build_runtime_traceability_bundle_persists_inline_charts(tmp_path: Path
 
     assert len(full["report"]["inline_charts"]) == 2
     assert full["report"]["inline_charts"][0]["kind"] == "line"
+    assert full["report"]["inline_charts"][0]["metric_key"] == "revenue_growth_qoq"
     assert full["report"]["inline_charts"][1]["kind"] == "grouped_bar"

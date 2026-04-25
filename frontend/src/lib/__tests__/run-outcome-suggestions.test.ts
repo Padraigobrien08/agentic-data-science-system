@@ -37,7 +37,7 @@ describe("buildOutcomeSuggestions", () => {
     const out = buildOutcomeSuggestions("partial_success", "general goal", [], emptySignals, 0, "p", trace);
     expect(out).toHaveLength(3);
     expect(out![0]!.href).toContain("#run-agents");
-    expect(out![2]!.href).toBe("/projects/p/runs/new");
+    expect(out![2]!.href).toBe("/projects/p/chat");
   });
 
   it("prioritizes budget hint in middle slot for partial_success", () => {

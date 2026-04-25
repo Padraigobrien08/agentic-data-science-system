@@ -90,11 +90,40 @@ const ChartContainer = React.forwardRef<
 >(({ id, className, children, config, ...props }, ref) => {
   const uniqueId = React.useId();
   const chartId = `chart-${id ?? uniqueId.replace(/:/g, "")}`;
+  const containerRef = React.useRef<HTMLDivElement | null>(null);
+  const [containerReady, setContainerReady] = React.useState(false);
+
+  React.useEffect(() => {
+    const node = containerRef.current;
+    if (!node) {
+      return;
+    }
+
+    const updateReady = () => {
+      const { width, height } = node.getBoundingClientRect();
+      setContainerReady(width > 0 && height > 0);
+    };
+
+    updateReady();
+    if (typeof ResizeObserver === "undefined") {
+      return;
+    }
+    const observer = new ResizeObserver(updateReady);
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, []);
 
   return (
     <ChartContext.Provider value={{ config }}>
       <div
-        ref={ref}
+        ref={(node) => {
+          containerRef.current = node;
+          if (typeof ref === "function") {
+            ref(node);
+          } else if (ref) {
+            ref.current = node;
+          }
+        }}
         data-chart={chartId}
         className={cn(
           "flex w-full items-center justify-center text-xs",
@@ -110,7 +139,11 @@ const ChartContainer = React.forwardRef<
         {...props}
       >
         <ChartStyle id={chartId} config={config} />
-        <RechartsPrimitive.ResponsiveContainer>{children}</RechartsPrimitive.ResponsiveContainer>
+        {containerReady ? (
+          <RechartsPrimitive.ResponsiveContainer width="100%" height="100%">
+            {children}
+          </RechartsPrimitive.ResponsiveContainer>
+        ) : null}
       </div>
     </ChartContext.Provider>
   );
@@ -147,7 +180,7 @@ type ChartTooltipContentProps = React.ComponentProps<"div"> & {
 const ChartTooltip = RechartsPrimitive.Tooltip;
 
 const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContentProps>(
-  ({ active, className, formatter, hideLabel = false, label, labelFormatter, payload, ...props }, ref) => {
+  ({ active, className, formatter, hideLabel = false, label, labelFormatter, payload }, ref) => {
     const { config } = useChart();
 
     if (!active || !payload?.length) {
@@ -171,7 +204,6 @@ const ChartTooltipContent = React.forwardRef<HTMLDivElement, ChartTooltipContent
           "shadow-[0_24px_60px_-40px_rgba(19,31,57,0.42)] backdrop-blur-sm",
           className,
         )}
-        {...props}
       >
         {!hideLabel && renderedLabel !== undefined && renderedLabel !== null ? (
           <div className="mb-2 text-[10px] font-semibold uppercase tracking-[0.2em] text-[hsl(var(--ui-muted-foreground))]">

@@ -1,9 +1,22 @@
 "use client";
 
 import { useCallback } from "react";
+import { History, MessageSquarePlus, MessagesSquare } from "lucide-react";
 
-import { StatusBadge } from "@/components/ui/technical";
-import { formatDate, shortId } from "@/lib/format";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarGroupLabel,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  SidebarRail,
+  SidebarTrigger,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import type { ChatRecentRun } from "./types";
 
 type Props = {
@@ -13,9 +26,10 @@ type Props = {
 };
 
 /**
- * Conversation-first rail with a new-chat affordance and in-chat history.
+ * Conversation-first shadcn sidebar with a new-chat affordance and in-chat history only.
  */
 export function ChatSidebar({ scopeTickers, newConversationAction, recentRuns }: Props) {
+  const { open } = useSidebar();
   const scrollToAnswer = useCallback((targetId?: string) => {
     if (!targetId) return;
     const node = document.getElementById(targetId);
@@ -24,55 +38,70 @@ export function ChatSidebar({ scopeTickers, newConversationAction, recentRuns }:
   }, []);
 
   return (
-    <aside className="flex w-full flex-shrink-0 flex-col border-b border-[var(--border)] bg-neutral-50 dark:border-[var(--border)] dark:bg-neutral-950 md:w-56 md:border-b-0 md:border-r">
-      <div className="border-b border-[var(--border)] p-3">
-        <div className="space-y-2 px-1">
-          <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Chat</p>
-          <p className="text-xs leading-5 text-[var(--muted)]">
-            Ask questions, keep the scope lightweight, and return to prior answers from one thread.
-          </p>
+    <Sidebar collapsible="icon" className="group relative bg-[hsl(var(--sidebar-background)/0.96)]">
+      <SidebarHeader className="space-y-3 p-2.5">
+        <div className="flex items-center justify-between gap-2">
+          <SidebarTrigger className="h-8 w-8 rounded-xl border border-[hsl(var(--sidebar-border))] bg-white/75 text-[hsl(var(--sidebar-foreground)/0.75)] hover:bg-white" />
+          <form action={newConversationAction}>
+            <input type="hidden" name="tickers" value={scopeTickers.join(",")} />
+            <SidebarMenuButton
+              type="submit"
+              className="h-8 w-8 items-center justify-center rounded-xl border border-[hsl(var(--sidebar-border))] bg-white/86 p-0 text-[hsl(var(--sidebar-foreground))] shadow-sm hover:bg-white"
+              disabled={scopeTickers.length === 0}
+              title="New chat"
+              aria-label="New chat"
+            >
+              <MessageSquarePlus className="h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.7)]" />
+            </SidebarMenuButton>
+          </form>
         </div>
-        <form action={newConversationAction} className="mt-3">
-          <input type="hidden" name="tickers" value={scopeTickers.join(",")} />
-          <button
-            type="submit"
-            className="w-full rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-left text-xs font-medium text-[var(--foreground)] shadow-sm transition hover:bg-neutral-100 disabled:opacity-50 dark:hover:bg-neutral-900"
-            disabled={scopeTickers.length === 0}
-          >
-            New chat
-          </button>
-        </form>
-      </div>
-
-      <div className="border-b border-[var(--border)] p-3">
-        <p className="px-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">History</p>
-      </div>
-      <nav
-        className="scrollbar-hidden flex max-h-40 flex-1 flex-col gap-1 overflow-y-auto p-2 md:max-h-none"
-        aria-label="Chat history"
-      >
-        {recentRuns.length === 0 ? (
-          <p className="px-2 py-2 text-xs text-[var(--muted)]">Earlier answers in this chat will appear here.</p>
-        ) : null}
-        {recentRuns.map((run) => (
-          <button
-            key={run.id}
-            type="button"
-            onClick={() => scrollToAnswer(run.scrollTargetId)}
-            className="rounded-xl border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-left text-xs hover:bg-neutral-100 dark:hover:bg-neutral-900"
-          >
-            <span className="line-clamp-3 font-medium text-[var(--foreground)]">{run.title}</span>
-            {run.preview ? (
-              <span className="mt-1 block line-clamp-2 text-[11px] leading-5 text-[var(--muted)]">{run.preview}</span>
-            ) : null}
-            <span className="mt-2 flex flex-wrap items-center gap-2">
-              <StatusBadge status={run.status} variant="friendly" />
-              <span className="text-[10px] text-[var(--muted)]">{formatDate(run.createdAt)}</span>
-            </span>
-            <span className="mt-1 block font-mono text-[10px] text-[var(--muted)]">{shortId(run.id)}</span>
-          </button>
-        ))}
-      </nav>
-    </aside>
+      </SidebarHeader>
+      <SidebarContent aria-label="Chat history" className="px-1 pb-2">
+        <SidebarGroup className="pt-2">
+          <SidebarGroupLabel className="flex items-center gap-2 px-3">
+            <History className="h-3.5 w-3.5" />
+            <span>History</span>
+          </SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu className="px-1">
+              {recentRuns.length === 0 ? (
+                <SidebarMenuItem>
+                  {open ? (
+                    <div className="rounded-xl border border-dashed border-[hsl(var(--sidebar-border))] px-3 py-3 text-xs leading-5 text-[hsl(var(--sidebar-foreground)/0.6)]">
+                      Earlier answers in this chat will appear here.
+                    </div>
+                  ) : (
+                    <div className="flex justify-center px-1 py-2 text-[hsl(var(--sidebar-foreground)/0.45)]">
+                      <MessagesSquare className="h-4 w-4" />
+                    </div>
+                  )}
+                </SidebarMenuItem>
+              ) : null}
+              {recentRuns.map((run, index) => (
+                <SidebarMenuItem key={run.id}>
+                  <SidebarMenuButton
+                    type="button"
+                    onClick={() => scrollToAnswer(run.scrollTargetId)}
+                    isActive={index === 0}
+                    className="min-h-0 items-center gap-2 rounded-xl px-2.5 py-2 md:group-data-[state=collapsed]:justify-center"
+                    title={run.title}
+                  >
+                    <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                    {open ? (
+                      <div className="min-w-0 flex-1">
+                        <span className="line-clamp-2 block text-[12.5px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
+                          {run.title}
+                        </span>
+                      </div>
+                    ) : null}
+                  </SidebarMenuButton>
+                </SidebarMenuItem>
+              ))}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+      <SidebarRail />
+    </Sidebar>
   );
 }

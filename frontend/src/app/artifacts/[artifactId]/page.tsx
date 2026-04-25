@@ -38,7 +38,7 @@ export default async function ArtifactDetailPage({
   if (row.analysis_run_id) {
     try {
       const r = await getRun(row.analysis_run_id, false);
-      runHref = `/projects/${r.project_id}/runs/${r.id}`;
+      runHref = `/projects/${r.project_id}/runs/${r.id}/trace`;
     } catch {
       runHref = null;
     }
@@ -50,7 +50,7 @@ export default async function ArtifactDetailPage({
         <h1 className="text-lg font-semibold">Artifact</h1>
         {runHref ? (
           <Link href={runHref} className="font-mono text-sm underline">
-            ← Parent run
+            ← Parent trace
           </Link>
         ) : null}
       </div>

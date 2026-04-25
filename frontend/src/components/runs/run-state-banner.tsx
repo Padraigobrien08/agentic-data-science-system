@@ -47,14 +47,14 @@ export function RunStateBanner({ status, surface, runAnswerHref }: Props) {
     return null;
   }
 
-  /** Run inspection header already links to trace — avoid repeating the same CTA. */
+  /** Trace header already links back to chat — avoid repeating the same CTA. */
   const cta =
     model.showOutcomeCta && surface === "trace" ? (
       <p className="mt-2 text-xs text-[var(--muted)]">
         <Link href={runAnswerHref} className="font-medium text-[var(--foreground)] underline">
-          View run inspection
+          Return to chat
         </Link>{" "}
-        for the condensed summary.
+        for the compact answer.
       </p>
     ) : null;
 

@@ -137,7 +137,6 @@ describe("ChatMessageList", () => {
     expect(
       screen.getByText("Background delivery was rerouted to immediate execution for this chat request."),
     ).toBeTruthy();
-    expect(screen.getByText("Answer")).toBeTruthy();
     expect(screen.getByText("What's happening")).toBeTruthy();
     expect(screen.getByText("Why we think that")).toBeTruthy();
     expect(screen.getByText("What weakens the claim")).toBeTruthy();

@@ -7,7 +7,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "EDGAR Analysis",
-  description: "Analysis runs and traces",
+  description: "Evidence-first SEC analysis with deterministic runs, artifacts, and traceable workflows",
   icons: {
     icon: [{ url: "/favicon.svg", type: "image/svg+xml" }],
   },
@@ -23,7 +23,7 @@ export default async function RootLayout({
     <html lang="en" data-scroll-behavior="smooth">
       <body className="min-h-screen antialiased">
         <SiteHeader user={user} />
-        <main className="mx-auto max-w-6xl px-4 py-6">{children}</main>
+        <main className="mx-auto w-full max-w-[90rem] px-3 py-8 sm:px-5 lg:px-6">{children}</main>
       </body>
     </html>
   );
