@@ -15,6 +15,20 @@ The core design goal is simple:
 
 **Every analysis run should be trustworthy, inspectable, and reproducible.**
 
+## Product Screens
+
+### Narrative answer with supporting evidence
+
+![Narrative answer view](docs/screenshots/chat-answer.png)
+
+### Inline chart evidence inside chat
+
+![Inline chart evidence](docs/screenshots/chat-chart.png)
+
+### Deep-dive trace and inspection surface
+
+![Run trace view](docs/screenshots/run-trace.png)
+
 ## Why this repo matters
 
 Most AI-finance demos stop at “LLM says something plausible.” This repo is different:
@@ -201,6 +215,6 @@ See [SECURITY.md](SECURITY.md).
 
 See [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md).
 
-## Remaining high-leverage repo upgrade
+## License
 
-The biggest missing public-facing item is still a deliberate license choice. I did not add a `LICENSE` file automatically because that is a legal/product decision, not just packaging.
+A repository license is still intentionally pending. I did not add one automatically because that is a legal/product decision, not just documentation polish.
