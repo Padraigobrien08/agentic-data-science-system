@@ -37,7 +37,7 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- None - `v1.3` feature work is complete and the milestone is ready for audit/archive
+- None — `v1.3` is shipped and archived; no new milestone is defined yet
 
 ### Out of Scope
 
@@ -47,18 +47,12 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ## Current State
 
-**Current milestone:** `v1.3 Narrative Answers and Visual Evidence`
-**Status:** The platform now has a centered narrative chat answer with inline confidence, collapsed supplemental evidence, deterministic inline charts, and a final polish pass that keeps trace clearly technical. `v1.3` is ready for milestone audit/archive.
+**Shipped:** `v1.3 Narrative Answers and Visual Evidence` on 2026-04-25
+**Status:** The platform now has a centered narrative chat answer with inline confidence, collapsed supplemental evidence, deterministic inline charts, and a final polish pass that keeps trace clearly technical. There is no active milestone at the moment.
 
-## Current Milestone: v1.3 Narrative Answers and Visual Evidence
+## No Active Milestone
 
-**Goal:** Turn the chat answer into a full narrative analyst response with supplemental evidence and deterministic visual proof.
-
-**Target features:**
-- Multi-paragraph narrative answers that feel like a substantive analyst reply, not a compressed summary card
-- Inline evidence-strength badge in the answer header with semantic color treatment and a compact explainer for why the score was assigned
-- Supplemental evidence disclosure below the answer with slim supporting cards and compact secondary navigation pills
-- Deterministic inline charts rendered from trusted run data through shadcn/Recharts components
+The planning set is between milestones. The shipped `v1.3` archive now captures the narrative-first chat answer surface, and the next milestone should be chosen from the remaining multi-run, evidence-bundle, or analyst-memory workflow gaps rather than from unresolved answer-architecture blockers.
 
 ## Future Milestone Candidates
 
@@ -76,7 +70,7 @@ The highest-value work in v1.0 was operational rather than feature-based, and al
 
 The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface.
 
-`v1.3` follows directly from the first live iteration on that new chat surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip, Phase 20 added deterministic inline charts rendered directly inside the answer column from backend-authored chart previews, and Phase 21 finished the stack with calmer editorial spacing, responsive answer-shell cleanup, and final chat-versus-trace wording alignment. The result is now a coherent narrative-first answer experience rather than a visible stack of incremental UI layers.
+`v1.3` follows directly from the first live iteration on the new chat-first answer surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip, Phase 20 added deterministic inline charts rendered directly inside the answer column from backend-authored chart previews, and Phase 21 finished the stack with calmer editorial spacing, responsive answer-shell cleanup, and final chat-versus-trace wording alignment. That narrative-first answer model is now shipped and archived, and the next milestone should build on it rather than reopen it.
 
 ## Constraints
 
@@ -120,4 +114,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after completing Phase 21 Narrative Answer Polish*
+*Last updated: 2026-04-25 after v1.3 archive*

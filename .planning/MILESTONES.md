@@ -1,5 +1,32 @@
 # Project Milestones: Agentic Data Science System
 
+## v1.3 Narrative Answers and Visual Evidence (Shipped: 2026-04-25)
+
+**Delivered:** A narrative-first EDGAR answer experience with backend-authored analyst prose, inline evidence strength, on-demand supporting proof, deterministic inline charts, and a trace surface clearly framed as the technical deep dive.
+
+**Phases completed:** 5 phases, 15 plans, 27 tasks
+
+**Key accomplishments:**
+
+- Replaced summary-card answers with substantive centered narrative replies authored through safe backend previews.
+- Moved evidence strength into a compact semantic header pill with an in-chat explainer.
+- Collapsed supporting proof into an on-demand disclosure with slim exact-jump evidence rows and quiet secondary navigation.
+- Added deterministic inline charts from trusted backend-authored previews instead of frontend inference.
+- Finished the answer stack with calmer editorial spacing, responsive cleanup, and explicit chat-versus-trace product framing.
+
+**Stats:**
+
+- 107 files created or modified
+- 13,040 insertions and 322 deletions across backend, frontend, tests, and planning artifacts
+- 5 phases, 15 plans, 27 tasks, 65 commits
+- 6 calendar days from 2026-04-19 to 2026-04-25
+
+**Git range:** `7f1d98f` → `7904171`
+
+**What's next:** Define the next milestone around multi-run conversation workflows, reusable evidence bundles, or analyst memory and comparison features that build on the shipped narrative-first answer surface.
+
+---
+
 ## v1.2 Chat-First Analysis Experience (Shipped: 2026-04-19)
 
 **Delivered:** A chat-first EDGAR analysis experience with dependable local runtime delivery, deterministic analyst-language routing, inline answer and evidence reading in workspace chat, and a simplified secondary run inspection surface.

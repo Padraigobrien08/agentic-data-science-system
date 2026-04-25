@@ -1,14 +1,15 @@
 ---
 gsd_state_version: 1.0
-milestone: v1.3
-milestone_name: Narrative Answers and Visual Evidence
-status: Ready to complete milestone
-last_updated: "2026-04-25T09:55:00.000Z"
+milestone: none
+milestone_name: none
+status: Ready to define next milestone
+stopped_at: v1.3 archived; awaiting next milestone definition
+last_updated: "2026-04-25T10:05:00.000Z"
 progress:
-  total_phases: 5
-  completed_phases: 4
-  total_plans: 15
-  completed_plans: 12
+  total_phases: 0
+  completed_phases: 0
+  total_plans: 0
+  completed_plans: 0
 ---
 
 # Project State
@@ -18,35 +19,22 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-19)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Phase 21 — narrative-answer-polish
+**Current focus:** Define the next milestone after shipping and archiving `v1.3 Narrative Answers and Visual Evidence`.
 
 ## Current Position
 
-Phase: 21 (narrative-answer-polish) — COMPLETE
-Plan: Phase 21 complete; milestone audited and ready to archive
+Phase: none
+Plan: none
+Milestone: none
+Status: Ready to define next milestone
+Last activity: 2026-04-25 — archived `v1.3 Narrative Answers and Visual Evidence` after a clean milestone audit
 
-## Current Milestone
+## Recently Shipped
 
-- `v1.3 Narrative Answers and Visual Evidence`
-- Goal: make the chat answer a fuller analyst reply with inline confidence posture, supplemental evidence disclosure, and deterministic charts
-- Phases: 17-21
+- `v1.3 Narrative Answers and Visual Evidence` shipped on 2026-04-25
+- Archive: [/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-ROADMAP.md](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-ROADMAP.md)
+- Audit: [/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-MILESTONE-AUDIT.md](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-MILESTONE-AUDIT.md)
 
 ## Next Command
 
-`$gsd-complete-milestone`
-
-## Recent Decisions
-
-- Inline chart eligibility stays backend-owned, with only strong deterministic cases surviving into chat.
-- The answer column now renders either trusted inline charts or one explicit chart-preview fallback notice.
-- Phase 21 should polish the shipped answer stack rather than reopen the chart contract.
-- The final answer polish pass should preserve the narrative-first hierarchy and keep trace as the technical deep-dive surface.
-- Phase 21 plan is locked to prose/link polish, responsive cleanup, and final chat/trace wording alignment only.
-- The narrative-first answer experience is now fully shipped and the milestone is ready for audit/archive.
-- The `v1.3` milestone audit passed cleanly with 12/12 requirements and no remaining tech debt.
-
-## Last Session
-
-- Completed `v1.3` milestone audit
-- Duration: 36 min
-- Files changed: audit report plus milestone-ready state update
+`$gsd-new-milestone`

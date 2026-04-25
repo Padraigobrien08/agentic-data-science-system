@@ -2,6 +2,41 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.3 — Narrative Answers and Visual Evidence
+
+**Shipped:** 2026-04-25
+**Phases:** 5 | **Plans:** 15 | **Sessions:** 1
+
+### What Was Built
+- A narrative-first chat answer surface with backend-authored analyst prose, inline confidence explanation, on-demand supporting proof, deterministic inline charts, and a trace surface clearly framed as the technical deep dive
+
+### What Worked
+- The milestone stayed coherent because each phase enriched one already-centered answer surface instead of creating parallel summary and evidence paths.
+- Keeping semantics backend-owned while limiting frontend work to rendering and layout polish preserved trust and kept later phases low-risk.
+- The final polish phase was worth its own closeout step; it made the shipped answer stack feel deliberate rather than merely functional.
+
+### What Was Inefficient
+- Large amounts of in-progress local UI work remained dirty in the worktree throughout the milestone, which made careful file-level integration necessary in the final polish phase.
+- The shadcn/Recharts answer-path warnings under jsdom are still noisy in tests even though runtime behavior is correct.
+- Milestone archive curation remains manual: roadmap slimming, state reset, milestone history, and retrospective updates are still hand-authored.
+
+### Patterns Established
+- Treat chat as the final analytical reading surface, then add confidence, proof, and charts beneath it in that exact order.
+- Keep every answer enhancement deterministic-first and backend-authored at the meaning layer; use the frontend only for view-model rendering and polish.
+- Reserve one final polish phase for narrative-heavy UI milestones so the product ships as one coherent experience rather than as a sequence of stacked feature additions.
+
+### Key Lessons
+1. Once the answer surface is stable, most remaining UX quality comes from hierarchy, spacing, and wording polish rather than from adding more features.
+2. Trust-heavy UI work moves faster when the frontend never has to infer semantics from raw payloads.
+3. Trace surfaces need explicit copy discipline or they will drift back into acting like second answer pages.
+
+### Cost Observations
+- Model mix: not tracked in repository metadata for this milestone
+- Sessions: 1 visible GSD execution session
+- Notable: 15 plans and 27 tasks shipped across 5 phases because the milestone stayed focused on one answer-reading model
+
+---
+
 ## Milestone: v1.2 — Chat-First Analysis Experience
 
 **Shipped:** 2026-04-19
@@ -125,6 +160,7 @@
 | v1.0 | 1 | 5 | Introduced trust-boundary phases, archived planning artifacts, and regression-first execution |
 | v1.1 | 1 | 6 | Extended the hardened base into live-validation scale features and added an explicit archive-traceability cleanup phase |
 | v1.2 | 1 | 5 | Re-centered the product around chat-first answer delivery and demoted the run page to secondary inspection |
+| v1.3 | 1 | 5 | Turned the chat answer into the primary narrative product surface with inline confidence, on-demand proof, deterministic charts, and explicit trace framing |
 
 ### Cumulative Quality
 
@@ -133,8 +169,10 @@
 | v1.0 | 57 prior-phase regression tests green at milestone closeout plus 13/13 Phase 5 must-haves | Broad backend, worker, browser, and Compose workflow gating | 0 |
 | v1.1 | 66 backend audit-slice tests plus 8 frontend trace tests green at milestone closeout | Validation policy, remote storage, large traces, evaluation control plane, child-run reconciliation, and ops truthfulness | 0 |
 | v1.2 | 84 backend audit-slice tests plus 12 frontend chat/run-page tests green at milestone closeout | Runtime reliability, deterministic routing, chat-native answers, inline evidence navigation, and secondary run inspection | 0 |
+| v1.3 | 37 backend audit-slice tests plus 22 frontend answer/trace tests green at milestone closeout | Narrative answers, confidence explainer, supplemental proof disclosure, deterministic inline charts, and final answer/trace polish | 0 |
 
 ### Top Lessons (Verified Across Milestones)
 
 1. Contract-driven milestones stay executable at speed when each phase owns one trust boundary or operator surface.
 2. Archive helpers still need manual curation; treat milestone completion as a documentation pass, not just a file move.
+3. Narrative-heavy product milestones benefit from one final polish phase that explicitly cleans up hierarchy, copy, and responsive behavior after the core contracts are already shipped.
