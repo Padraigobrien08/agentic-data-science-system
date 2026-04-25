@@ -24,7 +24,14 @@ DEFAULT_TEST_POSTGRES_URL = "postgresql+psycopg2://edgar:edgar@127.0.0.1:5432/ed
 
 
 def postgres_test_url() -> str:
-    return os.getenv("EDGAR_TEST_POSTGRES_URL", DEFAULT_TEST_POSTGRES_URL)
+    configured = os.getenv("EDGAR_TEST_POSTGRES_URL")
+    if not configured:
+        pytest.skip(
+            "Postgres-only queue regressions require EDGAR_TEST_POSTGRES_URL. "
+            "They run in the dedicated Postgres CI job, not the default backend suite.",
+            allow_module_level=True,
+        )
+    return configured
 
 
 def _unique_database_name() -> str:
@@ -114,4 +121,3 @@ def list_jobs_for_run(factory: sessionmaker[Session], analysis_run_id: uuid.UUID
         )
     finally:
         db.close()
-
