@@ -11,7 +11,7 @@
 
 ### Milestone v1.3: Narrative Answers and Visual Evidence
 
-**Status:** Phase 21 ready to execute
+**Status:** All phases complete · milestone audit next
 **Phases:** 17-21
 **Total Plans:** 15 planned
 
@@ -88,13 +88,13 @@ Plans:
 **Goal**: Refine the end-to-end narrative answer experience so it feels intentional across desktop and smaller viewports and leaves the trace as the technical surface.
 **Depends on**: Phase 20
 **Plans**: 3 plans
-**Status**: Ready to execute — 2026-04-25
+**Status**: Complete — 2026-04-25
 
 Plans:
 
-- [ ] 21-01: Add final prose hierarchy, spacing, and citation/link polish to the narrative answer flow
-- [ ] 21-02: Tune responsiveness and disclosure behavior so the new answer architecture works cleanly across common screen sizes
-- [ ] 21-03: Align remaining chat/trace wording and navigation so trace stays the technical deep-dive rather than a competing answer reader
+- [x] 21-01: Add final prose hierarchy, spacing, and citation/link polish to the narrative answer flow
+- [x] 21-02: Tune responsiveness and disclosure behavior so the new answer architecture works cleanly across common screen sizes
+- [x] 21-03: Align remaining chat/trace wording and navigation so trace stays the technical deep-dive rather than a competing answer reader
 
 **Details:**
 - Requirements: UX polish across `ANSR-01` to `CHRT-03`
@@ -112,4 +112,4 @@ Plans:
 | v1.0 Hardening | 1-5 | 17 | Complete | 2026-04-17 |
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
-| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Phase 20 complete | — |
+| v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Complete | — |
