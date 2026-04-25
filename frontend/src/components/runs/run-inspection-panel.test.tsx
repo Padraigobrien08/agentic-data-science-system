@@ -79,7 +79,7 @@ describe("RunInspectionPanel", () => {
     );
 
     expect(screen.getByText("Inspection focus")).toBeTruthy();
-    expect(screen.getByText(/The full answer lives in workspace chat\./)).toBeTruthy();
+    expect(screen.getByText(/The full answer lives in chat\./)).toBeTruthy();
     expect(screen.getByRole("link", { name: "Back to chat" }).getAttribute("href")).toBe("/projects/project-1/chat");
     expect(screen.getByRole("link", { name: "Open trace" }).getAttribute("href")).toBe(
       "/projects/project-1/runs/run-1/trace",

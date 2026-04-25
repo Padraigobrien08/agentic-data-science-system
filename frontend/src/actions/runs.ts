@@ -35,6 +35,11 @@ function parseTickers(raw: string): string[] {
     .filter(Boolean);
 }
 
+function normalizeRoutingReason(reason: string | null | undefined): string | undefined {
+  if (!reason) return undefined;
+  return reason.replace(/workspace scope/g, "chat scope");
+}
+
 export async function createAnalysisRunFromChat(
   projectId: string,
   _prev: {
@@ -56,7 +61,7 @@ export async function createAnalysisRunFromChat(
     return { error: "Analysis goal is required." };
   }
   if (tickers.length === 0) {
-    return { error: "This workspace has no tickers configured. Add tickers in workspace settings." };
+    return { error: "This chat has no tickers configured. Add tickers in the scope editor." };
   }
 
   let run;
@@ -74,7 +79,7 @@ export async function createAnalysisRunFromChat(
           requestId,
           content: "I couldn't route that request yet.",
           rewriteSuggestions: preview.rewrite_suggestions,
-          routingReason: preview.reason ?? undefined,
+          routingReason: normalizeRoutingReason(preview.reason),
         },
       };
     }
@@ -137,7 +142,7 @@ export async function createAnalysisRunFromChat(
   const deliveryMode: DeliveryMode = "sync_only";
   const deliveryDetail = reroutedFromBackground
     ? "Background delivery was rerouted to immediate execution for this chat request."
-    : "Workspace chat is executing synchronously right now.";
+    : "This chat is executing synchronously right now.";
   const content =
     answerCard.narrativeAnswer.thesis ??
     answerCard.emptyStateReason ??

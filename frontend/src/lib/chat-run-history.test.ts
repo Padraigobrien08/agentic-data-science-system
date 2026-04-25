@@ -128,7 +128,8 @@ describe("buildProjectChatHistory", () => {
     expect(result.recentRuns).toHaveLength(2);
     expect(result.recentRuns[0]).toMatchObject({
       id: "run-2",
-      href: "/projects/project-1/runs/run-2/trace",
+      title: "MSFT is lagging AAPL on operating margin stability.",
+      scrollTargetId: "answer-run-2",
     });
   });
 });

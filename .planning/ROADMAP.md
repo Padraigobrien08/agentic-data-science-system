@@ -6,28 +6,28 @@
 - [x] **v1.1 Live Validation and Scale** — shipped 2026-04-18 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-MILESTONE-AUDIT.md)
 - [x] **v1.2 Chat-First Analysis Experience** — shipped 2026-04-19 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-MILESTONE-AUDIT.md)
 - [x] **v1.3 Narrative Answers and Visual Evidence** — shipped 2026-04-25 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-MILESTONE-AUDIT.md)
-- [ ] **v1.4 Conversation-First Information Architecture** — active · phases 22-26
+- [x] **v1.4 Conversation-First Information Architecture** — shipped 2026-04-25 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.4-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.4-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.4-MILESTONE-AUDIT.md)
 
 ## Active Planning
 
 ### Milestone v1.4: Conversation-First Information Architecture
 
-**Status:** Requirements and roadmap defined · ready to plan Phase 22
-**Phases:** 22-26
-**Total Plans:** 15 planned
+**Status:** Shipped 2026-04-25
+**Phases:** 22-26 complete
+**Total Plans:** 15 complete
 
 ### Phase 22: Conversation-First Shell
 
 **Goal**: Remove visible workspace-first framing from the primary product surface and make chat the unmistakable entrypoint.
 **Depends on**: Shipped `v1.3` narrative answer baseline
 **Plans**: 3 plans
-**Status**: Not started
+**Status**: Complete
 
 Plans:
 
-- [ ] 22-01: Replace workspace-heavy shell labels and chrome with a conversation-first chat shell
-- [ ] 22-02: Introduce clearer new-conversation and primary history affordances without changing backend project ownership
-- [ ] 22-03: Align top-level navigation and entry flow so the product opens as chat with history instead of workspace management
+- [x] 22-01: Replace workspace-heavy shell labels and chrome with a conversation-first chat shell
+- [x] 22-02: Introduce clearer new-conversation and primary history affordances without changing backend project ownership
+- [x] 22-03: Align top-level navigation and entry flow so the product opens as chat with history instead of workspace management
 
 **Details:**
 - Requirements: `CONV-01`, `CONV-02`, `SURF-01`
@@ -38,13 +38,13 @@ Plans:
 **Goal**: Make history feel like conversation history rather than a list of generic analyses or runs.
 **Depends on**: Phase 22
 **Plans**: 3 plans
-**Status**: Not started
+**Status**: Complete
 
 Plans:
 
-- [ ] 23-01: Reframe the left rail and history model around conversations and prior answers rather than generic analysis cards
-- [ ] 23-02: Tighten persisted history selection and reopening behavior so continuing a prior conversation feels natural
-- [ ] 23-03: Harden history naming, ordering, and empty states so users can understand what each prior conversation contains
+- [x] 23-01: Reframe the left rail and history model around conversations and prior answers rather than generic analysis cards
+- [x] 23-02: Tighten persisted history selection and reopening behavior so continuing a prior conversation feels natural
+- [x] 23-03: Harden history naming, ordering, and empty states so users can understand what each prior conversation contains
 
 **Details:**
 - Requirements: `CONV-03`, `HIST-01`
@@ -55,13 +55,13 @@ Plans:
 **Goal**: Treat scope as lightweight chat context that is visible and editable without turning it back into workspace configuration.
 **Depends on**: Phase 23
 **Plans**: 3 plans
-**Status**: Not started
+**Status**: Complete
 
 Plans:
 
-- [ ] 24-01: Redesign visible scope presentation as quiet chat-context metadata instead of workspace setup chrome
-- [ ] 24-02: Make scope editing inline and conversational while preserving the existing project-backed scope contract
-- [ ] 24-03: Clarify how current scope affects future prompts and when a prompt narrows scope within the active conversation
+- [x] 24-01: Redesign visible scope presentation as quiet chat-context metadata instead of workspace setup chrome
+- [x] 24-02: Make scope editing inline and conversational while preserving the existing project-backed scope contract
+- [x] 24-03: Clarify how current scope affects future prompts and when a prompt narrows scope within the active conversation
 
 **Details:**
 - Requirements: `SCOPE-01`, `SCOPE-02`
@@ -72,13 +72,13 @@ Plans:
 **Goal**: Tighten the answer layout so the question, answer, confidence, proof, and composer feel like one coherent reading flow.
 **Depends on**: Phase 24
 **Plans**: 3 plans
-**Status**: Not started
+**Status**: Complete
 
 Plans:
 
-- [ ] 25-01: Pull the answer upward and reduce dead space between the user prompt and the start of the response
-- [ ] 25-02: Integrate the confidence pill directly with the answer header and rebalance editorial spacing across the answer block
-- [ ] 25-03: Compress supplemental evidence rows and bottom spacing so proof stays secondary and the composer feels better placed
+- [x] 25-01: Pull the answer upward and reduce dead space between the user prompt and the start of the response
+- [x] 25-02: Integrate the confidence pill directly with the answer header and rebalance editorial spacing across the answer block
+- [x] 25-03: Compress supplemental evidence rows and bottom spacing so proof stays secondary and the composer feels better placed
 
 **Details:**
 - Requirements: `LAY-01`, `LAY-02`, `LAY-03`
@@ -89,13 +89,13 @@ Plans:
 **Goal**: Keep trace and artifact routes coherent as technical deep dives after workspace and run language are demoted in the primary UI.
 **Depends on**: Phase 25
 **Plans**: 3 plans
-**Status**: Not started
+**Status**: Complete
 
 Plans:
 
-- [ ] 26-01: Align trace and artifact wording, back-links, and route affordances to the conversation-first model
-- [ ] 26-02: Remove remaining user-facing workspace and run terminology where it conflicts with the primary chat/history framing
-- [ ] 26-03: Harden secondary-route navigation so technical deep dives always point back to the right conversation context
+- [x] 26-01: Align trace and artifact wording, back-links, and route affordances to the conversation-first model
+- [x] 26-02: Remove remaining user-facing workspace and run terminology where it conflicts with the primary chat/history framing
+- [x] 26-03: Harden secondary-route navigation so technical deep dives always point back to the right conversation context
 
 **Details:**
 - Requirements: `SURF-02`, `SURF-03`
@@ -114,4 +114,4 @@ Plans:
 | v1.1 Live Validation and Scale | 6-11 | 18 | Complete | 2026-04-18 |
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
 | v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Complete | 2026-04-25 |
-| v1.4 Conversation-First Information Architecture | 22-26 | 15 | Active | — |
+| v1.4 Conversation-First Information Architecture | 22-26 | 15 | Complete | 2026-04-25 |

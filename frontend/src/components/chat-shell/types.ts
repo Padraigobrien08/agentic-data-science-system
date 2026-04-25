@@ -45,10 +45,11 @@ export type ChatMessage = ChatUserMessage | ChatSystemMessage | ChatAssistantMes
 
 export type ChatRecentRun = {
   id: string;
-  href: string;
   status: AnalysisRunStatus;
-  goalDisplay: string;
+  title: string;
+  preview?: string | null;
   createdAt: string;
+  scrollTargetId?: string;
 };
 
 export type ChatBackgroundDelivery = BackgroundDeliveryHealth;

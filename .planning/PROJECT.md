@@ -37,10 +37,10 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- [ ] Users experience the product primarily as a chat with history instead of a workspace shell with redundant framing
-- [ ] Users can manage analysis scope as lightweight conversation context without leaving the chat flow
-- [ ] Users can read a tighter answer layout that begins closer to the prompt and uses width more effectively before proof and secondary navigation appear
-- [ ] Users can treat trace and artifact views as technical deep dives linked from chat instead of as competing primary destinations
+- ✓ Users experience the product primarily as a chat with history instead of a workspace shell with redundant framing — validated in Phase 22/23
+- ✓ Users can manage analysis scope as lightweight conversation context without leaving the chat flow — validated in Phase 24
+- ✓ Users can read a tighter answer layout that begins closer to the prompt and uses width more effectively before proof and secondary navigation appear — validated in Phase 25
+- ✓ Users can treat trace and artifact views as technical deep dives linked from chat instead of as competing primary destinations — validated in Phase 26
 
 ### Out of Scope
 
@@ -50,22 +50,16 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ## Current State
 
-**Shipped:** `v1.3 Narrative Answers and Visual Evidence` on 2026-04-25
-**Status:** The platform now has a centered narrative chat answer with inline confidence, collapsed supplemental evidence, deterministic inline charts, and a final polish pass that keeps trace clearly technical. `v1.4` now focuses on making that answer surface live inside a cleaner conversation-first product model.
+**Shipped:** `v1.4 Conversation-First Information Architecture` on 2026-04-25
+**Status:** The platform now presents as chat with history and lightweight scope, while keeping trace and artifacts as secondary technical deep dives.
 
-## Current Milestone: v1.4 Conversation-First Information Architecture
+## Current Milestone
 
-**Goal:** Make the product feel like a chat with history and lightweight scope, not like a workspace shell, while tightening the answer layout and demoting remaining operational chrome.
-
-**Target features:**
-- Replace visible workspace-first framing with a conversation-first shell and clearer history model
-- Treat scope as lightweight chat context that can be edited inline without leaving the conversation flow
-- Pull the answer upward, align confidence with the answer header, and compress supplemental evidence presentation
-- Keep trace and artifact routes as secondary technical deep dives with language and navigation aligned to the chat-first model
+No active milestone is defined. `v1.4` is complete and archived.
 
 ## Future Milestone Candidates
 
-- Multi-run conversation workflows so analysts can compare or revisit prior runs inside one workspace thread
+- Multi-run conversation workflows so analysts can compare or revisit prior runs inside one chat thread
 - Saved evidence bundles and reusable verification sets built from the new supplemental evidence cards
 - Scheduled live canary suites with alerting and explicit request-budget controls
 - Promotion of failing live or hybrid cases into deterministic fixture regressions
@@ -81,7 +75,7 @@ The `v1.2` milestone came directly from local product testing after the `v1.1` s
 
 `v1.3` follows directly from the first live iteration on the new chat-first answer surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip, Phase 20 added deterministic inline charts rendered directly inside the answer column from backend-authored chart previews, and Phase 21 finished the stack with calmer editorial spacing, responsive answer-shell cleanup, and final chat-versus-trace wording alignment.
 
-`v1.4` builds directly on that shipped answer stack. The main gap is no longer answer architecture; it is information architecture. The app still exposes a strong internal `project/workspace/run` model in places where the user mostly wants “a chat with history, an editable scope, and a technical deep dive when needed.” This milestone therefore focuses on making the conversation and history model primary, shrinking the visible workspace chrome, tightening the answer layout around the prompt that triggered it, and keeping trace and artifact routes coherent as secondary technical surfaces without breaking the existing backend project/run/artifact contracts.
+`v1.4` built directly on that shipped answer stack and completed the information-architecture pass. The visible product now behaves like chat with history and lightweight scope, while the backend `project/run/artifact` model remains intact underneath for persistence and traceability.
 
 ## Constraints
 
@@ -106,7 +100,7 @@ The `v1.2` milestone came directly from local product testing after the `v1.1` s
 | Keep prompt routing deterministic-first and expose unsupported guidance before run creation | Analyst trust depends on predictable routing behavior and actionable chat guidance rather than opaque fallback behavior | ✓ Good |
 | Treat the chat reply as the primary analytical product and move evidence into a clearly secondary disclosure | The current centered answer still reads like a summary card; analysts need a substantive narrative first and supporting proof second | ✓ Good |
 | Render inline charts only from deterministic, backend-safe chart specs derived from trusted run data | Visuals should strengthen trust, not introduce frontend-side inference or chart hallucination risk | ✓ Good |
-| Keep the backend project and run model while demoting workspace language in the visible product | Persistence, ownership, and traceability still depend on the existing model, but the user-facing experience should feel like chat with history | — Pending |
+| Keep the backend project and run model while demoting workspace language in the visible product | Persistence, ownership, and traceability still depend on the existing model, but the user-facing experience should feel like chat with history | ✓ Good |
 
 ## Evolution
 
@@ -126,4 +120,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after starting v1.4 Conversation-First Information Architecture*
+*Last updated: 2026-04-25 after shipping v1.4 Conversation-First Information Architecture*

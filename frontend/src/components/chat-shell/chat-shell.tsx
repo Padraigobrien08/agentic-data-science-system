@@ -2,8 +2,9 @@
 
 import { useActionState, useEffect, useState } from "react";
 
-import { updateWorkspaceScopeAction } from "@/actions/projects";
+import { startConversationFromScopeAction, updateWorkspaceScopeAction } from "@/actions/projects";
 import { createAnalysisRunFromChat } from "@/actions/runs";
+import { cn } from "@/lib/utils";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
@@ -19,12 +20,20 @@ type Props = {
   backgroundDelivery: ChatBackgroundDelivery;
   initialMessages: ChatMessage[];
   recentRuns: ChatRecentRun[];
+  className?: string;
 };
 
 /**
- * Workspace chat is one visible thread, hydrated from persisted runs and extended in place.
+ * One visible conversation thread, hydrated from persisted runs and extended in place.
  */
-export function ChatShell({ projectId, tickers, backgroundDelivery, initialMessages, recentRuns }: Props) {
+export function ChatShell({
+  projectId,
+  tickers,
+  backgroundDelivery,
+  initialMessages,
+  recentRuns,
+  className,
+}: Props) {
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
   const [isEditingScope, setIsEditingScope] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
@@ -33,6 +42,7 @@ export function ChatShell({ projectId, tickers, backgroundDelivery, initialMessa
   const [state, formAction] = useActionState(action, {});
   const scopeAction = updateWorkspaceScopeAction.bind(null, projectId);
   const [scopeState, scopeFormAction] = useActionState(scopeAction, { tickers });
+  const newConversationAction = startConversationFromScopeAction.bind(null, projectId);
 
   useEffect(() => {
     if (scopeState.tickers) {
@@ -93,26 +103,37 @@ export function ChatShell({ projectId, tickers, backgroundDelivery, initialMessa
   };
 
   return (
-    <div className="flex h-[min(calc(100vh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row">
-      <ChatSidebar projectId={projectId} recentRuns={recentRuns} />
+    <div
+      className={cn(
+        "flex h-[min(calc(100dvh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row",
+        className,
+      )}
+    >
+      <ChatSidebar
+        scopeTickers={scopeTickers}
+        newConversationAction={newConversationAction}
+        recentRuns={recentRuns}
+      />
       <div className="flex min-h-0 min-w-0 flex-1 flex-col">
         <header className="border-b border-[var(--border)] px-4 py-3">
           <div className="flex items-start justify-between gap-3">
-            <div>
-              <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">Analysis workspace</h2>
-              <p className="text-[10px] text-[var(--muted)]">
-                Scope:{" "}
-                <span className="font-mono text-[var(--foreground)]">
-                  {scopeTickers.length ? scopeTickers.join(", ") : "—"}
-                </span>
+            <div className="space-y-1">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                Conversation
               </p>
+              <div className="flex flex-wrap items-center gap-2">
+                <span className="text-[10px] uppercase tracking-[0.14em] text-[var(--muted)]">Scope</span>
+                <span className="rounded-full border border-[var(--border)] bg-neutral-50 px-2.5 py-1 font-mono text-[10px] text-[var(--foreground)] dark:bg-neutral-950/60">
+                  {scopeTickers.length ? scopeTickers.join(", ") : "No tickers yet"}
+                </span>
+              </div>
             </div>
             <button
               type="button"
               onClick={() => setIsEditingScope((v) => !v)}
               className="rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--foreground)]"
             >
-              {isEditingScope ? "Close scope editor" : "Edit scope"}
+              {isEditingScope ? "Close scope" : "Edit scope"}
             </button>
           </div>
           {isEditingScope ? (
@@ -124,7 +145,9 @@ export function ChatShell({ projectId, tickers, backgroundDelivery, initialMessa
                 className="w-full resize-y rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-xs"
               />
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] text-[var(--muted)]">Comma or newline separated</p>
+                <p className="text-[10px] text-[var(--muted)]">
+                  Comma or newline separated. This affects future prompts in this chat.
+                </p>
                 <button
                   type="submit"
                   className="rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--foreground)]"

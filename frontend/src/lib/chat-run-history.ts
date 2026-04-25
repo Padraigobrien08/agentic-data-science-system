@@ -66,6 +66,30 @@ function buildAssistantMessage(
   };
 }
 
+function historyTitle(fallbackTitle: string, assistant: ChatAssistantMessage): string {
+  const thesis = assistant.answerCard?.narrativeAnswer.thesis?.trim();
+  if (thesis) {
+    return thesis;
+  }
+  return fallbackTitle;
+}
+
+function historyPreview(assistant: ChatAssistantMessage): string | null {
+  const section = assistant.answerCard?.narrativeAnswer.sections[0]?.body?.trim();
+  if (section) {
+    return section;
+  }
+  const rider = assistant.answerCard?.conclusionRider?.text?.trim();
+  if (rider) {
+    return rider;
+  }
+  return null;
+}
+
+function summaryGoalText(run: Pick<AnalysisRunDetail, "orchestration_goal_text">): string {
+  return run.orchestration_goal_text?.trim() || "Analysis run";
+}
+
 function buildUserMessage(run: AnalysisRunDetail): ChatUserMessage {
   return {
     id: `user-${run.id}`,
@@ -92,18 +116,29 @@ export async function buildProjectChatHistory(projectId: string, limit = 12): Pr
     (a, b) => new Date(a.run.created_at).getTime() - new Date(b.run.created_at).getTime(),
   );
 
-  const messages = chronologicalRuns.flatMap(({ run, artifacts }) => [
-    buildUserMessage(run),
-    buildAssistantMessage(projectId, run, artifacts),
-  ]);
+  const pairedMessages = chronologicalRuns.map(({ run, artifacts }) => {
+    const userMessage = buildUserMessage(run);
+    const assistantMessage = buildAssistantMessage(projectId, run, artifacts);
+    return { run, userMessage, assistantMessage };
+  });
 
-  const recentRuns: ChatRecentRun[] = recentRunsSorted.map((run) => ({
-    id: run.id,
-    href: `/projects/${projectId}/runs/${run.id}/trace`,
-    status: run.status,
-    goalDisplay: run.orchestration_goal_text?.trim() || "Analysis run",
-    createdAt: run.created_at,
-  }));
+  const messages = pairedMessages.flatMap(({ userMessage, assistantMessage }) => [userMessage, assistantMessage]);
+
+  const assistantByRunId = new Map(
+    pairedMessages.map(({ run, assistantMessage }) => [run.id, assistantMessage] as const),
+  );
+
+  const recentRuns: ChatRecentRun[] = recentRunsSorted.map((run) => {
+    const assistant = assistantByRunId.get(run.id);
+    return {
+      id: run.id,
+      status: run.status,
+      title: assistant ? historyTitle(summaryGoalText(run), assistant) : summaryGoalText(run),
+      preview: assistant ? historyPreview(assistant) : null,
+      createdAt: run.created_at,
+      scrollTargetId: `answer-${run.id}`,
+    };
+  });
 
   return { messages, recentRuns };
 }

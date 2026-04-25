@@ -121,9 +121,9 @@ export function ChatRunAnswerCard({
 
   return (
     <div className="w-full">
-      <div className="mx-auto w-full max-w-[58rem] space-y-8">
-        <section className="space-y-7 border-b border-[var(--border)]/80 pb-9">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+      <div className="mx-auto w-full max-w-[58rem] space-y-6">
+        <section className="space-y-5 border-b border-[var(--border)]/80 pb-7">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">Answer</p>
             <ConfidenceStrip
               overallConfidence={answerCard.overallConfidence}
@@ -131,12 +131,12 @@ export function ChatRunAnswerCard({
               reliabilityNote={reliabilityNote}
             />
           </div>
-          <p className="max-w-[46rem] text-[1.12rem] font-medium leading-[1.72] tracking-[-0.03em] text-[var(--foreground)] sm:text-[1.38rem]">
+          <p className="max-w-[46rem] text-[1.12rem] font-medium leading-[1.64] tracking-[-0.03em] text-[var(--foreground)] sm:text-[1.34rem]">
             {thesis}
           </p>
 
           {!isErrorState && narrativeSections.length > 0 ? (
-            <div className="max-w-[48rem] space-y-6">
+            <div className="max-w-[48rem] space-y-5">
               {narrativeSections.map((section) => (
                 <section key={`${section.heading}-${section.body.slice(0, 24)}`} className="space-y-2.5">
                   <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]/95">

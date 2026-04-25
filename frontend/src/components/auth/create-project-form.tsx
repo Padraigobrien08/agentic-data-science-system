@@ -30,11 +30,10 @@ export function CreateProjectForm() {
       ) : null}
       <div className="flex flex-col gap-3 sm:flex-row sm:items-end">
         <label className="flex min-w-[12rem] flex-1 flex-col gap-1">
-          <span className="text-[10px] text-[var(--muted)]">workspace name</span>
+          <span className="text-[10px] text-[var(--muted)]">chat title (optional)</span>
           <input
             name="name"
-            required
-            placeholder="My workspace"
+            placeholder="MSFT focus chat"
             className="rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-sm"
           />
         </label>

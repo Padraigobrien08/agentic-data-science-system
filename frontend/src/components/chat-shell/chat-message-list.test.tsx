@@ -159,7 +159,7 @@ describe("ChatMessageList", () => {
     expect(screen.getByRole("link", { name: "Artifacts" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Critic" })).toBeTruthy();
     expect(screen.getByRole("link", { name: "Trace" })).toBeTruthy();
-    expect(screen.queryByRole("link", { name: "Open source" })).toBeNull();
+    expect(screen.queryByRole("link", { name: "Source" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Run answer" })).toBeNull();
     expect(screen.queryByRole("link", { name: "Deep dive" })).toBeNull();
     expect(screen.queryByRole("link", { name: "All runs" })).toBeNull();
@@ -169,7 +169,7 @@ describe("ChatMessageList", () => {
 
     expect(screen.getByText("Hide supporting evidence")).toBeTruthy();
     expect(screen.getByText("Cash-flow deterioration is weaker than the revenue signal.")).toBeTruthy();
-    const expandedJumpLinks = screen.getAllByRole("link", { name: "Open source" });
+    const expandedJumpLinks = screen.getAllByRole("link", { name: "Source" });
     expect(expandedJumpLinks.length).toBeGreaterThanOrEqual(2);
     expect(expandedJumpLinks[0]?.getAttribute("href")).toBe("/projects/project-1/runs/run-1/trace#run-artifacts");
   });
@@ -415,7 +415,7 @@ describe("ChatMessageList", () => {
         content: "Running analysis...",
         pending: true,
         deliveryMode: "sync_only",
-        deliveryDetail: "Workspace chat is executing synchronously right now.",
+        deliveryDetail: "This chat is executing synchronously right now.",
         createdAt: "2026-04-18T20:00:00Z",
       },
     ];
@@ -432,7 +432,7 @@ describe("ChatMessageList", () => {
         id: "assistant-unsupported",
         role: "assistant",
         content: "I couldn't route that request yet.",
-        routingReason: "Requested tickers fall outside the current workspace scope.",
+        routingReason: "Requested tickers fall outside the current chat scope.",
         rewriteSuggestions: [
           "Assess whether margin pressure is temporary or structural for MSFT.",
           "Compare AAPL versus MSFT on operating margin over the last eight quarters.",
@@ -443,7 +443,7 @@ describe("ChatMessageList", () => {
 
     render(<ChatMessageList messages={messages} />);
 
-    expect(screen.getByText("Requested tickers fall outside the current workspace scope.")).toBeTruthy();
+    expect(screen.getByText("Requested tickers fall outside the current chat scope.")).toBeTruthy();
     expect(
       screen.getByText("Assess whether margin pressure is temporary or structural for MSFT."),
     ).toBeTruthy();

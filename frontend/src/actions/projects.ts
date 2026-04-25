@@ -16,20 +16,30 @@ function parseTickers(raw: string): string[] {
     .filter(Boolean);
 }
 
+function buildConversationName(tickers: string[]): string {
+  if (tickers.length === 1) {
+    return `${tickers[0]} chat`;
+  }
+  if (tickers.length === 2) {
+    return `${tickers[0]} + ${tickers[1]} chat`;
+  }
+  if (tickers.length > 2) {
+    return `${tickers[0]} + ${tickers.length - 1} more`;
+  }
+  return "New chat";
+}
+
 export async function createProjectAction(
   _prev: CreateProjectState,
   formData: FormData,
 ): Promise<CreateProjectState> {
   const name = String(formData.get("name") ?? "").trim();
   const tickers = parseTickers(String(formData.get("tickers") ?? ""));
-  if (!name) {
-    return { error: "Project name is required." };
-  }
   if (tickers.length === 0) {
     return { error: "Add at least one ticker (comma or newline separated)." };
   }
   try {
-    const row = await createProject({ name, tickers });
+    const row = await createProject({ name: name || buildConversationName(tickers), tickers });
     revalidatePath("/projects");
     redirect(`/projects/${row.id}/chat`);
   } catch (e) {
@@ -60,4 +70,18 @@ export async function updateWorkspaceScopeAction(
     }
     return { error: e instanceof Error ? e.message : "Request failed." };
   }
+}
+
+export async function startConversationFromScopeAction(projectId: string, formData: FormData) {
+  const tickers = parseTickers(String(formData.get("tickers") ?? ""));
+  if (tickers.length === 0) {
+    redirect(`/projects/${projectId}/chat`);
+  }
+
+  const row = await createProject({
+    name: buildConversationName(tickers),
+    tickers,
+  });
+  revalidatePath("/projects");
+  redirect(`/projects/${row.id}/chat`);
 }

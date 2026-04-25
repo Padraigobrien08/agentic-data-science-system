@@ -40,6 +40,7 @@ export function ChatComposer({
         ? crypto.randomUUID()
         : `rq-${Date.now()}`;
     setRequestId(id);
+    setValue("");
     if (requestIdRef.current) {
       requestIdRef.current.value = id;
     }
@@ -47,17 +48,16 @@ export function ChatComposer({
     formRef.current?.requestSubmit();
   }, [value, disabled, onSend]);
 
+  const showStatusBanner = backgroundDelivery.delivery_mode !== "sync_only";
   const statusTitle =
     backgroundDelivery.delivery_mode === "background_ready"
       ? "Background delivery ready"
-      : backgroundDelivery.delivery_mode === "background_degraded"
-        ? "Background delivery degraded"
-        : "Sync only";
+      : "Background delivery degraded";
   const statusDetail =
     backgroundDelivery.detail ??
     (backgroundDelivery.background_available
       ? "Queued background delivery is healthy."
-      : "Chat requests execute immediately in this workspace.");
+      : "Chat requests execute immediately in this conversation.");
   const statusTone =
     backgroundDelivery.delivery_mode === "background_ready"
       ? "border-emerald-200 bg-emerald-50 text-emerald-900"
@@ -84,10 +84,12 @@ export function ChatComposer({
       <input type="hidden" name="refresh" value={refresh ? "on" : "off"} />
       <input type="hidden" name="execute_now" value="on" />
       <input type="hidden" name="enqueue_execution" value="off" />
-      <div className={`mx-auto mb-2 max-w-4xl rounded-xl border px-3 py-2 text-xs ${statusTone}`}>
-        <p className="font-semibold uppercase tracking-[0.18em]">{statusTitle}</p>
-        <p className="mt-1 leading-5">{statusDetail}</p>
-      </div>
+      {showStatusBanner ? (
+        <div className={`mx-auto mb-2 max-w-4xl rounded-xl border px-3 py-2 text-xs ${statusTone}`}>
+          <p className="font-semibold uppercase tracking-[0.18em]">{statusTitle}</p>
+          <p className="mt-1 leading-5">{statusDetail}</p>
+        </div>
+      ) : null}
       <div className="mx-auto flex max-w-4xl gap-2 rounded-xl border border-[var(--border)] bg-neutral-50 p-2 dark:bg-neutral-950">
         <textarea
           value={value}
@@ -95,7 +97,7 @@ export function ChatComposer({
           onKeyDown={onKeyDown}
           disabled={disabled}
           rows={1}
-          className="max-h-40 min-h-[2.5rem] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-[var(--muted)]"
+          className="scrollbar-hidden max-h-40 min-h-[2.5rem] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-[var(--muted)]"
           placeholder={placeholder}
           aria-label="Message input"
         />
@@ -117,7 +119,7 @@ export function ChatComposer({
           />
           <span>Refresh SEC cache</span>
         </label>
-        <span>Chat runs execute immediately in this phase.</span>
+        <span>Chat runs execute immediately in this conversation.</span>
       </div>
       {error ? (
         <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[10px] text-red-700 dark:text-red-400">

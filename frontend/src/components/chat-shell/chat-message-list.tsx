@@ -13,10 +13,10 @@ function deliveryNote(message: Extract<ChatMessage, { role: "assistant" }>): str
     return message.deliveryDetail ?? "Background delivery was rerouted to immediate execution.";
   }
   if (message.deliveryMode === "background_degraded") {
-    return message.deliveryDetail ?? "Background delivery is degraded in this workspace.";
+    return message.deliveryDetail ?? "Background delivery is degraded in this chat.";
   }
   if (message.deliveryMode === "sync_only") {
-    return message.deliveryDetail ?? "This workspace is currently running chat requests synchronously.";
+    return message.deliveryDetail ?? "This chat is currently running requests synchronously.";
   }
   return message.deliveryDetail ?? null;
 }
@@ -35,7 +35,7 @@ function SystemStrip({ content }: { content: string }) {
 export function ChatMessageList({ messages }: Props) {
   return (
     <div
-      className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-7 overflow-y-auto px-4 py-6 md:px-6 lg:px-10"
+      className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 md:px-6 md:py-5 lg:px-10"
       role="log"
       aria-live="polite"
       aria-relevant="additions"
@@ -73,7 +73,11 @@ export function ChatMessageList({ messages }: Props) {
           }
           const note = deliveryNote(m);
           return (
-            <article key={m.id} className="flex w-full justify-center">
+            <article
+              key={m.id}
+              id={m.runId ? `answer-${m.runId}` : undefined}
+              className="scroll-mt-24 flex w-full justify-center"
+            >
               <div className="w-full max-w-[76rem]">
                 {m.pending ? (
                   <div className="mx-auto max-w-[58rem]">

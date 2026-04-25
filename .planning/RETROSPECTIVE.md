@@ -2,6 +2,41 @@
 
 *A living document updated after each milestone. Lessons feed forward into future planning.*
 
+## Milestone: v1.4 — Conversation-First Information Architecture
+
+**Shipped:** 2026-04-25
+**Phases:** 5 | **Plans:** 15 | **Sessions:** 1
+
+### What Was Built
+- A conversation-first chat shell with in-chat history, lightweight scope context, tighter answer flow, and secondary technical deep dives that no longer compete with chat
+
+### What Worked
+- The existing dirty UI work already contained much of the intended direction, so the milestone could focus on integrating and tightening rather than rebuilding.
+- Treating the backend `project` model as an internal persistence seam made the visible IA shift much cheaper than a data-model rewrite.
+- The biggest gains came from copy, navigation targets, and spacing changes, not from adding new primitives.
+
+### What Was Inefficient
+- The worktree already contained many unrelated frontend changes in the same files, so integration required careful read-first behavior before any patching.
+- The chat shell still shares some legacy naming internally (`project`, `workspace`-named functions), which is acceptable but not fully cleaned at the code symbol level.
+- The jsdom/Recharts warnings remain noisy in tests even though the functional gates passed.
+
+### Patterns Established
+- Treat the backend `project` as the persistence container and the visible product as chat.
+- Keep history in the same conversation surface whenever continuity matters more than technical drill-down.
+- Use copy and hierarchy changes aggressively once the answer architecture is stable.
+
+### Key Lessons
+1. Information-architecture milestones often deliver more value through label, target, and spacing changes than through new feature work.
+2. Preserving the backend contract while hiding the machinery is a strong brownfield move when the user-facing model has drifted from what users actually want.
+3. A conversation product feels materially different once history points back into chat instead of outward to technical routes.
+
+### Cost Observations
+- Model mix: not tracked in repository metadata for this milestone
+- Sessions: 1 visible GSD autonomous session
+- Notable: the code changes were concentrated in frontend shell/history/copy seams, with minimal backend surface change
+
+---
+
 ## Milestone: v1.3 — Narrative Answers and Visual Evidence
 
 **Shipped:** 2026-04-25

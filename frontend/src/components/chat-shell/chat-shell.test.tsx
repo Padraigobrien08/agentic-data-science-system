@@ -5,6 +5,7 @@ import { ChatShell } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatRecentRun } from "@/components/chat-shell/types";
 
 vi.mock("@/actions/projects", () => ({
+  startConversationFromScopeAction: async () => undefined,
   updateWorkspaceScopeAction: async () => ({}),
 }));
 
@@ -103,10 +104,11 @@ describe("ChatShell", () => {
     const recentRuns: ChatRecentRun[] = [
       {
         id: "run-1",
-        href: "/projects/project-1/runs/run-1/trace",
         status: "success",
-        goalDisplay: "Assess whether margin pressure is temporary or structural for MSFT",
+        title: "MSFT margin pressure looks cyclical rather than structural.",
+        preview: "Revenue growth deterioration appears in several recent quarters.",
         createdAt: "2026-04-18T19:58:00Z",
+        scrollTargetId: "answer-run-1",
       },
     ];
 
@@ -117,17 +119,17 @@ describe("ChatShell", () => {
         backgroundDelivery={{
           delivery_mode: "sync_only",
           background_available: false,
-          detail: "Workspace chat is executing synchronously right now.",
+          detail: "This chat is executing synchronously right now.",
         }}
         initialMessages={initialMessages}
         recentRuns={recentRuns}
       />,
     );
 
-    expect(
-      screen.getAllByText("Assess whether margin pressure is temporary or structural for MSFT").length,
-    ).toBeGreaterThan(1);
-    expect(screen.getByText("MSFT margin pressure looks cyclical rather than structural.")).toBeTruthy();
+    expect(screen.getByText("Assess whether margin pressure is temporary or structural for MSFT")).toBeTruthy();
+    expect(screen.getAllByText("MSFT margin pressure looks cyclical rather than structural.").length).toBeGreaterThan(
+      1,
+    );
 
     const input = screen.getByLabelText("Message input");
     fireEvent.change(input, {
@@ -137,10 +139,12 @@ describe("ChatShell", () => {
 
     expect(screen.getAllByText("Detect unusual financial changes for MSFT")).toHaveLength(1);
     expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
-    expect(screen.getAllByText("Workspace chat is executing synchronously right now.")).toHaveLength(1);
+    expect(screen.getAllByText("This chat is executing synchronously right now.")).toHaveLength(1);
     expect(screen.getByText("Answer")).toBeTruthy();
     expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
+    expect(screen.getByRole("button", { name: "New chat" })).toBeTruthy();
+    expect(screen.getByText("History")).toBeTruthy();
     const visualEvidence = screen.getByText("Visual evidence");
     const supportingEvidence = screen.getByText("Show supporting evidence");
     expect(
@@ -215,7 +219,7 @@ describe("ChatShell", () => {
         backgroundDelivery={{
           delivery_mode: "sync_only",
           background_available: false,
-          detail: "Workspace chat is executing synchronously right now.",
+          detail: "This chat is executing synchronously right now.",
         }}
         initialMessages={initialMessages}
         recentRuns={[]}

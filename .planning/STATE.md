@@ -2,14 +2,14 @@
 gsd_state_version: 1.0
 milestone: v1.4
 milestone_name: Conversation-First Information Architecture
-status: Ready to plan Phase 22
-stopped_at: v1.4 defined; Phase 22 planning next
-last_updated: "2026-04-25T12:20:00.000Z"
+status: Milestone complete
+stopped_at: v1.4 archived; ready for next milestone
+last_updated: "2026-04-25T19:45:00.000Z"
 progress:
   total_phases: 5
-  completed_phases: 0
+  completed_phases: 5
   total_plans: 15
-  completed_plans: 0
+  completed_plans: 15
 ---
 
 # Project State
@@ -19,17 +19,17 @@ progress:
 See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Deliver a conversation-first product model with chat history, lightweight scope, tighter answer layout, and secondary technical deep dives that no longer compete with chat.
+**Current focus:** `v1.4` is complete. Define the next milestone from live product testing.
 
 ## Current Position
 
-Phase: 22
-Plan: not started
+Phase: —
+Plan: —
 Milestone: v1.4 Conversation-First Information Architecture
-Status: Ready to plan Phase 22
-Last activity: 2026-04-25 — defined `v1.4 Conversation-First Information Architecture` from live product feedback on the shipped narrative chat surface
+Status: Milestone complete
+Last activity: 2026-04-25 — shipped and archived `v1.4 Conversation-First Information Architecture`
 
-## Active Milestone
+## Milestone Snapshot
 
 ### v1.4 Conversation-First Information Architecture
 
@@ -37,12 +37,12 @@ Last activity: 2026-04-25 — defined `v1.4 Conversation-First Information Archi
 
 **Phases:** 22-26
 
-- Phase 22: Conversation-First Shell
-- Phase 23: Chat History and Continuity
-- Phase 24: Lightweight Scope Context
-- Phase 25: Answer Surface Tightening
-- Phase 26: Secondary Surface Cleanup
+- Phase 22: Conversation-First Shell — complete
+- Phase 23: Chat History and Continuity — complete
+- Phase 24: Lightweight Scope Context — complete
+- Phase 25: Answer Surface Tightening — complete
+- Phase 26: Secondary Surface Cleanup — complete
 
 ## Next Command
 
-`$gsd-plan-phase 22`
+`$gsd-new-milestone`

@@ -1,6 +1,5 @@
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ChatShell } from "@/components/chat-shell/chat-shell";
-import { ProjectWorkspaceNav } from "@/components/layout/project-workspace-nav";
 import { ApiError } from "@/lib/api/errors";
 import { getProject } from "@/lib/api/projects";
 import { getBackgroundDeliveryHealth } from "@/lib/api/runs";
@@ -9,10 +8,7 @@ import type { BackgroundDeliveryHealth } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
 
-/**
- * Chat-style primary workspace shell (Chatbot UI–inspired layout).
- * Local-only messages until wired to run creation / streaming APIs.
- */
+/** Conversation-first primary product surface. */
 export default async function ProjectChatPage({
   params,
 }: Readonly<{
@@ -47,21 +43,14 @@ export default async function ProjectChatPage({
   const history = await buildProjectChatHistory(projectId);
 
   return (
-    <div className="space-y-4">
-      <div>
-        <h1 className="text-lg font-semibold">Workspace chat</h1>
-        <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-          Ask questions against this workspace’s ticker scope. Completed analyses appear inline here first, with the
-          standalone run page reserved for secondary inspection when you need to dig deeper.
-        </p>
-      </div>
-      <ProjectWorkspaceNav projectId={projectId} current="chat" />
+    <div className="fixed inset-x-3 bottom-3 top-[calc(4rem+0.75rem)] overflow-hidden md:inset-x-4 md:bottom-4 md:top-[calc(4rem+1rem)]">
       <ChatShell
         projectId={projectId}
         tickers={project.tickers ?? []}
         backgroundDelivery={backgroundDelivery}
         initialMessages={history.messages}
         recentRuns={history.recentRuns}
+        className="h-full min-h-0 rounded-2xl"
       />
     </div>
   );

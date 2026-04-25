@@ -34,14 +34,14 @@ export default async function ProjectsIndexPage() {
   return (
     <div className="space-y-6 text-sm">
       <div>
-        <h1 className="text-lg font-semibold">Workspaces</h1>
+        <h1 className="text-lg font-semibold">Chats</h1>
         <p className="mt-1 max-w-prose text-xs text-[var(--muted)]">
-          Each workspace has a default ticker scope; chat messages create runs in that scope.
+          Each chat keeps its own ticker scope, answer history, and technical deep dives.
         </p>
       </div>
 
       {projects.length === 0 ? (
-        <p className="text-[var(--muted)]">No workspaces yet. Create one below.</p>
+        <p className="text-[var(--muted)]">No chats yet. Start one below.</p>
       ) : (
         <ul className="space-y-2">
           {projects.map((p) => (
@@ -66,10 +66,10 @@ export default async function ProjectsIndexPage() {
 
       <div className="rounded border border-[var(--border)] p-4">
         <h2 className="text-xs font-semibold uppercase tracking-wide text-[var(--muted)]">
-          New workspace
+          Start a new chat
         </h2>
         <p className="mt-1 text-xs text-[var(--muted)]">
-          Pick tickers once; then use workspace chat to submit analysis questions.
+          Pick a starting scope now. You can refine it later from the chat header.
         </p>
         <div className="mt-3">
           <CreateProjectForm />

@@ -1,10 +1,10 @@
 import Link from "next/link";
 
-export type WorkspaceSurface = "chat" | "run" | "trace";
+export type WorkspaceSurface = "chat" | "trace";
 
 type Props = {
   projectId: string;
-  /** When set, links to primary run page and deep-dive trace. */
+  /** When set, links to the technical deep-dive trace. */
   runId?: string;
   current: WorkspaceSurface;
 };
@@ -16,8 +16,8 @@ const activeBtn =
   "rounded-md border border-[var(--border)] bg-neutral-100 px-2.5 py-1.5 text-xs font-semibold text-[var(--foreground)] dark:bg-neutral-900";
 
 /**
- * Cross-links the three product surfaces (landing, primary run, deep-dive) plus chat workspace.
- * Rendered on run detail, trace, and chat pages under a project.
+ * Cross-links the primary product surfaces for a project-backed conversation.
+ * Chat stays primary; trace is the secondary technical surface.
  */
 export function ProjectWorkspaceNav({ projectId, runId, current }: Props) {
   const base = `/projects/${projectId}`;
@@ -26,7 +26,7 @@ export function ProjectWorkspaceNav({ projectId, runId, current }: Props) {
   return (
     <nav
       className="flex flex-wrap items-center gap-1 border-b border-[var(--border)] pb-3"
-      aria-label="Workspace"
+      aria-label="Conversation surfaces"
     >
       <Link href="/" className={navBtn}>
         Home
@@ -37,20 +37,8 @@ export function ProjectWorkspaceNav({ projectId, runId, current }: Props) {
       <Link href={`${base}/chat`} className={current === "chat" ? activeBtn : navBtn}>
         Chat
       </Link>
-      <span className="text-[var(--muted)]" aria-hidden>
-        ·
-      </span>
-      <Link href={`${base}/runs`} className={navBtn}>
-        Runs
-      </Link>
       {runBase ? (
         <>
-          <span className="text-[var(--muted)]" aria-hidden>
-            ·
-          </span>
-          <Link href={runBase} className={current === "run" ? activeBtn : navBtn}>
-            Run inspection
-          </Link>
           <span className="text-[var(--muted)]" aria-hidden>
             ·
           </span>

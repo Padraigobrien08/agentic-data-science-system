@@ -1,5 +1,23 @@
 # Project Milestones: Agentic Data Science System
 
+## v1.4 Conversation-First Information Architecture (Shipped: 2026-04-25)
+
+**Delivered:** A conversation-first EDGAR product shell with in-chat history, lightweight scope context, tighter answer spacing, and secondary trace/artifact surfaces that now clearly sit beneath chat.
+
+**Phases completed:** 5 phases, 15 plans
+
+**Key accomplishments:**
+
+- Reframed the primary shell and entry surfaces around chat instead of workspace chrome.
+- Added a new-chat affordance from the shell while preserving the backend project model.
+- Turned the left rail into answer-forward history with in-chat continuity.
+- Quieted scope into inline conversation context and normalized chat/scope wording.
+- Tightened answer spacing and cleaned up the remaining secondary-surface language.
+
+**What's next:** Define the next milestone around richer cross-chat history, comparison workflows, or higher-level analyst memory built on the new conversation-first model.
+
+---
+
 ## v1.3 Narrative Answers and Visual Evidence (Shipped: 2026-04-25)
 
 **Delivered:** A narrative-first EDGAR answer experience with backend-authored analyst prose, inline evidence strength, on-demand supporting proof, deterministic inline charts, and a trace surface clearly framed as the technical deep dive.

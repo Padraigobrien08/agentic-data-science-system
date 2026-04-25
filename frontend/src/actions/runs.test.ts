@@ -56,7 +56,7 @@ describe("createAnalysisRunFromChat", () => {
     getPromptRoutingPreviewMock.mockResolvedValue({
       supported: false,
       routing_source: "deterministic",
-      reason: "TSLA is outside the current workspace scope.",
+      reason: "TSLA is outside the current chat scope.",
       rewrite_suggestions: [
         "Compare AAPL and MSFT on operating margin over the last eight quarters.",
         "Assess whether margin pressure is temporary or structural for MSFT.",
@@ -74,7 +74,7 @@ describe("createAnalysisRunFromChat", () => {
           "Compare AAPL and MSFT on operating margin over the last eight quarters.",
           "Assess whether margin pressure is temporary or structural for MSFT.",
         ],
-        routingReason: "TSLA is outside the current workspace scope.",
+        routingReason: "TSLA is outside the current chat scope.",
       },
     });
     expect(result.reply?.runId).toBeUndefined();
