@@ -37,7 +37,10 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- None — `v1.3` is shipped and archived; no new milestone is defined yet
+- [ ] Users experience the product primarily as a chat with history instead of a workspace shell with redundant framing
+- [ ] Users can manage analysis scope as lightweight conversation context without leaving the chat flow
+- [ ] Users can read a tighter answer layout that begins closer to the prompt and uses width more effectively before proof and secondary navigation appear
+- [ ] Users can treat trace and artifact views as technical deep dives linked from chat instead of as competing primary destinations
 
 ### Out of Scope
 
@@ -48,11 +51,17 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Shipped:** `v1.3 Narrative Answers and Visual Evidence` on 2026-04-25
-**Status:** The platform now has a centered narrative chat answer with inline confidence, collapsed supplemental evidence, deterministic inline charts, and a final polish pass that keeps trace clearly technical. There is no active milestone at the moment.
+**Status:** The platform now has a centered narrative chat answer with inline confidence, collapsed supplemental evidence, deterministic inline charts, and a final polish pass that keeps trace clearly technical. `v1.4` now focuses on making that answer surface live inside a cleaner conversation-first product model.
 
-## No Active Milestone
+## Current Milestone: v1.4 Conversation-First Information Architecture
 
-The planning set is between milestones. The shipped `v1.3` archive now captures the narrative-first chat answer surface, and the next milestone should be chosen from the remaining multi-run, evidence-bundle, or analyst-memory workflow gaps rather than from unresolved answer-architecture blockers.
+**Goal:** Make the product feel like a chat with history and lightweight scope, not like a workspace shell, while tightening the answer layout and demoting remaining operational chrome.
+
+**Target features:**
+- Replace visible workspace-first framing with a conversation-first shell and clearer history model
+- Treat scope as lightweight chat context that can be edited inline without leaving the conversation flow
+- Pull the answer upward, align confidence with the answer header, and compress supplemental evidence presentation
+- Keep trace and artifact routes as secondary technical deep dives with language and navigation aligned to the chat-first model
 
 ## Future Milestone Candidates
 
@@ -70,7 +79,9 @@ The highest-value work in v1.0 was operational rather than feature-based, and al
 
 The `v1.2` milestone came directly from local product testing after the `v1.1` ship. The original answer-reading flow pushed users onto a dense standalone run page with repeated evidence chips and buried caveats, even when the natural place to read the result was the workspace chat that launched the run. Phase 12 repaired the documented runtime and onboarding seams, Phase 13 removed the dead-end intent failures by broadening deterministic analyst-language routing and surfacing rewrite guidance inline in chat, Phase 14 moved the compact answer itself into chat with persisted history and stable run linkage, Phase 15 added inline findings, confidence/caveats, compact evidence navigation, and exact-jump verification links, and Phase 16 reduced the standalone run page to a secondary inspection surface.
 
-`v1.3` follows directly from the first live iteration on the new chat-first answer surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip, Phase 20 added deterministic inline charts rendered directly inside the answer column from backend-authored chart previews, and Phase 21 finished the stack with calmer editorial spacing, responsive answer-shell cleanup, and final chat-versus-trace wording alignment. That narrative-first answer model is now shipped and archived, and the next milestone should build on it rather than reopen it.
+`v1.3` follows directly from the first live iteration on the new chat-first answer surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip, Phase 20 added deterministic inline charts rendered directly inside the answer column from backend-authored chart previews, and Phase 21 finished the stack with calmer editorial spacing, responsive answer-shell cleanup, and final chat-versus-trace wording alignment.
+
+`v1.4` builds directly on that shipped answer stack. The main gap is no longer answer architecture; it is information architecture. The app still exposes a strong internal `project/workspace/run` model in places where the user mostly wants “a chat with history, an editable scope, and a technical deep dive when needed.” This milestone therefore focuses on making the conversation and history model primary, shrinking the visible workspace chrome, tightening the answer layout around the prompt that triggered it, and keeping trace and artifact routes coherent as secondary technical surfaces without breaking the existing backend project/run/artifact contracts.
 
 ## Constraints
 
@@ -95,6 +106,7 @@ The `v1.2` milestone came directly from local product testing after the `v1.1` s
 | Keep prompt routing deterministic-first and expose unsupported guidance before run creation | Analyst trust depends on predictable routing behavior and actionable chat guidance rather than opaque fallback behavior | ✓ Good |
 | Treat the chat reply as the primary analytical product and move evidence into a clearly secondary disclosure | The current centered answer still reads like a summary card; analysts need a substantive narrative first and supporting proof second | ✓ Good |
 | Render inline charts only from deterministic, backend-safe chart specs derived from trusted run data | Visuals should strengthen trust, not introduce frontend-side inference or chart hallucination risk | ✓ Good |
+| Keep the backend project and run model while demoting workspace language in the visible product | Persistence, ownership, and traceability still depend on the existing model, but the user-facing experience should feel like chat with history | — Pending |
 
 ## Evolution
 
@@ -114,4 +126,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after v1.3 archive*
+*Last updated: 2026-04-25 after starting v1.4 Conversation-First Information Architecture*

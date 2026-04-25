@@ -1,14 +1,14 @@
 ---
 gsd_state_version: 1.0
-milestone: none
-milestone_name: none
-status: Ready to define next milestone
-stopped_at: v1.3 archived; awaiting next milestone definition
-last_updated: "2026-04-25T10:05:00.000Z"
+milestone: v1.4
+milestone_name: Conversation-First Information Architecture
+status: Ready to plan Phase 22
+stopped_at: v1.4 defined; Phase 22 planning next
+last_updated: "2026-04-25T12:20:00.000Z"
 progress:
-  total_phases: 0
+  total_phases: 5
   completed_phases: 0
-  total_plans: 0
+  total_plans: 15
   completed_plans: 0
 ---
 
@@ -16,25 +16,33 @@ progress:
 
 ## Project Reference
 
-See: .planning/PROJECT.md (updated 2026-04-19)
+See: .planning/PROJECT.md (updated 2026-04-25)
 
 **Core value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
-**Current focus:** Define the next milestone after shipping and archiving `v1.3 Narrative Answers and Visual Evidence`.
+**Current focus:** Deliver a conversation-first product model with chat history, lightweight scope, tighter answer layout, and secondary technical deep dives that no longer compete with chat.
 
 ## Current Position
 
-Phase: none
-Plan: none
-Milestone: none
-Status: Ready to define next milestone
-Last activity: 2026-04-25 — archived `v1.3 Narrative Answers and Visual Evidence` after a clean milestone audit
+Phase: 22
+Plan: not started
+Milestone: v1.4 Conversation-First Information Architecture
+Status: Ready to plan Phase 22
+Last activity: 2026-04-25 — defined `v1.4 Conversation-First Information Architecture` from live product feedback on the shipped narrative chat surface
 
-## Recently Shipped
+## Active Milestone
 
-- `v1.3 Narrative Answers and Visual Evidence` shipped on 2026-04-25
-- Archive: [/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-ROADMAP.md](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-ROADMAP.md)
-- Audit: [/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-MILESTONE-AUDIT.md](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.3-MILESTONE-AUDIT.md)
+### v1.4 Conversation-First Information Architecture
+
+**Goal:** Make the product feel like a chat with history and lightweight scope instead of a workspace shell, while tightening the answer and proof layout around the conversation.
+
+**Phases:** 22-26
+
+- Phase 22: Conversation-First Shell
+- Phase 23: Chat History and Continuity
+- Phase 24: Lightweight Scope Context
+- Phase 25: Answer Surface Tightening
+- Phase 26: Secondary Surface Cleanup
 
 ## Next Command
 
-`$gsd-new-milestone`
+`$gsd-plan-phase 22`
