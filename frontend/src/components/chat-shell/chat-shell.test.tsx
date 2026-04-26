@@ -5,6 +5,7 @@ import { ChatShell } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
 vi.mock("@/actions/projects", () => ({
+  deleteChatAction: async () => undefined,
   startConversationFromScopeAction: async () => undefined,
   updateWorkspaceScopeAction: async () => ({}),
 }));
@@ -142,6 +143,11 @@ describe("ChatShell", () => {
     expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getByRole("button", { name: "New chat" })).toBeTruthy();
+    expect(
+      screen.getByRole("button", {
+        name: "Delete Assess whether margin pressure is temporary or structural for MSFT",
+      }),
+    ).toBeTruthy();
     expect(screen.getAllByText("History").length).toBeGreaterThan(0);
     expect(screen.queryByText("Home")).toBeNull();
     expect(screen.queryByText("Workspace")).toBeNull();

@@ -4,7 +4,8 @@ import { apiGet, apiPatch, apiPost } from "./client";
 import type { ProjectRead } from "./types";
 
 export async function listProjects(): Promise<ProjectRead[]> {
-  return apiGet<ProjectRead[]>("/v1/projects");
+  const projects = await apiGet<ProjectRead[]>("/v1/projects");
+  return projects.filter((project) => project.archived_at === null);
 }
 
 export async function getProject(projectId: string): Promise<ProjectRead> {
@@ -17,4 +18,8 @@ export async function createProject(body: { name: string; tickers: string[] }): 
 
 export async function updateProject(projectId: string, body: { tickers: string[] }): Promise<ProjectRead> {
   return apiPatch<ProjectRead>(`/v1/projects/${projectId}`, { tickers: body.tickers });
+}
+
+export async function archiveProject(projectId: string, archivedAt: string): Promise<ProjectRead> {
+  return apiPatch<ProjectRead>(`/v1/projects/${projectId}`, { archived_at: archivedAt });
 }

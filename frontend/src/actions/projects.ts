@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { ApiError } from "@/lib/api/errors";
-import { createProject, updateProject } from "@/lib/api/projects";
+import { archiveProject, createProject, listProjects, updateProject } from "@/lib/api/projects";
 
 export type CreateProjectState = { error?: string };
 export type UpdateScopeState = { error?: string; saved?: boolean; tickers?: string[] };
@@ -84,4 +84,36 @@ export async function startConversationFromScopeAction(projectId: string, formDa
   });
   revalidatePath("/projects");
   redirect(`/projects/${row.id}/chat`);
+}
+
+export async function deleteChatAction(currentProjectId: string, formData: FormData) {
+  const targetProjectId = String(formData.get("projectId") ?? "").trim();
+  if (!targetProjectId) {
+    return redirect(`/projects/${currentProjectId}/chat`);
+  }
+
+  try {
+    await archiveProject(targetProjectId, new Date().toISOString());
+  } catch (e) {
+    if (targetProjectId !== currentProjectId) {
+      return redirect(`/projects/${currentProjectId}/chat`);
+    }
+    return redirect("/projects");
+  }
+
+  revalidatePath("/projects");
+  revalidatePath(`/projects/${targetProjectId}/chat`);
+  revalidatePath(`/projects/${targetProjectId}/runs`);
+
+  if (targetProjectId !== currentProjectId) {
+    revalidatePath(`/projects/${currentProjectId}/chat`);
+    return redirect(`/projects/${currentProjectId}/chat`);
+  }
+
+  const remainingProjects = await listProjects();
+  const nextProject = remainingProjects.find((project) => project.id !== targetProjectId);
+  if (nextProject) {
+    return redirect(`/projects/${nextProject.id}/chat`);
+  }
+  return redirect("/projects");
 }

@@ -2,7 +2,11 @@
 
 import { useActionState, useEffect, useState } from "react";
 
-import { startConversationFromScopeAction, updateWorkspaceScopeAction } from "@/actions/projects";
+import {
+  deleteChatAction,
+  startConversationFromScopeAction,
+  updateWorkspaceScopeAction,
+} from "@/actions/projects";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createAnalysisRunFromChat } from "@/actions/runs";
 import { cn } from "@/lib/utils";
@@ -44,6 +48,7 @@ export function ChatShell({
   const scopeAction = updateWorkspaceScopeAction.bind(null, projectId);
   const [scopeState, scopeFormAction] = useActionState(scopeAction, { tickers });
   const newConversationAction = startConversationFromScopeAction.bind(null, projectId);
+  const deleteConversationAction = deleteChatAction.bind(null, projectId);
 
   useEffect(() => {
     if (scopeState.tickers) {
@@ -114,6 +119,7 @@ export function ChatShell({
         projectId={projectId}
         scopeTickers={scopeTickers}
         newConversationAction={newConversationAction}
+        deleteConversationAction={deleteConversationAction}
         chatThreads={chatThreads}
       />
       <SidebarInset className="bg-[var(--background)]">
