@@ -52,4 +52,12 @@ export type ChatRecentRun = {
   scrollTargetId?: string;
 };
 
+export type ChatThreadSummary = {
+  id: string;
+  title: string;
+  href: string;
+  hasMessages: boolean;
+  updatedAt: string;
+};
+
 export type ChatBackgroundDelivery = BackgroundDeliveryHealth;

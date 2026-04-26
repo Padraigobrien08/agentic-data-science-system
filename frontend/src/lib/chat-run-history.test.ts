@@ -1,9 +1,14 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { listRunsMock, getRunMock, listRunArtifactsMock } = vi.hoisted(() => ({
+const { listProjectsMock, listRunsMock, getRunMock, listRunArtifactsMock } = vi.hoisted(() => ({
+  listProjectsMock: vi.fn(),
   listRunsMock: vi.fn(),
   getRunMock: vi.fn(),
   listRunArtifactsMock: vi.fn(),
+}));
+
+vi.mock("@/lib/api/projects", () => ({
+  listProjects: listProjectsMock,
 }));
 
 vi.mock("@/lib/api/runs", () => ({
@@ -15,41 +20,104 @@ vi.mock("@/lib/api/runs", () => ({
 import { buildProjectChatHistory } from "@/lib/chat-run-history";
 
 describe("buildProjectChatHistory", () => {
-  it("maps persisted runs into an oldest-to-newest transcript with answer cards", async () => {
-    listRunsMock.mockResolvedValue([
+  it("maps persisted runs into a transcript and keeps durable thread history across projects", async () => {
+    listProjectsMock.mockResolvedValue([
       {
-        id: "run-2",
-        project_id: "project-1",
-        initiated_by_user_id: "user-1",
-        correlation_id: null,
-        status: "success",
-        orchestration_goal_text: "Compare AAPL and MSFT on operating margin",
-        error_summary: null,
-        started_at: "2026-04-19T10:01:00Z",
-        finished_at: "2026-04-19T10:02:00Z",
-        created_at: "2026-04-19T10:00:00Z",
+        id: "project-1",
+        owner_user_id: "user-1",
+        name: "MSFT chat",
+        slug: null,
+        description: null,
+        settings_json: null,
+        tickers: ["MSFT"],
+        archived_at: null,
+        created_at: "2026-04-19T08:50:00Z",
         updated_at: "2026-04-19T10:02:00Z",
-        current_phase: "finished",
-        total_steps: 5,
-        completed_steps: 5,
       },
       {
-        id: "run-1",
-        project_id: "project-1",
-        initiated_by_user_id: "user-1",
-        correlation_id: null,
-        status: "success",
-        orchestration_goal_text: "Assess whether margin pressure is temporary or structural for MSFT",
-        error_summary: null,
-        started_at: "2026-04-19T09:01:00Z",
-        finished_at: "2026-04-19T09:02:00Z",
-        created_at: "2026-04-19T09:00:00Z",
-        updated_at: "2026-04-19T09:02:00Z",
-        current_phase: "finished",
-        total_steps: 5,
-        completed_steps: 5,
+        id: "project-2",
+        owner_user_id: "user-1",
+        name: "AAPL chat",
+        slug: null,
+        description: null,
+        settings_json: null,
+        tickers: ["AAPL"],
+        archived_at: null,
+        created_at: "2026-04-19T10:45:00Z",
+        updated_at: "2026-04-19T11:32:00Z",
+      },
+      {
+        id: "project-3",
+        owner_user_id: "user-1",
+        name: "NVDA chat",
+        slug: null,
+        description: null,
+        settings_json: null,
+        tickers: ["NVDA"],
+        archived_at: null,
+        created_at: "2026-04-19T11:40:00Z",
+        updated_at: "2026-04-19T11:40:00Z",
       },
     ]);
+    listRunsMock.mockImplementation(async (projectId: string) => {
+      if (projectId === "project-1") {
+        return [
+          {
+            id: "run-2",
+            project_id: "project-1",
+            initiated_by_user_id: "user-1",
+            correlation_id: null,
+            status: "success",
+            orchestration_goal_text: "Compare AAPL and MSFT on operating margin",
+            error_summary: null,
+            started_at: "2026-04-19T10:01:00Z",
+            finished_at: "2026-04-19T10:02:00Z",
+            created_at: "2026-04-19T10:00:00Z",
+            updated_at: "2026-04-19T10:02:00Z",
+            current_phase: "finished",
+            total_steps: 5,
+            completed_steps: 5,
+          },
+          {
+            id: "run-1",
+            project_id: "project-1",
+            initiated_by_user_id: "user-1",
+            correlation_id: null,
+            status: "success",
+            orchestration_goal_text: "Assess whether margin pressure is temporary or structural for MSFT",
+            error_summary: null,
+            started_at: "2026-04-19T09:01:00Z",
+            finished_at: "2026-04-19T09:02:00Z",
+            created_at: "2026-04-19T09:00:00Z",
+            updated_at: "2026-04-19T09:02:00Z",
+            current_phase: "finished",
+            total_steps: 5,
+            completed_steps: 5,
+          },
+        ];
+      }
+      if (projectId === "project-2") {
+        return [
+          {
+            id: "run-3",
+            project_id: "project-2",
+            initiated_by_user_id: "user-1",
+            correlation_id: null,
+            status: "success",
+            orchestration_goal_text: "Show whether AAPL cash-flow quality is weakening",
+            error_summary: null,
+            started_at: "2026-04-19T11:30:00Z",
+            finished_at: "2026-04-19T11:32:00Z",
+            created_at: "2026-04-19T11:30:00Z",
+            updated_at: "2026-04-19T11:32:00Z",
+            current_phase: "finished",
+            total_steps: 5,
+            completed_steps: 5,
+          },
+        ];
+      }
+      return [];
+    });
     getRunMock.mockImplementation(async (runId: string) => ({
       id: runId,
       project_id: "project-1",
@@ -128,8 +196,31 @@ describe("buildProjectChatHistory", () => {
     expect(result.recentRuns).toHaveLength(2);
     expect(result.recentRuns[0]).toMatchObject({
       id: "run-2",
-      title: "MSFT is lagging AAPL on operating margin stability.",
+      title: "Compare AAPL and MSFT on operating margin",
       scrollTargetId: "answer-run-2",
     });
+    expect(result.chatThreads).toEqual([
+      {
+        id: "project-3",
+        title: "NVDA chat",
+        href: "/projects/project-3/chat",
+        hasMessages: false,
+        updatedAt: "2026-04-19T11:40:00Z",
+      },
+      {
+        id: "project-2",
+        title: "Show whether AAPL cash-flow quality is weakening",
+        href: "/projects/project-2/chat",
+        hasMessages: true,
+        updatedAt: "2026-04-19T11:32:00Z",
+      },
+      {
+        id: "project-1",
+        title: "Assess whether margin pressure is temporary or struct...",
+        href: "/projects/project-1/chat",
+        hasMessages: true,
+        updatedAt: "2026-04-19T10:02:00Z",
+      },
+    ]);
   });
 });

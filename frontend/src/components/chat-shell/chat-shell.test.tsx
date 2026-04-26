@@ -2,7 +2,7 @@ import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
 import { ChatShell } from "@/components/chat-shell/chat-shell";
-import type { ChatMessage, ChatRecentRun } from "@/components/chat-shell/types";
+import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
 vi.mock("@/actions/projects", () => ({
   startConversationFromScopeAction: async () => undefined,
@@ -101,14 +101,13 @@ describe("ChatShell", () => {
         createdAt: "2026-04-18T20:00:00Z",
       },
     ];
-    const recentRuns: ChatRecentRun[] = [
+    const chatThreads: ChatThreadSummary[] = [
       {
-        id: "run-1",
-        status: "success",
-        title: "MSFT margin pressure looks cyclical rather than structural.",
-        preview: "Revenue growth deterioration appears in several recent quarters.",
-        createdAt: "2026-04-18T19:58:00Z",
-        scrollTargetId: "answer-run-1",
+        id: "project-1",
+        title: "Assess whether margin pressure is temporary or structural for MSFT",
+        href: "/projects/project-1/chat",
+        hasMessages: true,
+        updatedAt: "2026-04-18T20:00:00Z",
       },
     ];
 
@@ -122,14 +121,14 @@ describe("ChatShell", () => {
           detail: "This chat is executing synchronously right now.",
         }}
         initialMessages={initialMessages}
-        recentRuns={recentRuns}
+        chatThreads={chatThreads}
       />,
     );
 
-    expect(screen.getByText("Assess whether margin pressure is temporary or structural for MSFT")).toBeTruthy();
-    expect(screen.getAllByText("MSFT margin pressure looks cyclical rather than structural.").length).toBeGreaterThan(
-      1,
+    expect(screen.getAllByText("Assess whether margin pressure is temporary or structural for MSFT").length).toBe(
+      2,
     );
+    expect(screen.getAllByText("MSFT margin pressure looks cyclical rather than structural.")).toHaveLength(1);
 
     const input = screen.getByLabelText("Message input");
     fireEvent.change(input, {
@@ -224,7 +223,7 @@ describe("ChatShell", () => {
           detail: "This chat is executing synchronously right now.",
         }}
         initialMessages={initialMessages}
-        recentRuns={[]}
+        chatThreads={[]}
       />,
     );
 

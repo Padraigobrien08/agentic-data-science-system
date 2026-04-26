@@ -1,13 +1,21 @@
-import type { ChatAssistantMessage, ChatMessage, ChatRecentRun, ChatUserMessage } from "@/components/chat-shell/types";
+import type {
+  ChatAssistantMessage,
+  ChatMessage,
+  ChatRecentRun,
+  ChatThreadSummary,
+  ChatUserMessage,
+} from "@/components/chat-shell/types";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
+import { listProjects } from "@/lib/api/projects";
 import { getRun, listRunArtifacts, listRuns } from "@/lib/api/runs";
-import type { AnalysisRunDetail } from "@/lib/api/types";
+import type { AnalysisRunDetail, AnalysisRunSummary, ProjectRead } from "@/lib/api/types";
 import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
 import { buildChatAnswerCardView, buildPrimaryAnswerView } from "@/lib/run-primary-view";
 
 type ProjectChatHistory = {
   messages: ChatMessage[];
   recentRuns: ChatRecentRun[];
+  chatThreads: ChatThreadSummary[];
 };
 
 function goalText(run: AnalysisRunDetail): string {
@@ -78,6 +86,32 @@ function summaryGoalText(run: Pick<AnalysisRunDetail, "orchestration_goal_text">
   return run.orchestration_goal_text?.trim() || "Analysis run";
 }
 
+function projectThreadFallbackTitle(project: Pick<ProjectRead, "name" | "tickers">): string {
+  if (project.name.trim()) {
+    return project.name.trim();
+  }
+  if (project.tickers?.length) {
+    return `${project.tickers[0]} chat`;
+  }
+  return "New chat";
+}
+
+function buildChatThreadSummary(project: ProjectRead, runs: AnalysisRunSummary[]): ChatThreadSummary {
+  const sortedRuns = [...runs].sort((a, b) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
+  const firstRun = sortedRuns[0] ?? null;
+  const lastRun = sortedRuns.at(-1) ?? null;
+  const titleSource = firstRun ? summaryGoalText(firstRun) : projectThreadFallbackTitle(project);
+  const updatedAt = lastRun?.updated_at ?? project.updated_at;
+
+  return {
+    id: project.id,
+    title: compactHistoryTitle(titleSource),
+    href: `/projects/${project.id}/chat`,
+    hasMessages: runs.length > 0,
+    updatedAt,
+  };
+}
+
 function buildUserMessage(run: AnalysisRunDetail): ChatUserMessage {
   return {
     id: `user-${run.id}`,
@@ -88,7 +122,7 @@ function buildUserMessage(run: AnalysisRunDetail): ChatUserMessage {
 }
 
 export async function buildProjectChatHistory(projectId: string, limit = 12): Promise<ProjectChatHistory> {
-  const runs = await listRuns(projectId);
+  const [runs, projects] = await Promise.all([listRuns(projectId), listProjects()]);
   const recentRunsSorted = [...runs]
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, limit);
@@ -123,5 +157,17 @@ export async function buildProjectChatHistory(projectId: string, limit = 12): Pr
     };
   });
 
-  return { messages, recentRuns };
+  const chatThreads = (
+    await Promise.all(
+      projects.map(async (project) => ({
+        project,
+        runs: project.id === projectId ? runs : await listRuns(project.id),
+      })),
+    )
+  )
+    .map(({ project, runs: projectRuns }) => buildChatThreadSummary(project, projectRuns))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime())
+    .slice(0, limit);
+
+  return { messages, recentRuns, chatThreads };
 }

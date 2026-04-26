@@ -49,7 +49,7 @@ export default async function ProjectChatPage({
         tickers={project.tickers ?? []}
         backgroundDelivery={backgroundDelivery}
         initialMessages={history.messages}
-        recentRuns={history.recentRuns}
+        chatThreads={history.chatThreads}
         className="h-full min-h-0 rounded-2xl"
       />
     </div>

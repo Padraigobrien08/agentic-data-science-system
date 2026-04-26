@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback } from "react";
+import Link from "next/link";
 import { History, MessageSquarePlus, MessagesSquare } from "lucide-react";
 
 import {
@@ -17,25 +17,20 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import type { ChatRecentRun } from "./types";
+import type { ChatThreadSummary } from "./types";
 
 type Props = {
+  projectId: string;
   scopeTickers: string[];
   newConversationAction: (payload: FormData) => void;
-  recentRuns: ChatRecentRun[];
+  chatThreads: ChatThreadSummary[];
 };
 
 /**
- * Conversation-first shadcn sidebar with a new-chat affordance and in-chat history only.
+ * Conversation-first shadcn sidebar with a new-chat affordance and durable chat history.
  */
-export function ChatSidebar({ scopeTickers, newConversationAction, recentRuns }: Props) {
+export function ChatSidebar({ projectId, scopeTickers, newConversationAction, chatThreads }: Props) {
   const { open } = useSidebar();
-  const scrollToAnswer = useCallback((targetId?: string) => {
-    if (!targetId) return;
-    const node = document.getElementById(targetId);
-    if (!node) return;
-    node.scrollIntoView({ behavior: "smooth", block: "start" });
-  }, []);
 
   return (
     <Sidebar collapsible="icon" className="group relative bg-[hsl(var(--sidebar-background)/0.96)]">
@@ -64,11 +59,11 @@ export function ChatSidebar({ scopeTickers, newConversationAction, recentRuns }:
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="px-1">
-              {recentRuns.length === 0 ? (
+              {chatThreads.length === 0 ? (
                 <SidebarMenuItem>
                   {open ? (
                     <div className="rounded-xl border border-dashed border-[hsl(var(--sidebar-border))] px-3 py-3 text-xs leading-5 text-[hsl(var(--sidebar-foreground)/0.6)]">
-                      Earlier answers in this chat will appear here.
+                      Earlier chats will appear here.
                     </div>
                   ) : (
                     <div className="flex justify-center px-1 py-2 text-[hsl(var(--sidebar-foreground)/0.45)]">
@@ -77,23 +72,24 @@ export function ChatSidebar({ scopeTickers, newConversationAction, recentRuns }:
                   )}
                 </SidebarMenuItem>
               ) : null}
-              {recentRuns.map((run, index) => (
-                <SidebarMenuItem key={run.id}>
+              {chatThreads.map((thread) => (
+                <SidebarMenuItem key={thread.id}>
                   <SidebarMenuButton
-                    type="button"
-                    onClick={() => scrollToAnswer(run.scrollTargetId)}
-                    isActive={index === 0}
+                    asChild
+                    isActive={thread.id === projectId}
                     className="min-h-0 items-center gap-2 rounded-xl px-2.5 py-2 md:group-data-[state=collapsed]:justify-center"
-                    title={run.title}
+                    title={thread.title}
                   >
-                    <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
-                    {open ? (
-                      <div className="min-w-0 flex-1">
-                        <span className="line-clamp-2 block text-[12.5px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
-                          {run.title}
-                        </span>
-                      </div>
-                    ) : null}
+                    <Link href={thread.href}>
+                      <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                      {open ? (
+                        <div className="min-w-0 flex-1">
+                          <span className="line-clamp-2 block text-[12.5px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
+                            {thread.title}
+                          </span>
+                        </div>
+                      ) : null}
+                    </Link>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
               ))}

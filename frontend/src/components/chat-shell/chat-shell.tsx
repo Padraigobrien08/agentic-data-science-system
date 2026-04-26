@@ -9,7 +9,7 @@ import { cn } from "@/lib/utils";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
-import type { ChatAssistantMessage, ChatBackgroundDelivery, ChatMessage, ChatRecentRun } from "./types";
+import type { ChatAssistantMessage, ChatBackgroundDelivery, ChatMessage, ChatThreadSummary } from "./types";
 
 function nowIso(): string {
   return new Date().toISOString();
@@ -20,7 +20,7 @@ type Props = {
   tickers: string[];
   backgroundDelivery: ChatBackgroundDelivery;
   initialMessages: ChatMessage[];
-  recentRuns: ChatRecentRun[];
+  chatThreads: ChatThreadSummary[];
   className?: string;
 };
 
@@ -32,7 +32,7 @@ export function ChatShell({
   tickers,
   backgroundDelivery,
   initialMessages,
-  recentRuns,
+  chatThreads,
   className,
 }: Props) {
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
@@ -111,9 +111,10 @@ export function ChatShell({
       )}
     >
       <ChatSidebar
+        projectId={projectId}
         scopeTickers={scopeTickers}
         newConversationAction={newConversationAction}
-        recentRuns={recentRuns}
+        chatThreads={chatThreads}
       />
       <SidebarInset className="bg-[var(--background)]">
         <header className="border-b border-[var(--border)] px-4 py-2.5">
