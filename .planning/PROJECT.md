@@ -37,10 +37,9 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 
 ### Active
 
-- ✓ Users experience the product primarily as a chat with history instead of a workspace shell with redundant framing — validated in Phase 22/23
-- ✓ Users can manage analysis scope as lightweight conversation context without leaving the chat flow — validated in Phase 24
-- ✓ Users can read a tighter answer layout that begins closer to the prompt and uses width more effectively before proof and secondary navigation appear — validated in Phase 25
-- ✓ Users can treat trace and artifact views as technical deep dives linked from chat instead of as competing primary destinations — validated in Phase 26
+- Users can start a new chat without the previous conversation disappearing from history
+- Users can switch between a newly created empty chat and older chats without losing continuity or mutating the wrong thread
+- Users can trust that chat history reflects real persisted conversation boundaries rather than whichever run was most recently loaded into the shell
 
 ### Out of Scope
 
@@ -51,11 +50,13 @@ Every EDGAR run must produce trustworthy, isolated, auditable results that the u
 ## Current State
 
 **Shipped:** `v1.4 Conversation-First Information Architecture` on 2026-04-25
-**Status:** The platform now presents as chat with history and lightweight scope, while keeping trace and artifacts as secondary technical deep dives.
+**Status:** The platform now presents as chat with history and lightweight scope, but the history model still breaks continuity when `New chat` hides the prior thread.
 
 ## Current Milestone
 
-No active milestone is defined. `v1.4` is complete and archived.
+**v1.5 Durable Chat History**
+
+Goal: make chat history behavior match the conversation-first product promise by preserving prior chats when a new chat is created, separating thread creation from thread selection, and hardening continuity semantics in the shell.
 
 ## Future Milestone Candidates
 
@@ -76,6 +77,8 @@ The `v1.2` milestone came directly from local product testing after the `v1.1` s
 `v1.3` follows directly from the first live iteration on the new chat-first answer surface. Phase 17 replaced the old summary-first card contract with a backend-authored narrative answer and a centered narrative renderer, Phase 18 moved evidence strength into a compact header pill backed by a grouped confidence explainer, Phase 19 pushed supporting proof into a collapsed supplemental disclosure with slim exact-jump evidence rows and a quiet secondary pill strip, Phase 20 added deterministic inline charts rendered directly inside the answer column from backend-authored chart previews, and Phase 21 finished the stack with calmer editorial spacing, responsive answer-shell cleanup, and final chat-versus-trace wording alignment.
 
 `v1.4` built directly on that shipped answer stack and completed the information-architecture pass. The visible product now behaves like chat with history and lightweight scope, while the backend `project/run/artifact` model remains intact underneath for persistence and traceability.
+
+The next milestone, `v1.5`, comes from the first real continuity break discovered after that ship: creating a new chat currently makes the prior conversation disappear from the visible history model. That undercuts the conversation-first promise. The next work should therefore stay tightly scoped to durable thread boundaries, predictable new-chat creation, and safe history switching rather than widening into broader memory or comparison features.
 
 ## Constraints
 
@@ -101,6 +104,7 @@ The `v1.2` milestone came directly from local product testing after the `v1.1` s
 | Treat the chat reply as the primary analytical product and move evidence into a clearly secondary disclosure | The current centered answer still reads like a summary card; analysts need a substantive narrative first and supporting proof second | ✓ Good |
 | Render inline charts only from deterministic, backend-safe chart specs derived from trusted run data | Visuals should strengthen trust, not introduce frontend-side inference or chart hallucination risk | ✓ Good |
 | Keep the backend project and run model while demoting workspace language in the visible product | Persistence, ownership, and traceability still depend on the existing model, but the user-facing experience should feel like chat with history | ✓ Good |
+| Treat `New chat` as explicit thread creation, never as destructive context replacement | Conversation-first UX fails if users cannot trust that prior chats remain available after starting a new one | ✓ Good |
 
 ## Evolution
 
@@ -120,4 +124,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-04-25 after shipping v1.4 Conversation-First Information Architecture*
+*Last updated: 2026-04-26 after defining v1.5 Durable Chat History*

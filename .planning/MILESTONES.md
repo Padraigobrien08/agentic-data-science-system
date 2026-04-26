@@ -1,5 +1,21 @@
 # Project Milestones: Agentic Data Science System
 
+## v1.5 Durable Chat History (Active)
+
+**Intent:** Fix the continuity break where clicking `New chat` makes the previous conversation disappear, and harden the visible history model so chat threads behave like durable threads rather than transient shell state.
+
+**Planned phases:** 4 phases, starting at Phase 27
+
+**Success criteria:**
+
+- prior chats remain visible immediately after a new chat is created
+- new chats create distinct empty threads instead of replacing older ones
+- reopening an older history item restores the correct persisted conversation
+
+**What's next:** Plan Phase 27 around stable conversation identity and visible history persistence semantics.
+
+---
+
 ## v1.4 Conversation-First Information Architecture (Shipped: 2026-04-25)
 
 **Delivered:** A conversation-first EDGAR product shell with in-chat history, lightweight scope context, tighter answer spacing, and secondary trace/artifact surfaces that now clearly sit beneath chat.

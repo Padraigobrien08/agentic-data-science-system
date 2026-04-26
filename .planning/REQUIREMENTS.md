@@ -3,6 +3,24 @@
 **Defined:** 2026-04-25
 **Core Value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
 
+## v1.5 Requirements
+
+### Durable History
+
+- **HIST-03**: User can create a new chat and still see the previous conversation in the history rail immediately afterward
+- **HIST-04**: User can reopen an older chat after creating a new one and get the same persisted thread context back, not a replaced shell state
+- **HIST-05**: User can trust that history items represent stable conversation identities rather than the most recently loaded run
+
+### New Chat Semantics
+
+- **CONV-04**: User can start a clean new chat without mutating the currently selected prior conversation
+- **CONV-05**: User can tell which chat is active, which chat is new and empty, and which chats already contain persisted answers
+
+### Shell Safety
+
+- **SHELL-01**: User does not lose visible access to prior answers when switching between new-chat creation and existing history
+- **SHELL-02**: History ordering and selection stay stable across refresh, new run completion, and new chat creation
+
 ## v1.4 Requirements
 
 ### Conversation Model
@@ -33,7 +51,7 @@
 
 ### Conversation Expansion
 
-- **CONV-04**: User can compare multiple prior conversations or answers side by side inside one chat history
+- **CONV-06**: User can compare multiple prior conversations or answers side by side inside one chat history
 - **HIST-02**: User can pin important answers or conversations in history for later return
 
 ### Scope Expansion
@@ -48,6 +66,7 @@
 | Collaborative shared chat threads or multi-user live presence | This milestone is about single-user information architecture, not real-time collaboration |
 | Cross-thread memory synthesis or automatic prior-answer comparison | That is a separate product capability after the core conversation model is simplified |
 | Reopening the narrative answer contract or chart trust model | `v1.3` already shipped the right answer architecture; this milestone changes product framing and layout around it |
+| Broad analyst memory or side-by-side comparison tooling | The immediate gap is broken durability of basic chat history, not higher-order memory features |
 
 ## Traceability
 
@@ -56,9 +75,16 @@
 | CONV-01 | Phase 22 | Complete |
 | CONV-02 | Phase 22 | Complete |
 | CONV-03 | Phase 23 | Complete |
+| CONV-04 | Phase 28 | Pending |
+| CONV-05 | Phase 28 | Pending |
 | HIST-01 | Phase 23 | Complete |
+| HIST-03 | Phase 27 | Pending |
+| HIST-04 | Phase 29 | Pending |
+| HIST-05 | Phase 29 | Pending |
 | SCOPE-01 | Phase 24 | Complete |
 | SCOPE-02 | Phase 24 | Complete |
+| SHELL-01 | Phase 30 | Pending |
+| SHELL-02 | Phase 30 | Pending |
 | LAY-01 | Phase 25 | Complete |
 | LAY-02 | Phase 25 | Complete |
 | LAY-03 | Phase 25 | Complete |
@@ -67,10 +93,10 @@
 | SURF-03 | Phase 26 | Complete |
 
 **Coverage:**
-- v1.4 requirements: 12 total
-- Mapped to phases: 12
+- active v1.5 requirements: 7 total
+- mapped to phases: 7
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-04-25*
-*Last updated: 2026-04-25 after defining v1.4 Conversation-First Information Architecture*
+*Last updated: 2026-04-26 after defining v1.5 Durable Chat History*

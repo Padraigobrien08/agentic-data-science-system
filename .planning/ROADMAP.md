@@ -2,6 +2,7 @@
 
 ## Milestones
 
+- [ ] **v1.5 Durable Chat History** — active · preserve prior conversations when `New chat` creates a fresh thread
 - [x] **v1.0 Hardening** — shipped 2026-04-17 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.0-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.0-REQUIREMENTS.md)
 - [x] **v1.1 Live Validation and Scale** — shipped 2026-04-18 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-MILESTONE-AUDIT.md)
 - [x] **v1.2 Chat-First Analysis Experience** — shipped 2026-04-19 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-MILESTONE-AUDIT.md)
@@ -9,6 +10,56 @@
 - [x] **v1.4 Conversation-First Information Architecture** — shipped 2026-04-25 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.4-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.4-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.4-MILESTONE-AUDIT.md)
 
 ## Active Planning
+
+### Milestone v1.5: Durable Chat History
+
+**Status:** Active
+**Phases:** 27-30 planned
+**Total Plans:** 0 planned yet
+
+### Phase 27: History Persistence Semantics
+
+**Goal**: Define and enforce stable conversation identity so a new chat never makes a prior conversation disappear from the visible history model.
+**Depends on**: Shipped `v1.4` conversation-first shell
+**Plans**: 0 plans yet
+**Status**: Pending
+
+Expected outcome:
+
+- prior chats remain visible and reopenable immediately after new-chat creation
+
+### Phase 28: New Chat Creation Flow
+
+**Goal**: Make `New chat` create a distinct empty thread instead of replacing or hijacking the current history selection.
+**Depends on**: Phase 27
+**Plans**: 0 plans yet
+**Status**: Pending
+
+Expected outcome:
+
+- new chat is a clean thread with clear active-state behavior
+
+### Phase 29: History Selection and Resume
+
+**Goal**: Ensure selecting an older chat restores the right persisted thread and latest answer instead of whichever shell state was loaded most recently.
+**Depends on**: Phase 28
+**Plans**: 0 plans yet
+**Status**: Pending
+
+Expected outcome:
+
+- history items behave like durable conversation handles, not transient run cards
+
+### Phase 30: Continuity Hardening and Regression Coverage
+
+**Goal**: Lock the new history model down across refresh, run completion, and future shell changes.
+**Depends on**: Phase 29
+**Plans**: 0 plans yet
+**Status**: Pending
+
+Expected outcome:
+
+- continuity regressions are caught before ship
 
 ### Milestone v1.4: Conversation-First Information Architecture
 
@@ -115,3 +166,4 @@ Plans:
 | v1.2 Chat-First Analysis Experience | 12-16 | 15 | Complete | 2026-04-19 |
 | v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Complete | 2026-04-25 |
 | v1.4 Conversation-First Information Architecture | 22-26 | 15 | Complete | 2026-04-25 |
+| v1.5 Durable Chat History | 27-30 | 0 | Active | — |
