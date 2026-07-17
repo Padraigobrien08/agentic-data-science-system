@@ -32,12 +32,24 @@ from .enums import (
     ExperimentStatus,
     HypothesisStatus,
     InvestigationStatus,
+    Modality,
     ObservationType,
     OpenQuestionStatus,
     PayloadKind,
     ProvenanceSource,
+    QualitySeverity,
     ReferenceKind,
+    SemanticType,
     TerminationReason,
+)
+from .profiles import (
+    ColumnMissingness,
+    DatasetDimensions,
+    DuplicateSummary,
+    MissingnessSummary,
+    QualityWarning,
+    SourceIdentity,
+    TemporalCoverage,
 )
 from .evidence import Evidence, PayloadReference, SourceReference
 from .experiment import (
@@ -96,12 +108,23 @@ __all__ = [
     "ExperimentStatus",
     "HypothesisStatus",
     "InvestigationStatus",
+    "Modality",
     "ObservationType",
     "OpenQuestionStatus",
     "PayloadKind",
     "ProvenanceSource",
+    "QualitySeverity",
     "ReferenceKind",
+    "SemanticType",
     "TerminationReason",
+    # dataset profiles
+    "SourceIdentity",
+    "DatasetDimensions",
+    "TemporalCoverage",
+    "MissingnessSummary",
+    "ColumnMissingness",
+    "DuplicateSummary",
+    "QualityWarning",
     # provenance & reproducibility
     "Provenance",
     "ReproducibilityManifest",

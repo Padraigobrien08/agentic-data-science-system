@@ -41,11 +41,13 @@ class AdapterRegistry:
 
 
 def build_default_registry() -> AdapterRegistry:
-    """Registry seeded with first-party adapters (EDGAR)."""
-    from .edgar import EdgarInputAdapter
+    """Registry seeded with first-party adapters (EDGAR + local tabular)."""
+    from .edgar import EDGARAdapter
+    from .tabular import LocalTabularAdapter
 
     registry = AdapterRegistry()
-    registry.register(EdgarInputAdapter())
+    registry.register(EDGARAdapter())
+    registry.register(LocalTabularAdapter())
     return registry
 
 

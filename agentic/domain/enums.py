@@ -48,6 +48,48 @@ class ColumnRole(str, Enum):
     dimension = "dimension"
     identifier = "identifier"
     derived = "derived"
+    unknown = "unknown"
+
+
+class SemanticType(str, Enum):
+    """
+    Interpretation of a column's values, inferred generically (domain-agnostic).
+
+    Units-bearing types (monetary/percentage) cannot be inferred from values
+    alone; adapters supply those as hints without the general layer knowing any
+    domain vocabulary.
+    """
+
+    identifier = "identifier"
+    categorical = "categorical"
+    integer = "integer"
+    real = "real"
+    monetary = "monetary"
+    percentage = "percentage"
+    count = "count"
+    temporal = "temporal"
+    boolean = "boolean"
+    text = "text"
+    unknown = "unknown"
+
+
+class Modality(str, Enum):
+    """Coarse consumption mode of a materialized dataset."""
+
+    tabular = "tabular"
+    time_series = "time_series"
+    document = "document"
+    relational = "relational"
+    api_records = "api_records"
+    mixed = "mixed"
+
+
+class QualitySeverity(str, Enum):
+    """Severity of a data-quality warning."""
+
+    info = "info"
+    warning = "warning"
+    error = "error"
 
 
 # ---------------------------------------------------------------------------

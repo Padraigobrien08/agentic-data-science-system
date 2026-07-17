@@ -1,41 +1,57 @@
 """
 EDGAR input adapter.
 
-Wraps the existing deterministic EDGAR pipeline as a first-party input adapter,
-so the generalized platform keeps EDGAR working as a demo, a reference template,
-and a regression fixture. This adapter only *describes* the dataset; the actual
-SEC fetch and numerical computation stay in ``src`` and ``edgar_project`` and
-are reached through the established MCP tooling — no computation moves here.
+Wraps the existing deterministic EDGAR pipeline as a first-party input adapter so
+EDGAR stays a one-click demo, a reference template, and a regression fixture. The
+adapter only *describes* the dataset and injects EDGAR domain knowledge as
+**hints**; the general profilers stay domain-agnostic. No numerical computation
+is moved or rewritten here — data acquisition still lives in ``src`` /
+``edgar_project`` and is reached offline for fixtures.
 
-The manifest is built offline. When a panel CSV path is supplied via
-``parameters['panel_csv']`` the columns/entities/row_count are derived from that
-materialized file; otherwise the canonical EDGAR panel schema is declared from
-the pipeline's known metric contract.
+Manifest sources:
+
+* ``parameters['panel_csv']`` — profile a materialized EDGAR panel file.
+* otherwise — declare the canonical EDGAR panel schema (no data materialized).
 """
 
 from __future__ import annotations
 
 from pathlib import Path
 
-from agentic.domain.enums import ColumnRole, DatasetKind
-from agentic.domain.manifest import ColumnSpec, DatasetManifest, DatasetProvenance
+from agentic.domain.enums import ColumnRole, DatasetKind, Modality, SemanticType
+from agentic.domain.manifest import ColumnSpec, DatasetManifest
 
 from .base import AdapterInfo, AdapterRequest, InputAdapter
-
-ADAPTER_ID = "edgar"
-ADAPTER_VERSION = "1"
-
-# Canonical identity columns of the EDGAR panel (metrics are added from the
-# pipeline's FEATURE_COLS contract so this stays truthful if that list changes).
-_IDENTITY_COLUMNS: tuple[tuple[str, str, ColumnRole, str | None], ...] = (
-    ("ticker", "str", ColumnRole.entity_id, None),
-    ("cik", "int", ColumnRole.identifier, None),
-    ("company_name", "str", ColumnRole.dimension, None),
-    ("period", "period", ColumnRole.time_index, None),
+from .capabilities import PermittedOperation, SourceCapabilityDescriptor, SourceType
+from .materialize import (
+    DatasetMaterializer,
+    SchemaOnlyMaterializer,
+    TabularFileMaterializer,
 )
 
-# Units for known EDGAR metrics (best-effort; unknown metrics default to None).
-_METRIC_UNITS: dict[str, str] = {
+ADAPTER_ID = "edgar"
+ADAPTER_VERSION = "2"
+
+# EDGAR domain knowledge, injected as hints (kept out of the general layer).
+EDGAR_ROLE_HINTS: dict[str, ColumnRole] = {
+    "ticker": ColumnRole.entity_id,
+    "cik": ColumnRole.identifier,
+    "company_name": ColumnRole.dimension,
+    "period": ColumnRole.time_index,
+}
+EDGAR_SEMANTIC_HINTS: dict[str, SemanticType] = {
+    "ticker": SemanticType.identifier,
+    "cik": SemanticType.identifier,
+    "company_name": SemanticType.categorical,
+    "period": SemanticType.temporal,
+    "revenue": SemanticType.monetary,
+    "net_income": SemanticType.monetary,
+    "revenue_growth_qoq": SemanticType.percentage,
+    "net_margin": SemanticType.percentage,
+    "current_ratio": SemanticType.real,
+    "debt_to_assets": SemanticType.percentage,
+}
+EDGAR_UNIT_HINTS: dict[str, str] = {
     "revenue": "USD",
     "net_income": "USD",
     "revenue_growth_qoq": "ratio",
@@ -44,9 +60,15 @@ _METRIC_UNITS: dict[str, str] = {
     "debt_to_assets": "ratio",
 }
 
+_IDENTITY_COLUMNS: tuple[tuple[str, str, ColumnRole], ...] = (
+    ("ticker", "str", ColumnRole.entity_id),
+    ("cik", "int", ColumnRole.identifier),
+    ("company_name", "str", ColumnRole.dimension),
+    ("period", "period", ColumnRole.time_index),
+)
+
 
 def _feature_cols() -> list[str]:
-    """EDGAR metric columns from the deterministic pipeline contract (offline import)."""
     from src.anomaly import FEATURE_COLS
 
     return list(FEATURE_COLS)
@@ -58,26 +80,29 @@ def _default_tickers() -> list[str]:
     return [str(t).strip().upper() for t in config.DEFAULT_TICKERS if str(t).strip()]
 
 
-def _infer_role(name: str, metric_names: set[str]) -> tuple[ColumnRole, str, str | None]:
-    """Map a raw panel column to (role, dtype, unit) using EDGAR conventions."""
-    lname = name.lower()
-    if lname == "ticker":
-        return ColumnRole.entity_id, "str", None
-    if lname == "cik":
-        return ColumnRole.identifier, "int", None
-    if lname == "company_name":
-        return ColumnRole.dimension, "str", None
-    if lname == "period":
-        return ColumnRole.time_index, "period", None
-    if lname in metric_names:
-        return ColumnRole.metric, "float", _METRIC_UNITS.get(lname)
-    return ColumnRole.dimension, "str", None
-
-
-class EdgarInputAdapter(InputAdapter):
+class EDGARAdapter(InputAdapter):
     """First-party adapter describing the SEC EDGAR financial panel."""
 
     adapter_id = ADAPTER_ID
+    adapter_version = ADAPTER_VERSION
+
+    def capabilities(self) -> SourceCapabilityDescriptor:
+        return SourceCapabilityDescriptor(
+            adapter_id=ADAPTER_ID,
+            adapter_version=ADAPTER_VERSION,
+            supported_source_types=[SourceType.edgar, SourceType.csv],
+            supported_modalities=[Modality.tabular, Modality.time_series],
+            permitted_operations=[
+                PermittedOperation.materialize,
+                PermittedOperation.profile_schema,
+                PermittedOperation.profile_quality,
+                PermittedOperation.fingerprint,
+                PermittedOperation.full_scan,
+            ],
+            supports_temporal=True,
+            supports_entity_ids=True,
+            notes="Wraps the deterministic EDGAR pipeline; entity=ticker, time=fiscal period.",
+        )
 
     def describe(self) -> AdapterInfo:
         return AdapterInfo(
@@ -91,92 +116,74 @@ class EdgarInputAdapter(InputAdapter):
             default_dataset_kind=DatasetKind.tabular_panel.value,
         )
 
-    def build_manifest(self, request: AdapterRequest) -> DatasetManifest:
-        metric_names = _feature_cols()
+    def materializer(self, request: AdapterRequest) -> DatasetMaterializer:
         panel_csv = request.parameters.get("panel_csv")
         if panel_csv:
-            return self._manifest_from_panel(Path(panel_csv), request, metric_names)
-        return self._manifest_declared(request, metric_names)
+            return TabularFileMaterializer(
+                Path(panel_csv),
+                adapter_id=ADAPTER_ID,
+                source_type=SourceType.edgar.value,
+                name=f"EDGAR panel ({Path(panel_csv).name})",
+                modality=Modality.time_series,
+                dataset_kind=DatasetKind.tabular_panel,
+                role_hints=EDGAR_ROLE_HINTS,
+                semantic_hints=EDGAR_SEMANTIC_HINTS,
+                unit_hints=EDGAR_UNIT_HINTS,
+                entity_id_fields=["ticker"],
+                time_field="period",
+            )
+        return self._declared_materializer(request)
 
-    # -- offline manifest builders ------------------------------------------
-
-    def _manifest_declared(
-        self,
-        request: AdapterRequest,
-        metric_names: list[str],
-    ) -> DatasetManifest:
+    def _declared_materializer(self, request: AdapterRequest) -> SchemaOnlyMaterializer:
         entities = [e.strip().upper() for e in request.entities if e.strip()] or _default_tickers()
         columns: list[ColumnSpec] = [
-            ColumnSpec(name=name, dtype=dtype, role=role, nullable=(role != ColumnRole.entity_id), unit=unit)
-            for name, dtype, role, unit in _IDENTITY_COLUMNS
+            ColumnSpec(
+                name=name,
+                dtype=dtype,
+                role=role,
+                semantic_type=EDGAR_SEMANTIC_HINTS.get(name, SemanticType.unknown),
+                nullable=(role != ColumnRole.entity_id),
+                unit=EDGAR_UNIT_HINTS.get(name),
+            )
+            for name, dtype, role in _IDENTITY_COLUMNS
         ]
         columns.extend(
-            ColumnSpec(name=m, dtype="float", role=ColumnRole.metric, nullable=True, unit=_METRIC_UNITS.get(m))
-            for m in metric_names
+            ColumnSpec(
+                name=m,
+                dtype="float",
+                role=ColumnRole.metric,
+                semantic_type=EDGAR_SEMANTIC_HINTS.get(m, SemanticType.real),
+                nullable=True,
+                unit=EDGAR_UNIT_HINTS.get(m),
+            )
+            for m in _feature_cols()
         )
-        return DatasetManifest(
-            name="EDGAR financial panel",
-            description="Declared EDGAR panel schema (no data materialized).",
-            dataset_kind=DatasetKind.tabular_panel,
-            columns=columns,
-            entities=entities,
-            row_count=None,
-            provenance=self._provenance(request, source="SEC EDGAR companyfacts (declared schema)"),
-        )
-
-    def _manifest_from_panel(
-        self,
-        panel_csv: Path,
-        request: AdapterRequest,
-        metric_names: list[str],
-    ) -> DatasetManifest:
-        import pandas as pd
-
-        if not panel_csv.is_file():
-            raise FileNotFoundError(f"panel_csv not found: {panel_csv}")
-        df = pd.read_csv(panel_csv)
-        metric_set = {m.lower() for m in metric_names}
-        columns: list[ColumnSpec] = []
-        for raw in df.columns:
-            name = str(raw)
-            role, dtype, unit = _infer_role(name, metric_set)
-            columns.append(ColumnSpec(name=name, dtype=dtype, role=role, nullable=True, unit=unit))
-
-        entities = [e.strip().upper() for e in request.entities if e.strip()]
-        if not entities and "ticker" in {str(c).lower() for c in df.columns}:
-            ticker_col = next(c for c in df.columns if str(c).lower() == "ticker")
-            entities = sorted({str(v).strip().upper() for v in df[ticker_col].dropna().unique() if str(v).strip()})
-
-        return DatasetManifest(
-            name=f"EDGAR financial panel ({panel_csv.name})",
-            description="EDGAR panel manifest derived from a materialized panel CSV.",
-            dataset_kind=DatasetKind.tabular_panel,
-            columns=columns,
-            entities=entities,
-            row_count=int(len(df)),
-            provenance=self._provenance(
-                request,
-                source=f"EDGAR panel CSV: {panel_csv}",
-                extra={"panel_csv": str(panel_csv)},
-            ),
-        )
-
-    def _provenance(
-        self,
-        request: AdapterRequest,
-        *,
-        source: str,
-        extra: dict[str, str] | None = None,
-    ) -> DatasetProvenance:
-        params: dict[str, str] = {
-            "entities": ",".join(request.entities),
-            **request.parameters,
-        }
-        if extra:
-            params.update(extra)
-        return DatasetProvenance(
+        return SchemaOnlyMaterializer(
             adapter_id=ADAPTER_ID,
-            adapter_version=ADAPTER_VERSION,
-            source=source,
-            parameters=params,
+            source_type=SourceType.edgar.value,
+            name="EDGAR financial panel",
+            columns=columns,
+            entities=entities,
+            modality=Modality.time_series,
+            dataset_kind=DatasetKind.tabular_panel,
+            provenance_parameters={"entities": ",".join(entities)},
         )
+
+    def build_manifest(self, request: AdapterRequest) -> DatasetManifest:
+        """Build a manifest, recording the EDGAR panel path in provenance when used."""
+        materialized = self.materializer(request).materialize()
+        extra: dict[str, str] = {}
+        panel_csv = request.parameters.get("panel_csv")
+        if panel_csv:
+            extra["panel_csv"] = panel_csv
+        return self._manifest_builder().build(
+            materialized,
+            adapter_id=self.adapter_id,
+            adapter_version=self.adapter_version,
+            description="EDGAR panel manifest.",
+            extra_provenance=extra,
+        )
+
+
+# Backward-compatible alias (earlier name).
+EdgarInputAdapter = EDGARAdapter
