@@ -85,6 +85,7 @@ from .provenance import (
     ReproducibilityManifest,
 )
 from .questions import OpenQuestion
+from .statistics import StatisticalSummary, Uncertainty
 
 __all__ = [
     # common
@@ -125,6 +126,9 @@ __all__ = [
     "ColumnMissingness",
     "DuplicateSummary",
     "QualityWarning",
+    # statistics
+    "StatisticalSummary",
+    "Uncertainty",
     # provenance & reproducibility
     "Provenance",
     "ReproducibilityManifest",

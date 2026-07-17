@@ -16,6 +16,7 @@ from pydantic import Field
 from .common import DOMAIN_SCHEMA_VERSION, DomainModel, new_id, utc_now
 from .enums import EvidenceDirection, EvidenceType, PayloadKind, ReferenceKind
 from .provenance import Provenance
+from .statistics import StatisticalSummary
 
 
 class SourceReference(DomainModel):
@@ -77,6 +78,10 @@ class Evidence(DomainModel):
         description="Typed pointer to the underlying numeric payload.",
     )
     artifact_ids: list[str] = Field(default_factory=list)
+    statistics: StatisticalSummary | None = Field(
+        default=None,
+        description="Statistical backing (effect size, uncertainty, sample size) when applicable.",
+    )
     provenance: Provenance
     created_at: datetime = Field(default_factory=utc_now)
     schema_version: str = Field(default=DOMAIN_SCHEMA_VERSION)
