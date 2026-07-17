@@ -1,10 +1,10 @@
 """
-Explicit enums for the input-agnostic investigation domain.
+Explicit enums for the investigation domain.
 
-The generalized platform represents agent decisions as persisted structured
-state rather than free-form status strings. Every lifecycle value below is an
-explicit enum so orchestration decisions stay inspectable and serializable
-(see the project's "definition of agency").
+Agent decisions are persisted structured state rather than free-form status
+strings. Every lifecycle and classification value is a string-backed enum for
+storage portability (matches the project's existing ``str, Enum`` convention)
+and inspectability.
 """
 
 from __future__ import annotations
@@ -12,12 +12,26 @@ from __future__ import annotations
 from enum import Enum
 
 
+# ---------------------------------------------------------------------------
+# Datasets
+# ---------------------------------------------------------------------------
+
+
+class DataSourceKind(str, Enum):
+    """Class of system a :class:`DataSource` represents."""
+
+    edgar = "edgar"
+    csv = "csv"
+    warehouse = "warehouse"
+    api = "api"
+    fixture = "fixture"
+    other = "other"
+
+
 class DatasetKind(str, Enum):
     """Shape of a dataset described by a :class:`DatasetManifest`."""
 
     tabular_panel = "tabular_panel"
-    """Wide entity x period table (the EDGAR financial panel is this kind)."""
-
     timeseries = "timeseries"
     cross_section = "cross_section"
     event_log = "event_log"
@@ -29,26 +43,20 @@ class ColumnRole(str, Enum):
     """Semantic role of a column, independent of its storage dtype."""
 
     entity_id = "entity_id"
-    """Unit of analysis identifier (e.g. ticker)."""
-
     time_index = "time_index"
-    """Ordering/period axis (e.g. fiscal period)."""
-
     metric = "metric"
-    """Numeric measurement an experiment may analyze."""
-
     dimension = "dimension"
-    """Categorical descriptor used for grouping/labeling."""
-
     identifier = "identifier"
-    """Secondary key or provenance id (e.g. CIK)."""
-
     derived = "derived"
-    """Value computed from other columns by the deterministic layer."""
+
+
+# ---------------------------------------------------------------------------
+# Investigation lifecycle
+# ---------------------------------------------------------------------------
 
 
 class InvestigationStatus(str, Enum):
-    """Lifecycle of an :class:`InvestigationState` aggregate."""
+    """Lifecycle of an :class:`Investigation`."""
 
     created = "created"
     planning = "planning"
@@ -63,20 +71,20 @@ class HypothesisStatus(str, Enum):
     """
     Whether accumulated evidence supports a hypothesis.
 
-    Agency requires that hypotheses can be supported, weakened, or rejected,
-    so these are first-class persisted transitions rather than log lines.
+    Hypotheses can be supported, weakened, or rejected as evidence arrives, so
+    these are first-class persisted transitions (see :data:`ALLOWED_HYPOTHESIS_TRANSITIONS`).
     """
 
     proposed = "proposed"
-    under_investigation = "under_investigation"
+    active = "active"
     supported = "supported"
     weakened = "weakened"
     rejected = "rejected"
-    inconclusive = "inconclusive"
+    unresolved = "unresolved"
 
 
 class ExperimentStatus(str, Enum):
-    """Lifecycle of a single typed experiment."""
+    """Lifecycle of an experiment request/result."""
 
     planned = "planned"
     running = "running"
@@ -85,12 +93,157 @@ class ExperimentStatus(str, Enum):
     skipped = "skipped"
 
 
+# ---------------------------------------------------------------------------
+# Evidence & observations
+# ---------------------------------------------------------------------------
+
+
+class EvidenceType(str, Enum):
+    """Kind of observation an :class:`Evidence` record encodes."""
+
+    statistical_test = "statistical_test"
+    anomaly_flag = "anomaly_flag"
+    descriptive_stat = "descriptive_stat"
+    peer_comparison = "peer_comparison"
+    trend_break = "trend_break"
+    data_quality = "data_quality"
+    external_reference = "external_reference"
+    model_assertion = "model_assertion"
+
+
 class EvidenceDirection(str, Enum):
-    """How a piece of evidence bears on a hypothesis."""
+    """How a piece of evidence bears on its target hypothesis."""
 
     supports = "supports"
     refutes = "refutes"
     neutral = "neutral"
+
+
+class ObservationType(str, Enum):
+    """Kind of raw observation (pre-interpretation)."""
+
+    value = "value"
+    outlier = "outlier"
+    trend = "trend"
+    gap = "gap"
+    comparison = "comparison"
+    error = "error"
+
+
+class ReferenceKind(str, Enum):
+    """What a :class:`SourceReference` points at."""
+
+    dataset = "dataset"
+    dataset_column = "dataset_column"
+    artifact = "artifact"
+    experiment_result = "experiment_result"
+    observation = "observation"
+    manifest = "manifest"
+    hypothesis = "hypothesis"
+    external = "external"
+    other = "other"
+
+
+class PayloadKind(str, Enum):
+    """Where the concrete numeric payload behind evidence lives."""
+
+    artifact = "artifact"
+    storage_uri = "storage_uri"
+    dataset_reference = "dataset_reference"
+    inline = "inline"
+    external = "external"
+
+
+# ---------------------------------------------------------------------------
+# Decisions, critiques, questions, conclusions
+# ---------------------------------------------------------------------------
+
+
+class EntityKind(str, Enum):
+    """Type tag for a cross-entity reference (:class:`EntityRef`)."""
+
+    investigation = "investigation"
+    hypothesis = "hypothesis"
+    evidence = "evidence"
+    observation = "observation"
+    experiment_definition = "experiment_definition"
+    experiment_request = "experiment_request"
+    experiment_result = "experiment_result"
+    dataset = "dataset"
+    manifest = "manifest"
+    artifact = "artifact"
+    open_question = "open_question"
+    decision = "decision"
+    critique = "critique"
+    conclusion = "conclusion"
+
+
+class DecisionType(str, Enum):
+    """What kind of agent decision was recorded."""
+
+    propose_hypothesis = "propose_hypothesis"
+    select_experiment = "select_experiment"
+    update_evidence = "update_evidence"
+    revise_confidence = "revise_confidence"
+    spawn_sub_hypothesis = "spawn_sub_hypothesis"
+    request_critique = "request_critique"
+    open_question = "open_question"
+    answer_question = "answer_question"
+    conclude = "conclude"
+    terminate = "terminate"
+
+
+class CritiqueType(str, Enum):
+    """Category of a critic's challenge."""
+
+    insufficient_evidence = "insufficient_evidence"
+    confounding = "confounding"
+    data_quality = "data_quality"
+    overreach = "overreach"
+    competing_explanation = "competing_explanation"
+    reproducibility = "reproducibility"
+
+
+class CritiqueSeverity(str, Enum):
+    """How strongly a critique should influence the run."""
+
+    info = "info"
+    minor = "minor"
+    major = "major"
+    blocking = "blocking"
+
+
+class OpenQuestionStatus(str, Enum):
+    """Lifecycle of an open question."""
+
+    open = "open"
+    answered = "answered"
+    dropped = "dropped"
+
+
+class ConclusionDisposition(str, Enum):
+    """Overall disposition of an investigation's current conclusion."""
+
+    supported = "supported"
+    refuted = "refuted"
+    inconclusive = "inconclusive"
+    insufficient_evidence = "insufficient_evidence"
+
+
+# ---------------------------------------------------------------------------
+# Provenance & termination
+# ---------------------------------------------------------------------------
+
+
+class ProvenanceSource(str, Enum):
+    """Who/what produced a domain entity."""
+
+    agent_llm = "agent_llm"
+    deterministic_rule = "deterministic_rule"
+    deterministic_tool = "deterministic_tool"
+    input_adapter = "input_adapter"
+    human = "human"
+    system = "system"
 
 
 class TerminationReason(str, Enum):
@@ -104,6 +257,78 @@ class TerminationReason(str, Enum):
     sufficient_evidence = "sufficient_evidence"
     insufficient_evidence = "insufficient_evidence"
     max_iterations = "max_iterations"
+    budget_exhausted = "budget_exhausted"
     no_progress = "no_progress"
     error = "error"
     user_stop = "user_stop"
+
+
+# ---------------------------------------------------------------------------
+# Allowed transitions (validated by entity mutators)
+# ---------------------------------------------------------------------------
+
+#: Directed graph of legal :class:`HypothesisStatus` transitions.
+ALLOWED_HYPOTHESIS_TRANSITIONS: dict[HypothesisStatus, frozenset[HypothesisStatus]] = {
+    HypothesisStatus.proposed: frozenset(
+        {HypothesisStatus.active, HypothesisStatus.rejected}
+    ),
+    HypothesisStatus.active: frozenset(
+        {
+            HypothesisStatus.supported,
+            HypothesisStatus.weakened,
+            HypothesisStatus.rejected,
+            HypothesisStatus.unresolved,
+        }
+    ),
+    HypothesisStatus.weakened: frozenset(
+        {
+            HypothesisStatus.active,
+            HypothesisStatus.supported,
+            HypothesisStatus.rejected,
+            HypothesisStatus.unresolved,
+        }
+    ),
+    HypothesisStatus.supported: frozenset(
+        {HypothesisStatus.weakened, HypothesisStatus.unresolved}
+    ),
+    HypothesisStatus.unresolved: frozenset(
+        {
+            HypothesisStatus.active,
+            HypothesisStatus.supported,
+            HypothesisStatus.weakened,
+            HypothesisStatus.rejected,
+        }
+    ),
+    # rejected is terminal.
+    HypothesisStatus.rejected: frozenset(),
+}
+
+#: Directed graph of legal :class:`InvestigationStatus` transitions.
+ALLOWED_INVESTIGATION_TRANSITIONS: dict[InvestigationStatus, frozenset[InvestigationStatus]] = {
+    InvestigationStatus.created: frozenset(
+        {InvestigationStatus.planning, InvestigationStatus.failed}
+    ),
+    InvestigationStatus.planning: frozenset(
+        {InvestigationStatus.running, InvestigationStatus.failed}
+    ),
+    InvestigationStatus.running: frozenset(
+        {
+            InvestigationStatus.awaiting_evidence,
+            InvestigationStatus.converged,
+            InvestigationStatus.exhausted,
+            InvestigationStatus.failed,
+        }
+    ),
+    InvestigationStatus.awaiting_evidence: frozenset(
+        {
+            InvestigationStatus.running,
+            InvestigationStatus.converged,
+            InvestigationStatus.exhausted,
+            InvestigationStatus.failed,
+        }
+    ),
+    # converged / exhausted / failed are terminal.
+    InvestigationStatus.converged: frozenset(),
+    InvestigationStatus.exhausted: frozenset(),
+    InvestigationStatus.failed: frozenset(),
+}

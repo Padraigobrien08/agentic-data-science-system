@@ -1,34 +1,37 @@
 """
-Hypotheses — the questions an investigation tests.
+Hypotheses — the falsifiable claims an investigation tests.
 
-A hypothesis is persisted structured state whose status is advanced by
-evidence. Confidence is an explicit numeric field so "supported", "weakened",
-and "rejected" transitions are inspectable rather than implied by prose.
+A hypothesis is persisted structured state whose status is advanced by evidence
+through validated transitions (:data:`ALLOWED_HYPOTHESIS_TRANSITIONS`).
+Confidence is an explicit bounded field so "supported"/"weakened"/"rejected"
+are inspectable, not implied by prose.
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from uuid import uuid4
+from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from .enums import HypothesisStatus
-
-
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+from .common import DOMAIN_SCHEMA_VERSION, DomainModel, new_id, utc_now
+from .enums import ALLOWED_HYPOTHESIS_TRANSITIONS, HypothesisStatus
+from .provenance import Provenance
 
 
-class Hypothesis(BaseModel):
-    """One testable claim within an :class:`InvestigationState`."""
+class IllegalHypothesisTransition(ValueError):
+    """Raised when a hypothesis status change is not permitted."""
 
-    model_config = {"extra": "forbid"}
 
-    hypothesis_id: str = Field(default_factory=lambda: str(uuid4()))
+class Hypothesis(DomainModel):
+    """One testable claim within an investigation."""
+
+    id: str = Field(default_factory=lambda: new_id("hyp"))
     statement: str = Field(..., min_length=1, description="Falsifiable claim in plain language.")
+    rationale: str = Field(default="", description="Why this is worth testing.")
+    confidence: float = Field(default=0.5, ge=0.0, le=1.0, description="Current belief (0..1).")
     status: HypothesisStatus = Field(default=HypothesisStatus.proposed)
-    rationale: str | None = Field(default=None, max_length=1024, description="Why this is worth testing.")
+    supporting_evidence_ids: list[str] = Field(default_factory=list)
+    contradicting_evidence_ids: list[str] = Field(default_factory=list)
     metric_refs: list[str] = Field(
         default_factory=list,
         description="Manifest column names this hypothesis concerns.",
@@ -37,25 +40,48 @@ class Hypothesis(BaseModel):
         default_factory=list,
         description="Entities (e.g. tickers) this hypothesis concerns; empty means dataset-wide.",
     )
-    evidence_ids: list[str] = Field(
-        default_factory=list,
-        description="Evidence records attached to this hypothesis.",
+    parent_hypothesis_id: str | None = Field(
+        default=None,
+        description="Set when this hypothesis was spawned to refine/compete with another.",
     )
-    prior_confidence: float = Field(
-        default=0.5,
-        ge=0.0,
-        le=1.0,
-        description="Belief before evidence (0..1).",
-    )
-    confidence: float = Field(
-        default=0.5,
-        ge=0.0,
-        le=1.0,
-        description="Current belief after attached evidence (0..1).",
-    )
-    tags: list[str] = Field(default_factory=list)
-    created_at: datetime = Field(default_factory=_utc_now)
-    updated_at: datetime = Field(default_factory=_utc_now)
+    provenance: Provenance
+    created_at: datetime = Field(default_factory=utc_now)
+    updated_at: datetime = Field(default_factory=utc_now)
+    schema_version: str = Field(default=DOMAIN_SCHEMA_VERSION)
 
-    def touch(self) -> None:
-        self.updated_at = _utc_now()
+    # -- mutation (explicit, validated) -------------------------------------
+
+    def _touch(self) -> None:
+        self.updated_at = utc_now()
+
+    def can_transition_to(self, target: HypothesisStatus) -> bool:
+        return target == self.status or target in ALLOWED_HYPOTHESIS_TRANSITIONS[self.status]
+
+    def set_status(self, target: HypothesisStatus) -> None:
+        """Advance status, enforcing the legal transition graph."""
+        if not self.can_transition_to(target):
+            raise IllegalHypothesisTransition(
+                f"cannot transition hypothesis from {self.status.value} to {target.value}"
+            )
+        if target != self.status:
+            self.status = target
+            self._touch()
+
+    def set_confidence(self, value: float) -> None:
+        if not 0.0 <= value <= 1.0:
+            raise ValueError("confidence must be within [0, 1]")
+        self.confidence = value
+        self._touch()
+
+    def link_supporting_evidence(self, evidence_id: str) -> None:
+        if evidence_id not in self.supporting_evidence_ids:
+            self.supporting_evidence_ids.append(evidence_id)
+            self._touch()
+
+    def link_contradicting_evidence(self, evidence_id: str) -> None:
+        if evidence_id not in self.contradicting_evidence_ids:
+            self.contradicting_evidence_ids.append(evidence_id)
+            self._touch()
+
+    def is_terminal(self) -> bool:
+        return not ALLOWED_HYPOTHESIS_TRANSITIONS[self.status]

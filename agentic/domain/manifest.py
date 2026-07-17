@@ -1,97 +1,122 @@
 """
-Dataset manifests — the input-agnostic description of what a run analyzes.
+Dataset entities — the input-agnostic description of what an investigation analyzes.
 
-A manifest is produced by an input adapter (see :mod:`agentic.adapters`) and is
-the contract the planner and deterministic tools read instead of assuming an
-EDGAR panel. Manifests are pure, typed, and JSON-serializable via
-``model_dump(mode="json")``; they carry provenance so a run is reproducible
-from persisted state.
+Lineage: a :class:`DataSource` (a system) yields a :class:`DatasetReference` (a
+concrete dataset instance), whose schema is described by a :class:`DatasetManifest`.
+Deterministic tools bind to columns by :class:`~agentic.domain.enums.ColumnRole`,
+so the same machinery works for any adapter that can emit a manifest. All types
+are pure and JSON-serializable via ``model_dump(mode="json")``.
+
+The module name is kept as ``manifest`` for import stability (input adapters
+import :class:`DatasetManifest`, :class:`ColumnSpec`, :class:`DatasetProvenance`
+from here).
 """
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
-from uuid import uuid4
+from datetime import datetime
 
-from pydantic import BaseModel, Field
+from pydantic import Field
 
-from .enums import ColumnRole, DatasetKind
-
-
-def _utc_now() -> datetime:
-    return datetime.now(timezone.utc)
+from .common import DOMAIN_SCHEMA_VERSION, DomainModel, new_id, utc_now
+from .enums import ColumnRole, DataSourceKind, DatasetKind
 
 
-class ColumnSpec(BaseModel):
-    """One column in a dataset, described by semantic role rather than storage."""
+class DataSource(DomainModel):
+    """A system data can be acquired from (the EDGAR SEC API is one instance)."""
 
-    model_config = {"extra": "forbid"}
+    id: str = Field(default_factory=lambda: new_id("src"))
+    kind: DataSourceKind
+    name: str = Field(..., min_length=1)
+    description: str | None = Field(default=None, max_length=512)
+    adapter_id: str | None = Field(
+        default=None,
+        description="Input adapter that services this source, e.g. 'edgar'.",
+    )
+    connection_ref: str | None = Field(
+        default=None,
+        description="Opaque connection/locator hint (never raw secrets).",
+    )
+    parameters: dict[str, str] = Field(
+        default_factory=dict,
+        description="JSON-safe source options for reproduction.",
+    )
+    schema_version: str = Field(default=DOMAIN_SCHEMA_VERSION)
 
-    name: str = Field(..., min_length=1, description="Column name as it appears in the dataset.")
+
+class ColumnSpec(DomainModel):
+    """One column, described by semantic role rather than storage dtype."""
+
+    name: str = Field(..., min_length=1)
     dtype: str = Field(default="unknown", description="Storage/interpretation dtype, e.g. float, str, period.")
-    role: ColumnRole = Field(..., description="Semantic role used by planner/tool selection.")
-    nullable: bool = Field(default=True, description="Whether missing values are expected.")
+    role: ColumnRole
+    nullable: bool = Field(default=True)
     unit: str | None = Field(default=None, description="Measurement unit for metric columns (e.g. USD, ratio).")
     description: str | None = Field(default=None, max_length=512)
 
 
-class DatasetProvenance(BaseModel):
-    """Where a manifest's data came from and how to reproduce it."""
-
-    model_config = {"extra": "forbid"}
+class DatasetProvenance(DomainModel):
+    """Lineage of a manifest's data (distinct from agent-decision provenance)."""
 
     adapter_id: str = Field(..., description="Adapter that produced the manifest, e.g. 'edgar'.")
-    adapter_version: str = Field(default="1", description="Adapter contract version for reproducibility.")
+    adapter_version: str = Field(default="1")
     source: str = Field(..., description="Human-readable source label, e.g. 'SEC EDGAR companyfacts'.")
-    fetched_at: datetime = Field(default_factory=_utc_now)
+    fetched_at: datetime = Field(default_factory=utc_now)
     parameters: dict[str, str] = Field(
         default_factory=dict,
-        description="JSON-safe request parameters that generated this manifest (audit/reproduction).",
+        description="JSON-safe request parameters that generated this manifest.",
     )
 
 
-class DatasetManifest(BaseModel):
-    """
-    Typed description of a dataset an investigation will analyze.
+class DatasetManifest(DomainModel):
+    """Typed description of a dataset an investigation will analyze."""
 
-    Deterministic tools bind to columns by :class:`ColumnRole`, so the same
-    planner and experiment machinery works across any adapter that can emit a
-    manifest — not only the first-party EDGAR panel.
-    """
-
-    model_config = {"extra": "forbid"}
-
-    manifest_id: str = Field(default_factory=lambda: str(uuid4()))
-    schema_version: str = Field(default="1")
-    name: str = Field(..., min_length=1, description="Short dataset label.")
+    manifest_id: str = Field(default_factory=lambda: new_id("mfst"))
+    schema_version: str = Field(default=DOMAIN_SCHEMA_VERSION)
+    name: str = Field(..., min_length=1)
     description: str | None = Field(default=None, max_length=512)
     dataset_kind: DatasetKind = Field(default=DatasetKind.tabular_panel)
+    data_source_id: str | None = Field(default=None)
+    dataset_reference_id: str | None = Field(default=None)
     columns: list[ColumnSpec] = Field(default_factory=list)
-    entities: list[str] = Field(
-        default_factory=list,
-        description="Units of analysis in scope (e.g. tickers).",
-    )
-    row_count: int | None = Field(default=None, ge=0, description="Row count when materialized offline.")
+    entities: list[str] = Field(default_factory=list, description="Units of analysis in scope (e.g. tickers).")
+    row_count: int | None = Field(default=None, ge=0)
     artifacts: dict[str, str] = Field(
         default_factory=dict,
-        description="Role key -> artifact URI/path (reuses existing artifact-path conventions).",
+        description="Role key -> artifact URI/path.",
     )
     provenance: DatasetProvenance
 
     def columns_with_role(self, role: ColumnRole) -> list[ColumnSpec]:
-        """All columns carrying ``role`` (e.g. every metric the tools can analyze)."""
         return [c for c in self.columns if c.role == role]
 
     def metric_names(self) -> list[str]:
-        """Convenience accessor for metric column names in declaration order."""
         return [c.name for c in self.columns_with_role(ColumnRole.metric)]
 
     def entity_id_column(self) -> ColumnSpec | None:
-        """First column carrying the entity_id role, if any."""
         cols = self.columns_with_role(ColumnRole.entity_id)
         return cols[0] if cols else None
 
     def time_index_column(self) -> ColumnSpec | None:
-        """First column carrying the time_index role, if any."""
         cols = self.columns_with_role(ColumnRole.time_index)
         return cols[0] if cols else None
+
+
+class DatasetReference(DomainModel):
+    """
+    A stable pointer to a concrete dataset instance from a :class:`DataSource`.
+
+    ``locator`` is an opaque handle (path, query id, URI); ``content_hash`` makes
+    the exact bytes reproducible. An optional embedded :class:`DatasetManifest`
+    describes its schema.
+    """
+
+    id: str = Field(default_factory=lambda: new_id("dset"))
+    data_source_id: str | None = Field(default=None)
+    name: str = Field(..., min_length=1)
+    locator: str = Field(..., description="Opaque handle to the dataset (path/query/uri).")
+    content_hash: str | None = Field(default=None, description="Hash of materialized bytes for reproduction.")
+    row_count: int | None = Field(default=None, ge=0)
+    retrieved_at: datetime | None = Field(default=None)
+    manifest: DatasetManifest | None = Field(default=None)
+    schema_version: str = Field(default=DOMAIN_SCHEMA_VERSION)
