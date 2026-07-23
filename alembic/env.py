@@ -42,6 +42,25 @@ def run_migrations_offline() -> None:
         context.run_migrations()
 
 
+def _ensure_wide_version_table(connection) -> None:
+    """
+    Pre-create ``alembic_version`` with a wide ``version_num`` column.
+
+    Alembic (>= 1.14) hard-codes ``alembic_version.version_num`` as ``VARCHAR(32)``,
+    but this project's revision identifiers exceed 32 characters (e.g.
+    ``013_live_hybrid_evaluation_case_run_links``). On a *fresh* database that
+    makes ``alembic upgrade head`` fail when it stamps the first long revision.
+    Creating the table up front with a wide column (idempotent, ``IF NOT EXISTS``)
+    fixes fresh migrations without touching any revision id or applied migration;
+    existing databases already hold long heads, so their table is left untouched.
+    """
+    connection.exec_driver_sql(
+        "CREATE TABLE IF NOT EXISTS alembic_version ("
+        "version_num VARCHAR(255) NOT NULL, "
+        "CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num))"
+    )
+
+
 def run_migrations_online() -> None:
     """Run migrations in 'online' mode (live connection)."""
     configuration = config.get_section(config.config_ini_section) or {}
@@ -52,6 +71,13 @@ def run_migrations_online() -> None:
         prefix="sqlalchemy.",
         poolclass=pool.NullPool,
     )
+
+    # Ensure a wide alembic_version table in its own committed transaction, fully
+    # isolated from the migration connection so it cannot interfere with alembic's
+    # own transaction handling.
+    with connectable.connect() as pre_connection:
+        with pre_connection.begin():
+            _ensure_wide_version_table(pre_connection)
 
     with connectable.connect() as connection:
         context.configure(

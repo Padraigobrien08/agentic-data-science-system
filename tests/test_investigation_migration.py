@@ -59,3 +59,48 @@ def test_migration_014_revision_chain() -> None:
     mod = _load_migration()
     assert mod.revision == "014_investigation_persistence"
     assert mod.down_revision == "013_live_hybrid_evaluation_case_run_links"
+
+
+def _revision_ids() -> list[str]:
+    import re
+
+    ids: list[str] = []
+    for path in (Path(__file__).resolve().parents[1] / "alembic/versions").glob("*.py"):
+        m = re.search(r'^revision:\s*str\s*=\s*"([^"]+)"', path.read_text(), re.M)
+        if m:
+            ids.append(m.group(1))
+    return ids
+
+
+def test_env_widens_version_table_for_long_revision_ids() -> None:
+    """
+    Guard: several revision ids exceed alembic's default ``version_num`` width
+    (VARCHAR(32)); ``alembic/env.py`` must pre-create a wider ``alembic_version``
+    so a fresh ``alembic upgrade head`` (the Compose ``migrate`` service) works.
+    """
+    ids = _revision_ids()
+    assert ids, "no revision ids found"
+    longest = max(len(r) for r in ids)
+    assert longest > 32, "test premise changed: no long revision ids remain"
+
+    env_src = (Path(__file__).resolve().parents[1] / "alembic/env.py").read_text()
+    assert "_ensure_wide_version_table" in env_src
+    # the ensured width must accommodate the longest revision id
+    import re
+
+    width = int(re.search(r"version_num VARCHAR\((\d+)\)", env_src).group(1))
+    assert width >= longest
+
+    # the ensured DDL actually stores the longest id (SQLite proxy for any backend)
+    from sqlalchemy import create_engine, text
+
+    engine = create_engine("sqlite:///:memory:")
+    longest_id = max(ids, key=len)
+    with engine.begin() as conn:
+        conn.exec_driver_sql(
+            f"CREATE TABLE alembic_version (version_num VARCHAR({width}) NOT NULL, "
+            "CONSTRAINT alembic_version_pkc PRIMARY KEY (version_num))"
+        )
+        conn.execute(text("INSERT INTO alembic_version (version_num) VALUES (:v)"), {"v": longest_id})
+        stored = conn.execute(text("SELECT version_num FROM alembic_version")).scalar_one()
+    assert stored == longest_id
