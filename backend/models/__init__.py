@@ -14,6 +14,31 @@ from backend.models.enums import (
     ToolCallMcpStatus,
 )
 from backend.models.evaluation_run import EvaluationRun
+from backend.models.enums_investigation import (
+    InvestigationOrigin,
+    StateEventType,
+)
+from backend.models.investigation import (
+    Investigation,
+    InvestigationDataset,
+    InvestigationStateEvent,
+    OrchestrationCheckpoint,
+    ReproducibilityManifestRow,
+)
+from backend.models.investigation_entities import (
+    AgentDecisionRow,
+    ConclusionRow,
+    CritiqueRow,
+    EvidenceArtifactLink,
+    EvidenceHypothesisLink,
+    EvidenceRow,
+    ExperimentRequestRow,
+    ExperimentResultArtifactLink,
+    ExperimentResultRow,
+    HypothesisRow,
+    ObservationRow,
+    OpenQuestionRow,
+)
 from backend.models.model_call import ModelCall
 from backend.models.project import Project
 from backend.models.run_execution_job import RunExecutionJob
@@ -22,11 +47,30 @@ from backend.models.tool_call import ToolCall
 from backend.models.user import User
 
 __all__ = [
+    "AgentDecisionRow",
     "AnalysisRun",
     "AnalysisRunStatus",
     "Artifact",
     "ArtifactKind",
     "Base",
+    "ConclusionRow",
+    "CritiqueRow",
+    "EvidenceArtifactLink",
+    "EvidenceHypothesisLink",
+    "EvidenceRow",
+    "ExperimentRequestRow",
+    "ExperimentResultArtifactLink",
+    "ExperimentResultRow",
+    "HypothesisRow",
+    "Investigation",
+    "InvestigationDataset",
+    "InvestigationOrigin",
+    "InvestigationStateEvent",
+    "ObservationRow",
+    "OpenQuestionRow",
+    "OrchestrationCheckpoint",
+    "ReproducibilityManifestRow",
+    "StateEventType",
     "EvaluationCaseResult",
     "EvaluationRun",
     "EvaluationRunStatus",

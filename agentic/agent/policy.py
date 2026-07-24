@@ -1,0 +1,162 @@
+"""
+AgentPolicy — the model-backed decision surface.
+
+Deterministic computation never goes through the policy; only *interpretation*,
+*hypothesis generation*, *experiment selection*, and *critique* do. Each policy
+method is one "model call" with a defined input and a typed, validated output.
+Model-backed policies validate the raw response into these types and fail safely
+(:class:`MalformedPolicyResponse`) on malformed output.
+
+Two implementations satisfy the protocol: :class:`FixtureAgentPolicy`
+(deterministic, for tests) and :class:`ModelAgentPolicy` (wraps a JSON responder).
+"""
+
+from __future__ import annotations
+
+import json
+from enum import Enum
+from typing import Callable, Literal, Protocol, runtime_checkable
+
+from pydantic import BaseModel, Field, ValidationError
+
+from agentic.domain.common import DomainModel
+
+
+class AnalysisIntent(str, Enum):
+    """What the goal is primarily asking for (drives which experiments are candidates)."""
+
+    trend = "trend"
+    comparison = "comparison"
+    correlation = "correlation"
+    anomaly = "anomaly"
+    distribution = "distribution"
+    ranking = "ranking"
+    association = "association"
+    profile = "profile"
+    general = "general"
+
+
+# -- typed policy I/O --------------------------------------------------------
+
+
+class GoalInterpretation(DomainModel):
+    intent: AnalysisIntent
+    metric_hint: str | None = None
+    group_hint: str | None = None
+    direction: Literal["up", "down"] | None = None
+    rationale: str = ""
+
+
+class HypothesisProposal(DomainModel):
+    statement: str = Field(..., min_length=1)
+    metric: str | None = None
+    direction: Literal["up", "down", "none"] = "none"
+    rationale: str = ""
+
+
+class HypothesisProposals(DomainModel):
+    hypotheses: list[HypothesisProposal] = Field(default_factory=list)
+    questions: list[str] = Field(default_factory=list)
+
+
+class ExperimentChoice(DomainModel):
+    """Selection among candidate experiments; ``request_index`` indexes candidates."""
+
+    request_index: int | None = None
+    rationale: str = ""
+
+
+class CritiqueProposal(DomainModel):
+    should_challenge: bool = False
+    target_hypothesis_id: str | None = None
+    falsification_tool: str | None = None
+    message: str = ""
+    rationale: str = ""
+
+
+# -- errors ------------------------------------------------------------------
+
+
+class AgentPolicyError(RuntimeError):
+    """Base for policy failures (the loop terminates safely on these)."""
+
+
+class MalformedPolicyResponse(AgentPolicyError):
+    """The model returned output that failed typed validation."""
+
+
+# -- protocol ----------------------------------------------------------------
+
+
+@runtime_checkable
+class AgentPolicy(Protocol):
+    """The set of model-backed decisions the loop delegates."""
+
+    def interpret_goal(self, goal_text: str, *, capability_summary: dict) -> GoalInterpretation: ...
+
+    def generate_hypotheses(
+        self, interpretation: GoalInterpretation, *, metric_names: list[str], dimension_names: list[str]
+    ) -> HypothesisProposals: ...
+
+    def select_experiment(self, *, goal_summary: dict, candidates: list[dict]) -> ExperimentChoice: ...
+
+    def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal: ...
+
+
+# -- model-backed implementation --------------------------------------------
+
+Responder = Callable[[str, str], str]
+"""A function (system_prompt, user_prompt) -> raw JSON string."""
+
+
+class ModelAgentPolicy:
+    """
+    Policy backed by a JSON responder (e.g. an LLM). Every method validates the
+    raw response into a typed model and raises :class:`MalformedPolicyResponse`
+    on malformed output, so the loop can fail safely.
+    """
+
+    def __init__(self, respond: Responder) -> None:
+        self._respond = respond
+
+    def _call(self, system: str, user: str, model: type[BaseModel]):
+        raw = self._respond(system, user)
+        try:
+            data = json.loads(raw)
+        except (json.JSONDecodeError, TypeError) as exc:
+            raise MalformedPolicyResponse(f"policy response is not valid JSON: {exc}") from exc
+        try:
+            return model.model_validate(data)
+        except ValidationError as exc:
+            raise MalformedPolicyResponse(f"policy response failed {model.__name__} validation: {exc}") from exc
+
+    def interpret_goal(self, goal_text: str, *, capability_summary: dict) -> GoalInterpretation:
+        return self._call(
+            "Interpret the analytical goal. Reply as GoalInterpretation JSON.",
+            json.dumps({"goal": goal_text, "capabilities": capability_summary}),
+            GoalInterpretation,
+        )
+
+    def generate_hypotheses(
+        self, interpretation: GoalInterpretation, *, metric_names: list[str], dimension_names: list[str]
+    ) -> HypothesisProposals:
+        return self._call(
+            "Propose falsifiable hypotheses and open questions. Reply as HypothesisProposals JSON.",
+            json.dumps({"interpretation": interpretation.model_dump(mode="json"),
+                        "metrics": metric_names, "dimensions": dimension_names}),
+            HypothesisProposals,
+        )
+
+    def select_experiment(self, *, goal_summary: dict, candidates: list[dict]) -> ExperimentChoice:
+        return self._call(
+            "Choose the most informative next experiment. Reply as ExperimentChoice JSON.",
+            json.dumps({"goal": goal_summary, "candidates": candidates}),
+            ExperimentChoice,
+        )
+
+    def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal:
+        return self._call(
+            "Challenge the strongest current claim; suggest a falsification tool. Reply as CritiqueProposal JSON.",
+            json.dumps({"claim": strongest_claim, "tools": available_tools}),
+            CritiqueProposal,
+        )
