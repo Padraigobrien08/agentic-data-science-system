@@ -146,12 +146,19 @@ class SqlAlchemyInvestigationRepository:
         return self._s.scalar(select(Investigation).where(Investigation.analysis_run_id == analysis_run_id))
 
     def list_for_user(
-        self, user_id: UUID, *, project_id: UUID | None = None, limit: int = 100, offset: int = 0
+        self,
+        user_id: UUID,
+        *,
+        project_id: UUID | None = None,
+        analysis_run_id: UUID | None = None,
+        limit: int = 100,
+        offset: int = 0,
     ) -> list[Investigation]:
         """Investigations owned by the user's projects or initiated by the user, newest first.
 
         When ``project_id`` is given it is scoped to that project (which the caller must have
-        already confirmed the user owns).
+        already confirmed the user owns). ``analysis_run_id`` resolves the investigation for a
+        specific run while keeping the same ownership scoping.
         """
         from backend.models.project import Project
 
@@ -164,6 +171,8 @@ class SqlAlchemyInvestigationRepository:
                 (Investigation.project_id.in_(owned_projects))
                 | (Investigation.initiated_by_user_id == user_id)
             )
+        if analysis_run_id is not None:
+            stmt = stmt.where(Investigation.analysis_run_id == analysis_run_id)
         stmt = stmt.order_by(Investigation.created_at.desc()).limit(limit).offset(offset)
         return list(self._s.scalars(stmt).all())
 

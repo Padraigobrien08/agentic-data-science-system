@@ -23,12 +23,14 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from backend.config.settings import Settings, get_settings
+from backend.models.analysis_run import AnalysisRun
 from backend.repositories.investigation_repository import SqlAlchemyInvestigationRepository
 from backend.services.agentic_investigation_execution_service import (
     ENGINE_AGENTIC,
     AgenticInvestigationExecutionService,
 )
 from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.run_queue_service import RunQueueService
 
 MAX_ROWS = 5000
 MAX_COLS = 100
@@ -44,10 +46,11 @@ class InvalidDatasetError(ValueError):
 
 @dataclass
 class InvestigationCreateResult:
-    investigation_id: UUID
     analysis_run_id: UUID
     status: str
     db_status: str
+    investigation_id: UUID | None = None
+    queued: bool = False
 
 
 def _coerce(value: str | None):
@@ -114,6 +117,70 @@ class InvestigationCreateService:
         time_field: str | None,
         entity_id_fields: list[str],
     ) -> InvestigationCreateResult:
+        """Create and execute synchronously (best for small pasted datasets)."""
+        run = self._prepare_run(
+            project_id=project_id, user_id=user_id, goal=goal, dataset_format=dataset_format,
+            csv_text=csv_text, records=records, name=name, time_field=time_field,
+            entity_id_fields=entity_id_fields,
+        )
+        result = AgenticInvestigationExecutionService(self._session).execute_analysis_run(run.id)
+
+        inv_row = SqlAlchemyInvestigationRepository(self._session).get_by_domain_id(str(run.id))
+        if inv_row is None:  # pragma: no cover - execute always creates one
+            raise RuntimeError("investigation was not persisted for the run")
+
+        return InvestigationCreateResult(
+            analysis_run_id=run.id,
+            status=result.investigation_status.value,
+            db_status=result.db_status.value,
+            investigation_id=inv_row.id,
+            queued=False,
+        )
+
+    def create_and_enqueue(
+        self,
+        *,
+        project_id: UUID,
+        user_id: UUID,
+        goal: str,
+        dataset_format: str,
+        csv_text: str | None,
+        records: list[dict] | None,
+        name: str,
+        time_field: str | None,
+        entity_id_fields: list[str],
+        trace_carrier: dict[str, str] | None = None,
+    ) -> InvestigationCreateResult:
+        """Create and enqueue for background execution by the worker (robust for large datasets)."""
+        run = self._prepare_run(
+            project_id=project_id, user_id=user_id, goal=goal, dataset_format=dataset_format,
+            csv_text=csv_text, records=records, name=name, time_field=time_field,
+            entity_id_fields=entity_id_fields,
+        )
+        RunQueueService(self._session).enqueue_after_create(run.id, None, trace_carrier=trace_carrier)
+        self._session.commit()
+        return InvestigationCreateResult(
+            analysis_run_id=run.id,
+            status="queued",
+            db_status="queued",
+            investigation_id=None,
+            queued=True,
+        )
+
+    def _prepare_run(
+        self,
+        *,
+        project_id: UUID,
+        user_id: UUID,
+        goal: str,
+        dataset_format: str,
+        csv_text: str | None,
+        records: list[dict] | None,
+        name: str,
+        time_field: str | None,
+        entity_id_fields: list[str],
+    ) -> AnalysisRun:
+        """Validate the flag + dataset and create a ``pending`` agentic run (no execution)."""
         if not self._settings.agentic_engine_enabled:
             raise AgenticEngineDisabledError(
                 "The agentic investigation engine is disabled. Set "
@@ -136,7 +203,6 @@ class InvestigationCreateService:
                 "entity_id_fields": entity_id_fields or [],
             },
         }
-
         run = AnalysisRunService(self._session).create(
             project_id,
             initiated_by_user_id=user_id,
@@ -144,19 +210,7 @@ class InvestigationCreateService:
             input_payload_json=payload,
         )
         self._session.flush()
-
-        result = AgenticInvestigationExecutionService(self._session).execute_analysis_run(run.id)
-
-        inv_row = SqlAlchemyInvestigationRepository(self._session).get_by_domain_id(str(run.id))
-        if inv_row is None:  # pragma: no cover - execute always creates one
-            raise RuntimeError("investigation was not persisted for the run")
-
-        return InvestigationCreateResult(
-            investigation_id=inv_row.id,
-            analysis_run_id=run.id,
-            status=result.investigation_status.value,
-            db_status=result.db_status.value,
-        )
+        return run
 
     def _resolve_records(
         self, dataset_format: str, csv_text: str | None, records: list[dict] | None

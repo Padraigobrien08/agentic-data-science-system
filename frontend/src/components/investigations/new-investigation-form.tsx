@@ -86,9 +86,19 @@ export function NewInvestigationForm({ projectId }: Readonly<{ projectId: string
         </label>
       </div>
 
+      <label className="flex items-start gap-2 text-sm text-neutral-600 dark:text-neutral-300">
+        <input type="checkbox" name="background" className="mt-0.5" />
+        <span>
+          Run in the background
+          <span className="block text-xs text-neutral-400">
+            Recommended for larger datasets. Requires a running worker; you can watch progress
+            and land on the results when it finishes.
+          </span>
+        </span>
+      </label>
+
       <div className="flex items-center gap-3">
         <SubmitButton />
-        <span className="text-xs text-neutral-400">Runs synchronously; you land on the results.</span>
       </div>
     </form>
   );

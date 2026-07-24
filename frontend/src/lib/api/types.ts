@@ -604,13 +604,15 @@ export interface InvestigationCreateBody {
   project_id: string;
   goal: string;
   dataset: InvestigationDatasetInput;
+  async_execution?: boolean;
 }
 
 export interface InvestigationCreateResponse {
-  investigation_id: string;
   analysis_run_id: string;
   status: string;
   db_status: string;
+  investigation_id: string | null;
+  queued: boolean;
 }
 
 export interface InvestigationDetail extends InvestigationSummary {
