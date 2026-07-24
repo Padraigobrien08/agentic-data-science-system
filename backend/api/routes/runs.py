@@ -50,7 +50,12 @@ from backend.schemas.run_transparency import build_run_transparency_summary
 from backend.schemas.run_transparency import RunTransparencySummary
 from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
 from backend.schemas.prompt_routing import PromptRoutingPreviewRequest, PromptRoutingPreviewResponse
-from backend.services.exceptions import InvalidStatusTransition, RunLifecycleError
+from backend.services.agentic_investigation_execution_service import (
+    AgenticInvestigationExecutionService,
+    ENGINE_AGENTIC,
+    select_run_engine,
+)
+from backend.services.exceptions import InvalidStatusTransition, RunCancelledDuringExecution, RunLifecycleError
 from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.services.run_lifecycle_service import RunLifecycleService
 from backend.services.run_queue_service import RunQueueService
@@ -562,6 +567,7 @@ def execute_run(
             status_code=409,
             detail="Run is already executing",
         )
+    engine = select_run_engine(row, get_settings())
     tc = getattr(request.state, "trace_carrier_for_jobs", None)
     api_tracer = get_tracer("backend.api.runs")
     try:
@@ -569,15 +575,32 @@ def execute_run(
             bind_current_trace_for_logs()
             with api_tracer.start_as_current_span(
                 "runs.dispatch_execute",
-                attributes={"analysis.run.id": str(run_id)},
+                attributes={"analysis.run.id": str(run_id), "run.engine": engine},
             ):
                 bind_current_trace_for_logs()
+                if engine == ENGINE_AGENTIC:
+                    agentic = AgenticInvestigationExecutionService(db)
+                    result = agentic.execute_analysis_run(
+                        run_id,
+                        analysis_goal=body.analysis_goal if body else None,
+                    )
+                    return ExecuteRunResponse(
+                        analysis_run_id=run_id,
+                        orchestration_run_id=result.investigation_id,
+                        orchestration_status=result.investigation_status.value,
+                        message=result.message,
+                        final_summary=result.final_summary,
+                        artifact_count=0,
+                        db_status=result.db_status,
+                    )
                 out = pipeline.execute_analysis_run(
                     run_id,
                     tickers=body.tickers if body else None,
                     analysis_goal=body.analysis_goal if body else None,
                     refresh=body.refresh if body else None,
                 )
+    except RunCancelledDuringExecution as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     except ValueError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return ExecuteRunResponse(
