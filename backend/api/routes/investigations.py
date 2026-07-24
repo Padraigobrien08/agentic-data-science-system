@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from uuid import UUID
 
-from fastapi import APIRouter, HTTPException, Query
+from fastapi import APIRouter, HTTPException, Query, Request
 
 from backend.api.access_checks import require_investigation_owned, require_project_owned
 from backend.api.auth_deps import CurrentUserDep
@@ -30,26 +30,34 @@ router = APIRouter(prefix="/investigations", tags=["investigations"])
 @router.post("", response_model=InvestigationCreateResponse, status_code=201)
 def create_investigation(
     body: InvestigationCreateRequest,
+    request: Request,
     db: DbSession,
     user: CurrentUserDep,
 ) -> InvestigationCreateResponse:
-    """Create an agentic investigation over a user-provided dataset and run it (synchronous).
+    """Create an agentic investigation over a user-provided dataset and run it.
 
-    Requires the agentic engine flag to be enabled; owner-scoped to the target project.
+    Synchronous by default; ``async_execution=true`` enqueues it for the worker (robust for
+    larger datasets). Requires the agentic engine flag; owner-scoped to the target project.
     """
     require_project_owned(db, body.project_id, user.id)
+    service = InvestigationCreateService(db)
+    kwargs = dict(
+        project_id=body.project_id,
+        user_id=user.id,
+        goal=body.goal,
+        dataset_format=body.dataset.format,
+        csv_text=body.dataset.csv_text,
+        records=body.dataset.records,
+        name=body.dataset.name,
+        time_field=body.dataset.time_field,
+        entity_id_fields=body.dataset.entity_id_fields,
+    )
     try:
-        result = InvestigationCreateService(db).create_and_run(
-            project_id=body.project_id,
-            user_id=user.id,
-            goal=body.goal,
-            dataset_format=body.dataset.format,
-            csv_text=body.dataset.csv_text,
-            records=body.dataset.records,
-            name=body.dataset.name,
-            time_field=body.dataset.time_field,
-            entity_id_fields=body.dataset.entity_id_fields,
-        )
+        if body.async_execution:
+            tc = getattr(request.state, "trace_carrier_for_jobs", None)
+            result = service.create_and_enqueue(**kwargs, trace_carrier=tc)
+        else:
+            result = service.create_and_run(**kwargs)
     except AgenticEngineDisabledError as exc:
         db.rollback()
         raise HTTPException(status_code=409, detail=str(exc)) from exc
@@ -57,10 +65,11 @@ def create_investigation(
         db.rollback()
         raise HTTPException(status_code=400, detail=str(exc)) from exc
     return InvestigationCreateResponse(
-        investigation_id=result.investigation_id,
         analysis_run_id=result.analysis_run_id,
         status=result.status,
         db_status=result.db_status,
+        investigation_id=result.investigation_id,
+        queued=result.queued,
     )
 
 
@@ -69,6 +78,7 @@ def list_investigations(
     db: DbSession,
     user: CurrentUserDep,
     project_id: UUID | None = Query(default=None, description="Scope to one owned project"),
+    analysis_run_id: UUID | None = Query(default=None, description="Resolve the investigation for a run"),
     limit: int = Query(default=100, ge=1, le=500),
     offset: int = Query(default=0, ge=0),
 ) -> list[InvestigationSummary]:
@@ -76,7 +86,9 @@ def list_investigations(
     if project_id is not None:
         require_project_owned(db, project_id, user.id)
     repo = SqlAlchemyInvestigationRepository(db)
-    rows = repo.list_for_user(user.id, project_id=project_id, limit=limit, offset=offset)
+    rows = repo.list_for_user(
+        user.id, project_id=project_id, analysis_run_id=analysis_run_id, limit=limit, offset=offset
+    )
     return [build_summary(row) for row in rows]
 
 

@@ -33,13 +33,18 @@ class InvestigationCreateRequest(BaseModel):
     project_id: UUID
     goal: str = Field(min_length=1, description="What the investigation should answer.")
     dataset: InvestigationDatasetInput
+    async_execution: bool = Field(
+        default=False,
+        description="Run in the background via the worker (requires a running worker) instead of synchronously.",
+    )
 
 
 class InvestigationCreateResponse(BaseModel):
-    investigation_id: UUID
     analysis_run_id: UUID
     status: str
     db_status: str
+    investigation_id: UUID | None = None
+    queued: bool = False
 
 
 def _as_list(value: Any) -> list:

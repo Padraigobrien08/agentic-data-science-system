@@ -20,9 +20,12 @@ from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.db.session import get_db
 from backend.main import create_app
+from backend.models.analysis_run import AnalysisRun
+from backend.models.enums import AnalysisRunStatus
 from backend.models.project import Project
 from backend.models.user import User
 from backend.services import agentic_investigation_execution_service as exec_mod
+from backend.services.agentic_investigation_execution_service import AgenticInvestigationExecutionService
 from backend.services import investigation_create_service as create_mod
 from backend.services.investigation_create_service import (
     AgenticEngineDisabledError,
@@ -122,7 +125,7 @@ def test_service_rejects_when_flag_disabled(session: Session) -> None:
 
 
 @pytest.fixture
-def api_ctx(monkeypatch) -> Iterator[tuple[TestClient, str, dict[str, str]]]:
+def api_ctx(monkeypatch) -> Iterator[tuple[TestClient, str, dict[str, str], sessionmaker[Session]]]:
     engine = create_engine("sqlite://", connect_args={"check_same_thread": False}, poolclass=StaticPool)
     Base.metadata.create_all(engine)
     factory = sessionmaker(bind=engine, expire_on_commit=False)
@@ -138,7 +141,7 @@ def api_ctx(monkeypatch) -> Iterator[tuple[TestClient, str, dict[str, str]]]:
     app.dependency_overrides[get_db] = override_get_db
     with TestClient(app) as client:
         project_id, headers = bootstrap_admin_and_headers(client)
-        yield client, project_id, headers
+        yield client, project_id, headers, factory
     app.dependency_overrides.clear()
 
 
@@ -147,7 +150,7 @@ def _enable_flag(monkeypatch) -> None:
 
 
 def test_http_create_disabled_returns_409(api_ctx) -> None:
-    client, project_id, h = api_ctx  # flag off by default
+    client, project_id, h, _factory = api_ctx  # flag off by default
     r = client.post(
         "/v1/investigations",
         json={"project_id": project_id, "goal": "g", "dataset": {"format": "csv", "csv_text": CSV}},
@@ -157,7 +160,7 @@ def test_http_create_disabled_returns_409(api_ctx) -> None:
 
 
 def test_http_create_runs_and_is_readable(api_ctx, monkeypatch) -> None:
-    client, project_id, h = api_ctx
+    client, project_id, h, _factory = api_ctx
     _enable_flag(monkeypatch)
     _force_fixture_policy(monkeypatch)
     r = client.post(
@@ -180,8 +183,65 @@ def test_http_create_runs_and_is_readable(api_ctx, monkeypatch) -> None:
     assert len(detail.json()["experiments"]) >= 1
 
 
+def test_service_enqueue_leaves_run_queued(session: Session, monkeypatch) -> None:
+    project_id, user_id = _seed_project(session)
+    result = InvestigationCreateService(session, settings=_enabled_settings()).create_and_enqueue(
+        project_id=project_id, user_id=user_id, goal="revenue trend", dataset_format="csv",
+        csv_text=CSV, records=None, name="rev", time_field="period", entity_id_fields=["entity"],
+    )
+    assert result.queued is True
+    assert result.investigation_id is None
+    assert result.status == "queued"
+    run = session.get(AnalysisRun, result.analysis_run_id)
+    assert run.status == AnalysisRunStatus.queued
+    # no investigation exists until the worker runs it
+    from backend.repositories.investigation_repository import SqlAlchemyInvestigationRepository
+    assert SqlAlchemyInvestigationRepository(session).get_by_domain_id(str(run.id)) is None
+
+
+def test_http_async_create_queues_then_resolves(api_ctx, monkeypatch) -> None:
+    client, project_id, h, factory = api_ctx
+    _enable_flag(monkeypatch)
+    _force_fixture_policy(monkeypatch)
+
+    r = client.post(
+        "/v1/investigations",
+        json={
+            "project_id": project_id, "goal": "revenue is increasing over time",
+            "async_execution": True,
+            "dataset": {"format": "csv", "csv_text": CSV, "name": "rev",
+                        "time_field": "period", "entity_id_fields": ["entity"]},
+        },
+        headers=h,
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["queued"] is True and body["investigation_id"] is None
+    run_id = body["analysis_run_id"]
+
+    # not resolvable yet — the worker has not run it
+    pre = client.get("/v1/investigations", params={"analysis_run_id": run_id}, headers=h)
+    assert pre.status_code == 200 and pre.json() == []
+
+    # simulate the worker claiming and executing the queued run (shared in-memory DB)
+    worker = factory()
+    AgenticInvestigationExecutionService(
+        worker, policy_factory=lambda s: FixtureAgentPolicy()
+    ).execute_analysis_run(uuid.UUID(run_id), from_worker=True)
+    worker.close()
+
+    # now the read path resolves the investigation for that run
+    resolved = client.get("/v1/investigations", params={"analysis_run_id": run_id}, headers=h)
+    assert resolved.status_code == 200
+    items = resolved.json()
+    assert len(items) == 1 and items[0]["analysis_run_id"] == run_id
+    detail = client.get(f"/v1/investigations/{items[0]['id']}", headers=h)
+    assert detail.status_code == 200
+    assert detail.json()["status"] in ("converged", "exhausted")
+
+
 def test_http_create_invalid_csv_returns_400(api_ctx, monkeypatch) -> None:
-    client, project_id, h = api_ctx
+    client, project_id, h, _factory = api_ctx
     _enable_flag(monkeypatch)
     r = client.post(
         "/v1/investigations",
@@ -192,7 +252,7 @@ def test_http_create_invalid_csv_returns_400(api_ctx, monkeypatch) -> None:
 
 
 def test_http_create_other_users_project_is_404(api_ctx, monkeypatch) -> None:
-    client, _project_id, _h = api_ctx
+    client, _project_id, _h, _factory = api_ctx
     _enable_flag(monkeypatch)
     other_project, other_headers = register_project_and_headers(client)
     # first user's project id is not owned by the just-registered user

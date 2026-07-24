@@ -42,3 +42,12 @@ export async function getInvestigation(
 ): Promise<InvestigationDetail> {
   return apiGet<InvestigationDetail>(`/v1/investigations/${investigationId}`);
 }
+
+/** Resolve the investigation for a run (once the worker has persisted it), or null. */
+export async function findInvestigationForRun(
+  runId: string,
+): Promise<InvestigationSummary | null> {
+  const q = new URLSearchParams({ analysis_run_id: runId });
+  const rows = await apiGet<InvestigationSummary[]>(`/v1/investigations?${q.toString()}`);
+  return rows[0] ?? null;
+}

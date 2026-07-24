@@ -25,6 +25,7 @@ export async function createInvestigationAction(
   const name = String(formData.get("name") ?? "").trim() || "dataset";
   const timeField = String(formData.get("time_field") ?? "").trim();
   const entityFields = parseList(String(formData.get("entity_id_fields") ?? ""));
+  const background = formData.get("background") != null;
 
   if (!goal) return { error: "Describe what you want the investigation to answer." };
   if (!csv) return { error: "Paste a small CSV dataset (a header row plus data rows)." };
@@ -34,6 +35,7 @@ export async function createInvestigationAction(
     created = await createInvestigation({
       project_id: projectId,
       goal,
+      async_execution: background,
       dataset: {
         format: "csv",
         csv_text: csv,
@@ -49,5 +51,8 @@ export async function createInvestigationAction(
 
   // Outside try/catch: redirect() throws a control-flow signal that must not be swallowed.
   revalidatePath(`/projects/${projectId}/investigations`);
+  if (created.queued || !created.investigation_id) {
+    redirect(`/projects/${projectId}/investigations/pending/${created.analysis_run_id}`);
+  }
   redirect(`/projects/${projectId}/investigations/${created.investigation_id}`);
 }

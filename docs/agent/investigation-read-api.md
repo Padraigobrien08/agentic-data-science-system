@@ -13,8 +13,14 @@ and how the run terminated.
   (`{format: "csv", csv_text, name?, time_field?, entity_id_fields?}`) or inline records
   (`{format: "records", records: [...]}`).
 - It creates an `AnalysisRun` opting into the agentic engine (`input_payload_json.engine =
-  "agentic"`, `in_memory` adapter), runs the loop **synchronously**, and returns
-  `{investigation_id, analysis_run_id, status, db_status}`.
+  "agentic"`, `in_memory` adapter) and returns
+  `{analysis_run_id, investigation_id, status, db_status, queued}`.
+- **Execution mode.** Default is **synchronous** (best for small pasted datasets; works with no
+  worker). `async_execution: true` **enqueues** the run for the worker instead — robust for
+  larger datasets, but requires a running worker with the flag enabled. When queued,
+  `investigation_id` is `null` until the worker persists it; resolve it with
+  `GET /v1/investigations?analysis_run_id=…` (owner-scoped). The UI's pending page
+  (`investigations/pending/[runId]`) polls this and redirects to the detail when it lands.
 - `409` when the engine flag is off; `400` on an empty/malformed/oversized dataset;
   owner-scoped to the project (`404` otherwise). CSV parsing (typed coercion, row/column
   caps) and flag-gating live in `backend/services/investigation_create_service.py`.
