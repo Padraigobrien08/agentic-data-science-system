@@ -444,3 +444,164 @@ export interface ExecuteRunResponse {
   artifact_count: number;
   db_status: AnalysisRunStatus;
 }
+
+// --- Generalized investigation model (read-only) ---------------------------
+
+export type InvestigationStatus =
+  | "created"
+  | "planning"
+  | "running"
+  | "awaiting_evidence"
+  | "converged"
+  | "exhausted"
+  | "failed";
+
+export interface InvestigationCounts {
+  hypotheses: number;
+  evidence: number;
+  experiments: number;
+  observations: number;
+  decisions: number;
+  critiques: number;
+  open_questions: number;
+}
+
+export interface InvestigationSummary {
+  id: string;
+  domain_id: string | null;
+  analysis_run_id: string | null;
+  project_id: string | null;
+  origin: string;
+  status: InvestigationStatus | string;
+  confidence: number | null;
+  objective: string | null;
+  adapter_id: string | null;
+  conclusion: string | null;
+  counts: InvestigationCounts;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface HypothesisItem {
+  id: string;
+  statement: string;
+  status: string;
+  confidence: number;
+  prior_confidence: number;
+  rationale: string | null;
+  metric_refs: string[];
+  entity_refs: string[];
+}
+
+export interface EvidenceItem {
+  id: string;
+  claim: string;
+  evidence_type: string;
+  direction: string;
+  strength: number;
+  reliability: number;
+  coverage: number;
+  experiment_result_id: string | null;
+  hypothesis_ids: string[];
+  statistics: Record<string, unknown> | null;
+}
+
+export interface ExperimentItem {
+  id: string;
+  tool_name: string;
+  status: string;
+  summary: string | null;
+  metrics: Record<string, unknown> | null;
+  error: Record<string, unknown> | null;
+  request_domain_id: string | null;
+  created_at: string;
+}
+
+export interface ObservationItem {
+  id: string;
+  statement: string;
+  observation_type: string;
+  magnitude: number | null;
+  entity_ref: string | null;
+  metric_ref: string | null;
+  experiment_result_id: string | null;
+}
+
+export interface DecisionItem {
+  id: string;
+  sequence: number;
+  decision_type: string;
+  rationale: string;
+  iteration: number;
+  chosen_option: string | null;
+  alternatives: string[];
+}
+
+export interface CritiqueItem {
+  id: string;
+  critique_type: string;
+  severity: string;
+  target_kind: string;
+  target_id: string;
+  message: string;
+  suggested_action: string | null;
+  resolved: boolean;
+}
+
+export interface OpenQuestionItem {
+  id: string;
+  question: string;
+  status: string;
+  priority: number;
+  answer: string | null;
+  related_hypothesis_ids: string[];
+}
+
+export interface ConclusionItem {
+  id: string;
+  statement: string;
+  disposition: string;
+  confidence: number;
+  caveats: string[];
+  supporting_hypothesis_ids: string[];
+  key_evidence_ids: string[];
+}
+
+export interface DatasetItem {
+  id: string | null;
+  name: string;
+  locator: string | null;
+  row_count: number | null;
+  content_hash: string | null;
+}
+
+export interface InvestigationEventItem {
+  sequence: number;
+  event_type: string;
+  entity_kind: string | null;
+  entity_id: string | null;
+  payload: Record<string, unknown> | null;
+  created_at: string;
+}
+
+export interface InvestigationTermination {
+  reason: string | null;
+  rationale: string | null;
+  at_iteration: number | null;
+}
+
+export interface InvestigationDetail extends InvestigationSummary {
+  success_criteria: string[];
+  constraints: string[];
+  termination: InvestigationTermination | null;
+  hypotheses: HypothesisItem[];
+  evidence: EvidenceItem[];
+  experiments: ExperimentItem[];
+  observations: ObservationItem[];
+  decisions: DecisionItem[];
+  critiques: CritiqueItem[];
+  open_questions: OpenQuestionItem[];
+  conclusion_detail: ConclusionItem | null;
+  datasets: DatasetItem[];
+  events: InvestigationEventItem[];
+}

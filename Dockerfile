@@ -16,6 +16,7 @@ RUN pip install --no-cache-dir --upgrade pip \
 
 COPY backend ./backend
 COPY edgar_project ./edgar_project
+COPY agentic ./agentic
 COPY src ./src
 COPY config.py ./
 COPY alembic ./alembic

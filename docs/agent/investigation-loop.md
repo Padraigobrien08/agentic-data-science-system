@@ -7,8 +7,9 @@ genuinely adaptive agent — **not a renamed static pipeline**. Execution paths
 differ by goal, intermediate results steer the next experiment, hypotheses move
 between states, and the run stops for an explicit reason before concluding.
 
-Not yet wired into production orchestration. Entry point: `InvestigationLoop`
-(`loop.py`) / `run_investigation(...)`.
+Entry point: `InvestigationLoop` (`loop.py`) / `run_investigation(...)`. It is wired into
+the backend run path behind an off-by-default flag — see
+[backend-execution-wiring.md](backend-execution-wiring.md).
 
 ## Ten explicit components
 

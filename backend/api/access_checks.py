@@ -7,10 +7,16 @@ from uuid import UUID
 from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
-from backend.auth.resource_access import get_owned_project, get_run_for_owner, user_can_access_artifact
+from backend.auth.resource_access import (
+    get_investigation_for_owner,
+    get_owned_project,
+    get_run_for_owner,
+    user_can_access_artifact,
+)
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
 from backend.models.evaluation_run import EvaluationRun
+from backend.models.investigation import Investigation
 from backend.models.project import Project
 from backend.services.artifact_service import ArtifactService
 
@@ -26,6 +32,13 @@ def require_analysis_run_owned(db: Session, run_id: UUID, user_id: UUID) -> Anal
     row = get_run_for_owner(db, run_id, user_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Run not found")
+    return row
+
+
+def require_investigation_owned(db: Session, investigation_id: UUID, user_id: UUID) -> Investigation:
+    row = get_investigation_for_owner(db, investigation_id, user_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Investigation not found")
     return row
 
 

@@ -27,6 +27,11 @@ from backend.observability.metrics import (
 from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.agentic_investigation_execution_service import (
+    AgenticInvestigationExecutionService,
+    ENGINE_AGENTIC,
+    select_run_engine,
+)
 from backend.services.edgar_pipeline_execution_service import EdgarPipelineExecutionService
 from backend.services.exceptions import RunCancelledDuringExecution, WorkerLeaseLostError
 from backend.worker.lease import WorkerLeaseGuard
@@ -379,15 +384,29 @@ def process_next_job(
                 )
                 run_session = session_factory()
                 try:
-                    pipeline = EdgarPipelineExecutionService(run_session)
-                    pipeline.execute_analysis_run(
-                        analysis_run_id,
-                        from_worker=True,
-                        tickers=overrides.get("tickers"),
-                        analysis_goal=overrides.get("analysis_goal"),
-                        refresh=overrides.get("refresh"),
-                        execution_checkpoint=lease_guard.checkpoint if lease_guard is not None else None,
+                    checkpoint = lease_guard.checkpoint if lease_guard is not None else None
+                    run_for_engine = run_session.get(AnalysisRun, analysis_run_id)
+                    engine = (
+                        select_run_engine(run_for_engine, get_settings())
+                        if run_for_engine is not None
+                        else "edgar"
                     )
+                    if engine == ENGINE_AGENTIC:
+                        AgenticInvestigationExecutionService(run_session).execute_analysis_run(
+                            analysis_run_id,
+                            from_worker=True,
+                            analysis_goal=overrides.get("analysis_goal"),
+                            execution_checkpoint=checkpoint,
+                        )
+                    else:
+                        EdgarPipelineExecutionService(run_session).execute_analysis_run(
+                            analysis_run_id,
+                            from_worker=True,
+                            tickers=overrides.get("tickers"),
+                            analysis_goal=overrides.get("analysis_goal"),
+                            refresh=overrides.get("refresh"),
+                            execution_checkpoint=checkpoint,
+                        )
                 finally:
                     run_session.close()
             except BaseException as err:

@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import { logoutAction } from "@/actions/auth";
+import { InvestigationsNavLink } from "@/components/investigations/investigations-nav-link";
 import type { CurrentUser } from "@/lib/api/types";
 
 type Props = {
@@ -18,6 +19,7 @@ export function SiteHeader({ user }: Props) {
         <div className="flex items-center gap-3 text-xs">
           {user ? (
             <>
+              <InvestigationsNavLink />
               <span
                 className="hidden max-w-[18rem] truncate rounded-full border border-[var(--border)] bg-white/82 px-3 py-2 text-[11px] text-[var(--muted)] sm:inline-flex"
                 title={user.email}

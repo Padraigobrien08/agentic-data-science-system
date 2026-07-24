@@ -21,20 +21,36 @@ from backend.repositories.investigation_repository import SqlAlchemyInvestigatio
 class SqlAlchemyInvestigationStore:
     """Persists loop checkpoints through the investigation repository."""
 
-    def __init__(self, session: Session, *, project_id: UUID | None = None, user_id: UUID | None = None) -> None:
+    def __init__(
+        self,
+        session: Session,
+        *,
+        project_id: UUID | None = None,
+        user_id: UUID | None = None,
+        analysis_run_id: UUID | None = None,
+    ) -> None:
         self._session = session
         self._repo = SqlAlchemyInvestigationRepository(session)
         self._project_id = project_id
         self._user_id = user_id
+        self._analysis_run_id = analysis_run_id
+
+    def _create(self, investigation: Investigation) -> None:
+        self._repo.create(
+            investigation,
+            project_id=self._project_id,
+            initiated_by_user_id=self._user_id,
+            analysis_run_id=self._analysis_run_id,
+        )
 
     def create(self, investigation: Investigation) -> None:
-        self._repo.create(investigation, project_id=self._project_id, initiated_by_user_id=self._user_id)
+        self._create(investigation)
         self._session.commit()
 
     def save(self, investigation: Investigation) -> None:
         row = self._repo.get_by_domain_id(investigation.id)
         if row is None:
-            self._repo.create(investigation, project_id=self._project_id, initiated_by_user_id=self._user_id)
+            self._create(investigation)
         else:
             self._repo.save_state(row.id, investigation, event_type=StateEventType.checkpoint_saved)
         self._session.commit()

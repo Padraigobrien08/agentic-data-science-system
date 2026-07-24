@@ -9,6 +9,7 @@ from sqlalchemy.orm import Session
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
 from backend.models.evaluation_run import EvaluationRun
+from backend.models.investigation import Investigation
 from backend.models.project import Project
 from backend.models.run_step import RunStep
 
@@ -18,6 +19,24 @@ def get_owned_project(db: Session, project_id: UUID, user_id: UUID) -> Project |
     if row is None or row.owner_user_id != user_id:
         return None
     return row
+
+
+def get_investigation_for_owner(db: Session, investigation_id: UUID, user_id: UUID) -> Investigation | None:
+    """An investigation is accessible to the owner of its project, or its initiating user.
+
+    Investigations without a project fall back to the initiating user; unattributed
+    investigations (no project, no user) are treated as inaccessible.
+    """
+    inv = db.get(Investigation, investigation_id)
+    if inv is None:
+        return None
+    if inv.project_id is not None:
+        proj = db.get(Project, inv.project_id)
+        if proj is not None and proj.owner_user_id == user_id:
+            return inv
+    if inv.initiated_by_user_id is not None and inv.initiated_by_user_id == user_id:
+        return inv
+    return None
 
 
 def get_run_for_owner(db: Session, run_id: UUID, user_id: UUID) -> AnalysisRun | None:
