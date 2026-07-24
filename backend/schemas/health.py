@@ -78,6 +78,10 @@ class HealthResponse(BaseModel):
     background_delivery: BackgroundDeliveryHealth = Field(
         description="User-safe chat delivery posture derived from runtime policy plus queue health",
     )
+    agentic_engine_enabled: bool = Field(
+        default=False,
+        description="Whether the generalized agentic investigation engine is enabled in this process",
+    )
 
 
 class WorkerHealthResponse(BaseModel):

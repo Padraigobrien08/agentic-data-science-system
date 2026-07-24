@@ -10,12 +10,36 @@ the structured state that makes agency inspectable rather than hidden in prompts
 from __future__ import annotations
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 from backend.models.investigation import Investigation as InvestigationRow
+
+
+class InvestigationDatasetInput(BaseModel):
+    """A small tabular dataset for an agentic investigation (pasted CSV or inline records)."""
+
+    format: Literal["csv", "records"] = "csv"
+    csv_text: str | None = None
+    records: list[dict] | None = None
+    name: str = "dataset"
+    time_field: str | None = None
+    entity_id_fields: list[str] = Field(default_factory=list)
+
+
+class InvestigationCreateRequest(BaseModel):
+    project_id: UUID
+    goal: str = Field(min_length=1, description="What the investigation should answer.")
+    dataset: InvestigationDatasetInput
+
+
+class InvestigationCreateResponse(BaseModel):
+    investigation_id: UUID
+    analysis_run_id: UUID
+    status: str
+    db_status: str
 
 
 def _as_list(value: Any) -> list:

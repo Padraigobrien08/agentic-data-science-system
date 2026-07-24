@@ -124,6 +124,7 @@ def health(db: DbSession) -> HealthResponse:
             settings=settings,
             queue_result=queue_result,
         ),
+        agentic_engine_enabled=settings.agentic_engine_enabled,
     )
 
 
