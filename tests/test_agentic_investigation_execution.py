@@ -163,6 +163,35 @@ def test_execute_records_experiments_over_the_frame(session: Session) -> None:
     assert result.experiments_count >= 1
 
 
+def _sample_total(metric, suffix: str) -> float:
+    """Sum all label children of a prometheus metric via the public collect() API."""
+    total = 0.0
+    for family in metric.collect():
+        for s in family.samples:
+            if s.name.endswith(suffix):
+                total += s.value
+    return total
+
+
+def test_execute_emits_agentic_metrics(session: Session, tmp_path) -> None:
+    """A terminal agentic run increments the agentic metrics and the shared run-terminal counter."""
+    from backend.observability import metrics as m
+
+    before_terminal = _sample_total(m.AGENTIC_INVESTIGATION_TERMINAL_TOTAL, "_total")
+    before_duration = _sample_total(m.AGENTIC_INVESTIGATION_DURATION_SECONDS, "_count")
+    before_experiments = _sample_total(m.AGENTIC_EXPERIMENTS_TOTAL, "_total")
+    before_run_terminal = _sample_total(m.ANALYSIS_RUN_TERMINAL_TOTAL, "_total")
+
+    run = _seed_run(session, input_payload=_agentic_payload())
+    _fixture_service(session).execute_analysis_run(run.id)
+
+    assert _sample_total(m.AGENTIC_INVESTIGATION_TERMINAL_TOTAL, "_total") == before_terminal + 1
+    assert _sample_total(m.AGENTIC_INVESTIGATION_DURATION_SECONDS, "_count") == before_duration + 1
+    assert _sample_total(m.AGENTIC_EXPERIMENTS_TOTAL, "_total") >= before_experiments + 1
+    # agentic runs also show up in the engine-agnostic run-terminal metric
+    assert _sample_total(m.ANALYSIS_RUN_TERMINAL_TOTAL, "_total") == before_run_terminal + 1
+
+
 def test_execute_ingests_and_links_experiment_artifacts(session: Session, tmp_path) -> None:
     """Artifacts emitted by experiments are ingested into the artifacts table, linked to their
     result, and surfaced (downloadable) through the read-API detail projection."""

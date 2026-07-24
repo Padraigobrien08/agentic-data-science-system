@@ -7,14 +7,18 @@ turns the flag on, *and* a specific run opts in. Nothing changes unless both are
 
 ## The flag
 
-`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED` (`Settings.agentic_engine_enabled`, default `false`).
+`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED` (`Settings.agentic_engine_enabled`, default `true`).
 
-- `false` → every run uses `EdgarPipelineExecutionService` (unchanged behavior).
-- `true` → a run may select the agentic engine via `input_payload_json.engine == "agentic"`.
-  Runs that don't opt in still use the EDGAR path.
+- `true` (default) → a run may select the agentic engine via
+  `input_payload_json.engine == "agentic"`. Runs that don't opt in still use the EDGAR path,
+  so enabling the flag never changes existing behavior on its own.
+- `false` → hard-disables the engine and the `/investigations` endpoint; every run uses
+  `EdgarPipelineExecutionService` (unchanged behavior).
 
-Enable it on **both** the `api` process (synchronous `/execute`) and the `worker` process
-(queued runs) if you use the background queue.
+Enabling by default is safe: engine selection stays opt-in per run, the `/investigations`
+create path is owner-scoped, size-capped (`MAX_ROWS`/`MAX_COLS`), and offline-safe (fixture
+policy without an LLM). Keep the same value on **both** the `api` process (synchronous
+`/execute`) and the `worker` process (queued runs) if you use the background queue.
 
 ## Engine selection
 

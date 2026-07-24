@@ -47,7 +47,12 @@ from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, ArtifactKind
 from backend.models.investigation_entities import ExperimentResultRow
 from backend.observability.context import bind_run_context
-from backend.observability.metrics import monotonic_s
+from backend.observability.metrics import (
+    monotonic_s,
+    observe_agentic_artifacts_ingested,
+    observe_agentic_complete,
+    observe_agentic_exception,
+)
 from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
 from backend.repositories.investigation_repository import SqlAlchemyInvestigationRepository
 from backend.services.analysis_run_service import AnalysisRunService
@@ -219,6 +224,7 @@ class AgenticInvestigationExecutionService:
                 self._runs.set_error_summary(analysis_run_id, str(exc)[:2048])
                 self._runs.transition_status(analysis_run_id, AnalysisRunStatus.error)
                 self._session.commit()
+                observe_agentic_exception(exc)
                 raise
 
             if execution_checkpoint is not None:
@@ -376,6 +382,7 @@ class AgenticInvestigationExecutionService:
                 ingested += 1
         if ingested:
             self._session.flush()
+            observe_agentic_artifacts_ingested(ingested)
             log.info(
                 "agentic_artifacts_ingested",
                 analysis_run_id=str(analysis_run_id),
@@ -446,13 +453,22 @@ class AgenticInvestigationExecutionService:
         self._runs.transition_status(analysis_run_id, db_status)
         self._session.commit()
 
+        duration_s = monotonic_s() - t0
+        observe_agentic_complete(
+            duration_s,
+            db_status=db_status.value,
+            investigation_status=investigation.status.value,
+            experiments_completed=len(state.completed_experiments),
+            experiments_failed=len(state.failed_experiments),
+        )
+
         log.info(
             "agentic_completed",
             analysis_run_id=str(analysis_run_id),
             investigation_id=investigation.id,
             investigation_status=investigation.status.value,
             db_status=db_status.value,
-            duration_s=round(monotonic_s() - t0, 4),
+            duration_s=round(duration_s, 4),
             hypotheses=len(state.hypotheses),
             evidence=len(state.evidence),
             experiments=len(state.completed_experiments),

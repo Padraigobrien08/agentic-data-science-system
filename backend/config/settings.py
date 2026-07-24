@@ -187,12 +187,15 @@ class Settings(BaseSettings):
         description="``off`` disables factory; ``openai`` uses the OpenAI API (requires API key).",
     )
     agentic_engine_enabled: bool = Field(
-        default=False,
+        default=True,
         description=(
             "Feature flag for the generalized agentic investigation engine "
-            "(``agentic.agent.InvestigationLoop``). When false (default) all runs use the "
-            "deterministic EDGAR pipeline. When true, a run may opt into the agentic engine "
-            "via ``input_payload_json['engine'] = 'agentic'`` (EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED)."
+            "(``agentic.agent.InvestigationLoop``). Enabled by default: it is safe because the "
+            "engine never changes existing behavior on its own — a run reaches it only by explicitly "
+            "opting in via ``input_payload_json['engine'] = 'agentic'`` (default remains the "
+            "deterministic EDGAR pipeline), and the create path is owner-scoped, size-capped, and "
+            "offline-safe. Set to false to hard-disable the ``/investigations`` endpoint and the "
+            "engine entirely (EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED)."
         ),
     )
     openai_api_key: SecretStr | None = Field(

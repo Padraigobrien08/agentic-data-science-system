@@ -53,6 +53,33 @@ PIPELINE_ERRORS_TOTAL = Counter(
     ("error_type",),
 )
 
+# --- Agentic investigations (generalized engine) ---
+AGENTIC_INVESTIGATION_TERMINAL_TOTAL = Counter(
+    "edgar_agentic_investigation_terminal_total",
+    "Agentic investigations reaching a terminal state (labelled by loop status and DB run status)",
+    ("investigation_status", "db_status"),
+)
+AGENTIC_INVESTIGATION_DURATION_SECONDS = Histogram(
+    "edgar_agentic_investigation_duration_seconds",
+    "End-to-end agentic investigation time (loop + persistence)",
+    ("outcome",),
+    buckets=(1.0, 5.0, 15.0, 30.0, 60.0, 120.0, 300.0, 600.0, 1800.0, 3600.0),
+)
+AGENTIC_EXPERIMENTS_TOTAL = Counter(
+    "edgar_agentic_experiments_total",
+    "Experiments executed by the agentic loop, by outcome",
+    ("outcome",),
+)
+AGENTIC_ARTIFACTS_INGESTED_TOTAL = Counter(
+    "edgar_agentic_artifacts_ingested_total",
+    "Experiment-emitted artifacts ingested into the artifacts table and linked to their result",
+)
+AGENTIC_ERRORS_TOTAL = Counter(
+    "edgar_agentic_errors_total",
+    "Agentic executions that raised before terminal persistence",
+    ("error_type",),
+)
+
 # --- MCP (executor emits via log + optional counter from backend wrapper; executor sets counter in edgar) ---
 # Counters from edgar_project would create import cycle; executor will call a small hook.
 MCP_TOOL_CALLS_TOTAL = Counter(
@@ -182,6 +209,38 @@ def observe_pipeline_complete(duration_s: float, terminal_status: str) -> None:
 
 def observe_pipeline_exception(exc: BaseException) -> None:
     PIPELINE_ERRORS_TOTAL.labels(error_type=type(exc).__name__).inc()
+
+
+def observe_agentic_complete(
+    duration_s: float,
+    *,
+    db_status: str,
+    investigation_status: str,
+    experiments_completed: int = 0,
+    experiments_failed: int = 0,
+) -> None:
+    """Record a terminal agentic investigation. Also counts the shared run-terminal metric so
+    agentic runs appear alongside EDGAR runs in ``edgar_analysis_run_terminal_total``."""
+    AGENTIC_INVESTIGATION_DURATION_SECONDS.labels(outcome=investigation_status).observe(duration_s)
+    AGENTIC_INVESTIGATION_TERMINAL_TOTAL.labels(
+        investigation_status=investigation_status, db_status=db_status
+    ).inc()
+    ANALYSIS_RUN_TERMINAL_TOTAL.labels(status=db_status).inc()
+    if experiments_completed:
+        AGENTIC_EXPERIMENTS_TOTAL.labels(outcome="completed").inc(experiments_completed)
+    if experiments_failed:
+        AGENTIC_EXPERIMENTS_TOTAL.labels(outcome="failed").inc(experiments_failed)
+
+
+def observe_agentic_exception(exc: BaseException) -> None:
+    """Record an agentic execution that failed before terminal persistence (error, not cancel)."""
+    AGENTIC_ERRORS_TOTAL.labels(error_type=type(exc).__name__).inc()
+    ANALYSIS_RUN_TERMINAL_TOTAL.labels(status="error").inc()
+
+
+def observe_agentic_artifacts_ingested(count: int) -> None:
+    if count:
+        AGENTIC_ARTIFACTS_INGESTED_TOTAL.inc(count)
 
 
 def observe_mcp_tool(tool_name: str, status: str) -> None:
