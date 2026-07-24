@@ -27,9 +27,13 @@ jobs:
         run: ./scripts/smoke-compose.sh
 
       - name: Seed deterministic browser fixture
+        # Run as appuser (uid 1000) — the same user the api/worker serve as. The
+        # local artifact store writes blobs mode 0600 (owner-only), so seeding as
+        # root (docker compose exec default) would create root-owned blobs the
+        # appuser API cannot read ("Could not read artifact from storage").
         run: |
           mkdir -p .tmp
-          docker compose exec -T \
+          docker compose exec -T -u appuser \
             -e EDGAR_SMOKE_ADMIN_EMAIL="${EDGAR_SMOKE_ADMIN_EMAIL}" \
             -e EDGAR_SMOKE_ADMIN_PASSWORD="${EDGAR_SMOKE_ADMIN_PASSWORD}" \
             api python -m tests.support.seed_fullstack_browser_fixture > .tmp/e2e-fixture.json
