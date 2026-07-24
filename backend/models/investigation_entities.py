@@ -31,6 +31,7 @@ from sqlalchemy.orm import Mapped, mapped_column, relationship
 from backend.db.base import Base
 
 if TYPE_CHECKING:
+    from backend.models.artifact import Artifact
     from backend.models.investigation import Investigation
 
 
@@ -325,3 +326,4 @@ class ExperimentResultArtifactLink(Base):
     experiment_result: Mapped[ExperimentResultRow] = relationship(
         "ExperimentResultRow", back_populates="artifact_links"
     )
+    artifact: Mapped[Artifact] = relationship("Artifact")

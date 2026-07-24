@@ -36,7 +36,7 @@ from agentic.domain import (
 from agentic.domain.enums import CritiqueSeverity, CritiqueType, ProvenanceSource
 from agentic.domain.manifest import DatasetManifest
 from agentic.domain.provenance import Provenance
-from agentic.experiments import ExperimentContext, ExperimentRegistry, InMemoryArtifactSink
+from agentic.experiments import ArtifactSink, ExperimentContext, ExperimentRegistry, InMemoryArtifactSink
 from agentic.experiments.record import ExperimentExecutionRecord
 
 from .budget import BudgetTracker
@@ -274,16 +274,21 @@ class ExperimentSelector:
 
 
 class ExperimentExecutor:
-    def __init__(self, registry: ExperimentRegistry) -> None:
+    def __init__(self, registry: ExperimentRegistry, *, artifact_sink: ArtifactSink | None = None) -> None:
         self._registry = registry
+        # When a shared sink is supplied (e.g. by the backend), every experiment emits into
+        # it so the emitted bytes survive the loop and can be ingested + linked afterwards.
+        # When absent, each experiment gets a throwaway sink (unchanged in-process behavior).
+        self._artifact_sink = artifact_sink
 
     def execute(
         self, request: ExperimentRequest, manifest: DatasetManifest, frame: pd.DataFrame | None,
         idgen: DeterministicIds, state: InvestigationState,
     ) -> ExperimentExecutionRecord:
+        sink = self._artifact_sink if self._artifact_sink is not None else InMemoryArtifactSink()
         ctx = ExperimentContext(
             manifest=manifest, frame=frame, raw_params=dict(request.parameters),
-            artifact_sink=InMemoryArtifactSink(), request_id=request.id)
+            artifact_sink=sink, request_id=request.id)
         record = self._registry.get(request.tool_name).run(ctx)
         result = record.to_domain_result()
         # deterministic ids for the persisted result/observations

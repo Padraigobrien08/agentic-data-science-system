@@ -5,6 +5,7 @@ import type {
   EvidenceItem,
   ExperimentItem,
   HypothesisItem,
+  InvestigationArtifactRef,
   InvestigationDetail as Detail,
 } from "@/lib/api/types";
 import {
@@ -133,6 +134,31 @@ function DecisionRow({ d }: Readonly<{ d: DecisionItem }>) {
   );
 }
 
+function formatBytes(n: number | null): string {
+  if (n === null || !Number.isFinite(n)) return "";
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function ArtifactChip({ a }: Readonly<{ a: InvestigationArtifactRef }>) {
+  const size = formatBytes(a.byte_size);
+  return (
+    <a
+      href={`/api/artifacts/${a.id}/content?disposition=attachment`}
+      className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 px-2 py-1 font-mono text-xs text-neutral-600 transition-colors hover:border-neutral-400 hover:text-neutral-900 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-neutral-100"
+      title={`Download ${a.name}${a.mime_type ? ` (${a.mime_type})` : ""}`}
+    >
+      <span className="select-none text-neutral-400" aria-hidden>
+        ↓
+      </span>
+      <span className="truncate">{a.name}</span>
+      <span className="text-[10px] uppercase text-neutral-400">{a.kind}</span>
+      {size ? <span className="text-neutral-400">· {size}</span> : null}
+    </a>
+  );
+}
+
 function ExperimentRow({ x }: Readonly<{ x: ExperimentItem }>) {
   const failed = x.status === "failed";
   return (
@@ -152,6 +178,13 @@ function ExperimentRow({ x }: Readonly<{ x: ExperimentItem }>) {
       ) : null}
       {x.error?.message ? (
         <p className="mt-1 text-sm text-red-600 dark:text-red-400">{String(x.error.message)}</p>
+      ) : null}
+      {x.artifacts.length ? (
+        <div className="mt-3 flex flex-wrap gap-2 border-t border-neutral-100 pt-3 dark:border-neutral-800">
+          {x.artifacts.map((a) => (
+            <ArtifactChip key={a.id} a={a} />
+          ))}
+        </div>
       ) : null}
     </Card>
   );

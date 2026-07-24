@@ -22,17 +22,21 @@ from agentic.domain import InvestigationStatus
 from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
+from backend.models.artifact import Artifact
 from backend.models.enums import AnalysisRunStatus
 from backend.models.investigation import Investigation as InvestigationRow
 from backend.models.investigation import OrchestrationCheckpoint
+from backend.models.investigation_entities import ExperimentResultArtifactLink
 from backend.models.project import Project
 from backend.models.user import User
+from backend.schemas.investigation import build_detail
 from backend.services.agentic_investigation_execution_service import (
     AgenticInvestigationExecutionService,
     ENGINE_AGENTIC,
     ENGINE_EDGAR,
     select_run_engine,
 )
+from backend.services.artifact_service import ArtifactService
 
 
 @pytest.fixture
@@ -157,6 +161,84 @@ def test_execute_records_experiments_over_the_frame(session: Session) -> None:
     result = _fixture_service(session).execute_analysis_run(run.id)
     # the loop actually ran deterministic experiments over the materialized frame
     assert result.experiments_count >= 1
+
+
+def test_execute_ingests_and_links_experiment_artifacts(session: Session, tmp_path) -> None:
+    """Artifacts emitted by experiments are ingested into the artifacts table, linked to their
+    result, and surfaced (downloadable) through the read-API detail projection."""
+    run = _seed_run(session, input_payload=_agentic_payload())
+    artifact_service = ArtifactService(session, settings=Settings(artifact_storage_root=tmp_path / "blobs"))
+    service = AgenticInvestigationExecutionService(
+        session, policy_factory=lambda s: FixtureAgentPolicy(), artifact_service=artifact_service
+    )
+
+    service.execute_analysis_run(run.id)
+    session.expire_all()
+
+    # artifact rows were created and scoped to the run
+    artifacts = session.scalars(select(Artifact).where(Artifact.analysis_run_id == run.id)).all()
+    assert artifacts, "expected experiments to emit at least one ingested artifact"
+    for a in artifacts:
+        assert a.byte_size and a.byte_size > 0
+        assert (a.meta_json or {}).get("source") == "agentic_experiment"
+        # bytes are actually retrievable from the object store
+        assert len(artifact_service.load_bytes(a.id)) == a.byte_size
+
+    # each artifact is linked to an experiment result (experiment -> artifact linkage)
+    links = session.scalars(select(ExperimentResultArtifactLink)).all()
+    linked_ids = {link.artifact_id for link in links}
+    assert linked_ids == {a.id for a in artifacts}
+
+    # the read-API surfaces artifacts under the experiments that produced them
+    inv_row = session.scalar(select(InvestigationRow).where(InvestigationRow.domain_id == str(run.id)))
+    detail = build_detail(inv_row)
+    surfaced = [ref for x in detail.experiments for ref in x.artifacts]
+    assert {ref.id for ref in surfaced} == {a.id for a in artifacts}
+    assert all(ref.name and ref.kind for ref in surfaced)
+
+
+def test_artifact_ingestion_is_idempotent(session: Session, tmp_path) -> None:
+    """Re-running ingestion against already-linked results never duplicates artifacts or links."""
+    from agentic.domain import Investigation as DomainInvestigation
+    from agentic.experiments import InMemoryArtifactSink
+    from agentic.experiments.artifacts import ArtifactRecord
+    from agentic.experiments.descriptor import ArtifactType
+
+    run = _seed_run(session, input_payload=_agentic_payload())
+    artifact_service = ArtifactService(session, settings=Settings(artifact_storage_root=tmp_path / "blobs"))
+    service = AgenticInvestigationExecutionService(
+        session, policy_factory=lambda s: FixtureAgentPolicy(), artifact_service=artifact_service
+    )
+    service.execute_analysis_run(run.id)
+    session.expire_all()
+    first = session.scalars(select(Artifact).where(Artifact.analysis_run_id == run.id)).all()
+
+    # Rebuild a sink whose records match the persisted results' artifact ids, then re-ingest.
+    # The result rows already carry links, so the guard must skip them (no duplicate rows/links).
+    inv_row = session.scalar(select(InvestigationRow).where(InvestigationRow.domain_id == str(run.id)))
+    reloaded = DomainInvestigation.model_validate(
+        max(inv_row.checkpoints, key=lambda c: c.sequence).state_json
+    )
+    replay = InMemoryArtifactSink()
+    for result in [*reloaded.state.completed_experiments, *reloaded.state.failed_experiments]:
+        for art_id in result.artifact_ids:
+            replay.records.append(
+                ArtifactRecord(
+                    id=art_id, name="replay", artifact_type=ArtifactType.json,
+                    media_type="application/json", fingerprint="sha256:replay", byte_size=2,
+                )
+            )
+            replay.contents[art_id] = b"{}"
+    assert replay.records, "expected the reproduced run to reference artifact ids"
+
+    service._ingest_artifacts(run.id, reloaded, replay)
+    session.flush()
+    session.expire_all()
+
+    second = session.scalars(select(Artifact).where(Artifact.analysis_run_id == run.id)).all()
+    assert {a.id for a in second} == {a.id for a in first}
+    links = session.scalars(select(ExperimentResultArtifactLink)).all()
+    assert len(links) == len(first)
 
 
 # --- guards -----------------------------------------------------------------
