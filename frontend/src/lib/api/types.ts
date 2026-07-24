@@ -70,6 +70,7 @@ export interface HealthResponse {
     detail: string | null;
   };
   background_delivery: BackgroundDeliveryHealth;
+  agentic_engine_enabled?: boolean;
 }
 
 export interface ProjectRead {
@@ -588,6 +589,28 @@ export interface InvestigationTermination {
   reason: string | null;
   rationale: string | null;
   at_iteration: number | null;
+}
+
+export interface InvestigationDatasetInput {
+  format: "csv" | "records";
+  csv_text?: string;
+  records?: Record<string, unknown>[];
+  name?: string;
+  time_field?: string | null;
+  entity_id_fields?: string[];
+}
+
+export interface InvestigationCreateBody {
+  project_id: string;
+  goal: string;
+  dataset: InvestigationDatasetInput;
+}
+
+export interface InvestigationCreateResponse {
+  investigation_id: string;
+  analysis_run_id: string;
+  status: string;
+  db_status: string;
 }
 
 export interface InvestigationDetail extends InvestigationSummary {
