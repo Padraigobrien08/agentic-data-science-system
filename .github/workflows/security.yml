@@ -1,9 +1,9 @@
 # Supply-chain vulnerability audit (backlog E2).
 #
-# Report-only for now (continue-on-error): dependencies are still specified as
-# open `>=` ranges (backlog E1), so a newly-published advisory should surface here
-# without blocking unrelated merges. Once dependencies are pinned via a lockfile
-# and known findings are triaged, drop `continue-on-error` to make these blocking.
+# Vulnerability + secret scanning. pip-audit is blocking (dependencies are pinned in
+# requirements.lock and were vetted clean, so a new advisory should fail CI and force a
+# bump). npm audit / gitleaks / trivy remain report-only until their first findings are
+# triaged; drop their `continue-on-error` to make them blocking too.
 name: Security audit
 
 on:
@@ -33,9 +33,10 @@ jobs:
       - name: Install pip-audit
         run: pip install --upgrade pip pip-audit
 
-      - name: Audit backend requirements
-        continue-on-error: true
-        run: pip-audit -r requirements.txt -r requirements-backend.txt --desc
+      # Blocking: audits the fully-pinned runtime lock. A new advisory fails CI and
+      # forces a dependency bump (regenerate with scripts/compile-requirements.sh).
+      - name: Audit backend lockfile
+        run: pip-audit -r requirements.lock --desc
 
   npm-audit:
     name: Frontend (npm audit)

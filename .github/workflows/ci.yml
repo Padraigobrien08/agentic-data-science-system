@@ -25,12 +25,11 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: |
-            requirements.txt
-            requirements-backend.txt
-            requirements-dev.txt
+            requirements-dev.lock
+            requirements.lock
 
       - name: Install dependencies
-        run: pip install --upgrade pip && pip install -r requirements-dev.txt
+        run: pip install --upgrade pip && pip install -r requirements-dev.lock
 
       # Blocking: ruff is kept green (see ruff.toml). New violations fail CI.
       - name: Ruff lint
@@ -54,12 +53,11 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: |
-            requirements.txt
-            requirements-backend.txt
-            requirements-dev.txt
+            requirements-dev.lock
+            requirements.lock
 
       - name: Install dependencies
-        run: pip install --upgrade pip && pip install -r requirements-dev.txt
+        run: pip install --upgrade pip && pip install -r requirements-dev.lock
 
       # Coverage floor is 80% (baseline ~84%); ratchet upward toward baseline over time.
       - name: Run pytest (with coverage)

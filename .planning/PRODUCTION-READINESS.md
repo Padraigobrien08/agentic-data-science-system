@@ -8,7 +8,7 @@ The gaps below are the *production envelope* around it.
 Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 Effort: S (<1h) · M (half day) · L (multi-day)
 
-_Last updated: 2026-07-26 — E4 landed (coverage floor 80%, baseline ~84%); C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
+_Last updated: 2026-07-26 — E1 landed (pinned lockfiles; pip-audit now blocking); E4 landed (coverage floor 80%, baseline ~84%); C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
 
 ---
 
@@ -30,8 +30,11 @@ _Last updated: 2026-07-26 — E4 landed (coverage floor 80%, baseline ~84%); C2 
 
 ## 🟠 Supply chain & CI — highest leverage
 
-- [ ] **E1. Pin dependencies / add a Python lockfile** — M
-  - `requirements*.txt` use `>=` ranges → non-reproducible builds. Adopt pip-compile / uv / poetry lockfile. (Frontend already has `package-lock.json`.)
+- [x] **E1. Pin dependencies / add a Python lockfile** — M
+  - [x] Loose `requirements*.txt` stay the source of truth; fully-pinned `requirements.lock` (runtime) + `requirements-dev.lock` (runtime+dev) generated via `scripts/compile-requirements.sh`, resolved inside `python:3.12-slim` so pins match the deploy target.
+  - [x] Dockerfile installs `requirements.lock`; CI installs `requirements-dev.lock`. Validated: locks resolve clean, full suite passes against the dev lock, image builds + app imports.
+  - [x] Unblocked the ratchet: `pip-audit` now audits `requirements.lock` and is **blocking** (verified 0 known vulns). npm audit / gitleaks / trivy still report-only pending first-findings triage.
+  - [x] Workflow documented in `CONTRIBUTING.md`; `.coverage`/lock artifacts handled in `.gitignore`.
 
 - [x] **E2. Vulnerability + secret scanning in CI** — S each
   - [x] `.github/dependabot.yml` (pip + npm + actions) — grouped weekly updates
@@ -40,7 +43,7 @@ _Last updated: 2026-07-26 — E4 landed (coverage floor 80%, baseline ~84%); C2 
   - [x] CodeQL (SAST) — `.github/workflows/codeql.yml`, python + javascript-typescript; alerts → Security tab
   - [x] Image + IaC scan (Trivy) — `security.yml`: `trivy config` (Dockerfile/compose misconfig) + `trivy image` (built backend image CVEs)
   - [x] Secret scan (gitleaks) — `security.yml` (report-only; scans event commits, full history on cron)
-  - _Ratchet: flip pip-audit/npm audit/gitleaks/trivy to blocking (drop `continue-on-error`) once E1 pins deps and known findings are triaged._
+  - _Ratchet: pip-audit is now **blocking** (E1 pinned deps, 0 vulns). npm audit / gitleaks / trivy remain report-only until their first findings are triaged._
 
 - [x] **E3. Backend lint + type-check in CI** — S
   - [x] `ruff` — `ruff.toml`, **blocking** in CI (`quality` job). Codebase made green: 146 auto-fixed + 4 real fixes (dead vars, forward-ref import). E501/line-length not enforced.
