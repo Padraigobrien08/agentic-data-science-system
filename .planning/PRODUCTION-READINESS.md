@@ -8,7 +8,7 @@ The gaps below are the *production envelope* around it.
 Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 Effort: S (<1h) · M (half day) · L (multi-day)
 
-_Last updated: 2026-07-26 — C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
+_Last updated: 2026-07-26 — E4 landed (coverage floor 80%, baseline ~84%); C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
 
 ---
 
@@ -46,7 +46,9 @@ _Last updated: 2026-07-26 — C2 landed (auth rate limiting); C3 landed (securit
   - [x] `ruff` — `ruff.toml`, **blocking** in CI (`quality` job). Codebase made green: 146 auto-fixed + 4 real fixes (dead vars, forward-ref import). E501/line-length not enforced.
   - [x] `mypy` — `mypy.ini`, **report-only** in CI (52 findings). _Ratchet: tighten config + flip to blocking as findings are burned down._
 
-- [ ] **E4. Coverage gate + reporting** — S
+- [x] **E4. Coverage gate + reporting** — S
+  - [x] `pytest-cov` + `.coveragerc`; CI backend job measures coverage over backend/edgar_project/src/agentic, writes `coverage.xml` (artifact) and a job-summary table.
+  - [x] **Blocking** floor `--cov-fail-under=80` (baseline ~84%). Coverage args live in CI only so local `pytest` stays fast. _Ratchet the floor up toward baseline over time._
 
 - [ ] **E5. Release/CD pipeline** — L
   - No tagged image build/publish for backend or frontend, no SBOM, no CD path. Deployment is manual `docker build`.

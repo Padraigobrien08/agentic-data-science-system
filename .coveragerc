@@ -1,0 +1,20 @@
+# Coverage config for the backend/orchestration/pipeline test run.
+# Source packages are passed explicitly on the CI command line (--cov=...); this file
+# holds reporting behaviour so `coverage report` and the CI run agree.
+
+[run]
+branch = false
+omit =
+    tests/*
+    alembic/*
+
+[report]
+show_missing = true
+skip_covered = true
+# Lines that never need coverage.
+exclude_also =
+    pragma: no cover
+    if TYPE_CHECKING:
+    raise NotImplementedError
+    if __name__ == .__main__.:
+    \.\.\.
