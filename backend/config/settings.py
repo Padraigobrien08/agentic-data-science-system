@@ -57,6 +57,33 @@ class Settings(BaseSettings):
         description="Required bearer token for ops-only routes such as /metrics and /v1/worker/health.",
     )
 
+    # HTTP security (CORS + response headers). The documented architecture proxies browser
+    # traffic through the Next.js server, so CORS is closed by default; set origins only when
+    # a browser calls this API directly. See ``backend.api.security_headers``.
+    cors_allow_origins: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Exact browser origins allowed for cross-origin requests (comma-separated or JSON list). "
+            "Empty (default) disables CORS entirely. '*' is rejected when credentials are allowed."
+        ),
+    )
+    cors_allow_credentials: bool = Field(
+        default=True,
+        description="Send Access-Control-Allow-Credentials for allowed origins (cookies / auth headers).",
+    )
+    hsts_max_age_seconds: int = Field(
+        default=63_072_000,  # 2 years
+        ge=0,
+        description="Strict-Transport-Security max-age. Only emitted on HTTPS requests; 0 disables.",
+    )
+    security_content_security_policy: str = Field(
+        default="default-src 'none'; frame-ancestors 'none'; base-uri 'none'",
+        description=(
+            "Content-Security-Policy for API responses (the docs/openapi paths are exempt so "
+            "Swagger UI keeps working). Empty string disables the header."
+        ),
+    )
+
     # Default file SQLite is for quick local API/tests without Docker. The documented stack uses Postgres
     # (see docker-compose.yml and docs/local-stack.md). Set EDGAR_BACKEND_ALLOW_SQLITE=false in production.
     database_url: str = Field(
@@ -359,6 +386,17 @@ class Settings(BaseSettings):
             return v.strip()
         return v
 
+    @field_validator("cors_allow_origins", mode="before")
+    @classmethod
+    def _split_cors_origins(cls, v: object) -> object:
+        """Accept a comma-separated string (operator-friendly) as well as a JSON list."""
+        if isinstance(v, str):
+            stripped = v.strip()
+            if not stripped or stripped.startswith("["):
+                return v  # empty -> default; JSON list -> let pydantic parse it
+            return [item.strip() for item in stripped.split(",") if item.strip()]
+        return v
+
     @field_validator(
         "artifact_storage_backend",
         "artifact_storage_s3_bucket",
@@ -418,6 +456,12 @@ class Settings(BaseSettings):
         if not ops_token.strip():
             raise ValueError(
                 "EDGAR_BACKEND_OPS_API_TOKEN must be set to a non-empty value.",
+            )
+        if "*" in self.cors_allow_origins and self.cors_allow_credentials:
+            raise ValueError(
+                "EDGAR_BACKEND_CORS_ALLOW_ORIGINS cannot be '*' while "
+                "EDGAR_BACKEND_CORS_ALLOW_CREDENTIALS is true (the browser forbids the combination). "
+                "List explicit origins, or set EDGAR_BACKEND_CORS_ALLOW_CREDENTIALS=false.",
             )
         if self.artifact_storage_backend not in {"local", "s3"}:
             raise ValueError(
