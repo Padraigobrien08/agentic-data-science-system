@@ -12,7 +12,14 @@ from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.exceptions import WorkerLeaseLostError
-from tests.postgres_queue_test_utils import list_jobs_for_run, seed_queued_job
+
+# postgres_session_factory is a pytest fixture consumed by name; noqa keeps ruff's
+# F401 autofix from stripping it (removing it breaks fixture resolution).
+from tests.postgres_queue_test_utils import (  # noqa: F401
+    list_jobs_for_run,
+    postgres_session_factory,
+    seed_queued_job,
+)
 
 
 def test_only_one_concurrent_session_can_claim_same_pending_row(
