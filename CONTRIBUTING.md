@@ -43,6 +43,20 @@ npm install
 npm run dev
 ```
 
+## Dependencies
+
+The loose `requirements.txt`, `requirements-backend.txt`, and `requirements-dev.txt` are the
+human-edited source of truth. Fully-pinned lockfiles are generated from them and are what the
+Docker image (`requirements.lock`) and CI (`requirements-dev.lock`) install, so builds are
+reproducible and `pip-audit` runs against exact versions.
+
+After changing any `requirements*.txt`, regenerate the locks (resolved inside the Python 3.12
+deploy image) and commit them alongside your change:
+
+```bash
+./scripts/compile-requirements.sh
+```
+
 ## Tests
 
 Run the most relevant checks for your change.
