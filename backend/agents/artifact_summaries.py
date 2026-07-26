@@ -16,7 +16,6 @@ from pathlib import Path
 from typing import Any, Callable
 
 from backend.agents.context_budget import ContextBudget
-
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
     ARTIFACT_KEY_DATA_QUALITY,

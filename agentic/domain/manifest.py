@@ -19,7 +19,7 @@ from datetime import datetime
 from pydantic import Field
 
 from .common import DOMAIN_SCHEMA_VERSION, DomainModel, new_id, utc_now
-from .enums import ColumnRole, DataSourceKind, DatasetKind, Modality, SemanticType
+from .enums import ColumnRole, DatasetKind, DataSourceKind, Modality, SemanticType
 from .profiles import (
     DatasetDimensions,
     DuplicateSummary,

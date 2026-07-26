@@ -8,7 +8,6 @@ from typing import BinaryIO
 
 from backend.config.settings import Settings, get_settings
 from backend.storage.factory import get_store_for_uri
-from backend.storage.types import UnsupportedStorageUri
 
 
 def read_bytes(uri: str, *, settings: Settings | None = None) -> bytes:

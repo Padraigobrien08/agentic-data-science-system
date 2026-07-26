@@ -15,7 +15,6 @@ from backend.config.settings import get_settings
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
 from backend.models.run_execution_job import RunExecutionJob
-
 from backend.observability.context import bind_run_context, clear_run_context
 from backend.observability.metrics import (
     mark_worker_loop_tick,
@@ -26,16 +25,16 @@ from backend.observability.metrics import (
 )
 from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
-from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.agentic_investigation_execution_service import (
-    AgenticInvestigationExecutionService,
     ENGINE_AGENTIC,
+    AgenticInvestigationExecutionService,
     select_run_engine,
 )
+from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.edgar_pipeline_execution_service import EdgarPipelineExecutionService
 from backend.services.exceptions import RunCancelledDuringExecution, WorkerLeaseLostError
-from backend.worker.lease import WorkerLeaseGuard
 from backend.worker.failure_classification import is_transient_pipeline_failure
+from backend.worker.lease import WorkerLeaseGuard
 
 logger = logging.getLogger(__name__)
 log = structlog.get_logger(__name__)

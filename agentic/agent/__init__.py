@@ -16,8 +16,8 @@ from __future__ import annotations
 
 from .budget import BudgetTracker, LoopBudget, SafetyLimits
 from .components import (
-    Critic,
     ConclusionSynthesizer,
+    Critic,
     EvidenceUpdater,
     ExperimentExecutor,
     ExperimentSelector,

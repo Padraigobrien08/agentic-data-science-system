@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from secrets import compare_digest
+from typing import Annotated
 
 from fastapi import APIRouter, Depends, Header, HTTPException
 from sqlalchemy import select
@@ -10,6 +11,7 @@ from sqlalchemy.exc import IntegrityError
 
 from backend.api.auth_deps import CurrentUserDep
 from backend.api.deps import DbSession
+from backend.api.rate_limit import enforce_auth_rate_limit
 from backend.auth.tokens import create_access_token
 from backend.config.settings import get_settings
 from backend.models.user import User
@@ -25,6 +27,10 @@ from backend.security.passwords import hash_password, verify_password
 from backend.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Applied to the unauthenticated write endpoints to blunt credential stuffing /
+# registration spam / bootstrap-token brute forcing (see backend.api.rate_limit).
+AuthRateLimit = Annotated[None, Depends(enforce_auth_rate_limit)]
 
 
 @router.get("/capabilities", response_model=AuthCapabilitiesResponse)
@@ -42,6 +48,7 @@ def capabilities(db: DbSession) -> AuthCapabilitiesResponse:
 def register(
     body: AuthRegisterBody,
     db: DbSession,
+    _rate_limit: AuthRateLimit = None,
 ) -> User:
     settings = get_settings()
     if not settings.allow_open_registration:
@@ -68,6 +75,7 @@ def bootstrap_admin(
     body: AuthBootstrapBody,
     db: DbSession,
     bootstrap_token: str | None = Header(default=None, alias="X-EDGAR-Bootstrap-Token"),
+    _rate_limit: AuthRateLimit = None,
 ) -> User:
     settings = get_settings()
     configured_bootstrap_token = (
@@ -101,7 +109,7 @@ def bootstrap_admin(
 
 
 @router.post("/login", response_model=AccessTokenResponse)
-def login(body: AuthLoginBody, db: DbSession) -> AccessTokenResponse:
+def login(body: AuthLoginBody, db: DbSession, _rate_limit: AuthRateLimit = None) -> AccessTokenResponse:
     settings = get_settings()
     users = UserService(db)
     user = users.get_by_email(str(body.email))

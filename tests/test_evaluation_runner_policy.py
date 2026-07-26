@@ -7,7 +7,6 @@ from edgar_project.evaluation.schemas import (
     BenchmarkSuite,
     EvaluationResult,
     EvaluationStatus,
-    InputMode,
     ValidationDegradationClass,
     ValidationObservation,
 )
@@ -65,7 +64,7 @@ def test_run_case_with_allow_live_keeps_current_not_implemented_skip() -> None:
 def test_classify_degradation_class_distinguishes_product_stale_and_upstream() -> None:
     runner = EvaluationRunner(suite=BenchmarkSuite(suite_id="classification"))
 
-    fixture_case = suite_case = BenchmarkSuite.model_validate(
+    fixture_case = BenchmarkSuite.model_validate(
         {
             "suite_id": "classification",
             "cases": [

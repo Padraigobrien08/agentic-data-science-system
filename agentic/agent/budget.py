@@ -10,8 +10,9 @@ from __future__ import annotations
 
 from dataclasses import dataclass, field
 
-from agentic.domain.common import DomainModel
 from pydantic import Field
+
+from agentic.domain.common import DomainModel
 
 
 class LoopBudget(DomainModel):

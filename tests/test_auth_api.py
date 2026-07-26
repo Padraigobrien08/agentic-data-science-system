@@ -99,7 +99,6 @@ def test_authenticated_access_to_protected_endpoints(auth_api_client: TestClient
 
 def test_protected_endpoints_reject_unauthenticated_requests(auth_api_client: TestClient) -> None:
     client = auth_api_client
-    fake_project = "00000000-0000-4000-8000-000000000002"
     fake_run = "00000000-0000-4000-8000-000000000003"
     fake_artifact = "00000000-0000-4000-8000-000000000004"
     cases: list[tuple[str, str, dict]] = [

@@ -5,8 +5,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 from pathlib import Path
 
-from edgar_project.repo_layout import REPO_ROOT
 from edgar_project.evaluation.schemas import InputMode
+from edgar_project.repo_layout import REPO_ROOT
 
 
 @dataclass(frozen=True)

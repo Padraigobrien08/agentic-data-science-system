@@ -4,10 +4,9 @@ from __future__ import annotations
 
 import json
 
+from backend.agents.phase_outputs import build_intent_phase_output
 from edgar_project.orchestration.planner import Planner
 from edgar_project.orchestration.schemas import OrchestrationInput
-
-from backend.agents.phase_outputs import build_intent_phase_output
 from tests.orchestration.test_planner_alignment_regression import (
     GOAL_DETERIORATION_PERSISTENT_NOT_ONE_OFF,
     GOAL_PEER_UNDERPERFORMERS,

@@ -234,7 +234,6 @@ def extract_metrics_with_extraction_caveats(
     all_rows: list[dict[str, Any]] = []
 
     for metric_name, tags in METRIC_TAGS.items():
-        tag_order = list(tags)
         for tag in tags:
             got = _gather_tag_rows(
                 facts_json, tag, cik=cik, year_min=year_min, exclusion_counts=exclusion_counts

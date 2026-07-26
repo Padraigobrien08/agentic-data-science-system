@@ -1,0 +1,25 @@
+# Ruff configuration — backend/orchestration/pipeline lint gate.
+# Kept intentionally focused: real-bug + import-hygiene rules, not whole-repo
+# style reformatting (line length is not enforced; see E501 note below).
+target-version = "py312"
+line-length = 120
+
+extend-exclude = [
+    "alembic/versions",  # generated migration revisions
+    "notebooks",
+    "data",
+]
+
+[lint]
+# E4/E7/E9 = import/statement/syntax correctness, F = pyflakes (unused, undefined),
+# I = import sorting, W = whitespace. E501 (line-too-long) is deliberately omitted:
+# the codebase predates a line-length standard; formatting is a separate follow-up.
+select = ["E4", "E7", "E9", "F", "I", "W"]
+# E402: several entrypoints (edgar_project/cli.py, some repositories) import after
+# deliberate sys.path / environment setup. Allowed rather than restructured here.
+ignore = ["E402"]
+
+[lint.per-file-ignores]
+# pytest fixtures are imported and then re-used as test-function parameters, which
+# pyflakes reads as a redefinition (F811). Standard pytest pattern, not a bug.
+"tests/**" = ["F811"]

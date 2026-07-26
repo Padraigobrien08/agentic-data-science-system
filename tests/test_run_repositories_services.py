@@ -9,8 +9,8 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 import backend.models  # noqa: F401
-from backend.db.base import Base
 from backend.config.settings import Settings
+from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus, RunStepStatus, ToolCallMcpStatus
 from backend.models.project import Project
@@ -18,8 +18,6 @@ from backend.models.run_execution_job import RunExecutionJob
 from backend.models.user import User
 from backend.repositories.analysis_run_repository import AnalysisRunRepository
 from backend.repositories.artifact_repository import ArtifactRepository
-from backend.repositories.run_step_repository import RunStepRepository
-from backend.repositories.tool_call_repository import ToolCallRepository
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
 from backend.services.exceptions import InvalidStatusTransition

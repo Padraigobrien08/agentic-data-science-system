@@ -7,8 +7,8 @@ import logging
 import structlog
 
 from backend.config.settings import get_settings, log_database_posture_once
-from backend.llm.factory import describe_llm_runtime
 from backend.db.session import SessionLocal
+from backend.llm.factory import describe_llm_runtime
 from backend.observability import install_edgar_telemetry_hooks, setup_observability_logging
 from backend.observability.tracing import setup_tracing
 from backend.worker.loop import run_forever

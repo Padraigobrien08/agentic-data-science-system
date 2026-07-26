@@ -10,7 +10,6 @@ the registry compute. Every step records an :class:`AgentDecision` into state.
 from __future__ import annotations
 
 import math
-from uuid import UUID
 
 import pandas as pd
 
@@ -25,7 +24,6 @@ from agentic.domain import (
     Evidence,
     EvidenceDirection,
     ExperimentRequest,
-    ExperimentStatus,
     Hypothesis,
     HypothesisStatus,
     InvestigationState,

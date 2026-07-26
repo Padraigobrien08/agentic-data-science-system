@@ -14,17 +14,17 @@ from typing import Any
 from uuid import uuid4
 
 import pandas as pd
-
 import requests
+
 from edgar_project.orchestration.schemas import RunWorkspacePayload
-from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths as workspace_phase1_paths
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace
 
 from .schemas import (
     ARTIFACT_KEY_CACHE_COMPANYFACTS,
     ARTIFACT_KEY_CACHE_SUBMISSIONS,
-    ArtifactSummary,
     CODE_SEC_FETCH,
     CODE_VALIDATION,
+    ArtifactSummary,
     ErrorInfo,
     TabularPreview,
     ToolResponseEnvelope,

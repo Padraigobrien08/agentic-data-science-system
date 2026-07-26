@@ -7,10 +7,9 @@ outputs so prompts cannot emit empty or structurally invalid step lists.
 
 from __future__ import annotations
 
-from edgar_project.orchestration.schemas import PlannedStep
-
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.tool_allowlist import PLANNING_ALLOWED_TOOL_NAMES
+from edgar_project.orchestration.schemas import PlannedStep
 
 
 def validate_llm_planned_steps_for_handoff(steps: list[PlannedStep]) -> None:

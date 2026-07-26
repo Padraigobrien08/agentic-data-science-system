@@ -13,22 +13,31 @@ from uuid import UUID
 
 from sqlalchemy.orm import Session
 
-from backend.agents.critic_agent import CriticAgent
+from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
 from backend.agents.artifact_summaries import build_artifact_summaries_for_llm
-from backend.agents.context_budget import ContextBudget
-from backend.agents.llm_context import (
-    audit_compact_context,
-    build_critic_llm_context,
-    build_report_llm_context,
-)
-from backend.agents.output_schemas import CriticAgentLLMOutput
 from backend.agents.boundary_failures import (
     CRITIC_BLOCKED_REPORT,
     LLM_NOT_CONFIGURED,
     classify_llm_phase_exception,
 )
+from backend.agents.context_budget import ContextBudget
+from backend.agents.critic_agent import CriticAgent
+from backend.agents.llm_context import (
+    audit_compact_context,
+    build_critic_llm_context,
+    build_report_llm_context,
+)
+from backend.agents.llm_phase_status import (
+    PHASE_DEGRADED,
+    PHASE_FAILED,
+    PHASE_SKIPPED,
+    PHASE_SUCCESS,
+    build_llm_phases_summary_payload,
+    latest_model_call_for_agent_prompt,
+)
+from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
+from backend.agents.output_schemas import CriticAgentLLMOutput
 from backend.agents.persist_mcp_trace import persist_orchestration_step_trace
-from backend.agents.plan_alignment_review import compute_plan_alignment_findings
 from backend.agents.phase_outputs import (
     attach_plan_alignment_findings,
     build_critic_phase_output,
@@ -38,18 +47,9 @@ from backend.agents.phase_outputs import (
     build_report_phase_output,
     build_skipped_phase_output,
 )
-from backend.agents.report_agent import ReportAgent
-from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
-from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
-from backend.agents.llm_phase_status import (
-    PHASE_DEGRADED,
-    PHASE_FAILED,
-    PHASE_SKIPPED,
-    PHASE_SUCCESS,
-    build_llm_phases_summary_payload,
-    latest_model_call_for_agent_prompt,
-)
+from backend.agents.plan_alignment_review import compute_plan_alignment_findings
 from backend.agents.prompt_registry import AGENT_PROMPT_IDS
+from backend.agents.report_agent import ReportAgent
 from backend.agents.traceability_summary import build_runtime_traceability_bundle
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider

@@ -2,8 +2,8 @@
 
 from __future__ import annotations
 
-from pydantic import SecretStr
 import pytest
+from pydantic import SecretStr
 
 from backend.config.settings import BUILTIN_DEV_JWT_SECRET, Settings
 

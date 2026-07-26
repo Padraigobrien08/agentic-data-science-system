@@ -35,7 +35,6 @@ from uuid import uuid4
 from edgar_project.orchestration.execution_contract import ExecutionRequest
 from edgar_project.orchestration.executor import Executor
 from edgar_project.orchestration.planner import Planner
-from edgar_project.orchestration.state import OrchestrationRunState
 from edgar_project.orchestration.run_logging import log_run_finished, logger
 from edgar_project.orchestration.schemas import (
     CODE_ORCH_VALIDATION,
@@ -47,6 +46,7 @@ from edgar_project.orchestration.schemas import (
     OrchestrationRunStatus,
     PlanningOutcome,
 )
+from edgar_project.orchestration.state import OrchestrationRunState
 
 
 def _build_final_summary_line(out: OrchestrationOutput) -> str:

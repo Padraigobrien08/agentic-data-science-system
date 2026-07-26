@@ -10,9 +10,9 @@ from sqlalchemy import func, select
 from backend.api.access_checks import require_evaluation_run_owned, require_project_owned
 from backend.api.auth_deps import CurrentUserDep
 from backend.api.deps import DbSession, EvaluationControlPlaneServiceDep
+from backend.models.enums import EvaluationRunStatus
 from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.evaluation_run import EvaluationRun
-from backend.models.enums import EvaluationRunStatus
 from backend.schemas.evaluation_case_result import (
     EvaluationCaseResultRead,
     evaluation_case_result_to_read,

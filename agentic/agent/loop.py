@@ -28,10 +28,10 @@ from agentic.experiments import ArtifactSink, ExperimentRegistry, build_default_
 
 from .budget import BudgetTracker, LoopBudget, SafetyLimits
 from .components import (
-    INTENT_TOOLS,
-    Critic,
-    ConclusionSynthesizer,
     EDGAR_INTENT_TOOLS,
+    INTENT_TOOLS,
+    ConclusionSynthesizer,
+    Critic,
     EvidenceUpdater,
     ExperimentExecutor,
     ExperimentSelector,

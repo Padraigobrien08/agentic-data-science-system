@@ -15,13 +15,13 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 import backend.models  # noqa: F401
+from agentic.adapters import AdapterRequest, InMemoryDatasetAdapter
+from agentic.agent import InvestigationLoop
+from agentic.domain.enums import ColumnRole
 from backend.db.base import Base
 from backend.models.investigation import Investigation as InvestigationRow
 from backend.models.investigation_entities import AgentDecisionRow
 from backend.services.investigation_store import SqlAlchemyInvestigationStore
-from agentic.adapters import AdapterRequest, InMemoryDatasetAdapter
-from agentic.domain.enums import ColumnRole
-from agentic.agent import InvestigationLoop
 
 
 @pytest.fixture

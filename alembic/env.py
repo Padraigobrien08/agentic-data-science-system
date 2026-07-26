@@ -5,14 +5,13 @@ from __future__ import annotations
 import logging
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import engine_from_config, pool
-
-from backend.config.settings import get_settings
-from backend.db.base import Base
 
 # Register all models on Base.metadata
 import backend.models  # noqa: F401
+from alembic import context
+from backend.config.settings import get_settings
+from backend.db.base import Base
 
 config = context.config
 if config.config_file_name is not None:

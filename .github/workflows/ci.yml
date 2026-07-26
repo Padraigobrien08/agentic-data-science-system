@@ -13,6 +13,34 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  quality:
+    name: Backend (ruff + mypy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.lock
+            requirements.lock
+
+      - name: Install dependencies
+        run: pip install --upgrade pip && pip install -r requirements-dev.lock
+
+      # Blocking: ruff is kept green (see ruff.toml). New violations fail CI.
+      - name: Ruff lint
+        run: python -m ruff check .
+
+      # Report-only for now: the backend is not yet mypy-clean (see mypy.ini / backlog E3).
+      # Surfaces type findings without blocking merges; flip to blocking once burned down.
+      - name: Mypy (report-only)
+        continue-on-error: true
+        run: python -m mypy backend
+
   backend:
     name: Backend (pytest)
     runs-on: ubuntu-latest
@@ -25,17 +53,36 @@ jobs:
           python-version: "3.12"
           cache: pip
           cache-dependency-path: |
-            requirements.txt
-            requirements-backend.txt
-            requirements-dev.txt
+            requirements-dev.lock
+            requirements.lock
 
       - name: Install dependencies
-        run: pip install --upgrade pip && pip install -r requirements-dev.txt
+        run: pip install --upgrade pip && pip install -r requirements-dev.lock
 
-      - name: Run pytest
+      # Coverage floor is 80% (baseline ~84%); ratchet upward toward baseline over time.
+      - name: Run pytest (with coverage)
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: python -m pytest tests/ -q --tb=short
+        run: >
+          python -m pytest tests/ -q --tb=short
+          --cov=backend --cov=edgar_project --cov=src --cov=agentic
+          --cov-report=term-missing:skip-covered
+          --cov-report=xml
+          --cov-fail-under=80
+
+      - name: Coverage summary
+        if: always()
+        run: |
+          echo '### Backend coverage' >> "$GITHUB_STEP_SUMMARY"
+          python -m coverage report --format=markdown >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Upload coverage.xml
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage-xml
+          path: coverage.xml
+          if-no-files-found: ignore
 
   frontend:
     name: Frontend (lint + build)

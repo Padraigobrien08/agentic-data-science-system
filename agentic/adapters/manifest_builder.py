@@ -10,7 +10,6 @@ missingness, duplicates, quality warnings, provenance, and adapter version.
 
 from __future__ import annotations
 
-from agentic.domain.enums import Modality
 from agentic.domain.manifest import DatasetManifest, DatasetProvenance
 from agentic.domain.profiles import SourceIdentity
 

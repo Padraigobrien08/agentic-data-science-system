@@ -23,8 +23,8 @@ from .enums import (
     ConclusionDisposition,
     CritiqueSeverity,
     CritiqueType,
-    DataSourceKind,
     DatasetKind,
+    DataSourceKind,
     DecisionType,
     EntityKind,
     EvidenceDirection,
@@ -41,15 +41,6 @@ from .enums import (
     ReferenceKind,
     SemanticType,
     TerminationReason,
-)
-from .profiles import (
-    ColumnMissingness,
-    DatasetDimensions,
-    DuplicateSummary,
-    MissingnessSummary,
-    QualityWarning,
-    SourceIdentity,
-    TemporalCoverage,
 )
 from .evidence import Evidence, PayloadReference, SourceReference
 from .experiment import (
@@ -78,6 +69,15 @@ from .manifest import (
     DataSource,
 )
 from .observation import Observation
+from .profiles import (
+    ColumnMissingness,
+    DatasetDimensions,
+    DuplicateSummary,
+    MissingnessSummary,
+    QualityWarning,
+    SourceIdentity,
+    TemporalCoverage,
+)
 from .provenance import (
     EnvironmentInfo,
     ModelConfigSnapshot,

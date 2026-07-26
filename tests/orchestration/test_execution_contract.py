@@ -9,7 +9,12 @@ import pytest
 from edgar_project.orchestration.constants import ORCH_RUN_STATE_CONTRACT_VERSION
 from edgar_project.orchestration.execution_contract import ExecutionRequest, ExecutionResult
 from edgar_project.orchestration.planner import Planner
-from edgar_project.orchestration.schemas import OrchestrationInput, OrchestrationOutput, OrchestrationRunStatus, PlanningOutcome
+from edgar_project.orchestration.schemas import (
+    OrchestrationInput,
+    OrchestrationOutput,
+    OrchestrationRunStatus,
+    PlanningOutcome,
+)
 from edgar_project.orchestration.state import OrchestrationRunState
 
 

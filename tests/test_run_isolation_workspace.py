@@ -4,10 +4,10 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import config
 import pandas as pd
 import pytest
 
+import config
 from edgar_project.orchestration.execution_contract import ExecutionRequest
 from edgar_project.orchestration.schemas import (
     InterpretedGoal,

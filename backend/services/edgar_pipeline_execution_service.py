@@ -17,9 +17,10 @@ import structlog
 from sqlalchemy.orm import Session
 
 from backend.agents.intent_preferences_assistant import maybe_apply_llm_intent_preferences
-from backend.agents.traceable_analysis_pipeline import run_traceable_edgar_pipeline
 from backend.agents.llm_phase_status import maybe_llm_error_summary_note
 from backend.agents.traceability_summary import enrich_traceability_artifact_ids
+from backend.agents.traceable_analysis_pipeline import run_traceable_edgar_pipeline
+from backend.config.settings import get_settings
 from backend.llm.exceptions import LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
 from backend.models.enums import AnalysisRunStatus
@@ -36,7 +37,6 @@ from backend.observability.metrics import (
 from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
-from backend.config.settings import get_settings
 from backend.services.exceptions import RunCancelledDuringExecution, WorkerLeaseLostError
 from edgar_project.orchestration import OrchestrationInput
 from edgar_project.orchestration.agent import AnalysisAgent

@@ -5,13 +5,13 @@ from __future__ import annotations
 from uuid import UUID
 
 from fastapi import APIRouter
+from sqlalchemy import select
 
 from backend.api.access_checks import require_project_owned
 from backend.api.auth_deps import CurrentUserDep
 from backend.api.deps import DbSession
 from backend.models.project import Project
 from backend.schemas.project import ProjectCreate, ProjectRead, ProjectUpdate
-from sqlalchemy import select
 
 router = APIRouter(prefix="/projects", tags=["projects"])
 

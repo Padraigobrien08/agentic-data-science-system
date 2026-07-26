@@ -31,9 +31,9 @@ from backend.models.project import Project
 from backend.models.user import User
 from backend.schemas.investigation import build_detail
 from backend.services.agentic_investigation_execution_service import (
-    AgenticInvestigationExecutionService,
     ENGINE_AGENTIC,
     ENGINE_EDGAR,
+    AgenticInvestigationExecutionService,
     select_run_engine,
 )
 from backend.services.artifact_service import ArtifactService

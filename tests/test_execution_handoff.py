@@ -6,6 +6,10 @@ from unittest.mock import MagicMock
 
 import pytest
 
+from backend.agents.boundary_failures import classify_llm_phase_exception
+from backend.agents.errors import AgentFailureCode, AgentOutputError
+from backend.agents.llm_plan_handoff import validate_llm_planned_steps_for_handoff
+from backend.llm.exceptions import ChatCompletionProviderError
 from edgar_project.orchestration.agent import AnalysisAgent
 from edgar_project.orchestration.execution_contract import ExecutionRequest
 from edgar_project.orchestration.schemas import (
@@ -17,11 +21,6 @@ from edgar_project.orchestration.schemas import (
     PlannedStep,
     PlanningOutcome,
 )
-
-from backend.agents.boundary_failures import classify_llm_phase_exception
-from backend.agents.errors import AgentFailureCode, AgentOutputError
-from backend.agents.llm_plan_handoff import validate_llm_planned_steps_for_handoff
-from backend.llm.exceptions import ChatCompletionProviderError
 
 
 def test_execution_request_rejects_empty_plan() -> None:

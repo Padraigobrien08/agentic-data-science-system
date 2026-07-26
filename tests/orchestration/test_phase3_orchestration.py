@@ -25,9 +25,6 @@ from edgar_project.orchestration.execution_contract import ExecutionRequest
 from edgar_project.orchestration.executor import Executor
 from edgar_project.orchestration.planner import (
     TOOL_BUILD_PANEL,
-    TOOL_COMPUTE_FEATURES,
-    TOOL_DETECT_ANOMALIES,
-    TOOL_FETCH_COMPANY_DATA,
     TOOL_GENERATE_REPORT,
     TOOL_RESOLVE_COMPANY,
     TOOL_RUN_PIPELINE,

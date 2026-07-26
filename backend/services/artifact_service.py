@@ -12,14 +12,14 @@ from pathlib import Path
 from typing import BinaryIO
 from uuid import UUID
 
-from sqlalchemy.orm import Session
 import structlog
+from sqlalchemy.orm import Session
 
 from backend.config.settings import Settings, get_settings
-from backend.observability.tracing import get_tracer
 from backend.domain.json_merge import merge_dict_json
 from backend.models.artifact import Artifact
 from backend.models.enums import ArtifactKind
+from backend.observability.tracing import get_tracer
 from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.run_step_repository import RunStepRepository
 from backend.storage import delete_at_uri, open_reader, read_bytes

@@ -26,7 +26,7 @@ from backend.db.session import get_db
 from backend.main import create_app
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
-from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus, RunStepStatus
+from backend.models.enums import ArtifactKind, ModelCallStatus, RunStepStatus
 from backend.models.model_call import ModelCall
 from backend.models.run_step import RunStep
 from backend.schemas.api_phase_a import run_step_to_detail

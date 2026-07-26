@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
+from backend.agents.critic_artifact_keys import collect_critic_excerpts
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
     ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_UNIFIED_FINDINGS,
 )
-
-from backend.agents.critic_artifact_keys import collect_critic_excerpts
 
 
 def test_collect_includes_anomalies_and_panel(tmp_path: Path) -> None:

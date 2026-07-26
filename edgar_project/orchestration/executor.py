@@ -25,8 +25,8 @@ Does **not**:
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
 from collections.abc import Callable
+from datetime import datetime, timezone
 
 from opentelemetry import trace as otel_trace
 
@@ -57,11 +57,12 @@ from edgar_project.orchestration.constants import (
     TOOL_RUN_PIPELINE,
 )
 from edgar_project.orchestration.execution_contract import ExecutionRequest, ExecutionResult
+from edgar_project.orchestration.run_logging import log_run_finished, logger, tool_summary_line
 from edgar_project.orchestration.schemas import (
     CODE_ORCH_ALL_RESOLVE_FAILED,
     CODE_ORCH_BUILD_PANEL_NO_DATA,
-    CODE_ORCH_DISPATCH,
     CODE_ORCH_COMPUTE_FEATURES_FAILED,
+    CODE_ORCH_DISPATCH,
     CODE_ORCH_DOWNSTREAM_SKIPPED,
     CODE_ORCH_FETCH_ALL_NO_DATA,
     CODE_ORCH_FETCH_TICKER_NO_DATA,
@@ -82,7 +83,6 @@ from edgar_project.orchestration.schemas import (
     StepStatusEntry,
     ToolResultSummary,
 )
-from edgar_project.orchestration.run_logging import log_run_finished, logger, tool_summary_line
 from edgar_project.orchestration.state import OrchestrationRunState
 from edgar_project.orchestration.telemetry_callbacks import notify_mcp_tool
 

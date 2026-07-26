@@ -2,15 +2,6 @@
 
 from __future__ import annotations
 
-from edgar_project.orchestration.schemas import (
-    InterpretedGoal,
-    InterpretedGoalCode,
-    OrchestrationIntent,
-    OrchestrationPlan,
-    PlannedStep,
-    StepStatusEntry,
-)
-
 from backend.agents.output_schemas import CriticAgentLLMOutput, ReportAgentLLMOutput
 from backend.agents.phase_outputs import (
     build_critic_phase_output,
@@ -18,6 +9,14 @@ from backend.agents.phase_outputs import (
     build_planning_phase_output,
     build_planning_phase_output_from_step_statuses,
     build_report_phase_output,
+)
+from edgar_project.orchestration.schemas import (
+    InterpretedGoal,
+    InterpretedGoalCode,
+    OrchestrationIntent,
+    OrchestrationPlan,
+    PlannedStep,
+    StepStatusEntry,
 )
 
 

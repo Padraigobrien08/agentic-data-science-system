@@ -15,7 +15,6 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
-from backend.agents.prompt_registry import AGENT_PROMPT_IDS
 from backend.models.model_call import ModelCall
 
 PHASE_SKIPPED = "skipped"

@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from uuid import UUID
 
+from backend.schemas.common import TimestampedRead
 from edgar_project.evaluation.schemas import (
     EvaluationStatus,
     InputMode,
     ValidationDegradationClass,
 )
-
-from backend.schemas.common import TimestampedRead
 
 
 class EvaluationCaseResultRead(TimestampedRead):

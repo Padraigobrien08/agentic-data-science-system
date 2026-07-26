@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from edgar_project.orchestration.schemas import InterpretedGoalCode, OrchestrationIntent
-
 from backend.agents.tool_allowlist import PLANNING_ALLOWED_TOOL_NAMES
+from edgar_project.orchestration.schemas import InterpretedGoalCode, OrchestrationIntent
 
 
 def render_intent_prompt(system_body: str) -> str:
