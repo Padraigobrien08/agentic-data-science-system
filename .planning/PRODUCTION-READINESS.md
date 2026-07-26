@@ -8,7 +8,7 @@ The gaps below are the *production envelope* around it.
 Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 Effort: S (<1h) · M (half day) · L (multi-day)
 
-_Last updated: 2026-07-26 — E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
+_Last updated: 2026-07-26 — C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
 
 ---
 
@@ -21,8 +21,10 @@ _Last updated: 2026-07-26 — E2 complete (dependabot + pip-audit + npm audit + 
 - [ ] **C2. Rate limiting / brute-force protection on auth** — M
   - Nothing throttles `POST /v1/auth/login` and `/register`. Add per-IP/per-account limiting (slowapi or ingress-level).
 
-- [ ] **C3. CORS posture + security response headers on the API** — M
-  - `create_app()` mounts only `ObservabilityMiddleware`. Decide CORS explicitly (frontend proxies server-side, so it may be intentionally closed). Add `HSTS`, `X-Content-Type-Options`, `Referrer-Policy`, CSP.
+- [x] **C3. CORS posture + security response headers on the API** — M
+  - [x] `SecurityHeadersMiddleware` (`backend/api/security_headers.py`) on all responses: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, CSP (`default-src 'none'`; docs paths exempt), and HSTS (HTTPS-only, 2y default, 0 disables).
+  - [x] CORS is **opt-in, closed by default** (`EDGAR_BACKEND_CORS_ALLOW_ORIGINS`); comma-separated or JSON list, with a settings guard rejecting `*` + credentials. Matches the server-side-proxy architecture.
+  - [x] Documented in `.env.example`; covered by `tests/test_security_headers.py`.
 
 ## 🟠 Supply chain & CI — highest leverage
 

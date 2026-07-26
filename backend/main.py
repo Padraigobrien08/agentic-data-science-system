@@ -8,12 +8,14 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.engine.url import make_url
 
 from backend import __version__
 from backend.api.router import api_router
 from backend.api.routes import health
 from backend.api.routes import metrics as metrics_route
+from backend.api.security_headers import SecurityHeadersMiddleware
 from backend.config.settings import get_settings, log_database_posture_once
 from backend.observability import install_edgar_telemetry_hooks, setup_observability_logging
 from backend.observability.middleware import ObservabilityMiddleware
@@ -54,6 +56,22 @@ def create_app() -> FastAPI:
         lifespan=lifespan,
     )
     app.add_middleware(ObservabilityMiddleware)
+    app.add_middleware(
+        SecurityHeadersMiddleware,
+        hsts_max_age_seconds=settings.hsts_max_age_seconds,
+        content_security_policy=settings.security_content_security_policy,
+    )
+    # Added last so CORS is the outermost middleware and can answer preflight (OPTIONS)
+    # before the request reaches routes. Closed by default (no origins configured).
+    if settings.cors_allow_origins:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=settings.cors_allow_origins,
+            allow_credentials=settings.cors_allow_credentials,
+            allow_methods=["*"],
+            allow_headers=["*"],
+            expose_headers=["X-Request-ID"],
+        )
     app.include_router(health.router, tags=["health"])
     app.include_router(metrics_route.router)
     app.include_router(api_router, prefix=settings.api_v1_prefix)
