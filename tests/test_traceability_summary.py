@@ -5,6 +5,12 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
+
+from backend.agents.traceability_summary import (
+    TRACEABILITY_CONTRACT_VERSION,
+    _blocking_caveats_from_critic_patch,
+    build_runtime_traceability_bundle,
+)
 from edgar_project.orchestration.schemas import (
     GoalPreferences,
     InterpretedGoal,
@@ -13,12 +19,6 @@ from edgar_project.orchestration.schemas import (
     OrchestrationOutput,
     OrchestrationRunStatus,
     StepStatusEntry,
-)
-
-from backend.agents.traceability_summary import (
-    TRACEABILITY_CONTRACT_VERSION,
-    _blocking_caveats_from_critic_patch,
-    build_runtime_traceability_bundle,
 )
 
 

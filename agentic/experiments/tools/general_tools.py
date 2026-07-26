@@ -14,7 +14,7 @@ from typing import Literal
 
 import numpy as np
 import pandas as pd
-from pydantic import Field
+from pydantic import BaseModel, Field
 
 from agentic.domain.common import DomainModel
 from agentic.domain.enums import (
@@ -27,7 +27,6 @@ from agentic.domain.enums import (
 from agentic.domain.experiment import CostEstimate
 from agentic.domain.manifest import DatasetManifest
 from agentic.domain.statistics import Uncertainty
-from pydantic import BaseModel
 
 from .. import stats as st
 from ..base import BaseExperimentTool, ExperimentOutcome

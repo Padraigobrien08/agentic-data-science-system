@@ -2,9 +2,8 @@
 
 from __future__ import annotations
 
-from edgar_project.orchestration.telemetry_callbacks import register_mcp_tool_callback
-
 from backend.observability.metrics import observe_mcp_tool
+from edgar_project.orchestration.telemetry_callbacks import register_mcp_tool_callback
 
 
 def install_edgar_telemetry_hooks() -> None:

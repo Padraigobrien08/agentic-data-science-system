@@ -19,7 +19,7 @@ from __future__ import annotations
 
 import numpy as np
 import pandas as pd
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 from agentic.domain.common import DomainModel
 from agentic.domain.enums import (
@@ -36,7 +36,7 @@ from ..base import BaseExperimentTool, ExperimentOutcome
 from ..capability import ExperimentCapability, ValidationIssue
 from ..context import ExperimentContext
 from ..descriptor import ArtifactType, ExperimentToolDescriptor, OutputField
-from ..errors import ExperimentExecutionError, ParameterError
+from ..errors import ParameterError
 from ._helpers import make_evidence, make_observation, make_statistics, require_frame, source_ref
 
 _TS = [Modality.time_series, Modality.tabular]

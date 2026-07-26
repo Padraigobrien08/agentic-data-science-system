@@ -23,8 +23,8 @@ from edgar_project.repo_layout import REPO_ROOT, ensure_repo_root_on_syspath
 ensure_repo_root_on_syspath()
 
 from backend.db.session import SessionLocal
-from backend.models.evaluation_run import EvaluationRun
 from backend.models.enums import EvaluationRunStatus
+from backend.models.evaluation_run import EvaluationRun
 from backend.services.evaluation_control_plane_service import EvaluationControlPlaneService
 from edgar_project.console_digest import print_run_digest_stdout
 from edgar_project.demo import DemoScenario, get_demo_scenario, list_demo_scenario_ids, load_demo_catalog

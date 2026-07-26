@@ -16,9 +16,9 @@ from abc import ABC, abstractmethod
 from pathlib import Path
 
 import pandas as pd
+from pydantic import Field
 
 from agentic.domain.common import DomainModel, new_id
-from pydantic import Field
 
 from .descriptor import ArtifactType
 

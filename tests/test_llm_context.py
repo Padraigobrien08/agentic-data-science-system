@@ -2,16 +2,6 @@
 
 from __future__ import annotations
 
-from edgar_project.orchestration.plan_templates import get_plan_template_snapshot
-from edgar_project.orchestration.schemas import (
-    InterpretedGoal,
-    InterpretedGoalCode,
-    OrchestrationInput,
-    OrchestrationOutput,
-    OrchestrationRunStatus,
-    PlanTemplateId,
-)
-
 from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import (
     CONTRACT_CRITIC_LLM,
@@ -24,6 +14,15 @@ from backend.agents.llm_context import (
     build_planning_llm_context,
     build_report_llm_context,
     slim_interpreted_goal_for_llm,
+)
+from edgar_project.orchestration.plan_templates import get_plan_template_snapshot
+from edgar_project.orchestration.schemas import (
+    InterpretedGoal,
+    InterpretedGoalCode,
+    OrchestrationInput,
+    OrchestrationOutput,
+    OrchestrationRunStatus,
+    PlanTemplateId,
 )
 
 

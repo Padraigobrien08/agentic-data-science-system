@@ -19,8 +19,8 @@ from agentic.domain import (
     HypothesisStatus,
     Provenance,
     ProvenanceSource,
-    SourceReference,
     ReferenceKind,
+    SourceReference,
     new_id,
 )
 

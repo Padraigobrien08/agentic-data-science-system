@@ -4,7 +4,7 @@ from __future__ import annotations
 
 from secrets import compare_digest
 
-from fastapi import APIRouter, Depends, Header, HTTPException
+from fastapi import APIRouter, Header, HTTPException
 from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 

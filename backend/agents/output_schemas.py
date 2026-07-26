@@ -6,6 +6,7 @@ from typing import Any
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator, model_validator
 
+from backend.agents.tool_allowlist import PLANNING_ALLOWED_TOOL_NAMES
 from edgar_project.orchestration.schemas import (
     DirectionalFocus,
     InterpretedGoal,
@@ -18,8 +19,6 @@ from edgar_project.orchestration.schemas import (
     PrimaryAnalysisMode,
     TimeFocus,
 )
-
-from backend.agents.tool_allowlist import PLANNING_ALLOWED_TOOL_NAMES
 
 
 class IntentAgentLLMOutput(BaseModel):

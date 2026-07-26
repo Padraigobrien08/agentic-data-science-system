@@ -6,7 +6,6 @@ from pathlib import Path
 from unittest.mock import MagicMock, patch
 
 import pandas as pd
-import pytest
 import requests
 
 from edgar_project.mcp import tools as mcp_tools
@@ -14,9 +13,7 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
     ARTIFACT_KEY_DATA_QUALITY,
     ARTIFACT_KEY_EXCLUSIONS,
-    ARTIFACT_KEY_PEER_SIGNALS,
-    ARTIFACT_KEY_TREND_BREAKS,
-    ARTIFACT_KEY_UNIFIED_FINDINGS,
+    ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_METRIC,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_PERIOD,
@@ -25,12 +22,14 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
     ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
     ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
-    ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_PANEL,
+    ARTIFACT_KEY_PEER_SIGNALS,
     ARTIFACT_KEY_REPORT,
-    BuildPanelInput,
+    ARTIFACT_KEY_TREND_BREAKS,
+    ARTIFACT_KEY_UNIFIED_FINDINGS,
     CODE_SEC_FETCH,
     CODE_UNKNOWN_TICKER,
+    BuildPanelInput,
     ComputeFeaturesInput,
     FetchCompanyDataInput,
     GenerateReportInput,

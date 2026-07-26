@@ -9,11 +9,11 @@ from sqlalchemy.orm import Session
 
 from backend.domain.status_transitions import is_retriable_terminal, is_terminal_analysis_run
 from backend.models.analysis_run import AnalysisRun
-from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
+from backend.models.enums import AnalysisRunStatus
 from backend.models.run_execution_job import RunExecutionJob
+from backend.observability.tracing import serialize_trace_carrier
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.analysis_run_service import AnalysisRunService
-from backend.observability.tracing import serialize_trace_carrier
 from backend.services.exceptions import RunLifecycleError
 
 

@@ -7,7 +7,6 @@ from pathlib import Path
 from edgar_project.cli import build_parser
 from edgar_project.evaluation.scripts.run_suite import parse_args
 
-
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 

@@ -21,7 +21,6 @@ from backend.main import create_app
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus
 from backend.models.evaluation_case_result import EvaluationCaseResult
-from backend.models.evaluation_run import EvaluationRun
 from tests.api_auth import register_project_and_headers
 
 

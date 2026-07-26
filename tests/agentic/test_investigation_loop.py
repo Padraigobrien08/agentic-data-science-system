@@ -13,17 +13,15 @@ from __future__ import annotations
 from pathlib import Path
 
 import pandas as pd
-import pytest
 
 from agentic.adapters import AdapterRequest, EDGARAdapter, InMemoryDatasetAdapter
-from agentic.domain.enums import ColumnRole, ConclusionDisposition, HypothesisStatus, InvestigationStatus
 from agentic.agent import (
     InMemoryInvestigationStore,
     InvestigationLoop,
     LoopBudget,
     ModelAgentPolicy,
-    SafetyLimits,
 )
+from agentic.domain.enums import ColumnRole, ConclusionDisposition, HypothesisStatus, InvestigationStatus
 
 REPO = Path(__file__).resolve().parents[2]
 EDGAR_FIXTURE = REPO / "edgar_project/evaluation/fixtures/data/01_simple_anomaly_features.csv"

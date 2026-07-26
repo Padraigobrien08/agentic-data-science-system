@@ -9,9 +9,11 @@ so models saw empty excerpts and produced hollow narratives.
 
 from __future__ import annotations
 
+from backend.agents.artifact_excerpts import read_text_excerpt
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_ANOMALIES,
     ARTIFACT_KEY_DATA_QUALITY,
+    ARTIFACT_KEY_DETERIORATION_FOCUS,
     ARTIFACT_KEY_EXCLUSIONS,
     ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_FINDINGS_SUMMARY_BY_COMPANY,
@@ -25,10 +27,7 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_REPORT,
     ARTIFACT_KEY_TREND_BREAKS,
     ARTIFACT_KEY_UNIFIED_FINDINGS,
-    ARTIFACT_KEY_DETERIORATION_FOCUS,
 )
-
-from backend.agents.artifact_excerpts import read_text_excerpt
 
 # Order matters: highest-signal tables first. Per-role UTF-8 char caps (truncated excerpts).
 CRITIC_EXCERPT_PLAN: tuple[tuple[str, int], ...] = (

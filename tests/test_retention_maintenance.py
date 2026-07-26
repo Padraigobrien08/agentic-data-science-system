@@ -16,15 +16,13 @@ from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
-from backend.models.enums import AnalysisRunStatus, ModelCallStatus
-from backend.models.enums import ArtifactKind
+from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus
 from backend.models.model_call import ModelCall
 from backend.models.project import Project
 from backend.models.user import User
 from backend.repositories.analysis_run_repository import AnalysisRunRepository
 from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.model_call_repository import ModelCallRepository
-from backend.storage.factory import get_s3_object_store
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
     ArtifactDetailResponse,
@@ -33,6 +31,7 @@ from backend.schemas.api_phase_a import (
     artifact_to_detail,
     model_call_to_api_item,
 )
+from backend.storage.factory import get_s3_object_store
 from backend.storage.local import LocalFilesystemStore
 
 SECURE_JWT_SECRET = "secure-jwt-secret-minimum-32-characters-long"

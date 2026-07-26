@@ -23,7 +23,6 @@ from .enums import (
     ALLOWED_INVESTIGATION_TRANSITIONS,
     EvidenceDirection,
     ExperimentStatus,
-    HypothesisStatus,
     InvestigationStatus,
     TerminationReason,
 )

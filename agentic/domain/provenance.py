@@ -9,11 +9,11 @@ needed to reproduce an experiment or an entire run from persisted state.
 
 from __future__ import annotations
 
+from datetime import datetime
+
 from pydantic import Field
 
 from .common import DOMAIN_SCHEMA_VERSION, DomainModel, new_id, utc_now
-from datetime import datetime
-
 from .enums import ProvenanceSource
 
 

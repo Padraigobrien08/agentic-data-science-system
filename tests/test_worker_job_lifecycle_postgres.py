@@ -10,10 +10,9 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, RunExecutionJobStatus
-from backend.models.run_execution_job import RunExecutionJob
 from backend.repositories.run_execution_job_repository import RunExecutionJobRepository
 from backend.services.exceptions import WorkerLeaseLostError
-from tests.postgres_queue_test_utils import list_jobs_for_run, postgres_session_factory, seed_queued_job
+from tests.postgres_queue_test_utils import list_jobs_for_run, seed_queued_job
 
 
 def test_only_one_concurrent_session_can_claim_same_pending_row(

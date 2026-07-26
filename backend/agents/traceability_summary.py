@@ -14,6 +14,9 @@ from uuid import UUID
 from sqlalchemy.orm import Session
 
 from backend.agents.inline_chart_preview import build_inline_chart_previews
+from backend.agents.llm_phase_status import PHASE_DEGRADED, PHASE_FAILED, PHASE_SUCCESS
+from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.artifact_service import ArtifactService
 from edgar_project.orchestration.planning_transparency import build_planning_transparency
 from edgar_project.orchestration.schemas import (
     GoalPreferences,
@@ -21,10 +24,6 @@ from edgar_project.orchestration.schemas import (
     MetricPriority,
     OrchestrationOutput,
 )
-
-from backend.agents.llm_phase_status import PHASE_DEGRADED, PHASE_FAILED, PHASE_SUCCESS
-from backend.services.analysis_run_service import AnalysisRunService
-from backend.services.artifact_service import ArtifactService
 
 TRACEABILITY_CONTRACT_VERSION = "1"
 

@@ -52,22 +52,20 @@ from edgar_project.orchestration.plan_templates import (
     select_plan_template,
     short_description_for_code,
 )
+from edgar_project.orchestration.prompt_scope import extract_prompt_scope
 from edgar_project.orchestration.schemas import (
     CODE_ORCH_UNSUPPORTED_GOAL,
     CODE_ORCH_VALIDATION,
     GoalPreferences,
     InterpretedGoal,
-    InterpretedGoalCode,
     MetricPriority,
     OrchestrationError,
     OrchestrationInput,
-    OrchestrationIntent,
     OrchestrationPlan,
     PlannedStep,
-    PlanTemplateId,
     PlanningOutcome,
+    PlanTemplateId,
 )
-from edgar_project.orchestration.prompt_scope import extract_prompt_scope
 
 _MAX_TICKERS: Final[int] = 5
 _COMPARISON_CUES: Final[tuple[str, ...]] = (

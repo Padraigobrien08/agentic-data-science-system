@@ -44,7 +44,6 @@ from edgar_project.orchestration.schemas import (
 )
 from edgar_project.orchestration.state import OrchestrationRunState
 
-
 _ALL_TOOL_NAMES: frozenset[str] = frozenset(
     {
         TOOL_RESOLVE_COMPANY,

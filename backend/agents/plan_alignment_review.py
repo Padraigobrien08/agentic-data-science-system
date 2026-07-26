@@ -12,10 +12,10 @@ from edgar_project.mcp.schemas import ARTIFACT_KEY_DETERIORATION_FOCUS
 from edgar_project.orchestration.schemas import (
     DirectionalFocus,
     InterpretedGoal,
+    PeerRequirement,
     PlanTemplateId,
     PreferredSignalStyle,
     PrimaryAnalysisMode,
-    PeerRequirement,
 )
 
 _MAX_FINDINGS = 8

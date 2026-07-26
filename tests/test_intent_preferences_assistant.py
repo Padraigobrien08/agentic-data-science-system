@@ -2,18 +2,17 @@
 
 from __future__ import annotations
 
+from backend.agents.intent_preferences_assistant import merge_goal_preferences
+from backend.agents.output_schemas import LLMGoalPreferencesPatch
+from edgar_project.orchestration.goal_preferences import parse_goal_preferences
 from edgar_project.orchestration.planner import Planner
 from edgar_project.orchestration.schemas import (
     GoalPreferences,
     IntentAssistancePayload,
     OrchestrationInput,
-    PrimaryAnalysisMode,
     PlanTemplateId,
+    PrimaryAnalysisMode,
 )
-from edgar_project.orchestration.goal_preferences import parse_goal_preferences
-
-from backend.agents.intent_preferences_assistant import merge_goal_preferences
-from backend.agents.output_schemas import LLMGoalPreferencesPatch
 
 
 def test_merge_goal_preferences_overlays_patch() -> None:

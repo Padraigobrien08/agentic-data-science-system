@@ -11,7 +11,6 @@ from backend.agents.artifact_summaries import (
     build_artifact_summaries_for_llm,
     summarize_anomalies_csv,
 )
-from backend.agents.context_budget import ContextBudget
 from edgar_project.mcp.schemas import ARTIFACT_KEY_ANOMALIES, ARTIFACT_KEY_UNIFIED_FINDINGS
 
 

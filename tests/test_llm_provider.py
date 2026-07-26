@@ -8,12 +8,12 @@ from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session, sessionmaker
 
 import backend.models  # noqa: F401
+from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.llm.exceptions import ChatCompletionProviderError, LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
-from backend.llm.openai_provider import _completion_length_payload, OpenAIChatCompletionProvider
+from backend.llm.openai_provider import OpenAIChatCompletionProvider, _completion_length_payload
 from backend.llm.types import ChatCompletionRequest, ChatCompletionResult
-from backend.config.settings import Settings
 from backend.models.enums import ModelCallStatus
 from backend.models.model_call import ModelCall
 from backend.services.recorded_chat_completion_service import RecordedChatCompletionService
