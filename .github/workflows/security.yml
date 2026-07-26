@@ -1,0 +1,103 @@
+# Supply-chain vulnerability audit (backlog E2).
+#
+# Report-only for now (continue-on-error): dependencies are still specified as
+# open `>=` ranges (backlog E1), so a newly-published advisory should surface here
+# without blocking unrelated merges. Once dependencies are pinned via a lockfile
+# and known findings are triaged, drop `continue-on-error` to make these blocking.
+name: Security audit
+
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+  schedule:
+    # Weekly sweep so advisories on unchanged deps are still caught (Mondays 06:00 UTC).
+    - cron: "0 6 * * 1"
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pip-audit:
+    name: Python (pip-audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install pip-audit
+        run: pip install --upgrade pip pip-audit
+
+      - name: Audit backend requirements
+        continue-on-error: true
+        run: pip-audit -r requirements.txt -r requirements-backend.txt --desc
+
+  npm-audit:
+    name: Frontend (npm audit)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: npm audit (high+ severity)
+        continue-on-error: true
+        working-directory: frontend
+        run: npm audit --audit-level=high
+
+  gitleaks:
+    name: Secret scan (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # full history so the scheduled scan covers past commits
+
+      # Report-only for now (continue-on-error), consistent with the audit jobs above.
+      # On push/PR the action scans only the event's new commits; the weekly cron scans full history.
+      # Flip to blocking once history is confirmed clean. Free for personal repos (no license needed).
+      - name: Gitleaks
+        continue-on-error: true
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  trivy:
+    name: Container + IaC scan (trivy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      # Dockerfile / compose / IaC misconfiguration scan (fast, no image build).
+      - name: Trivy config (misconfig)
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: config
+          scan-ref: .
+          severity: HIGH,CRITICAL
+
+      # Build the backend image and scan its OS + Python packages for known CVEs.
+      - name: Build backend image
+        run: docker build -t edgar-backend:scan .
+
+      - name: Trivy image (vulnerabilities)
+        continue-on-error: true
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: image
+          image-ref: edgar-backend:scan
+          severity: HIGH,CRITICAL
+          ignore-unfixed: true
