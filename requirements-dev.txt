@@ -10,5 +10,7 @@ pyarrow>=15.0.0  # Parquet fixtures for the input-adapter tests (agentic/adapter
 # Ruff is upper-bounded so new rule releases can't turn CI red without a deliberate bump.
 ruff>=0.13.3,<0.14
 mypy>=1.11
+# Coverage measurement + CI floor (see .coveragerc, .github/workflows/ci.yml).
+pytest-cov>=5.0.0
 # Supply-chain audit (see .github/workflows/security.yml).
 pip-audit>=2.7.3
