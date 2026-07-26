@@ -106,6 +106,16 @@ class EvidenceItem(BaseModel):
     statistics: dict | None = None
 
 
+class ArtifactRef(BaseModel):
+    """A downloadable artifact emitted by an experiment (bytes served via the artifacts API)."""
+
+    id: UUID
+    name: str
+    kind: str
+    mime_type: str | None = None
+    byte_size: int | None = None
+
+
 class ExperimentItem(BaseModel):
     id: str
     tool_name: str
@@ -115,6 +125,7 @@ class ExperimentItem(BaseModel):
     error: dict | None = None
     request_domain_id: str | None = None
     created_at: datetime
+    artifacts: list[ArtifactRef] = []
 
 
 class ObservationItem(BaseModel):
@@ -262,12 +273,23 @@ def _evidence(e) -> EvidenceItem:
     )
 
 
+def _artifact_ref(link) -> ArtifactRef:
+    a = link.artifact
+    meta = a.meta_json if isinstance(a.meta_json, dict) else {}
+    name = str(meta.get("artifact_name") or a.role_key.rsplit("/", 1)[-1] or "artifact")
+    return ArtifactRef(
+        id=a.id, name=name, kind=a.kind.value if hasattr(a.kind, "value") else str(a.kind),
+        mime_type=a.mime_type, byte_size=a.byte_size,
+    )
+
+
 def _experiment(x) -> ExperimentItem:
     return ExperimentItem(
         id=x.domain_id, tool_name=x.tool_name, status=x.status, summary=x.summary,
         metrics=x.metrics_json if isinstance(x.metrics_json, dict) else None,
         error=x.error_json if isinstance(x.error_json, dict) else None,
         request_domain_id=x.request_domain_id, created_at=x.created_at,
+        artifacts=[_artifact_ref(link) for link in x.artifact_links],
     )
 
 

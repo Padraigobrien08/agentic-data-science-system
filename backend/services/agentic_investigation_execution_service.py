@@ -28,6 +28,7 @@ from uuid import UUID
 
 import pandas as pd
 import structlog
+from sqlalchemy import select
 
 from agentic.adapters.base import AdapterRequest
 from agentic.adapters.edgar import EDGARAdapter
@@ -37,14 +38,20 @@ from agentic.adapters.tabular import LocalTabularAdapter
 from agentic.agent.loop import InvestigationLoop
 from agentic.domain import Investigation, InvestigationStatus
 from agentic.domain.manifest import DatasetManifest
+from agentic.experiments import InMemoryArtifactSink
+from agentic.experiments.artifacts import ArtifactRecord
+from agentic.experiments.descriptor import ArtifactType
 from backend.agents.agentic_model_policy import build_agent_policy
 from backend.config.settings import Settings, get_settings
 from backend.models.analysis_run import AnalysisRun
-from backend.models.enums import AnalysisRunStatus
+from backend.models.enums import AnalysisRunStatus, ArtifactKind
+from backend.models.investigation_entities import ExperimentResultRow
 from backend.observability.context import bind_run_context
 from backend.observability.metrics import monotonic_s
 from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
+from backend.repositories.investigation_repository import SqlAlchemyInvestigationRepository
 from backend.services.analysis_run_service import AnalysisRunService
+from backend.services.artifact_service import ArtifactService
 from backend.services.exceptions import RunCancelledDuringExecution
 from backend.services.investigation_store import SqlAlchemyInvestigationStore
 
@@ -69,6 +76,14 @@ _STATUS_MAP: dict[InvestigationStatus, AnalysisRunStatus] = {
     InvestigationStatus.converged: AnalysisRunStatus.success,
     InvestigationStatus.exhausted: AnalysisRunStatus.partial_success,
     InvestigationStatus.failed: AnalysisRunStatus.error,
+}
+
+# Emitted-artifact type -> (storage kind, filename suffix) for ingestion into the artifacts table.
+_ARTIFACT_KIND: dict[ArtifactType, tuple[ArtifactKind, str]] = {
+    ArtifactType.table: (ArtifactKind.tabular, ".csv"),
+    ArtifactType.json: (ArtifactKind.json, ".json"),
+    ArtifactType.chart_spec: (ArtifactKind.json, ".chart.json"),
+    ArtifactType.summary: (ArtifactKind.json, ".json"),
 }
 
 
@@ -122,10 +137,12 @@ class AgenticInvestigationExecutionService:
         *,
         run_service: AnalysisRunService | None = None,
         policy_factory: Callable[[Settings], Any] | None = None,
+        artifact_service: ArtifactService | None = None,
     ) -> None:
         self._session = session
         self._runs = run_service or AnalysisRunService(self._session)
         self._policy_factory = policy_factory or (lambda s: build_agent_policy(s))
+        self._artifact_service = artifact_service
 
     def execute_analysis_run(
         self,
@@ -178,7 +195,10 @@ class AgenticInvestigationExecutionService:
                 user_id=row.initiated_by_user_id,
                 analysis_run_id=analysis_run_id,
             )
-            loop = InvestigationLoop(policy=self._policy_factory(settings))
+            # Shared sink: every experiment emits into it, so the emitted bytes survive the
+            # loop and can be ingested into the artifacts table + linked to their results.
+            sink = InMemoryArtifactSink()
+            loop = InvestigationLoop(policy=self._policy_factory(settings), artifact_sink=sink)
 
             try:
                 investigation = loop.start(
@@ -205,6 +225,7 @@ class AgenticInvestigationExecutionService:
                 execution_checkpoint()
             self._raise_if_cancelled(analysis_run_id, "before the investigation results were persisted")
 
+            self._ingest_artifacts(analysis_run_id, investigation, sink)
             return self._finalize(analysis_run_id, investigation, resolved, t0)
 
     # -- status guards -------------------------------------------------------
@@ -297,6 +318,70 @@ class AgenticInvestigationExecutionService:
         if isinstance(value, (list, tuple)):
             return [str(v).strip() for v in value if str(v).strip()]
         return []
+
+    # -- artifact ingestion --------------------------------------------------
+
+    def _ingest_artifacts(
+        self, analysis_run_id: UUID, investigation: Investigation, sink: InMemoryArtifactSink
+    ) -> None:
+        """Ingest each experiment-emitted artifact into the artifacts table and link it to its result.
+
+        Bytes emitted during this run live in ``sink``; the domain results carry the artifact ids
+        that reference them. Idempotent: a persisted result row that already has artifact links is
+        skipped, so retries and resumed runs never duplicate linkage.
+        """
+        records: dict[str, ArtifactRecord] = {r.id: r for r in sink.records}
+        if not records:
+            return
+        repo = SqlAlchemyInvestigationRepository(self._session)
+        inv_row = repo.get_by_domain_id(investigation.id)
+        if inv_row is None:
+            return
+        result_rows = {
+            r.domain_id: r
+            for r in self._session.scalars(
+                select(ExperimentResultRow).where(ExperimentResultRow.investigation_id == inv_row.id)
+            ).all()
+        }
+        artifacts = self._artifact_service or ArtifactService(self._session)
+        state = investigation.state
+        ingested = 0
+        for result in [*state.completed_experiments, *state.failed_experiments]:
+            res_row = result_rows.get(result.id)
+            if res_row is None or res_row.artifact_links:
+                continue  # result not persisted yet, or already ingested (idempotent)
+            for art_id in result.artifact_ids:
+                rec = records.get(art_id)
+                data = sink.contents.get(art_id) if rec is not None else None
+                if rec is None or data is None:
+                    continue  # emitted in a prior call (resume) — bytes not in this sink
+                kind, suffix = _ARTIFACT_KIND.get(rec.artifact_type, (ArtifactKind.other, ""))
+                artifact_row = artifacts.save_bytes(
+                    data,
+                    role_key=f"agentic/experiment/{result.tool_name}/{rec.name}",
+                    analysis_run_id=analysis_run_id,
+                    kind=kind,
+                    mime_type=rec.media_type,
+                    filename_suffix=suffix,
+                    meta_json={
+                        "source": "agentic_experiment",
+                        "artifact_name": rec.name,
+                        "artifact_type": rec.artifact_type.value,
+                        "fingerprint": rec.fingerprint,
+                        "tool_name": result.tool_name,
+                        "experiment_result_domain_id": result.id,
+                    },
+                )
+                repo.link_experiment_result_artifact(res_row.id, artifact_row.id)
+                ingested += 1
+        if ingested:
+            self._session.flush()
+            log.info(
+                "agentic_artifacts_ingested",
+                analysis_run_id=str(analysis_run_id),
+                investigation_id=investigation.id,
+                artifacts=ingested,
+            )
 
     # -- finalize ------------------------------------------------------------
 

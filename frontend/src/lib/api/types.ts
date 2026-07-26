@@ -507,6 +507,14 @@ export interface EvidenceItem {
   statistics: Record<string, unknown> | null;
 }
 
+export interface InvestigationArtifactRef {
+  id: string;
+  name: string;
+  kind: ArtifactKind;
+  mime_type: string | null;
+  byte_size: number | null;
+}
+
 export interface ExperimentItem {
   id: string;
   tool_name: string;
@@ -516,6 +524,7 @@ export interface ExperimentItem {
   error: Record<string, unknown> | null;
   request_domain_id: string | null;
   created_at: string;
+  artifacts: InvestigationArtifactRef[];
 }
 
 export interface ObservationItem {

@@ -24,7 +24,7 @@ from agentic.domain import (
     TerminationReason,
 )
 from agentic.domain.manifest import DatasetManifest
-from agentic.experiments import ExperimentRegistry, build_default_registry
+from agentic.experiments import ArtifactSink, ExperimentRegistry, build_default_registry
 
 from .budget import BudgetTracker, LoopBudget, SafetyLimits
 from .components import (
@@ -61,13 +61,16 @@ class InvestigationLoop:
 
     registry: ExperimentRegistry = field(default_factory=build_default_registry)
     policy: AgentPolicy = field(default_factory=FixtureAgentPolicy)
+    # Optional shared sink: when set, every experiment emits into it so the emitted
+    # artifact bytes survive the run and can be ingested + linked to their results.
+    artifact_sink: ArtifactSink | None = None
 
     def __post_init__(self) -> None:
         self._interpreter = GoalInterpreter(self.policy)
         self._generator = HypothesisGenerator(self.policy)
         self._planner = InvestigationPlanner(self.registry)
         self._selector = ExperimentSelector(self.policy)
-        self._executor = ExperimentExecutor(self.registry)
+        self._executor = ExperimentExecutor(self.registry, artifact_sink=self.artifact_sink)
         self._evidence = EvidenceUpdater()
         self._hypotheses = HypothesisUpdater()
         self._critic = Critic(self.policy)
