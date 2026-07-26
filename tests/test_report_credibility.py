@@ -6,10 +6,9 @@ from pathlib import Path
 
 import pandas as pd
 
+import config
 from edgar_project.run_workspace import build_run_workspace, phase1_paths
 from src.report import _artifact_paths_footer, generate_report
-
-import config
 
 
 def _minimal_features() -> pd.DataFrame:

@@ -7,13 +7,13 @@ from uuid import uuid4
 
 import pytest
 
-from backend.models.enums import AnalysisRunStatus, RunStepStatus
 from backend.domain.run_progress import (
     classify_step_to_phase_index,
     count_step_progress,
     derive_current_phase_str,
     derive_run_progress_public,
 )
+from backend.models.enums import AnalysisRunStatus, RunStepStatus
 
 
 def _step(

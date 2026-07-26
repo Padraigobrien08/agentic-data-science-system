@@ -8,7 +8,7 @@ from collections.abc import Iterator
 
 import pytest
 from sqlalchemy import create_engine, select, text
-from sqlalchemy.engine import URL, make_url
+from sqlalchemy.engine import make_url
 from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.pool import NullPool
 

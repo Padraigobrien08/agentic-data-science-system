@@ -17,6 +17,7 @@ import pandas as pd
 
 import config
 from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths
+
 from .anomaly import MIN_PEER_GROUP
 from .metric_extraction import sort_period_key
 

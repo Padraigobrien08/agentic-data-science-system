@@ -12,7 +12,7 @@ across this boundary (the executor still builds run state in-process).
 
 from __future__ import annotations
 
-from typing import TypeAlias
+from typing import TYPE_CHECKING, TypeAlias
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -26,6 +26,11 @@ from edgar_project.orchestration.schemas import (
     PlanningOutcome,
     RunWorkspacePayload,
 )
+
+if TYPE_CHECKING:
+    # Imported lazily at runtime inside ``to_run_state`` to avoid a circular import;
+    # declared here so type-checkers and linters can resolve the return annotation.
+    from edgar_project.orchestration.state import OrchestrationRunState
 
 ExecutionResult: TypeAlias = OrchestrationOutput
 """Worker return type; identical schema to :class:`OrchestrationOutput`."""

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from backend.agents.plan_alignment_review import compute_plan_alignment_findings
+from edgar_project.mcp.schemas import ARTIFACT_KEY_DETERIORATION_FOCUS
 from edgar_project.orchestration.plan_templates import get_plan_template_snapshot
 from edgar_project.orchestration.schemas import (
     GoalPreferences,
@@ -12,9 +14,6 @@ from edgar_project.orchestration.schemas import (
     PreferredSignalStyle,
     PrimaryAnalysisMode,
 )
-from edgar_project.mcp.schemas import ARTIFACT_KEY_DETERIORATION_FOCUS
-
-from backend.agents.plan_alignment_review import compute_plan_alignment_findings
 
 
 def _ig(

@@ -11,56 +11,55 @@ from sqlalchemy.exc import IntegrityError
 from backend.api.access_checks import require_analysis_run_owned, require_project_owned
 from backend.api.auth_deps import CurrentUserDep, require_admin_debug_access
 from backend.api.deps import AnalysisRunServiceDep, ArtifactServiceDep, DbSession, EdgarPipelineExecutionDep
-from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus, RunStepStatus
-from backend.models.artifact import Artifact
-from backend.models.model_call import ModelCall
-from backend.schemas.analysis_run import AnalysisRunCreate
-from backend.schemas.run_lifecycle import (
-    AnalysisRunStatusResponse,
-    RunRetryRequest,
-    analysis_run_status_to_response,
-)
+from backend.config.settings import get_settings
 from backend.domain.run_progress import derive_run_progress_public
+from backend.models.artifact import Artifact
+from backend.models.enums import AnalysisRunStatus, ArtifactKind, ModelCallStatus, RunStepStatus
+from backend.models.model_call import ModelCall
+from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.repositories.artifact_repository import ArtifactRepository
 from backend.repositories.model_call_repository import ModelCallRepository
 from backend.repositories.run_step_repository import RunStepRepository
+from backend.schemas.analysis_run import AnalysisRunCreate
 from backend.schemas.api_phase_a import (
     AnalysisRunDetailResponse,
     AnalysisRunSummary,
     ArtifactMetadata,
     ModelCallApiItem,
+    RunStepDetailItem,
     RunTraceArtifactPreview,
     RunTraceModelCallPreview,
     RunTraceShellResponse,
     RunTraceStepPreview,
-    RunStepDetailItem,
     analysis_run_to_detail,
     analysis_run_to_summary,
     artifact_to_metadata,
     model_call_to_api_item,
     run_step_to_detail,
 )
-from backend.config.settings import get_settings
+from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
 from backend.schemas.llm_usage import (
     LlmRunUsageSummary,
     aggregate_llm_usage_for_calls,
     to_transparency_wire,
 )
-from backend.schemas.run_transparency import build_run_transparency_summary
-from backend.schemas.run_transparency import RunTransparencySummary
-from backend.schemas.execute_run import ExecuteRunOverrides, ExecuteRunResponse
 from backend.schemas.prompt_routing import PromptRoutingPreviewRequest, PromptRoutingPreviewResponse
+from backend.schemas.run_lifecycle import (
+    AnalysisRunStatusResponse,
+    RunRetryRequest,
+    analysis_run_status_to_response,
+)
+from backend.schemas.run_transparency import RunTransparencySummary, build_run_transparency_summary
 from backend.services.agentic_investigation_execution_service import (
-    AgenticInvestigationExecutionService,
     ENGINE_AGENTIC,
+    AgenticInvestigationExecutionService,
     select_run_engine,
 )
 from backend.services.exceptions import InvalidStatusTransition, RunCancelledDuringExecution, RunLifecycleError
-from backend.observability.tracing import attach_trace_carrier, bind_current_trace_for_logs, get_tracer
 from backend.services.run_lifecycle_service import RunLifecycleService
 from backend.services.run_queue_service import RunQueueService
 from edgar_project.orchestration.planner import Planner
-from edgar_project.orchestration.schemas import PlanningOutcome, OrchestrationInput
+from edgar_project.orchestration.schemas import OrchestrationInput, PlanningOutcome
 
 router = APIRouter(prefix="/runs", tags=["runs"])
 

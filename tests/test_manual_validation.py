@@ -4,7 +4,6 @@ from pathlib import Path
 
 import pandas as pd
 
-import config
 from src.manual_validation import (
     VALIDATION_COLUMNS,
     candidate_records_from_panel,

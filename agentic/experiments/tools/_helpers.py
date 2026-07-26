@@ -5,11 +5,10 @@ from __future__ import annotations
 import numpy as np
 import pandas as pd
 
-from agentic.domain.enums import ColumnRole, EvidenceDirection, EvidenceType, ReferenceKind
+from agentic.domain.enums import EvidenceDirection, EvidenceType, ObservationType, ReferenceKind
 from agentic.domain.evidence import Evidence, SourceReference
 from agentic.domain.manifest import DatasetManifest
 from agentic.domain.observation import Observation
-from agentic.domain.enums import ObservationType
 from agentic.domain.provenance import Provenance
 from agentic.domain.statistics import StatisticalSummary, Uncertainty
 

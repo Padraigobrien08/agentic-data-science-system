@@ -14,7 +14,8 @@ from pathlib import Path
 import pandas as pd
 
 import config
-from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths as workspace_phase1_paths
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace
+from edgar_project.run_workspace import phase1_paths as workspace_phase1_paths
 from src.exclusions import build_exclusions_dataframe
 
 _log = logging.getLogger(__name__)
@@ -121,9 +122,6 @@ def run_pipeline_computation(
     from src.anomaly import detect_anomalies
     from src.data_quality import compute_data_quality_summary
     from src.features import compute_features
-    from src.normalization import build_panel
-    from src.peer_signals import compute_peer_signals
-    from src.trend_breaks import compute_trend_break_signals
     from src.findings import (
         build_findings_summary_by_company,
         build_findings_summary_by_metric,
@@ -132,7 +130,10 @@ def run_pipeline_computation(
     )
     from src.metric_caveats import compute_panel_metric_caveats, filter_extraction_caveats_to_panel
     from src.metric_coverage import compute_metric_coverage_summary
+    from src.normalization import build_panel
+    from src.peer_signals import compute_peer_signals
     from src.report import generate_report
+    from src.trend_breaks import compute_trend_break_signals
 
     long_frames, extraction_caveats_long, extraction_counts = extract_long_frames(tickers, refresh=refresh)
     normalization_counts: dict[str, int] = {}
@@ -504,7 +505,6 @@ def write_all_phase1_artifacts(
             workspace=workspace,
             use_legacy_shared_paths=use_legacy_shared_paths,
         )
-    from src.trend_breaks import compute_trend_break_signals
     from src.findings import (
         build_deterioration_focus,
         build_findings_summary_by_company,
@@ -512,6 +512,7 @@ def write_all_phase1_artifacts(
         build_findings_summary_by_period,
         build_unified_findings,
     )
+    from src.trend_breaks import compute_trend_break_signals
 
     trend_breaks_df = compute_trend_break_signals(features)
     out["trend_breaks"] = write_trend_breaks_csv(

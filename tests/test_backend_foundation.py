@@ -22,10 +22,10 @@ from sqlalchemy.pool import StaticPool
 pytest.importorskip("fastapi")
 
 import backend.models  # noqa: F401 — register ORM metadata
+from backend.api import deps as api_deps
 from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.db.session import get_db
-from backend.api import deps as api_deps
 from backend.main import create_app
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
@@ -33,7 +33,6 @@ from backend.models.enums import AnalysisRunStatus, ArtifactKind, RunStepStatus
 from backend.models.project import Project
 from backend.models.run_step import RunStep
 from backend.models.user import User
-from tests.api_auth import register_project_and_headers
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
 from backend.services.edgar_pipeline_execution_service import EdgarPipelineExecutionService
@@ -45,6 +44,7 @@ from edgar_project.orchestration.schemas import (
     OrchestrationOutput,
     OrchestrationRunStatus,
 )
+from tests.api_auth import register_project_and_headers
 
 
 @pytest.fixture

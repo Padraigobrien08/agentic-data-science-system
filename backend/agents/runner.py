@@ -12,17 +12,17 @@ from __future__ import annotations
 from dataclasses import dataclass
 from uuid import UUID
 
-from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 from sqlalchemy.orm import Session
 
 from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
-from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.agents.intent_agent import IntentAgent
+from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.agents.phase_outputs import build_intent_phase_output, build_planning_phase_output
 from backend.agents.planning_agent import PlanningAgent
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
 from backend.services.recorded_chat_completion_service import RecordedChatCompletionService
+from edgar_project.orchestration.schemas import InterpretedGoal, PlannedStep
 
 
 @dataclass(frozen=True)

@@ -6,13 +6,13 @@ import pandas as pd
 
 import config
 from edgar_project.run_workspace import build_run_workspace
+from src.anomaly import MIN_PEER_GROUP
 from src.metric_caveats import (
     compute_panel_metric_caveats,
     filter_extraction_caveats_to_panel,
     prior_fiscal_period,
     write_metric_caveats_artifacts,
 )
-from src.anomaly import MIN_PEER_GROUP
 
 
 def _wide_row(cik: int, period: str) -> dict:

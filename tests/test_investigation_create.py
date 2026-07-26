@@ -25,8 +25,8 @@ from backend.models.enums import AnalysisRunStatus
 from backend.models.project import Project
 from backend.models.user import User
 from backend.services import agentic_investigation_execution_service as exec_mod
-from backend.services.agentic_investigation_execution_service import AgenticInvestigationExecutionService
 from backend.services import investigation_create_service as create_mod
+from backend.services.agentic_investigation_execution_service import AgenticInvestigationExecutionService
 from backend.services.investigation_create_service import (
     AgenticEngineDisabledError,
     InvalidDatasetError,

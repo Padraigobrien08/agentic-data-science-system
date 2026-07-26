@@ -23,6 +23,7 @@ from src.manual_validation import VALIDATION_COLUMNS
 from src.metric_coverage import SUMMARY_COLUMNS as METRIC_COVERAGE_SUMMARY_COLUMNS
 from src.normalization import METRIC_COLUMNS
 from src.peer_signals import PEER_SIGNAL_COLUMNS
+
 # Trend-break CSV may be full pipeline output (see ``TREND_BREAK_COLUMNS`` in :mod:`src.trend_breaks`) or a thin fixture.
 # Require only columns that must exist for consumers and unified findings.
 TREND_BREAK_REQUIRED_COLUMNS_MINIMAL: tuple[str, ...] = (

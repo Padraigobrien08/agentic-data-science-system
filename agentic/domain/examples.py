@@ -15,8 +15,8 @@ from .enums import (
     ConclusionDisposition,
     CritiqueSeverity,
     CritiqueType,
-    DataSourceKind,
     DatasetKind,
+    DataSourceKind,
     DecisionType,
     EntityKind,
     EvidenceDirection,
@@ -37,7 +37,6 @@ from .investigation import (
     BudgetState,
     Investigation,
     InvestigationGoal,
-    InvestigationState,
     TerminationDecision,
 )
 from .manifest import (

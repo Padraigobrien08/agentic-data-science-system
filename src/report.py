@@ -13,7 +13,8 @@ import numpy as np
 import pandas as pd
 
 import config
-from edgar_project.run_workspace import RunWorkspace, build_run_workspace, phase1_paths as workspace_phase1_paths
+from edgar_project.run_workspace import RunWorkspace, build_run_workspace
+from edgar_project.run_workspace import phase1_paths as workspace_phase1_paths
 from src.peer_signals import PEER_SIGNAL_METRICS, summarize_peer_coverage
 
 # Sample columns for the "normalized panel" section (intersection with actual columns is used).

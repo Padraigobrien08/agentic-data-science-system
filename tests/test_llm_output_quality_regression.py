@@ -31,7 +31,12 @@ from backend.agents.output_schemas import (
 )
 from backend.config.settings import Settings
 from edgar_project.orchestration.plan_templates import PlanTemplateId, build_plan_template_snapshot
-from edgar_project.orchestration.schemas import InterpretedGoal, InterpretedGoalCode, OrchestrationIntent, StepStatusEntry
+from edgar_project.orchestration.schemas import (
+    InterpretedGoal,
+    InterpretedGoalCode,
+    OrchestrationIntent,
+    StepStatusEntry,
+)
 
 _FIXTURES = Path(__file__).resolve().parent / "fixtures" / "llm_regression"
 

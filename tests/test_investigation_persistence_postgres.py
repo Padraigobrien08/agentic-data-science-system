@@ -22,17 +22,17 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.orm.exc import StaleDataError
 from sqlalchemy.pool import NullPool
 
-# Reuse the module-scoped Postgres database fixture (creates + create_all + drops).
-from tests.postgres_queue_test_utils import postgres_session_factory, postgres_test_url  # noqa: F401
-
 import backend.models  # noqa: F401
+from agentic.domain import ExperimentResult, ExperimentStatus, Provenance, ProvenanceSource
+from agentic.domain.examples import example_investigation
 from backend.models.investigation import Investigation
 from backend.repositories.investigation_repository import (
     InvestigationConcurrencyError,
     SqlAlchemyInvestigationRepository,
 )
-from agentic.domain import ExperimentResult, ExperimentStatus, Provenance, ProvenanceSource
-from agentic.domain.examples import example_investigation
+
+# Reuse the module-scoped Postgres database fixture (creates + create_all + drops).
+from tests.postgres_queue_test_utils import postgres_session_factory, postgres_test_url  # noqa: F401
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 _INVESTIGATION_TABLES = {

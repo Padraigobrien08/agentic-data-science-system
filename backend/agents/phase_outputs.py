@@ -10,6 +10,7 @@ from __future__ import annotations
 from pathlib import Path
 from typing import Any
 
+from backend.agents.output_schemas import CriticAgentLLMOutput, ReportAgentLLMOutput
 from edgar_project.orchestration.planning_transparency import build_planning_transparency
 from edgar_project.orchestration.schemas import (
     InterpretedGoal,
@@ -17,8 +18,6 @@ from edgar_project.orchestration.schemas import (
     PlannedStep,
     StepStatusEntry,
 )
-
-from backend.agents.output_schemas import CriticAgentLLMOutput, ReportAgentLLMOutput
 
 PHASE_OUTPUT_CONTRACT_VERSION = "1"
 

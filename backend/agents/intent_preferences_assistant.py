@@ -9,20 +9,19 @@ Optional LLM layer: refine :class:`~edgar_project.orchestration.schemas.GoalPref
 from __future__ import annotations
 
 import json
-from typing import Any
 from uuid import UUID
 
 from pydantic import ValidationError
 from sqlalchemy.orm import Session
 
+from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
+from backend.agents.context_budget import ContextBudget
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
-from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import build_intent_preferences_assistant_context
+from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.agents.output_schemas import LLMGoalPreferencesPatch
 from backend.agents.prompt_registry import load_registered_prompt
-from backend.agents.ai_agents_meta import merge_ai_agents_meta, merge_completion_models_entries
-from backend.agents.model_routing import completion_model_audit_dict, resolve_agent_completion_model
 from backend.config.settings import Settings, get_settings
 from backend.llm.protocol import ChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest

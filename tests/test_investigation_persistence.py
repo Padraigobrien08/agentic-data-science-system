@@ -9,7 +9,6 @@ reproducibility / tool-version / prompt-model persistence, and legacy-run import
 
 from __future__ import annotations
 
-import uuid
 from collections.abc import Iterator
 
 import pytest
@@ -18,6 +17,17 @@ from sqlalchemy.orm import Session, sessionmaker
 from sqlalchemy.orm.exc import StaleDataError
 
 import backend.models  # noqa: F401 — register ORM metadata
+from agentic.domain import (
+    ExperimentResult,
+    ExperimentStatus,
+    HypothesisStatus,
+    InvestigationStatus,
+    ModelConfigSnapshot,
+    Provenance,
+    ProvenanceSource,
+    ReproducibilityManifest,
+)
+from agentic.domain.examples import example_inconclusive_investigation, example_investigation
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
@@ -36,17 +46,6 @@ from backend.repositories.investigation_repository import (
     InvestigationConcurrencyError,
     SqlAlchemyInvestigationRepository,
 )
-from agentic.domain import (
-    ExperimentResult,
-    ExperimentStatus,
-    HypothesisStatus,
-    InvestigationStatus,
-    ModelConfigSnapshot,
-    Provenance,
-    ProvenanceSource,
-    ReproducibilityManifest,
-)
-from agentic.domain.examples import example_inconclusive_investigation, example_investigation
 
 
 @pytest.fixture

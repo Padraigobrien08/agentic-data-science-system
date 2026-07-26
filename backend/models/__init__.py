@@ -3,7 +3,6 @@
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
-from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.enums import (
     AnalysisRunStatus,
     ArtifactKind,
@@ -13,11 +12,12 @@ from backend.models.enums import (
     RunStepStatus,
     ToolCallMcpStatus,
 )
-from backend.models.evaluation_run import EvaluationRun
 from backend.models.enums_investigation import (
     InvestigationOrigin,
     StateEventType,
 )
+from backend.models.evaluation_case_result import EvaluationCaseResult
+from backend.models.evaluation_run import EvaluationRun
 from backend.models.investigation import (
     Investigation,
     InvestigationDataset,

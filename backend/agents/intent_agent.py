@@ -7,16 +7,15 @@ from uuid import UUID
 
 from pydantic import ValidationError
 
+from backend.agents.context_budget import ContextBudget
 from backend.agents.errors import AgentFailureCode, AgentOutputError
 from backend.agents.json_extract import parse_json_object
-from backend.agents.context_budget import ContextBudget
 from backend.agents.llm_context import build_intent_llm_context
 from backend.agents.model_routing import resolve_agent_completion_model
 from backend.agents.output_schemas import IntentAgentLLMOutput
 from backend.agents.prompt_registry import load_registered_prompt
 from backend.agents.template_render import render_intent_prompt
 from backend.config.settings import Settings, get_settings
-from backend.llm.protocol import ChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest
 from backend.models.model_call import ModelCall
 from backend.services.recorded_chat_completion_service import RecordedChatCompletionService
