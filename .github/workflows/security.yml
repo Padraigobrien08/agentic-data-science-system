@@ -84,19 +84,22 @@ jobs:
       # Dockerfile / compose / IaC misconfiguration scan (fast, no image build).
       - name: Trivy config (misconfig)
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: config
           scan-ref: .
           severity: HIGH,CRITICAL
 
       # Build the backend image and scan its OS + Python packages for known CVEs.
+      # Non-fatal here: the real image build is gated by the compose-smoke workflow;
+      # this job is report-only, so a build hiccup must not turn the check red.
       - name: Build backend image
+        continue-on-error: true
         run: docker build -t edgar-backend:scan .
 
       - name: Trivy image (vulnerabilities)
         continue-on-error: true
-        uses: aquasecurity/trivy-action@0.28.0
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
           image-ref: edgar-backend:scan
