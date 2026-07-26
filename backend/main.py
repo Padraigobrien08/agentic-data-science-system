@@ -12,6 +12,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.engine.url import make_url
 
 from backend import __version__
+from backend.api.rate_limit import SlidingWindowRateLimiter
 from backend.api.router import api_router
 from backend.api.routes import health
 from backend.api.routes import metrics as metrics_route
@@ -54,6 +55,14 @@ def create_app() -> FastAPI:
         version=__version__,
         debug=settings.debug,
         lifespan=lifespan,
+    )
+    app.state.auth_rate_limiter = (
+        SlidingWindowRateLimiter(
+            max_attempts=settings.auth_rate_limit_max_attempts,
+            window_seconds=settings.auth_rate_limit_window_seconds,
+        )
+        if settings.auth_rate_limit_enabled
+        else None
     )
     app.add_middleware(ObservabilityMiddleware)
     app.add_middleware(
