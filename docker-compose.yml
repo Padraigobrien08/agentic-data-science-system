@@ -47,6 +47,12 @@ x-backend-env: &backend_env
   OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   EDGAR_BACKEND_OPENAI_BASE_URL: ${EDGAR_BACKEND_OPENAI_BASE_URL:-}
   EDGAR_BACKEND_AGENT_COMPLETION_MODEL: ${EDGAR_BACKEND_AGENT_COMPLETION_MODEL:-gpt-5.4-mini}
+  # Retention (payload compaction + artifact-blob pruning). The `retention` service applies these on a
+  # schedule. The code default is 0/off (safe for dev, tests, and the CLI); the deployed stack enables
+  # sensible windows here. Set any tier to 0 to disable it. See backend/maintenance/retention.py.
+  EDGAR_BACKEND_RETENTION_RUN_PAYLOAD_DAYS: ${EDGAR_BACKEND_RETENTION_RUN_PAYLOAD_DAYS:-90}
+  EDGAR_BACKEND_RETENTION_MODEL_PAYLOAD_DAYS: ${EDGAR_BACKEND_RETENTION_MODEL_PAYLOAD_DAYS:-30}
+  EDGAR_BACKEND_RETENTION_ARTIFACT_BLOB_DAYS: ${EDGAR_BACKEND_RETENTION_ARTIFACT_BLOB_DAYS:-180}
 
 services:
   db:
@@ -114,6 +120,26 @@ services:
       - artifacts:/var/lib/edgar/artifacts
       - run_workspaces:/var/lib/edgar/run_workspaces
     command: ["python", "-m", "backend.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  retention:
+    build: .
+    image: edgar-backend:latest
+    restart: unless-stopped
+    environment:
+      <<: *backend_env
+    volumes:
+      - artifacts:/var/lib/edgar/artifacts
+      - run_workspaces:/var/lib/edgar/run_workspaces
+    # Compose has no native cron: apply retention, then sleep. Interval is substituted at
+    # `compose up` time (override EDGAR_BACKEND_RETENTION_INTERVAL_SECONDS in .env; default 24h).
+    # `--apply` is a safe no-op when every EDGAR_BACKEND_RETENTION_*_DAYS tier is 0.
+    command:
+      - sh
+      - -c
+      - "while true; do python -m backend.maintenance.retention --apply --json || true; sleep ${EDGAR_BACKEND_RETENTION_INTERVAL_SECONDS:-86400}; done"
     depends_on:
       migrate:
         condition: service_completed_successfully
