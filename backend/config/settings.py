@@ -84,6 +84,24 @@ class Settings(BaseSettings):
         ),
     )
 
+    # Rate limiting for unauthenticated auth endpoints (login / register / bootstrap).
+    # In-process sliding window (per API process); multi-replica deployments need a shared
+    # store — see ``backend.api.rate_limit``.
+    auth_rate_limit_enabled: bool = Field(
+        default=True,
+        description="Enable per-IP rate limiting on login/register/bootstrap.",
+    )
+    auth_rate_limit_max_attempts: int = Field(
+        default=10,
+        ge=1,
+        description="Max auth attempts per client IP per endpoint within the window before 429.",
+    )
+    auth_rate_limit_window_seconds: int = Field(
+        default=60,
+        ge=1,
+        description="Sliding-window length (seconds) for auth rate limiting.",
+    )
+
     # Default file SQLite is for quick local API/tests without Docker. The documented stack uses Postgres
     # (see docker-compose.yml and docs/local-stack.md). Set EDGAR_BACKEND_ALLOW_SQLITE=false in production.
     database_url: str = Field(

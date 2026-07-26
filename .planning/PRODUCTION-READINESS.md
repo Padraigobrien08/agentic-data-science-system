@@ -8,7 +8,7 @@ The gaps below are the *production envelope* around it.
 Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 Effort: S (<1h) · M (half day) · L (multi-day)
 
-_Last updated: 2026-07-26 — C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
+_Last updated: 2026-07-26 — C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
 
 ---
 
@@ -18,8 +18,10 @@ _Last updated: 2026-07-26 — C3 landed (security headers + opt-in CORS); E2 com
   - A live `sk-proj-…` key is in local `.env` (gitignored, not in git history, but exposed to tooling). Treat as compromised, rotate, and restrict scope.
   - Follow-up: no secrets-manager seam exists (Vault / AWS Secrets Manager / SSM). Secrets are env-only. — M
 
-- [ ] **C2. Rate limiting / brute-force protection on auth** — M
-  - Nothing throttles `POST /v1/auth/login` and `/register`. Add per-IP/per-account limiting (slowapi or ingress-level).
+- [x] **C2. Rate limiting / brute-force protection on auth** — M
+  - [x] `backend/api/rate_limit.py`: in-process sliding-window limiter (no new dependency), applied to `/auth/login`, `/auth/register`, `/auth/bootstrap` via a FastAPI dependency; keyed by client IP + path. Returns 429 + `Retry-After`.
+  - [x] Configurable (`EDGAR_BACKEND_AUTH_RATE_LIMIT_*`, default 10/60s), disable-able; documented in `.env.example`; covered by `tests/test_auth_rate_limit.py`.
+  - _Caveat: per-process state — multi-replica deployments need a shared store (Redis) or an ingress limiter. Ties into O3 (deploy target)._
 
 - [x] **C3. CORS posture + security response headers on the API** — M
   - [x] `SecurityHeadersMiddleware` (`backend/api/security_headers.py`) on all responses: `X-Content-Type-Options`, `X-Frame-Options`, `Referrer-Policy`, `Cross-Origin-Opener-Policy`, CSP (`default-src 'none'`; docs paths exempt), and HSTS (HTTPS-only, 2y default, 0 disables).
