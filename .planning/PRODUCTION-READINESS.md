@@ -8,15 +8,15 @@ The gaps below are the *production envelope* around it.
 Status legend: `[ ]` todo · `[~]` in progress · `[x]` done
 Effort: S (<1h) · M (half day) · L (multi-day)
 
-_Last updated: 2026-07-26 — E1 landed (pinned lockfiles; pip-audit now blocking); E4 landed (coverage floor 80%, baseline ~84%); C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
+_Last updated: 2026-07-27 — C1 done (OpenAI key rotated; secrets-manager migration remains open). E1 landed (pinned lockfiles; pip-audit now blocking); E4 landed (coverage floor 80%, baseline ~84%); C2 landed (auth rate limiting); C3 landed (security headers + opt-in CORS); E2 complete (dependabot + pip-audit + npm audit + CodeQL + gitleaks + Trivy); E3 landed (ruff blocking, mypy report-only); O1 landed (retention windows + sidecar scheduler)._
 
 ---
 
 ## 🔴 Critical — before any real deployment
 
-- [ ] **C1. Rotate the exposed OpenAI API key** — S
-  - A live `sk-proj-…` key is in local `.env` (gitignored, not in git history, but exposed to tooling). Treat as compromised, rotate, and restrict scope.
-  - Follow-up: no secrets-manager seam exists (Vault / AWS Secrets Manager / SSM). Secrets are env-only. — M
+- [x] **C1. Rotate the exposed OpenAI API key** — S
+  - [x] Rotated 2026-07-27: new key generated, swapped into `.env`, verified reachable (HTTP 200), old `sk-proj-…` key revoked. (The key was never committed/pushed — gitignored and absent from git history — but had been surfaced to the terminal/logs.)
+  - [ ] **Follow-up (open): move secrets out of plaintext `.env` into a secrets manager** (Vault / AWS Secrets Manager / SSM); secrets are still env-only. — M
 
 - [x] **C2. Rate limiting / brute-force protection on auth** — M
   - [x] `backend/api/rate_limit.py`: in-process sliding-window limiter (no new dependency), applied to `/auth/login`, `/auth/register`, `/auth/bootstrap` via a FastAPI dependency; keyed by client IP + path. Returns 429 + `Retry-After`.
