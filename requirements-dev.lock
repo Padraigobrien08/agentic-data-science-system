@@ -160,6 +160,7 @@ packaging==26.2
     #   pip-audit
     #   pip-requirements-parser
     #   pytest
+    #   pytest-rerunfailures
 pandas==3.0.5
     # via -r requirements.txt
 pathspec==1.1.1
@@ -221,7 +222,10 @@ pytest==9.1.1
     # via
     #   -r requirements-dev.txt
     #   pytest-cov
+    #   pytest-rerunfailures
 pytest-cov==7.1.0
+    # via -r requirements-dev.txt
+pytest-rerunfailures==16.4
     # via -r requirements-dev.txt
 python-dateutil==2.9.0.post0
     # via
