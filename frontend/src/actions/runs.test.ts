@@ -8,6 +8,7 @@ const {
   getPromptRoutingPreviewMock,
   getRunMock,
   listRunArtifactsMock,
+  appendChatMessageMock,
 } = vi.hoisted(() => ({
   revalidatePathMock: vi.fn(),
   redirectMock: vi.fn(),
@@ -16,6 +17,7 @@ const {
   getPromptRoutingPreviewMock: vi.fn(),
   getRunMock: vi.fn(),
   listRunArtifactsMock: vi.fn(),
+  appendChatMessageMock: vi.fn(),
 }));
 
 vi.mock("next/cache", () => ({
@@ -32,6 +34,10 @@ vi.mock("@/lib/api/runs", () => ({
   getPromptRoutingPreview: getPromptRoutingPreviewMock,
   getRun: getRunMock,
   listRunArtifacts: listRunArtifactsMock,
+}));
+
+vi.mock("@/lib/api/conversations", () => ({
+  appendChatMessage: appendChatMessageMock,
 }));
 
 import { createAnalysisRunFromChat } from "@/actions/runs";
@@ -64,7 +70,7 @@ describe("createAnalysisRunFromChat", () => {
       effective_tickers: ["AAPL", "MSFT"],
     });
 
-    const result = await createAnalysisRunFromChat("project-1", {}, buildFormData());
+    const result = await createAnalysisRunFromChat("project-1", "conv-1", {}, buildFormData());
 
     expect(result).toMatchObject({
       reply: {
@@ -83,7 +89,20 @@ describe("createAnalysisRunFromChat", () => {
     expect(result.reply?.runsHref).toBeUndefined();
     expect(createRunMock).not.toHaveBeenCalled();
     expect(executeRunMock).not.toHaveBeenCalled();
-    expect(revalidatePathMock).not.toHaveBeenCalled();
+    // The user turn and the "couldn't route" reply are both persisted durably.
+    expect(appendChatMessageMock).toHaveBeenCalledTimes(2);
+    expect(appendChatMessageMock).toHaveBeenNthCalledWith(
+      1,
+      "conv-1",
+      expect.objectContaining({ role: "user", content: "Analyze margin pressure for AAPL versus MSFT" }),
+    );
+    expect(appendChatMessageMock).toHaveBeenNthCalledWith(
+      2,
+      "conv-1",
+      expect.objectContaining({ role: "assistant" }),
+    );
+    // Chat history is revalidated so a reload shows the persisted exchange.
+    expect(revalidatePathMock).toHaveBeenCalledWith("/projects/project-1/chat");
   });
 
   it("creates and executes a run with preview effective_tickers when routing is supported", async () => {
@@ -177,6 +196,7 @@ describe("createAnalysisRunFromChat", () => {
 
     const result = await createAnalysisRunFromChat(
       "project-1",
+      "conv-1",
       {},
       buildFormData({
         goal: "Assess whether margin pressure is temporary or structural for MSFT",
@@ -234,5 +254,10 @@ describe("createAnalysisRunFromChat", () => {
       },
     });
     expect(result.reply?.content).toBe("MSFT margin pressure looks cyclical rather than structural.");
+    // The assistant turn is persisted and linked to the run that produced it.
+    expect(appendChatMessageMock).toHaveBeenCalledWith(
+      "conv-1",
+      expect.objectContaining({ role: "assistant", analysis_run_id: "run-1", status: "complete" }),
+    );
   });
 });

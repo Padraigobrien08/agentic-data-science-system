@@ -6,15 +6,27 @@ import type {
   ChatUserMessage,
 } from "@/components/chat-shell/types";
 import { parseAiAgents } from "@/lib/ai-agents-meta";
+import { getConversation, listConversations } from "@/lib/api/conversations";
 import { listProjects } from "@/lib/api/projects";
 import { getRun, listRunArtifacts, listRuns } from "@/lib/api/runs";
-import type { AnalysisRunDetail, AnalysisRunSummary, ProjectRead } from "@/lib/api/types";
+import type {
+  AnalysisRunDetail,
+  AnalysisRunSummary,
+  ChatMessageRead,
+  ConversationRead,
+  ProjectRead,
+} from "@/lib/api/types";
 import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
 import { buildChatAnswerCardView, buildPrimaryAnswerView } from "@/lib/run-primary-view";
 
 type ProjectChatHistory = {
   messages: ChatMessage[];
   recentRuns: ChatRecentRun[];
+  chatThreads: ChatThreadSummary[];
+};
+
+type ConversationChatHistory = {
+  messages: ChatMessage[];
   chatThreads: ChatThreadSummary[];
 };
 
@@ -170,4 +182,89 @@ export async function buildProjectChatHistory(projectId: string, limit = 12): Pr
     .slice(0, limit);
 
   return { messages, recentRuns, chatThreads };
+}
+
+function metaStringList(meta: ChatMessageRead["meta_json"], key: string): string[] | undefined {
+  if (!meta || typeof meta !== "object" || Array.isArray(meta)) return undefined;
+  const value = (meta as Record<string, unknown>)[key];
+  if (!Array.isArray(value)) return undefined;
+  const list = value.filter((v): v is string => typeof v === "string");
+  return list.length > 0 ? list : undefined;
+}
+
+function metaString(meta: ChatMessageRead["meta_json"], key: string): string | undefined {
+  if (!meta || typeof meta !== "object" || Array.isArray(meta)) return undefined;
+  const value = (meta as Record<string, unknown>)[key];
+  return typeof value === "string" && value.trim() ? value : undefined;
+}
+
+/** A persisted assistant turn with no linked run (e.g. "couldn't route yet"). */
+function plainAssistantMessage(message: ChatMessageRead): ChatAssistantMessage {
+  return {
+    id: `msg-${message.id}`,
+    role: "assistant",
+    content: message.content ?? message.error_summary ?? "",
+    rewriteSuggestions: metaStringList(message.meta_json, "rewrite_suggestions"),
+    routingReason: metaString(message.meta_json, "routing_reason"),
+    createdAt: message.created_at,
+  };
+}
+
+function buildThreadSummaryFromConversation(
+  projectId: string,
+  conversation: ConversationRead,
+): ChatThreadSummary {
+  return {
+    id: conversation.id,
+    title: compactHistoryTitle(conversation.title?.trim() || "New chat"),
+    href: `/projects/${projectId}/chat/${conversation.id}`,
+    hasMessages: conversation.last_message_at !== null,
+    updatedAt: conversation.last_message_at ?? conversation.updated_at,
+  };
+}
+
+/**
+ * Durable history for one conversation. User/system turns render from stored content;
+ * assistant turns rehydrate their rich answer card from the linked analysis run.
+ */
+export async function buildConversationHistory(
+  projectId: string,
+  conversationId: string,
+): Promise<ConversationChatHistory> {
+  const [detail, conversations] = await Promise.all([
+    getConversation(conversationId),
+    listConversations(projectId),
+  ]);
+
+  const messages: ChatMessage[] = await Promise.all(
+    detail.messages.map(async (message): Promise<ChatMessage> => {
+      if (message.role === "assistant") {
+        if (message.analysis_run_id) {
+          try {
+            const [run, artifacts] = await Promise.all([
+              getRun(message.analysis_run_id, { includeTransparency: true }),
+              listRunArtifacts(message.analysis_run_id),
+            ]);
+            return buildAssistantMessage(projectId, run, artifacts);
+          } catch {
+            // Run was compacted or deleted — fall back to the stored narrative.
+            return plainAssistantMessage(message);
+          }
+        }
+        return plainAssistantMessage(message);
+      }
+      return {
+        id: `msg-${message.id}`,
+        role: message.role,
+        content: message.content ?? "",
+        createdAt: message.created_at,
+      };
+    }),
+  );
+
+  const chatThreads = conversations
+    .map((conversation) => buildThreadSummaryFromConversation(projectId, conversation))
+    .sort((a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime());
+
+  return { messages, chatThreads };
 }

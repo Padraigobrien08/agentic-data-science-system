@@ -20,7 +20,7 @@ import {
 import type { ChatThreadSummary } from "./types";
 
 type Props = {
-  projectId: string;
+  conversationId: string;
   scopeTickers: string[];
   newConversationAction: (payload: FormData) => void;
   deleteConversationAction: (payload: FormData) => void;
@@ -31,7 +31,7 @@ type Props = {
  * Conversation-first shadcn sidebar with a new-chat affordance and durable chat history.
  */
 export function ChatSidebar({
-  projectId,
+  conversationId,
   scopeTickers,
   newConversationAction,
   deleteConversationAction,
@@ -84,7 +84,7 @@ export function ChatSidebar({
                   <div className="flex items-start gap-1.5">
                     <SidebarMenuButton
                       asChild
-                      isActive={thread.id === projectId}
+                      isActive={thread.id === conversationId}
                       className="min-h-0 flex-1 items-center gap-2 rounded-xl px-2.5 py-2 md:group-data-[state=collapsed]:justify-center"
                       title={thread.title}
                     >
@@ -109,7 +109,7 @@ export function ChatSidebar({
                           }
                         }}
                       >
-                        <input type="hidden" name="projectId" value={thread.id} />
+                        <input type="hidden" name="conversationId" value={thread.id} />
                         <button
                           type="submit"
                           className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[hsl(var(--sidebar-foreground)/0.46)] transition hover:border-[hsl(var(--sidebar-border))] hover:bg-white hover:text-red-600"

@@ -27,6 +27,10 @@ export async function apiPatch<T>(
   return request<T>("PATCH", path, body as RequestBody, init);
 }
 
+export async function apiDelete<T>(path: string, init?: RequestInit): Promise<T> {
+  return request<T>("DELETE", path, undefined, init);
+}
+
 async function request<T>(
   method: string,
   path: string,

@@ -86,6 +86,52 @@ export interface ProjectRead {
   updated_at: string;
 }
 
+export type ChatMessageRole = "user" | "assistant" | "system";
+export type ChatMessageStatus = "pending" | "complete" | "error";
+
+export interface ChatMessageRead {
+  id: string;
+  conversation_id: string;
+  role: ChatMessageRole;
+  status: ChatMessageStatus;
+  content: string | null;
+  error_summary: string | null;
+  client_request_id: string | null;
+  analysis_run_id: string | null;
+  meta_json: Record<string, unknown> | unknown[] | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationRead {
+  id: string;
+  project_id: string;
+  owner_user_id: string | null;
+  title: string | null;
+  last_message_at: string | null;
+  archived_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface ConversationDetailRead extends ConversationRead {
+  messages: ChatMessageRead[];
+}
+
+export interface ConversationCreateBody {
+  title?: string | null;
+}
+
+export interface ChatMessageCreateBody {
+  role: ChatMessageRole;
+  content?: string | null;
+  status?: ChatMessageStatus;
+  client_request_id?: string | null;
+  analysis_run_id?: string | null;
+  meta_json?: Record<string, unknown> | unknown[] | null;
+  error_summary?: string | null;
+}
+
 export interface AnalysisRunSummary {
   id: string;
   project_id: string;

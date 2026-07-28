@@ -5,9 +5,12 @@ import { ChatShell } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
 vi.mock("@/actions/projects", () => ({
-  deleteChatAction: async () => undefined,
-  startConversationFromScopeAction: async () => undefined,
   updateWorkspaceScopeAction: async () => ({}),
+}));
+
+vi.mock("@/actions/conversations", () => ({
+  deleteConversationAction: async () => undefined,
+  startNewConversationAction: async () => undefined,
 }));
 
 vi.mock("@/actions/runs", () => ({
@@ -115,6 +118,7 @@ describe("ChatShell", () => {
     render(
       <ChatShell
         projectId="project-1"
+        conversationId="conv-1"
         tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",
@@ -222,6 +226,7 @@ describe("ChatShell", () => {
     render(
       <ChatShell
         projectId="project-1"
+        conversationId="conv-1"
         tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",

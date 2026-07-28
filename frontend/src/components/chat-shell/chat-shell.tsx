@@ -2,11 +2,11 @@
 
 import { useActionState, useEffect, useState } from "react";
 
+import { updateWorkspaceScopeAction } from "@/actions/projects";
 import {
-  deleteChatAction,
-  startConversationFromScopeAction,
-  updateWorkspaceScopeAction,
-} from "@/actions/projects";
+  deleteConversationAction,
+  startNewConversationAction,
+} from "@/actions/conversations";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { createAnalysisRunFromChat } from "@/actions/runs";
 import { cn } from "@/lib/utils";
@@ -21,6 +21,7 @@ function nowIso(): string {
 
 type Props = {
   projectId: string;
+  conversationId: string;
   tickers: string[];
   backgroundDelivery: ChatBackgroundDelivery;
   initialMessages: ChatMessage[];
@@ -29,10 +30,11 @@ type Props = {
 };
 
 /**
- * One visible conversation thread, hydrated from persisted runs and extended in place.
+ * One visible conversation thread, hydrated from persisted messages and extended in place.
  */
 export function ChatShell({
   projectId,
+  conversationId,
   tickers,
   backgroundDelivery,
   initialMessages,
@@ -43,12 +45,12 @@ export function ChatShell({
   const [isEditingScope, setIsEditingScope] = useState(false);
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
 
-  const action = createAnalysisRunFromChat.bind(null, projectId);
+  const action = createAnalysisRunFromChat.bind(null, projectId, conversationId);
   const [state, formAction] = useActionState(action, {});
   const scopeAction = updateWorkspaceScopeAction.bind(null, projectId);
   const [scopeState, scopeFormAction] = useActionState(scopeAction, { tickers });
-  const newConversationAction = startConversationFromScopeAction.bind(null, projectId);
-  const deleteConversationAction = deleteChatAction.bind(null, projectId);
+  const newConversationAction = startNewConversationAction.bind(null, projectId);
+  const boundDeleteConversationAction = deleteConversationAction.bind(null, projectId, conversationId);
 
   useEffect(() => {
     if (scopeState.tickers) {
@@ -116,10 +118,10 @@ export function ChatShell({
       )}
     >
       <ChatSidebar
-        projectId={projectId}
+        conversationId={conversationId}
         scopeTickers={scopeTickers}
         newConversationAction={newConversationAction}
-        deleteConversationAction={deleteConversationAction}
+        deleteConversationAction={boundDeleteConversationAction}
         chatThreads={chatThreads}
       />
       <SidebarInset className="bg-[var(--background)]">

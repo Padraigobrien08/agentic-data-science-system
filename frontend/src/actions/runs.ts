@@ -4,8 +4,9 @@ import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
 import { parseAiAgents } from "@/lib/ai-agents-meta";
+import { appendChatMessage } from "@/lib/api/conversations";
 import { ApiError } from "@/lib/api/errors";
-import type { AnalysisRunStatus } from "@/lib/api/types";
+import type { AnalysisRunStatus, ChatMessageCreateBody } from "@/lib/api/types";
 import { createRun, executeRun, getPromptRoutingPreview, getRun, listRunArtifacts } from "@/lib/api/runs";
 import { parseOrchestrationOutput, parseUserFacingReport } from "@/lib/orchestration-output";
 import { buildChatAnswerCardView, buildPrimaryAnswerView, type ChatAnswerCardView } from "@/lib/run-primary-view";
@@ -40,8 +41,26 @@ function normalizeRoutingReason(reason: string | null | undefined): string | und
   return reason.replace(/workspace scope/g, "chat scope");
 }
 
+/**
+ * Best-effort durable persistence of a chat turn. Failures never break the reply —
+ * the optimistic client state already reflects the exchange, and history is a
+ * projection that can tolerate a dropped write.
+ */
+async function persistMessage(
+  conversationId: string | undefined,
+  body: ChatMessageCreateBody,
+): Promise<void> {
+  if (!conversationId) return;
+  try {
+    await appendChatMessage(conversationId, body);
+  } catch {
+    // Swallow — durability is secondary to returning the answer.
+  }
+}
+
 export async function createAnalysisRunFromChat(
   projectId: string,
+  conversationId: string | undefined,
   _prev: {
     error?: string;
     reply?: ChatReply;
@@ -64,6 +83,14 @@ export async function createAnalysisRunFromChat(
     return { error: "This chat has no tickers configured. Add tickers in the scope editor." };
   }
 
+  // Record the user turn durably before doing any work.
+  await persistMessage(conversationId, {
+    role: "user",
+    content: goal,
+    status: "complete",
+    client_request_id: requestId,
+  });
+
   let run;
   let effectiveTickers = tickers;
   try {
@@ -74,12 +101,25 @@ export async function createAnalysisRunFromChat(
       refresh,
     });
     if (!preview.supported) {
+      const routingReason = normalizeRoutingReason(preview.reason);
+      const content = "I couldn't route that request yet.";
+      await persistMessage(conversationId, {
+        role: "assistant",
+        content,
+        status: "complete",
+        client_request_id: requestId,
+        meta_json: {
+          routing_reason: routingReason ?? null,
+          rewrite_suggestions: preview.rewrite_suggestions ?? [],
+        },
+      });
+      revalidatePath(`/projects/${projectId}/chat`);
       return {
         reply: {
           requestId,
-          content: "I couldn't route that request yet.",
+          content,
           rewriteSuggestions: preview.rewrite_suggestions,
-          routingReason: normalizeRoutingReason(preview.reason),
+          routingReason,
         },
       };
     }
@@ -149,6 +189,22 @@ export async function createAnalysisRunFromChat(
     (execution.db_status === "error"
       ? `Run finished with an error for ${effectiveTickers.join(", ")}.`
       : `Analysis completed for ${effectiveTickers.join(", ")}.`);
+
+  // Record the assistant turn durably, linked to the run that produced it.
+  await persistMessage(conversationId, {
+    role: "assistant",
+    content,
+    status: hydratedRun.status === "error" ? "error" : "complete",
+    client_request_id: requestId,
+    analysis_run_id: run.id,
+    error_summary: hydratedRun.error_summary ?? null,
+    meta_json: { delivery_mode: deliveryMode },
+  });
+  revalidatePath(`/projects/${projectId}/chat`);
+  if (conversationId) {
+    revalidatePath(`/projects/${projectId}/chat/${conversationId}`);
+  }
+
   return {
     reply: {
       requestId,
