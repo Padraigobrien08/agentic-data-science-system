@@ -40,15 +40,15 @@ export function ChatSidebar({
   const { open } = useSidebar();
 
   return (
-    <Sidebar collapsible="icon" className="group relative bg-[hsl(var(--sidebar-background)/0.96)]">
+    <Sidebar collapsible="icon" className="group relative bg-[hsl(var(--sidebar-background))]">
       <SidebarHeader className="space-y-3 p-2.5">
         <div className="flex items-center justify-between gap-2">
-          <SidebarTrigger className="h-8 w-8 rounded-xl border border-[hsl(var(--sidebar-border))] bg-white/75 text-[hsl(var(--sidebar-foreground)/0.75)] hover:bg-white" />
+          <SidebarTrigger className="h-8 w-8 rounded-xl border border-[hsl(var(--sidebar-border))] bg-[var(--chat-raise)] text-[hsl(var(--sidebar-foreground)/0.75)] transition-colors hover:border-[var(--accent)]" />
           <form action={newConversationAction}>
             <input type="hidden" name="tickers" value={scopeTickers.join(",")} />
             <SidebarMenuButton
               type="submit"
-              className="h-8 w-8 items-center justify-center rounded-xl border border-[hsl(var(--sidebar-border))] bg-white/86 p-0 text-[hsl(var(--sidebar-foreground))] shadow-sm hover:bg-white"
+              className="h-8 w-8 items-center justify-center rounded-xl border border-[hsl(var(--sidebar-border))] bg-[var(--chat-raise)] p-0 text-[hsl(var(--sidebar-foreground))] transition-colors hover:border-[var(--accent)]"
               disabled={scopeTickers.length === 0}
               title="New chat"
               aria-label="New chat"
@@ -92,7 +92,7 @@ export function ChatSidebar({
                         <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
                         {open ? (
                           <div className="min-w-0 flex-1">
-                            <span className="line-clamp-2 block text-[12.5px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
+                            <span className="line-clamp-2 block text-[13px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
                               {thread.title}
                             </span>
                           </div>
@@ -112,7 +112,7 @@ export function ChatSidebar({
                         <input type="hidden" name="conversationId" value={thread.id} />
                         <button
                           type="submit"
-                          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[hsl(var(--sidebar-foreground)/0.46)] transition hover:border-[hsl(var(--sidebar-border))] hover:bg-white hover:text-red-600"
+                          className="mt-1 flex h-8 w-8 items-center justify-center rounded-lg border border-transparent text-[hsl(var(--sidebar-foreground)/0.46)] transition hover:border-[hsl(var(--sidebar-border))] hover:bg-[var(--chat-raise)] hover:text-red-600 dark:hover:text-red-400"
                           title={`Delete ${thread.title}`}
                           aria-label={`Delete ${thread.title}`}
                         >

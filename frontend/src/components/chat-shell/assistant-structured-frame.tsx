@@ -23,7 +23,7 @@ export function AssistantStructuredFrame({ messageId, variant = "empty" }: Props
     >
       <CardHeader className="gap-1 pb-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
             Conclusion
           </p>
           {variant === "pending" ? (
@@ -38,7 +38,7 @@ export function AssistantStructuredFrame({ messageId, variant = "empty" }: Props
         <Skeleton className="h-12 w-full" />
         <Separator />
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Goal</p>
+          <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Goal</p>
           <Skeleton className="h-5 w-4/5" />
           <Skeleton className="h-5 w-3/5" />
         </div>

@@ -23,7 +23,7 @@ function deliveryNote(message: Extract<ChatMessage, { role: "assistant" }>): str
 
 function SystemStrip({ content }: { content: string }) {
   return (
-    <div className="mx-auto max-w-[40rem] rounded-full border border-[var(--border)] bg-neutral-100/60 px-4 py-2 text-center text-[11px] text-[var(--muted)] dark:bg-neutral-900/40">
+    <div className="mx-auto max-w-[40rem] rounded-full border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-2 text-center text-[11px] text-[var(--muted)]">
       {content}
     </div>
   );
@@ -55,8 +55,8 @@ export function ChatMessageList({ messages }: Props) {
               <article key={m.id} className="flex w-full justify-center">
                 <div className="w-full max-w-[76rem]">
                   <div className="flex justify-end">
-                    <div className="max-w-[min(100%,44rem)] rounded-[1.6rem] rounded-tr-[1rem] border border-[var(--border)] bg-white/92 px-5 py-4 text-sm shadow-[0_12px_32px_rgba(15,23,42,0.04)] dark:bg-neutral-950/80">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+                    <div className="max-w-[min(100%,44rem)] rounded-[1.4rem] rounded-tr-[0.8rem] border border-[var(--border)] bg-[var(--chat-user)] px-5 py-4 text-sm">
+                      <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">
                         You
                       </p>
                       <div className="mt-2 whitespace-pre-wrap text-[15px] leading-7 text-[var(--foreground)]">
@@ -95,18 +95,18 @@ export function ChatMessageList({ messages }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap rounded-[1.75rem] border border-[var(--border)] bg-white/80 px-5 py-4 text-[15px] leading-7 text-[var(--foreground)] shadow-[0_12px_32px_rgba(15,23,42,0.04)] dark:bg-neutral-950/70">
+                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap rounded-[1.4rem] border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[15px] leading-7 text-[var(--foreground)]">
                     {m.content}
                   </div>
                 )}
                 {m.routingReason ? (
-                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-neutral-50/80 px-4 py-3 text-[12px] leading-6 text-[var(--muted)] dark:bg-neutral-950/30">
+                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-3 text-[12.5px] leading-6 text-[var(--muted)]">
                     {m.routingReason}
                   </div>
                 ) : null}
                 {m.rewriteSuggestions?.length ? (
-                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-neutral-50/80 px-4 py-3 dark:bg-neutral-950/30">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-3">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[var(--muted)]">
                       Try one of these rewrites
                     </p>
                     <ul className="mt-3 space-y-2 text-[13px] leading-6 text-[var(--foreground)]">

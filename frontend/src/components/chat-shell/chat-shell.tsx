@@ -113,7 +113,7 @@ export function ChatShell({
   return (
     <SidebarProvider
       className={cn(
-        "h-[min(calc(100dvh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-xl border border-[var(--border)] bg-[var(--background)] shadow-sm md:flex-row",
+        "chat-surface h-[min(calc(100dvh-9rem),760px)] min-h-[440px] w-full flex-col overflow-hidden rounded-2xl border border-[var(--border)] bg-[var(--background)] text-[var(--foreground)] md:flex-row",
         className,
       )}
     >
@@ -125,37 +125,37 @@ export function ChatShell({
         chatThreads={chatThreads}
       />
       <SidebarInset className="bg-[var(--background)]">
-        <header className="border-b border-[var(--border)] px-4 py-2.5">
+        <header className="border-b border-[var(--border)] px-4 py-3">
           <div className="flex items-center justify-end gap-3">
             <button
               type="button"
               onClick={() => setIsEditingScope((v) => !v)}
-              className="rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--foreground)]"
+              className="rounded-lg border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)]"
             >
               {isEditingScope ? "Close scope" : "Edit scope"}
             </button>
           </div>
           {isEditingScope ? (
-            <form action={scopeFormAction} className="mt-2 space-y-2 rounded border border-[var(--border)] p-2">
+            <form action={scopeFormAction} className="mt-2 space-y-2 rounded-lg border border-[var(--border)] p-2.5">
               <textarea
                 name="tickers"
                 defaultValue={scopeTickers.join(", ")}
                 rows={2}
-                className="w-full resize-y rounded border border-[var(--border)] bg-transparent px-2 py-1.5 font-mono text-xs"
+                className="w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--chat-raise)] px-2.5 py-2 font-mono text-[13px]"
               />
               <div className="flex items-center justify-between gap-2">
-                <p className="text-[10px] text-[var(--muted)]">
+                <p className="text-[11px] text-[var(--muted)]">
                   Comma or newline separated. This affects future prompts in this chat.
                 </p>
                 <button
                   type="submit"
-                  className="rounded border border-[var(--border)] px-2 py-1 text-[10px] text-[var(--foreground)]"
+                  className="rounded-lg border border-[var(--border)] bg-[var(--chat-raise)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--foreground)] transition-colors hover:border-[var(--accent)]"
                 >
                   Save scope
                 </button>
               </div>
               {scopeState.error ? (
-                <p className="font-mono text-[10px] text-red-700 dark:text-red-400">{scopeState.error}</p>
+                <p className="font-mono text-[11px] text-red-600 dark:text-red-400">{scopeState.error}</p>
               ) : null}
             </form>
           ) : null}

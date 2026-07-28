@@ -89,27 +89,27 @@ export function ChatComposer({
           <p className="mt-1 leading-5">{statusDetail}</p>
         </div>
       ) : null}
-      <div className="mx-auto flex max-w-4xl gap-2 rounded-xl border border-[var(--border)] bg-neutral-50 p-2 dark:bg-neutral-950">
+      <div className="mx-auto flex max-w-4xl items-end gap-2 rounded-2xl border border-[var(--border)] bg-[var(--chat-raise)] p-2 focus-within:border-[var(--accent)]">
         <textarea
           value={value}
           onChange={(e) => setValue(e.target.value)}
           onKeyDown={onKeyDown}
           disabled={disabled}
           rows={1}
-          className="scrollbar-hidden max-h-40 min-h-[2.5rem] flex-1 resize-none bg-transparent px-2 py-2 text-sm outline-none placeholder:text-[var(--muted)]"
+          className="scrollbar-hidden max-h-40 min-h-[2.5rem] flex-1 resize-none bg-transparent px-3 py-2 text-[15px] leading-6 outline-none placeholder:text-[var(--muted)]"
           placeholder={placeholder}
           aria-label="Message input"
         />
         <button
           type="submit"
           disabled={disabled || !value.trim()}
-          className="self-end rounded-lg border border-[var(--border)] bg-[var(--background)] px-4 py-2 text-sm font-medium text-[var(--foreground)] disabled:opacity-40"
+          className="self-end rounded-xl border border-transparent bg-[var(--accent)] px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-[var(--accent-strong)] disabled:opacity-40"
         >
           Send
         </button>
       </div>
       {error ? (
-        <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[10px] text-red-700 dark:text-red-400">
+        <p className="mx-auto mt-2 max-w-4xl text-center font-mono text-[11px] text-red-600 dark:text-red-400">
           {error}
         </p>
       ) : null}

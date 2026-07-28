@@ -207,3 +207,118 @@ body {
     @apply border-border;
   }
 }
+
+/* ============================================================
+   Chat surface restyle (v1.6) — scoped token layer.
+   Redefines the semantic + sidebar tokens for the chat panel only,
+   so the calmer, flatter look and real system dark mode stay
+   contained to chat. Landing / trace / auth are untouched because
+   they never mount `.chat-surface`.
+   ============================================================ */
+.chat-surface {
+  color-scheme: light;
+
+  /* semantic tokens (consumed by existing var(--…) references) */
+  --background: #faf9f7;
+  --foreground: #1b2233;
+  --muted: #67718a;
+  --border: #e7e2d9;
+  --surface: #ffffff;
+  --surface-strong: #ffffff;
+  --accent: #2563eb;
+  --accent-strong: #1b52c4;
+
+  /* chat-specific extras */
+  --chat-rail: #f4f2ec;
+  --chat-raise: #ffffff;
+  --chat-user: #f4f2ec;
+  --chat-faint: #8a93a6;
+  --chat-accent-soft: rgba(37, 99, 235, 0.10);
+  --chat-gold-soft: rgba(185, 138, 46, 0.14);
+  --chat-gold-ink: #97701f;
+
+  /* feed the shadcn sidebar primitive warm, flat values */
+  --sidebar-background: 45 24% 94%;
+  --sidebar-foreground: 222 30% 15%;
+  --sidebar-primary: 217 76% 53%;
+  --sidebar-primary-foreground: 210 40% 98%;
+  --sidebar-accent: 45 26% 90%;
+  --sidebar-accent-foreground: 222 30% 15%;
+  --sidebar-border: 40 20% 87%;
+  --sidebar-ring: 217 76% 56%;
+
+  /* shadcn --ui-* primitives (Card, Skeleton, Separator, Button…) */
+  --ui-background: 40 20% 97%;
+  --ui-foreground: 222 31% 15%;
+  --ui-card: 0 0% 100%;
+  --ui-card-foreground: 222 31% 15%;
+  --ui-popover: 0 0% 100%;
+  --ui-popover-foreground: 222 31% 15%;
+  --ui-primary: 221 83% 53%;
+  --ui-primary-foreground: 210 40% 98%;
+  --ui-secondary: 45 24% 94%;
+  --ui-secondary-foreground: 222 31% 15%;
+  --ui-muted: 45 24% 94%;
+  --ui-muted-foreground: 222 16% 47%;
+  --ui-accent: 45 26% 91%;
+  --ui-accent-foreground: 222 31% 15%;
+  --ui-border: 40 20% 88%;
+  --ui-input: 40 20% 88%;
+  --ui-ring: 221 83% 53%;
+}
+
+@media (prefers-color-scheme: dark) {
+  .chat-surface {
+    color-scheme: dark;
+
+    --background: #141821;
+    --foreground: #eef1f6;
+    --muted: #94a0b4;
+    --border: #2a323f;
+    --surface: #1b212b;
+    --surface-strong: #1b212b;
+    --accent: #6aa2ff;
+    --accent-strong: #8ab6ff;
+
+    --chat-rail: #171c25;
+    --chat-raise: #1b212b;
+    --chat-user: #1b212b;
+    --chat-faint: #6f7a8d;
+    --chat-accent-soft: rgba(106, 162, 255, 0.15);
+    --chat-gold-soft: rgba(224, 180, 92, 0.16);
+    --chat-gold-ink: #e0b45c;
+
+    --sidebar-background: 222 26% 12%;
+    --sidebar-foreground: 210 30% 96%;
+    --sidebar-primary: 213 90% 68%;
+    --sidebar-primary-foreground: 222 47% 11%;
+    --sidebar-accent: 220 18% 20%;
+    --sidebar-accent-foreground: 210 30% 96%;
+    --sidebar-border: 218 20% 22%;
+    --sidebar-ring: 213 90% 68%;
+
+    --ui-background: 220 24% 11%;
+    --ui-foreground: 220 30% 95%;
+    --ui-card: 218 22% 14%;
+    --ui-card-foreground: 220 30% 95%;
+    --ui-popover: 218 22% 14%;
+    --ui-popover-foreground: 220 30% 95%;
+    --ui-primary: 216 100% 71%;
+    --ui-primary-foreground: 222 47% 11%;
+    --ui-secondary: 222 26% 12%;
+    --ui-secondary-foreground: 220 30% 95%;
+    --ui-muted: 222 20% 17%;
+    --ui-muted-foreground: 218 17% 64%;
+    --ui-accent: 220 18% 20%;
+    --ui-accent-foreground: 220 30% 95%;
+    --ui-border: 218 20% 20%;
+    --ui-input: 218 20% 20%;
+    --ui-ring: 216 100% 71%;
+
+    /* inline evidence charts: dark-tuned hues (else light hues on dark cards) */
+    --chart-1: #63a3ff;
+    --chart-2: #ff9b73;
+    --chart-3: #f2c56d;
+    --chart-4: #8c97ab;
+  }
+}
