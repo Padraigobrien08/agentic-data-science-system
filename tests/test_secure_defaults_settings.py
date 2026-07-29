@@ -26,6 +26,7 @@ def test_built_in_secret_rejected_by_default(monkeypatch: pytest.MonkeyPatch) ->
 
     with pytest.raises(ValueError, match="EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT=true"):
         Settings(
+            _env_file=None,
             jwt_secret=SecretStr(BUILTIN_DEV_JWT_SECRET),
             bootstrap_admin_token=SecretStr(BOOTSTRAP_TOKEN),
         )
@@ -37,6 +38,7 @@ def test_built_in_secret_allowed_only_with_explicit_override(
     _clear_security_env(monkeypatch)
 
     settings = Settings(
+        _env_file=None,
         jwt_secret=SecretStr(BUILTIN_DEV_JWT_SECRET),
         allow_insecure_dev_jwt=True,
         bootstrap_admin_token=SecretStr(BOOTSTRAP_TOKEN),
@@ -49,6 +51,7 @@ def test_open_registration_defaults_to_false(monkeypatch: pytest.MonkeyPatch) ->
     _clear_security_env(monkeypatch)
 
     settings = Settings(
+        _env_file=None,
         jwt_secret=SecretStr(SECURE_JWT_SECRET),
         bootstrap_admin_token=SecretStr(BOOTSTRAP_TOKEN),
     )
@@ -61,5 +64,6 @@ def test_closed_registration_requires_bootstrap_token(monkeypatch: pytest.Monkey
 
     with pytest.raises(ValueError, match="EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN"):
         Settings(
+            _env_file=None,
             jwt_secret=SecretStr(SECURE_JWT_SECRET),
         )
