@@ -22,7 +22,7 @@ type Props =
 
 export function TraceRawDetailSheet(props: Props) {
   return (
-    <Card className="rounded-[28px] border-[rgba(31,111,255,0.28)] bg-white/92 lg:sticky lg:top-6">
+    <Card className="rounded-[28px] border-[var(--accent)]/40 bg-[var(--surface)] lg:sticky lg:top-6">
       <CardHeader className="gap-3">
         <div className="flex items-start justify-between gap-4">
           <div className="space-y-2">
@@ -51,7 +51,7 @@ export function TraceRawDetailSheet(props: Props) {
 
         {props.kind === "step" && props.item ? (
           <>
-            <div className="rounded-[20px] border border-[var(--border)] bg-white/70 px-4 py-4">
+            <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] px-4 py-4">
               <p className="text-sm font-semibold text-[var(--foreground)]">
                 {props.item.label ?? props.item.planned_tool_name ?? "Selected step"}
               </p>
@@ -66,7 +66,7 @@ export function TraceRawDetailSheet(props: Props) {
 
         {props.kind === "model-call" && props.item ? (
           <>
-            <div className="rounded-[20px] border border-[var(--border)] bg-white/70 px-4 py-4">
+            <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] px-4 py-4">
               <p className="text-sm font-semibold text-[var(--foreground)]">{props.item.model_name}</p>
               <p className="mt-1 text-sm text-[var(--muted)]">
                 {props.item.provider}

@@ -97,21 +97,21 @@ export function ArtifactContentViewer({ artifactId, kind }: Props) {
           target="_blank"
           rel="noopener noreferrer"
           title="Same as GET …/content?disposition=inline — opens in a new tab when the browser can display the type"
-          className="rounded border border-[var(--border)] bg-neutral-50 px-2 py-1 font-mono hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono hover:bg-[var(--chat-hover)]"
         >
           Open in browser
         </a>
         <a
           href={downloadHref}
           title="Same as GET …/content?disposition=attachment — suggests download via Content-Disposition"
-          className="rounded border border-[var(--border)] bg-neutral-50 px-2 py-1 font-mono hover:bg-neutral-100 dark:bg-neutral-900 dark:hover:bg-neutral-800"
+          className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1 font-mono hover:bg-[var(--chat-hover)]"
         >
           Download
         </a>
         <button
           type="button"
           onClick={() => void load()}
-          className="rounded border border-[var(--border)] px-2 py-1 font-mono text-[var(--muted)] hover:bg-neutral-100 dark:hover:bg-neutral-900"
+          className="rounded border border-[var(--border)] px-2 py-1 font-mono text-[var(--muted)] hover:bg-[var(--chat-hover)]"
         >
           Reload preview
         </button>
@@ -160,7 +160,7 @@ export function ArtifactContentViewer({ artifactId, kind }: Props) {
               <span className="text-[var(--muted)]">Declared size: 0 B</span>
             ) : null}
           </div>
-          <div className="max-h-[32rem] overflow-auto rounded border border-[var(--border)] bg-neutral-50 p-3 dark:bg-neutral-950">
+          <div className="max-h-[32rem] overflow-auto rounded border border-[var(--border)] bg-[var(--surface)] p-3">
             {preview.text.length === 0 ? (
               <p className="text-xs italic text-[var(--muted)]">
                 Empty preview (zero-byte object or empty decoded text).

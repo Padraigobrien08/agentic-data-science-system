@@ -9,7 +9,7 @@ import { formatTokenTotal, modelCallLabel } from "@/lib/agent-transparency";
 export function ModelCallInlineSummary({ call }: { call: ModelCallApiItem }) {
   const tokens = formatTokenTotal(call);
   return (
-    <div className="rounded border border-[var(--border)] bg-neutral-50/80 px-2 py-1.5 font-mono text-[10px] dark:bg-neutral-950/50">
+    <div className="rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 font-mono text-[10px]">
       <span className="text-[var(--foreground)]">{modelCallLabel(call)}</span>
       <span className="text-[var(--muted)]"> · </span>
       <span>{call.model_name}</span>
@@ -42,7 +42,7 @@ export function ModelCallSummaryCard({ call, inspectHref }: Props) {
 
   return (
     <div
-      className={`rounded border bg-neutral-50/50 dark:bg-neutral-950/30 ${
+      className={`rounded border bg-[var(--surface)] ${
         failed
           ? "border-red-400 dark:border-red-700"
           : "border-[var(--border)]"

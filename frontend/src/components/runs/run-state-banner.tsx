@@ -12,7 +12,7 @@ const TONE_BOX: Record<
   string
 > = {
   neutral:
-    "border-[var(--border)] bg-neutral-50/90 text-[var(--foreground)] dark:bg-neutral-950/50",
+    "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)]",
   sky: "border-sky-200 bg-sky-50/90 text-sky-950 dark:border-sky-900 dark:bg-sky-950/35 dark:text-sky-50",
   amber:
     "border-amber-200 bg-amber-50/90 text-amber-950 dark:border-amber-900 dark:bg-amber-950/35 dark:text-amber-50",

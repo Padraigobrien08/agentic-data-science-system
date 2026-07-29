@@ -156,6 +156,45 @@ export async function logoutAction(): Promise<void> {
   redirect("/login");
 }
 
+/**
+ * Frictionless demo entry: provision an isolated guest session server-side and drop
+ * the visitor straight into a working chat — no login form. Falls back to the login
+ * page if guest demo access is disabled on the backend.
+ */
+type GuestSession = { access_token: string; expires_in: number; project_id: string };
+
+export async function enterDemoAction(): Promise<void> {
+  const base = getApiBaseUrl();
+  let session: GuestSession | undefined;
+  try {
+    const res = await fetch(`${base}/v1/auth/guest`, {
+      method: "POST",
+      headers: { Accept: "application/json" },
+      cache: "no-store",
+    });
+    if (res.ok) {
+      session = JSON.parse(await res.text()) as GuestSession;
+    }
+  } catch {
+    /* fall through to login */
+  }
+  if (!session) {
+    redirect(`/login?next=${encodeURIComponent("/")}`);
+    return;
+  }
+
+  const jar = await cookies();
+  jar.set(SESSION_COOKIE_NAME, session.access_token, {
+    httpOnly: true,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: session.expires_in,
+    path: "/",
+  });
+
+  redirect(`/projects/${session.project_id}/chat`);
+}
+
 export type InterestState = { ok?: boolean; error?: string };
 
 /** Optional landing-page email capture — a signal of interest, not a sign-up. */

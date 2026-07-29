@@ -138,7 +138,7 @@ export function FinalReportWithEvidence({
           ) : null}
 
           {showCriticAside ? (
-            <div className="rounded border border-[var(--border)] border-dashed bg-neutral-50/80 p-3 dark:bg-neutral-950/40">
+            <div className="rounded border border-[var(--border)] border-dashed bg-[var(--surface)] p-3">
               <p className="mb-2 text-xs font-semibold uppercase text-[var(--muted)]">
                 Critic context (alongside conclusions)
               </p>

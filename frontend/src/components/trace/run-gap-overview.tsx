@@ -68,7 +68,7 @@ export function RunGapOverview({
 
   return (
     <div className="overflow-hidden rounded-lg border border-[var(--border)] bg-[var(--background)] shadow-sm">
-      <div className="border-b border-[var(--border)] bg-neutral-50 px-4 py-3 dark:bg-neutral-900/60">
+      <div className="border-b border-[var(--border)] bg-[var(--surface)] px-4 py-3">
         <h2 className="text-sm font-semibold tracking-tight text-[var(--foreground)]">
           Run overview — coverage &amp; gaps
         </h2>

@@ -108,7 +108,7 @@ export function PlannerOutputPanel({ orch, ai }: Props) {
                         <td className="py-1.5 pr-2 text-[var(--muted)]">{s.label ?? "—"}</td>
                         <td className="max-w-md py-1.5 font-mono text-[10px]">
                           {s.tool_input ? (
-                            <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-all rounded bg-neutral-100 p-1 dark:bg-neutral-900">
+                            <pre className="max-h-24 overflow-auto whitespace-pre-wrap break-all rounded bg-[var(--surface)] p-1">
                               {JSON.stringify(s.tool_input)}
                             </pre>
                           ) : (

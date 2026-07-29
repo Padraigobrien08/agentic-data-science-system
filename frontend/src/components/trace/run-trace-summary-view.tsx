@@ -63,15 +63,15 @@ export function RunTraceSummaryView({
                 "This run has no stored orchestration goal text. Return to chat for the answer, then inspect the execution spine here when you need the technical record."}
             </p>
             <div className="grid gap-4 sm:grid-cols-3">
-              <div className="rounded-[20px] border border-[var(--border)] bg-white/70 p-4">
+              <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Status</p>
                 <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">{shell.run.status}</p>
               </div>
-              <div className="rounded-[20px] border border-[var(--border)] bg-white/70 p-4">
+              <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Created</p>
                 <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">{formatDate(shell.run.created_at)}</p>
               </div>
-              <div className="rounded-[20px] border border-[var(--border)] bg-white/70 p-4">
+              <div className="rounded-[20px] border border-[var(--border)] bg-[var(--surface)] p-4">
                 <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[var(--muted)]">Current phase</p>
                 <p className="mt-2 text-lg font-semibold text-[var(--foreground)]">{shell.run.current_phase}</p>
               </div>
@@ -97,7 +97,7 @@ export function RunTraceSummaryView({
           </CardHeader>
           <CardContent className="space-y-3">
             {shell.timeline_preview.map((step) => (
-              <div key={step.id} className="rounded-[18px] border border-[var(--border)] bg-white/70 px-4 py-3">
+              <div key={step.id} className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
                 <div className="flex flex-wrap items-center gap-2">
                   <Badge variant="muted">Step {step.step_index + 1}</Badge>
                   <Badge variant={step.status === "success" ? "success" : "default"}>{step.status}</Badge>

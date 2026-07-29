@@ -69,7 +69,7 @@ export function RunStepTrace({ steps, projectId, runId }: Props) {
         return (
           <li
             key={s.id}
-            className="rounded border border-[var(--border)] bg-neutral-50/50 p-3 dark:bg-neutral-950/30"
+            className="rounded border border-[var(--border)] bg-[var(--surface)] p-3"
           >
             <div className="flex flex-wrap items-center gap-2">
               <span className="font-mono text-xs font-semibold text-[var(--muted)]">
@@ -81,7 +81,7 @@ export function RunStepTrace({ steps, projectId, runId }: Props) {
                     ? "bg-sky-100 text-sky-900 dark:bg-sky-950 dark:text-sky-100"
                     : lane === "LLM"
                       ? "bg-violet-100 text-violet-900 dark:bg-violet-950 dark:text-violet-100"
-                      : "bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200"
+                      : "bg-[var(--surface)] text-[var(--foreground)]"
                 }`}
                 title={trace || undefined}
               >

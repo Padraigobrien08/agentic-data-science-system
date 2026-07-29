@@ -135,7 +135,7 @@ export function ReportEvidencePanel({
               <span className="font-mono text-[var(--muted)]"> ({charCount} chars)</span>
             ) : null}
           </p>
-          <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-[var(--border)] bg-neutral-50 p-2 font-mono text-[11px] dark:bg-neutral-950">
+          <pre className="max-h-48 overflow-auto whitespace-pre-wrap rounded border border-[var(--border)] bg-[var(--surface)] p-2 font-mono text-[11px]">
             {preview}
           </pre>
         </div>

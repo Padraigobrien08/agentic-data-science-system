@@ -1,9 +1,13 @@
 import type { Metadata } from "next";
+import { Geist, Geist_Mono } from "next/font/google";
 
-import { SiteHeader } from "@/components/layout/site-header";
+import { AppChrome } from "@/components/layout/app-chrome";
 import { getCurrentUser } from "@/lib/auth/session";
 
 import "./globals.css";
+
+const geistSans = Geist({ subsets: ["latin"], variable: "--font-geist-sans", display: "swap" });
+const geistMono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono", display: "swap" });
 
 export const metadata: Metadata = {
   title: "EDGAR Analysis",
@@ -20,10 +24,9 @@ export default async function RootLayout({
 }>) {
   const user = await getCurrentUser();
   return (
-    <html lang="en" data-scroll-behavior="smooth">
+    <html lang="en" data-scroll-behavior="smooth" className={`${geistSans.variable} ${geistMono.variable}`}>
       <body className="min-h-screen antialiased">
-        <SiteHeader user={user} />
-        <main className="mx-auto w-full max-w-[90rem] px-3 py-8 sm:px-5 lg:px-6">{children}</main>
+        <AppChrome user={user}>{children}</AppChrome>
       </body>
     </html>
   );

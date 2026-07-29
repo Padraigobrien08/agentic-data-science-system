@@ -28,7 +28,7 @@ export function VerifyAnalysisSection({
   const topEvidence = evidenceLinks.slice(0, 3);
 
   return (
-    <section className="rounded-lg border border-[var(--border)] bg-neutral-50/50 px-3 py-3 dark:bg-neutral-950/35">
+    <section className="rounded-lg border border-[var(--border)] bg-[var(--surface)] px-3 py-3">
       <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Verify this analysis</p>
       <p className="mt-1 text-xs leading-snug text-[var(--muted)]">
         Conclusions are model-assisted — cross-check steps, sources, and stored artifacts before high-stakes use.

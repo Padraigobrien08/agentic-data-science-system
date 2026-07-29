@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from typing import Literal
+from uuid import UUID
 
 from pydantic import BaseModel, EmailStr, Field
 
@@ -28,6 +29,12 @@ class AccessTokenResponse(BaseModel):
     access_token: str
     token_type: Literal["bearer"] = "bearer"
     expires_in: int = Field(description="Access token lifetime in seconds.")
+
+
+class GuestSessionResponse(AccessTokenResponse):
+    """Bearer token plus the demo workspace the guest was dropped into."""
+
+    project_id: UUID = Field(description="Starter demo project owned by the guest.")
 
 
 class AuthCapabilitiesResponse(BaseModel):
