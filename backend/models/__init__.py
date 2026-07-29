@@ -22,6 +22,7 @@ from backend.models.enums_investigation import (
 )
 from backend.models.evaluation_case_result import EvaluationCaseResult
 from backend.models.evaluation_run import EvaluationRun
+from backend.models.interest_signal import InterestSignal
 from backend.models.investigation import (
     Investigation,
     InvestigationDataset,
@@ -82,6 +83,7 @@ __all__ = [
     "EvaluationCaseResult",
     "EvaluationRun",
     "EvaluationRunStatus",
+    "InterestSignal",
     "ModelCall",
     "ModelCallStatus",
     "Project",
