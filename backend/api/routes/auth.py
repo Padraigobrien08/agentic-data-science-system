@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+import secrets
+import uuid
 from secrets import compare_digest
 from typing import Annotated
 
@@ -14,6 +16,7 @@ from backend.api.deps import DbSession
 from backend.api.rate_limit import enforce_auth_rate_limit
 from backend.auth.tokens import create_access_token
 from backend.config.settings import get_settings
+from backend.models.project import Project
 from backend.models.user import User
 from backend.schemas.auth import (
     AccessTokenResponse,
@@ -21,12 +24,16 @@ from backend.schemas.auth import (
     AuthCapabilitiesResponse,
     AuthLoginBody,
     AuthRegisterBody,
+    GuestSessionResponse,
 )
 from backend.schemas.user import UserRead
 from backend.security.passwords import hash_password, verify_password
 from backend.services.user_service import UserService
 
 router = APIRouter(prefix="/auth", tags=["auth"])
+
+# Starter tickers so a guest can ask a real question immediately.
+_GUEST_DEMO_TICKERS = ["AAPL", "MSFT", "NVDA"]
 
 # Applied to the unauthenticated write endpoints to blunt credential stuffing /
 # registration spam / bootstrap-token brute forcing (see backend.api.rate_limit).
@@ -121,6 +128,43 @@ def login(body: AuthLoginBody, db: DbSession, _rate_limit: AuthRateLimit = None)
         raise HTTPException(status_code=401, detail="Invalid email or password")
     token, expires_in = create_access_token(user_id=user.id, settings=settings)
     return AccessTokenResponse(access_token=token, expires_in=expires_in)
+
+
+@router.post("/guest", response_model=GuestSessionResponse, status_code=201)
+def guest_session(db: DbSession, _rate_limit: AuthRateLimit = None) -> GuestSessionResponse:
+    """Provision an isolated throwaway guest account + demo workspace and return a token.
+
+    Lets a visitor try the product with no sign-up. Off unless ``allow_guest_demo`` is set,
+    because auto-provisioning accounts is a spam vector on a public deployment.
+    """
+    settings = get_settings()
+    if not settings.allow_guest_demo:
+        raise HTTPException(status_code=403, detail="Guest demo access is disabled")
+
+    users = UserService(db)
+    email = f"guest-{uuid.uuid4().hex[:16]}@demo.local"
+    try:
+        user = users.create_with_password(
+            email=email,
+            hashed_password=hash_password(secrets.token_urlsafe(24)),
+            display_name="Guest",
+        )
+        db.flush()
+        project = Project(
+            owner_user_id=user.id,
+            name="Demo workspace",
+            description="Sandbox for exploring EDGAR analysis without an account.",
+            tickers=list(_GUEST_DEMO_TICKERS),
+        )
+        db.add(project)
+        db.commit()
+    except IntegrityError:
+        db.rollback()
+        raise HTTPException(status_code=503, detail="Could not create a guest session") from None
+    db.refresh(project)
+
+    token, expires_in = create_access_token(user_id=user.id, settings=settings)
+    return GuestSessionResponse(access_token=token, expires_in=expires_in, project_id=project.id)
 
 
 @router.get("/me", response_model=UserRead)

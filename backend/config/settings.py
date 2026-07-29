@@ -44,6 +44,14 @@ class Settings(BaseSettings):
         default=False,
         description="When false, POST /v1/auth/register returns 403.",
     )
+    allow_guest_demo: bool = Field(
+        default=False,
+        description=(
+            "When true, POST /v1/auth/guest provisions an isolated throwaway guest "
+            "account + demo workspace so visitors can try the product without signing up. "
+            "Off by default; enable only for demo deployments (auto-provisioning is a spam vector)."
+        ),
+    )
     allow_insecure_dev_jwt: bool = Field(
         default=False,
         description="Allow the built-in development JWT secret for explicit local-only use.",
