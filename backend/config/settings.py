@@ -309,7 +309,7 @@ class Settings(BaseSettings):
         description="Prompt file version under ``backend/agents/prompts/critic/``",
     )
     agent_report_prompt_version: str = Field(
-        default="1.2.0",
+        default="1.3.0",
         description="Prompt file version under ``backend/agents/prompts/report/``",
     )
 
