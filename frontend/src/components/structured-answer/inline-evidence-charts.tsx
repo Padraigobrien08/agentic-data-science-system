@@ -57,19 +57,16 @@ function buildChartConfig(chart: InlineEvidenceChart): ChartConfig {
 }
 
 function referenceMarkers(markers: InlineEvidenceChartMarker[]) {
+  // Subtle guide lines mark where the shifts occur; the caption says what they are,
+  // so no per-line text label (repeated labels stacked and clipped the plot top).
   return markers.map((marker) => (
     <ReferenceLine
       key={`${marker.xValue}-${marker.label}`}
       x={marker.xValue}
-      stroke="hsl(var(--ui-border))"
-      strokeDasharray="4 4"
+      stroke="hsl(var(--ui-muted-foreground))"
+      strokeOpacity={0.35}
+      strokeDasharray="3 3"
       ifOverflow="extendDomain"
-      label={{
-        value: marker.label,
-        position: "insideTopRight",
-        fill: "hsl(var(--ui-muted-foreground))",
-        fontSize: 10,
-      }}
     />
   ));
 }
@@ -84,7 +81,7 @@ function seriesKey(chart: InlineEvidenceChart) {
       {chart.series.map((series) => (
         <div key={series.key} className="flex items-center gap-2">
           <span
-            className="h-2.5 w-2.5 rounded-full border border-white/80"
+            className="h-2.5 w-2.5 rounded-full border border-[var(--border)]"
             style={{ backgroundColor: `var(--${series.colorToken})` }}
           />
           <span>{series.label}</span>
@@ -110,8 +107,8 @@ function renderLineChart(chart: InlineEvidenceChart) {
       className="h-[220px] w-full min-w-0 sm:h-[240px]"
       aria-label={`${chart.metricLabel}. ${chart.caption}`}
     >
-      <LineChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 8 }}>
-        <CartesianGrid vertical={false} stroke="hsl(var(--ui-border))" opacity={0.7} />
+      <LineChart data={data} margin={{ top: 18, right: 14, left: 0, bottom: 8 }}>
+        <CartesianGrid vertical={false} stroke="hsl(var(--ui-border))" strokeOpacity={0.6} />
         <XAxis
           dataKey="xValue"
           axisLine={false}
@@ -156,8 +153,8 @@ function renderGroupedBarChart(chart: InlineEvidenceChart) {
       className="h-[220px] w-full min-w-0 sm:h-[240px]"
       aria-label={`${chart.metricLabel}. ${chart.caption}`}
     >
-      <BarChart data={data} margin={{ top: 12, right: 12, left: 0, bottom: 8 }} barGap={10} barCategoryGap="18%">
-        <CartesianGrid vertical={false} stroke="hsl(var(--ui-border))" opacity={0.7} />
+      <BarChart data={data} margin={{ top: 18, right: 14, left: 0, bottom: 8 }} barGap={10} barCategoryGap="18%">
+        <CartesianGrid vertical={false} stroke="hsl(var(--ui-border))" strokeOpacity={0.6} />
         <XAxis
           dataKey="xValue"
           axisLine={false}
@@ -168,7 +165,7 @@ function renderGroupedBarChart(chart: InlineEvidenceChart) {
         />
         <YAxis axisLine={false} tickLine={false} tickMargin={8} width={56} />
         <ChartTooltip
-          cursor={{ fill: "rgba(31, 111, 255, 0.06)" }}
+          cursor={{ fill: "hsl(var(--ui-muted-foreground))", fillOpacity: 0.06 }}
           content={
             <ChartTooltipContent
               formatter={(value) => formatChartValue(typeof value === "number" ? value : Number(value), chart.valueFormat)}
@@ -194,7 +191,7 @@ function chartCard(chart: InlineEvidenceChart) {
   return (
     <article
       key={chart.chartId}
-      className="space-y-4 rounded-[1.35rem] border border-[var(--border)]/75 bg-white/72 px-4 py-4 shadow-[0_22px_64px_-46px_rgba(19,31,57,0.24)] backdrop-blur-sm sm:px-6 sm:py-5"
+      className="space-y-4 rounded-card border border-[var(--border)] bg-[var(--surface)] px-4 py-4 sm:px-6 sm:py-5"
     >
       {seriesKey(chart)}
       <div className="space-y-1">
@@ -218,10 +215,10 @@ export function InlineEvidenceCharts({ charts, notice, className }: InlineEviden
 
   return (
     <section className={cn("space-y-4", className)} aria-label="Visual evidence">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Visual evidence</p>
+      <h3 className="text-base font-semibold leading-tight tracking-[-0.01em] text-[var(--foreground)]">Visual evidence</h3>
       {visibleCharts.length > 0 ? <div className="space-y-6">{visibleCharts.map((chart) => chartCard(chart))}</div> : null}
       {!visibleCharts.length && notice ? (
-        <div className="rounded-[1.15rem] border border-dashed border-[var(--border)]/80 bg-neutral-50/70 px-4 py-3 dark:bg-neutral-950/20">
+        <div className="rounded-card border border-dashed border-[var(--border)] bg-[var(--surface)] px-4 py-3">
           <p className="text-[13px] leading-6 text-[var(--muted)]">{notice}</p>
         </div>
       ) : null}

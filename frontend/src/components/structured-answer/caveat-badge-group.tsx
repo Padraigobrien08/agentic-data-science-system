@@ -5,10 +5,10 @@ import type { CaveatBadgeGroupProps } from "./types";
 
 function toneClasses(tone: "neutral" | "warning" | "info"): string {
   if (tone === "warning") {
-    return "border-amber-400/70 bg-amber-50 text-amber-950 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-50";
+    return "border-[color:var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[color:var(--status-warning-ink)]";
   }
   if (tone === "info") {
-    return "border-blue-200 bg-blue-50 text-blue-950 dark:border-blue-900 dark:bg-blue-950/35 dark:text-blue-50";
+    return "border-[color:var(--status-info-border)] bg-[var(--status-info-bg)] text-[color:var(--status-info-ink)]";
   }
   return "border-[var(--border)] bg-[var(--background)] text-[var(--foreground)]";
 }
@@ -78,7 +78,7 @@ export function CaveatBadgeGroup({
         </div>
       ) : null}
       {hasBlocking ? (
-        <ul className="list-inside list-disc text-xs text-amber-950 dark:text-amber-100">
+        <ul className="list-inside list-disc text-xs text-[color:var(--status-warning-ink)]">
           {blockingCaveats.map((c, i) => (
             <li key={i} className="max-w-prose">
               {c}

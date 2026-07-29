@@ -7,8 +7,6 @@ describe("ChatComposer", () => {
   it("hides the redundant sync-only banner and removes queue controls", () => {
     render(
       <ChatComposer
-        action={vi.fn()}
-        tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",
           background_available: false,
@@ -25,17 +23,28 @@ describe("ChatComposer", () => {
     expect(screen.queryByText("Press Enter to submit · Shift+Enter for newline")).toBeNull();
   });
 
-  it("clears the input after sending a message", () => {
-    const action = vi.fn();
+  it("shows the delivery banner only when degraded, not when ready", () => {
+    const { rerender } = render(
+      <ChatComposer
+        backgroundDelivery={{ delivery_mode: "background_ready", background_available: true, detail: null }}
+      />,
+    );
+    expect(screen.queryByText("Background delivery degraded")).toBeNull();
+
+    rerender(
+      <ChatComposer
+        backgroundDelivery={{ delivery_mode: "background_degraded", background_available: false, detail: null }}
+      />,
+    );
+    expect(screen.getByText("Background delivery degraded")).not.toBeNull();
+  });
+
+  it("calls onSend with the text + a request id and clears the input", () => {
     const onSend = vi.fn();
-    const requestSubmit = vi.fn();
-    vi.spyOn(HTMLFormElement.prototype, "requestSubmit").mockImplementation(requestSubmit);
 
     render(
       <ChatComposer
-        action={action}
         onSend={onSend}
-        tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",
           background_available: false,
@@ -51,6 +60,5 @@ describe("ChatComposer", () => {
     expect(onSend).toHaveBeenCalledTimes(1);
     expect(onSend).toHaveBeenCalledWith("Find unusual financial changes", expect.any(String));
     expect((screen.getByLabelText("Message input") as HTMLTextAreaElement).value).toBe("");
-    expect(requestSubmit).toHaveBeenCalledTimes(1);
   });
 });

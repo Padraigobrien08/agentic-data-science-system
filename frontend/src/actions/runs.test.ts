@@ -85,8 +85,6 @@ describe("createAnalysisRunFromChat", () => {
     });
     expect(result.reply?.runId).toBeUndefined();
     expect(result.reply?.runHref).toBeUndefined();
-    expect(result.reply?.deepDiveHref).toBeUndefined();
-    expect(result.reply?.runsHref).toBeUndefined();
     expect(createRunMock).not.toHaveBeenCalled();
     expect(executeRunMock).not.toHaveBeenCalled();
     // The user turn and the "couldn't route" reply are both persisted durably.

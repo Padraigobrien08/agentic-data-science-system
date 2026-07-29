@@ -209,116 +209,164 @@ body {
 }
 
 /* ============================================================
-   Chat surface restyle (v1.6) — scoped token layer.
-   Redefines the semantic + sidebar tokens for the chat panel only,
-   so the calmer, flatter look and real system dark mode stay
-   contained to chat. Landing / trace / auth are untouched because
-   they never mount `.chat-surface`.
+   Chat surface skin — Vercel-template aesthetic (neutral zinc) + Geist.
+   Scoped tokens + typography for the full-page chat only; landing /
+   trace / auth are untouched (they never mount `.chat-surface`).
    ============================================================ */
-.chat-surface {
+.chat-surface,
+.app-skin {
   color-scheme: light;
+  font-family: var(--font-geist-sans, -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif);
+  letter-spacing: -0.011em;
 
   /* semantic tokens (consumed by existing var(--…) references) */
-  --background: #faf9f7;
-  --foreground: #1b2233;
-  --muted: #67718a;
-  --border: #e7e2d9;
+  --background: #ffffff;
+  --foreground: #09090b;
+  --muted: #71717a;
+  --border: #e4e4e7;
   --surface: #ffffff;
   --surface-strong: #ffffff;
   --accent: #2563eb;
-  --accent-strong: #1b52c4;
+  --accent-strong: #1d4ed8;
 
   /* chat-specific extras */
-  --chat-rail: #f4f2ec;
+  --chat-rail: #fafafa;
   --chat-raise: #ffffff;
-  --chat-user: #f4f2ec;
-  --chat-faint: #8a93a6;
+  --chat-user: #ffffff;
+  --chat-faint: #a1a1aa;
+  --chat-hover: #f4f4f5;
+  --chat-primary: #18181b;
+  --chat-primary-ink: #fafafa;
   --chat-accent-soft: rgba(37, 99, 235, 0.10);
-  --chat-gold-soft: rgba(185, 138, 46, 0.14);
-  --chat-gold-ink: #97701f;
+  --chat-gold-soft: #f4f4f5; /* confidence chip → neutral in the template look */
+  --chat-gold-ink: #3f3f46;
 
-  /* feed the shadcn sidebar primitive warm, flat values */
-  --sidebar-background: 45 24% 94%;
-  --sidebar-foreground: 222 30% 15%;
-  --sidebar-primary: 217 76% 53%;
-  --sidebar-primary-foreground: 210 40% 98%;
-  --sidebar-accent: 45 26% 90%;
-  --sidebar-accent-foreground: 222 30% 15%;
-  --sidebar-border: 40 20% 87%;
-  --sidebar-ring: 217 76% 56%;
+  /* semantic status: tint bg + hairline + AA ink. These invert in the dark
+     media block below — the chat surface has no `.dark` class, so Tailwind
+     `dark:` utilities never fire here; status color must live in tokens. */
+  --status-success-bg: rgba(16, 185, 129, 0.10);
+  --status-success-border: rgba(16, 185, 129, 0.24);
+  --status-success-ink: #047857; /* emerald-700 · 4.99:1 on tint */
+  --status-warning-bg: rgba(217, 119, 6, 0.12);
+  --status-warning-border: rgba(217, 119, 6, 0.28);
+  --status-warning-ink: #92400e; /* amber-800 · 6.25:1 on tint */
+  --status-info-bg: rgba(37, 99, 235, 0.10);
+  --status-info-border: rgba(37, 99, 235, 0.24);
+  --status-info-ink: #1d4ed8; /* blue-700 · 5.82:1 on tint */
+  --status-danger-bg: rgba(220, 38, 38, 0.10);
+  --status-danger-border: rgba(220, 38, 38, 0.26);
+  --status-danger-ink: #b91c1c; /* red-700 · 5.54:1 on tint */
 
-  /* shadcn --ui-* primitives (Card, Skeleton, Separator, Button…) */
-  --ui-background: 40 20% 97%;
-  --ui-foreground: 222 31% 15%;
+  /* shadcn sidebar primitive (zinc) */
+  --sidebar-background: 0 0% 98%;
+  --sidebar-foreground: 240 10% 4%;
+  --sidebar-primary: 240 6% 10%;
+  --sidebar-primary-foreground: 0 0% 98%;
+  --sidebar-accent: 240 5% 96%;
+  --sidebar-accent-foreground: 240 10% 4%;
+  --sidebar-border: 240 6% 90%;
+  --sidebar-ring: 240 5% 65%;
+
+  /* shadcn --ui-* primitives (zinc) */
+  --ui-background: 0 0% 100%;
+  --ui-foreground: 240 10% 4%;
   --ui-card: 0 0% 100%;
-  --ui-card-foreground: 222 31% 15%;
+  --ui-card-foreground: 240 10% 4%;
   --ui-popover: 0 0% 100%;
-  --ui-popover-foreground: 222 31% 15%;
-  --ui-primary: 221 83% 53%;
-  --ui-primary-foreground: 210 40% 98%;
-  --ui-secondary: 45 24% 94%;
-  --ui-secondary-foreground: 222 31% 15%;
-  --ui-muted: 45 24% 94%;
-  --ui-muted-foreground: 222 16% 47%;
-  --ui-accent: 45 26% 91%;
-  --ui-accent-foreground: 222 31% 15%;
-  --ui-border: 40 20% 88%;
-  --ui-input: 40 20% 88%;
-  --ui-ring: 221 83% 53%;
+  --ui-popover-foreground: 240 10% 4%;
+  --ui-primary: 240 6% 10%;
+  --ui-primary-foreground: 0 0% 98%;
+  --ui-secondary: 240 5% 96%;
+  --ui-secondary-foreground: 240 6% 10%;
+  --ui-muted: 240 5% 96%;
+  --ui-muted-foreground: 240 4% 46%;
+  --ui-accent: 240 5% 96%;
+  --ui-accent-foreground: 240 6% 10%;
+  --ui-border: 240 6% 90%;
+  --ui-input: 240 6% 90%;
+  --ui-ring: 240 5% 65%;
+
+  /* inline evidence charts: one restrained blue + neutrals */
+  --chart-1: #2563eb;
+  --chart-2: #71717a;
+  --chart-3: #a1a1aa;
+  --chart-4: #52525b;
+}
+
+.chat-surface .font-mono,
+.app-skin .font-mono {
+  font-family: var(--font-geist-mono, ui-monospace, "SF Mono", "SFMono-Regular", Menlo, monospace);
 }
 
 @media (prefers-color-scheme: dark) {
-  .chat-surface {
+  .chat-surface,
+  .app-skin {
     color-scheme: dark;
 
-    --background: #141821;
-    --foreground: #eef1f6;
-    --muted: #94a0b4;
-    --border: #2a323f;
-    --surface: #1b212b;
-    --surface-strong: #1b212b;
-    --accent: #6aa2ff;
-    --accent-strong: #8ab6ff;
+    --background: #09090b;
+    --foreground: #fafafa;
+    --muted: #a1a1aa;
+    --border: #27272a;
+    --surface: #18181b;
+    --surface-strong: #18181b;
+    --accent: #60a5fa;
+    --accent-strong: #93c5fd;
 
-    --chat-rail: #171c25;
-    --chat-raise: #1b212b;
-    --chat-user: #1b212b;
-    --chat-faint: #6f7a8d;
-    --chat-accent-soft: rgba(106, 162, 255, 0.15);
-    --chat-gold-soft: rgba(224, 180, 92, 0.16);
-    --chat-gold-ink: #e0b45c;
+    --chat-rail: #0c0c0e;
+    --chat-raise: #18181b;
+    --chat-user: #18181b;
+    --chat-faint: #71717a;
+    --chat-hover: #1c1c1f;
+    --chat-primary: #fafafa;
+    --chat-primary-ink: #09090b;
+    --chat-accent-soft: rgba(96, 165, 250, 0.14);
+    --chat-gold-soft: #27272a;
+    --chat-gold-ink: #d4d4d8;
 
-    --sidebar-background: 222 26% 12%;
-    --sidebar-foreground: 210 30% 96%;
-    --sidebar-primary: 213 90% 68%;
-    --sidebar-primary-foreground: 222 47% 11%;
-    --sidebar-accent: 220 18% 20%;
-    --sidebar-accent-foreground: 210 30% 96%;
-    --sidebar-border: 218 20% 22%;
-    --sidebar-ring: 213 90% 68%;
+    /* status inks lift to the 300-band on the zinc dark ground (≥7.3:1) */
+    --status-success-bg: rgba(16, 185, 129, 0.15);
+    --status-success-border: rgba(16, 185, 129, 0.32);
+    --status-success-ink: #6ee7b7; /* emerald-300 */
+    --status-warning-bg: rgba(245, 158, 11, 0.16);
+    --status-warning-border: rgba(245, 158, 11, 0.34);
+    --status-warning-ink: #fcd34d; /* amber-300 */
+    --status-info-bg: rgba(96, 165, 250, 0.16);
+    --status-info-border: rgba(96, 165, 250, 0.34);
+    --status-info-ink: #93c5fd; /* blue-300 */
+    --status-danger-bg: rgba(248, 113, 113, 0.16);
+    --status-danger-border: rgba(248, 113, 113, 0.34);
+    --status-danger-ink: #fca5a5; /* red-300 */
 
-    --ui-background: 220 24% 11%;
-    --ui-foreground: 220 30% 95%;
-    --ui-card: 218 22% 14%;
-    --ui-card-foreground: 220 30% 95%;
-    --ui-popover: 218 22% 14%;
-    --ui-popover-foreground: 220 30% 95%;
-    --ui-primary: 216 100% 71%;
-    --ui-primary-foreground: 222 47% 11%;
-    --ui-secondary: 222 26% 12%;
-    --ui-secondary-foreground: 220 30% 95%;
-    --ui-muted: 222 20% 17%;
-    --ui-muted-foreground: 218 17% 64%;
-    --ui-accent: 220 18% 20%;
-    --ui-accent-foreground: 220 30% 95%;
-    --ui-border: 218 20% 20%;
-    --ui-input: 218 20% 20%;
-    --ui-ring: 216 100% 71%;
+    --sidebar-background: 240 6% 5%;
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-primary: 0 0% 98%;
+    --sidebar-primary-foreground: 240 6% 10%;
+    --sidebar-accent: 240 4% 11%;
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 4% 16%;
+    --sidebar-ring: 240 5% 45%;
 
-    /* inline evidence charts: dark-tuned hues (else light hues on dark cards) */
-    --chart-1: #63a3ff;
-    --chart-2: #ff9b73;
-    --chart-3: #f2c56d;
-    --chart-4: #8c97ab;
+    --ui-background: 240 10% 4%;
+    --ui-foreground: 0 0% 98%;
+    --ui-card: 240 6% 10%;
+    --ui-card-foreground: 0 0% 98%;
+    --ui-popover: 240 6% 10%;
+    --ui-popover-foreground: 0 0% 98%;
+    --ui-primary: 0 0% 98%;
+    --ui-primary-foreground: 240 6% 10%;
+    --ui-secondary: 240 4% 16%;
+    --ui-secondary-foreground: 0 0% 98%;
+    --ui-muted: 240 4% 16%;
+    --ui-muted-foreground: 240 5% 65%;
+    --ui-accent: 240 4% 16%;
+    --ui-accent-foreground: 0 0% 98%;
+    --ui-border: 240 4% 16%;
+    --ui-input: 240 4% 16%;
+    --ui-ring: 240 5% 45%;
+
+    --chart-1: #60a5fa;
+    --chart-2: #a1a1aa;
+    --chart-3: #71717a;
+    --chart-4: #d4d4d8;
   }
 }

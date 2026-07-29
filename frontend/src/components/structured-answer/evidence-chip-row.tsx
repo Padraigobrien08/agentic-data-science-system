@@ -16,7 +16,7 @@ export function EvidenceChipRow({ chips, className }: Props) {
         <Link
           key={`${c.label}-${c.href}`}
           href={c.href}
-          className="inline-flex items-center rounded-full border border-[var(--border)] bg-neutral-50 px-2 py-0.5 text-[10px] font-medium text-[var(--foreground)] transition-colors hover:border-[var(--foreground)]/30 hover:bg-[var(--background)] dark:bg-neutral-900/60"
+          className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-2 py-0.5 text-[10px] font-medium text-[var(--foreground)] transition-colors hover:border-[var(--foreground)]/30 hover:bg-[var(--background)]"
         >
           {c.label}
         </Link>

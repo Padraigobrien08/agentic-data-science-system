@@ -44,7 +44,12 @@ export default {
       borderRadius: {
         lg: "var(--ui-radius)",
         md: "calc(var(--ui-radius) - 2px)",
-        sm: "calc(var(--ui-radius) - 4px)"
+        sm: "calc(var(--ui-radius) - 4px)",
+        // Chat/answer surface radius scale — collapses the prior sprawl of
+        // bespoke radii to three steps (pill = rounded-full).
+        card: "1.25rem", // surface containers
+        control: "0.75rem", // buttons, inputs, nested boxes
+        chip: "0.5rem" // small tight elements
       },
       keyframes: {
         "accordion-down": {

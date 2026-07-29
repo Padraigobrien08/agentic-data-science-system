@@ -9,13 +9,13 @@ import { cn } from "@/lib/utils";
 function toneClasses(tone: ConfidenceStripProps["confidenceExplainer"]["tone"]): string {
   switch (tone) {
     case "good":
-      return "border-emerald-300/80 bg-emerald-50 text-emerald-900 hover:border-emerald-400 dark:border-emerald-800 dark:bg-emerald-950/35 dark:text-emerald-100";
+      return "border-[color:var(--status-success-border)] bg-[var(--status-success-bg)] text-[color:var(--status-success-ink)] hover:border-[color:var(--status-success-ink)]";
     case "medium":
-      return "border-amber-300/80 bg-amber-50 text-amber-900 hover:border-amber-400 dark:border-amber-800 dark:bg-amber-950/35 dark:text-amber-100";
+      return "border-[color:var(--status-warning-border)] bg-[var(--status-warning-bg)] text-[color:var(--status-warning-ink)] hover:border-[color:var(--status-warning-ink)]";
     case "bad":
-      return "border-rose-300/80 bg-rose-50 text-rose-900 hover:border-rose-400 dark:border-rose-800 dark:bg-rose-950/35 dark:text-rose-100";
+      return "border-[color:var(--status-danger-border)] bg-[var(--status-danger-bg)] text-[color:var(--status-danger-ink)] hover:border-[color:var(--status-danger-ink)]";
     default:
-      return "border-[var(--border)] bg-neutral-50 text-[var(--foreground)] hover:border-[var(--foreground)]/20 dark:bg-neutral-950/35";
+      return "border-[var(--border)] bg-[var(--surface)] text-[var(--foreground)] hover:border-[var(--foreground)]/20";
   }
 }
 
@@ -32,7 +32,7 @@ function ExplainerSection({
 
   return (
     <section className="space-y-2">
-      <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">{title}</p>
+      <p className="text-[12px] font-semibold text-[var(--foreground)]">{title}</p>
       <ul className="space-y-2 text-[13px] leading-6 text-[var(--foreground)]">
         {items.map((item) => (
           <li key={`${title}-${item}`} className="flex gap-2">
@@ -47,7 +47,6 @@ function ExplainerSection({
 
 /** Compact header disclosure for answer confidence and its grouped rationale. */
 export function ConfidenceStrip({
-  overallConfidence,
   confidenceExplainer,
   reliabilityNote,
   className,
@@ -65,7 +64,7 @@ export function ConfidenceStrip({
           <button
             type="button"
             className={cn(
-              "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] font-medium transition-colors",
+              "inline-flex items-center gap-2 rounded-full border px-3.5 py-1.5 text-[12px] font-medium transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]",
               toneClasses(confidenceExplainer.tone),
             )}
             aria-label={`Evidence strength: ${confidenceExplainer.label}`}
@@ -78,17 +77,8 @@ export function ConfidenceStrip({
         {hasExplainer ? (
           <PopoverContent align="end" className="space-y-4">
             <div className="space-y-1">
-              <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-[var(--muted)]">
-                Evidence strength
-              </p>
-              <p className="text-sm font-medium text-[var(--foreground)]">
-                {confidenceExplainer.label}
-                {overallConfidence ? (
-                  <span className="ml-2 text-[11px] font-normal uppercase tracking-[0.18em] text-[var(--muted)]">
-                    {overallConfidence}
-                  </span>
-                ) : null}
-              </p>
+              <p className="text-[11px] font-medium text-[var(--muted)]">Evidence strength</p>
+              <p className="text-sm font-medium text-[var(--foreground)]">{confidenceExplainer.label}</p>
             </div>
 
             <ExplainerSection title="What supports this" items={confidenceExplainer.supports} />
@@ -96,7 +86,7 @@ export function ConfidenceStrip({
             <ExplainerSection title="Coverage limits" items={confidenceExplainer.limits} />
 
             {reliabilityNote ? (
-              <p className="rounded-xl border border-[var(--border)]/70 bg-neutral-50/85 px-3 py-2 text-[12px] leading-5 text-[var(--muted)] dark:bg-neutral-950/35">
+              <p className="rounded-control border border-[var(--border)] bg-[var(--surface)] px-3 py-2 text-[12px] leading-5 text-[var(--muted)]">
                 {reliabilityNote}
               </p>
             ) : null}
