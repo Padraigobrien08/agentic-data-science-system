@@ -194,3 +194,32 @@ export async function enterDemoAction(): Promise<void> {
 
   redirect(`/projects/${session.project_id}/chat`);
 }
+
+export type InterestState = { ok?: boolean; error?: string };
+
+/** Optional landing-page email capture — a signal of interest, not a sign-up. */
+export async function submitInterestAction(
+  _prev: InterestState,
+  formData: FormData,
+): Promise<InterestState> {
+  const email = String(formData.get("email") ?? "").trim();
+  if (!email) {
+    return { error: "Enter an email address." };
+  }
+
+  const base = getApiBaseUrl();
+  try {
+    const res = await fetch(`${base}/v1/interest`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Accept: "application/json" },
+      body: JSON.stringify({ email, source: "landing" }),
+      cache: "no-store",
+    });
+    if (!res.ok) {
+      return { error: parseDetail(await res.text()) };
+    }
+  } catch {
+    return { error: "Could not submit right now — try again." };
+  }
+  return { ok: true };
+}
