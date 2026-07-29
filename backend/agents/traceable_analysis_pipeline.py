@@ -90,6 +90,11 @@ def run_traceable_edgar_pipeline(
     s = settings if settings is not None else get_settings()
     coord_fn = coordinator or AnalysisAgent().run_returning_state
 
+    # Incremental commits at phase boundaries publish progress to pollers (chat run
+    # progress). expire_on_commit=False keeps live objects usable across commits; on a
+    # mid-run failure the already-committed phases persist (intentional: auditable runs).
+    session.commit()
+
     # --- Step 1: coordinator → planner → Executor (only MCP entry; existing tool layer) ---
     orch_out, run_state = coord_fn(orch_input)
 
@@ -170,6 +175,9 @@ def run_traceable_edgar_pipeline(
     prompt_versions["critic"] = s.agent_critic_prompt_version
     prompt_versions["report"] = s.agent_report_prompt_version
     merge_ai_agents_meta(session, analysis_run_id, "prompt_versions", prompt_versions)
+
+    # Executor + planning trace persisted → the analysis phase is now visible to pollers.
+    session.commit()
 
     output_patch: dict[str, Any] = {}
 
@@ -311,6 +319,9 @@ def run_traceable_edgar_pipeline(
             }
 
     merge_ai_agents_meta(session, analysis_run_id, "critic", critic_patch)
+
+    # Critic phase complete → visible to pollers before the report phase runs.
+    session.commit()
 
     # --- Step 4: report (LLM) — user-facing narrative (uses critic when present) ---
     report_row = rs_steps.create(
