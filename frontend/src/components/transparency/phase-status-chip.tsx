@@ -4,7 +4,7 @@ export function PhaseStatusChip({ status }: Props) {
   if (!status) return <span className="text-[var(--muted)]">—</span>;
   const muted =
     status === "skipped"
-      ? "bg-neutral-200 text-neutral-800 dark:bg-neutral-800 dark:text-neutral-200"
+      ? "bg-[var(--surface)] text-[var(--foreground)]"
       : status === "failed"
         ? "bg-red-100 text-red-900 dark:bg-red-950 dark:text-red-200"
         : status === "degraded"

@@ -113,7 +113,7 @@ export function RunPrimaryAnswer({ projectId, runId, runStatus, view, canExecute
         className={`rounded-xl border px-4 py-4 sm:px-5 ${
           highlightConfidence
             ? "border-amber-300/80 bg-amber-50/50 dark:border-amber-800 dark:bg-amber-950/20"
-            : "border-[var(--border)] bg-neutral-50/40 dark:bg-neutral-950/30"
+            : "border-[var(--border)] bg-[var(--surface)]"
         }`}
       >
         <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Confidence & caveats</p>

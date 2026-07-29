@@ -24,7 +24,7 @@ function stateStyles(state: PipelinePhaseLineState): { row: string; marker: stri
     case "skipped":
       return {
         row: "border-l-2 border-[var(--border)] pl-3 opacity-60",
-        marker: "border-[var(--border)] bg-neutral-100 text-[var(--muted)] dark:bg-neutral-800",
+        marker: "border-[var(--border)] bg-[var(--surface)] text-[var(--muted)]",
         label: "text-[var(--muted)] line-through decoration-[var(--muted)]/50",
       };
     default:
@@ -69,7 +69,7 @@ export function RunPipelinePhaseTrack({ status, steps, className }: Props) {
     <section
       className={
         className ??
-        "rounded-xl border border-[var(--border)] bg-neutral-50/60 px-4 py-4 dark:bg-neutral-950/40"
+        "rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4"
       }
       aria-label="Execution phases"
     >

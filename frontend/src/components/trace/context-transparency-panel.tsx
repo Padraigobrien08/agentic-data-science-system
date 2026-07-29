@@ -53,7 +53,7 @@ export function ContextTransparencyPanel({ ai }: Props) {
       {phases.map(({ phase, rows }) => (
         <div key={phase} className="mb-3 last:mb-0">
           <p className="mb-1 font-mono text-[10px] uppercase text-[var(--muted)]">{phase} phase</p>
-          <div className="overflow-x-auto rounded border border-[var(--border)] bg-neutral-50/40 dark:bg-neutral-950/30">
+          <div className="overflow-x-auto rounded border border-[var(--border)] bg-[var(--surface)]">
             <table className="w-full border-collapse text-left text-[10px]">
               <tbody className="divide-y divide-[var(--border)]">
                 {rows.map((r) => (

@@ -194,7 +194,7 @@ export const SidebarMenuButton = React.forwardRef<
       className={cn(
         "flex w-full items-start gap-3 rounded-2xl border border-transparent px-3 py-3 text-left transition-colors",
         "hover:bg-[hsl(var(--sidebar-accent))] hover:text-[hsl(var(--sidebar-accent-foreground))]",
-        "data-[active=true]:border-[hsl(var(--sidebar-border))] data-[active=true]:bg-white/85 data-[active=true]:shadow-sm",
+        "data-[active=true]:bg-[hsl(var(--sidebar-accent))] data-[active=true]:font-medium data-[active=true]:text-[hsl(var(--sidebar-accent-foreground))]",
         className,
       )}
       {...props}

@@ -130,7 +130,7 @@ export function StepStatusTimeline({
                 </p>
               ) : null}
               {mc ? (
-                <div className="mt-1 rounded border border-[var(--border)] bg-neutral-50/80 px-2 py-1.5 font-mono text-[10px] dark:bg-neutral-950/50">
+                <div className="mt-1 rounded border border-[var(--border)] bg-[var(--surface)] px-2 py-1.5 font-mono text-[10px]">
                   <span className="text-[var(--foreground)]">{mc.model_name}</span>
                   <span className="text-[var(--muted)]"> · {mc.provider}</span>
                   {mc.latency_ms != null ? (
