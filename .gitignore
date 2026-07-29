@@ -24,10 +24,26 @@ coverage.xml
 
 # Local API database (Alembic / FastAPI dev)
 data/backend.db
+# WAL/SHM sidecars (SQLite runs in WAL mode; see backend/db/session.py) and local backups
+data/backend.db-*
+data/backend.db.*
 
 # Managed artifact blobs (local object store)
 data/artifact_storage/
 
+# Durable per-run workspaces (EDGAR_BACKEND_RUN_WORKSPACE_ROOT)
+data/runs/
+
 # Next.js app (see frontend/.gitignore)
 frontend/node_modules/
 frontend/.next/
+
+# Root-level node install (tooling); frontend has its own
+node_modules/
+
+# Impeccable design-skill state. Critique snapshots are tracked design history
+# (they carry the score trend); anything else the skill writes here stays local.
+.impeccable/*
+!.impeccable/critique/
+frontend/.impeccable/*
+!frontend/.impeccable/critique/
