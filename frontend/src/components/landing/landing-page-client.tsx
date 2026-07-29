@@ -1,7 +1,9 @@
 "use client";
 
 import Link from "next/link";
+import { useActionState } from "react";
 
+import { enterDemoAction, submitInterestAction, type InterestState } from "@/actions/auth";
 import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
 
 const PLATFORM_PILLARS = [
@@ -58,9 +60,9 @@ function getActionConfig(isAuthenticated: boolean, projectId: string | null): Ac
   const loginNext = encodeURIComponent("/");
   if (!isAuthenticated) {
     return {
-      badge: "Guest preview",
-      title: "Sign in to run live analysis.",
-      note: "Start a run, inspect the answer, and open the supporting artifacts from the same chat context.",
+      badge: "Live demo",
+      title: "Try it now — no sign-up.",
+      note: "Jump straight into a sandbox workspace and run real SEC analysis. Leave your email only if you want product updates.",
       primaryHref: `/login?next=${loginNext}`,
       primaryLabel: "Sign in",
       secondaryHref: `/register?next=${loginNext}`,
@@ -93,7 +95,48 @@ function getActionConfig(isAuthenticated: boolean, projectId: string | null): Ac
   );
 }
 
-function ActionPanel({ config }: { config: ActionConfig }) {
+function DemoEntry() {
+  const [interest, interestAction] = useActionState(submitInterestAction, {} as InterestState);
+  return (
+    <div className="space-y-4">
+      <form action={enterDemoAction}>
+        <button
+          type="submit"
+          className="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_36px_-20px_rgba(31,111,255,0.56)] transition hover:-translate-y-0.5"
+        >
+          Enter the live demo →
+        </button>
+      </form>
+
+      {interest.ok ? (
+        <p className="text-sm font-medium text-[var(--foreground)]">Thanks — we&rsquo;ll keep you posted.</p>
+      ) : (
+        <form action={interestAction} className="flex flex-wrap items-center gap-2">
+          <input
+            name="email"
+            type="email"
+            required
+            placeholder="you@work.com"
+            aria-label="Email for product updates"
+            className="min-h-11 min-w-[15rem] flex-1 rounded-full border border-[var(--border)] bg-white px-4 py-3 text-sm text-[var(--foreground)] outline-none transition focus:border-[var(--accent)] placeholder:text-[var(--muted)]"
+          />
+          <button
+            type="submit"
+            className="min-h-11 rounded-full border border-[var(--border)] bg-white px-4 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5"
+          >
+            Keep me posted
+          </button>
+        </form>
+      )}
+      {interest.error ? <p className="text-xs text-red-700">{interest.error}</p> : null}
+      <p className="text-xs text-[var(--muted)]">
+        No sign-up required. Email is optional — just a signal of interest.
+      </p>
+    </div>
+  );
+}
+
+function ActionPanel({ config, isAuthenticated }: { config: ActionConfig; isAuthenticated: boolean }) {
   return (
     <div className="landing-reveal landing-reveal-delay-1 max-w-xl space-y-5">
       <div className="space-y-3">
@@ -101,20 +144,24 @@ function ActionPanel({ config }: { config: ActionConfig }) {
         <p className="text-[1.02rem] font-semibold tracking-[-0.03em] text-[var(--foreground)]">{config.title}</p>
         <p className="text-sm leading-6 text-[var(--muted)]">{config.note}</p>
       </div>
-      <div className="flex flex-wrap items-center gap-3">
-        <Link
-          href={config.primaryHref}
-          className="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_36px_-20px_rgba(31,111,255,0.56)] transition hover:-translate-y-0.5"
-        >
-          {config.primaryLabel}
-        </Link>
-        <Link
-          href={config.secondaryHref}
-          className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] bg-white px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5 hover:bg-white"
-        >
-          {config.secondaryLabel}
-        </Link>
-      </div>
+      {isAuthenticated ? (
+        <div className="flex flex-wrap items-center gap-3">
+          <Link
+            href={config.primaryHref}
+            className="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_36px_-20px_rgba(31,111,255,0.56)] transition hover:-translate-y-0.5"
+          >
+            {config.primaryLabel}
+          </Link>
+          <Link
+            href={config.secondaryHref}
+            className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] bg-white px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5 hover:bg-white"
+          >
+            {config.secondaryLabel}
+          </Link>
+        </div>
+      ) : (
+        <DemoEntry />
+      )}
     </div>
   );
 }
@@ -202,7 +249,7 @@ function HeroPreview() {
   );
 }
 
-function LandingHero({ config }: { config: ActionConfig }) {
+function LandingHero({ config, isAuthenticated }: { config: ActionConfig; isAuthenticated: boolean }) {
   return (
     <section className="relative overflow-hidden px-2 py-6 sm:px-4 sm:py-10 lg:px-6 lg:py-14">
       <div className="absolute left-[-8%] top-[10%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.1),transparent_68%)] blur-3xl" />
@@ -224,7 +271,7 @@ function LandingHero({ config }: { config: ActionConfig }) {
           </p>
 
           <div className="mt-10">
-            <ActionPanel config={config} />
+            <ActionPanel config={config} isAuthenticated={isAuthenticated} />
           </div>
 
           <div className="landing-reveal landing-reveal-delay-2 mt-12 grid gap-5 border-t border-[rgba(23,32,51,0.08)] pt-6 sm:grid-cols-3">
@@ -340,7 +387,7 @@ function ExampleShowcase() {
   );
 }
 
-function ClosingStrip({ config }: { config: ActionConfig }) {
+function ClosingStrip({ config, isAuthenticated }: { config: ActionConfig; isAuthenticated: boolean }) {
   return (
     <section className="relative overflow-hidden rounded-[2.2rem] border border-white/75 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.62))] px-6 py-7 shadow-[0_34px_90px_-56px_rgba(19,31,57,0.72)] sm:px-8 sm:py-8">
       <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,rgba(31,111,255,0.15),transparent_58%)] lg:block" />
@@ -356,18 +403,31 @@ function ClosingStrip({ config }: { config: ActionConfig }) {
           </p>
         </div>
         <div className="flex flex-wrap gap-3">
-          <Link
-            href={config.primaryHref}
-            className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(31,111,255,0.8)] transition hover:-translate-y-0.5"
-          >
-            {config.primaryLabel}
-          </Link>
-          <Link
-            href={config.secondaryHref}
-            className="inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-white/85 px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5 hover:bg-white"
-          >
-            {config.secondaryLabel}
-          </Link>
+          {isAuthenticated ? (
+            <>
+              <Link
+                href={config.primaryHref}
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(31,111,255,0.8)] transition hover:-translate-y-0.5"
+              >
+                {config.primaryLabel}
+              </Link>
+              <Link
+                href={config.secondaryHref}
+                className="inline-flex items-center justify-center rounded-full border border-[var(--border)] bg-white/85 px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5 hover:bg-white"
+              >
+                {config.secondaryLabel}
+              </Link>
+            </>
+          ) : (
+            <form action={enterDemoAction}>
+              <button
+                type="submit"
+                className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(31,111,255,0.8)] transition hover:-translate-y-0.5"
+              >
+                Enter the live demo →
+              </button>
+            </form>
+          )}
         </div>
       </div>
     </section>
@@ -384,11 +444,11 @@ export function LandingPageClient({ isAuthenticated, projectId }: Props) {
 
   return (
     <div className="mx-auto w-full max-w-[96rem] px-3 sm:px-5 lg:px-6 space-y-8 sm:space-y-10">
-      <LandingHero config={config} />
+      <LandingHero config={config} isAuthenticated={isAuthenticated} />
       <PlatformPillars />
       <WorkflowSection />
       <ExampleShowcase />
-      <ClosingStrip config={config} />
+      <ClosingStrip config={config} isAuthenticated={isAuthenticated} />
     </div>
   );
 }
