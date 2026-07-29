@@ -3,9 +3,13 @@
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
+from backend.models.chat_message import ChatMessage
+from backend.models.conversation import Conversation
 from backend.models.enums import (
     AnalysisRunStatus,
     ArtifactKind,
+    ChatMessageRole,
+    ChatMessageStatus,
     EvaluationRunStatus,
     ModelCallStatus,
     RunExecutionJobStatus,
@@ -53,6 +57,10 @@ __all__ = [
     "Artifact",
     "ArtifactKind",
     "Base",
+    "ChatMessage",
+    "ChatMessageRole",
+    "ChatMessageStatus",
+    "Conversation",
     "ConclusionRow",
     "CritiqueRow",
     "EvidenceArtifactLink",

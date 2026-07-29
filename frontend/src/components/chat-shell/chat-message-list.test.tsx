@@ -75,7 +75,7 @@ describe("ChatMessageList", () => {
           },
           overallConfidence: "medium",
           confidenceExplainer: {
-            label: "Medium",
+            label: "Moderate",
             tone: "medium",
             supports: ["Revenue growth deterioration appears in several recent quarters."],
             weakens: ["Peer coverage is limited for this run."],
@@ -147,7 +147,7 @@ describe("ChatMessageList", () => {
     expect(screen.getByText("The summarized evidence is directionally consistent.")).toBeTruthy();
     expect(screen.getByText("Peer validation remains limited across the available evidence.")).toBeTruthy();
     expect(screen.getByText("Evidence strength:")).toBeTruthy();
-    expect(screen.getByText("Medium")).toBeTruthy();
+    expect(screen.getByText("Moderate")).toBeTruthy();
     const visualEvidence = screen.getByText("Visual evidence");
     const supportingEvidence = screen.getByText("Show supporting evidence");
     expect(
@@ -296,7 +296,7 @@ describe("ChatMessageList", () => {
           },
           overallConfidence: "medium",
           confidenceExplainer: {
-            label: "Medium",
+            label: "Moderate",
             tone: "medium",
             supports: [],
             weakens: ["Peer validation is incomplete."],
@@ -406,7 +406,7 @@ describe("ChatMessageList", () => {
     expect(screen.queryByText("Run completed without a summary line.")).toBeNull();
   });
 
-  it("renders the structured pending footprint while analysis is running", () => {
+  it("renders live pipeline-phase progress while analysis is running", () => {
     const messages: ChatMessage[] = [
       {
         id: "assistant-pending",
@@ -421,8 +421,8 @@ describe("ChatMessageList", () => {
 
     render(<ChatMessageList messages={messages} />);
 
-    expect(screen.getByText("Running analysis...")).toBeTruthy();
-    expect(screen.getByText("Updating…")).toBeTruthy();
+    expect(screen.getByText("Starting analysis…")).toBeTruthy();
+    expect(screen.getByText("Understanding goal & plan")).toBeTruthy();
   });
 
   it("renders rewriteSuggestions inline without run links for unsupported routing replies", () => {
@@ -484,7 +484,7 @@ describe("ChatMessageList", () => {
           },
           overallConfidence: "medium",
           confidenceExplainer: {
-            label: "Medium",
+            label: "Moderate",
             tone: "medium",
             supports: [],
             weakens: [],
@@ -524,5 +524,18 @@ describe("ChatMessageList", () => {
       ),
     ).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
+  });
+
+  it("shows the first-run help hint on the empty state and hides it after dismissal", async () => {
+    window.localStorage.removeItem("edgar-chat-firstrun-help-dismissed");
+
+    render(<ChatMessageList messages={[]} onPickPrompt={() => {}} />);
+
+    expect(await screen.findByText("How this works")).toBeTruthy();
+
+    fireEvent.click(screen.getByRole("button", { name: "Dismiss how this works" }));
+
+    expect(screen.queryByText("How this works")).toBeNull();
+    expect(window.localStorage.getItem("edgar-chat-firstrun-help-dismissed")).toBe("1");
   });
 });

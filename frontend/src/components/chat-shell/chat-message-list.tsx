@@ -1,12 +1,100 @@
 "use client";
 
-import { AssistantStructuredFrame } from "./assistant-structured-frame";
+import { useEffect, useState } from "react";
+import { X } from "lucide-react";
+
+import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
 import { ChatRunAnswerCard } from "./chat-run-answer-card";
+import { ChatRunProgress } from "./chat-run-progress";
 import type { ChatMessage } from "./types";
+
+const FIRST_RUN_HELP_KEY = "edgar-chat-firstrun-help-dismissed";
+
+/**
+ * One-time, dismissable explainer of the ask → confidence → verify loop. Shown
+ * only on first visit (persisted per-browser), so it teaches without nagging.
+ */
+function FirstRunHint() {
+  const [show, setShow] = useState(false);
+  useEffect(() => {
+    try {
+      setShow(window.localStorage.getItem(FIRST_RUN_HELP_KEY) !== "1");
+    } catch {
+      setShow(true);
+    }
+  }, []);
+
+  if (!show) return null;
+
+  const dismiss = () => {
+    try {
+      window.localStorage.setItem(FIRST_RUN_HELP_KEY, "1");
+    } catch {
+      /* private mode: hide for this session only */
+    }
+    setShow(false);
+  };
+
+  return (
+    <div className="relative mx-auto w-full max-w-2xl rounded-card border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-3 pr-10 text-left">
+      <p className="text-[12px] font-semibold text-[var(--foreground)]">How this works</p>
+      <p className="mt-1 text-[12.5px] leading-5 text-[var(--muted)]">
+        Ask about a company&rsquo;s filings in plain language. A deterministic pipeline runs against
+        SEC data and returns an answer with a confidence read and evidence you can open and verify.
+      </p>
+      <button
+        type="button"
+        onClick={dismiss}
+        aria-label="Dismiss how this works"
+        className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-control text-[var(--chat-faint)] transition-colors hover:bg-[var(--chat-hover)] hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+      >
+        <X className="h-4 w-4" />
+      </button>
+    </div>
+  );
+}
 
 type Props = {
   messages: ChatMessage[];
+  onPickPrompt?: (goal: string) => void;
+  onStop?: () => void;
 };
+
+function EmptyState({ onPickPrompt }: { onPickPrompt?: (goal: string) => void }) {
+  return (
+    <div className="flex flex-1 flex-col items-center justify-center gap-7 px-4 py-12 text-center">
+      <div className="space-y-2.5">
+        <h2 className="text-2xl font-semibold leading-tight tracking-[-0.02em] text-[var(--foreground)] sm:text-[1.7rem]">
+          Ask a question about a company&rsquo;s filings
+        </h2>
+        <p className="mx-auto max-w-md text-sm leading-6 text-[var(--muted)]">
+          Deterministic SEC analysis with traceable evidence. Pick a starting point, or type your own below.
+        </p>
+      </div>
+      {onPickPrompt ? (
+        <div className="grid w-full max-w-2xl gap-3 sm:grid-cols-2">
+          {ANALYSIS_EXAMPLES.map((example) => (
+            <button
+              key={example.label}
+              type="button"
+              onClick={() => onPickPrompt(example.goal)}
+              className="group rounded-card border border-[var(--border)] bg-[var(--surface)] p-4 text-left transition hover:-translate-y-0.5 hover:border-[var(--accent)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)] motion-reduce:transition-none motion-reduce:hover:translate-y-0"
+            >
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[12px] font-semibold text-[var(--foreground)]">
+                  {example.label}
+                </p>
+                <span className="font-mono text-[11px] text-[var(--accent)]">{example.tickers}</span>
+              </div>
+              <p className="mt-2 line-clamp-3 text-[13.5px] leading-6 text-[var(--foreground)]">{example.goal}</p>
+            </button>
+          ))}
+        </div>
+      ) : null}
+      <FirstRunHint />
+    </div>
+  );
+}
 
 function deliveryNote(message: Extract<ChatMessage, { role: "assistant" }>): string | null {
   if (message.reroutedFromBackground) {
@@ -23,7 +111,7 @@ function deliveryNote(message: Extract<ChatMessage, { role: "assistant" }>): str
 
 function SystemStrip({ content }: { content: string }) {
   return (
-    <div className="mx-auto max-w-[40rem] rounded-full border border-[var(--border)] bg-neutral-100/60 px-4 py-2 text-center text-[11px] text-[var(--muted)] dark:bg-neutral-900/40">
+    <div className="mx-auto max-w-[40rem] rounded-full border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-2 text-center text-[11px] text-[var(--muted)]">
       {content}
     </div>
   );
@@ -32,7 +120,7 @@ function SystemStrip({ content }: { content: string }) {
 /**
  * Conversation strip: user and assistant chat bubbles.
  */
-export function ChatMessageList({ messages }: Props) {
+export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
   return (
     <div
       className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 md:px-6 md:py-5 lg:px-10"
@@ -41,13 +129,7 @@ export function ChatMessageList({ messages }: Props) {
       aria-relevant="additions"
     >
       {messages.length === 0 ? (
-        <div className="flex flex-1 flex-col items-center justify-center gap-2 py-12 text-center">
-          <p className="text-sm font-medium text-[var(--foreground)]">No messages yet</p>
-          <p className="max-w-sm text-xs text-[var(--muted)]">
-            Use the composer to describe a goal. Assistant replies will appear as narrative answers with
-            supporting proof beneath them.
-          </p>
-        </div>
+        <EmptyState onPickPrompt={onPickPrompt} />
       ) : (
         messages.map((m) => {
           if (m.role === "user") {
@@ -55,13 +137,8 @@ export function ChatMessageList({ messages }: Props) {
               <article key={m.id} className="flex w-full justify-center">
                 <div className="w-full max-w-[76rem]">
                   <div className="flex justify-end">
-                    <div className="max-w-[min(100%,44rem)] rounded-[1.6rem] rounded-tr-[1rem] border border-[var(--border)] bg-white/92 px-5 py-4 text-sm shadow-[0_12px_32px_rgba(15,23,42,0.04)] dark:bg-neutral-950/80">
-                      <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
-                        You
-                      </p>
-                      <div className="mt-2 whitespace-pre-wrap text-[15px] leading-7 text-[var(--foreground)]">
-                        {m.content}
-                      </div>
+                    <div className="max-w-[min(100%,44rem)] whitespace-pre-wrap break-words rounded-card border border-[var(--border)] bg-[var(--chat-user)] px-4 py-3 text-[15px] leading-7 text-[var(--foreground)]">
+                      {m.content}
                     </div>
                   </div>
                 </div>
@@ -80,9 +157,7 @@ export function ChatMessageList({ messages }: Props) {
             >
               <div className="w-full max-w-[76rem]">
                 {m.pending ? (
-                  <div className="mx-auto max-w-[58rem]">
-                    <AssistantStructuredFrame messageId={m.id} variant="pending" />
-                  </div>
+                  <ChatRunProgress view={m.phaseView} onStop={onStop} />
                 ) : m.answerCard ? (
                   <div className="mx-auto max-w-[66rem]">
                     <ChatRunAnswerCard
@@ -95,18 +170,18 @@ export function ChatMessageList({ messages }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap rounded-[1.75rem] border border-[var(--border)] bg-white/80 px-5 py-4 text-[15px] leading-7 text-[var(--foreground)] shadow-[0_12px_32px_rgba(15,23,42,0.04)] dark:bg-neutral-950/70">
+                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap break-words rounded-card border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[15px] leading-7 text-[var(--foreground)]">
                     {m.content}
                   </div>
                 )}
                 {m.routingReason ? (
-                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-neutral-50/80 px-4 py-3 text-[12px] leading-6 text-[var(--muted)] dark:bg-neutral-950/30">
+                  <div className="mx-auto mt-3 max-w-[52rem] rounded-card border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-3 text-[12.5px] leading-6 text-[var(--muted)]">
                     {m.routingReason}
                   </div>
                 ) : null}
                 {m.rewriteSuggestions?.length ? (
-                  <div className="mx-auto mt-3 max-w-[52rem] rounded-2xl border border-[var(--border)] bg-neutral-50/80 px-4 py-3 dark:bg-neutral-950/30">
-                    <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">
+                  <div className="mx-auto mt-3 max-w-[52rem] rounded-card border border-[var(--border)] bg-[var(--chat-rail)] px-4 py-3">
+                    <p className="text-[12px] font-semibold text-[var(--foreground)]">
                       Try one of these rewrites
                     </p>
                     <ul className="mt-3 space-y-2 text-[13px] leading-6 text-[var(--foreground)]">

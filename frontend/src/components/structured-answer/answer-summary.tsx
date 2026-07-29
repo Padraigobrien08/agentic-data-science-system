@@ -35,7 +35,7 @@ export function AnswerSummary({
     <section
       className={
         className ??
-        "rounded-xl border border-[var(--border)] bg-[var(--background)] px-4 py-5 shadow-sm sm:px-5 sm:py-6"
+        "rounded-control border border-[var(--border)] bg-[var(--background)] px-4 py-5 shadow-sm sm:px-5 sm:py-6"
       }
     >
       <div className="space-y-4">
@@ -48,7 +48,7 @@ export function AnswerSummary({
           </p>
         </div>
         {conclusionRider ? (
-          <div className="rounded-md border border-amber-200/80 bg-amber-50/50 px-2.5 py-2 text-[11px] leading-snug text-amber-950 dark:border-amber-900/60 dark:bg-amber-950/25 dark:text-amber-50">
+          <div className="rounded-control border border-[color:var(--status-warning-border)] bg-[var(--status-warning-bg)] px-2.5 py-2 text-[11px] leading-snug text-[var(--foreground)]">
             <span className="font-medium text-[var(--foreground)]">Note · </span>
             {conclusionRider.text}{" "}
             <Link href={conclusionRider.href} className="font-medium text-[var(--foreground)] underline">
@@ -68,7 +68,7 @@ export function AnswerSummary({
               </span>
               <span className="ml-1.5 font-normal text-[var(--muted)]">(technical)</span>
             </summary>
-            <div className="mt-2 rounded border border-[var(--border)] bg-neutral-50/80 px-2.5 py-2 font-mono text-[10px] leading-snug dark:bg-neutral-950/50">
+            <div className="mt-2 rounded border border-[var(--border)] bg-[var(--surface)] px-2.5 py-2 font-mono text-[10px] leading-snug">
               {orchestrationStatus}
             </div>
           </details>

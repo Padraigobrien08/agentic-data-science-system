@@ -5,13 +5,23 @@ import { ChatShell } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
 vi.mock("@/actions/projects", () => ({
-  deleteChatAction: async () => undefined,
-  startConversationFromScopeAction: async () => undefined,
   updateWorkspaceScopeAction: async () => ({}),
 }));
 
+vi.mock("@/actions/conversations", () => ({
+  deleteConversationAction: async () => undefined,
+  startNewConversationAction: async () => undefined,
+}));
+
+vi.mock("@/actions/auth", () => ({
+  logoutAction: async () => undefined,
+}));
+
 vi.mock("@/actions/runs", () => ({
-  createAnalysisRunFromChat: async () => ({}),
+  // Never resolve so the send flow stays in its live-progress state during assertions.
+  startAnalysisRun: () => new Promise(() => {}),
+  finalizeAnalysisRun: () => new Promise(() => {}),
+  getRunProgress: () => new Promise(() => {}),
 }));
 
 describe("ChatShell", () => {
@@ -115,6 +125,7 @@ describe("ChatShell", () => {
     render(
       <ChatShell
         projectId="project-1"
+        conversationId="conv-1"
         tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",
@@ -138,8 +149,8 @@ describe("ChatShell", () => {
     fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
 
     expect(screen.getAllByText("Detect unusual financial changes for MSFT")).toHaveLength(1);
-    expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
-    expect(screen.getAllByText("This chat is executing synchronously right now.")).toHaveLength(1);
+    expect(screen.getByText("Starting analysis…")).toBeTruthy();
+    expect(screen.getByText("Understanding goal & plan")).toBeTruthy();
     expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getByRole("button", { name: "New chat" })).toBeTruthy();
@@ -222,6 +233,7 @@ describe("ChatShell", () => {
     render(
       <ChatShell
         projectId="project-1"
+        conversationId="conv-1"
         tickers={["MSFT"]}
         backgroundDelivery={{
           delivery_mode: "sync_only",

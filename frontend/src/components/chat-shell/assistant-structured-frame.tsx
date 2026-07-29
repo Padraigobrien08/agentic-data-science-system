@@ -17,13 +17,13 @@ type Props = {
 export function AssistantStructuredFrame({ messageId, variant = "empty" }: Props) {
   return (
     <Card
-      className="w-full max-w-[min(100%,42rem)] rounded-2xl rounded-bl-md bg-[var(--background)] shadow-none"
+      className="w-full max-w-[min(100%,42rem)] rounded-card bg-[var(--background)] shadow-none"
       data-message-id={messageId}
       data-assistant-slot="structured"
     >
       <CardHeader className="gap-1 pb-4">
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">
+          <p className="text-[12px] font-semibold text-[var(--foreground)]">
             Conclusion
           </p>
           {variant === "pending" ? (
@@ -38,7 +38,7 @@ export function AssistantStructuredFrame({ messageId, variant = "empty" }: Props
         <Skeleton className="h-12 w-full" />
         <Separator />
         <div className="space-y-2">
-          <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[var(--muted)]">Goal</p>
+          <p className="text-[12px] font-semibold text-[var(--foreground)]">Goal</p>
           <Skeleton className="h-5 w-4/5" />
           <Skeleton className="h-5 w-3/5" />
         </div>

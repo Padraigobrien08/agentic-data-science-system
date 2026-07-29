@@ -16,7 +16,7 @@ export function TopFindingsList({
       {items.map((row, i) => (
         <li
           key={`${i}-${row.text.slice(0, 48)}`}
-          className="rounded-lg border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm leading-snug text-[var(--foreground)]"
+          className="rounded-control border border-[var(--border)] bg-[var(--background)] px-3 py-2 text-sm leading-snug text-[var(--foreground)]"
         >
           <p>{row.text}</p>
           {chipMode === "full" ? <EvidenceChipRow chips={row.chips} /> : null}

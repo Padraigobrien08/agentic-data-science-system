@@ -8,6 +8,7 @@ from sqlalchemy.orm import Session
 
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
+from backend.models.conversation import Conversation
 from backend.models.evaluation_run import EvaluationRun
 from backend.models.investigation import Investigation
 from backend.models.project import Project
@@ -19,6 +20,17 @@ def get_owned_project(db: Session, project_id: UUID, user_id: UUID) -> Project |
     if row is None or row.owner_user_id != user_id:
         return None
     return row
+
+
+def get_conversation_for_owner(db: Session, conversation_id: UUID, user_id: UUID) -> Conversation | None:
+    """A conversation is accessible to the owner of its project."""
+    conv = db.get(Conversation, conversation_id)
+    if conv is None:
+        return None
+    proj = db.get(Project, conv.project_id)
+    if proj is None or proj.owner_user_id != user_id:
+        return None
+    return conv
 
 
 def get_investigation_for_owner(db: Session, investigation_id: UUID, user_id: UUID) -> Investigation | None:

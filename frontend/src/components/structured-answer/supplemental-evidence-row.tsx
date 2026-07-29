@@ -14,7 +14,7 @@ export function SupplementalEvidenceRow({ row, className }: Props) {
     <article
       className={
         className ??
-        "rounded-[1.15rem] border border-[var(--border)]/70 bg-white/75 px-4 py-3 dark:bg-neutral-950/25"
+        "rounded-card border border-[var(--border)] bg-[var(--surface)] px-4 py-3"
       }
     >
       <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between md:gap-6">

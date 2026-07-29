@@ -76,3 +76,19 @@ class ModelCallStatus(str, enum.Enum):
     success = "success"
     error = "error"
     cancelled = "cancelled"
+
+
+class ChatMessageRole(str, enum.Enum):
+    """Author of a durable chat message."""
+
+    user = "user"
+    assistant = "assistant"
+    system = "system"
+
+
+class ChatMessageStatus(str, enum.Enum):
+    """Lifecycle of a chat message (assistant turns start ``pending``)."""
+
+    pending = "pending"
+    complete = "complete"
+    error = "error"

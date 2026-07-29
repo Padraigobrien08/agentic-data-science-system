@@ -1,10 +1,19 @@
 import { describe, expect, it, vi } from "vitest";
 
-const { listProjectsMock, listRunsMock, getRunMock, listRunArtifactsMock } = vi.hoisted(() => ({
+const {
+  listProjectsMock,
+  listRunsMock,
+  getRunMock,
+  listRunArtifactsMock,
+  getConversationMock,
+  listConversationsMock,
+} = vi.hoisted(() => ({
   listProjectsMock: vi.fn(),
   listRunsMock: vi.fn(),
   getRunMock: vi.fn(),
   listRunArtifactsMock: vi.fn(),
+  getConversationMock: vi.fn(),
+  listConversationsMock: vi.fn(),
 }));
 
 vi.mock("@/lib/api/projects", () => ({
@@ -17,7 +26,12 @@ vi.mock("@/lib/api/runs", () => ({
   listRunArtifacts: listRunArtifactsMock,
 }));
 
-import { buildProjectChatHistory } from "@/lib/chat-run-history";
+vi.mock("@/lib/api/conversations", () => ({
+  getConversation: getConversationMock,
+  listConversations: listConversationsMock,
+}));
+
+import { buildConversationHistory, buildProjectChatHistory } from "@/lib/chat-run-history";
 
 describe("buildProjectChatHistory", () => {
   it("maps persisted runs into a transcript and keeps durable thread history across projects", async () => {
@@ -220,6 +234,125 @@ describe("buildProjectChatHistory", () => {
         href: "/projects/project-1/chat",
         hasMessages: true,
         updatedAt: "2026-04-19T10:02:00Z",
+      },
+    ]);
+  });
+});
+
+describe("buildConversationHistory", () => {
+  it("rehydrates durable messages and lists the project's conversations as threads", async () => {
+    getConversationMock.mockResolvedValue({
+      id: "conv-1",
+      project_id: "project-1",
+      owner_user_id: "user-1",
+      title: "MSFT margins",
+      last_message_at: "2026-04-19T09:02:00Z",
+      archived_at: null,
+      created_at: "2026-04-19T09:00:00Z",
+      updated_at: "2026-04-19T09:02:00Z",
+      messages: [
+        {
+          id: "m1",
+          conversation_id: "conv-1",
+          role: "user",
+          status: "complete",
+          content: "Is MSFT margin pressure structural?",
+          error_summary: null,
+          client_request_id: "req-1",
+          analysis_run_id: null,
+          meta_json: null,
+          created_at: "2026-04-19T09:00:00Z",
+          updated_at: "2026-04-19T09:00:00Z",
+        },
+        {
+          id: "m2",
+          conversation_id: "conv-1",
+          role: "assistant",
+          status: "complete",
+          content: "MSFT margin pressure looks cyclical rather than structural.",
+          error_summary: null,
+          client_request_id: "req-1",
+          analysis_run_id: "run-1",
+          meta_json: { delivery_mode: "sync_only" },
+          created_at: "2026-04-19T09:02:00Z",
+          updated_at: "2026-04-19T09:02:00Z",
+        },
+      ],
+    });
+    listConversationsMock.mockResolvedValue([
+      {
+        id: "conv-1",
+        project_id: "project-1",
+        owner_user_id: "user-1",
+        title: "MSFT margins",
+        last_message_at: "2026-04-19T09:02:00Z",
+        archived_at: null,
+        created_at: "2026-04-19T09:00:00Z",
+        updated_at: "2026-04-19T09:02:00Z",
+      },
+      {
+        id: "conv-2",
+        project_id: "project-1",
+        owner_user_id: "user-1",
+        title: null,
+        last_message_at: null,
+        archived_at: null,
+        created_at: "2026-04-19T08:00:00Z",
+        updated_at: "2026-04-19T08:00:00Z",
+      },
+    ]);
+    getRunMock.mockResolvedValue({
+      id: "run-1",
+      project_id: "project-1",
+      initiated_by_user_id: "user-1",
+      correlation_id: null,
+      status: "success",
+      orchestration_goal_text: "Is MSFT margin pressure structural?",
+      error_summary: null,
+      started_at: "2026-04-19T09:00:30Z",
+      finished_at: "2026-04-19T09:02:00Z",
+      created_at: "2026-04-19T09:00:00Z",
+      updated_at: "2026-04-19T09:02:00Z",
+      current_phase: "finished",
+      total_steps: 5,
+      completed_steps: 5,
+      input_payload_json: { tickers: ["MSFT"], analysis_goal: "Is MSFT margin pressure structural?" },
+      output_payload_json: {
+        status: "success",
+        final_summary: "MSFT margin pressure looks cyclical rather than structural.",
+      },
+      meta_json: null,
+      transparency: null,
+    });
+    listRunArtifactsMock.mockResolvedValue([]);
+
+    const result = await buildConversationHistory("project-1", "conv-1");
+
+    expect(result.messages).toHaveLength(2);
+    expect(result.messages[0]).toMatchObject({
+      role: "user",
+      content: "Is MSFT margin pressure structural?",
+    });
+    expect(result.messages[1]).toMatchObject({
+      role: "assistant",
+      content: "MSFT margin pressure looks cyclical rather than structural.",
+      runHref: "/projects/project-1/runs/run-1/trace",
+    });
+    // Threads point at conversation URLs; the fresh empty thread has no messages yet.
+    expect(result.chatThreads).toEqual([
+      {
+        id: "conv-1",
+        title: "MSFT margins",
+        href: "/projects/project-1/chat/conv-1",
+        hasMessages: true,
+        updatedAt: "2026-04-19T09:02:00Z",
+      },
+      {
+        id: "conv-2",
+        title: "New chat",
+        href: "/projects/project-1/chat/conv-2",
+        hasMessages: false,
+        updatedAt: "2026-04-19T08:00:00Z",
       },
     ]);
   });

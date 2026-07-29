@@ -13,6 +13,7 @@ from backend.db.base import Base
 
 if TYPE_CHECKING:
     from backend.models.analysis_run import AnalysisRun
+    from backend.models.conversation import Conversation
     from backend.models.evaluation_run import EvaluationRun
     from backend.models.user import User
 
@@ -58,6 +59,11 @@ class Project(Base):
     )
     evaluation_runs: Mapped[list[EvaluationRun]] = relationship(
         "EvaluationRun",
+        back_populates="project",
+        cascade="all, delete-orphan",
+    )
+    conversations: Mapped[list[Conversation]] = relationship(
+        "Conversation",
         back_populates="project",
         cascade="all, delete-orphan",
     )

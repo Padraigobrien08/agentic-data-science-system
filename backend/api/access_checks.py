@@ -8,6 +8,7 @@ from fastapi import HTTPException
 from sqlalchemy.orm import Session
 
 from backend.auth.resource_access import (
+    get_conversation_for_owner,
     get_investigation_for_owner,
     get_owned_project,
     get_run_for_owner,
@@ -15,6 +16,7 @@ from backend.auth.resource_access import (
 )
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
+from backend.models.conversation import Conversation
 from backend.models.evaluation_run import EvaluationRun
 from backend.models.investigation import Investigation
 from backend.models.project import Project
@@ -25,6 +27,13 @@ def require_project_owned(db: Session, project_id: UUID, user_id: UUID) -> Proje
     row = get_owned_project(db, project_id, user_id)
     if row is None:
         raise HTTPException(status_code=404, detail="Project not found")
+    return row
+
+
+def require_conversation_owned(db: Session, conversation_id: UUID, user_id: UUID) -> Conversation:
+    row = get_conversation_for_owner(db, conversation_id, user_id)
+    if row is None:
+        raise HTTPException(status_code=404, detail="Conversation not found")
     return row
 
 

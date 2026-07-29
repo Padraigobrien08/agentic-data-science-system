@@ -7,19 +7,19 @@ export function DeepDiveActions({ traceHref, reportArtifactId, chatHref, classNa
     <div className={className ?? "flex flex-col gap-2 sm:flex-row sm:flex-wrap sm:items-center"}>
       <Link
         href={traceHref}
-        className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--foreground)] px-4 py-2.5 text-center text-sm font-semibold text-[var(--background)]"
+        className="inline-flex items-center justify-center rounded-control border border-[var(--border)] bg-[var(--foreground)] px-4 py-2.5 text-center text-sm font-semibold text-[var(--background)]"
       >
         Deep dive (steps &amp; artifacts)
       </Link>
       {reportArtifactId ? (
         <Link
           href={`/artifacts/${reportArtifactId}`}
-          className="inline-flex items-center justify-center rounded-lg border border-[var(--border)] px-4 py-2.5 text-center text-sm font-medium text-[var(--foreground)]"
+          className="inline-flex items-center justify-center rounded-control border border-[var(--border)] px-4 py-2.5 text-center text-sm font-medium text-[var(--foreground)]"
         >
           Open report artifact
         </Link>
       ) : (
-        <span className="inline-flex items-center justify-center rounded-lg border border-dashed border-[var(--border)] px-4 py-2.5 text-center text-sm text-[var(--muted)]">
+        <span className="inline-flex items-center justify-center rounded-control border border-dashed border-[var(--border)] px-4 py-2.5 text-center text-sm text-[var(--muted)]">
           Report artifact not linked yet
         </span>
       )}

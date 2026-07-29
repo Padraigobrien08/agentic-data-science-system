@@ -24,7 +24,7 @@ export function EvidenceSummary({
             <Link
               key={`${item.label}-${item.href}`}
               href={item.href}
-              className="inline-flex items-center rounded-full border border-[var(--border)]/80 bg-neutral-50/80 px-3 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:border-[var(--foreground)]/20 hover:text-[var(--foreground)] dark:bg-neutral-950/25"
+              className="inline-flex items-center rounded-full border border-[var(--border)] bg-[var(--surface)] px-3 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:border-[var(--foreground)]/20 hover:text-[var(--foreground)]"
             >
               {item.label}
             </Link>
@@ -62,7 +62,7 @@ export function EvidenceSummary({
   return (
     <div className={className ?? "space-y-2"}>
       {hasLinks ? (
-        <ul className="divide-y divide-[var(--border)] rounded-lg border border-[var(--border)]">
+        <ul className="divide-y divide-[var(--border)] rounded-control border border-[var(--border)]">
           {links.map(({ role, artifactId }) => (
             <li
               key={`${role}-${artifactId}`}

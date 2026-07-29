@@ -44,7 +44,7 @@ const view: PrimaryAnswerView = {
   },
   overallConfidence: "medium",
   confidenceExplainer: {
-    label: "Medium",
+    label: "Moderate",
     tone: "medium",
     supports: ["Revenue growth deterioration appears in several recent quarters."],
     weakens: ["Peer coverage is limited for this run."],

@@ -179,3 +179,7 @@ export async function executeRun(
 ): Promise<ExecuteRunResponse> {
   return apiPost<ExecuteRunResponse>(`/v1/runs/${runId}/execute`, overrides ?? {});
 }
+
+export async function cancelRun(runId: string): Promise<AnalysisRunSummary> {
+  return apiPost<AnalysisRunSummary>(`/v1/runs/${runId}/cancel`, {});
+}

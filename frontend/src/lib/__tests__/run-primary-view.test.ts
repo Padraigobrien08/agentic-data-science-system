@@ -198,7 +198,7 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.emptyStateReason).toBeNull();
     expect(view.blockingCaveats).toEqual(["Peer coverage is insufficient."]);
     expect(view.overallConfidence).toBe("medium");
-    expect(view.confidenceExplainer.label).toBe("Medium");
+    expect(view.confidenceExplainer.label).toBe("Moderate");
     expect(view.confidenceExplainer.weakens).toEqual(["Peer coverage is insufficient."]);
   });
 
