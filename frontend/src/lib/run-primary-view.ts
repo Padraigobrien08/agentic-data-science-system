@@ -81,7 +81,7 @@ export type NarrativeAnswerView = {
 export type ConfidenceTone = "good" | "medium" | "bad" | "neutral";
 
 export type ConfidenceExplainerView = {
-  label: "Good" | "Medium" | "Bad" | "Not rated";
+  label: "Strong" | "Moderate" | "Weak" | "Not rated";
   tone: ConfidenceTone;
   supports: string[];
   weakens: string[];
@@ -250,11 +250,11 @@ function mapConfidenceTone(value: string | null): ConfidenceTone {
 function mapConfidenceLabel(value: string | null): ConfidenceExplainerView["label"] {
   switch (value) {
     case "high":
-      return "Good";
+      return "Strong";
     case "medium":
-      return "Medium";
+      return "Moderate";
     case "low":
-      return "Bad";
+      return "Weak";
     default:
       return "Not rated";
   }

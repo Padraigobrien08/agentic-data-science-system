@@ -13,8 +13,15 @@ vi.mock("@/actions/conversations", () => ({
   startNewConversationAction: async () => undefined,
 }));
 
+vi.mock("@/actions/auth", () => ({
+  logoutAction: async () => undefined,
+}));
+
 vi.mock("@/actions/runs", () => ({
-  createAnalysisRunFromChat: async () => ({}),
+  // Never resolve so the send flow stays in its live-progress state during assertions.
+  startAnalysisRun: () => new Promise(() => {}),
+  finalizeAnalysisRun: () => new Promise(() => {}),
+  getRunProgress: () => new Promise(() => {}),
 }));
 
 describe("ChatShell", () => {
@@ -142,8 +149,8 @@ describe("ChatShell", () => {
     fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
 
     expect(screen.getAllByText("Detect unusual financial changes for MSFT")).toHaveLength(1);
-    expect(screen.getAllByText("Running analysis...")).toHaveLength(1);
-    expect(screen.getAllByText("This chat is executing synchronously right now.")).toHaveLength(1);
+    expect(screen.getByText("Starting analysis…")).toBeTruthy();
+    expect(screen.getByText("Understanding goal & plan")).toBeTruthy();
     expect(screen.getByText("Visual evidence")).toBeTruthy();
     expect(screen.getByText("Show supporting evidence")).toBeTruthy();
     expect(screen.getByRole("button", { name: "New chat" })).toBeTruthy();

@@ -4,6 +4,7 @@
  */
 
 import type { AnalysisRunStatus, BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
+import type { PipelinePhaseView } from "@/lib/run-pipeline-phases";
 import type { ChatAnswerCardView } from "@/lib/run-primary-view";
 
 export type ChatUserMessage = {
@@ -35,6 +36,8 @@ export type ChatAssistantMessage = {
   runCreatedAt?: string;
   runFinishedAt?: string | null;
   pending?: boolean;
+  /** Live pipeline-phase progress while the run executes (polled). */
+  phaseView?: PipelinePhaseView;
   deliveryMode?: BackgroundDeliveryMode;
   deliveryDetail?: string;
   reroutedFromBackground?: boolean;
