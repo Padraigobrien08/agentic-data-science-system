@@ -112,7 +112,7 @@ export function AgentModelStepsPanel({ ai }: Props) {
       ) : (
         <div className="space-y-4">
           {ai.prompt_versions && Object.keys(ai.prompt_versions).length > 0 ? (
-            <div className="rounded border border-[var(--border)] bg-neutral-50/80 p-3 dark:bg-neutral-950/40">
+            <div className="rounded border border-[var(--border)] bg-[var(--surface)] p-3">
               <h4 className="text-xs font-semibold uppercase text-[var(--muted)]">
                 Prompt template versions
               </h4>

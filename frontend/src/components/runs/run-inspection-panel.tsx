@@ -19,7 +19,7 @@ export function RunInspectionPanel({ projectId, runId, runStatus, view, canExecu
 
   return (
     <article className="space-y-6">
-      <section className="rounded-xl border border-[var(--border)] bg-neutral-50/50 px-4 py-4 sm:px-5 dark:bg-neutral-950/30">
+      <section className="rounded-xl border border-[var(--border)] bg-[var(--surface)] px-4 py-4 sm:px-5">
         <p className="text-[10px] font-semibold uppercase tracking-wide text-[var(--muted)]">Inspection focus</p>
         <p className="mt-2 max-w-prose text-sm leading-relaxed text-[var(--foreground)]">
           The full answer lives in chat. Use this page to verify artifacts, inspect execution, and rerun the

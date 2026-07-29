@@ -74,8 +74,8 @@ function rowClass(isSelected: boolean) {
   return [
     "rounded-[20px] border px-4 py-4 transition-colors",
     isSelected
-      ? "border-[rgba(31,111,255,0.35)] bg-[rgba(31,111,255,0.05)]"
-      : "border-[var(--border)] bg-white/70",
+      ? "border-[var(--accent)]/40 bg-[var(--accent)]/10"
+      : "border-[var(--border)] bg-[var(--surface)]",
   ].join(" ");
 }
 
@@ -257,7 +257,7 @@ export function RunTraceCollectionPanel(props: RunTraceCollectionPanelProps) {
         >
           <div className="space-y-4">
             {props.items.length === 0 ? (
-              <div className="rounded-[20px] border border-dashed border-[var(--border)] bg-white/55 px-5 py-8">
+              <div className="rounded-[20px] border border-dashed border-[var(--border)] bg-[var(--surface)] px-5 py-8">
                 <p className="text-base font-semibold text-[var(--foreground)]">No trace details yet</p>
                 <p className="mt-2 max-w-prose text-sm leading-6 text-[var(--muted)]">
                   This run has not produced trace records yet. Wait for execution to finish, return to chat, or retry the run if it is stuck.

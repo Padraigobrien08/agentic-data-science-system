@@ -129,7 +129,7 @@ export function AgenticTraceView({
             />
           </DeepDiveLayout>
 
-          <details className="rounded-[24px] border border-[var(--border)] bg-white/60">
+          <details className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)]">
             <summary className="cursor-pointer select-none border-b border-[var(--border)] px-4 py-3 text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground)]">
               Technical inspector
             </summary>
@@ -162,7 +162,7 @@ function SectionPersistedSteps({
   steps: RunStepDetail[];
 }) {
   return (
-    <div className="rounded-[24px] border border-[var(--border)] bg-white/60">
+    <div className="rounded-[24px] border border-[var(--border)] bg-[var(--surface)]">
       <header className="border-b border-[var(--border)] px-4 py-3">
         <h2 className="text-xs font-semibold uppercase tracking-[0.16em] text-[var(--foreground)]">
           Persisted run steps
