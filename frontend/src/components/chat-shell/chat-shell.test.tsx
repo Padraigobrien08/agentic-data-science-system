@@ -4,6 +4,13 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import { ChatShell } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
+// The command palette navigates between chats via the app router, which is not
+// mounted in jsdom.
+const routerPushMock = vi.hoisted(() => vi.fn());
+vi.mock("next/navigation", () => ({
+  useRouter: () => ({ push: routerPushMock, replace: vi.fn(), prefetch: vi.fn() }),
+}));
+
 vi.mock("@/actions/projects", () => ({
   updateWorkspaceScopeAction: async () => ({}),
 }));

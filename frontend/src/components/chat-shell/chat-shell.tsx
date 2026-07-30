@@ -1,6 +1,8 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useRef, useState } from "react";
+import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
+import { Search } from "lucide-react";
 
 import { updateWorkspaceScopeAction } from "@/actions/projects";
 import {
@@ -18,9 +20,11 @@ import {
 import type { PipelinePhaseView } from "@/lib/run-pipeline-phases";
 import type { CurrentUser } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
+import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
 import { ChatComposer } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
+import { CommandPalette, type PaletteCommand } from "./command-palette";
 import { HelpHint } from "./help-hint";
 import type {
   ChatAssistantMessage,
@@ -58,8 +62,12 @@ export function ChatShell({
   chatThreads,
   className,
 }: Props) {
+  const router = useRouter();
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
   const [isEditingScope, setIsEditingScope] = useState(false);
+  const [paletteOpen, setPaletteOpen] = useState(false);
+  // Resolved after mount so the shortcut hints never cause a hydration mismatch.
+  const [modKey, setModKey] = useState("Ctrl");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
   const [draft, setDraft] = useState("");
   const [isRunning, setIsRunning] = useState(false);
@@ -69,6 +77,10 @@ export function ChatShell({
   const activeRequestId = useRef<string | null>(null);
   const activeRunId = useRef<string | null>(null);
   const cancelledRequests = useRef<Set<string>>(new Set());
+
+  useEffect(() => {
+    if (/mac|iphone|ipad/i.test(navigator.platform || navigator.userAgent)) setModKey("⌘");
+  }, []);
 
   const handlePickPrompt = useCallback((goal: string) => {
     setDraft(goal);
@@ -178,15 +190,40 @@ export function ChatShell({
     if (runId) void cancelAnalysisRun(runId);
   }, [notePendingStopped]);
 
-  // Escape stops a running analysis — the standard cancel gesture.
+  // Escape stops a running analysis — the standard cancel gesture. Skipped while the
+  // palette is open, where Escape belongs to dismissing the palette.
   useEffect(() => {
     if (!isRunning) return;
     const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") handleStop();
+      if (e.key === "Escape" && !paletteOpen) handleStop();
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [isRunning, handleStop]);
+  }, [isRunning, handleStop, paletteOpen]);
+
+  const startNewChat = useCallback(() => {
+    if (scopeTickers.length === 0) return;
+    void newConversationAction(new FormData());
+  }, [newConversationAction, scopeTickers.length]);
+
+  // Accelerators: ⌘K / Ctrl+K opens the palette, ⌘⇧O / Ctrl+Shift+O starts a new chat.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      const mod = e.metaKey || e.ctrlKey;
+      if (!mod) return;
+      if (e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        setPaletteOpen((v) => !v);
+        return;
+      }
+      if (e.shiftKey && e.key.toLowerCase() === "o") {
+        e.preventDefault();
+        startNewChat();
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [startNewChat]);
 
   const onSend = async (text: string, requestId: string) => {
     setSendError(undefined);
@@ -260,6 +297,49 @@ export function ChatShell({
     }
   };
 
+  const paletteCommands: PaletteCommand[] = useMemo(() => {
+    const actions: PaletteCommand[] = [
+      {
+        id: "action-new-chat",
+        label: "New chat",
+        hint: `${modKey}⇧O`,
+        group: "Actions",
+        disabled: scopeTickers.length === 0,
+        run: startNewChat,
+      },
+      {
+        id: "action-edit-scope",
+        label: isEditingScope ? "Close scope editor" : "Edit scope",
+        group: "Actions",
+        run: () => setIsEditingScope((v) => !v),
+      },
+    ];
+    const prompts: PaletteCommand[] = ANALYSIS_EXAMPLES.map((example, i) => ({
+      id: `prompt-${i}`,
+      label: example.label,
+      hint: example.tickers,
+      group: "Starter prompts",
+      run: () => handlePickPrompt(example.goal),
+    }));
+    const threads: PaletteCommand[] = chatThreads.map((thread) => ({
+      id: `thread-${thread.id}`,
+      label: thread.title,
+      hint: thread.id === conversationId ? "current" : undefined,
+      group: "Chats",
+      run: () => router.push(thread.href),
+    }));
+    return [...actions, ...threads, ...prompts];
+  }, [
+    modKey,
+    scopeTickers.length,
+    startNewChat,
+    isEditingScope,
+    chatThreads,
+    conversationId,
+    router,
+    handlePickPrompt,
+  ]);
+
   return (
     <SidebarProvider
       className={cn(
@@ -267,6 +347,7 @@ export function ChatShell({
         className,
       )}
     >
+      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={paletteCommands} />
       <ChatSidebar
         conversationId={conversationId}
         user={user}
@@ -300,13 +381,24 @@ export function ChatShell({
                 <span className="text-[11px] text-[var(--muted)]">none set</span>
               )}
             </div>
-            <button
-              type="button"
-              onClick={() => setIsEditingScope((v) => !v)}
-              className="shrink-0 rounded-control border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-            >
-              {isEditingScope ? "Close scope" : "Edit scope"}
-            </button>
+            <div className="flex shrink-0 items-center gap-2">
+              <button
+                type="button"
+                onClick={() => setPaletteOpen(true)}
+                aria-label={`Open command palette (${modKey}K)`}
+                className="flex items-center gap-2 rounded-control border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+              >
+                <Search className="h-3.5 w-3.5" aria-hidden="true" />
+                <span className="font-mono">{modKey}K</span>
+              </button>
+              <button
+                type="button"
+                onClick={() => setIsEditingScope((v) => !v)}
+                className="rounded-control border border-[var(--border)] px-2.5 py-1.5 text-[11px] font-medium text-[var(--muted)] transition-colors hover:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+              >
+                {isEditingScope ? "Close scope" : "Edit scope"}
+              </button>
+            </div>
           </div>
           {isEditingScope ? (
             <form action={scopeFormAction} className="mt-2 space-y-2 rounded-control border border-[var(--border)] p-2.5">
