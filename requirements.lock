@@ -91,7 +91,7 @@ numpy==2.5.1
     # via
     #   -r requirements.txt
     #   pandas
-openai==2.48.0
+openai==2.53.0
     # via -r requirements-backend.txt
 opentelemetry-api==1.44.0
     # via
