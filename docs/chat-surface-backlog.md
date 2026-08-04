@@ -14,6 +14,11 @@ Latest critique snapshot: `.impeccable/critique/2026-07-29T11-58-40Z__frontend-s
 
 ## 1. Command palette + new-chat keyboard shortcut  · P2 · Flexibility (heuristic 7, 3/10)
 
+> **Shipped.** Delivered as `command-palette.tsx` plus the accelerator wiring in
+> `chat-shell.tsx`: a native-`<dialog>` palette over chats, starter prompts, and shell
+> actions, opened with ⌘K/Ctrl+K, with ⌘⇧O/Ctrl+Shift+O for a new chat and a visible
+> ⌘K affordance in the chat header. Remaining from item 4: a full shortcut reference.
+
 **Problem.** The only accelerators are Enter / Shift+Enter / Escape / starter-prompt
 prefill. There is no command palette, no new-chat shortcut, and no keyboard path to
 switch threads. Power users (persona "Alex") hit this ceiling immediately; it is the
