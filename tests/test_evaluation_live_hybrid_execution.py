@@ -264,9 +264,61 @@ def test_refresh_linked_case_results_reconciles_terminal_child_run_truth(
     assert case_row.observation_json["source_age_seconds"] >= 0
 
 
-# Auto-retry mitigation for a rare, non-deterministic cross-test in-process ORM/pydantic
-# object-aliasing Heisenbug (see issue #8). It has no production impact and passes on retry;
-# reruns keep CI green while the underlying test-isolation defect is tracked separately.
+def test_healthy_run_payload_containing_429_is_not_read_as_rate_limiting(
+    session_factory: sessionmaker[Session],
+) -> None:
+    """A successful run's own data must never trip the upstream-failure heuristics.
+
+    Regression test. The heuristics used to substring-match the whole serialized
+    payload, so any run whose data contained "429" — a figure like 4291000, a CIK, or
+    an ISO timestamp whose microseconds happened to read .429183 — was classified as
+    sec_rate_limited. That misreported healthy runs as upstream-degraded in production
+    and made these tests fail depending on the wall-clock time they ran at.
+    """
+    evaluation_run_id = _seed_evaluation_run(session_factory, suite_id="suite_smoke")
+
+    with session_factory() as db:
+        service = EvaluationControlPlaneService(db)
+        row = service.start_evaluation_run(evaluation_run_id)
+        case_row = db.scalar(
+            select(EvaluationCaseResult).where(
+                EvaluationCaseResult.evaluation_run_id == row.id
+            )
+        )
+        assert case_row is not None
+        child_run = db.get(AnalysisRun, case_row.latest_analysis_run_id)
+        assert child_run is not None
+        child_run.status = AnalysisRunStatus.success
+        child_run.started_at = datetime.now(timezone.utc) - timedelta(seconds=8)
+        child_run.finished_at = datetime.now(timezone.utc)
+        # Recent enough to stay inside the freshness window (so this asserts the
+        # upstream heuristic, not staleness), but with microseconds pinned so the
+        # serialized timestamp always contains "429".
+        observed_at = (datetime.now(timezone.utc) - timedelta(seconds=30)).replace(
+            microsecond=429183
+        )
+        # Every "429" here is legitimate run data, not an HTTP status.
+        child_run.output_payload_json = {
+            "source_observed_at": observed_at.isoformat(),
+            "revenue": 4291000,
+            "cik": "0000042900",
+        }
+        child_run.meta_json = {"artifact_bytes": 429, "notes": "403 filings scanned"}
+
+        service.refresh_linked_case_results(row.id)
+        db.commit()
+        db.refresh(case_row)
+
+    assert case_row.degradation_class == "none"
+    assert case_row.status == "passed"
+    assert "upstream_error_code" not in (case_row.metadata_json or {})
+
+
+# Auto-retry retained as belt-and-braces only. The failure this originally masked was
+# not an ORM/pydantic aliasing issue: the upstream/storage heuristics substring-matched
+# the serialized payload, so a timestamp or figure containing "429" read as an HTTP 429
+# (see the regression test above). Root cause is fixed; drop the reruns once CI has run
+# green for a while.
 @pytest.mark.flaky(reruns=3)
 @pytest.mark.parametrize(
     ("error_summary", "meta_patch", "expected_degradation", "expected_metadata_key", "expected_metadata_value"),

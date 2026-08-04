@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
@@ -46,6 +47,25 @@ _UPSTREAM_SEC_ERROR_CODES = frozenset(
     {"sec_rate_limited", "sec_access_denied", "sec_unavailable", "upstream_unavailable"}
 )
 _STORAGE_ERROR_CODES = frozenset({"artifact_storage_unavailable"})
+
+# Free-text keys that legitimately carry error prose. The heuristics below read these
+# rather than the whole serialized payload: a run's own data (figures, CIKs, ISO
+# timestamps) must never be mistaken for an upstream failure signal.
+_ERROR_TEXT_KEYS = frozenset({"error", "error_message", "message", "detail", "reason"})
+
+# Ordered most-specific first. HTTP status codes are matched on word boundaries so a
+# revenue of 4291000 or a microsecond field of .429183 cannot read as a 429.
+_UPSTREAM_TEXT_PATTERNS: tuple[tuple[re.Pattern[str], str], ...] = (
+    (re.compile(r"rate limit|\b429\b"), "sec_rate_limited"),
+    (re.compile(r"access denied|forbidden|\b403\b"), "sec_access_denied"),
+    (re.compile(r"sec unavailable|upstream unavailable"), "sec_unavailable"),
+)
+_STORAGE_TEXT_PATTERN = re.compile(
+    r"artifact content not found in storage"
+    r"|could not read artifact from storage"
+    r"|storage_reconciliation"
+    r"|artifact storage"
+)
 
 
 class EvaluationControlPlaneService:
@@ -769,17 +789,10 @@ class EvaluationControlPlaneService:
         if isinstance(explicit, str) and explicit in _UPSTREAM_SEC_ERROR_CODES:
             return explicit
 
-        error_text = (
-            f"{child_run.error_summary or ''} "
-            f"{child_run.meta_json or ''} "
-            f"{child_run.output_payload_json or ''}"
-        ).lower()
-        if "rate limit" in error_text or "429" in error_text:
-            return "sec_rate_limited"
-        if "access denied" in error_text or "403" in error_text or "forbidden" in error_text:
-            return "sec_access_denied"
-        if "sec unavailable" in error_text or "upstream unavailable" in error_text:
-            return "sec_unavailable"
+        error_text = self._error_prose(child_run)
+        for pattern, code in _UPSTREAM_TEXT_PATTERNS:
+            if pattern.search(error_text):
+                return code
         return None
 
     def _extract_storage_error_code(self, child_run: AnalysisRun) -> str | None:
@@ -793,19 +806,26 @@ class EvaluationControlPlaneService:
         if isinstance(explicit, str) and explicit in _STORAGE_ERROR_CODES:
             return explicit
 
-        error_text = (
-            f"{child_run.error_summary or ''} "
-            f"{child_run.meta_json or ''} "
-            f"{child_run.output_payload_json or ''}"
-        ).lower()
-        if (
-            "artifact content not found in storage" in error_text
-            or "could not read artifact from storage" in error_text
-            or "storage_reconciliation" in error_text
-            or "artifact storage" in error_text
-        ):
+        if _STORAGE_TEXT_PATTERN.search(self._error_prose(child_run)):
             return "artifact_storage_unavailable"
         return None
+
+    def _error_prose(self, child_run: AnalysisRun) -> str:
+        """Lower-cased error prose for a run: the summary plus any nested error message.
+
+        Deliberately excludes the raw ``meta_json`` / ``output_payload_json`` blobs.
+        Scanning those meant a successful run's own values could trip a failure
+        heuristic — a figure like 4291000, a CIK, or an ISO timestamp whose
+        microseconds happened to contain 429 all read as an HTTP 429, which
+        misclassified healthy runs as upstream-degraded (and made the evaluation
+        tests fail depending on the wall-clock time they ran at).
+        """
+        parts = [child_run.error_summary or ""]
+        for source in (child_run.meta_json, child_run.output_payload_json):
+            value = self._find_first_nested_value(source, keys=_ERROR_TEXT_KEYS)
+            if isinstance(value, str):
+                parts.append(value)
+        return " ".join(parts).lower()
 
     @staticmethod
     def _sync_analysis_run_history(
