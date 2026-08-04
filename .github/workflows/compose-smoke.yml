@@ -38,7 +38,7 @@ jobs:
             -e EDGAR_SMOKE_ADMIN_PASSWORD="${EDGAR_SMOKE_ADMIN_PASSWORD}" \
             api python -m tests.support.seed_fullstack_browser_fixture > .tmp/e2e-fixture.json
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: "20"
           cache: npm
