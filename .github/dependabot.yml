@@ -3,6 +3,17 @@
 version: 2
 updates:
   # Backend Python deps (requirements*.txt live at the repo root).
+  #
+  # IMPORTANT: these PRs only raise the floors in the loose requirements*.txt files.
+  # Docker and CI install from requirements.lock / requirements-dev.lock, which
+  # dependabot does not update — so merging one of these changes nothing about what
+  # actually installs, and can leave the lock pinned below its own declared floor.
+  #
+  # After merging a Python bump, regenerate and commit the lockfiles:
+  #   ./scripts/compile-requirements.sh
+  #
+  # The "Dependency locks" CI job fails when the two drift apart, so this cannot be
+  # forgotten silently.
   - package-ecosystem: pip
     directory: "/"
     schedule:
