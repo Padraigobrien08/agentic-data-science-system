@@ -291,9 +291,15 @@ def test_healthy_run_payload_containing_429_is_not_read_as_rate_limiting(
         child_run.status = AnalysisRunStatus.success
         child_run.started_at = datetime.now(timezone.utc) - timedelta(seconds=8)
         child_run.finished_at = datetime.now(timezone.utc)
+        # Recent enough to stay inside the freshness window (so this asserts the
+        # upstream heuristic, not staleness), but with microseconds pinned so the
+        # serialized timestamp always contains "429".
+        observed_at = (datetime.now(timezone.utc) - timedelta(seconds=30)).replace(
+            microsecond=429183
+        )
         # Every "429" here is legitimate run data, not an HTTP status.
         child_run.output_payload_json = {
-            "source_observed_at": "2026-08-04T08:42:11.429183+00:00",
+            "source_observed_at": observed_at.isoformat(),
             "revenue": 4291000,
             "cik": "0000042900",
         }
