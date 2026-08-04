@@ -18,7 +18,7 @@ jobs:
       EDGAR_SMOKE_ADMIN_EMAIL: smoke-admin@example.com
       EDGAR_SMOKE_ADMIN_PASSWORD: Smokepass12!
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Build images and start full stack
         run: docker compose up -d --build
