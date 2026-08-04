@@ -13,6 +13,27 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # Blocking, and deliberately cheap: nothing else notices when the loose
+  # requirements*.txt drift from the .lock files that Docker and CI actually install
+  # from. Dependabot only ever raises floors in the loose files, so without this a
+  # merged bump leaves a stale lock and CI stays green on the old pin.
+  locks:
+    name: Dependency locks
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+
+      - name: Install checker dependency
+        run: pip install --upgrade pip packaging
+
+      - name: Check lockfiles satisfy the declared floors
+        run: python3 scripts/check-lockfile-drift.py
+
   quality:
     name: Backend (ruff + mypy)
     runs-on: ubuntu-latest
