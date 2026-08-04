@@ -68,7 +68,7 @@ jobs:
 
       - name: Upload browser and Compose diagnostics
         if: ${{ failure() || !cancelled() }}
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: full-stack-diagnostics
           path: |
