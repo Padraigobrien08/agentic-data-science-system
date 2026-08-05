@@ -70,7 +70,7 @@ jobs:
       # Flip to blocking once history is confirmed clean. Free for personal repos (no license needed).
       - name: Gitleaks
         continue-on-error: true
-        uses: gitleaks/gitleaks-action@v2
+        uses: gitleaks/gitleaks-action@v3
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
