@@ -200,6 +200,10 @@ describe("buildPrimaryAnswerView evidence linking", () => {
     expect(view.overallConfidence).toBe("medium");
     expect(view.confidenceExplainer.label).toBe("Moderate");
     expect(view.confidenceExplainer.weakens).toEqual(["Peer coverage is insufficient."]);
+    // The rider is attributed: these strings are the critic's remediation notes, and
+    // printing them bare made the product read as if it were instructing itself.
+    expect(view.conclusionRider?.text).toBe("Critic flagged: Peer coverage is insufficient.");
+    expect(view.conclusionRider?.href).toContain("/trace#run-agents");
   });
 
   it("promotes the first real takeaway when the orchestration summary is generic", () => {

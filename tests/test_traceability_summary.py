@@ -44,7 +44,10 @@ def test_blocking_caveats_success_low_confidence() -> None:
         },
     )
     assert conf == "low"
-    assert any("low" in x for x in caveats)
+    # Low confidence is reported through the dedicated return value, not smuggled into
+    # the caveat prose. This used to assert a literal "overall_confidence: low" string
+    # in `caveats`, which the answer card then rendered as its first user-facing line.
+    assert caveats == ["gap in data"]
     assert "gap in data" in caveats
 
 
@@ -419,3 +422,71 @@ def test_build_runtime_traceability_bundle_persists_inline_charts(tmp_path: Path
     assert full["report"]["inline_charts"][0]["kind"] == "line"
     assert full["report"]["inline_charts"][0]["metric_key"] == "revenue_growth_qoq"
     assert full["report"]["inline_charts"][1]["kind"] == "grouped_bar"
+
+
+def test_narrative_sections_are_not_clipped_mid_sentence() -> None:
+    """Narrative prose survives at the length the report prompt actually produces.
+
+    Regression: sections were bounded at 360 characters while the report prompt asks
+    for a combined 120-220 word reply, so a single section could exceed the cap and be
+    cut mid-word ("...so there is little…"). The model was well inside its token
+    budget; the truncation was ours.
+    """
+    from backend.agents.traceability_summary import (
+        _MAX_NARRATIVE_CHARS,
+        _build_narrative_sections,
+        _safe_text,
+    )
+
+    body = (
+        "The anomaly summary is dominated by peer-relative signals, and the top rows "
+        "include Apple's repeated leverage readings, Microsoft's repeated liquidity "
+        "readings, and Nvidia's high margin point. The feature sample confirms the "
+        "relevant operating measures are present, but the report preview shows no "
+        "trend-break rows and no unified findings, so there is little support for a "
+        "clean cash-flow or margin story."
+    )
+    assert len(body) > 360, "fixture must exceed the old cap to be meaningful"
+
+    sections = _build_narrative_sections(
+        whats_happening=_safe_text(body, max_len=_MAX_NARRATIVE_CHARS),
+        why_we_think_that="",
+        what_weakens_claim="",
+    )
+    assert sections[0]["body"] == body
+    assert not sections[0]["body"].endswith("…")
+
+
+def test_trunc_prefers_a_sentence_boundary_over_a_mid_word_cut() -> None:
+    from backend.agents.traceability_summary import _trunc
+
+    first = (
+        "This opening sentence is long enough that its full stop sits comfortably past "
+        "the sixty percent threshold of the truncation window."
+    )
+    text = first + " " + ("filler words continue here " * 20)
+    out = _trunc(text, 200)
+    assert len(out) <= 200
+    assert out == first
+    assert not out.endswith("…")
+
+    # A run-on with no sentence break is still hard-bounded.
+    runon = "x" * 2000
+    bounded = _trunc(runon, 200)
+    assert len(bounded) <= 200
+    assert bounded.endswith("…")
+
+
+def test_low_confidence_does_not_leak_a_raw_key_value_caveat() -> None:
+    """Confidence is rendered as its own UI element, never as prose.
+
+    Regression: a literal "overall_confidence: low" was prepended to the caveat list,
+    and the answer card shows caveats[0] as its rider — so a raw key:value dump was
+    the first thing a reader saw.
+    """
+    caveats, confidence = _blocking_caveats_from_critic_patch(
+        {"result": {"issues": ["Peer coverage is thin."], "overall_confidence": "low"}}
+    )
+    assert confidence == "low"
+    assert caveats == ["Peer coverage is thin."]
+    assert not any("overall_confidence" in c for c in caveats)
