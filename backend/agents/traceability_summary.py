@@ -32,6 +32,11 @@ _MAX_CAVEAT_ITEMS = 12
 _MAX_TAKEAWAY_PREVIEW = 5
 _MAX_ARTIFACT_REFS = 24
 _MAX_NARRATIVE_SECTIONS = 3
+# The report prompt asks for a combined 120-220 word reply across thesis + three
+# sections, so a single section can legitimately run past the generic 360-char cap.
+# It did: sections were being clipped mid-sentence while the model was well inside its
+# token budget. Bound generously instead, purely to keep meta_json from growing wild.
+_MAX_NARRATIVE_CHARS = 900
 _MAX_CONFIDENCE_EXPLAINER_ITEMS = 4
 _CHART_METRIC_PRIORITY_KEYS: dict[MetricPriority, tuple[str, ...]] = {
     MetricPriority.revenue_growth: ("revenue_growth_qoq", "revenue_growth_yoy", "revenue"),
@@ -43,12 +48,23 @@ _CHART_METRIC_PRIORITY_KEYS: dict[MetricPriority, tuple[str, ...]] = {
 
 
 def _trunc(text: str | None, max_len: int) -> str:
+    """Bound a string, ending on a sentence boundary where one is available.
+
+    A hard character cut leaves user-facing prose dangling mid-word ("so there is
+    little…"), which reads as a failed generation even when the model returned
+    complete text. Prefer the last sentence end inside the window; fall back to the
+    ellipsis only when there is no usable break (a single long run-on).
+    """
     if not text:
         return ""
     t = text.strip()
     if len(t) <= max_len:
         return t
-    return t[: max_len - 1].rstrip() + "…"
+    head = t[:max_len]
+    cut = max(head.rfind(". "), head.rfind("! "), head.rfind("? "))
+    if cut >= int(max_len * 0.6):
+        return head[: cut + 1].rstrip()
+    return head[: max_len - 1].rstrip() + "…"
 
 
 def _preferred_chart_metric_keys(goal_preferences: GoalPreferences | None) -> list[str]:
@@ -95,8 +111,10 @@ def _blocking_caveats_from_critic_patch(patch: dict[str, Any]) -> tuple[list[str
         return [], None
     issues = [str(x) for x in (res.get("issues") or []) if x][: _MAX_CAVEAT_ITEMS]
     conf = res.get("overall_confidence")
-    if conf == "low":
-        issues = ["overall_confidence: low"] + issues
+    # Deliberately not prepending a raw "overall_confidence: low" string here. It is a
+    # key:value dump in user-facing prose (the report prompt forbids exactly that), and
+    # it surfaced first in the answer card because the rider shows caveats[0]. The
+    # confidence is already returned separately and rendered as its own element.
     return issues[:_MAX_CAVEAT_ITEMS], str(conf) if isinstance(conf, str) else None
 
 
@@ -117,7 +135,9 @@ def _build_narrative_sections(
     ]
     sections: list[dict[str, str]] = []
     for heading, body in rows:
-        clean = _safe_text(body)
+        # Callers already bound these to _MAX_NARRATIVE_CHARS; re-applying the smaller
+        # default here would silently clip them back to 360.
+        clean = _safe_text(body, max_len=_MAX_NARRATIVE_CHARS)
         if not clean:
             continue
         sections.append({"heading": heading, "body": clean})
@@ -146,11 +166,17 @@ def _build_report_narrative_preview(
 ) -> dict[str, Any]:
     phase_status = str(report_patch.get("phase_status") or "")
     report_res = report_patch.get("result") if isinstance(report_patch.get("result"), dict) else {}
-    thesis = _safe_text(report_res.get("narrative_thesis"))
+    thesis = _safe_text(report_res.get("narrative_thesis"), max_len=_MAX_NARRATIVE_CHARS)
     sections = _build_narrative_sections(
-        whats_happening=_safe_text(report_res.get("narrative_whats_happening")),
-        why_we_think_that=_safe_text(report_res.get("narrative_why_we_think_that")),
-        what_weakens_claim=_safe_text(report_res.get("narrative_what_weakens_claim")),
+        whats_happening=_safe_text(
+            report_res.get("narrative_whats_happening"), max_len=_MAX_NARRATIVE_CHARS
+        ),
+        why_we_think_that=_safe_text(
+            report_res.get("narrative_why_we_think_that"), max_len=_MAX_NARRATIVE_CHARS
+        ),
+        what_weakens_claim=_safe_text(
+            report_res.get("narrative_what_weakens_claim"), max_len=_MAX_NARRATIVE_CHARS
+        ),
     )
     if phase_status == PHASE_SUCCESS and thesis and sections:
         return {

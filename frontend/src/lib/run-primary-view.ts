@@ -437,7 +437,10 @@ function buildConclusionRider(
   if (!nav) return null;
   const criticHref = tracePath(nav, "#run-agents");
   if (blocking.length > 0) {
-    const text = truncate(blocking[0]!.trim(), 140);
+    // Attribute it. These come from the critic's `issues`, which are remediation notes
+    // aimed at the pipeline ("Surface the missing cash-flow emphasis in the narrative"),
+    // so printing them bare made the product look like it was instructing itself.
+    const text = `Critic flagged: ${truncate(blocking[0]!.trim(), 140)}`;
     return { text, href: criticHref };
   }
   if (weak.length > 0) {
