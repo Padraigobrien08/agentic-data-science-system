@@ -62,7 +62,7 @@ dnspython==2.8.0
     # via email-validator
 email-validator==2.3.0
     # via -r requirements-backend.txt
-fastapi==0.140.0
+fastapi==0.141.1
     # via -r requirements-backend.txt
 filelock==3.32.0
     # via cachecontrol
@@ -115,7 +115,7 @@ markupsafe==3.0.3
     # via
     #   mako
     #   werkzeug
-mcp==1.28.1
+mcp==1.29.0
     # via -r requirements.txt
 mdurl==0.1.2
     # via markdown-it-py
