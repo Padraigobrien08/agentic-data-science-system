@@ -317,13 +317,20 @@ def test_build_inline_chart_previews_returns_line_and_grouped_bar(tmp_path: Path
     assert previews[0]["markers"][0]["label"] == "Strong shift"
     assert previews[0]["caption"]
     assert "; this matters because " in previews[0]["caption"]
-    assert 90 <= len(previews[0]["caption"]) <= 160
+    assert 90 <= len(previews[0]["caption"]) <= 220
+    # Periods come from a fiscal-quarter panel, so the axis must say so: a reader
+    # otherwise sees a label like "2027-Q1" and reasonably reads it as a future date.
+    assert previews[0]["x_axis_label"] == "Fiscal period"
     assert previews[1]["kind"] == "grouped_bar"
     assert previews[1]["chart_id"] == "peer-net_margin-grouped_bar"
     assert previews[1]["source_artifact_roles"] == ["features_csv", "peer_signals_csv"]
     assert previews[1]["caption"]
     assert "; this matters because " in previews[1]["caption"]
-    assert 90 <= len(previews[1]["caption"]) <= 160
+    assert 90 <= len(previews[1]["caption"]) <= 220
+    assert previews[1]["x_axis_label"] == "Fiscal period"
+    # Peer comparison aligns on fiscal period, so one label can cover different calendar
+    # windows per company. The chart has to disclose that rather than imply like-for-like.
+    assert "fiscal quarter" in previews[1]["caption"].casefold()
 
 
 def test_build_inline_chart_previews_caps_results_to_one_per_family(tmp_path: Path) -> None:
@@ -490,3 +497,28 @@ def test_low_confidence_does_not_leak_a_raw_key_value_caveat() -> None:
     assert confidence == "low"
     assert caveats == ["Peer coverage is thin."]
     assert not any("overall_confidence" in c for c in caveats)
+
+
+def test_every_metric_label_produces_an_in_range_chart_caption() -> None:
+    """No metric label may push a caption out of range and silently drop its chart.
+
+    Regression: adding the fiscal-alignment disclosure to peer captions pushed them to
+    217-227 characters against a 220 bound, so charts survived for short metric labels
+    ("Net margin") and vanished for longer ones ("Revenue growth (QoQ)"). The failure is
+    invisible — the chart is simply absent — so it has to be asserted across every label
+    rather than the one that happens to be in a fixture.
+    """
+    from backend.agents.inline_chart_preview import (
+        _METRIC_LABELS,
+        _build_peer_caption,
+        _build_trend_caption,
+    )
+
+    labels = set(_METRIC_LABELS.values()) | {"Free Cash Flow Margin"}
+    for label in labels:
+        peer = _build_peer_caption(label, relation="above", period_count=3)
+        assert peer is not None, f"peer caption dropped for {label!r}"
+        assert "fiscal quarter" in peer.casefold()
+
+        trend = _build_trend_caption(label, direction="higher", period_count=6)
+        assert trend is not None, f"trend caption dropped for {label!r}"
