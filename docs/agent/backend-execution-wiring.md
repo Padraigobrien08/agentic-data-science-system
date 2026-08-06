@@ -73,6 +73,33 @@ deterministic decisions. Deterministic *computation* never goes through the poli
 }
 ```
 
+## Observability and cost
+
+The run driver injects `BackendAgentObserver`
+(`backend/observability/agent_observer.py`) into the loop, turning the loop's typed
+events (see [investigation-loop.md](investigation-loop.md#observability)) into the three
+signals the platform already speaks:
+
+- **Traces** — `agent.investigation → agent.iteration.N → agent.component.{name}`,
+  nested under the existing `agentic.execute` span, so one investigation reads as a
+  flame graph of the agent deciding. Component spans are created retroactively from
+  their measured duration, which keeps `agentic/` free of any tracing dependency.
+- **Logs** — structured events bound to `analysis_run_id`; component-level events log
+  at debug (there are ten per iteration), everything else at info.
+- **Metrics** — the `edgar_agent_*` families: investigations by status and termination
+  reason, iterations, component latency and errors, experiments by tool and status,
+  hypothesis transitions, model calls, and cost. Every label comes from a closed enum
+  or the experiment registry, so cardinality stays bounded.
+
+Every hook is wrapped so a tracing or metrics failure degrades observability rather than
+failing the investigation.
+
+**Cost.** `build_agent_policy` returns a `CostAwareModelPolicy` wrapping a
+`CostTrackingResponder`, which prices each completion's real token usage via
+`EDGAR_BACKEND_LLM_MODEL_PRICES` (USD per one million tokens). The loop drains that cost
+after every policy decision, so `LoopBudget.max_cost_usd` binds on actual spend. Models
+with no configured price contribute `0.0` — the budget never binds on invented numbers.
+
 ## Scope / follow-ups
 
 - Both call sites (sync route + worker) route through the same selector and service.

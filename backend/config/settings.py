@@ -262,6 +262,17 @@ class Settings(BaseSettings):
         description="HTTP timeout for OpenAI chat completion requests",
     )
 
+    llm_model_prices: dict[str, dict[str, float]] = Field(
+        default_factory=dict,
+        description=(
+            "USD per one million tokens per model id, as JSON: "
+            '{"gpt-5.4-mini": {"input_per_1m": 0.15, "output_per_1m": 0.60}}. '
+            "Drives the agentic loop's cost budget and the agent cost metric. "
+            "Unpriced models contribute 0.0, so cost budgets never bind on invented numbers "
+            "(EDGAR_BACKEND_LLM_MODEL_PRICES)."
+        ),
+    )
+
     # Intent / planning agents (``backend.agents``) — prompts under versioned files on disk
     agent_completion_model: str = Field(
         default="gpt-5.4-mini",

@@ -74,6 +74,69 @@ LLM_COMPLETION_DURATION_SECONDS = Histogram(
     buckets=(0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 15.0, 30.0, 60.0, 120.0),
 )
 
+# --- Agentic investigation loop (populated by ``backend.observability.agent_observer``) ---
+# Every label here is drawn from a closed enum (LoopComponent, TerminationReason,
+# HypothesisStatus, InvestigationStatus) or the experiment registry's tool names, so
+# label cardinality stays bounded.
+AGENT_INVESTIGATIONS_TOTAL = Counter(
+    "edgar_agent_investigations_total",
+    "Investigations reaching a terminal loop status",
+    ("status", "termination_reason"),
+)
+AGENT_INVESTIGATION_DURATION_SECONDS = Histogram(
+    "edgar_agent_investigation_duration_seconds",
+    "Wall time of one investigation loop call",
+    ("status",),
+    buckets=(0.5, 1.0, 5.0, 15.0, 30.0, 60.0, 120.0, 300.0, 600.0, 1800.0),
+)
+AGENT_INVESTIGATION_ITERATIONS = Histogram(
+    "edgar_agent_investigation_iterations",
+    "Loop iterations completed per investigation",
+    buckets=(1, 2, 3, 5, 8, 13, 21, 34),
+)
+AGENT_COMPONENT_DURATION_SECONDS = Histogram(
+    "edgar_agent_component_duration_seconds",
+    "Decision latency of one loop component",
+    ("component",),
+    buckets=(0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 10.0, 30.0, 60.0),
+)
+AGENT_COMPONENT_ERRORS_TOTAL = Counter(
+    "edgar_agent_component_errors_total",
+    "Loop component invocations that raised",
+    ("component", "error_type"),
+)
+AGENT_EXPERIMENTS_TOTAL = Counter(
+    "edgar_agent_experiments_total",
+    "Deterministic experiments executed by the loop",
+    ("tool_name", "status"),
+)
+AGENT_EXPERIMENT_DURATION_SECONDS = Histogram(
+    "edgar_agent_experiment_duration_seconds",
+    "Deterministic experiment execution time",
+    ("tool_name",),
+    buckets=(0.005, 0.01, 0.05, 0.1, 0.25, 0.5, 1.0, 2.5, 5.0, 15.0, 60.0),
+)
+AGENT_HYPOTHESIS_TRANSITIONS_TOTAL = Counter(
+    "edgar_agent_hypothesis_transitions_total",
+    "Hypothesis status changes (evidence actually moving a claim)",
+    ("from_status", "to_status"),
+)
+AGENT_MODEL_CALLS_TOTAL = Counter(
+    "edgar_agent_model_calls_total",
+    "Model-backed policy decisions made by the loop",
+    ("component",),
+)
+AGENT_COST_USD_TOTAL = Counter(
+    "edgar_agent_cost_usd_total",
+    "Estimated USD spent on loop policy decisions (0 for unpriced models)",
+    ("component",),
+)
+AGENT_TERMINATIONS_TOTAL = Counter(
+    "edgar_agent_terminations_total",
+    "Typed termination decisions (why investigations stop)",
+    ("reason",),
+)
+
 # --- Worker ---
 WORKER_JOBS_TOTAL = Counter(
     "edgar_worker_jobs_total",

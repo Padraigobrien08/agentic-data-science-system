@@ -46,6 +46,7 @@ from backend.config.settings import Settings, get_settings
 from backend.models.analysis_run import AnalysisRun
 from backend.models.enums import AnalysisRunStatus, ArtifactKind
 from backend.models.investigation_entities import ExperimentResultRow
+from backend.observability.agent_observer import BackendAgentObserver
 from backend.observability.context import bind_run_context
 from backend.observability.metrics import monotonic_s
 from backend.observability.tracing import bind_current_trace_for_logs, get_tracer
@@ -198,7 +199,11 @@ class AgenticInvestigationExecutionService:
             # Shared sink: every experiment emits into it, so the emitted bytes survive the
             # loop and can be ingested into the artifacts table + linked to their results.
             sink = InMemoryArtifactSink()
-            loop = InvestigationLoop(policy=self._policy_factory(settings), artifact_sink=sink)
+            loop = InvestigationLoop(
+                policy=self._policy_factory(settings),
+                artifact_sink=sink,
+                observer=BackendAgentObserver(analysis_run_id=str(analysis_run_id)),
+            )
 
             try:
                 investigation = loop.start(
