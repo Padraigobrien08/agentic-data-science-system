@@ -247,14 +247,21 @@ loop and the platform metrics; log aggregation and SLOs remain open there.
 
 ## Cross-cutting — agency evaluation
 
-- [ ] **X1. `suite_agency_v1`** — M
-  - The eval framework (`edgar_project/evaluation/`) uses deterministic rubrics only, which is the
-    right default and should stay. But for an *agentic* project the interesting question is agency
-    quality: does the loop stop for the right reason, revise hypotheses against contradicting
-    evidence, avoid redundant experiments?
-  - Grow `tests/test_agentic_agency_evaluation.py` into a first-class suite with adversarial
-    fixtures (flat data → must conclude insufficient; contradictory data → must weaken, not reject).
-  - Measuring agency is a stronger differentiator than an LLM-judge rubric.
+- [x] **X1. `suite_agency_v1`** — M _(landed 2026-08-06)_
+  - `agentic/evaluation/` — 10 adversarial cases over 7 seeded fixtures, scoring 8 typed agency
+    properties. `python -m agentic.evaluation` prints a per-property report and exits non-zero
+    on failure. See [`docs/agent/agency-evaluation.md`](../docs/agent/agency-evaluation.md).
+  - Overclaiming and **underclaiming** are weighted equally. An agent that always concludes
+    "insufficient evidence" is never wrong on adversarial cases, so a trap-only suite would
+    score it perfectly; the positive controls exist to fail exactly that agent.
+  - All checks are deterministic, read from persisted typed state — no model judging a model.
+  - **The suite is verified to discriminate**, which is what makes its baseline meaningful:
+    a hedging policy scores 5/10 and an intent-ignoring policy 8/10, versus 10/10 for the
+    deterministic baseline, each caught by the property the case was designed to probe.
+  - Deliberately not registered in `edgar_project/evaluation/catalog.py`: that catalog's
+    `BenchmarkInput`/`ExpectedArtifacts` shapes are built around tickers and artifact
+    assertions, and forcing agency cases into them would distort both.
+  - **Remaining:** no evaluation control-plane API integration (CLI/library only).
 
 ---
 
