@@ -286,6 +286,119 @@ def test_every_tool_returns_the_shared_envelope_shape(mcp_env) -> None:
         assert set(result) >= {"status", "message", "data", "artifacts", "errors"}
 
 
+# -- hosted (HTTP) transport auth --------------------------------------------
+
+
+class _FakeHeaders(dict):
+    """Header mapping that is case-insensitive on lookup, like Starlette's."""
+
+    def get(self, key, default=None):  # type: ignore[override]
+        for k, v in self.items():
+            if k.lower() == str(key).lower():
+                return v
+        return default
+
+
+def _as_http_mode(monkeypatch, headers: dict | None) -> None:
+    """Put the server in hosted mode with a given in-flight request's headers."""
+    from types import SimpleNamespace
+
+    from backend.mcp import auth as auth_mod
+
+    monkeypatch.setattr(auth_mod, "_MODE", auth_mod.TransportMode.http)
+    context = SimpleNamespace(
+        request_context=SimpleNamespace(
+            request=SimpleNamespace(headers=_FakeHeaders(headers)) if headers is not None else None
+        )
+    )
+    monkeypatch.setattr(mcp_server.mcp, "get_context", lambda: context)
+
+
+def test_hosted_mode_acts_as_the_calling_user(mcp_env, monkeypatch) -> None:
+    """Each HTTP caller's own bearer token is what the downstream API sees."""
+    _client, project_id, headers = mcp_env
+    monkeypatch.setenv("EDGAR_MCP_TOKEN", "not-this-one")
+    _as_http_mode(monkeypatch, {"Authorization": headers["Authorization"]})
+
+    result = mcp_server.list_investigations(project_id=project_id)
+    assert result["status"] == "success", result
+
+
+def test_hosted_mode_never_falls_back_to_the_server_token(mcp_env, monkeypatch) -> None:
+    """
+    The security property that makes hosting safe. If a request without credentials fell back
+    to EDGAR_MCP_TOKEN, every anonymous caller would inherit the operator's access.
+    """
+    _client, project_id, headers = mcp_env
+    monkeypatch.setenv("EDGAR_MCP_TOKEN", headers["Authorization"].removeprefix("Bearer "))
+    _as_http_mode(monkeypatch, {})  # a request carrying no Authorization header
+
+    result = mcp_server.list_investigations(project_id=project_id)
+    assert result["status"] == "error"
+    assert result["errors"][0]["code"] == "PLATFORM_NOT_CONFIGURED"
+    assert "hosted" in result["errors"][0]["message"].lower()
+
+
+@pytest.mark.parametrize(
+    "header",
+    [
+        {"Authorization": "Basic abc123"},       # wrong scheme
+        {"Authorization": "Bearer"},             # no value
+        {"Authorization": "   "},                # blank
+        {"X-Api-Key": "abc123"},                 # not an Authorization header
+    ],
+)
+def test_hosted_mode_rejects_unusable_credentials(mcp_env, monkeypatch, header) -> None:
+    _client, project_id, headers = mcp_env
+    monkeypatch.setenv("EDGAR_MCP_TOKEN", headers["Authorization"].removeprefix("Bearer "))
+    _as_http_mode(monkeypatch, header)
+
+    result = mcp_server.list_investigations(project_id=project_id)
+    assert result["status"] == "error"
+    assert result["errors"][0]["code"] == "PLATFORM_NOT_CONFIGURED"
+
+
+def test_hosted_mode_with_no_active_request_is_refused(mcp_env, monkeypatch) -> None:
+    _client, project_id, headers = mcp_env
+    monkeypatch.setenv("EDGAR_MCP_TOKEN", headers["Authorization"].removeprefix("Bearer "))
+    _as_http_mode(monkeypatch, None)  # no in-flight request at all
+
+    result = mcp_server.list_investigations(project_id=project_id)
+    assert result["status"] == "error"
+    assert result["errors"][0]["code"] == "PLATFORM_NOT_CONFIGURED"
+
+
+def test_two_hosted_callers_are_isolated(mcp_env, monkeypatch) -> None:
+    """A hosted server must not leak one caller's data to another."""
+    client, project_id, headers = mcp_env
+    investigation_id = _investigation_id(_start(project_id))
+    _other_project, other_headers = register_project_and_headers(client)
+
+    _as_http_mode(monkeypatch, {"Authorization": headers["Authorization"]})
+    assert mcp_server.get_investigation(investigation_id)["status"] == "success"
+
+    _as_http_mode(monkeypatch, {"Authorization": other_headers["Authorization"]})
+    denied = mcp_server.get_investigation(investigation_id)
+    assert denied["status"] == "error"
+    assert denied["errors"][0]["http_status"] == 404
+
+
+def test_stdio_mode_still_uses_the_environment_token(mcp_env, monkeypatch) -> None:
+    """stdio is a per-user subprocess, so the environment token remains correct there."""
+    from backend.mcp import auth as auth_mod
+
+    _client, project_id, _h = mcp_env
+    monkeypatch.setattr(auth_mod, "_MODE", auth_mod.TransportMode.stdio)
+    assert mcp_server.list_investigations(project_id=project_id)["status"] == "success"
+
+
+def test_transport_mode_defaults_to_stdio() -> None:
+    """The safer default: require an explicit token rather than trusting an inbound header."""
+    from backend.mcp.auth import TransportMode, get_transport_mode
+
+    assert get_transport_mode() is TransportMode.stdio
+
+
 def test_the_registered_tool_surface_is_the_platform(mcp_env) -> None:
     """The point of this server: the platform is reachable, not just EDGAR computation."""
     import asyncio

@@ -224,9 +224,19 @@ loop and the platform metrics; log aggregation and SLOs remain open there.
     as `application/vnd.chart+json`, which the preview endpoint rejected with 415 despite the
     bytes being plain JSON — those artifacts were unreadable through *every* surface, not just
     MCP. `artifact_previewable` now accepts any RFC 6839 `+json` structured-suffix type.
-- [ ] **C2. Streamable-HTTP transport + bearer auth** — M
-  - Reuse `backend/auth/tokens.py` so it can be hosted. Demo: point Claude Code at the endpoint
-    and have it commission and inspect investigations.
+- [x] **C2. Streamable-HTTP transport + bearer auth** — M _(landed 2026-08-06)_
+  - `python -m backend.mcp --transport streamable-http` hosts the server; stdio stays the
+    default. Verified booting and serving the MCP protocol over HTTP.
+  - `backend/mcp/auth.py` separates the two trust models. stdio is a per-user subprocess and
+    keeps the environment token; hosted HTTP resolves the caller's own
+    `Authorization: Bearer` header per request and **never** falls back to `EDGAR_MCP_TOKEN` —
+    a fallback would let any anonymous caller inherit the operator's access. Six tests cover
+    this and were verified to fail with the guard removed.
+  - Two hosted callers are isolated: each call runs with its own token, so the API's owner
+    scoping applies and one caller gets 404 on another's investigation.
+  - **Known gaps:** the MCP handshake and tool listing are unauthenticated (schema only, no
+    user data — normal for MCP; bind loopback + reverse proxy to close it), and there is no
+    rate limiting on tool invocations.
 
 ## Workstream D — Open-source packaging (do last)
 

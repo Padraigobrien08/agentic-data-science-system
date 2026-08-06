@@ -20,11 +20,14 @@ the EDGAR server, so a client sees one response shape across both.
 
 from __future__ import annotations
 
+import argparse
 import logging
+import os
 from typing import Any
 
 from mcp.server.fastmcp import FastMCP
 
+from backend.mcp.auth import TokenUnavailable, TransportMode, resolve_token, set_transport_mode
 from backend.mcp.client import PlatformApiError, PlatformClient, PlatformNotConfigured
 from edgar_project.mcp.schemas import (
     CODE_INTERNAL,
@@ -46,7 +49,16 @@ MAX_LIST_LIMIT = 100
 
 
 def _client() -> PlatformClient:
-    return PlatformClient.from_env()
+    """
+    A client authenticated as **the current caller**.
+
+    Under HTTP transport the token comes from this request's ``Authorization`` header, so a
+    hosted server acts only ever as the calling user; under stdio it comes from the
+    environment. See :mod:`backend.mcp.auth`.
+    """
+    client = PlatformClient.from_env()
+    client.token = resolve_token()
+    return client
 
 
 def _ok(message: str, data: dict[str, Any], artifacts: dict[str, Any] | None = None) -> dict[str, Any]:
@@ -72,7 +84,7 @@ def _guarded(action: str, fn) -> dict[str, Any]:
     """
     try:
         return fn()
-    except PlatformNotConfigured as exc:
+    except (TokenUnavailable, PlatformNotConfigured) as exc:
         return _error(CODE_NOT_CONFIGURED, str(exc))
     except PlatformApiError as exc:
         # 404 covers both "missing" and "not yours" by design; relay it without speculating.
@@ -315,7 +327,7 @@ def artifact_resource(artifact_id: str) -> str:
     """
     try:
         preview = _client().get_artifact_preview(artifact_id)
-    except (PlatformApiError, PlatformNotConfigured) as exc:
+    except (PlatformApiError, PlatformNotConfigured, TokenUnavailable) as exc:
         return f"Artifact unavailable: {exc}"
     content = preview.get("content")
     if isinstance(content, str):
@@ -328,7 +340,7 @@ def conclusion_resource(investigation_id: str) -> str:
     """An investigation's conclusion as readable text, addressable by URI."""
     try:
         detail = _client().get_investigation(investigation_id)
-    except (PlatformApiError, PlatformNotConfigured) as exc:
+    except (PlatformApiError, PlatformNotConfigured, TokenUnavailable) as exc:
         return f"Investigation unavailable: {exc}"
     lines = [
         f"# Investigation {investigation_id}",
@@ -342,10 +354,50 @@ def conclusion_resource(investigation_id: str) -> str:
     return "\n".join(lines)
 
 
-def main() -> None:
+def main(argv: list[str] | None = None) -> None:
+    """
+    Entry point for both transports.
+
+    ``stdio`` (default) is the per-user subprocess model an MCP host launches directly.
+    ``streamable-http`` hosts the server for many callers, each authenticating with their own
+    bearer token; the environment token is not used in that mode (see :mod:`backend.mcp.auth`).
+    """
+    parser = argparse.ArgumentParser(prog="python -m backend.mcp", description=__doc__)
+    parser.add_argument(
+        "--transport",
+        choices=["stdio", "streamable-http", "sse"],
+        default=os.getenv("EDGAR_MCP_TRANSPORT", "stdio"),
+        help="stdio (default) for a per-user subprocess; streamable-http to host the server.",
+    )
+    parser.add_argument("--host", default=os.getenv("EDGAR_MCP_HOST", "127.0.0.1"),
+                        help="Bind address for HTTP transports (default: loopback).")
+    parser.add_argument("--port", type=int, default=int(os.getenv("EDGAR_MCP_PORT", "8765")),
+                        help="Bind port for HTTP transports.")
+    args = parser.parse_args(argv)
+
     logging.basicConfig(level=logging.INFO)
-    logger.info("Starting investigation-platform MCP server (stdio)")
-    mcp.run()
+
+    if args.transport == "stdio":
+        set_transport_mode(TransportMode.stdio)
+        logger.info("Starting investigation-platform MCP server (stdio)")
+        mcp.run()
+        return
+
+    # Hosted: every request authenticates itself, so the process holds no ambient identity.
+    set_transport_mode(TransportMode.http)
+    mcp.settings.host = args.host
+    mcp.settings.port = args.port
+    if os.getenv("EDGAR_MCP_TOKEN"):
+        logger.warning(
+            "EDGAR_MCP_TOKEN is set but ignored under %s: hosted requests must each carry "
+            "their own Authorization: Bearer header.",
+            args.transport,
+        )
+    logger.info(
+        "Starting investigation-platform MCP server (%s) on %s:%s%s",
+        args.transport, args.host, args.port, mcp.settings.streamable_http_path,
+    )
+    mcp.run(transport=args.transport)
 
 
 if __name__ == "__main__":
