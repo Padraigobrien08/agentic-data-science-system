@@ -69,3 +69,15 @@ def test_every_analysis_artifact_role_is_reviewable_by_the_critic() -> None:
     planned_list = [role for role, _ in CRITIC_EXCERPT_PLAN]
     assert len(planned_list) == len(planned), "duplicate role in CRITIC_EXCERPT_PLAN"
     assert all(cap > 0 for _, cap in CRITIC_EXCERPT_PLAN), "every role needs a positive cap"
+
+    # Plan membership alone is not enough, and asserting only that is how the first
+    # attempt at this fix passed while nothing changed. build_artifact_summaries skips
+    # any role without a handler ("fn is None: continue"), so a planned role with no
+    # summarizer never reaches the model regardless of the plan.
+    from backend.agents.artifact_summaries import _DEFAULT_BUDGET, _handlers_for
+
+    handlers = _handlers_for(_DEFAULT_BUDGET)
+    unhandled = planned - set(handlers)
+    assert not unhandled, (
+        f"planned roles with no summarizer, so they are silently skipped: {sorted(unhandled)}"
+    )
