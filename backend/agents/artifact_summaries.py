@@ -28,6 +28,9 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_MANUAL_VALIDATION,
     ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION,
     ARTIFACT_KEY_METRIC_CAVEATS_PANEL,
+    ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
+    ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
+    ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
     ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_PEER_SIGNALS,
     ARTIFACT_KEY_REPORT,
@@ -390,6 +393,15 @@ def _handlers_for(budget: ContextBudget) -> dict[str, Callable[[str], dict[str, 
         ARTIFACT_KEY_PANEL: lambda p: summarize_panel_or_features_csv(p, kind="panel_csv", budget=budget),
         ARTIFACT_KEY_FEATURES: lambda p: summarize_panel_or_features_csv(p, kind="features_csv", budget=budget),
         ARTIFACT_KEY_DATA_QUALITY: lambda p: summarize_generic_csv(p, kind="data_quality_csv", budget=budget),
+        ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY: lambda p: summarize_generic_csv(
+            p, kind="metric_coverage_summary_csv", budget=budget
+        ),
+        ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY: lambda p: summarize_generic_csv(
+            p, kind="metric_coverage_by_company_csv", budget=budget
+        ),
+        ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD: lambda p: summarize_generic_csv(
+            p, kind="metric_coverage_by_period_csv", budget=budget
+        ),
         ARTIFACT_KEY_EXCLUSIONS: lambda p: summarize_generic_csv(p, kind="exclusions_csv", budget=budget),
         ARTIFACT_KEY_MANUAL_VALIDATION: lambda p: summarize_generic_csv(p, kind="manual_validation_csv", budget=budget),
         ARTIFACT_KEY_PEER_SIGNALS: lambda p: summarize_generic_csv(p, kind="peer_signals_csv", budget=budget),
