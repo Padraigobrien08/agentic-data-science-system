@@ -98,6 +98,7 @@ services:
     volumes:
       - artifacts:/var/lib/edgar/artifacts
       - run_workspaces:/var/lib/edgar/run_workspaces
+      - validation:/app/validation
     depends_on:
       migrate:
         condition: service_completed_successfully
@@ -125,6 +126,7 @@ services:
     volumes:
       - artifacts:/var/lib/edgar/artifacts
       - run_workspaces:/var/lib/edgar/run_workspaces
+      - validation:/app/validation
     command: ["python", "-m", "backend.worker"]
     depends_on:
       migrate:
@@ -139,6 +141,7 @@ services:
     volumes:
       - artifacts:/var/lib/edgar/artifacts
       - run_workspaces:/var/lib/edgar/run_workspaces
+      - validation:/app/validation
     # Compose has no native cron: apply retention, then sleep. Interval is substituted at
     # `compose up` time (override EDGAR_BACKEND_RETENTION_INTERVAL_SECONDS in .env; default 24h).
     # `--apply` is a safe no-op when every EDGAR_BACKEND_RETENTION_*_DAYS tier is 0.
@@ -166,3 +169,4 @@ volumes:
   pgdata:
   artifacts:
   run_workspaces:
+  validation:
