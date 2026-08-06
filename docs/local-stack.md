@@ -172,6 +172,22 @@ python -m backend.maintenance.retention --apply --json
 
 Dry-run reports candidate counts without mutation. Apply mode compacts run payloads, redacts model payloads, and prunes eligible artifact blobs by deleting the stored object and setting `artifacts.blob_deleted_at` so later content requests return an explicit retention-expired response instead of looking like accidental storage loss.
 
+## Observability stack (optional overlay)
+
+Metrics and traces are emitted by default but have nowhere to land until you add the
+observability overlay — Prometheus, Grafana (with a provisioned agent-loop dashboard and
+alert rules), and Jaeger:
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+```
+
+Grafana http://127.0.0.1:3001 · Prometheus http://127.0.0.1:9090 · Jaeger http://127.0.0.1:16686
+
+All ports bind to loopback and Grafana allows anonymous read, so this overlay is for local
+use only. See [`docs/observability.md`](observability.md) for the metrics reference, the
+trace span tree, and cost-tracking configuration.
+
 ## Verification (after `docker compose up -d`)
 
 **Automated** (requires curl, docker CLI, Python 3 on the host):
@@ -217,4 +233,5 @@ Registration is disabled by default, so use this bootstrap flow for the first op
 ## See also
 
 - [`docs/auth-api.md`](auth-api.md) — bootstrap admin, JWT auth, registration posture, and ops-token routes.
+- [`docs/observability.md`](observability.md) — metrics, traces, dashboards, and alert rules.
 - [`docker-compose.yml`](../docker-compose.yml), [`Dockerfile`](../Dockerfile), [`frontend/Dockerfile`](../frontend/Dockerfile).

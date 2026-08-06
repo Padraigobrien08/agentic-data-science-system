@@ -1,0 +1,15 @@
+apiVersion: 1
+
+providers:
+  - name: edgar
+    orgId: 1
+    folder: EDGAR
+    type: file
+    disableDeletion: false
+    # Dashboards are files in the repo, not clicked-together state: edits made in the UI
+    # are overwritten on reload. Change the JSON to change the dashboard.
+    allowUiUpdates: false
+    updateIntervalSeconds: 30
+    options:
+      path: /var/lib/grafana/dashboards
+      foldersFromFilesStructure: false

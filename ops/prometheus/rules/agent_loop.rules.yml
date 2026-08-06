@@ -1,0 +1,168 @@
+# Alert rules for the agentic investigation loop and the platform around it.
+#
+# Thresholds are starting points for a single-host local/demo stack, not tuned SLOs —
+# adjust them once you have real traffic. Each rule carries a `summary` that names the
+# signal and a `runbook` hint pointing at what to inspect.
+#
+# Ratio rules use clamp_min on the denominator so they stay silent (0/ε → 0) instead of
+# producing NaN when nothing has run yet.
+
+groups:
+  - name: agent-loop-health
+    rules:
+      - alert: AgentInvestigationFailureRateHigh
+        expr: |
+          sum(rate(edgar_agent_investigations_total{status="failed"}[15m]))
+            / clamp_min(sum(rate(edgar_agent_investigations_total[15m])), 1e-9)
+            > 0.2
+        for: 15m
+        labels:
+          severity: critical
+          component: agent-loop
+        annotations:
+          summary: "More than 20% of investigations are failing"
+          description: "Failed investigations over the last 15m exceed 20% of all terminal investigations."
+          runbook: "Check edgar_agent_component_errors_total for the failing component, then the agent.investigation traces."
+
+      - alert: AgentComponentErrors
+        expr: sum by (component, error_type) (rate(edgar_agent_component_errors_total[10m])) > 0
+        for: 10m
+        labels:
+          severity: warning
+          component: agent-loop
+        annotations:
+          summary: "Loop component {{ $labels.component }} is raising {{ $labels.error_type }}"
+          description: "A loop component has been raising for 10m. Malformed policy output terminates runs with reason=error."
+          runbook: "Inspect the agent.component.{{ $labels.component }} spans; check the LLM provider if the component is model-backed."
+
+      - alert: AgentExperimentFailureRateHigh
+        expr: |
+          sum(rate(edgar_agent_experiments_total{status="failed"}[15m]))
+            / clamp_min(sum(rate(edgar_agent_experiments_total[15m])), 1e-9)
+            > 0.25
+        for: 15m
+        labels:
+          severity: warning
+          component: agent-loop
+        annotations:
+          summary: "Over 25% of deterministic experiments are failing"
+          description: "Experiment failures feed the consecutive-failure safety cap, so runs will start terminating early."
+          runbook: "Break down edgar_agent_experiments_total by tool_name to find the failing experiment."
+
+      - alert: AgentComponentLatencyHigh
+        expr: |
+          histogram_quantile(
+            0.95,
+            sum by (component, le) (rate(edgar_agent_component_duration_seconds_bucket[15m]))
+          ) > 30
+        for: 15m
+        labels:
+          severity: warning
+          component: agent-loop
+        annotations:
+          summary: "p95 decision latency for {{ $labels.component }} is above 30s"
+          description: "Slow decisions burn the elapsed-time budget and push runs toward budget_exhausted."
+          runbook: "Model-backed components (goal_interpreter, hypothesis_generator, selector, critic) usually mean provider latency."
+
+  - name: agent-loop-quality
+    rules:
+      # Not an outage — a *quality* signal. The loop concluding "insufficient evidence"
+      # is a valid outcome, but a sustained majority means goals aren't answerable with
+      # the available experiments or data.
+      - alert: AgentInsufficientEvidenceRateHigh
+        expr: |
+          sum(rate(edgar_agent_terminations_total{reason="insufficient_evidence"}[1h]))
+            / clamp_min(sum(rate(edgar_agent_terminations_total[1h])), 1e-9)
+            > 0.5
+        for: 1h
+        labels:
+          severity: info
+          component: agent-loop
+        annotations:
+          summary: "Most investigations are concluding with insufficient evidence"
+          description: "Over half of terminations in the last hour were insufficient_evidence."
+          runbook: "Check dataset coverage and whether the intent→tool mapping has experiments for the goals being asked."
+
+      - alert: AgentRunsHittingBudgetCeiling
+        expr: |
+          sum(rate(edgar_agent_terminations_total{reason=~"budget_exhausted|max_iterations|safety_constraint"}[1h]))
+            / clamp_min(sum(rate(edgar_agent_terminations_total[1h])), 1e-9)
+            > 0.3
+        for: 1h
+        labels:
+          severity: warning
+          component: agent-loop
+        annotations:
+          summary: "Investigations are frequently stopped by budgets or safety caps"
+          description: "Over 30% of terminations hit a resource ceiling rather than an evidence-based conclusion."
+          runbook: "Raise LoopBudget limits, or investigate why the loop needs so many iterations to converge."
+
+      - alert: AgentModelSpendRateHigh
+        expr: sum(rate(edgar_agent_cost_usd_total[1h])) * 3600 > 5
+        for: 30m
+        labels:
+          severity: warning
+          component: agent-loop
+        annotations:
+          summary: "Agent model spend is above $5/hour"
+          description: "Estimated spend from EDGAR_BACKEND_LLM_MODEL_PRICES. Silent when models are unpriced."
+          runbook: "Break down edgar_agent_cost_usd_total by component; consider lowering LoopBudget.max_cost_usd."
+
+  - name: platform
+    rules:
+      - alert: WorkerLoopStalled
+        # The gauge is 0 until the worker's first tick, so require a real timestamp
+        # before alerting — otherwise this fires on every cold start.
+        expr: edgar_worker_loop_last_tick_unixtime > 0 and (time() - edgar_worker_loop_last_tick_unixtime) > 120
+        for: 5m
+        labels:
+          severity: critical
+          component: worker
+        annotations:
+          summary: "Worker poll loop has not ticked for over 2 minutes"
+          runbook: "Check the worker container logs; queued runs are not being claimed."
+
+      - alert: WorkerQueueBacklog
+        expr: edgar_worker_queue_depth > 20
+        for: 10m
+        labels:
+          severity: warning
+          component: worker
+        annotations:
+          summary: "More than 20 jobs are waiting to be claimed"
+          runbook: "Scale workers or check for jobs failing and requeueing in a loop."
+
+      - alert: WorkerStaleLeases
+        expr: edgar_worker_queue_jobs_running_stale_lease > 0
+        for: 10m
+        labels:
+          severity: warning
+          component: worker
+        annotations:
+          summary: "Jobs are running with an expired lease"
+          runbook: "Usually a worker died mid-job; the reclaimer should recover them. Persisting means reclaim is not running."
+
+      - alert: QueueObservabilityDown
+        # A false-green guard: when this is 0 the queue gauges are unknown, not healthy.
+        expr: edgar_worker_queue_observability_up == 0
+        for: 5m
+        labels:
+          severity: warning
+          component: observability
+        annotations:
+          summary: "Worker queue gauges cannot be refreshed from the database"
+          description: "Queue depth/lease panels are stale. Treat them as unknown, not zero."
+          runbook: "Check API→database connectivity; see refresh_worker_queue_gauges_from_db."
+
+      - alert: ApiErrorRateHigh
+        expr: |
+          sum(rate(edgar_http_requests_total{status_class="5xx"}[10m]))
+            / clamp_min(sum(rate(edgar_http_requests_total[10m])), 1e-9)
+            > 0.05
+        for: 10m
+        labels:
+          severity: critical
+          component: api
+        annotations:
+          summary: "Over 5% of API requests are returning 5xx"
+          runbook: "Break down edgar_http_requests_total by route."

@@ -71,8 +71,12 @@ _Last updated: 2026-07-27 — C1 done (OpenAI key rotated; secrets-manager migra
 - [ ] **O3. Deployment target beyond single-host Compose** — L
   - No K8s/Terraform/managed-hosting manifests. No autoscaling, rolling deploys, or zero-downtime migration strategy.
 
-- [ ] **O4. Alerting / dashboards / SLOs / log shipping** — M
-  - Logs, `/metrics`, and OTel traces are emitted but have no consumers. Add alert rules, dashboards, SLOs, log aggregation.
+- [~] **O4. Alerting / dashboards / SLOs / log shipping** — M
+  - [x] Consumers landed 2026-08-06: `docker-compose.observability.yml` (Prometheus + Grafana + Jaeger),
+    a provisioned agent-loop dashboard and 12 alert rules under `ops/`, documented in `docs/observability.md`.
+    Assets are contract-tested against the metric registry (`tests/test_observability_assets.py`).
+  - [ ] **Remaining:** log aggregation (structured JSON still goes only to container stdout), SLOs /
+    burn-rate alerts, and a dashboard for the HTTP + queue + pipeline metrics (alerted on, but not charted).
 
 - [ ] **O5. Load / performance testing** — M
   - Worker lease/retry + queue untested under concurrency/throughput.
