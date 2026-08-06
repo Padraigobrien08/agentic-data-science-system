@@ -22,6 +22,9 @@ from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_MANUAL_VALIDATION,
     ARTIFACT_KEY_METRIC_CAVEATS_EXTRACTION,
     ARTIFACT_KEY_METRIC_CAVEATS_PANEL,
+    ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY,
+    ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD,
+    ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY,
     ARTIFACT_KEY_PANEL,
     ARTIFACT_KEY_PEER_SIGNALS,
     ARTIFACT_KEY_REPORT,
@@ -44,6 +47,15 @@ CRITIC_EXCERPT_PLAN: tuple[tuple[str, int], ...] = (
     (ARTIFACT_KEY_FEATURES, 7_000),
     (ARTIFACT_KEY_PANEL, 5_000),
     (ARTIFACT_KEY_DATA_QUALITY, 5_000),
+    # Coverage sits with data quality: both answer "can this evidence be trusted?", which
+    # the critic is explicitly asked to judge. These were produced and registered by the
+    # pipeline but missing from this plan, so they were permanently in the "has a path,
+    # no summary" state the critic is told to flag — meaning every run reported a missing
+    # metric coverage summary as a top weakness of its own analysis. The summary table is
+    # ~250 bytes; all three together are ~5 KB against a ~21k-token prompt.
+    (ARTIFACT_KEY_METRIC_COVERAGE_SUMMARY, 5_000),
+    (ARTIFACT_KEY_METRIC_COVERAGE_BY_COMPANY, 5_000),
+    (ARTIFACT_KEY_METRIC_COVERAGE_BY_PERIOD, 6_000),
     (ARTIFACT_KEY_EXCLUSIONS, 5_000),
     (ARTIFACT_KEY_PEER_SIGNALS, 5_000),
     (ARTIFACT_KEY_TREND_BREAKS, 5_000),
