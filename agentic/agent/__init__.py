@@ -15,6 +15,7 @@ Not yet wired into production orchestration.
 from __future__ import annotations
 
 from .budget import BudgetTracker, LoopBudget, SafetyLimits
+from .clock import Clock, ManualClock, MonotonicClock
 from .components import (
     ConclusionSynthesizer,
     Critic,
@@ -29,10 +30,26 @@ from .components import (
 )
 from .fixture_policy import FixtureAgentPolicy
 from .loop import InvestigationLoop, run_investigation
+from .observer import (
+    NULL_OBSERVER,
+    AgentObserver,
+    ComponentCompleted,
+    ExperimentObserved,
+    HypothesisTransitioned,
+    InvestigationEnded,
+    InvestigationStarted,
+    IterationEnded,
+    IterationStarted,
+    LoopComponent,
+    ModelCallObserved,
+    RecordingObserver,
+    TerminationObserved,
+)
 from .policy import (
     AgentPolicy,
     AgentPolicyError,
     AnalysisIntent,
+    CostAwarePolicy,
     ExperimentChoice,
     GoalInterpretation,
     MalformedPolicyResponse,
@@ -52,6 +69,24 @@ __all__ = [
     "AnalysisIntent",
     "GoalInterpretation",
     "ExperimentChoice",
+    "CostAwarePolicy",
+    # observability
+    "AgentObserver",
+    "NULL_OBSERVER",
+    "RecordingObserver",
+    "LoopComponent",
+    "InvestigationStarted",
+    "InvestigationEnded",
+    "IterationStarted",
+    "IterationEnded",
+    "ComponentCompleted",
+    "ExperimentObserved",
+    "HypothesisTransitioned",
+    "TerminationObserved",
+    "ModelCallObserved",
+    "Clock",
+    "MonotonicClock",
+    "ManualClock",
     # components
     "GoalInterpreter",
     "HypothesisGenerator",

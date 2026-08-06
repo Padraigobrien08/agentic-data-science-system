@@ -10,6 +10,7 @@ the registry compute. Every step records an :class:`AgentDecision` into state.
 from __future__ import annotations
 
 import math
+from typing import Callable, TypeVar
 
 import pandas as pd
 
@@ -39,7 +40,7 @@ from agentic.experiments.record import ExperimentExecutionRecord
 
 from .budget import BudgetTracker
 from .ids import DeterministicIds
-from .policy import AgentPolicy, AnalysisIntent, GoalInterpretation
+from .policy import AgentPolicy, AnalysisIntent, GoalInterpretation, drain_policy_cost
 
 # Intent -> ordered candidate tools (general layer). Order encodes priority.
 INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
@@ -61,8 +62,23 @@ EDGAR_INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
     AnalysisIntent.comparison: ["edgar_peer_comparison"],
 }
 
+_T = TypeVar("_T")
+
 _UP_WORDS = ("increasing", "up", "grow", "rise", "higher")
 _DOWN_WORDS = ("decreasing", "down", "declin", "fall", "drop", "lower", "deteriorat")
+
+
+def _invoke_policy(tracker: BudgetTracker, policy: AgentPolicy, call: Callable[[], _T]) -> _T:
+    """
+    Run one policy decision against the run's budget: count it before the call (so a
+    policy that raises is still counted) and attribute its cost after, whether or not
+    it raised. Policies that don't track cost contribute zero.
+    """
+    tracker.record_model_call()
+    try:
+        return call()
+    finally:
+        tracker.record_model_cost(drain_policy_cost(policy))
 
 
 def _prov(agent_id: str) -> Provenance:
@@ -104,8 +120,9 @@ class GoalInterpreter:
     def interpret(self, goal_text: str, manifest: DatasetManifest, tracker: BudgetTracker) -> GoalInterpretation:
         summary = {"metrics": manifest.metric_names(),
                    "dimensions": [c.name for c in manifest.columns if c.role.value == "dimension"]}
-        tracker.record_model_call()
-        return self._policy.interpret_goal(goal_text, capability_summary=summary)
+        return _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.interpret_goal(goal_text, capability_summary=summary))
 
 
 # ---------------------------------------------------------------------------
@@ -122,9 +139,10 @@ class HypothesisGenerator:
         manifest: DatasetManifest, idgen: DeterministicIds, tracker: BudgetTracker,
     ) -> None:
         dims = [c.name for c in manifest.columns if c.role.value == "dimension"]
-        tracker.record_model_call()
-        proposals = self._policy.generate_hypotheses(
-            interpretation, metric_names=manifest.metric_names(), dimension_names=dims)
+        proposals = _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.generate_hypotheses(
+                interpretation, metric_names=manifest.metric_names(), dimension_names=dims))
         for i, p in enumerate(proposals.hypotheses):
             h = Hypothesis(
                 id=idgen.make("hyp", i), statement=p.statement, rationale=p.rationale,
@@ -251,9 +269,10 @@ class ExperimentSelector:
              "falsification": c.definition_id == "falsification"}
             for i, c in enumerate(candidates)
         ]
-        tracker.record_model_call()
-        choice = self._policy.select_experiment(
-            goal_summary={"intent": interpretation.intent.value}, candidates=summaries)
+        choice = _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.select_experiment(
+                goal_summary={"intent": interpretation.intent.value}, candidates=summaries))
         if choice.request_index is None or not (0 <= choice.request_index < len(candidates)):
             return None
         chosen = candidates[choice.request_index]
@@ -435,11 +454,12 @@ class Critic:
         if is_edgar_manifest(manifest):
             tools = EDGAR_INTENT_TOOLS.get(interpretation.intent, []) + tools
         available = [t for t in tools if t not in executed_tools and self._registry_ok(t)]
-        tracker.record_model_call()
-        proposal = self._policy.critique(
-            strongest_claim={"id": h.id, "status": h.status.value, "confidence": h.confidence,
-                             "already_critiqued": already},
-            available_tools=available)
+        proposal = _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.critique(
+                strongest_claim={"id": h.id, "status": h.status.value, "confidence": h.confidence,
+                                 "already_critiqued": already},
+                available_tools=available))
         if not proposal.should_challenge or not proposal.target_hypothesis_id or not proposal.falsification_tool:
             return
         state.add_critique(Critique(

@@ -12,6 +12,8 @@ subsequent state.
 
 from __future__ import annotations
 
+from collections.abc import Iterator
+from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 import pandas as pd
@@ -27,6 +29,7 @@ from agentic.domain.manifest import DatasetManifest
 from agentic.experiments import ArtifactSink, ExperimentRegistry, build_default_registry
 
 from .budget import BudgetTracker, LoopBudget, SafetyLimits
+from .clock import Clock, MonotonicClock
 from .components import (
     EDGAR_INTENT_TOOLS,
     INTENT_TOOLS,
@@ -45,6 +48,20 @@ from .components import (
 )
 from .fixture_policy import FixtureAgentPolicy
 from .ids import DeterministicIds
+from .observer import (
+    NULL_OBSERVER,
+    AgentObserver,
+    ComponentCompleted,
+    ExperimentObserved,
+    HypothesisTransitioned,
+    InvestigationEnded,
+    InvestigationStarted,
+    IterationEnded,
+    IterationStarted,
+    LoopComponent,
+    ModelCallObserved,
+    TerminationObserved,
+)
 from .policy import AgentPolicy, AgentPolicyError, AnalysisIntent
 from .store import InvestigationStore, NullInvestigationStore
 
@@ -64,6 +81,11 @@ class InvestigationLoop:
     # Optional shared sink: when set, every experiment emits into it so the emitted
     # artifact bytes survive the run and can be ingested + linked to their results.
     artifact_sink: ArtifactSink | None = None
+    # Observation is off by default; the backend injects a real observer that turns
+    # these events into spans, structured logs, and metrics.
+    observer: AgentObserver = NULL_OBSERVER
+    # Injected so elapsed-time budgets and component timings stay deterministic in tests.
+    clock: Clock = field(default_factory=MonotonicClock)
 
     def __post_init__(self) -> None:
         self._interpreter = GoalInterpreter(self.policy)
@@ -97,7 +119,8 @@ class InvestigationLoop:
         store.create(inv)
         tracker = BudgetTracker(budget=budget or LoopBudget(), safety=safety or SafetyLimits())
         return self._run(inv, goal_text=goal_text, manifest=manifest, frame=frame, tracker=tracker,
-                         store=store, max_new_experiments=max_new_experiments, user_stop=user_stop)
+                         store=store, max_new_experiments=max_new_experiments, user_stop=user_stop,
+                         resumed=False)
 
     def resume(
         self, investigation: Investigation, *, goal_text: str, manifest: DatasetManifest,
@@ -112,27 +135,36 @@ class InvestigationLoop:
         for r in [*investigation.state.completed_experiments, *investigation.state.failed_experiments]:
             tracker.tool_uses[r.tool_name] = tracker.tool_uses.get(r.tool_name, 0) + 1
         return self._run(investigation, goal_text=goal_text, manifest=manifest, frame=frame, tracker=tracker,
-                         store=store, max_new_experiments=max_new_experiments, user_stop=user_stop)
+                         store=store, max_new_experiments=max_new_experiments, user_stop=user_stop,
+                         resumed=True)
 
     # -- core loop -----------------------------------------------------------
 
     def _run(
         self, inv: Investigation, *, goal_text: str, manifest: DatasetManifest, frame: pd.DataFrame | None,
         tracker: BudgetTracker, store: InvestigationStore, max_new_experiments: int | None, user_stop: bool,
+        resumed: bool,
     ) -> Investigation:
         idgen = DeterministicIds(inv.id)
         state = inv.state
+        started_at = self.clock.monotonic()
+        self.observer.on_investigation_start(InvestigationStarted(
+            investigation_id=inv.id, goal_text=goal_text, adapter_id=state.objective.adapter_id,
+            dataset_name=manifest.name, resumed=resumed))
+
         try:
-            interpretation = self._interpreter.interpret(goal_text, manifest, tracker)
+            with self._timed(inv.id, LoopComponent.goal_interpreter, tracker):
+                interpretation = self._interpreter.interpret(goal_text, manifest, tracker)
         except AgentPolicyError:
-            return self._fail_safe(inv, state, idgen, store, TerminationReason.error)
+            return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
 
         # initial phase runs once (skipped on resume)
         if not state.hypotheses:
             try:
-                self._generator.generate(interpretation, state, manifest, idgen, tracker)
+                with self._timed(inv.id, LoopComponent.hypothesis_generator, tracker):
+                    self._generator.generate(interpretation, state, manifest, idgen, tracker)
             except AgentPolicyError:
-                return self._fail_safe(inv, state, idgen, store, TerminationReason.error)
+                return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
             inv.set_status(InvestigationStatus.planning)
             inv.set_status(InvestigationStatus.running)
             store.save(inv)
@@ -144,45 +176,133 @@ class InvestigationLoop:
         experiments_this_call = 0
 
         while state.termination is None:
+            iteration = state.budget.iterations_used
+            iteration_started_at = self.clock.monotonic()
+            # Refresh elapsed before the limit check so time-based budgets and safety
+            # caps are evaluated against real wall time.
+            tracker.elapsed_seconds = iteration_started_at - started_at
+            self.observer.on_iteration_start(IterationStarted(investigation_id=inv.id, iteration=iteration))
+
             executed_tools = {r.tool_name for r in [*state.completed_experiments, *state.failed_experiments]}
-            stop, reason = self._termination.decide(
-                state, tracker, state.budget.iterations_used,
-                executed_tools=executed_tools, intent_tools=intent_tools, user_stop=user_stop)
+            with self._timed(inv.id, LoopComponent.termination_policy):
+                stop, reason = self._termination.decide(
+                    state, tracker, iteration,
+                    executed_tools=executed_tools, intent_tools=intent_tools, user_stop=user_stop)
             if stop:
-                return self._finalize(inv, state, idgen, store, reason)
+                return self._finalize(inv, state, idgen, store, reason, tracker, started_at)
 
             if max_new_experiments is not None and experiments_this_call >= max_new_experiments:
                 store.save(inv)
+                self._emit_end(inv, state, tracker, started_at, partial=True)
                 return inv  # partial (not terminal); resumable
 
             try:
-                candidates = self._planner.candidates(state, interpretation, manifest, executed_tools, tracker, idgen)
-                chosen = self._selector.select(state, candidates, interpretation, tracker, idgen)
+                with self._timed(inv.id, LoopComponent.planner):
+                    candidates = self._planner.candidates(state, interpretation, manifest, executed_tools, tracker, idgen)
+                with self._timed(inv.id, LoopComponent.selector, tracker):
+                    chosen = self._selector.select(state, candidates, interpretation, tracker, idgen)
             except AgentPolicyError:
-                return self._fail_safe(inv, state, idgen, store, TerminationReason.error)
+                return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
 
             if chosen is None:
                 reason = self._termination.finalize_no_candidates(state, ran_any=tracker.experiments_used > 0)
-                return self._finalize(inv, state, idgen, store, reason)
+                return self._finalize(inv, state, idgen, store, reason, tracker, started_at)
 
-            record = self._executor.execute(chosen, manifest, frame, idgen, state)
+            execution_started_at = self.clock.monotonic()
+            with self._timed(inv.id, LoopComponent.executor):
+                record = self._executor.execute(chosen, manifest, frame, idgen, state)
+            execution_seconds = self.clock.monotonic() - execution_started_at
             failed = record.status.value == "failed"
             tracker.record_experiment(chosen.tool_name, failed=failed)
             experiments_this_call += 1
 
+            evidence_produced = 0
             if not failed:
-                self._evidence.update(state, record, chosen, idgen)
-                self._hypotheses.update(state, chosen, idgen)
+                with self._timed(inv.id, LoopComponent.evidence_updater):
+                    evidence_produced = len(self._evidence.update(state, record, chosen, idgen))
+                # Snapshot before/after so genuine status changes are observable without
+                # the components themselves needing to know about observation.
+                before = {h.id: h.status for h in state.hypotheses}
+                with self._timed(inv.id, LoopComponent.hypothesis_updater):
+                    self._hypotheses.update(state, chosen, idgen)
+                self._emit_hypothesis_transitions(inv.id, before, state)
+
+            self.observer.on_experiment(ExperimentObserved(
+                investigation_id=inv.id, tool_name=chosen.tool_name, status=record.status.value,
+                duration_seconds=execution_seconds, evidence_produced=evidence_produced))
+
+            if not failed:
                 try:
-                    self._critic.challenge(state, interpretation, manifest,
-                                           executed_tools | {chosen.tool_name}, tracker, idgen)
+                    with self._timed(inv.id, LoopComponent.critic, tracker):
+                        self._critic.challenge(state, interpretation, manifest,
+                                               executed_tools | {chosen.tool_name}, tracker, idgen)
                 except AgentPolicyError:
-                    return self._fail_safe(inv, state, idgen, store, TerminationReason.error)
+                    return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
 
             state.advance_iteration()
             store.save(inv)
+            self.observer.on_iteration_end(IterationEnded(
+                investigation_id=inv.id, iteration=iteration,
+                duration_seconds=self.clock.monotonic() - iteration_started_at))
 
+        self._emit_end(inv, state, tracker, started_at)
         return inv
+
+    # -- observation helpers -------------------------------------------------
+
+    @contextmanager
+    def _timed(
+        self, investigation_id: str, component: LoopComponent, tracker: BudgetTracker | None = None,
+    ) -> Iterator[None]:
+        """
+        Time one component invocation and report it, including on failure.
+
+        When ``tracker`` is supplied the component is model-backed: the tracker is
+        diffed across the call to report model calls and their cost, so the components
+        themselves stay free of observation concerns.
+        """
+        started = self.clock.monotonic()
+        calls_before = tracker.model_calls_used if tracker is not None else 0
+        cost_before = tracker.cost_used_usd if tracker is not None else 0.0
+        error: str | None = None
+        try:
+            yield
+        except BaseException as exc:
+            error = type(exc).__name__
+            raise
+        finally:
+            self.observer.on_component_completed(ComponentCompleted(
+                investigation_id=investigation_id, component=component,
+                duration_seconds=self.clock.monotonic() - started, error=error))
+            if tracker is not None and tracker.model_calls_used > calls_before:
+                self.observer.on_model_call(ModelCallObserved(
+                    investigation_id=investigation_id, component=component,
+                    cost_usd=tracker.cost_used_usd - cost_before))
+
+    def _emit_hypothesis_transitions(
+        self, investigation_id: str, before: dict[str, object], state: InvestigationState,
+    ) -> None:
+        for h in state.hypotheses:
+            prior = before.get(h.id)
+            if prior is not None and prior != h.status:
+                self.observer.on_hypothesis_transition(HypothesisTransitioned(
+                    investigation_id=investigation_id, hypothesis_id=h.id,
+                    from_status=prior, to_status=h.status))  # type: ignore[arg-type]
+
+    def _emit_end(
+        self, inv: Investigation, state: InvestigationState, tracker: BudgetTracker,
+        started_at: float, *, partial: bool = False,
+    ) -> None:
+        tracker.elapsed_seconds = self.clock.monotonic() - started_at
+        self.observer.on_investigation_end(InvestigationEnded(
+            investigation_id=inv.id, status=inv.status,
+            termination_reason=state.termination.reason if state.termination is not None else None,
+            iterations=state.budget.iterations_used,
+            experiments_completed=len(state.completed_experiments),
+            experiments_failed=len(state.failed_experiments),
+            hypotheses=len(state.hypotheses), evidence=len(state.evidence),
+            elapsed_seconds=tracker.elapsed_seconds, cost_usd=tracker.cost_used_usd,
+            model_calls=tracker.model_calls_used, partial=partial))
 
     # -- helpers -------------------------------------------------------------
 
@@ -193,18 +313,25 @@ class InvestigationLoop:
         return tools
 
     def _finalize(self, inv: Investigation, state: InvestigationState, idgen: DeterministicIds,
-                  store: InvestigationStore, reason: TerminationReason) -> Investigation:
-        self._synth.synthesize(state, reason, idgen)
+                  store: InvestigationStore, reason: TerminationReason,
+                  tracker: BudgetTracker, started_at: float) -> Investigation:
+        with self._timed(inv.id, LoopComponent.conclusion_synthesizer):
+            self._synth.synthesize(state, reason, idgen)
         state.record_termination(make_termination(reason, state, idgen))
         inv.set_status(_TERMINAL_STATUS.get(reason, InvestigationStatus.exhausted))
         store.save(inv)
+        self.observer.on_termination(TerminationObserved(
+            investigation_id=inv.id, reason=reason, iterations=state.budget.iterations_used))
+        self._emit_end(inv, state, tracker, started_at)
         return inv
 
     def _fail_safe(self, inv: Investigation, state: InvestigationState, idgen: DeterministicIds,
-                   store: InvestigationStore, reason: TerminationReason) -> Investigation:
+                   store: InvestigationStore, reason: TerminationReason,
+                   tracker: BudgetTracker, started_at: float) -> Investigation:
         """Malformed model output / internal error -> terminate safely with a conclusion."""
         if state.termination is None:
-            self._synth.synthesize(state, reason, idgen)
+            with self._timed(inv.id, LoopComponent.conclusion_synthesizer):
+                self._synth.synthesize(state, reason, idgen)
             state.record_termination(make_termination(reason, state, idgen))
         if inv.status not in (InvestigationStatus.converged, InvestigationStatus.exhausted, InvestigationStatus.failed):
             # created -> planning -> running -> failed (respect the transition graph)
@@ -214,6 +341,9 @@ class InvestigationLoop:
                 inv.set_status(InvestigationStatus.running)
             inv.set_status(InvestigationStatus.failed)
         store.save(inv)
+        self.observer.on_termination(TerminationObserved(
+            investigation_id=inv.id, reason=reason, iterations=state.budget.iterations_used))
+        self._emit_end(inv, state, tracker, started_at)
         return inv
 
 

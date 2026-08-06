@@ -89,6 +89,46 @@ synthesize conclusion (only after termination); record TerminationDecision; chec
   terminates with reason `error`, still synthesizes an (insufficient) conclusion,
   and sets status `failed` (`test_malformed_model_response_fails_safely`).
 
+## Observability
+
+The loop emits a typed event at every decision boundary through an injected
+`AgentObserver` (`agentic/agent/observer.py`). The default is a **no-op**, so
+observation is off unless an observer is supplied and `agentic/` keeps the
+zero-infrastructure-dependency purity required by `domain-boundaries.md` — nothing
+in the package imports structlog, OpenTelemetry, or prometheus_client.
+
+| Event | Emitted when |
+|---|---|
+| `InvestigationStarted` / `InvestigationEnded` | once per `start`/`resume` call; the end event also covers partial (resumable) and failed exits, and carries elapsed time, cost, and model-call count |
+| `IterationStarted` / `IterationEnded` | per loop iteration, with duration |
+| `ComponentCompleted` | every one of the ten components, with duration and the exception type when it raised |
+| `ExperimentObserved` | per executed experiment, with tool, status, duration, evidence produced |
+| `HypothesisTransitioned` | whenever a hypothesis actually changes status |
+| `ModelCallObserved` | per model-backed component call, with attributed cost |
+| `TerminationObserved` | on the typed termination decision |
+
+Components stay observation-free: the loop diffs hypothesis statuses and the budget
+tracker around each call, so all instrumentation lives in `loop.py`. `LoopComponent`
+is an enum rather than a free string to keep downstream metric label cardinality bounded.
+
+`RecordingObserver` collects events in order for tests and local inspection.
+
+## Time and cost accounting
+
+`InvestigationLoop` takes an injected `Clock` (`agentic/agent/clock.py`) so elapsed-time
+behavior is deterministic under test (`ManualClock`). Elapsed time is refreshed at the
+top of each iteration, **before** the termination pre-check, so `LoopBudget.max_elapsed_seconds`
+and `SafetyLimits.absolute_max_elapsed_seconds` are evaluated against real wall time.
+
+Cost is attributed through the optional `CostAwarePolicy` surface: a policy that knows its
+token usage exposes `drain_cost_usd()`, and `_invoke_policy` charges it to the run after each
+call, whether or not the call raised. `AgentPolicy` stays a four-method contract — policies
+without a cost surface contribute zero and are unaffected.
+
+> Before this wiring, `BudgetTracker.elapsed_seconds` was never assigned and no cost was ever
+> accrued, so `max_elapsed_seconds`, `absolute_max_elapsed_seconds` and `max_cost_usd` could
+> never fire. `tests/agentic/test_investigation_observability.py` covers each of them.
+
 ## The LLM/deterministic split
 
 The `AgentPolicy` (see [`decision-policy.md`](./decision-policy.md)) makes only

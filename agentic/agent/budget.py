@@ -50,6 +50,12 @@ class BudgetTracker:
     def record_model_call(self) -> None:
         self.model_calls_used += 1
 
+    def record_model_cost(self, cost: float) -> None:
+        """Attribute spend to the run. Separate from the count so a model call that
+        raises is still counted while its (possibly zero) cost is attributed after."""
+        if cost > 0:
+            self.cost_used_usd += cost
+
     def record_experiment(self, tool_name: str, *, cost: float = 0.0, failed: bool = False) -> None:
         self.experiments_used += 1
         self.cost_used_usd += cost
