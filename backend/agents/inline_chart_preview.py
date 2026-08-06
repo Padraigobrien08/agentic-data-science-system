@@ -46,7 +46,12 @@ _TREND_CHART_PERIOD_LIMIT = 6
 _PEER_CHART_PERIOD_LIMIT = 3
 _TREND_SCORE_STRONG_THRESHOLD = 2.0
 _CAPTION_MIN_LENGTH = 90
-_CAPTION_MAX_LENGTH = 160
+# Raised from 160 to fit the fiscal-alignment disclosure on peer captions. An
+# out-of-range caption drops the whole chart, and the length varies with the metric
+# label, so this must clear the *longest* label with headroom -- not the one that
+# happened to be in the test fixture. See the all-labels test in
+# tests/test_traceability_summary.py.
+_CAPTION_MAX_LENGTH = 240
 
 
 def _read_artifact_csv(artifact_paths: dict[str, str], role_key: str) -> pd.DataFrame | None:
@@ -145,9 +150,14 @@ def _build_trend_caption(metric_label: str, *, direction: str, period_count: int
 
 
 def _build_peer_caption(metric_label: str, *, relation: str, period_count: int) -> str | None:
+    # The fiscal-alignment note is not decoration. Peers are compared within a fiscal
+    # period (see src/peer_signals.py), and companies close their years at different
+    # times, so one shared label can span materially different calendar windows. Without
+    # saying so the chart implies a like-for-like comparison it is not making.
     caption = (
-        f"{metric_label} stayed {relation} the peer median across {period_count} shared periods; "
-        "this matters because the gap is broad, not a one-period outlier."
+        f"{metric_label} stayed {relation} the peer median across {period_count} shared "
+        "fiscal periods; this matters because the gap is broad, not a one-period outlier. "
+        "Fiscal quarters can cover different calendar dates per company."
     )
     return caption if _caption_in_range(caption) else None
 
@@ -276,7 +286,7 @@ def _build_trend_line_preview(
         "metric_key": metric_key,
         "metric_label": metric_label,
         "caption": caption,
-        "x_axis_label": "Period",
+        "x_axis_label": "Fiscal period",
         "y_axis_label": metric_label,
         "value_format": _value_format(metric_key),
         "series": [
@@ -409,7 +419,7 @@ def _build_peer_grouped_bar_preview(
         "metric_key": metric_key,
         "metric_label": metric_label,
         "caption": caption,
-        "x_axis_label": "Period",
+        "x_axis_label": "Fiscal period",
         "y_axis_label": metric_label,
         "value_format": _value_format(metric_key),
         "series": [
