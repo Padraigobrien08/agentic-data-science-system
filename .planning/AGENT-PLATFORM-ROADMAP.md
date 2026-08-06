@@ -208,9 +208,22 @@ loop and the platform metrics; log aggregation and SLOs remain open there.
 
 ## Workstream C — MCP as the platform surface
 
-- [ ] **C1. Orchestration MCP server** — L
-  - `start_investigation`, `get_investigation_state`, `list_hypotheses`, `get_evidence`,
-    `list_artifacts`; artifacts exposed as MCP resources.
+- [x] **C1. Orchestration MCP server** — L _(landed 2026-08-06)_
+  - `backend/mcp/` — 9 tools (`start_investigation`, `get_investigation`, `get_conclusion`,
+    `list_hypotheses`, `get_evidence`, `list_investigations`, `get_run_status`,
+    `list_artifacts`, `get_artifact_preview`) and 2 resources (`artifact://{id}`,
+    `investigation://{id}/conclusion`). See
+    [`docs/mcp-platform-server.md`](../docs/mcp-platform-server.md).
+  - **A client of the `/v1` API, not a second implementation.** Every tool is an HTTP call, so
+    auth, owner scoping, validation, and 404-for-unauthorized are inherited rather than
+    reimplemented — the MCP surface grants no access the token does not already have. Tested
+    against the real app: a second user's token gets 404 on another's investigation.
+  - Shares the EDGAR server's `ToolResponseEnvelope` contract; errors never cross the boundary
+    as exceptions. List responses are capped so one call cannot flood an agent's context.
+  - Found and fixed a real product bug while wiring artifact access: the loop emits chart specs
+    as `application/vnd.chart+json`, which the preview endpoint rejected with 415 despite the
+    bytes being plain JSON — those artifacts were unreadable through *every* surface, not just
+    MCP. `artifact_previewable` now accepts any RFC 6839 `+json` structured-suffix type.
 - [ ] **C2. Streamable-HTTP transport + bearer auth** — M
   - Reuse `backend/auth/tokens.py` so it can be hosted. Demo: point Claude Code at the endpoint
     and have it commission and inspect investigations.
