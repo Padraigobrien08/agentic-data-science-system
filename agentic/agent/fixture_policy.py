@@ -9,6 +9,7 @@ gain, so intermediate results steer the loop.
 
 from __future__ import annotations
 
+from .direction import parse_direction
 from .policy import (
     AnalysisIntent,
     CritiqueProposal,
@@ -28,8 +29,6 @@ _INTENT_KEYWORDS: list[tuple[AnalysisIntent, tuple[str, ...]]] = [
     (AnalysisIntent.distribution, ("distribution", "spread", "describe", "summary", "summarise", "summarize")),
 ]
 
-_UP = ("increas", "grow", "rise", "up", "higher", "improv")
-_DOWN = ("decreas", "declin", "fall", "drop", "down", "lower", "deteriorat", "worsen")
 
 
 class FixtureAgentPolicy:
@@ -42,12 +41,9 @@ class FixtureAgentPolicy:
             if any(k in text for k in kws):
                 intent = cand
                 break
-        direction = None
-        if intent is AnalysisIntent.trend:
-            if any(k in text for k in _DOWN):
-                direction = "down"
-            elif any(k in text for k in _UP):
-                direction = "up"
+        # Word-boundary parsing shared with the evidence updater, so a metric name that
+        # embeds a direction word ("rainfall") cannot flip the interpreted direction.
+        direction = parse_direction(text) if intent is AnalysisIntent.trend else None
         metrics = capability_summary.get("metrics") or []
         dims = capability_summary.get("dimensions") or []
         metric_hint = next((m for m in metrics if m.lower() in text), metrics[0] if metrics else None)

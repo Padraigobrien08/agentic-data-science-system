@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import Field, SecretStr, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 from sqlalchemy.engine.url import make_url
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -68,7 +70,7 @@ class Settings(BaseSettings):
     # HTTP security (CORS + response headers). The documented architecture proxies browser
     # traffic through the Next.js server, so CORS is closed by default; set origins only when
     # a browser calls this API directly. See ``backend.api.security_headers``.
-    cors_allow_origins: list[str] = Field(
+    cors_allow_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=list,
         description=(
             "Exact browser origins allowed for cross-origin requests (comma-separated or JSON list). "
@@ -457,11 +459,26 @@ class Settings(BaseSettings):
     @field_validator("cors_allow_origins", mode="before")
     @classmethod
     def _split_cors_origins(cls, v: object) -> object:
-        """Accept a comma-separated string (operator-friendly) as well as a JSON list."""
+        """Accept a comma-separated string (operator-friendly) as well as a JSON list.
+
+        The field is annotated ``NoDecode`` so this runs on the raw environment string.
+        Without that, pydantic-settings JSON-decodes complex fields *before* validators, so
+        ``EDGAR_BACKEND_CORS_ALLOW_ORIGINS=https://a.example`` raised a startup error and the
+        documented comma-separated form only ever worked for in-process construction. Because
+        decoding is off, JSON is parsed here too.
+        """
         if isinstance(v, str):
             stripped = v.strip()
-            if not stripped or stripped.startswith("["):
-                return v  # empty -> default; JSON list -> let pydantic parse it
+            # An empty value is how an operator writes "no CORS", and is also the default.
+            if not stripped:
+                return []
+            if stripped.startswith("["):
+                try:
+                    return json.loads(stripped)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        f"cors_allow_origins looks like JSON but could not be parsed: {exc}"
+                    ) from exc
             return [item.strip() for item in stripped.split(",") if item.strip()]
         return v
 

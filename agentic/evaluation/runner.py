@@ -16,7 +16,7 @@ from agentic.agent.policy import AgentPolicy
 from agentic.domain.enums import ColumnRole
 from agentic.evaluation.agency import AgencyCaseResult, AgencyReport, score_case
 from agentic.evaluation.cases import AGENCY_CASES, SUITE_ID, AgencyCase
-from agentic.evaluation.fixtures import METRIC, build_fixture
+from agentic.evaluation.fixtures import build_fixture
 
 
 def run_case(
@@ -32,7 +32,7 @@ def run_case(
         frame=frame,
         time_field=case.time_field,
         entity_id_fields=list(case.entity_id_fields),
-        role_hints={METRIC: ColumnRole.metric},
+        role_hints={case.metric_field: ColumnRole.metric},
     ).build_manifest(AdapterRequest())
 
     effective_budget = budget

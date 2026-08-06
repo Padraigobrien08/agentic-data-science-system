@@ -40,6 +40,7 @@ from agentic.experiments import ArtifactSink, ExperimentContext, ExperimentRegis
 from agentic.experiments.record import ExperimentExecutionRecord
 
 from .budget import BudgetTracker
+from .direction import direction_sign
 from .ids import DeterministicIds
 from .policy import AgentPolicy, AnalysisIntent, GoalInterpretation, drain_policy_cost
 
@@ -65,8 +66,6 @@ EDGAR_INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
 
 _T = TypeVar("_T")
 
-_UP_WORDS = ("increasing", "up", "grow", "rise", "higher")
-_DOWN_WORDS = ("decreasing", "down", "declin", "fall", "drop", "lower", "deteriorat")
 
 
 def _invoke_policy(tracker: BudgetTracker, policy: AgentPolicy, call: Callable[[], _T]) -> _T:
@@ -101,12 +100,7 @@ def is_edgar_manifest(manifest: DatasetManifest) -> bool:
 
 def expectation_direction(h: Hypothesis) -> int | None:
     """+1 (up), -1 (down), or None (non-directional) parsed from the statement."""
-    s = h.statement.lower()
-    if any(w in s for w in _UP_WORDS):
-        return 1
-    if any(w in s for w in _DOWN_WORDS):
-        return -1
-    return None
+    return direction_sign(h.statement)
 
 
 # ---------------------------------------------------------------------------

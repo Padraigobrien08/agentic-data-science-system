@@ -125,10 +125,30 @@ def test_fixtures_are_deterministic(fixture_id: str) -> None:
 
 
 @pytest.mark.parametrize("fixture_id", sorted(FIXTURES))
-def test_fixtures_are_non_empty_and_typed(fixture_id: str) -> None:
+def test_fixtures_are_non_empty_and_shaped(fixture_id: str) -> None:
+    """Structure, not names: an entity column, a time column, and a metric column."""
     frame = build_fixture(fixture_id)
     assert not frame.empty
-    assert {"entity", "period", "value"} <= set(frame.columns)
+    assert len(frame.columns) >= 3
+
+
+def test_non_financial_fixtures_use_their_own_vocabulary() -> None:
+    """
+    The input-agnosticism claim in one assertion: these fixtures share no column name with
+    the generic ones, so a case passing over them cannot be relying on column names.
+    """
+    generic = set(build_fixture("clear_rising").columns)
+    for fixture_id in ("rainfall_rising", "response_latency_flat"):
+        assert not (set(build_fixture(fixture_id).columns) & generic), fixture_id
+
+
+def test_non_financial_cases_are_in_the_suite() -> None:
+    from agentic.evaluation import AGENCY_CASES as cases
+
+    non_financial = {c.case_id for c in cases if c.fixture_id in
+                     ("rainfall_rising", "response_latency_flat")}
+    assert non_financial, "the suite must exercise a non-financial dataset"
+    assert all(c.metric_field != "value" for c in cases if c.case_id in non_financial)
 
 
 def test_unknown_fixture_is_rejected() -> None:
@@ -220,3 +240,60 @@ def test_report_is_serializable() -> None:
 def test_case_ids_are_unique() -> None:
     ids = [c.case_id for c in AGENCY_CASES]
     assert len(set(ids)) == len(ids)
+
+
+# -- direction parsing -------------------------------------------------------
+#
+# Regression: direction keywords were matched as substrings, so "rainfall_mm is increasing"
+# matched "fall" and the loop read a rising series as a claim about decline — rejecting a
+# hypothesis the data supported. Found by the non-financial agency case, which is exactly
+# what those cases exist for.
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        # the original failure and its family: a direction word inside a metric name
+        ("rainfall_mm is increasing over time", "up"),
+        ("shortfall is increasing", "up"),
+        ("downtime is increasing", "up"),
+        ("upstream_value is decreasing", "down"),
+        ("download_count is rising", "up"),
+        # "growth" is a noun in metric names, not a claim; "growing" is a claim
+        ("revenue_growth_qoq is deteriorating", "down"),
+        ("value is growing", "up"),
+        # ordinary directional claims
+        ("value is decreasing over time", "down"),
+        ("revenue is falling", "down"),
+        ("margins shrank", "down"),
+        ("latency dropped", "down"),
+        ("value is up", "up"),
+        ("value is down", "down"),
+        # non-directional
+        ("compare value between groups", None),
+        ("profile the dataset", None),
+        ("", None),
+    ],
+)
+def test_direction_is_parsed_on_word_boundaries(text: str, expected) -> None:
+    from agentic.agent.direction import parse_direction
+
+    assert parse_direction(text) == expected
+
+
+def test_direction_sign_matches_parse_direction() -> None:
+    """The two call sites (goal interpretation, evidence updating) must never disagree."""
+    from agentic.agent.direction import direction_sign, parse_direction
+
+    for text in ("value is increasing", "value is decreasing", "compare groups"):
+        sign = direction_sign(text)
+        direction = parse_direction(text)
+        assert sign == (None if direction is None else (1 if direction == "up" else -1))
+
+
+def test_earliest_direction_wins_when_both_appear() -> None:
+    """Fixed precedence made the answer depend on which list was checked first."""
+    from agentic.agent.direction import parse_direction
+
+    assert parse_direction("increasing then decreasing") == "up"
+    assert parse_direction("decreasing then increasing") == "down"

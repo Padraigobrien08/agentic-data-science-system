@@ -36,9 +36,11 @@ class AgencyCase(DomainModel):
     goal: str
     fixture_id: str
     expectations: AgencyExpectations
-    #: Structural hints the adapter needs; never domain vocabulary.
+    #: Structural hints the adapter needs; never domain vocabulary. Cases over non-financial
+    #: fixtures override these, which is how the suite proves nothing depends on column names.
     time_field: str | None = "period"
     entity_id_fields: list[str] = Field(default_factory=lambda: ["entity"])
+    metric_field: str = "value"
     max_experiments: int | None = None
 
 
@@ -140,6 +142,39 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
         expectations=AgencyExpectations(
             expect_any_tool=["analyze_time_series_trend", "detect_change_points"],
             forbid_tools=["compare_groups"],
+        ),
+    ),
+    # -- input-agnosticism: a different domain, different column names --------
+    #
+    # These matter because the platform's whole generalization claim rests on the loop
+    # reasoning over *roles* declared by an adapter, never over column names. If anything
+    # in the loop quietly special-cased financial vocabulary, these are what would fail.
+    AgencyCase(
+        case_id="non_financial_trend_is_concluded",
+        description="Rainfall at a weather station — a rising signal must conclude the same way.",
+        goal="rainfall_mm is increasing over time",
+        fixture_id="rainfall_rising",
+        time_field="month",
+        entity_id_fields=["station"],
+        metric_field="rainfall_mm",
+        expectations=AgencyExpectations(
+            termination_reason_in=[SUFFICIENT],
+            disposition_in=[SUPPORTED],
+            hypothesis_status_any=[SUPPORTED],
+            min_confidence=0.5,
+        ),
+    ),
+    AgencyCase(
+        case_id="non_financial_flat_is_not_a_trend",
+        description="Service latency that is not moving must not be read as a trend either.",
+        goal="latency_ms is increasing over time",
+        fixture_id="response_latency_flat",
+        time_field="day",
+        entity_id_fields=["service"],
+        metric_field="latency_ms",
+        expectations=AgencyExpectations(
+            hypothesis_status_not_in=[SUPPORTED],
+            max_confidence=0.6,
         ),
     ),
     # -- discipline -----------------------------------------------------------

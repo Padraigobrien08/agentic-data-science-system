@@ -92,6 +92,33 @@ def separated_groups(n: int = 8) -> pd.DataFrame:
     return pd.concat(frames, ignore_index=True)
 
 
+# ---------------------------------------------------------------------------
+# Non-financial fixtures — proving input-agnosticism
+# ---------------------------------------------------------------------------
+#
+# These deliberately use a different domain *and* different column names. Nothing in the
+# loop may depend on EDGAR vocabulary, or even on this module's own generic
+# entity/period/value names: the adapter declares structure, and the loop reasons over roles.
+
+
+def rainfall_rising(n: int = 12) -> pd.DataFrame:
+    """Monthly rainfall at one weather station, trending up. Columns are domain-native."""
+    return pd.DataFrame({
+        "station": ["Braemar"] * n,
+        "month": [f"2024-{m + 1:02d}" for m in range(n)],
+        "rainfall_mm": [40.0 + 6.0 * i for i in range(n)],
+    })
+
+
+def response_latency_flat(n: int = 12) -> pd.DataFrame:
+    """Service response latency that is not moving — a non-financial flat control."""
+    return pd.DataFrame({
+        "service": ["checkout-api"] * n,
+        "day": [f"2024-03-{d + 1:02d}" for d in range(n)],
+        "latency_ms": [180.0] * n,
+    })
+
+
 #: Fixture id -> builder. Cases reference these by name so a suite stays declarative.
 FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "clear_rising": clear_rising,
@@ -101,6 +128,8 @@ FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "too_short": too_short,
     "opposing_entities": opposing_entities,
     "separated_groups": separated_groups,
+    "rainfall_rising": rainfall_rising,
+    "response_latency_flat": response_latency_flat,
 }
 
 

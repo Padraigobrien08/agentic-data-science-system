@@ -34,6 +34,20 @@ jobs:
       - name: Check lockfiles satisfy the declared floors
         run: python3 scripts/check-lockfile-drift.py
 
+  api-contract:
+    name: API contract (OpenAPI)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Install dependencies
+        run: pip install --upgrade pip && pip install -r requirements-dev.lock
+      # The committed schema is what makes an API change reviewable; fail if it is stale.
+      - name: Check docs/api/openapi.json is in step with the app
+        run: python3 scripts/export-openapi.py --check
+
   quality:
     name: Backend (ruff + mypy)
     runs-on: ubuntu-latest
