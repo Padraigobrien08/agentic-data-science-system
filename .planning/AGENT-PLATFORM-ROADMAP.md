@@ -177,7 +177,21 @@ loop and the platform metrics; log aggregation and SLOs remain open there.
 - [ ] **B2. One real adaptive run, recorded** — M
   - goal → hypotheses → experiments → contradicting evidence → critic falsification →
     termination reason → evidence-linked conclusion. That trace is the README centerpiece.
-- [ ] **B3. Bounded parallel experiments per iteration** — M (loop is strictly sequential today)
+- [x] **B3. Bounded parallel experiments per iteration** — M _(landed 2026-08-06)_
+  - `LoopBudget.max_parallel_experiments` (default 1 — sequential runs take the original code
+    path verbatim, no thread pool). The policy picks the lead experiment as before; remaining
+    slots fill deterministically from the planner's ranked candidates, so `AgentPolicy` stays a
+    four-method contract and model calls stay at one per iteration — a wider batch *lowers*
+    cost per experiment.
+  - Ordering guarantee: results fold in **selection** order, never completion order, so ids,
+    evidence, and hypothesis updates remain a pure function of state. Proven by delaying a
+    batch so it finishes reversed, and by a resume-determinism test with batching on.
+  - Batch width is clamped by remaining budget, so it never overshoots `max_experiments` or a
+    caller's `max_new_experiments` window. Shared artifact sink serialized via
+    `LockedArtifactSink`; a raising tool propagates identically batched or not.
+  - Also closed a gap from A2: the service ran on `LoopBudget()` defaults, so the elapsed-time
+    and cost budgets were unreachable in a deployment. Budgets now come from settings
+    (`EDGAR_BACKEND_AGENT_MAX_*`).
 - [ ] **B4. Investigation replay/diff** — L
   - Rerun a persisted decision chain against a new policy or model and diff the conclusions.
     Nearly free given deterministic ids; almost nobody else has this.

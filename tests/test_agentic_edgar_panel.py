@@ -352,6 +352,60 @@ def test_no_investigation_is_persisted_when_the_panel_is_unavailable(
 # -- the materializer's own contract ----------------------------------------
 
 
+def test_loop_budget_comes_from_settings() -> None:
+    """
+    The service used to run on ``LoopBudget()`` defaults, which left the elapsed-time and
+    cost budgets unreachable in a deployment even though the loop enforces them.
+    """
+    from backend.services.agentic_investigation_execution_service import _loop_budget
+
+    budget = _loop_budget(Settings(
+        agent_max_experiments=3,
+        agent_max_parallel_experiments=4,
+        agent_max_elapsed_seconds=42.0,
+        agent_max_cost_usd=0.25,
+    ))
+    assert budget.max_experiments == 3
+    assert budget.max_parallel_experiments == 4
+    assert budget.max_elapsed_seconds == 42.0
+    assert budget.max_cost_usd == 0.25
+
+
+def test_parallel_experiments_setting_reaches_the_loop(session: Session, tmp_path: Path, monkeypatch) -> None:
+    """Batching is only useful if an operator can actually turn it on."""
+    settings = Settings(
+        run_workspace_root=tmp_path / "ws",
+        agent_max_parallel_experiments=3,
+    )
+    monkeypatch.setattr(
+        "backend.services.agentic_investigation_execution_service.get_settings",
+        lambda: settings,
+    )
+    seen: dict = {}
+    real_start = None
+
+    from agentic.agent.loop import InvestigationLoop
+
+    real_start = InvestigationLoop.start
+
+    def _spy_start(self, *args, **kwargs):
+        seen["budget"] = kwargs.get("budget")
+        return real_start(self, *args, **kwargs)
+
+    monkeypatch.setattr(InvestigationLoop, "start", _spy_start)
+
+    service = AgenticInvestigationExecutionService(
+        session,
+        policy_factory=lambda _s: FixtureAgentPolicy(),
+        panel_materializer=_FixturePanelMaterializer(),
+    )
+    run = _seed_run(session, input_payload=_edgar_payload())
+    service.execute_analysis_run(run.id)
+
+    assert seen["budget"] is not None, "the service must pass an explicit budget"
+    assert seen["budget"].max_parallel_experiments == 3
+
+
 def test_materializer_rejects_an_empty_ticker_list(tmp_path: Path) -> None:
     from backend.services.edgar_panel_materializer import DeterministicEdgarPanelMaterializer
 

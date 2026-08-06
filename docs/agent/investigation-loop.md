@@ -67,6 +67,33 @@ synthesize conclusion (only after termination); record TerminationDecision; chec
   signal → hypotheses left `unresolved` and disposition
   `insufficient_evidence` (`test_insufficient_data_unresolved_conclusion`).
 
+## Bounded parallel experiments
+
+`LoopBudget.max_parallel_experiments` (default **1**) lets one iteration run several
+selected experiments concurrently. At the default the loop is strictly sequential and takes
+the original code path — no thread pool, no shared-sink wrapper — so existing runs are
+unchanged.
+
+**Selection.** The *lead* experiment is chosen by the policy exactly as before: one selector
+model call per iteration. Remaining slots are filled deterministically from the planner's
+ranked candidates. That keeps `AgentPolicy` a four-method contract, keeps model calls at one
+per iteration (so a wider batch *lowers* cost per experiment), and keeps the batch
+reproducible. The trade-off — followers are chosen without seeing the lead's result — is
+exactly why the batch is bounded.
+
+**The ordering guarantee.** Results are folded into state strictly in *selection* order, never
+completion order, so result ids, evidence, and hypothesis updates stay a pure function of
+state regardless of how the batch interleaved. `test_results_fold_in_selection_order_not_completion_order`
+delays experiments so the batch finishes reversed and asserts state order is unaffected;
+`test_resume_matches_an_uninterrupted_batched_run` confirms resume determinism still holds.
+
+Batch width is clamped by whatever budget remains, so a batch never overshoots
+`max_experiments` or a caller's `max_new_experiments` window. Deterministic tools are
+read-only over the frame; the shared artifact sink is serialized behind `LockedArtifactSink`,
+so only emission is synchronized while analysis runs concurrently. A tool that *raises* (an
+internal error, as opposed to reporting `status=failed`) propagates identically batched or
+not — the pool never swallows it.
+
 ## Determinism, persistence, resume
 
 - **Deterministic ids** (`DeterministicIds`, seeded per investigation) make ids a

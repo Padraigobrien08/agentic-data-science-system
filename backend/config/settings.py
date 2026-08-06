@@ -262,6 +262,37 @@ class Settings(BaseSettings):
         description="HTTP timeout for OpenAI chat completion requests",
     )
 
+    # Agentic investigation loop budgets. These bound one investigation; the loop's
+    # deterministic safety caps (max iterations, consecutive failures) sit above them.
+    agent_max_parallel_experiments: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Experiments the loop may run concurrently within one iteration. 1 (default) is "
+            "strictly sequential. Higher values lower latency and selector model calls per "
+            "experiment, at the cost of choosing later experiments in a batch without seeing "
+            "the earlier ones' results (EDGAR_BACKEND_AGENT_MAX_PARALLEL_EXPERIMENTS)."
+        ),
+    )
+    agent_max_experiments: int = Field(
+        default=8, ge=1,
+        description="Maximum experiments per investigation (EDGAR_BACKEND_AGENT_MAX_EXPERIMENTS).",
+    )
+    agent_max_elapsed_seconds: float = Field(
+        default=120.0, gt=0,
+        description=(
+            "Wall-clock budget for one investigation; the loop terminates with "
+            "budget_exhausted when exceeded (EDGAR_BACKEND_AGENT_MAX_ELAPSED_SECONDS)."
+        ),
+    )
+    agent_max_cost_usd: float = Field(
+        default=1.0, gt=0,
+        description=(
+            "Estimated model spend budget for one investigation. Only binds when the models "
+            "in use are priced via ``llm_model_prices`` (EDGAR_BACKEND_AGENT_MAX_COST_USD)."
+        ),
+    )
+
     llm_model_prices: dict[str, dict[str, float]] = Field(
         default_factory=dict,
         description=(

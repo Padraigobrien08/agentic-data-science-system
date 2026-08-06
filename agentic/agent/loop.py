@@ -13,12 +13,14 @@ subsequent state.
 from __future__ import annotations
 
 from collections.abc import Iterator
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import contextmanager
 from dataclasses import dataclass, field
 
 import pandas as pd
 
 from agentic.domain import (
+    ExperimentRequest,
     Investigation,
     InvestigationGoal,
     InvestigationState,
@@ -27,6 +29,7 @@ from agentic.domain import (
 )
 from agentic.domain.manifest import DatasetManifest
 from agentic.experiments import ArtifactSink, ExperimentRegistry, build_default_registry
+from agentic.experiments.record import ExperimentExecutionRecord
 
 from .budget import BudgetTracker, LoopBudget, SafetyLimits
 from .clock import Clock, MonotonicClock
@@ -42,6 +45,7 @@ from .components import (
     HypothesisGenerator,
     HypothesisUpdater,
     InvestigationPlanner,
+    LockedArtifactSink,
     TerminationPolicy,
     is_edgar_manifest,
     make_termination,
@@ -196,46 +200,54 @@ class InvestigationLoop:
                 self._emit_end(inv, state, tracker, started_at, partial=True)
                 return inv  # partial (not terminal); resumable
 
+            batch_limit = self._batch_limit(tracker, max_new_experiments, experiments_this_call)
             try:
                 with self._timed(inv.id, LoopComponent.planner):
                     candidates = self._planner.candidates(state, interpretation, manifest, executed_tools, tracker, idgen)
                 with self._timed(inv.id, LoopComponent.selector, tracker):
-                    chosen = self._selector.select(state, candidates, interpretation, tracker, idgen)
+                    batch = self._selector.select_batch(
+                        state, candidates, interpretation, tracker, idgen, limit=batch_limit)
             except AgentPolicyError:
                 return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
 
-            if chosen is None:
+            if not batch:
                 reason = self._termination.finalize_no_candidates(state, ran_any=tracker.experiments_used > 0)
                 return self._finalize(inv, state, idgen, store, reason, tracker, started_at)
 
-            execution_started_at = self.clock.monotonic()
             with self._timed(inv.id, LoopComponent.executor):
-                record = self._executor.execute(chosen, manifest, frame, idgen, state)
-            execution_seconds = self.clock.monotonic() - execution_started_at
-            failed = record.status.value == "failed"
-            tracker.record_experiment(chosen.tool_name, failed=failed)
-            experiments_this_call += 1
+                outcomes = self._run_batch(batch, manifest, frame)
 
-            evidence_produced = 0
-            if not failed:
-                with self._timed(inv.id, LoopComponent.evidence_updater):
-                    evidence_produced = len(self._evidence.update(state, record, chosen, idgen))
-                # Snapshot before/after so genuine status changes are observable without
-                # the components themselves needing to know about observation.
-                before = {h.id: h.status for h in state.hypotheses}
-                with self._timed(inv.id, LoopComponent.hypothesis_updater):
-                    self._hypotheses.update(state, chosen, idgen)
-                self._emit_hypothesis_transitions(inv.id, before, state)
+            any_succeeded = False
+            for chosen, record, execution_seconds in outcomes:
+                failed = record.status.value == "failed"
+                tracker.record_experiment(chosen.tool_name, failed=failed)
+                experiments_this_call += 1
+                # Folded strictly in selection order, so result ids and evidence remain a pure
+                # function of state regardless of the order the batch finished in.
+                self._executor.record(record, chosen, idgen, state)
 
-            self.observer.on_experiment(ExperimentObserved(
-                investigation_id=inv.id, tool_name=chosen.tool_name, status=record.status.value,
-                duration_seconds=execution_seconds, evidence_produced=evidence_produced))
+                evidence_produced = 0
+                if not failed:
+                    any_succeeded = True
+                    with self._timed(inv.id, LoopComponent.evidence_updater):
+                        evidence_produced = len(self._evidence.update(state, record, chosen, idgen))
+                    # Snapshot before/after so genuine status changes are observable without
+                    # the components themselves needing to know about observation.
+                    before = {h.id: h.status for h in state.hypotheses}
+                    with self._timed(inv.id, LoopComponent.hypothesis_updater):
+                        self._hypotheses.update(state, chosen, idgen)
+                    self._emit_hypothesis_transitions(inv.id, before, state)
 
-            if not failed:
+                self.observer.on_experiment(ExperimentObserved(
+                    investigation_id=inv.id, tool_name=chosen.tool_name, status=record.status.value,
+                    duration_seconds=execution_seconds, evidence_produced=evidence_produced))
+
+            if any_succeeded:
                 try:
                     with self._timed(inv.id, LoopComponent.critic, tracker):
                         self._critic.challenge(state, interpretation, manifest,
-                                               executed_tools | {chosen.tool_name}, tracker, idgen)
+                                               executed_tools | {b.tool_name for b in batch},
+                                               tracker, idgen)
                 except AgentPolicyError:
                     return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
 
@@ -247,6 +259,60 @@ class InvestigationLoop:
 
         self._emit_end(inv, state, tracker, started_at)
         return inv
+
+    # -- batch execution -----------------------------------------------------
+
+    @staticmethod
+    def _batch_limit(
+        tracker: BudgetTracker, max_new_experiments: int | None, experiments_this_call: int,
+    ) -> int:
+        """How many experiments this iteration may start, respecting every active bound.
+
+        A batch must never overshoot ``max_experiments`` or the caller's
+        ``max_new_experiments`` window, so the width is clamped by whatever budget is left.
+        """
+        limit = max(1, tracker.budget.max_parallel_experiments)
+        remaining_budget = tracker.budget.max_experiments - tracker.experiments_used
+        limit = min(limit, max(1, remaining_budget))
+        if max_new_experiments is not None:
+            remaining_call = max_new_experiments - experiments_this_call
+            limit = min(limit, max(1, remaining_call))
+        return limit
+
+    def _run_batch(
+        self, batch: list[ExperimentRequest], manifest: DatasetManifest, frame: pd.DataFrame | None,
+    ) -> list[tuple[ExperimentRequest, ExperimentExecutionRecord, float]]:
+        """
+        Run a selected batch and return outcomes **in selection order**, each with its own
+        measured duration.
+
+        A single-experiment batch takes the sequential path verbatim — no threads, no shared
+        sink wrapper — so the default configuration behaves exactly as it did before batching
+        existed. Wider batches run concurrently; the deterministic tools are pure over the
+        frame, and the shared artifact sink is serialized behind a lock.
+        """
+        if len(batch) == 1:
+            request = batch[0]
+            started = self.clock.monotonic()
+            record = self._executor.run(request, manifest, frame)
+            return [(request, record, self.clock.monotonic() - started)]
+
+        shared = self._executor.shared_sink
+        sink = LockedArtifactSink(shared) if shared is not None else None
+
+        def _run(request: ExperimentRequest) -> tuple[ExperimentExecutionRecord, float]:
+            started = self.clock.monotonic()
+            record = self._executor.run(request, manifest, frame, sink=sink)
+            return record, self.clock.monotonic() - started
+
+        with ThreadPoolExecutor(max_workers=len(batch), thread_name_prefix="agentic-exp") as pool:
+            # Results are collected by index, not completion, so ordering is deterministic.
+            futures = [pool.submit(_run, request) for request in batch]
+            outcomes = []
+            for request, future in zip(batch, futures):
+                record, duration = future.result()
+                outcomes.append((request, record, duration))
+        return outcomes
 
     # -- observation helpers -------------------------------------------------
 

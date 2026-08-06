@@ -35,6 +35,7 @@ from agentic.adapters.edgar import EDGARAdapter
 from agentic.adapters.manifest_builder import DatasetManifestBuilder
 from agentic.adapters.materialize import DatasetMaterializer, InMemoryMaterializer
 from agentic.adapters.tabular import LocalTabularAdapter
+from agentic.agent.budget import LoopBudget
 from agentic.agent.loop import InvestigationLoop
 from agentic.domain import Investigation, InvestigationStatus
 from agentic.domain.manifest import DatasetManifest
@@ -96,6 +97,21 @@ _ARTIFACT_KIND: dict[ArtifactType, tuple[ArtifactKind, str]] = {
 
 def _payload_dict(payload: Any) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
+
+
+def _loop_budget(settings: Settings) -> LoopBudget:
+    """Operator-configurable bounds for one investigation.
+
+    Without this the loop always ran on ``LoopBudget()`` defaults, which made the
+    elapsed-time and cost budgets unreachable in a deployment even though the loop
+    enforces them.
+    """
+    return LoopBudget(
+        max_experiments=settings.agent_max_experiments,
+        max_parallel_experiments=settings.agent_max_parallel_experiments,
+        max_elapsed_seconds=settings.agent_max_elapsed_seconds,
+        max_cost_usd=settings.agent_max_cost_usd,
+    )
 
 
 def select_run_engine(row: AnalysisRun, settings: Settings | None = None) -> str:
@@ -236,6 +252,7 @@ class AgenticInvestigationExecutionService:
                     adapter_id=resolved.adapter_id,
                     store=store,
                     seed=str(analysis_run_id),
+                    budget=_loop_budget(settings),
                 )
             except Exception as exc:  # noqa: BLE001 - boundary: fail the run, don't leak
                 self._fail_run(analysis_run_id, exc, event="agentic_failed")
