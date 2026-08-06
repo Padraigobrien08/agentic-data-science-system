@@ -34,8 +34,9 @@ cancellation via `RunCancelledDuringExecution`, terminal-status commit) and then
    plus a live frame, via an input adapter:
    - `{"adapter": "in_memory", "records": [...]}` — inline records (offline).
    - `{"adapter": "local_tabular", "path": "/abs/file.csv"}` — a CSV/Parquet file.
-   - `{"adapter": "edgar", "panel_csv": "...", "entities": [...]}` — the EDGAR panel; with no
-     `panel_csv` the manifest is schema-only (no frame) and experiments degrade gracefully.
+   - `{"adapter": "edgar", "entities": [...]}` — the EDGAR panel, **materialized from SEC
+     data** into the run's workspace (see below). Pass `panel_csv` to point at an existing
+     file or fixture instead, and `refresh: true` to bypass the local SEC cache.
    Optional `time_field` / `entity_id_fields` hints are structural, not domain vocabulary.
 2. **Runs `InvestigationLoop`**, checkpointing every iteration into the durable investigation
    persistence layer through `SqlAlchemyInvestigationStore` (linked to the run's project,
@@ -72,6 +73,42 @@ deterministic decisions. Deterministic *computation* never goes through the poli
   }
 }
 ```
+
+## EDGAR panel materialization
+
+An EDGAR-adapter run used to reach the loop as a *schema-only* manifest — columns
+declared, `frame=None` — so every EDGAR experiment degraded and the adaptive loop could
+never actually analyze SEC data. `backend/services/edgar_panel_materializer.py` closes that:
+
+1. A run-scoped `RunWorkspace` is built under `EDGAR_BACKEND_RUN_WORKSPACE_ROOT`, keyed by
+   the analysis-run id — the same isolation the EDGAR pipeline path uses, so two runs never
+   share a panel.
+2. The existing deterministic pipeline runs into it: `build_panel_dataframe` →
+   `compute_features_dataframe` → `write_features_csv`. **No numerical logic lives in the
+   materializer**; acquisition and computation stay in `src`/the MCP adapters, so both
+   engines compute identically.
+3. The resulting `features.csv` is handed to `EDGARAdapter` as `panel_csv`, which profiles
+   it into a manifest with a real frame. The *features* frame is used rather than the raw
+   panel because it carries the identity columns plus `src.anomaly.FEATURE_COLS` — exactly
+   the schema the adapter declares and the EDGAR experiment tools require.
+4. The workspace and panel provenance (row count, tickers, CSV path) are recorded in
+   `meta_json` under `run_workspace` and `edgar_panel`.
+
+With a frame present, `EDGAR_INTENT_TOOLS` become reachable and are prepended to the intent
+candidates, so an EDGAR run leads with a domain tool
+(`edgar_trend_break_analysis`, `edgar_peer_comparison`, …) before falling back to the
+general layer.
+
+**Failure is loud.** If the panel cannot be materialized (no tickers, no extractable
+metrics, or an upstream SEC/IO failure) the service raises `EdgarPanelUnavailable` and marks
+the run `error`. It deliberately does *not* fall back to a schema-only manifest: an
+investigation over no data reaches a confident-looking "insufficient evidence" conclusion
+that is indistinguishable from a real analytical finding. Because materialization is the
+expensive network step, it runs *after* the run is marked `running`, so the work is visible
+and its failures are attributed to the run rather than escaping unhandled.
+
+The materializer is injectable (`panel_materializer=`), which is how the test suite stays
+fully offline while exercising the real execution path.
 
 ## Observability and cost
 

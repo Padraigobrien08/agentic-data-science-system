@@ -155,9 +155,25 @@ loop and the platform metrics; log aggregation and SLOs remain open there.
 
 ## Workstream B — Close the loop over EDGAR
 
-- [ ] **B1. Materialize the EDGAR panel before the loop** — L
-  - `AgenticInvestigationExecutionService` hands the loop a real frame instead of a schema-only
-    manifest, so `EDGAR_INTENT_TOOLS` become reachable.
+- [x] **B1. Materialize the EDGAR panel before the loop** — L _(landed 2026-08-06)_
+  - `backend/services/edgar_panel_materializer.py` runs the existing deterministic pipeline
+    (`build_panel_dataframe` → `compute_features_dataframe` → `write_features_csv`) into a
+    run-scoped workspace and hands the resulting CSV to `EDGARAdapter` as `panel_csv`. No
+    numerical logic moved: both engines compute identically.
+  - The *features* frame is used rather than the raw panel, because it carries the identity
+    columns plus `src.anomaly.FEATURE_COLS` — exactly what the adapter declares and the EDGAR
+    experiment tools require.
+  - `EDGAR_INTENT_TOOLS` are now reachable and lead the run. Verified end to end: a
+    deterioration goal over a rising-revenue panel runs `edgar_trend_break_analysis` first,
+    then three general tools, moves the hypothesis `proposed → active → rejected`, and
+    terminates `insufficient_evidence` → `exhausted` → `partial_success`.
+  - Failure is loud: `EdgarPanelUnavailable` marks the run `error` rather than degrading to a
+    schema-only manifest, because an investigation over no data produces a confident-looking
+    "insufficient evidence" conclusion indistinguishable from a real finding. Materialization
+    moved after the `running` transition so the expensive network step is visible and its
+    failures are attributed to the run.
+  - The materializer is injectable, so the 15 new tests exercise the real execution path
+    entirely offline.
 - [ ] **B2. One real adaptive run, recorded** — M
   - goal → hypotheses → experiments → contradicting evidence → critic falsification →
     termination reason → evidence-linked conclusion. That trace is the README centerpiece.

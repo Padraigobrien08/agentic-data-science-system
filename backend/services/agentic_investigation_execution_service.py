@@ -53,8 +53,14 @@ from backend.observability.tracing import bind_current_trace_for_logs, get_trace
 from backend.repositories.investigation_repository import SqlAlchemyInvestigationRepository
 from backend.services.analysis_run_service import AnalysisRunService
 from backend.services.artifact_service import ArtifactService
+from backend.services.edgar_panel_materializer import (
+    DeterministicEdgarPanelMaterializer,
+    EdgarPanelMaterializer,
+)
 from backend.services.exceptions import RunCancelledDuringExecution
 from backend.services.investigation_store import SqlAlchemyInvestigationStore
+from edgar_project.repo_layout import REPO_ROOT
+from edgar_project.run_workspace import build_run_workspace
 
 log = structlog.get_logger(__name__)
 
@@ -139,11 +145,14 @@ class AgenticInvestigationExecutionService:
         run_service: AnalysisRunService | None = None,
         policy_factory: Callable[[Settings], Any] | None = None,
         artifact_service: ArtifactService | None = None,
+        panel_materializer: EdgarPanelMaterializer | None = None,
     ) -> None:
         self._session = session
         self._runs = run_service or AnalysisRunService(self._session)
         self._policy_factory = policy_factory or (lambda s: build_agent_policy(s))
         self._artifact_service = artifact_service
+        # Injectable so tests can supply a fixture panel instead of reaching the SEC.
+        self._panel_materializer = panel_materializer or DeterministicEdgarPanelMaterializer()
 
     def execute_analysis_run(
         self,
@@ -180,7 +189,7 @@ class AgenticInvestigationExecutionService:
             self._guard_status(row, from_worker=from_worker)
 
             goal_text = self._resolve_goal(row, analysis_goal)
-            resolved = self._resolve_dataset(row)
+            settings = get_settings()
 
             self._runs.transition_status(analysis_run_id, AnalysisRunStatus.running)
             self._session.flush()
@@ -189,7 +198,21 @@ class AgenticInvestigationExecutionService:
             if execution_checkpoint is not None:
                 execution_checkpoint()
 
-            settings = get_settings()
+            # Resolving an EDGAR dataset materializes the panel from SEC data, so it runs
+            # after the run is marked running (the work is visible) and its failures mark
+            # the run errored rather than escaping as an unhandled exception.
+            try:
+                resolved = self._resolve_dataset(
+                    row, analysis_run_id=analysis_run_id, settings=settings
+                )
+            except Exception as exc:  # noqa: BLE001 - boundary: fail the run, don't leak
+                self._fail_run(analysis_run_id, exc, event="agentic_dataset_unavailable")
+                raise
+
+            self._raise_if_cancelled(analysis_run_id, "before the investigation started")
+            if execution_checkpoint is not None:
+                execution_checkpoint()
+
             store = SqlAlchemyInvestigationStore(
                 self._session,
                 project_id=row.project_id,
@@ -215,15 +238,7 @@ class AgenticInvestigationExecutionService:
                     seed=str(analysis_run_id),
                 )
             except Exception as exc:  # noqa: BLE001 - boundary: fail the run, don't leak
-                self._session.rollback()
-                if self._is_cancelled(analysis_run_id):
-                    raise RunCancelledDuringExecution(
-                        "Run was cancelled while the investigation was executing"
-                    ) from exc
-                log.exception("agentic_failed", analysis_run_id=str(analysis_run_id), exc_type=type(exc).__name__)
-                self._runs.set_error_summary(analysis_run_id, str(exc)[:2048])
-                self._runs.transition_status(analysis_run_id, AnalysisRunStatus.error)
-                self._session.commit()
+                self._fail_run(analysis_run_id, exc, event="agentic_failed")
                 raise
 
             if execution_checkpoint is not None:
@@ -232,6 +247,18 @@ class AgenticInvestigationExecutionService:
 
             self._ingest_artifacts(analysis_run_id, investigation, sink)
             return self._finalize(analysis_run_id, investigation, resolved, t0)
+
+    def _fail_run(self, analysis_run_id: UUID, exc: BaseException, *, event: str) -> None:
+        """Mark a run errored, unless it was actually cancelled underneath us."""
+        self._session.rollback()
+        if self._is_cancelled(analysis_run_id):
+            raise RunCancelledDuringExecution(
+                "Run was cancelled while the investigation was executing"
+            ) from exc
+        log.exception(event, analysis_run_id=str(analysis_run_id), exc_type=type(exc).__name__)
+        self._runs.set_error_summary(analysis_run_id, str(exc)[:2048])
+        self._runs.transition_status(analysis_run_id, AnalysisRunStatus.error)
+        self._session.commit()
 
     # -- status guards -------------------------------------------------------
 
@@ -267,18 +294,63 @@ class AgenticInvestigationExecutionService:
                 return str(candidate).strip()
         return "Investigate the provided dataset for notable patterns."
 
-    def _resolve_dataset(self, row: AnalysisRun) -> _ResolvedDataset:
+    def _resolve_dataset(
+        self, row: AnalysisRun, *, analysis_run_id: UUID, settings: Settings
+    ) -> _ResolvedDataset:
         payload = _payload_dict(row.input_payload_json)
         dataset = payload.get("dataset") if isinstance(payload.get("dataset"), Mapping) else {}
-        adapter_id, adapter_version, materializer = self._materializer_for(payload, dict(dataset))
+        adapter_id, adapter_version, materializer = self._materializer_for(
+            payload, dict(dataset), analysis_run_id=analysis_run_id, settings=settings
+        )
         materialized = materializer.materialize()
         manifest = DatasetManifestBuilder().build(
             materialized, adapter_id=adapter_id, adapter_version=adapter_version
         )
         return _ResolvedDataset(manifest=manifest, frame=materialized.frame, adapter_id=adapter_id)
 
+    def _edgar_panel_csv(
+        self, *, entities: list[str], analysis_run_id: UUID, settings: Settings, refresh: bool
+    ) -> str:
+        """Materialize the EDGAR panel into this run's workspace and return the CSV path.
+
+        Without this the EDGAR adapter falls back to a schema-only manifest (``frame=None``)
+        and every EDGAR experiment degrades, so the adaptive loop could never analyze SEC
+        data. The workspace is run-scoped for the same isolation reason as the EDGAR
+        pipeline path, and is recorded on the run for traceability.
+        """
+        workspace = build_run_workspace(
+            workspace_root=settings.run_workspace_root,
+            run_scoped_id=str(analysis_run_id),
+            manual_validation_csv=REPO_ROOT / "validation" / "manual_validation.csv",
+        )
+        result = self._panel_materializer.materialize(
+            tickers=entities, workspace=workspace, refresh=refresh
+        )
+        self._runs.merge_meta_json(
+            analysis_run_id,
+            {
+                "run_workspace": {
+                    "run_scoped_id": workspace.run_scoped_id,
+                    "root": str(workspace.root),
+                    "processed_dir": str(workspace.processed_dir),
+                    "artifacts_dir": str(workspace.artifacts_dir),
+                },
+                "edgar_panel": {
+                    "features_csv": str(result.features_csv),
+                    "row_count": result.row_count,
+                    "tickers": result.tickers,
+                },
+            },
+        )
+        return str(result.features_csv)
+
     def _materializer_for(
-        self, payload: Mapping[str, Any], dataset: dict[str, Any]
+        self,
+        payload: Mapping[str, Any],
+        dataset: dict[str, Any],
+        *,
+        analysis_run_id: UUID,
+        settings: Settings,
     ) -> tuple[str, str, DatasetMaterializer]:
         adapter = str(dataset.get("adapter") or "").strip().lower()
         records = dataset.get("records")
@@ -311,7 +383,16 @@ class AgenticInvestigationExecutionService:
         entities = self._as_str_list(dataset.get("entities")) or self._as_str_list(payload.get("tickers"))
         params = {}
         if dataset.get("panel_csv"):
+            # An explicit panel wins: it lets a caller point at a fixture or an existing
+            # workspace file without re-fetching from the SEC.
             params["panel_csv"] = str(dataset["panel_csv"])
+        else:
+            params["panel_csv"] = self._edgar_panel_csv(
+                entities=entities,
+                analysis_run_id=analysis_run_id,
+                settings=settings,
+                refresh=bool(dataset.get("refresh") or payload.get("refresh") or False),
+            )
         edgar = EDGARAdapter()
         request = AdapterRequest(entities=entities, parameters=params)
         return (edgar.adapter_id, edgar.adapter_version, edgar.materializer(request))
