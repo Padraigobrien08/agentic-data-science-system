@@ -192,9 +192,19 @@ loop and the platform metrics; log aggregation and SLOs remain open there.
   - Also closed a gap from A2: the service ran on `LoopBudget()` defaults, so the elapsed-time
     and cost budgets were unreachable in a deployment. Budgets now come from settings
     (`EDGAR_BACKEND_AGENT_MAX_*`).
-- [ ] **B4. Investigation replay/diff** — L
-  - Rerun a persisted decision chain against a new policy or model and diff the conclusions.
-    Nearly free given deterministic ids; almost nobody else has this.
+- [x] **B4. Investigation replay/diff** — L _(landed 2026-08-06)_
+  - `agentic/agent/replay.py` + `diff.py` (pure domain) and
+    `backend/services/investigation_replay_service.py`. See
+    [`docs/agent/replay-and-diff.md`](../docs/agent/replay-and-diff.md).
+  - Conclusion-first verdict (`identical` / `same_conclusion` / `diverged`) so reaching the
+    same answer by a different route reads differently from reaching a different answer.
+  - Replay is a fresh run seeded from the baseline id, so child ids align and hypotheses can
+    be matched positionally; the candidate is relabelled afterwards. Replay deliberately takes
+    no store — a checkpointing run would overwrite the baseline it is compared against.
+  - Like-with-like is enforced: the service reconstructs the frame from the exact recorded
+    panel and refuses (`ReplayDataUnavailable`) when it is gone, rather than re-fetching from
+    the SEC and attributing a data change to the policy.
+  - **Remaining:** no HTTP route (service-level only), and no batch "replay corpus" report.
 
 ## Workstream C — MCP as the platform surface
 

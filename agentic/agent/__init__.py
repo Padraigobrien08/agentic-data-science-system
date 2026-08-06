@@ -28,6 +28,13 @@ from .components import (
     InvestigationPlanner,
     TerminationPolicy,
 )
+from .diff import (
+    ConclusionSnapshot,
+    DiffVerdict,
+    HypothesisDelta,
+    InvestigationDiff,
+    diff_investigations,
+)
 from .fixture_policy import FixtureAgentPolicy
 from .loop import InvestigationLoop, run_investigation
 from .observer import (
@@ -54,6 +61,12 @@ from .policy import (
     GoalInterpretation,
     MalformedPolicyResponse,
     ModelAgentPolicy,
+)
+from .replay import (
+    ReplayNotPossible,
+    ReplayResult,
+    baseline_manifest,
+    replay_investigation,
 )
 from .store import InMemoryInvestigationStore, InvestigationStore, NullInvestigationStore
 
@@ -84,6 +97,16 @@ __all__ = [
     "HypothesisTransitioned",
     "TerminationObserved",
     "ModelCallObserved",
+    # replay / diff
+    "replay_investigation",
+    "ReplayResult",
+    "ReplayNotPossible",
+    "baseline_manifest",
+    "diff_investigations",
+    "InvestigationDiff",
+    "DiffVerdict",
+    "HypothesisDelta",
+    "ConclusionSnapshot",
     "Clock",
     "MonotonicClock",
     "ManualClock",
