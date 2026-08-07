@@ -105,16 +105,21 @@ def test_results_fold_in_selection_order_not_completion_order() -> None:
     df, manifest = _case()
     loop = InvestigationLoop()
     real_run = loop._executor.run
-    order_selected: list[str] = []
+    # Delays keyed by tool name, not by call order: which thread starts first is undefined,
+    # so a counter read inside the workers would itself be racy.
+    delay_by_tool = {
+        "analyze_time_series_trend": 0.15,
+        "detect_change_points": 0.05,
+        "summarize_distribution": 0.0,
+    }
     order_finished: list[str] = []
-    delay = {0: 0.15, 1: 0.05, 2: 0.0}
+    guard = threading.Lock()
 
     def _delayed_run(request, manifest_, frame_, *, sink=None):
-        index = len(order_selected)
-        order_selected.append(request.tool_name)
-        time.sleep(delay.get(index, 0.0))
+        time.sleep(delay_by_tool.get(request.tool_name, 0.0))
         record = real_run(request, manifest_, frame_, sink=sink)
-        order_finished.append(request.tool_name)
+        with guard:
+            order_finished.append(request.tool_name)
         return record
 
     loop._executor.run = _delayed_run  # type: ignore[method-assign]
@@ -122,14 +127,18 @@ def test_results_fold_in_selection_order_not_completion_order() -> None:
                      budget=LoopBudget(max_parallel_experiments=3, max_experiments=3),
                      store=InMemoryInvestigationStore())
 
-    assert len(order_finished) >= 2
-    # The delays must actually have reordered completion, or this proves nothing.
-    assert order_finished != order_selected, (
-        f"completion order was not shuffled; selected={order_selected} finished={order_finished}"
-    )
     executed = _executed(inv)
-    assert executed == order_selected[: len(executed)], (
-        f"state order {executed} must follow selection order {order_selected}"
+    assert len(executed) >= 2
+    # Completion is ordered by the injected delays, ascending.
+    expected_completion = sorted(order_finished, key=lambda t: delay_by_tool.get(t, 0.0))
+    assert order_finished == expected_completion, f"delays did not order completion: {order_finished}"
+    # The delays must actually have reordered completion, or this proves nothing.
+    assert order_finished != executed, (
+        f"completion order was not shuffled; state={executed} finished={order_finished}"
+    )
+    # ...yet state follows selection order, which is the guarantee under test.
+    assert executed == sorted(executed, key=lambda t: -delay_by_tool.get(t, 0.0)), (
+        f"state order {executed} must follow selection order, not completion {order_finished}"
     )
 
 
@@ -310,17 +319,21 @@ def test_a_raising_tool_behaves_the_same_batched_or_not(parallel: int) -> None:
     assert real_run is not None  # the real executor was never needed
 
 
+#: Selected deterministically for this goal/fixture, so keying a test failure off the tool
+#: name is stable — unlike a call counter, which races when the batch runs concurrently.
+FAILING_TOOL = "detect_change_points"
+
+
 def test_a_tool_reporting_failure_is_recorded_without_stopping_the_batch() -> None:
     """A record with status=failed is normal loop vocabulary and must fold like any other."""
     df, manifest = _case()
     loop = InvestigationLoop()
     real_run = loop._executor.run
-    calls = {"n": 0}
 
     def _one_failure(request, manifest_, frame_, *, sink=None):
-        calls["n"] += 1
+        # Keyed by tool name, not by call order: which thread runs first is not defined.
         record = real_run(request, manifest_, frame_, sink=sink)
-        if calls["n"] == 1:
+        if request.tool_name == FAILING_TOOL:
             record.status = ExperimentStatus.failed
         return record
 
@@ -329,6 +342,7 @@ def test_a_tool_reporting_failure_is_recorded_without_stopping_the_batch() -> No
                      budget=LoopBudget(max_parallel_experiments=3, max_experiments=3),
                      store=InMemoryInvestigationStore())
 
-    assert len(inv.state.failed_experiments) == 1, "the failed experiment must be recorded"
+    failed = [r.tool_name for r in inv.state.failed_experiments]
+    assert failed == [FAILING_TOOL], f"the failed experiment must be recorded, got {failed}"
     assert inv.state.completed_experiments, "its batch-mates must still have folded in"
     assert inv.is_terminal()

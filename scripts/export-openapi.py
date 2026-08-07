@@ -25,30 +25,47 @@ import argparse
 import json
 import os
 import sys
+import tempfile
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 OUTPUT = REPO_ROOT / "docs" / "api" / "openapi.json"
 
-#: Fixed so two machines produce byte-identical output. These only need to be *valid*; the
-#: schema does not embed them.
+#: Fixed so two machines produce byte-identical output. These only need to satisfy the
+#: settings validators; the schema does not embed them.
 _DETERMINISTIC_ENV = {
-    "EDGAR_BACKEND_JWT_SECRET": "openapi-export-placeholder-secret",
+    "EDGAR_BACKEND_JWT_SECRET": "openapi-export-placeholder-secret-value",
     "EDGAR_BACKEND_DATABASE_URL": "sqlite:///./openapi-export.db",
     "EDGAR_BACKEND_ALLOW_SQLITE": "true",
+    # Required whenever open registration is off (the default), or Settings refuses to build.
+    "EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN": "openapi-export-placeholder-bootstrap",
+    "EDGAR_BACKEND_OPS_API_TOKEN": "openapi-export-placeholder-ops",
 }
 
 
 def build_schema() -> dict:
+    """Build the app's schema hermetically.
+
+    ``Settings`` reads ``.env`` relative to the working directory, so this runs from a temp
+    directory: a developer's local ``.env`` must not be able to influence a contract that CI
+    then checks against a machine that has none. (That asymmetry is exactly how this script
+    first passed locally and failed in CI.)
+    """
     sys.path.insert(0, str(REPO_ROOT))
     for key, value in _DETERMINISTIC_ENV.items():
         os.environ.setdefault(key, value)
 
-    from backend.config.settings import get_settings
-    from backend.main import create_app
+    previous_cwd = Path.cwd()
+    with tempfile.TemporaryDirectory() as sandbox:
+        os.chdir(sandbox)
+        try:
+            from backend.config.settings import get_settings
+            from backend.main import create_app
 
-    get_settings.cache_clear()  # type: ignore[attr-defined]
-    return create_app().openapi()
+            get_settings.cache_clear()  # type: ignore[attr-defined]
+            return create_app().openapi()
+        finally:
+            os.chdir(previous_cwd)
 
 
 def render(schema: dict) -> str:
