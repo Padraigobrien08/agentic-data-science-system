@@ -12,6 +12,7 @@ from __future__ import annotations
 from agentic.adapters import AdapterRequest, InMemoryDatasetAdapter
 from agentic.agent.budget import LoopBudget, SafetyLimits
 from agentic.agent.loop import InvestigationLoop
+from agentic.agent.observer import AgentObserver
 from agentic.agent.policy import AgentPolicy
 from agentic.domain.enums import ColumnRole
 from agentic.evaluation.agency import AgencyCaseResult, AgencyReport, score_case
@@ -25,8 +26,13 @@ def run_case(
     policy: AgentPolicy | None = None,
     budget: LoopBudget | None = None,
     safety: SafetyLimits | None = None,
+    observer: AgentObserver | None = None,
 ) -> AgencyCaseResult:
-    """Run one agency case end to end and score it."""
+    """Run one agency case end to end and score it.
+
+    ``observer`` is forwarded to the loop; the benchmark uses it to capture each run's
+    cost and wall time from ``InvestigationEnded`` rather than measuring them separately.
+    """
     frame = build_fixture(case.fixture_id)
     manifest = InMemoryDatasetAdapter(
         frame=frame,
@@ -35,11 +41,25 @@ def run_case(
         role_hints={case.metric_field: ColumnRole.metric},
     ).build_manifest(AdapterRequest())
 
+    # A case's own max_experiments is part of what it asserts (see `budget_is_respected`), so
+    # it wins over a caller-supplied budget rather than being overwritten by it. A caller
+    # bounding cost or time therefore does not silently disarm the budget cases.
     effective_budget = budget
-    if effective_budget is None and case.max_experiments is not None:
-        effective_budget = LoopBudget(max_experiments=case.max_experiments)
+    if case.max_experiments is not None:
+        effective_budget = (
+            LoopBudget(max_experiments=case.max_experiments)
+            if budget is None
+            else budget.model_copy(update={"max_experiments": case.max_experiments})
+        )
 
-    loop = InvestigationLoop(policy=policy) if policy is not None else InvestigationLoop()
+    # Built as kwargs so an omitted policy/observer keeps the loop's own field default
+    # rather than being overwritten with None.
+    loop_kwargs: dict[str, object] = {}
+    if policy is not None:
+        loop_kwargs["policy"] = policy
+    if observer is not None:
+        loop_kwargs["observer"] = observer
+    loop = InvestigationLoop(**loop_kwargs)  # type: ignore[arg-type]
     investigation = loop.start(
         case.goal,
         manifest=manifest,
@@ -60,9 +80,16 @@ def run_agency_suite(
     policy: AgentPolicy | None = None,
     cases: tuple[AgencyCase, ...] = AGENCY_CASES,
     suite_id: str = SUITE_ID,
+    observer: AgentObserver | None = None,
+    budget: LoopBudget | None = None,
 ) -> AgencyReport:
-    """Run every case and aggregate a report."""
-    results = [run_case(case, policy=policy) for case in cases]
+    """Run every case and aggregate a report.
+
+    A single ``observer`` spans the whole suite, so one run collects one
+    ``InvestigationEnded`` per case. ``budget`` applies to every case except where a case
+    pins its own ``max_experiments`` — see :func:`run_case`.
+    """
+    results = [run_case(case, policy=policy, observer=observer, budget=budget) for case in cases]
     return AgencyReport(
         suite_id=suite_id,
         total=len(results),
