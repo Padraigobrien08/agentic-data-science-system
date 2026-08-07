@@ -10,8 +10,15 @@ required to run offline, and a misconfigured prompt directory is not allowed to 
 
 from __future__ import annotations
 
+import pytest
+
 import backend.agents.agentic_model_policy as policy_mod
-from agentic.agent.policy import DEFAULT_POLICY_PROMPTS
+from agentic.agent.policy import (
+    DEFAULT_POLICY_PROMPTS,
+    CritiqueProposal,
+    MalformedPolicyResponse,
+    ModelAgentPolicy,
+)
 from backend.agents.agentic_model_policy import (
     AGENTIC_PROMPT_VERSION,
     CostAwareModelPolicy,
@@ -78,6 +85,55 @@ def test_roles_map_to_the_right_decisions() -> None:
     assert "Hypothesis generator" in prompts.generate_hypotheses
     assert "Experiment selector" in prompts.select_experiment
     assert "Critic" in prompts.critique
+
+
+def test_the_documented_decline_shape_actually_validates() -> None:
+    """
+    Regression for the 1.0.0 critic prompt, which told the model to decline "with nulls".
+    Only two of `CritiqueProposal`'s five fields are nullable, so a null `message` failed
+    validation and took the entire investigation down with `reason=error` — every case that
+    reached a supported claim was lost. The prompt now names the nullable fields; this pins
+    the shape it documents.
+    """
+    declined = (
+        '{"should_challenge": false, "target_hypothesis_id": null, '
+        '"falsification_tool": null, "message": "", "rationale": "nothing to challenge"}'
+    )
+    policy = ModelAgentPolicy(lambda system, user: declined)
+
+    result = policy.critique(strongest_claim=None, available_tools=[])
+
+    assert isinstance(result, CritiqueProposal)
+    assert result.should_challenge is False
+
+
+def test_a_null_string_field_is_still_rejected() -> None:
+    """The constraint the prompt exists to respect — kept visible so it cannot regress."""
+    nulled = (
+        '{"should_challenge": false, "target_hypothesis_id": null, '
+        '"falsification_tool": null, "message": null, "rationale": null}'
+    )
+    policy = ModelAgentPolicy(lambda system, user: nulled)
+
+    with pytest.raises(MalformedPolicyResponse):
+        policy.critique(strongest_claim=None, available_tools=[])
+
+
+def test_every_prompt_names_its_nullable_fields() -> None:
+    """
+    Each prompt must state which fields accept null. This is the failure mode that cost a
+    whole benchmark run, and prose is where the fix lives, so prose is what gets asserted.
+    """
+    prompts, _ = _load_policy_prompts()
+
+    for body in (
+        prompts.interpret_goal,
+        prompts.generate_hypotheses,
+        prompts.select_experiment,
+        prompts.critique,
+    ):
+        assert "may be null" in body, "prompt does not tell the model which fields accept null"
+        assert "never `null`" in body
 
 
 def test_missing_prompt_files_degrade_to_the_domain_defaults(monkeypatch) -> None:

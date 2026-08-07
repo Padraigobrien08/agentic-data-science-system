@@ -92,7 +92,11 @@ class CostTrackingResponder:
 
 #: Prompt file version loaded for every agentic policy role. Bump when a new prompt
 #: version ships; the agency benchmark records this so results stay comparable.
-AGENTIC_PROMPT_VERSION = "1.0.0"
+#:
+#: 1.0.1 — spell out which fields accept ``null``. Under 1.0.0 the critic answered a
+#: decline with ``"message": null``, which fails the non-nullable ``str`` and terminated
+#: the whole investigation with ``reason=error``. Every converging case was lost that way.
+AGENTIC_PROMPT_VERSION = "1.0.1"
 
 
 class CostAwareModelPolicy(ModelAgentPolicy):
