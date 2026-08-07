@@ -7,6 +7,7 @@
   "properties": {
     "avoids_redundant_experiments": 1.0,
     "calibrated_confidence": 1.0,
+    "challenges_before_concluding": 1.0,
     "path_adapts_to_goal": 1.0,
     "preserves_contradicting_evidence": 1.0,
     "reaches_the_right_disposition": 1.0,

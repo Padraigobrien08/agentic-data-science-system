@@ -20,6 +20,8 @@ from __future__ import annotations
 import json
 from pathlib import Path
 
+from agentic.agent.fixture_policy import FixtureAgentPolicy
+from agentic.agent.policy import CritiqueProposal
 from agentic.evaluation.agency import AgencyProperty
 from agentic.evaluation.runner import run_agency_suite
 
@@ -87,6 +89,30 @@ def test_the_floors_file_covers_every_agency_property() -> None:
     assert floors == declared, (
         f"floors file and AgencyProperty disagree — missing floors: {sorted(declared - floors)}; "
         f"floors for unknown properties: {sorted(floors - declared)}"
+    )
+
+
+def test_a_critic_that_never_challenges_fails_the_suite() -> None:
+    """
+    The gap this property was added to close.
+
+    Before `challenges_before_concluding` existed, disabling the critic entirely left the
+    suite at 100%: the loop still reached `sufficient_evidence` at the same confidence, just
+    by exhausting the candidate tools instead of testing the claim. `TerminationPolicy`
+    accepts `tested or not unused`, so "ran everything" is an accepted route to sufficiency
+    and the adversarial behaviour degraded silently.
+    """
+
+    class _NeverChallenges(FixtureAgentPolicy):
+        def critique(self, *, strongest_claim, available_tools):  # noqa: ANN001, ANN201
+            return CritiqueProposal(should_challenge=False, rationale="never challenges")
+
+    report = run_agency_suite(policy=_NeverChallenges())
+
+    assert report.property_scores().get("challenges_before_concluding") == 0.0
+    assert report.pass_rate < 1.0, (
+        "a critic that never challenges must not score a perfect suite; if it does, the "
+        "adversarial property is unmeasured again"
     )
 
 

@@ -177,6 +177,29 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
             max_confidence=0.6,
         ),
     ),
+    # -- adversariality: a claim must survive a test before it is accepted -----
+    AgencyCase(
+        case_id="supported_claim_is_challenged_before_concluding",
+        description=(
+            "An unambiguous trend must be tested by an independent method before it is "
+            "concluded — and testing it must not become an excuse to run everything."
+        ),
+        goal="value is increasing over time",
+        fixture_id="clear_rising",
+        # Deliberately no `max_experiments` on the case: capping the *loop* at 2 would make
+        # the expectation below unfalsifiable, since the run could never exceed it. The loop
+        # keeps its default budget and the expectation does the asserting.
+        expectations=AgencyExpectations(
+            termination_reason_in=[SUFFICIENT],
+            disposition_in=[SUPPORTED],
+            require_challenge=True,
+            # The two failures are opposite and this bound catches the second. A critic that
+            # never fires reaches the same disposition at the same confidence by exhausting
+            # the tool list, so it costs an extra experiment; a critic that fires
+            # indiscriminately costs several. Two is what a single, targeted challenge takes.
+            max_experiments=2,
+        ),
+    ),
     # -- discipline -----------------------------------------------------------
     AgencyCase(
         case_id="budget_is_respected",

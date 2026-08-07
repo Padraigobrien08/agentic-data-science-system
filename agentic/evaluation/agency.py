@@ -56,6 +56,17 @@ class AgencyProperty(str, Enum):
     calibrated_confidence = "calibrated_confidence"
     """Confidence is proportional to the strength of the evidence."""
 
+    challenges_before_concluding = "challenges_before_concluding"
+    """A claim it accepted was first tested by an independent method it chose to run.
+
+    This is the property that separates an adversarial loop from a pipeline that stops at the
+    first agreeable result, and it needs its own name because the loop degrades *quietly*
+    without it: a critic that never challenges still terminates ``sufficient_evidence`` once
+    the candidate tools run out, reaching the same disposition at the same confidence by
+    simply running everything. Only the presence of a critique whose falsification tool
+    actually executed distinguishes the two.
+    """
+
 
 class AgencyExpectations(DomainModel):
     """Declarative, deterministic expectations for one case.
@@ -73,6 +84,10 @@ class AgencyExpectations(DomainModel):
     expect_any_tool: list[str] = Field(default_factory=list)
     forbid_tools: list[str] = Field(default_factory=list)
     require_contradicting_evidence: bool = False
+    #: A supported conclusion must have been challenged by a critique whose suggested
+    #: falsification tool actually ran. Only meaningful on cases that converge — a case
+    #: expected to end ``insufficient`` has nothing to challenge.
+    require_challenge: bool = False
     no_repeated_tools: bool = True
     max_experiments: int | None = None
     max_confidence: float | None = None
@@ -98,6 +113,8 @@ class AgencyCaseResult(DomainModel):
     observed_tools: list[str] = Field(default_factory=list)
     observed_hypothesis_statuses: list[str] = Field(default_factory=list)
     observed_confidence: float = 0.0
+    #: Falsification tools that a critique proposed *and* the loop then ran.
+    observed_challenge_tools: list[str] = Field(default_factory=list)
 
     @property
     def failures(self) -> list[PropertyOutcome]:
@@ -150,12 +167,33 @@ class AgencyReport(DomainModel):
 
 
 def _tools(investigation: Investigation) -> list[str]:
-    results = investigation.state.completed_experiments + investigation.state.failed_experiments
-    return [r.tool_name for r in results]
+    return [r.tool_name for r in _results(investigation)]
 
 
 def _statuses(investigation: Investigation) -> list[str]:
     return [h.status.value for h in investigation.state.hypotheses]
+
+
+def _challenge_tools(investigation: Investigation) -> list[str]:
+    """
+    Falsification tools a critique proposed that were actually executed.
+
+    A critique the loop never acted on is not a challenge — it is a note. This mirrors the
+    ``tested`` condition in ``TerminationPolicy.decide``, so the property measures the same
+    thing the loop itself treats as "this claim has been challenged".
+    """
+    executed = {r.tool_name for r in _results(investigation)}
+    return sorted(
+        {
+            c.suggested_action
+            for c in investigation.state.critiques
+            if c.suggested_action and c.suggested_action in executed
+        }
+    )
+
+
+def _results(investigation: Investigation):
+    return investigation.state.completed_experiments + investigation.state.failed_experiments
 
 
 def _check(
@@ -178,6 +216,7 @@ def score_case(
     confidence = float(conclusion.confidence) if conclusion is not None else 0.0
     tools = _tools(investigation)
     statuses = _statuses(investigation)
+    challenge_tools = _challenge_tools(investigation)
 
     if expectations.termination_reason_in:
         _check(
@@ -218,6 +257,20 @@ def score_case(
             AgencyProperty.preserves_contradicting_evidence,
             "refutes" in directions,
             f"no refuting evidence retained; directions present: {sorted(directions)}",
+            outcomes,
+        )
+
+    if expectations.require_challenge:
+        _check(
+            AgencyProperty.challenges_before_concluding,
+            bool(challenge_tools),
+            "concluded without testing the claim: "
+            + (
+                f"{len(state.critiques)} critique(s) raised but none of their falsification "
+                f"tools ran (ran {tools})"
+                if state.critiques
+                else f"no critique was raised at all (ran {tools})"
+            ),
             outcomes,
         )
 
@@ -282,4 +335,5 @@ def score_case(
         observed_tools=tools,
         observed_hypothesis_statuses=statuses,
         observed_confidence=round(confidence, 6),
+        observed_challenge_tools=challenge_tools,
     )
