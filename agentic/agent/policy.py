@@ -14,6 +14,7 @@ Two implementations satisfy the protocol: :class:`FixtureAgentPolicy`
 from __future__ import annotations
 
 import json
+from dataclasses import dataclass
 from enum import Enum
 from typing import Callable, Literal, Protocol, runtime_checkable
 
@@ -137,15 +138,46 @@ Responder = Callable[[str, str], str]
 """A function (system_prompt, user_prompt) -> raw JSON string."""
 
 
+@dataclass(frozen=True)
+class PolicyPrompts:
+    """
+    The system prompt for each of the four model-backed decisions.
+
+    Defaults are terse but sufficient: they keep this package standalone, so
+    :class:`ModelAgentPolicy` works with no external prompt files and the loop stays
+    runnable outside this repository. Richer, versioned bodies live under
+    ``backend/agents/prompts/`` and are *injected* — this module never loads them, which
+    is what keeps ``agentic/`` free of a dependency on the backend.
+    """
+
+    interpret_goal: str = "Interpret the analytical goal. Reply as GoalInterpretation JSON."
+    generate_hypotheses: str = (
+        "Propose falsifiable hypotheses and open questions. Reply as HypothesisProposals JSON."
+    )
+    select_experiment: str = "Choose the most informative next experiment. Reply as ExperimentChoice JSON."
+    critique: str = (
+        "Challenge the strongest current claim; suggest a falsification tool. "
+        "Reply as CritiqueProposal JSON."
+    )
+
+
+DEFAULT_POLICY_PROMPTS = PolicyPrompts()
+"""The standalone defaults, used whenever no prompts are injected."""
+
+
 class ModelAgentPolicy:
     """
     Policy backed by a JSON responder (e.g. an LLM). Every method validates the
     raw response into a typed model and raises :class:`MalformedPolicyResponse`
     on malformed output, so the loop can fail safely.
+
+    ``prompts`` overrides the system prompt of each decision; omitting it selects
+    :data:`DEFAULT_POLICY_PROMPTS`.
     """
 
-    def __init__(self, respond: Responder) -> None:
+    def __init__(self, respond: Responder, *, prompts: PolicyPrompts | None = None) -> None:
         self._respond = respond
+        self._prompts = prompts or DEFAULT_POLICY_PROMPTS
 
     def _call(self, system: str, user: str, model: type[BaseModel]):
         raw = self._respond(system, user)
@@ -160,7 +192,7 @@ class ModelAgentPolicy:
 
     def interpret_goal(self, goal_text: str, *, capability_summary: dict) -> GoalInterpretation:
         return self._call(
-            "Interpret the analytical goal. Reply as GoalInterpretation JSON.",
+            self._prompts.interpret_goal,
             json.dumps({"goal": goal_text, "capabilities": capability_summary}),
             GoalInterpretation,
         )
@@ -169,7 +201,7 @@ class ModelAgentPolicy:
         self, interpretation: GoalInterpretation, *, metric_names: list[str], dimension_names: list[str]
     ) -> HypothesisProposals:
         return self._call(
-            "Propose falsifiable hypotheses and open questions. Reply as HypothesisProposals JSON.",
+            self._prompts.generate_hypotheses,
             json.dumps({"interpretation": interpretation.model_dump(mode="json"),
                         "metrics": metric_names, "dimensions": dimension_names}),
             HypothesisProposals,
@@ -177,14 +209,14 @@ class ModelAgentPolicy:
 
     def select_experiment(self, *, goal_summary: dict, candidates: list[dict]) -> ExperimentChoice:
         return self._call(
-            "Choose the most informative next experiment. Reply as ExperimentChoice JSON.",
+            self._prompts.select_experiment,
             json.dumps({"goal": goal_summary, "candidates": candidates}),
             ExperimentChoice,
         )
 
     def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal:
         return self._call(
-            "Challenge the strongest current claim; suggest a falsification tool. Reply as CritiqueProposal JSON.",
+            self._prompts.critique,
             json.dumps({"claim": strongest_claim, "tools": available_tools}),
             CritiqueProposal,
         )

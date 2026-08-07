@@ -20,7 +20,24 @@ AGENT_PROMPT_IDS: dict[str, str] = {
     "planning": "edgar.agent.planning",
     "critic": "edgar.agent.critic",
     "report": "edgar.agent.report",
+    # The adaptive investigation loop's four model-backed decisions. Namespaced
+    # ``edgar.agentic.*`` to keep them distinct from the EDGAR chain's agents above,
+    # which serve a different execution path.
+    "agentic_goal_interpreter": "edgar.agentic.goal_interpreter",
+    "agentic_hypothesis_generator": "edgar.agentic.hypothesis_generator",
+    "agentic_experiment_selector": "edgar.agentic.experiment_selector",
+    "agentic_critic": "edgar.agentic.critic",
 }
+
+#: The agentic policy roles, in the order the loop calls them. Consumed by
+#: :mod:`backend.agents.agentic_model_policy` to build a ``PolicyPrompts`` container;
+#: the order matches ``AgentPolicy``'s four methods.
+AGENTIC_POLICY_ROLES: tuple[str, ...] = (
+    "agentic_goal_interpreter",
+    "agentic_hypothesis_generator",
+    "agentic_experiment_selector",
+    "agentic_critic",
+)
 
 
 @dataclass(frozen=True)
