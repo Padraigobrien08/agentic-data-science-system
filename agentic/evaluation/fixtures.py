@@ -141,6 +141,70 @@ def support_desk_slowing(n: int = 12) -> pd.DataFrame:
     )
 
 
+def regional_revenue_spread(n: int = 8) -> pd.DataFrame:
+    """
+    Four regions whose revenue trajectories differ sharply, with one clear laggard.
+
+    In aggregate the picture is unremarkable — the strong regions offset the weak one — so a
+    question about *which* region is worst is only answerable by comparing entities. Reading
+    it as a question about the overall trend produces a confident answer to a different
+    question.
+    """
+    rows = []
+    # north declines; the rest grow at varying rates, so the pooled series looks flat-ish.
+    slopes = {"north": -6.0, "south": 5.0, "east": 3.0, "west": 4.0}
+    for region, slope in slopes.items():
+        for q in range(n):
+            rows.append(
+                {
+                    "region": region,
+                    "quarter": f"2024-Q{q + 1}",
+                    "revenue": 100.0 + slope * q,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def plan_tier_separated(n: int = 8) -> pd.DataFrame:
+    """
+    Usage that separates cleanly by plan tier and not at all by signup month.
+
+    Two dimensions are available and the question names neither. Grouping by the first one
+    offered (``signup_month``) finds nothing, which is a true statement about a question
+    nobody asked; grouping by ``plan_tier`` finds the real difference.
+    """
+    rows = []
+    for i in range(n):
+        for tier, base in (("enterprise", 900.0), ("self_serve", 120.0)):
+            rows.append(
+                {
+                    "account": f"{tier}-{i % 4}",
+                    "signup_month": f"2024-{(i % 4) + 1:02d}",
+                    "plan_tier": tier,
+                    "monthly_active_minutes": base + (i % 3) * 5.0,
+                }
+            )
+    return pd.DataFrame(rows)
+
+
+def api_latency_rising(n: int = 12) -> pd.DataFrame:
+    """
+    Infrastructure telemetry with a genuine rising trend — and nothing about complaints.
+
+    Used for a goal the dataset cannot answer. The trend here is real and strong, so a policy
+    that silently substitutes an available metric for the one that was asked about will reach
+    a confident, well-evidenced conclusion about the wrong question.
+    """
+    return pd.DataFrame(
+        {
+            "service": ["gateway"] * n,
+            "day": [f"2024-05-{d + 1:02d}" for d in range(n)],
+            "p99_latency_ms": [220.0 + 18.0 * d for d in range(n)],
+            "requests_per_second": [1400.0 + (d % 3) * 10.0 for d in range(n)],
+        }
+    )
+
+
 FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "clear_rising": clear_rising,
     "clear_falling": clear_falling,
@@ -152,6 +216,9 @@ FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "rainfall_rising": rainfall_rising,
     "response_latency_flat": response_latency_flat,
     "support_desk_slowing": support_desk_slowing,
+    "regional_revenue_spread": regional_revenue_spread,
+    "plan_tier_separated": plan_tier_separated,
+    "api_latency_rising": api_latency_rising,
 }
 
 

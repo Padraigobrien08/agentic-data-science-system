@@ -97,12 +97,66 @@ runs deliberately bad agents and asserts the suite catches them:
 | `HedgingPolicy` — never selects an experiment | 6/13 | Both positive controls; `preserves_contradicting_evidence` and `challenges_before_concluding` 0%, `terminates_for_the_right_reason` 20%, `reaches_the_right_disposition` 33% |
 | `AlwaysTrendPolicy` — reads every goal as a trend | 11/13 | `comparison_goal_uses_comparison_tools`, `clear_falling_is_concluded`; `path_adapts_to_goal` 50% |
 
-These discrimination tests are what make the baseline 13/13 meaningful.
+These discrimination tests are what make the core baseline 13/13 meaningful.
 
-They also mark the limit of that meaning. The suite reliably separates a *broken* agent from a
-working one, and it caught a prompt defect worth 38 points. It does **not** separate competent
-agents from each other: `gpt-5.4-mini` and the deterministic baseline both score 13/13 on every
-property — see [the scoreboard](agency-scoreboard.md). Raising that ceiling is open work.
+They also mark the limit of that meaning, which is why the hard tier exists.
+
+## The hard tier
+
+`suite_agency_v1` — now the core tier — turned out to be **saturated**: `gpt-5.4-mini` and the
+deterministic baseline both scored 100% on every property ([scoreboard](agency-scoreboard.md)).
+It separates broken agents from working ones and has no headroom above "working".
+
+### Admission rule
+
+A case belongs in the hard tier when all three hold:
+
+1. **It fails `FixtureAgentPolicy`.** This is the operational definition of "discriminating".
+   It is free and deterministic to check, and `tests/agentic/test_agency_tiers.py` enforces it
+   per-case, so a case that does not discriminate cannot be added by accident.
+2. **It fails on a named `AgencyProperty`.** A case that fails via a crash or a missing tool
+   capability is measuring plumbing, not reasoning.
+3. **It stands on its own as a fair test.** The rule engine is the yardstick of convenience,
+   not the target. If the only argument for a case is that it breaks `FixtureAgentPolicy`, it
+   is a trick. This one is a review judgement, not a test.
+
+### The cases
+
+| Case | Judgement it requires |
+|---|---|
+| `implied_metric_is_selected_over_the_default` | A question about *how long* something takes is answered with the duration metric, though it names no column and two volume metrics are offered first |
+| `ranking_goal_is_not_a_trend_goal` | "Which entity is worst" is a question about entities, not time — even though the word *growth* appears in it |
+| `grouping_dimension_is_inferred_from_the_question` | Two segments are named, the column holding them is not; the wrong grouping yields a true answer to a question nobody asked |
+| `unanswerable_premise_is_declined` | The dataset holds no complaint metric, so the question cannot be answered here — substituting the nearest rising metric produces a confident answer to the wrong question |
+
+The last is the tier's counterweight. Every other case rewards reaching the right answer; that
+one rewards declining, so the tier cannot be cleared by being uniformly more assertive.
+
+### What the tier does not cover
+
+All four defeat `interpret_goal`, across four different judgements — metric selection, intent
+selection, dimension selection, and premise validity. Cases targeting the other two model-backed
+decisions were attempted and are **not fairly constructible against the current loop**:
+
+- **`select_experiment`** — `expected_information_gain` is `0.85 - 0.1 * position` in the
+  intent's tool list, so a candidate's rank is fixed by the planner. A case where the
+  highest-gain candidate is wrong would test disagreement with the planner's priority order,
+  not reasoning.
+- **`generate_hypotheses`** — a two-part goal needs two claims about two metrics, but the
+  planner parameterises every tool from a single `interpretation.metric_hint`. A second
+  hypothesis about a second metric stays `proposed` forever, for *any* policy. That is a loop
+  limitation, not a policy failure, and a case built on it would fail a perfect agent.
+
+Breadth is therefore enforced over the properties the tier exercises rather than over policy
+methods — a tier failing on only one or two properties would be cleared by a single narrow fix.
+
+### The headroom ceiling
+
+`agentic/evaluation/baselines/fixture_floors.json` carries per-property **floors** on the core
+tier and a **ceiling** on the hard tier. Floors catch the agent getting worse; the ceiling
+catches the suite getting easier. A breach has two possible causes needing opposite fixes — the
+deterministic policy genuinely improved (re-baseline deliberately) or the cases went soft
+(sharpen them) — so the assertion names both and the ceiling is never raised just to go green.
 
 ## Running it against a real model
 

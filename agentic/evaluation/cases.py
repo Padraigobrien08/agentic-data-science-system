@@ -278,6 +278,66 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
             expect_any_tool=["analyze_time_series_trend"],
         ),
     ),
+    AgencyCase(
+        case_id="ranking_goal_is_not_a_trend_goal",
+        description=(
+            "Asking which entity is worst is a question about entities, not about time. The "
+            "word 'growth' appears in it, but answering the overall trend answers a different "
+            "question — and here the strong regions offset the weak one, so the aggregate is "
+            "unremarkable while one region is plainly failing."
+        ),
+        goal="which region has the weakest growth?",
+        fixture_id="regional_revenue_spread",
+        time_field="quarter",
+        entity_id_fields=["region"],
+        metric_field="revenue",
+        tier=CaseTier.hard,
+        expectations=AgencyExpectations(
+            expect_any_tool=["rank_entities", "compare_groups"],
+        ),
+    ),
+    AgencyCase(
+        case_id="grouping_dimension_is_inferred_from_the_question",
+        description=(
+            "The question names two customer segments but not the column holding them. Two "
+            "groupings are available; one finds nothing and one finds a large real difference. "
+            "Comparing by the wrong dimension yields a true statement about a question nobody "
+            "asked."
+        ),
+        goal="do our enterprise and self-serve customers differ in engagement?",
+        fixture_id="plan_tier_separated",
+        time_field=None,
+        entity_id_fields=["account"],
+        metric_field="monthly_active_minutes",
+        tier=CaseTier.hard,
+        expectations=AgencyExpectations(
+            disposition_in=[SUPPORTED],
+            hypothesis_status_any=[SUPPORTED],
+        ),
+    ),
+    # The tier's counterweight. Every case above rewards finding the right answer; this one
+    # rewards declining, so a policy cannot clear the tier by being uniformly more assertive.
+    AgencyCase(
+        case_id="unanswerable_premise_is_declined",
+        description=(
+            "The dataset holds latency and throughput, and nothing about complaints. The "
+            "honest answer is that this question cannot be answered here. Substituting the "
+            "nearest available metric produces a confident, well-evidenced conclusion about "
+            "something the user did not ask about, which is worse than saying nothing."
+        ),
+        goal="is our customer complaint volume increasing?",
+        fixture_id="api_latency_rising",
+        time_field="day",
+        entity_id_fields=["service"],
+        # The substitution trap: this metric is genuinely, strongly rising, so answering with
+        # it looks well-supported rather than obviously wrong.
+        metric_field="p99_latency_ms",
+        tier=CaseTier.hard,
+        expectations=AgencyExpectations(
+            hypothesis_status_not_in=[SUPPORTED],
+            max_confidence=0.5,
+        ),
+    ),
 )
 
 

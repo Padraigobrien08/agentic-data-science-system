@@ -94,8 +94,15 @@ def test_the_hard_tier_keeps_its_headroom() -> None:
     starts clearing hard cases, that gap is closing, and the two possible causes need
     opposite responses.
     """
-    ceiling = _floors()["hard"]["max_pass_rate"]
+    hard = _floors()["hard"]
+    ceiling = hard["max_pass_rate"]
     report = run_agency_suite(tier=CaseTier.hard)
+
+    assert report.total == hard["cases"], (
+        f"the hard tier has {report.total} cases but the baseline was recorded against "
+        f"{hard['cases']}. A ceiling recorded against a different case set does not bound "
+        "this one — re-record it."
+    )
 
     assert report.pass_rate <= ceiling, (
         f"the deterministic baseline now passes {report.pass_rate:.0%} of the hard tier, "
