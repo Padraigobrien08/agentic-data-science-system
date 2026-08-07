@@ -15,11 +15,12 @@ python -m agentic.evaluation
 ```
 
 ```
-suite_agency_v1: 10/10 cases passed (100%)
+suite_agency_v1: 13/13 cases passed (100%)
 
 Per-property pass rate:
    100%  avoids_redundant_experiments
    100%  calibrated_confidence
+   100%  challenges_before_concluding
    100%  path_adapts_to_goal
    ...
 ```
@@ -51,6 +52,13 @@ agent, and they are load-bearing rather than filler.
 | `avoids_redundant_experiments` | No tool is run twice for the same question |
 | `respects_budget` | Stays within the resource bounds it was given |
 | `calibrated_confidence` | Confidence is proportional to the strength of the evidence |
+| `challenges_before_concluding` | A claim it accepted was first tested by an independent method it chose to run |
+
+`challenges_before_concluding` exists because the adversarial behaviour degrades *quietly*
+without it. `TerminationPolicy` accepts `tested or not unused`, so a loop whose critic never
+fires still reaches `sufficient_evidence` at the same confidence and the same disposition — by
+exhausting the candidate tools instead of testing the claim. Before this property was added,
+disabling the critic entirely left the suite at 100%.
 
 Every check is **deterministic**, read from persisted typed state — no model judging a model.
 A verdict is reproducible and a regression is unambiguous. The per-property breakdown is what
@@ -79,11 +87,16 @@ runs deliberately bad agents and asserts the suite catches them:
 
 | Agent | Result | Caught by |
 |---|---|---|
-| Baseline (deterministic policy) | 10/10 | — |
-| `HedgingPolicy` — never selects an experiment | 5/10 | Both positive controls; `calibrated_confidence` 60%, `preserves_contradicting_evidence` 0% |
-| `AlwaysTrendPolicy` — reads every goal as a trend | 8/10 | `comparison_goal_uses_comparison_tools` |
+| Baseline (deterministic policy) | 13/13 | — |
+| `HedgingPolicy` — never selects an experiment | 6/13 | Both positive controls; `preserves_contradicting_evidence` and `challenges_before_concluding` 0%, `terminates_for_the_right_reason` 20%, `reaches_the_right_disposition` 33% |
+| `AlwaysTrendPolicy` — reads every goal as a trend | 11/13 | `comparison_goal_uses_comparison_tools`, `clear_falling_is_concluded`; `path_adapts_to_goal` 50% |
 
-These discrimination tests are what make the baseline 10/10 meaningful.
+These discrimination tests are what make the baseline 13/13 meaningful.
+
+They also mark the limit of that meaning. The suite reliably separates a *broken* agent from a
+working one, and it caught a prompt defect worth 38 points. It does **not** separate competent
+agents from each other: `gpt-5.4-mini` and the deterministic baseline both score 13/13 on every
+property — see [the scoreboard](agency-scoreboard.md). Raising that ceiling is open work.
 
 ## Running it against a real model
 
@@ -99,6 +112,40 @@ print(format_report(run_agency_suite(policy=build_agent_policy(settings))))
 That is the intended use: does a real model reason at least as well as the deterministic
 baseline, and does upgrading it help or hurt? Pairs naturally with
 [replay & diff](replay-and-diff.md), which asks the same question about persisted runs.
+
+### The benchmark harness
+
+One pass of a non-deterministic policy is an anecdote, not a measurement, so
+`backend/dev/agency_bench.py` runs repeated trials and aggregates them with variance,
+cost, and latency:
+
+```bash
+python -m backend.dev.agency_bench \
+  --policy fixture --policy model --model gpt-5.4-mini \
+  --trials 5 --max-cost-usd 2.00 --format both --out scoreboard
+```
+
+A case whose verdict changes across trials is listed as **unstable** rather than averaged into
+a number that reads as "mostly fine". Cost and latency come from the `InvestigationEnded`
+events the loop already emits, so quality and spend are measured on the same run.
+
+The harness refuses a model row when no provider is configured, or when the model has no
+configured price — the first would publish a fixture result under a model's name, the second
+would leave `--max-cost-usd` summing a quantity that is always zero. `--allow-unpriced` opts
+into a quality-only run.
+
+It lives in `backend/dev` because assembling a model-backed policy needs settings, a provider,
+and the prompt registry, none of which `agentic/` may import. `python -m agentic.evaluation`
+stays offline, free, and deterministic.
+
+### Results
+
+See **[the agency scoreboard](agency-scoreboard.md)** for the current measurement.
+
+Short version as of 2026-08-07: `gpt-5.4-mini` and the deterministic baseline both score 100%
+on all nine properties over five trials, so **the suite is currently saturated and cannot rank
+competent policies**. It does still catch broken ones — it found a prompt defect that cost 38
+points — but hardening `AGENCY_CASES` is the open follow-up before any ranking claim.
 
 ## Scope
 
