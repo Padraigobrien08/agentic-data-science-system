@@ -35,9 +35,12 @@ Known limits, stated plainly:
 - The agentic engine is **flag-gated and off by default**
   (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the deterministic EDGAR chain remains the
   default execution path.
-- The loop's reasoning is verified against a **deterministic fixture policy**, not a live
-  model. `suite_agency_v1` accepts any `AgentPolicy` precisely so a real model can be held
-  to the same bar — that measurement has not been run.
+- `suite_agency_v1` has now been run against a live model, and **the suite turned out to be
+  saturated**: `gpt-5.4-mini` and the deterministic fixture policy both score 100% on all
+  nine properties over five trials. It separates broken agents from working ones — it found
+  a prompt defect worth 38 points — but it has no headroom above "working", so it cannot
+  rank competent policies. See [the scoreboard](docs/agent/agency-scoreboard.md). Raising
+  that ceiling is the next piece of work.
 - The hosted MCP endpoint has no rate limiting, and its handshake/tool-listing is
   unauthenticated (tool *invocation* is not).
 - No CD pipeline, backup/restore runbook, or deployment target beyond single-host Compose.
@@ -47,6 +50,8 @@ In progress:
 - expanded ticker coverage
 - hosted demo environment
 - extended benchmark suites
+- hardening `AGENCY_CASES` so the agency suite can discriminate between competent policies,
+  not only between working and broken ones
 
 ## Product Screens
 
