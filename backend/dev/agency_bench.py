@@ -49,6 +49,7 @@ from agentic.evaluation.scoreboard import (
 )
 from backend.agents.agentic_model_policy import AGENTIC_PROMPT_VERSION, build_agent_policy
 from backend.config.settings import Settings, get_settings
+from backend.llm.pricing import parse_model_prices
 
 log = structlog.get_logger(__name__)
 
@@ -71,6 +72,29 @@ def _label(kind: str, model: str | None) -> str:
     return FIXTURE if kind == FIXTURE else (model or "model")
 
 
+def _assert_priced(settings: Settings, model: str | None, label: str) -> None:
+    """
+    Refuse a model row whose model has no configured price.
+
+    Unpriced models cost ``0.0`` by design (see :mod:`backend.llm.pricing`), which is the
+    right call for a deployment but corrosive here: it makes the scoreboard's cost column
+    read ``$0.0000`` for every model, and it disarms ``--max-cost-usd``, since the ceiling
+    sums a quantity that is always zero. A paid benchmark with a ceiling that cannot fire is
+    worse than no ceiling, because it looks protected.
+    """
+    prices = parse_model_prices(settings.llm_model_prices)
+    if prices and (model is None or model in prices):
+        return
+    raise SystemExit(
+        f"no price configured for {label!r}, so cost tracking would report $0.00 and "
+        "--max-cost-usd could never fire.\n"
+        "Set EDGAR_BACKEND_LLM_MODEL_PRICES, e.g.\n"
+        f'  EDGAR_BACKEND_LLM_MODEL_PRICES=\'{{"{model or "<model-id>"}": '
+        '{"input_per_1m": 0.15, "output_per_1m": 0.60}}\'\n'
+        "Pass --allow-unpriced to measure quality only, accepting a meaningless cost column."
+    )
+
+
 def run_policy_rows(
     kinds: list[str],
     *,
@@ -78,6 +102,7 @@ def run_policy_rows(
     trials: int = 3,
     max_cost_usd: float | None = None,
     budget_cost_usd: float | None = None,
+    allow_unpriced: bool = False,
     settings: Settings | None = None,
     policy_factory: PolicyFactory = _default_policy_factory,
 ) -> list[PolicyScorecard]:
@@ -107,6 +132,9 @@ def run_policy_rows(
                 "set EDGAR_BACKEND_OPENAI_API_KEY (or OPENAI_API_KEY) or drop the model row."
             )
 
+        if kind == MODEL and not allow_unpriced:
+            _assert_priced(row_settings, model, label)
+
         budget = LoopBudget(max_cost_usd=budget_cost_usd) if budget_cost_usd else None
         reports: list[AgencyReport] = []
         metrics: list[RunMetrics] = []
@@ -125,6 +153,21 @@ def run_policy_rows(
                 pass_rate=reports[-1].pass_rate,
                 spent_usd=round(spent, 4),
             )
+            # The static check above prices the *configured* id, but the API bills against a
+            # resolved snapshot ("gpt-5.4-mini" -> "gpt-5.4-mini-2026-03-17") and the price
+            # lookup is an exact match. Only observed spend can catch that mismatch, so fail
+            # after one trial rather than completing a whole paid benchmark at $0.00.
+            calls = sum(m.model_calls for m in metrics)
+            if kind == MODEL and not allow_unpriced and trial == 0 and calls > 0 and spent == 0.0:
+                log.error("agency_bench.unpriced_resolved_model", label=label, model_calls=calls)
+                raise SystemExit(
+                    f"{label!r} made {calls} model calls that cost $0.00, so its price key does "
+                    "not match the id the API billed against.\n"
+                    "The provider resolves an alias to a dated snapshot; price that snapshot id "
+                    "(check the 'llm_model_unpriced' log line for the exact value), or pass "
+                    "--allow-unpriced to measure quality only."
+                )
+
             if max_cost_usd is not None and spent >= max_cost_usd and trial + 1 < trials:
                 log.warning(
                     "agency_bench.cost_ceiling",
@@ -183,6 +226,14 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         default=None,
         help="Per-investigation LoopBudget.max_cost_usd.",
     )
+    p.add_argument(
+        "--allow-unpriced",
+        action="store_true",
+        help=(
+            "Measure a model row with no configured price. The cost column will read $0.00 "
+            "and --max-cost-usd will never fire; quality scores remain valid."
+        ),
+    )
     p.add_argument("--out", default=None, help="Path stem for written output (no extension).")
     p.add_argument("--format", choices=["json", "md", "both"], default="md")
     return p.parse_args(argv)
@@ -200,6 +251,7 @@ def main(argv: list[str] | None = None) -> int:
         trials=args.trials,
         max_cost_usd=args.max_cost_usd,
         budget_cost_usd=args.budget_cost_usd,
+        allow_unpriced=args.allow_unpriced,
     )
     board = Scoreboard(suite_id=SUITE_ID, rows=rows)
 

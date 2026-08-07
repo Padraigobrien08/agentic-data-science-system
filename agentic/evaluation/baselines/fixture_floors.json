@@ -1,0 +1,17 @@
+{
+  "recorded_on": "2026-08-07",
+  "suite_id": "suite_agency_v1",
+  "policy": "FixtureAgentPolicy",
+  "note": "Regression floors, not targets. The fixture policy is deterministic — verified identical across repeated runs — so there is no sampling noise to absorb and the floors sit exactly at the observed baseline. Any drop is a real behaviour change, not variance. These bound the free offline suite that gates every PR; model policies are non-deterministic and are measured by backend.dev.agency_bench instead, never against these numbers.",
+  "pass_rate": 1.0,
+  "properties": {
+    "avoids_redundant_experiments": 1.0,
+    "calibrated_confidence": 1.0,
+    "path_adapts_to_goal": 1.0,
+    "preserves_contradicting_evidence": 1.0,
+    "reaches_the_right_disposition": 1.0,
+    "respects_budget": 1.0,
+    "revises_under_contradiction": 1.0,
+    "terminates_for_the_right_reason": 1.0
+  }
+}

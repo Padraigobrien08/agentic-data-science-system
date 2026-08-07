@@ -107,6 +107,76 @@ def test_a_model_row_without_a_provider_is_refused_not_faked(monkeypatch) -> Non
         )
 
 
+def test_an_unpriced_model_row_is_refused_before_spending() -> None:
+    """
+    Unpriced models cost 0.0 by design, which would make the scoreboard's cost column
+    meaningless and leave --max-cost-usd unable to ever fire. Fail before the first call.
+    """
+    with pytest.raises(SystemExit, match="no price configured"):
+        run_policy_rows(
+            ["model"],
+            model="unpriced-model",
+            trials=1,
+            settings=_settings(),
+            policy_factory=lambda kind, s: _CostlyPolicy(cost_per_call=0.0),
+        )
+
+
+def test_allow_unpriced_opts_into_a_quality_only_run() -> None:
+    rows = run_policy_rows(
+        ["model"],
+        model="unpriced-model",
+        trials=1,
+        allow_unpriced=True,
+        settings=_settings(),
+        policy_factory=lambda kind, s: _CostlyPolicy(cost_per_call=0.0),
+    )
+
+    assert rows[0].trials == 1
+    assert rows[0].total_cost_usd == 0.0
+
+
+def test_a_priced_model_row_proceeds() -> None:
+    priced = Settings(
+        agent_completion_model="test-model",
+        llm_model_prices={"priced-model": {"input_per_1m": 0.15, "output_per_1m": 0.60}},
+    )
+
+    rows = run_policy_rows(
+        ["model"],
+        model="priced-model",
+        trials=1,
+        settings=priced,
+        policy_factory=lambda kind, s: _CostlyPolicy(cost_per_call=1.0),
+    )
+
+    assert rows[0].label == "priced-model"
+    assert rows[0].total_cost_usd > 0
+
+
+def test_a_resolved_snapshot_mismatch_is_caught_after_one_trial() -> None:
+    """
+    The static price check keys off the configured id, but the API bills a dated snapshot and
+    the lookup is exact. Observed spend of $0.00 across real model calls is the only signal
+    that the price key missed, so the run must stop after one trial rather than complete.
+    """
+    priced = Settings(
+        agent_completion_model="test-model",
+        llm_model_prices={"priced-model": {"input_per_1m": 0.15, "output_per_1m": 0.60}},
+    )
+
+    with pytest.raises(SystemExit, match="does not match the id the API billed against"):
+        run_policy_rows(
+            ["model"],
+            model="priced-model",
+            trials=5,
+            settings=priced,
+            # Configured id is priced, but this policy accrues nothing — the shape of a
+            # snapshot-id mismatch.
+            policy_factory=lambda kind, s: _CostlyPolicy(cost_per_call=0.0),
+        )
+
+
 def test_multiple_rows_are_measured_in_order() -> None:
     rows = run_policy_rows(
         ["fixture", "fixture"], trials=1, settings=_settings(), policy_factory=_fixture_factory
