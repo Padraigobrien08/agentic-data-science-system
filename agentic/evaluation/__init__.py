@@ -14,7 +14,16 @@ from .agency import (
     PropertyOutcome,
     score_case,
 )
-from .cases import AGENCY_CASES, SUITE_ID, AgencyCase
+from .cases import (
+    AGENCY_CASES,
+    SUITE_ID,
+    SUITE_V1_CASE_IDS,
+    SUITE_V1_CASES,
+    SUITE_V1_ID,
+    AgencyCase,
+    CaseTier,
+    cases_for_tier,
+)
 from .fixtures import FIXTURES, build_fixture
 from .runner import format_report, run_agency_suite, run_case
 from .scoreboard import (
@@ -36,6 +45,12 @@ __all__ = [
     "AgencyCase",
     "AGENCY_CASES",
     "SUITE_ID",
+    # tiers
+    "CaseTier",
+    "cases_for_tier",
+    "SUITE_V1_ID",
+    "SUITE_V1_CASES",
+    "SUITE_V1_CASE_IDS",
     "FIXTURES",
     "build_fixture",
     "run_case",

@@ -23,6 +23,7 @@ from pathlib import Path
 from agentic.agent.fixture_policy import FixtureAgentPolicy
 from agentic.agent.policy import CritiqueProposal
 from agentic.evaluation.agency import AgencyProperty
+from agentic.evaluation.cases import CaseTier
 from agentic.evaluation.runner import run_agency_suite
 
 _FLOORS_PATH = (
@@ -36,6 +37,12 @@ _FLOORS_PATH = (
 
 def _floors() -> dict:
     return json.loads(_FLOORS_PATH.read_text(encoding="utf-8"))
+
+
+def _core() -> dict:
+    """Floors apply to the core tier. The hard tier is bounded from above instead — the
+    fixture policy is *expected* to fail it, so a floor there would be backwards."""
+    return _floors()["core"]
 
 
 def test_the_baseline_is_actually_deterministic() -> None:
@@ -53,8 +60,8 @@ def test_the_baseline_is_actually_deterministic() -> None:
 
 
 def test_every_property_holds_its_floor() -> None:
-    floors = _floors()["properties"]
-    observed = run_agency_suite().property_scores()
+    floors = _core()["properties"]
+    observed = run_agency_suite(tier=CaseTier.core).property_scores()
 
     below = [
         f"{name}: floor {floor:.4f}, observed {observed.get(name, 0.0):.4f}"
@@ -69,12 +76,34 @@ def test_every_property_holds_its_floor() -> None:
 
 
 def test_overall_pass_rate_holds_its_floor() -> None:
-    floor = _floors()["pass_rate"]
-    report = run_agency_suite()
+    floor = _core()["pass_rate"]
+    report = run_agency_suite(tier=CaseTier.core)
 
     assert report.pass_rate >= floor, (
-        f"suite pass rate {report.pass_rate:.4f} is below the committed floor {floor:.4f}; "
+        f"core pass rate {report.pass_rate:.4f} is below the committed floor {floor:.4f}; "
         f"failing cases: {[r.case_id for r in report.results if not r.passed]}"
+    )
+
+
+def test_the_hard_tier_keeps_its_headroom() -> None:
+    """
+    The ceiling, and the reason it points the opposite way to every other bound here.
+
+    `suite_agency_v1` was saturated — a rule engine and a frontier model both scored 100% —
+    so the hard tier exists to hold open a gap above "working". If `FixtureAgentPolicy`
+    starts clearing hard cases, that gap is closing, and the two possible causes need
+    opposite responses.
+    """
+    ceiling = _floors()["hard"]["max_pass_rate"]
+    report = run_agency_suite(tier=CaseTier.hard)
+
+    assert report.pass_rate <= ceiling, (
+        f"the deterministic baseline now passes {report.pass_rate:.0%} of the hard tier, "
+        f"above the committed ceiling of {ceiling:.0%} "
+        f"(newly passing: {[r.case_id for r in report.results if r.passed]}).\n"
+        "Either the deterministic policy genuinely improved — re-baseline deliberately and "
+        "say so — or those cases have gone soft and no longer discriminate. Do not raise the "
+        "ceiling to make this pass without deciding which."
     )
 
 
@@ -83,7 +112,7 @@ def test_the_floors_file_covers_every_agency_property() -> None:
     A new `AgencyProperty` must arrive with a floor. Without this, adding a property would
     silently leave it ungated — the gap would look exactly like everything passing.
     """
-    floors = set(_floors()["properties"])
+    floors = set(_core()["properties"])
     declared = {p.value for p in AgencyProperty}
 
     assert floors == declared, (
@@ -121,8 +150,8 @@ def test_every_floored_property_is_actually_exercised_by_a_case() -> None:
     Guards the other direction: a floor on a property no case asserts is unenforceable, and
     would read as a passing gate while measuring nothing.
     """
-    floors = set(_floors()["properties"])
-    exercised = set(run_agency_suite().property_scores())
+    floors = set(_core()["properties"])
+    exercised = set(run_agency_suite(tier=CaseTier.core).property_scores())
 
     assert floors <= exercised, (
         f"floors are declared for properties no case asserts: {sorted(floors - exercised)}. "

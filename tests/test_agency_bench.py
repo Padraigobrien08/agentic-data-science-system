@@ -20,7 +20,7 @@ from agentic.agent.policy import (
     GoalInterpretation,
     HypothesisProposals,
 )
-from agentic.evaluation.cases import AGENCY_CASES
+from agentic.evaluation.cases import AGENCY_CASES, SUITE_ID
 from agentic.evaluation.runner import run_agency_suite, run_case
 from backend.config.settings import Settings
 from backend.dev.agency_bench import main, run_policy_rows
@@ -271,7 +271,7 @@ def test_cli_writes_both_artifacts(tmp_path, capsys) -> None:
     assert code == 0
     assert out.with_suffix(".md").is_file()
     payload = json.loads(out.with_suffix(".json").read_text())
-    assert payload["suite_id"] == "suite_agency_v1"
+    assert payload["suite_id"] == SUITE_ID
     assert payload["requested_trials"] == 2
     assert payload["rows"][0]["label"] == "fixture"
     assert payload["prompt_version"]

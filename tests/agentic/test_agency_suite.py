@@ -25,7 +25,9 @@ from agentic.evaluation import (
     SUITE_ID,
     AgencyExpectations,
     AgencyProperty,
+    CaseTier,
     build_fixture,
+    cases_for_tier,
     format_report,
     run_agency_suite,
     run_case,
@@ -56,10 +58,15 @@ class AlwaysTrendPolicy(FixtureAgentPolicy):
 
 
 def test_the_deterministic_baseline_passes_the_suite() -> None:
-    report = run_agency_suite()
+    """
+    Scoped to the core tier on purpose. The hard tier is *defined* by the baseline failing it
+    (see `test_agency_tiers.py`), so asserting a clean sweep across every tier would assert
+    the opposite of what the hard tier is for.
+    """
+    report = run_agency_suite(tier=CaseTier.core)
     assert report.suite_id == SUITE_ID
     assert report.failed == 0, format_report(report)
-    assert report.total == len(AGENCY_CASES)
+    assert report.total == len(cases_for_tier(CaseTier.core))
 
 
 def test_every_property_is_exercised_by_the_suite() -> None:

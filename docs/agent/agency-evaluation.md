@@ -15,7 +15,7 @@ python -m agentic.evaluation
 ```
 
 ```
-suite_agency_v1: 13/13 cases passed (100%)
+suite_agency_v2: 13/13 cases passed (100%)
 
 Per-property pass rate:
    100%  avoids_redundant_experiments
@@ -26,6 +26,12 @@ Per-property pass rate:
 ```
 
 Exit code is non-zero when any case fails, so it can gate a change.
+
+This runs the **core** tier. `suite_agency_v1` — the 13 frozen, published cases — is the core
+tier today; `--tier hard` runs the cases the deterministic baseline is designed to fail, and
+`--tier all` runs both. The default is core precisely so the exit code stays usable as a gate:
+the hard tier is expected to fail for the deterministic policy, and a permanently red command
+signals nothing when a real regression arrives.
 
 ## Two failure modes, weighted equally
 

@@ -120,6 +120,27 @@ def response_latency_flat(n: int = 12) -> pd.DataFrame:
 
 
 #: Fixture id -> builder. Cases reference these by name so a suite stays declarative.
+def support_desk_slowing(n: int = 12) -> pd.DataFrame:
+    """
+    A support desk whose throughput is steady but which is getting steadily slower.
+
+    Three metrics, and the one the question is about is deliberately **not first**:
+    ``tickets_opened`` and ``tickets_closed`` are flat, while ``median_resolution_hours``
+    climbs from 4h to roughly 15h. A goal like "are we getting slower at resolving customer
+    issues?" names none of these columns, so choosing between them is an act of
+    interpretation rather than string matching.
+    """
+    return pd.DataFrame(
+        {
+            "team": ["support"] * n,
+            "week": [f"2025-W{w + 1:02d}" for w in range(n)],
+            "tickets_opened": [120.0 + (w % 3) for w in range(n)],
+            "tickets_closed": [118.0 + (w % 3) for w in range(n)],
+            "median_resolution_hours": [4.0 + 1.0 * w for w in range(n)],
+        }
+    )
+
+
 FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "clear_rising": clear_rising,
     "clear_falling": clear_falling,
@@ -130,6 +151,7 @@ FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "separated_groups": separated_groups,
     "rainfall_rising": rainfall_rising,
     "response_latency_flat": response_latency_flat,
+    "support_desk_slowing": support_desk_slowing,
 }
 
 

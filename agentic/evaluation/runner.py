@@ -16,7 +16,7 @@ from agentic.agent.observer import AgentObserver
 from agentic.agent.policy import AgentPolicy
 from agentic.domain.enums import ColumnRole
 from agentic.evaluation.agency import AgencyCaseResult, AgencyReport, score_case
-from agentic.evaluation.cases import AGENCY_CASES, SUITE_ID, AgencyCase
+from agentic.evaluation.cases import AGENCY_CASES, SUITE_ID, AgencyCase, CaseTier, cases_for_tier
 from agentic.evaluation.fixtures import build_fixture
 
 
@@ -82,13 +82,20 @@ def run_agency_suite(
     suite_id: str = SUITE_ID,
     observer: AgentObserver | None = None,
     budget: LoopBudget | None = None,
+    tier: CaseTier | None = None,
 ) -> AgencyReport:
     """Run every case and aggregate a report.
 
     A single ``observer`` spans the whole suite, so one run collects one
     ``InvestigationEnded`` per case. ``budget`` applies to every case except where a case
     pins its own ``max_experiments`` — see :func:`run_case`.
+
+    ``tier`` narrows to one tier. Core and hard measure different things — the core tier is
+    saturated by design history, the hard tier is where the headroom is — so a caller
+    comparing policies should report them separately rather than averaging them.
     """
+    if tier is not None:
+        cases = cases_for_tier(tier, cases)
     results = [run_case(case, policy=policy, observer=observer, budget=budget) for case in cases]
     return AgencyReport(
         suite_id=suite_id,
@@ -115,10 +122,37 @@ def format_report(report: AgencyReport) -> str:
     return "\n".join(lines)
 
 
-def main() -> int:
-    """``python -m agentic.evaluation.runner`` — run the suite, print a report."""
-    report = run_agency_suite()
+def main(argv: list[str] | None = None) -> int:
+    """
+    ``python -m agentic.evaluation`` — run a tier and print a report.
+
+    Defaults to the **core** tier, because this command's exit code is documented as a gate
+    and the hard tier is designed for the deterministic baseline to fail. Running everything
+    by default would leave the gate permanently red and say nothing when a real regression
+    arrived.
+    """
+    import argparse
+
+    parser = argparse.ArgumentParser(prog="python -m agentic.evaluation")
+    parser.add_argument(
+        "--tier",
+        choices=[t.value for t in CaseTier] + ["all"],
+        default=CaseTier.core.value,
+        help="Which tier to run (default: core, the tier the baseline is expected to pass).",
+    )
+    args = parser.parse_args(argv)
+
+    tier = None if args.tier == "all" else CaseTier(args.tier)
+    report = run_agency_suite(tier=tier)
     print(format_report(report))
+
+    if tier is CaseTier.core:
+        hard = len(cases_for_tier(CaseTier.hard))
+        if hard:
+            print(
+                f"\n{hard} hard case(s) not run. The deterministic baseline is expected to "
+                "fail these — that gap is the suite's headroom. `--tier hard` to see them."
+            )
     return 0 if report.failed == 0 else 1
 
 

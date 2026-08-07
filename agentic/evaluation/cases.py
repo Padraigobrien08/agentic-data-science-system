@@ -1,20 +1,54 @@
 """
-``suite_agency_v1`` — the agency case set.
+The agency case set, in two tiers.
 
 Cases are paired on purpose. For every fixture that punishes overclaiming there is one that
 punishes hedging, because the two failure modes are opposite and a suite that only tests one
 is trivially gamed: an agent that always concludes "insufficient evidence" passes every
 negative case and is useless.
+
+**Tiers.** `suite_agency_v1` — the 13 :data:`SUITE_V1_CASES` — is frozen. A published
+measurement reports against it (``docs/agent/agency-scoreboard.md``), and growing it in place
+would invalidate that result and destroy comparability, so it stays runnable on its own
+forever. That measurement also found it *saturated*: a keyword-matching rule engine and a
+frontier model both score 100%, so it separates broken agents from working ones but cannot
+rank competent ones.
+
+:data:`CaseTier.hard` is the headroom. A hard case must **fail**
+:class:`~agentic.agent.fixture_policy.FixtureAgentPolicy`, on a named reasoning property —
+that is the operational definition of "discriminating", it is free and deterministic to check,
+and ``tests/agentic/test_agency_tiers.py`` enforces it. A case the rule engine passes does not
+belong in the tier.
+
+The rule engine is the yardstick of convenience, not the target: each hard case must also read
+as a fair test on its own terms. If the only argument for a case is that it breaks
+`FixtureAgentPolicy`, it is a trick rather than a measurement.
 """
 
 from __future__ import annotations
+
+from enum import Enum
 
 from pydantic import Field
 
 from agentic.domain.common import DomainModel
 from agentic.evaluation.agency import AgencyExpectations
 
-SUITE_ID = "suite_agency_v1"
+
+class CaseTier(str, Enum):
+    """Which bar a case sets."""
+
+    core = "core"
+    """The frozen `suite_agency_v1` set. The deterministic baseline passes all of these."""
+
+    hard = "hard"
+    """Requires judgement a keyword-matching rule engine cannot supply — it must fail one."""
+
+
+#: The frozen, published suite. Never add to this.
+SUITE_V1_ID = "suite_agency_v1"
+
+#: The full set, core + hard. What `run_agency_suite()` reports by default.
+SUITE_ID = "suite_agency_v2"
 
 # Termination / disposition vocabulary, kept as literals so a case reads declaratively.
 SUFFICIENT = "sufficient_evidence"
@@ -42,6 +76,9 @@ class AgencyCase(DomainModel):
     entity_id_fields: list[str] = Field(default_factory=lambda: ["entity"])
     metric_field: str = "value"
     max_experiments: int | None = None
+    #: `core` unless the case is designed to defeat the deterministic baseline. Defaulted so
+    #: the frozen v1 cases below need no annotation and stay byte-for-byte what was published.
+    tier: CaseTier = CaseTier.core
 
 
 AGENCY_CASES: tuple[AgencyCase, ...] = (
@@ -214,4 +251,62 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
             ],
         ),
     ),
+    # -- hard tier: judgement a keyword matcher cannot supply --------------------
+    #
+    # Every case below must fail FixtureAgentPolicy on a named property — enforced by
+    # tests/agentic/test_agency_tiers.py — and must also stand on its own as a fair test.
+    AgencyCase(
+        case_id="implied_metric_is_selected_over_the_default",
+        description=(
+            "A question about how long something takes must be answered with the duration "
+            "metric, even though the question names no column and two higher-profile volume "
+            "metrics are offered first."
+        ),
+        goal="are we getting slower at resolving customer issues?",
+        fixture_id="support_desk_slowing",
+        time_field="week",
+        entity_id_fields=["team"],
+        # The obvious default, not the answer: this is the column a caller would hint first,
+        # and picking it produces a defensible-looking "no trend" on flat ticket volume.
+        metric_field="tickets_opened",
+        tier=CaseTier.hard,
+        expectations=AgencyExpectations(
+            termination_reason_in=[SUFFICIENT],
+            disposition_in=[SUPPORTED],
+            # "Slower over time" is a trend question. Answering it by profiling the dataset
+            # is not a weaker answer, it is a different question.
+            expect_any_tool=["analyze_time_series_trend"],
+        ),
+    ),
 )
+
+
+#: Exactly the cases published as `suite_agency_v1`, pinned by id.
+#:
+#: Pinned by id rather than derived from ``tier == core`` on purpose: a future core case would
+#: silently join a derived subset and change what "the v1 result" means. This list is the
+#: freeze, and ``tests/agentic/test_agency_tiers.py`` asserts every id still resolves.
+SUITE_V1_CASE_IDS: tuple[str, ...] = (
+    "clear_rising_is_concluded",
+    "clear_falling_is_concluded",
+    "flat_data_is_not_a_trend",
+    "noise_is_not_a_trend",
+    "two_points_are_not_a_trend",
+    "contradicted_claim_is_revised",
+    "opposing_entities_are_not_cherry_picked",
+    "comparison_goal_uses_comparison_tools",
+    "trend_goal_uses_trend_tools",
+    "non_financial_trend_is_concluded",
+    "non_financial_flat_is_not_a_trend",
+    "supported_claim_is_challenged_before_concluding",
+    "budget_is_respected",
+)
+
+SUITE_V1_CASES: tuple[AgencyCase, ...] = tuple(
+    case for case in AGENCY_CASES if case.case_id in SUITE_V1_CASE_IDS
+)
+
+
+def cases_for_tier(tier: CaseTier, cases: tuple[AgencyCase, ...] = AGENCY_CASES) -> tuple[AgencyCase, ...]:
+    """The subset of ``cases`` in one tier."""
+    return tuple(case for case in cases if case.tier is tier)
