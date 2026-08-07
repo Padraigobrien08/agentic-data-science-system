@@ -28,19 +28,26 @@ Stable:
 - deterministic EDGAR pipeline
 - chat UI with persisted runs and artifacts
 - evaluation and regression framework
-- agentic investigation loop: observability, budgets, replay/diff, agency evaluation
+- agentic investigation loop: observability, budgets, replay/diff
+- agency evaluation that discriminates: on its hard tier the deterministic baseline scores 0%
+  and `gpt-5.4-mini` 75%, stable across five trials — see
+  [the scoreboard](docs/agent/agency-scoreboard.md)
 
 Known limits, stated plainly:
 
 - The agentic engine is **flag-gated and off by default**
   (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the deterministic EDGAR chain remains the
   default execution path.
-- `suite_agency_v1` has now been run against a live model, and **the suite turned out to be
-  saturated**: `gpt-5.4-mini` and the deterministic fixture policy both score 100% on all
-  nine properties over five trials. It separates broken agents from working ones — it found
-  a prompt defect worth 38 points — but it has no headroom above "working", so it cannot
-  rank competent policies. See [the scoreboard](docs/agent/agency-scoreboard.md). Raising
-  that ceiling is the next piece of work.
+- The agency suite measures `interpret_goal` well and the loop's other two model-backed
+  decisions barely at all. Cases for them are not fairly constructible against the current
+  loop, for reasons that are themselves limitations —
+  [documented here](docs/agent/agency-evaluation.md#what-the-tier-does-not-cover).
+- **An investigation can examine one metric.** Every tool is parameterised from a single
+  `interpretation.metric_hint`, so a multi-part question ("is growth slowing *and* is margin
+  deteriorating?") strands its second hypothesis at `proposed` however well the agent reasons.
+- On the one benchmark case where the honest answer is "this data cannot answer that",
+  `gpt-5.4-mini` substitutes the nearest available metric and reports confidence 0.95 —
+  behaviour indistinguishable from the rule-engine baseline.
 - The hosted MCP endpoint has no rate limiting, and its handshake/tool-listing is
   unauthenticated (tool *invocation* is not).
 - No CD pipeline, backup/restore runbook, or deployment target beyond single-host Compose.
@@ -50,8 +57,8 @@ In progress:
 - expanded ticker coverage
 - hosted demo environment
 - extended benchmark suites
-- hardening `AGENCY_CASES` so the agency suite can discriminate between competent policies,
-  not only between working and broken ones
+- widening the agency hard tier beyond `interpret_goal`, which needs the loop's single-metric
+  limitation lifted first
 
 ## Product Screens
 

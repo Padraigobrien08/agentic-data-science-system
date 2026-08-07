@@ -83,9 +83,13 @@ class CaseStability(DomainModel):
 
 
 class PolicyScorecard(DomainModel):
-    """One policy's result over N trials of the suite."""
+    """One policy's result over N trials of one tier."""
 
     label: str
+    #: Which tier this row measures. Core and hard mean different things — core is saturated
+    #: by design history, hard is where the headroom is — so they are never averaged into one
+    #: number. An empty value means the row spans every tier.
+    tier: str = ""
     trials: int = 0
     mean_pass_rate: float = 0.0
     property_means: dict[str, float] = Field(default_factory=dict)
@@ -119,6 +123,7 @@ def aggregate_trials(
     metrics: Sequence[RunMetrics] = (),
     *,
     truncated: bool = False,
+    tier: str = "",
 ) -> PolicyScorecard:
     """
     Reduce N suite reports (and the metrics captured alongside them) to one scorecard.
@@ -127,7 +132,7 @@ def aggregate_trials(
     case exercises is absent rather than counted as zero.
     """
     if not reports:
-        return PolicyScorecard(label=label, truncated=truncated)
+        return PolicyScorecard(label=label, tier=tier, truncated=truncated)
 
     stability: dict[str, CaseStability] = {}
     for report in reports:
@@ -146,6 +151,7 @@ def aggregate_trials(
 
     return PolicyScorecard(
         label=label,
+        tier=tier,
         trials=len(reports),
         mean_pass_rate=round(sum(r.pass_rate for r in reports) / len(reports), 4),
         property_means={
@@ -179,7 +185,9 @@ class Scoreboard(DomainModel):
             return f"_No results for {self.suite_id}._"
 
         properties = self.property_names()
-        header = ["policy", "trials", "pass rate", *properties, "mean $", "p95 s"]
+        tiered = any(row.tier for row in self.rows)
+        header = ["policy", *(["tier"] if tiered else []), "trials", "pass rate",
+                  *properties, "mean $", "p95 s"]
         lines = [
             f"| {' | '.join(header)} |",
             f"|{'|'.join(['---'] * len(header))}|",
@@ -188,6 +196,7 @@ class Scoreboard(DomainModel):
             label = f"{row.label} ⚠️" if row.truncated else row.label
             cells = [
                 label,
+                *([row.tier or "all"] if tiered else []),
                 str(row.trials),
                 f"{row.mean_pass_rate:.0%}",
                 *[

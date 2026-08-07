@@ -224,5 +224,44 @@ def test_markdown_flags_a_truncated_row() -> None:
     assert "Truncated by the cost ceiling" in text
 
 
+# -- tiers -------------------------------------------------------------------
+
+
+def test_tiers_are_kept_as_separate_rows_not_averaged() -> None:
+    """
+    The core tier is saturated and the hard tier is where the headroom is. Merging them
+    yields a number that means nothing: a saturated core would mask a discriminating hard
+    tier, and a hard tier at 0% would drag a genuine core result down.
+    """
+    core = aggregate_trials("m", [_report(_result("a", True))], tier="core")
+    hard = aggregate_trials("m", [_report(_result("b", False))], tier="hard")
+
+    assert (core.tier, core.mean_pass_rate) == ("core", 1.0)
+    assert (hard.tier, hard.mean_pass_rate) == ("hard", 0.0)
+
+
+def test_the_markdown_names_the_tier_of_every_row() -> None:
+    board = Scoreboard(
+        suite_id="suite_agency_v2",
+        rows=[
+            aggregate_trials("m", [_report(_result("a", True))], tier="core"),
+            aggregate_trials("m", [_report(_result("b", False))], tier="hard"),
+        ],
+    )
+
+    text = board.to_markdown()
+
+    assert "| tier |" in text
+    assert "| core |" in text
+    assert "| hard |" in text
+
+
+def test_an_untiered_board_omits_the_tier_column() -> None:
+    """Rows with no tier predate tiering; the column would be an empty distraction."""
+    board = Scoreboard(suite_id="s", rows=[aggregate_trials("m", [_report(_result("a", True))])])
+
+    assert "| tier |" not in board.to_markdown()
+
+
 def test_empty_scoreboard_renders_without_raising() -> None:
     assert "No results" in Scoreboard(suite_id="suite_agency_v1").to_markdown()

@@ -75,10 +75,10 @@ def test_fixture_row_runs_offline_and_reports_its_trials() -> None:
         ["fixture"], trials=2, settings=_settings(), policy_factory=_fixture_factory
     )
 
-    assert len(rows) == 1
-    assert rows[0].label == "fixture"
-    assert rows[0].trials == 2
-    assert not rows[0].truncated
+    # One row per (policy, tier): core and hard are reported separately, never averaged.
+    assert [(r.label, r.tier) for r in rows] == [("fixture", "core"), ("fixture", "hard")]
+    assert all(r.trials == 2 for r in rows)
+    assert not any(r.truncated for r in rows)
 
 
 def test_the_deterministic_baseline_is_stable_across_trials() -> None:
@@ -177,12 +177,79 @@ def test_a_resolved_snapshot_mismatch_is_caught_after_one_trial() -> None:
         )
 
 
+def test_all_tiers_produce_one_row_each() -> None:
+    rows = run_policy_rows(
+        ["fixture"], trials=1, settings=_settings(), policy_factory=_fixture_factory
+    )
+
+    assert [(r.label, r.tier) for r in rows] == [("fixture", "core"), ("fixture", "hard")]
+
+
+def test_tier_core_measures_only_the_frozen_v1_cases() -> None:
+    from agentic.evaluation.cases import SUITE_V1_CASES, CaseTier
+
+    rows = run_policy_rows(
+        ["fixture"],
+        trials=1,
+        tiers=(CaseTier.core,),
+        settings=_settings(),
+        policy_factory=_fixture_factory,
+    )
+
+    assert len(rows) == 1
+    assert rows[0].tier == "core"
+    # The core tier is the frozen suite today; a divergence means v1 stopped being reproducible.
+    assert rows[0].mean_pass_rate == 1.0
+    assert len(SUITE_V1_CASES) == 13
+
+
+def test_the_hard_tier_row_shows_the_baseline_failing() -> None:
+    """The headroom, visible in the artifact that gets published."""
+    from agentic.evaluation.cases import CaseTier
+
+    rows = run_policy_rows(
+        ["fixture"],
+        trials=1,
+        tiers=(CaseTier.hard,),
+        settings=_settings(),
+        policy_factory=_fixture_factory,
+    )
+
+    assert rows[0].mean_pass_rate == 0.0
+
+
+def test_the_cost_ceiling_is_shared_across_a_policys_tiers() -> None:
+    """
+    One ceiling per policy, not one per tier — otherwise a two-tier run silently costs twice
+    what the ceiling says.
+    """
+    from agentic.evaluation.cases import CaseTier
+
+    rows = run_policy_rows(
+        ["fixture"],
+        trials=4,
+        max_cost_usd=0.5,
+        tiers=(CaseTier.core, CaseTier.hard),
+        settings=_settings(),
+        policy_factory=lambda kind, s: _CostlyPolicy(cost_per_call=1.0),
+    )
+
+    assert rows[0].truncated, "the first tier should have exhausted the shared ceiling"
+    # The second tier inherits the exhausted budget rather than starting fresh.
+    assert rows[1].trials <= rows[0].trials
+
+
 def test_multiple_rows_are_measured_in_order() -> None:
     rows = run_policy_rows(
         ["fixture", "fixture"], trials=1, settings=_settings(), policy_factory=_fixture_factory
     )
 
-    assert [r.label for r in rows] == ["fixture", "fixture"]
+    assert [(r.label, r.tier) for r in rows] == [
+        ("fixture", "core"),
+        ("fixture", "hard"),
+        ("fixture", "core"),
+        ("fixture", "hard"),
+    ]
 
 
 # -- cost ceiling ------------------------------------------------------------

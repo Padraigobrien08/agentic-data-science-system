@@ -38,7 +38,7 @@ import structlog
 from agentic.agent.budget import LoopBudget
 from agentic.agent.policy import AgentPolicy
 from agentic.evaluation.agency import AgencyReport
-from agentic.evaluation.cases import SUITE_ID
+from agentic.evaluation.cases import SUITE_ID, CaseTier
 from agentic.evaluation.runner import run_agency_suite
 from agentic.evaluation.scoreboard import (
     MetricsObserver,
@@ -103,15 +103,21 @@ def run_policy_rows(
     max_cost_usd: float | None = None,
     budget_cost_usd: float | None = None,
     allow_unpriced: bool = False,
+    tiers: tuple[CaseTier | None, ...] = (CaseTier.core, CaseTier.hard),
     settings: Settings | None = None,
     policy_factory: PolicyFactory = _default_policy_factory,
 ) -> list[PolicyScorecard]:
     """
     Run the suite ``trials`` times per requested policy and aggregate one scorecard each.
 
+    Produces one row per (policy, tier). Core and hard are never merged into a single number:
+    the core tier is saturated by design history and the hard tier is where the headroom is,
+    so an average would let either hide inside the other.
+
     Trials stop early — and the row is marked ``truncated`` — once accumulated spend crosses
     ``max_cost_usd``. That ceiling sits on top of the per-run ``LoopBudget.max_cost_usd``:
-    the budget bounds one investigation, this bounds the whole benchmark.
+    the budget bounds one investigation, this bounds the whole benchmark. Spend accumulates
+    across a policy's tiers, so one ceiling covers the whole policy.
     """
     base = settings if settings is not None else get_settings()
     rows: list[PolicyScorecard] = []
@@ -136,51 +142,69 @@ def run_policy_rows(
             _assert_priced(row_settings, model, label)
 
         budget = LoopBudget(max_cost_usd=budget_cost_usd) if budget_cost_usd else None
-        reports: list[AgencyReport] = []
-        metrics: list[RunMetrics] = []
-        truncated = False
+        # Spend accumulates across every tier this policy is measured on, so a two-tier run
+        # is bounded by one ceiling rather than one per tier.
+        policy_metrics: list[RunMetrics] = []
 
-        for trial in range(trials):
-            observer = MetricsObserver()
-            reports.append(run_agency_suite(policy=policy, observer=observer, budget=budget))
-            metrics.extend(observer.drain())
-            spent = sum(m.cost_usd for m in metrics)
-            log.info(
-                "agency_bench.trial",
-                label=label,
-                trial=trial + 1,
-                of=trials,
-                pass_rate=reports[-1].pass_rate,
-                spent_usd=round(spent, 4),
-            )
-            # The static check above prices the *configured* id, but the API bills against a
-            # resolved snapshot ("gpt-5.4-mini" -> "gpt-5.4-mini-2026-03-17") and the price
-            # lookup is an exact match. Only observed spend can catch that mismatch, so fail
-            # after one trial rather than completing a whole paid benchmark at $0.00.
-            calls = sum(m.model_calls for m in metrics)
-            if kind == MODEL and not allow_unpriced and trial == 0 and calls > 0 and spent == 0.0:
-                log.error("agency_bench.unpriced_resolved_model", label=label, model_calls=calls)
-                raise SystemExit(
-                    f"{label!r} made {calls} model calls that cost $0.00, so its price key does "
-                    "not match the id the API billed against.\n"
-                    "The provider resolves an alias to a dated snapshot; price that snapshot id "
-                    "(check the 'llm_model_unpriced' log line for the exact value), or pass "
-                    "--allow-unpriced to measure quality only."
+        for tier in tiers:
+            reports: list[AgencyReport] = []
+            metrics: list[RunMetrics] = []
+            truncated = False
+
+            for trial in range(trials):
+                observer = MetricsObserver()
+                reports.append(
+                    run_agency_suite(policy=policy, observer=observer, budget=budget, tier=tier)
                 )
-
-            if max_cost_usd is not None and spent >= max_cost_usd and trial + 1 < trials:
-                log.warning(
-                    "agency_bench.cost_ceiling",
+                fresh = observer.drain()
+                metrics.extend(fresh)
+                policy_metrics.extend(fresh)
+                spent = sum(m.cost_usd for m in policy_metrics)
+                log.info(
+                    "agency_bench.trial",
                     label=label,
+                    tier=tier.value if tier else "all",
+                    trial=trial + 1,
+                    of=trials,
+                    pass_rate=reports[-1].pass_rate,
                     spent_usd=round(spent, 4),
-                    ceiling_usd=max_cost_usd,
-                    completed_trials=trial + 1,
-                    requested_trials=trials,
                 )
-                truncated = True
-                break
 
-        rows.append(aggregate_trials(label, reports, metrics, truncated=truncated))
+                # The static check above prices the *configured* id, but the API bills against
+                # a resolved snapshot ("gpt-5.4-mini" -> "gpt-5.4-mini-2026-03-17") and the
+                # price lookup is an exact match. Only observed spend can catch that mismatch,
+                # so fail after one trial rather than completing a whole paid benchmark at $0.
+                calls = sum(m.model_calls for m in policy_metrics)
+                first_trial = tier is tiers[0] and trial == 0
+                if kind == MODEL and not allow_unpriced and first_trial and calls > 0 and spent == 0.0:
+                    log.error("agency_bench.unpriced_resolved_model", label=label, model_calls=calls)
+                    raise SystemExit(
+                        f"{label!r} made {calls} model calls that cost $0.00, so its price key "
+                        "does not match the id the API billed against.\n"
+                        "The provider resolves an alias to a dated snapshot; price that snapshot "
+                        "id (check the 'llm_model_unpriced' log line for the exact value), or "
+                        "pass --allow-unpriced to measure quality only."
+                    )
+
+                if max_cost_usd is not None and spent >= max_cost_usd and trial + 1 < trials:
+                    log.warning(
+                        "agency_bench.cost_ceiling",
+                        label=label,
+                        tier=tier.value if tier else "all",
+                        spent_usd=round(spent, 4),
+                        ceiling_usd=max_cost_usd,
+                        completed_trials=trial + 1,
+                        requested_trials=trials,
+                    )
+                    truncated = True
+                    break
+
+            rows.append(
+                aggregate_trials(
+                    label, reports, metrics,
+                    truncated=truncated, tier=tier.value if tier else "",
+                )
+            )
 
     return rows
 
@@ -227,6 +251,15 @@ def _parse_args(argv: list[str] | None) -> argparse.Namespace:
         help="Per-investigation LoopBudget.max_cost_usd.",
     )
     p.add_argument(
+        "--tier",
+        choices=[t.value for t in CaseTier] + ["all"],
+        default="all",
+        help=(
+            "Which tier(s) to measure. 'all' produces one row per (policy, tier); core and "
+            "hard are never averaged together."
+        ),
+    )
+    p.add_argument(
         "--allow-unpriced",
         action="store_true",
         help=(
@@ -252,6 +285,9 @@ def main(argv: list[str] | None = None) -> int:
         max_cost_usd=args.max_cost_usd,
         budget_cost_usd=args.budget_cost_usd,
         allow_unpriced=args.allow_unpriced,
+        tiers=(
+            (CaseTier.core, CaseTier.hard) if args.tier == "all" else (CaseTier(args.tier),)
+        ),
     )
     board = Scoreboard(suite_id=SUITE_ID, rows=rows)
 
