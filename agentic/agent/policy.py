@@ -103,6 +103,34 @@ class AgentPolicy(Protocol):
     def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal: ...
 
 
+@runtime_checkable
+class CostAwarePolicy(Protocol):
+    """
+    Optional policy extension: report and reset the cost accrued since the last drain.
+
+    Policies that know their token usage (model-backed ones) implement this so the
+    loop's ``max_cost_usd`` budget is enforceable. Policies that don't are unaffected
+    — :func:`drain_policy_cost` reports zero for them.
+    """
+
+    def drain_cost_usd(self) -> float: ...
+
+
+def drain_policy_cost(policy: object) -> float:
+    """
+    Cost accrued by ``policy`` since the last drain, or ``0.0`` when it doesn't
+    track cost. Kept duck-typed so :class:`AgentPolicy` stays a four-method contract
+    and existing implementations need no change.
+    """
+    drain = getattr(policy, "drain_cost_usd", None)
+    if not callable(drain):
+        return 0.0
+    try:
+        return max(0.0, float(drain()))
+    except (TypeError, ValueError):
+        return 0.0
+
+
 # -- model-backed implementation --------------------------------------------
 
 Responder = Callable[[str, str], str]

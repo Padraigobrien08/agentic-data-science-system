@@ -10,6 +10,8 @@ the registry compute. Every step records an :class:`AgentDecision` into state.
 from __future__ import annotations
 
 import math
+import threading
+from typing import Callable, TypeVar
 
 import pandas as pd
 
@@ -38,8 +40,9 @@ from agentic.experiments import ArtifactSink, ExperimentContext, ExperimentRegis
 from agentic.experiments.record import ExperimentExecutionRecord
 
 from .budget import BudgetTracker
+from .direction import direction_sign
 from .ids import DeterministicIds
-from .policy import AgentPolicy, AnalysisIntent, GoalInterpretation
+from .policy import AgentPolicy, AnalysisIntent, GoalInterpretation, drain_policy_cost
 
 # Intent -> ordered candidate tools (general layer). Order encodes priority.
 INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
@@ -61,8 +64,21 @@ EDGAR_INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
     AnalysisIntent.comparison: ["edgar_peer_comparison"],
 }
 
-_UP_WORDS = ("increasing", "up", "grow", "rise", "higher")
-_DOWN_WORDS = ("decreasing", "down", "declin", "fall", "drop", "lower", "deteriorat")
+_T = TypeVar("_T")
+
+
+
+def _invoke_policy(tracker: BudgetTracker, policy: AgentPolicy, call: Callable[[], _T]) -> _T:
+    """
+    Run one policy decision against the run's budget: count it before the call (so a
+    policy that raises is still counted) and attribute its cost after, whether or not
+    it raised. Policies that don't track cost contribute zero.
+    """
+    tracker.record_model_call()
+    try:
+        return call()
+    finally:
+        tracker.record_model_cost(drain_policy_cost(policy))
 
 
 def _prov(agent_id: str) -> Provenance:
@@ -84,12 +100,7 @@ def is_edgar_manifest(manifest: DatasetManifest) -> bool:
 
 def expectation_direction(h: Hypothesis) -> int | None:
     """+1 (up), -1 (down), or None (non-directional) parsed from the statement."""
-    s = h.statement.lower()
-    if any(w in s for w in _UP_WORDS):
-        return 1
-    if any(w in s for w in _DOWN_WORDS):
-        return -1
-    return None
+    return direction_sign(h.statement)
 
 
 # ---------------------------------------------------------------------------
@@ -104,8 +115,9 @@ class GoalInterpreter:
     def interpret(self, goal_text: str, manifest: DatasetManifest, tracker: BudgetTracker) -> GoalInterpretation:
         summary = {"metrics": manifest.metric_names(),
                    "dimensions": [c.name for c in manifest.columns if c.role.value == "dimension"]}
-        tracker.record_model_call()
-        return self._policy.interpret_goal(goal_text, capability_summary=summary)
+        return _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.interpret_goal(goal_text, capability_summary=summary))
 
 
 # ---------------------------------------------------------------------------
@@ -122,9 +134,10 @@ class HypothesisGenerator:
         manifest: DatasetManifest, idgen: DeterministicIds, tracker: BudgetTracker,
     ) -> None:
         dims = [c.name for c in manifest.columns if c.role.value == "dimension"]
-        tracker.record_model_call()
-        proposals = self._policy.generate_hypotheses(
-            interpretation, metric_names=manifest.metric_names(), dimension_names=dims)
+        proposals = _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.generate_hypotheses(
+                interpretation, metric_names=manifest.metric_names(), dimension_names=dims))
         for i, p in enumerate(proposals.hypotheses):
             h = Hypothesis(
                 id=idgen.make("hyp", i), statement=p.statement, rationale=p.rationale,
@@ -251,24 +264,92 @@ class ExperimentSelector:
              "falsification": c.definition_id == "falsification"}
             for i, c in enumerate(candidates)
         ]
-        tracker.record_model_call()
-        choice = self._policy.select_experiment(
-            goal_summary={"intent": interpretation.intent.value}, candidates=summaries)
+        choice = _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.select_experiment(
+                goal_summary={"intent": interpretation.intent.value}, candidates=summaries))
         if choice.request_index is None or not (0 <= choice.request_index < len(candidates)):
             return None
         chosen = candidates[choice.request_index]
+        self._accept(state, chosen, idgen, choice.rationale or "selected next experiment")
+        return chosen
+
+    def select_batch(
+        self, state: InvestigationState, candidates: list[ExperimentRequest],
+        interpretation: GoalInterpretation, tracker: BudgetTracker, idgen: DeterministicIds,
+        *, limit: int,
+    ) -> list[ExperimentRequest]:
+        """
+        Select up to ``limit`` experiments to run together, in execution order.
+
+        The **lead** experiment is chosen by the policy exactly as in :meth:`select` — one
+        model call per iteration, unchanged. Any remaining slots are filled deterministically
+        from the planner's ranked candidates, which already encode priority order.
+
+        Filling deterministically rather than asking the policy per slot is deliberate: it
+        keeps ``AgentPolicy`` a four-method contract, keeps model calls at one per iteration
+        (so a wider batch *lowers* cost per experiment), and keeps the batch reproducible.
+        The trade-off is that followers are picked without seeing the lead's result — which
+        is exactly why the batch is bounded.
+        """
+        if limit <= 1:
+            lead = self.select(state, candidates, interpretation, tracker, idgen)
+            return [lead] if lead is not None else []
+
+        lead = self.select(state, candidates, interpretation, tracker, idgen)
+        if lead is None:
+            return []
+        batch = [lead]
+        for candidate in candidates:
+            if len(batch) >= limit:
+                break
+            if candidate.id == lead.id or candidate.tool_name in {b.tool_name for b in batch}:
+                continue
+            self._accept(state, candidate, idgen, "batched alongside the selected experiment")
+            batch.append(candidate)
+        return batch
+
+    def _accept(
+        self, state: InvestigationState, chosen: ExperimentRequest, idgen: DeterministicIds,
+        rationale: str,
+    ) -> None:
         state.add_experiment_request(chosen)
         state.record_decision(AgentDecision(
             id=idgen.make("dec-sel", len(state.decisions)), decision_type=DecisionType.select_experiment,
-            rationale=choice.rationale or "selected next experiment", iteration=state.budget.iterations_used,
+            rationale=rationale, iteration=state.budget.iterations_used,
             targets=[EntityRef(kind=EntityKind.experiment_request, id=chosen.id)],
             chosen_option=chosen.tool_name, provenance=_prov("experiment_selector")))
-        return chosen
 
 
 # ---------------------------------------------------------------------------
 # 5. ExperimentExecutor
 # ---------------------------------------------------------------------------
+
+
+class LockedArtifactSink(ArtifactSink):
+    """
+    Serializes emission into a shared sink so a parallel batch can share one safely.
+
+    Only emission is serialized — the analysis itself still runs concurrently. The order
+    of records within the shared sink is therefore completion order and is deliberately
+    not part of the contract: artifacts are looked up by id, never by position.
+    """
+
+    def __init__(self, inner: ArtifactSink) -> None:
+        self._inner = inner
+        self._lock = threading.Lock()
+
+    def emit_table(self, name: str, frame: pd.DataFrame):
+        with self._lock:
+            return self._inner.emit_table(name, frame)
+
+    def emit_json(self, name: str, obj):
+        with self._lock:
+            return self._inner.emit_json(name, obj)
+
+    def emit_chart(self, name: str, spec: dict):
+        with self._lock:
+            return self._inner.emit_chart(name, spec)
 
 
 class ExperimentExecutor:
@@ -283,17 +364,45 @@ class ExperimentExecutor:
         self, request: ExperimentRequest, manifest: DatasetManifest, frame: pd.DataFrame | None,
         idgen: DeterministicIds, state: InvestigationState,
     ) -> ExperimentExecutionRecord:
-        sink = self._artifact_sink if self._artifact_sink is not None else InMemoryArtifactSink()
+        """Run one experiment and fold it into state (the sequential path)."""
+        record = self.run(request, manifest, frame)
+        self.record(record, request, idgen, state)
+        return record
+
+    def run(
+        self, request: ExperimentRequest, manifest: DatasetManifest, frame: pd.DataFrame | None,
+        *, sink: ArtifactSink | None = None,
+    ) -> ExperimentExecutionRecord:
+        """
+        Run the deterministic tool. **Pure with respect to investigation state**, so a batch
+        of experiments can run concurrently; ``sink`` lets each one collect artifacts into its
+        own buffer rather than racing on the shared one.
+
+        Tools are read-only over ``frame``; they must not mutate it, or concurrent execution
+        would not be safe.
+        """
+        target = sink if sink is not None else self._artifact_sink
         ctx = ExperimentContext(
             manifest=manifest, frame=frame, raw_params=dict(request.parameters),
-            artifact_sink=sink, request_id=request.id)
-        record = self._registry.get(request.tool_name).run(ctx)
+            artifact_sink=target if target is not None else InMemoryArtifactSink(),
+            request_id=request.id)
+        return self._registry.get(request.tool_name).run(ctx)
+
+    def record(
+        self, record: ExperimentExecutionRecord, request: ExperimentRequest,
+        idgen: DeterministicIds, state: InvestigationState,
+    ) -> None:
+        """Fold one finished experiment into state. Always called in selection order, so
+        result ids stay a pure function of state regardless of completion order."""
         result = record.to_domain_result()
         # deterministic ids for the persisted result/observations
         result.id = idgen.make("res", len(state.completed_experiments) + len(state.failed_experiments))
         request.status = record.status
         state.record_experiment_result(result)
-        return record
+
+    @property
+    def shared_sink(self) -> ArtifactSink | None:
+        return self._artifact_sink
 
 
 # ---------------------------------------------------------------------------
@@ -435,11 +544,12 @@ class Critic:
         if is_edgar_manifest(manifest):
             tools = EDGAR_INTENT_TOOLS.get(interpretation.intent, []) + tools
         available = [t for t in tools if t not in executed_tools and self._registry_ok(t)]
-        tracker.record_model_call()
-        proposal = self._policy.critique(
-            strongest_claim={"id": h.id, "status": h.status.value, "confidence": h.confidence,
-                             "already_critiqued": already},
-            available_tools=available)
+        proposal = _invoke_policy(
+            tracker, self._policy,
+            lambda: self._policy.critique(
+                strongest_claim={"id": h.id, "status": h.status.value, "confidence": h.confidence,
+                                 "already_critiqued": already},
+                available_tools=available))
         if not proposal.should_challenge or not proposal.target_hypothesis_id or not proposal.falsification_tool:
             return
         state.add_critique(Critique(

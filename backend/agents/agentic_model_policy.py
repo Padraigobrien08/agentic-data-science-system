@@ -21,6 +21,7 @@ from agentic.agent.policy import AgentPolicy, ModelAgentPolicy, Responder
 from backend.config.settings import Settings, get_settings
 from backend.llm.exceptions import ChatCompletionProviderError, LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
+from backend.llm.pricing import ModelPrice, estimate_cost_usd, parse_model_prices
 from backend.llm.protocol import ChatCompletionProvider
 from backend.llm.types import ChatCompletionRequest
 
@@ -32,18 +33,28 @@ def _agentic_model(settings: Settings) -> str:
     return settings.agent_completion_model or "gpt-5.4-mini"
 
 
-def build_provider_responder(provider: ChatCompletionProvider, *, model: str) -> Responder:
-    """Adapt a :class:`ChatCompletionProvider` to the loop's ``Responder`` contract.
+class CostTrackingResponder:
+    """
+    Adapt a :class:`ChatCompletionProvider` to the loop's ``Responder`` contract while
+    accumulating the USD cost of each completion.
 
-    The returned callable takes ``(system_prompt, user_prompt)`` and returns the raw
-    assistant text (expected to be JSON — the policy prompts request JSON explicitly).
-    ``ModelAgentPolicy`` validates the string and fails safely on malformed output, so
-    provider errors are surfaced as an empty string that fails typed validation there.
+    Cost is held here (rather than inside the policy) because usage is only visible at
+    the provider boundary. The loop drains it after every policy decision via
+    :class:`~agentic.agent.policy.CostAwarePolicy`, so ``LoopBudget.max_cost_usd`` binds
+    on real token usage. Unpriced models accrue ``0.0`` — see :mod:`backend.llm.pricing`.
     """
 
-    def respond(system_prompt: str, user_prompt: str) -> str:
+    def __init__(
+        self, provider: ChatCompletionProvider, *, model: str, prices: dict[str, ModelPrice] | None = None,
+    ) -> None:
+        self._provider = provider
+        self._model = model
+        self._prices = prices or {}
+        self._pending_cost_usd = 0.0
+
+    def __call__(self, system_prompt: str, user_prompt: str) -> str:
         request = ChatCompletionRequest(
-            model=model,
+            model=self._model,
             messages=[
                 {"role": "system", "content": system_prompt},
                 {"role": "user", "content": user_prompt},
@@ -52,15 +63,44 @@ def build_provider_responder(provider: ChatCompletionProvider, *, model: str) ->
             response_format={"type": "json_object"},
         )
         try:
-            result = provider.complete(request)
+            result = self._provider.complete(request)
         except ChatCompletionProviderError as exc:
             # Boundary: a provider failure becomes malformed policy output, which the
             # loop treats as a safe termination rather than an unhandled crash.
             log.warning("agentic.policy.provider_error", error=str(exc))
             return ""
+        self._pending_cost_usd += estimate_cost_usd(
+            self._prices,
+            model=result.model or self._model,
+            prompt_tokens=result.prompt_tokens,
+            completion_tokens=result.completion_tokens,
+        )
         return result.assistant_text or ""
 
-    return respond
+    def drain_cost_usd(self) -> float:
+        """Cost accrued since the last drain (the loop charges it to the run budget)."""
+        pending, self._pending_cost_usd = self._pending_cost_usd, 0.0
+        return pending
+
+
+class CostAwareModelPolicy(ModelAgentPolicy):
+    """:class:`ModelAgentPolicy` that reports spend, satisfying ``CostAwarePolicy``."""
+
+    def __init__(self, responder: CostTrackingResponder) -> None:
+        super().__init__(responder)
+        self._cost_source = responder
+
+    def drain_cost_usd(self) -> float:
+        return self._cost_source.drain_cost_usd()
+
+
+def build_provider_responder(provider: ChatCompletionProvider, *, model: str) -> Responder:
+    """Adapt a :class:`ChatCompletionProvider` to the loop's ``Responder`` contract.
+
+    Retained as the plain (cost-unaware) adapter; :class:`CostTrackingResponder` is the
+    one wired into :func:`build_agent_policy`.
+    """
+    return CostTrackingResponder(provider, model=model)
 
 
 def build_agent_policy(settings: Settings | None = None) -> AgentPolicy:
@@ -75,5 +115,7 @@ def build_agent_policy(settings: Settings | None = None) -> AgentPolicy:
     except LLMProviderConfigurationError:
         log.info("agentic.policy.fixture", reason="llm_provider_unavailable")
         return FixtureAgentPolicy()
-    log.info("agentic.policy.model_backed", model=_agentic_model(s))
-    return ModelAgentPolicy(build_provider_responder(provider, model=_agentic_model(s)))
+    model = _agentic_model(s)
+    prices = parse_model_prices(s.llm_model_prices)
+    log.info("agentic.policy.model_backed", model=model, priced=model in prices)
+    return CostAwareModelPolicy(CostTrackingResponder(provider, model=model, prices=prices))

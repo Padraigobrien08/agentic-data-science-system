@@ -1,0 +1,41 @@
+# Prometheus scrape config for the local observability stack
+# (`docker compose -f docker-compose.yml -f docker-compose.observability.yml up`).
+#
+# Two scrape targets, because the two processes expose different things:
+#   * api:8000/metrics   — HTTP, pipeline, agent-loop, and DB-backed queue gauges.
+#                          Requires the ops bearer token (see credentials_file below).
+#   * worker:9100        — process-local worker counters/gauges (prometheus_client
+#                          http server; no auth, not routed through FastAPI).
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    stack: edgar-local
+
+rule_files:
+  - /etc/prometheus/rules/*.rules.yml
+
+scrape_configs:
+  - job_name: edgar-api
+    metrics_path: /metrics
+    # GET /metrics is behind OpsTokenDep. The token is written to this file by the
+    # `ops-token` init service from EDGAR_BACKEND_OPS_API_TOKEN, so the secret stays
+    # in .env and never lands in this committed config.
+    authorization:
+      type: Bearer
+      credentials_file: /etc/prometheus/secrets/ops_token
+    static_configs:
+      - targets: ["api:8000"]
+        labels:
+          service: edgar-api
+
+  - job_name: edgar-worker
+    static_configs:
+      - targets: ["worker:9100"]
+        labels:
+          service: edgar-worker
+
+  - job_name: prometheus
+    static_configs:
+      - targets: ["localhost:9090"]

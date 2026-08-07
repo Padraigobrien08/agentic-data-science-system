@@ -2,12 +2,14 @@
 
 from __future__ import annotations
 
+import json
 import os
 from functools import lru_cache
 from pathlib import Path
+from typing import Annotated
 
 from pydantic import Field, SecretStr, field_validator, model_validator
-from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic_settings import BaseSettings, NoDecode, SettingsConfigDict
 from sqlalchemy.engine.url import make_url
 
 _REPO_ROOT = Path(__file__).resolve().parents[2]
@@ -68,7 +70,7 @@ class Settings(BaseSettings):
     # HTTP security (CORS + response headers). The documented architecture proxies browser
     # traffic through the Next.js server, so CORS is closed by default; set origins only when
     # a browser calls this API directly. See ``backend.api.security_headers``.
-    cors_allow_origins: list[str] = Field(
+    cors_allow_origins: Annotated[list[str], NoDecode] = Field(
         default_factory=list,
         description=(
             "Exact browser origins allowed for cross-origin requests (comma-separated or JSON list). "
@@ -262,6 +264,48 @@ class Settings(BaseSettings):
         description="HTTP timeout for OpenAI chat completion requests",
     )
 
+    # Agentic investigation loop budgets. These bound one investigation; the loop's
+    # deterministic safety caps (max iterations, consecutive failures) sit above them.
+    agent_max_parallel_experiments: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Experiments the loop may run concurrently within one iteration. 1 (default) is "
+            "strictly sequential. Higher values lower latency and selector model calls per "
+            "experiment, at the cost of choosing later experiments in a batch without seeing "
+            "the earlier ones' results (EDGAR_BACKEND_AGENT_MAX_PARALLEL_EXPERIMENTS)."
+        ),
+    )
+    agent_max_experiments: int = Field(
+        default=8, ge=1,
+        description="Maximum experiments per investigation (EDGAR_BACKEND_AGENT_MAX_EXPERIMENTS).",
+    )
+    agent_max_elapsed_seconds: float = Field(
+        default=120.0, gt=0,
+        description=(
+            "Wall-clock budget for one investigation; the loop terminates with "
+            "budget_exhausted when exceeded (EDGAR_BACKEND_AGENT_MAX_ELAPSED_SECONDS)."
+        ),
+    )
+    agent_max_cost_usd: float = Field(
+        default=1.0, gt=0,
+        description=(
+            "Estimated model spend budget for one investigation. Only binds when the models "
+            "in use are priced via ``llm_model_prices`` (EDGAR_BACKEND_AGENT_MAX_COST_USD)."
+        ),
+    )
+
+    llm_model_prices: dict[str, dict[str, float]] = Field(
+        default_factory=dict,
+        description=(
+            "USD per one million tokens per model id, as JSON: "
+            '{"gpt-5.4-mini": {"input_per_1m": 0.15, "output_per_1m": 0.60}}. '
+            "Drives the agentic loop's cost budget and the agent cost metric. "
+            "Unpriced models contribute 0.0, so cost budgets never bind on invented numbers "
+            "(EDGAR_BACKEND_LLM_MODEL_PRICES)."
+        ),
+    )
+
     # Intent / planning agents (``backend.agents``) — prompts under versioned files on disk
     agent_completion_model: str = Field(
         default="gpt-5.4-mini",
@@ -415,11 +459,26 @@ class Settings(BaseSettings):
     @field_validator("cors_allow_origins", mode="before")
     @classmethod
     def _split_cors_origins(cls, v: object) -> object:
-        """Accept a comma-separated string (operator-friendly) as well as a JSON list."""
+        """Accept a comma-separated string (operator-friendly) as well as a JSON list.
+
+        The field is annotated ``NoDecode`` so this runs on the raw environment string.
+        Without that, pydantic-settings JSON-decodes complex fields *before* validators, so
+        ``EDGAR_BACKEND_CORS_ALLOW_ORIGINS=https://a.example`` raised a startup error and the
+        documented comma-separated form only ever worked for in-process construction. Because
+        decoding is off, JSON is parsed here too.
+        """
         if isinstance(v, str):
             stripped = v.strip()
-            if not stripped or stripped.startswith("["):
-                return v  # empty -> default; JSON list -> let pydantic parse it
+            # An empty value is how an operator writes "no CORS", and is also the default.
+            if not stripped:
+                return []
+            if stripped.startswith("["):
+                try:
+                    return json.loads(stripped)
+                except json.JSONDecodeError as exc:
+                    raise ValueError(
+                        f"cors_allow_origins looks like JSON but could not be parsed: {exc}"
+                    ) from exc
             return [item.strip() for item in stripped.split(",") if item.strip()]
         return v
 

@@ -67,6 +67,33 @@ synthesize conclusion (only after termination); record TerminationDecision; chec
   signal → hypotheses left `unresolved` and disposition
   `insufficient_evidence` (`test_insufficient_data_unresolved_conclusion`).
 
+## Bounded parallel experiments
+
+`LoopBudget.max_parallel_experiments` (default **1**) lets one iteration run several
+selected experiments concurrently. At the default the loop is strictly sequential and takes
+the original code path — no thread pool, no shared-sink wrapper — so existing runs are
+unchanged.
+
+**Selection.** The *lead* experiment is chosen by the policy exactly as before: one selector
+model call per iteration. Remaining slots are filled deterministically from the planner's
+ranked candidates. That keeps `AgentPolicy` a four-method contract, keeps model calls at one
+per iteration (so a wider batch *lowers* cost per experiment), and keeps the batch
+reproducible. The trade-off — followers are chosen without seeing the lead's result — is
+exactly why the batch is bounded.
+
+**The ordering guarantee.** Results are folded into state strictly in *selection* order, never
+completion order, so result ids, evidence, and hypothesis updates stay a pure function of
+state regardless of how the batch interleaved. `test_results_fold_in_selection_order_not_completion_order`
+delays experiments so the batch finishes reversed and asserts state order is unaffected;
+`test_resume_matches_an_uninterrupted_batched_run` confirms resume determinism still holds.
+
+Batch width is clamped by whatever budget remains, so a batch never overshoots
+`max_experiments` or a caller's `max_new_experiments` window. Deterministic tools are
+read-only over the frame; the shared artifact sink is serialized behind `LockedArtifactSink`,
+so only emission is synchronized while analysis runs concurrently. A tool that *raises* (an
+internal error, as opposed to reporting `status=failed`) propagates identically batched or
+not — the pool never swallows it.
+
 ## Determinism, persistence, resume
 
 - **Deterministic ids** (`DeterministicIds`, seeded per investigation) make ids a
@@ -88,6 +115,46 @@ synthesize conclusion (only after termination); record TerminationDecision; chec
 - **Malformed model output** fails safely: policy validation raises, the loop
   terminates with reason `error`, still synthesizes an (insufficient) conclusion,
   and sets status `failed` (`test_malformed_model_response_fails_safely`).
+
+## Observability
+
+The loop emits a typed event at every decision boundary through an injected
+`AgentObserver` (`agentic/agent/observer.py`). The default is a **no-op**, so
+observation is off unless an observer is supplied and `agentic/` keeps the
+zero-infrastructure-dependency purity required by `domain-boundaries.md` — nothing
+in the package imports structlog, OpenTelemetry, or prometheus_client.
+
+| Event | Emitted when |
+|---|---|
+| `InvestigationStarted` / `InvestigationEnded` | once per `start`/`resume` call; the end event also covers partial (resumable) and failed exits, and carries elapsed time, cost, and model-call count |
+| `IterationStarted` / `IterationEnded` | per loop iteration, with duration |
+| `ComponentCompleted` | every one of the ten components, with duration and the exception type when it raised |
+| `ExperimentObserved` | per executed experiment, with tool, status, duration, evidence produced |
+| `HypothesisTransitioned` | whenever a hypothesis actually changes status |
+| `ModelCallObserved` | per model-backed component call, with attributed cost |
+| `TerminationObserved` | on the typed termination decision |
+
+Components stay observation-free: the loop diffs hypothesis statuses and the budget
+tracker around each call, so all instrumentation lives in `loop.py`. `LoopComponent`
+is an enum rather than a free string to keep downstream metric label cardinality bounded.
+
+`RecordingObserver` collects events in order for tests and local inspection.
+
+## Time and cost accounting
+
+`InvestigationLoop` takes an injected `Clock` (`agentic/agent/clock.py`) so elapsed-time
+behavior is deterministic under test (`ManualClock`). Elapsed time is refreshed at the
+top of each iteration, **before** the termination pre-check, so `LoopBudget.max_elapsed_seconds`
+and `SafetyLimits.absolute_max_elapsed_seconds` are evaluated against real wall time.
+
+Cost is attributed through the optional `CostAwarePolicy` surface: a policy that knows its
+token usage exposes `drain_cost_usd()`, and `_invoke_policy` charges it to the run after each
+call, whether or not the call raised. `AgentPolicy` stays a four-method contract — policies
+without a cost surface contribute zero and are unaffected.
+
+> Before this wiring, `BudgetTracker.elapsed_seconds` was never assigned and no cost was ever
+> accrued, so `max_elapsed_seconds`, `absolute_max_elapsed_seconds` and `max_cost_usd` could
+> never fire. `tests/agentic/test_investigation_observability.py` covers each of them.
 
 ## The LLM/deterministic split
 

@@ -20,6 +20,12 @@ _PREVIEW_MIME_EXACT: frozenset[str] = frozenset(
     }
 )
 
+#: RFC 6839 structured syntax suffix: ``application/vnd.chart+json`` and friends are JSON,
+#: so they are just as previewable as ``application/json``. Without this, a vendor JSON type
+#: (the agentic loop emits chart specs as ``application/vnd.chart+json``) is rejected with a
+#: 415 even though its bytes are plain JSON text.
+_PREVIEW_MIME_SUFFIXES: tuple[str, ...] = ("+json",)
+
 _DISPOSITION_SAFE = re.compile(r"[^a-zA-Z0-9._-]+")
 
 
@@ -27,14 +33,16 @@ def artifact_previewable(row: Artifact) -> bool:
     """
     True if the preview endpoint should accept this artifact (UTF-8 text-oriented).
 
-    Rules are documented in ``docs/artifact-delivery.md`` (``text/*``, selected JSON types, or
-    kind fallback when ``mime_type`` is empty).
+    Rules are documented in ``docs/artifact-delivery.md`` (``text/*``, selected JSON types,
+    any ``+json`` structured-suffix type, or kind fallback when ``mime_type`` is empty).
     """
     mt = (row.mime_type or "").strip().lower()
     if mt:
         if mt in _PREVIEW_MIME_EXACT:
             return True
         if mt.startswith(_PREVIEW_MIME_PREFIXES):
+            return True
+        if mt.endswith(_PREVIEW_MIME_SUFFIXES):
             return True
         return False
     # No MIME: fall back to kind hints from ingest layer.

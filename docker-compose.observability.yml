@@ -1,0 +1,99 @@
+# Observability overlay: gives the emitted metrics and traces somewhere to land.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+#
+# Adds Prometheus (scrape + alert rules), Grafana (provisioned datasources + the
+# committed agent-loop dashboard), and Jaeger (OTLP trace backend), and points the
+# api/worker OTLP exporter at Jaeger.
+#
+# URLs (all bound to loopback — see the note below):
+#   Grafana     http://127.0.0.1:3001   → EDGAR / "Agentic Investigation Loop"
+#   Prometheus  http://127.0.0.1:9090   → Status ▸ Rules for the alert rules
+#   Jaeger      http://127.0.0.1:16686  → service edgar-backend, span agent.investigation
+#
+# SECURITY: this overlay is for local development and demos. Every port is published on
+# 127.0.0.1 only, and Grafana runs with anonymous read access so the stack is useful
+# immediately. Do not apply this overlay to a shared or public host without putting the
+# UIs behind auth and removing the loopback-only assumption.
+
+name: edgar
+
+services:
+  # The api/worker containers already emit OTLP; this just tells them where to send it.
+  # The exporter is constructed with an explicit endpoint, so the full /v1/traces path
+  # is required here (it is not appended for us).
+  api:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      OTEL_SERVICE_NAME: edgar-backend
+
+  worker:
+    environment:
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://jaeger:4318/v1/traces
+      OTEL_SERVICE_NAME: edgar-worker
+
+  # GET /metrics is behind the ops bearer token. Rather than baking the secret into the
+  # committed prometheus.yml, write it to a file Prometheus reads via credentials_file.
+  ops-token:
+    image: alpine:3.20
+    restart: "no"
+    environment:
+      EDGAR_BACKEND_OPS_API_TOKEN: ${EDGAR_BACKEND_OPS_API_TOKEN:?set in .env}
+    volumes:
+      - prometheus_secrets:/secrets
+    command:
+      - sh
+      - -c
+      - 'printf "%s" "$$EDGAR_BACKEND_OPS_API_TOKEN" > /secrets/ops_token && chmod 0400 /secrets/ops_token'
+
+  prometheus:
+    image: prom/prometheus:v2.55.1
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./ops/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+      - ./ops/prometheus/rules:/etc/prometheus/rules:ro
+      - prometheus_secrets:/etc/prometheus/secrets:ro
+      - prometheus_data:/prometheus
+    command:
+      - --config.file=/etc/prometheus/prometheus.yml
+      - --storage.tsdb.path=/prometheus
+      - --storage.tsdb.retention.time=15d
+      - --web.enable-lifecycle
+    depends_on:
+      ops-token:
+        condition: service_completed_successfully
+
+  grafana:
+    image: grafana/grafana:11.3.0
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:${GRAFANA_PORT:-3001}:3000"
+    environment:
+      # Local-only convenience: land on the dashboard without a login prompt.
+      GF_AUTH_ANONYMOUS_ENABLED: ${GRAFANA_ANONYMOUS:-true}
+      GF_AUTH_ANONYMOUS_ORG_ROLE: Viewer
+      GF_SECURITY_ADMIN_PASSWORD: ${GRAFANA_ADMIN_PASSWORD:-admin}
+      GF_USERS_DEFAULT_THEME: dark
+      GF_FEATURE_TOGGLES_ENABLE: traceToMetrics
+    volumes:
+      - ./ops/grafana/provisioning:/etc/grafana/provisioning:ro
+      - ./ops/grafana/dashboards:/var/lib/grafana/dashboards:ro
+      - grafana_data:/var/lib/grafana
+    depends_on:
+      - prometheus
+
+  jaeger:
+    image: jaegertracing/all-in-one:1.62.0
+    restart: unless-stopped
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "127.0.0.1:${JAEGER_UI_PORT:-16686}:16686" # UI
+      - "127.0.0.1:4318:4318" # OTLP/HTTP (also reachable in-network as jaeger:4318)
+
+volumes:
+  prometheus_data:
+  prometheus_secrets:
+  grafana_data:

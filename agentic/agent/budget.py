@@ -19,6 +19,17 @@ class LoopBudget(DomainModel):
     """Resource budget for one investigation run."""
 
     max_experiments: int = Field(default=8, ge=1)
+    max_parallel_experiments: int = Field(
+        default=1,
+        ge=1,
+        description=(
+            "Experiments the loop may run concurrently within one iteration. 1 (default) is "
+            "strictly sequential. Higher values trade some adaptivity — later experiments in a "
+            "batch are chosen without seeing the earlier ones' results — for latency and fewer "
+            "selector model calls. Results are always folded back in selection order, so the "
+            "resulting state is identical to running the batch sequentially."
+        ),
+    )
     max_model_calls: int = Field(default=40, ge=1)
     max_elapsed_seconds: float = Field(default=120.0, gt=0)
     max_cost_usd: float = Field(default=1.0, gt=0)
@@ -49,6 +60,12 @@ class BudgetTracker:
 
     def record_model_call(self) -> None:
         self.model_calls_used += 1
+
+    def record_model_cost(self, cost: float) -> None:
+        """Attribute spend to the run. Separate from the count so a model call that
+        raises is still counted while its (possibly zero) cost is attributed after."""
+        if cost > 0:
+            self.cost_used_usd += cost
 
     def record_experiment(self, tool_name: str, *, cost: float = 0.0, failed: bool = False) -> None:
         self.experiments_used += 1

@@ -28,6 +28,19 @@ Stable:
 - deterministic EDGAR pipeline
 - chat UI with persisted runs and artifacts
 - evaluation and regression framework
+- agentic investigation loop: observability, budgets, replay/diff, agency evaluation
+
+Known limits, stated plainly:
+
+- The agentic engine is **flag-gated and off by default**
+  (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the deterministic EDGAR chain remains the
+  default execution path.
+- The loop's reasoning is verified against a **deterministic fixture policy**, not a live
+  model. `suite_agency_v1` accepts any `AgentPolicy` precisely so a real model can be held
+  to the same bar — that measurement has not been run.
+- The hosted MCP endpoint has no rate limiting, and its handshake/tool-listing is
+  unauthenticated (tool *invocation* is not).
+- No CD pipeline, backup/restore runbook, or deployment target beyond single-host Compose.
 
 In progress:
 
@@ -66,22 +79,65 @@ Most AI-finance demos stop at “LLM says something plausible.” This repo is d
 - Render inline charts when the backend has safe, deterministic chart previews
 - Preserve runs, artifacts, traceability, and audit surfaces for later inspection
 
+## The agentic investigation loop
+
+Alongside the fixed EDGAR pipeline, the platform runs an **adaptive investigation loop**
+([`agentic/`](agentic/)) that behaves like an analyst rather than a script: it interprets a
+goal, proposes hypotheses, chooses experiments based on what it has learned so far, revises
+claims when the evidence contradicts them, and stops for an explicit, typed reason.
+
+The division of labor is the point: **the model plans and interprets; deterministic code
+computes.** No number in an answer is produced by a model.
+
+| | |
+|---|---|
+| **Observable** | Every decision emits an OpenTelemetry span (`agent.investigation → agent.iteration.N → agent.component.{name}`), a structured log, and Prometheus metrics — outcomes, per-component latency, hypothesis transitions, experiment mix, model spend. `docker compose -f docker-compose.yml -f docker-compose.observability.yml up` brings up Prometheus, Grafana (with a committed dashboard), and Jaeger. → [docs](docs/observability.md) |
+| **Bounded** | Explicit budgets on experiments, iterations, wall time, and estimated cost, with deterministic safety caps above them. |
+| **Reproducible** | Deterministic IDs and per-iteration checkpoints; a resumed run reaches the same state as an uninterrupted one. |
+| **Comparable** | [Replay](docs/agent/replay-and-diff.md) a persisted investigation under a different model, prompt, or budget and diff the outcome — did the analysis change, or only the route to it? |
+| **Measured** | [`suite_agency_v1`](docs/agent/agency-evaluation.md) scores *reasoning quality* — does it conclude when evidence supports it, revise when contradicted, decline when it cannot? Run `python -m agentic.evaluation`. |
+
+The loop is input-agnostic: it reasons over **roles declared by an adapter**, never over
+column names. The agency suite includes weather-station and service-latency datasets whose
+columns share nothing with the financial fixtures.
+
+## Integration surfaces
+
+Everything goes through the `/v1` API — there is no privileged back door, which is why the MCP
+server can be hosted safely.
+
+- **HTTP API** — committed OpenAPI contract at [`docs/api/openapi.json`](docs/api/openapi.json),
+  enforced in CI. → [contract docs](docs/api/README.md)
+- **Platform MCP server** — commission investigations and read hypotheses, evidence, and
+  artifacts as MCP tools and resources. Runs over stdio or hosted streamable-HTTP with
+  per-caller bearer auth. → [docs](docs/mcp-platform-server.md)
+- **EDGAR MCP server** — the deterministic computation tools. → [`edgar_project/mcp/`](edgar_project/mcp/)
+- **Extending it** — add an input adapter, an experiment tool, or a decision policy.
+  → [guide](docs/extending.md)
+
 ## Product architecture
 
 ```mermaid
 flowchart LR
     U["User in chat UI"] --> W["Next.js web app"]
-    W --> API["FastAPI API"]
-    API --> ORCH["Orchestration layer"]
-    ORCH --> MCP["MCP tools"]
-    MCP --> PIPE["Deterministic EDGAR pipeline"]
-    PIPE --> ART["Artifacts and run outputs"]
-    API --> DB["Postgres run state"]
+    AG["External agent"] --> PMCP["Platform MCP server"]
+    W --> API["FastAPI /v1"]
+    PMCP --> API
     API --> WORK["Background worker"]
+    API --> LOOP["Investigation loop"]
+    WORK --> LOOP
+    LOOP --> REG["Deterministic experiment registry"]
+    REG --> PIPE["EDGAR pipeline (src/)"]
+    LOOP --> OBS["Traces · metrics · logs"]
+    PIPE --> ART["Artifacts"]
     ART --> API
+    API --> DB["Postgres: runs, investigations, evidence"]
     DB --> API
     API --> W
 ```
+
+Both MCP servers and the web app are clients of the same `/v1` API, so authentication and
+owner scoping apply identically to all of them.
 
 ## Tech stack
 
@@ -89,8 +145,10 @@ flowchart LR
 - **Worker**: Python background execution loop with persisted jobs and leases
 - **Frontend**: Next.js App Router, React, Tailwind
 - **Pipeline**: deterministic Python EDGAR processing in [`src/`](src/)
-- **MCP**: shared tool surface in [`edgar_project/mcp/`](edgar_project/mcp/)
-- **Evaluation**: benchmark suites and regression checks in [`edgar_project/evaluation/`](edgar_project/evaluation/)
+- **Agent loop**: adaptive investigation engine in [`agentic/`](agentic/) (domain model, adapters, deterministic experiment registry)
+- **MCP**: EDGAR computation tools in [`edgar_project/mcp/`](edgar_project/mcp/); the platform itself in [`backend/mcp/`](backend/mcp/)
+- **Observability**: structlog + OpenTelemetry + Prometheus, with a committed Grafana dashboard and alert rules in [`ops/`](ops/)
+- **Evaluation**: output benchmarks in [`edgar_project/evaluation/`](edgar_project/evaluation/); agency scoring in [`agentic/evaluation/`](agentic/evaluation/)
 
 ## 5-minute quickstart
 

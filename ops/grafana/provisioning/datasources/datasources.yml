@@ -1,0 +1,19 @@
+# Datasources are provisioned from this file, so the stack comes up with working
+# dashboards and no manual clicking. Fixed UIDs — the committed dashboard references them.
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    uid: edgar-prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    jsonData:
+      timeInterval: 15s
+
+  - name: Jaeger
+    uid: edgar-jaeger
+    type: jaeger
+    access: proxy
+    url: http://jaeger:16686
