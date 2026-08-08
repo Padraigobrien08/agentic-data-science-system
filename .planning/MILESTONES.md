@@ -1,5 +1,28 @@
 # Project Milestones: Agentic Data Science System
 
+## v1.6 Measured Agency and Visible Observability (Shipped: 2026-08-08)
+
+**Intent:** Point the agency suite at a real model for the first time, harden it until it can
+rank competent policies rather than only catch broken ones, and make the agent-loop
+observability visible to someone who will never clone the repo.
+
+**Phases:** 31, 32, 34 · 8 plans · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.6-ROADMAP.md)
+
+**Sequencing:** an unplanned track, shipped ahead of v1.5. Numbered after it because v1.5 was
+already claimed by chat history across four planning documents.
+
+**Outcome:**
+
+- the suite discriminates — hard tier: rule engine 0%, `gpt-5.4-mini` 75%, stable over 5 trials
+- `suite_agency_v1` was found saturated and published as such rather than dressed as a pass
+- the documented observability stack could not render a dashboard at all; four defects fixed
+  and guarded, and the dashboard is now in the README
+
+**What's next:** Phase 33 (Multi-Metric Investigations) is scoped but unexecuted — an
+investigation can currently examine only one metric.
+
+---
+
 ## v1.5 Durable Chat History (Active)
 
 **Intent:** Fix the continuity break where clicking `New chat` makes the previous conversation disappear, and harden the visible history model so chat threads behave like durable threads rather than transient shell state.
