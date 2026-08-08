@@ -53,6 +53,13 @@ x-backend-env: &backend_env
   OPENAI_API_KEY: ${OPENAI_API_KEY:-}
   EDGAR_BACKEND_OPENAI_BASE_URL: ${EDGAR_BACKEND_OPENAI_BASE_URL:-}
   EDGAR_BACKEND_AGENT_COMPLETION_MODEL: ${EDGAR_BACKEND_AGENT_COMPLETION_MODEL:-gpt-5.4-mini}
+  EDGAR_BACKEND_LLM_MODEL_PRICES: ${EDGAR_BACKEND_LLM_MODEL_PRICES:-}
+  # Agentic investigation loop. Off by default; the deterministic EDGAR chain stays the
+  # default execution path. Without this forwarded, setting it in `.env` has no effect on the
+  # containers and agent runs silently execute on the EDGAR chain, emitting no edgar_agent_*
+  # metrics at all — which on the Grafana dashboard is indistinguishable from broken
+  # instrumentation.
+  EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED: ${EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED:-false}
   # Retention (payload compaction + artifact-blob pruning). The `retention` service applies these on a
   # schedule. The code default is 0/off (safe for dev, tests, and the CLI); the deployed stack enables
   # sensible windows here. Set any tier to 0 to disable it. See backend/maintenance/retention.py.

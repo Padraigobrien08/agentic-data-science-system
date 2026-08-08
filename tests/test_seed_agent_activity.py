@@ -152,6 +152,27 @@ def test_the_seeder_reaches_no_external_service() -> None:
     assert "127.0.0.1" in source, "the default base URL should be local"
 
 
+def test_the_script_runs_standalone_from_any_directory() -> None:
+    """
+    Regression: the suite loads this module by path from the repo root, so every test above
+    passed while `python3 scripts/seed-agent-activity.py` died on `ModuleNotFoundError: agentic`
+    — only `scripts/` is on sys.path under direct invocation. Testing the real entry point is
+    the only thing that catches it.
+    """
+    import subprocess
+
+    result = subprocess.run(
+        [sys.executable, str(_SCRIPT), "--help"],
+        capture_output=True,
+        text=True,
+        cwd="/",
+        timeout=60,
+    )
+
+    assert result.returncode == 0, f"standalone invocation failed:\n{result.stderr[-600:]}"
+    assert "--duration" in result.stdout
+
+
 def test_the_docstring_states_the_free_offline_guarantee_and_its_caveat() -> None:
     doc = seeder.__doc__ or ""
 

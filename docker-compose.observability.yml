@@ -44,7 +44,12 @@ services:
     command:
       - sh
       - -c
-      - 'printf "%s" "$$EDGAR_BACKEND_OPS_API_TOKEN" > /secrets/ops_token && chmod 0400 /secrets/ops_token'
+      # chown to 65534 because the prom/prometheus image runs as `nobody`, not root. Writing
+      # the file 0400 root-owned — the obvious thing — makes it unreadable to the only process
+      # that needs it, and the failure surfaces as a `down` target with "unable to read
+      # authorization credential", which on the dashboard is indistinguishable from the API
+      # simply not being instrumented.
+      - 'printf "%s" "$$EDGAR_BACKEND_OPS_API_TOKEN" > /secrets/ops_token && chown 65534:65534 /secrets/ops_token && chmod 0400 /secrets/ops_token'
 
   prometheus:
     image: prom/prometheus:v2.55.1

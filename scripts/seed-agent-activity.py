@@ -42,10 +42,16 @@ import sys
 import time
 from collections import Counter
 from dataclasses import dataclass, field
+from pathlib import Path
 
 import requests
 
-from agentic.evaluation.fixtures import build_fixture
+# Invoked as `python3 scripts/seed-agent-activity.py`, so only `scripts/` lands on sys.path.
+# Add the repo root rather than requiring the caller to remember PYTHONPATH=. — the failure
+# without it is a bare ModuleNotFoundError at import time, well before anything explains why.
+sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
+
+from agentic.evaluation.fixtures import build_fixture  # noqa: E402  (after sys.path bootstrap)
 
 DEFAULT_BASE_URL = "http://127.0.0.1:8000"
 
