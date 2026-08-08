@@ -96,6 +96,11 @@ breakdown shows more than `sufficient_evidence` and the per-tool failure panels 
 
 ## The agent loop dashboard
 
+![Agent loop dashboard](screenshots/agent-loop-dashboard.png)
+
+*A seeded local run — 210 investigations, `gpt-5.4-mini`, $0.80. The two empty panels are
+accurate: nothing errored.*
+
 Reads top to bottom, from outcome to cause:
 
 1. **Headline** — investigations, convergence rate, median iterations, estimated spend,

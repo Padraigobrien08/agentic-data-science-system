@@ -74,6 +74,24 @@ In progress:
 
 ![Run trace view](docs/screenshots/run-trace.png)
 
+### Agent loop observability
+
+![Agent loop dashboard](docs/screenshots/agent-loop-dashboard.png)
+
+A **seeded local run**: 210 investigations over 30 minutes against `gpt-5.4-mini`, $0.80 of
+tracked spend. Not production traffic — reproduce it yourself with
+[`scripts/seed-agent-activity.py`](scripts/seed-agent-activity.py), documented under
+[Populating the dashboard](docs/observability.md#populating-the-dashboard).
+
+The panels are built to answer whether the loop is actually *working*, and here they show it is:
+**median iterations 1.4** (it iterates rather than one-shotting), **seven distinct tools** with
+the mix shifting by goal (it adapts rather than running a fixed script), and hypothesis
+transitions including `→ rejected` (its own evidence overturns its claims). Decision latency
+separates the four model-backed components at ~2s from the six deterministic ones at ~5ms.
+
+`Component errors` and `Experiment failure rate by tool` read "No data" because nothing failed
+across those 210 runs. Left as-is rather than manufactured.
+
 ## Why this repo matters
 
 Most AI-finance demos stop at “LLM says something plausible.” This repo is different:
