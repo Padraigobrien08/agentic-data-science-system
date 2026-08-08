@@ -103,7 +103,7 @@ def test_the_hard_tier_spans_more_than_one_property() -> None:
     Breadth, so the tier cannot be cleared by one narrow fix.
 
     The plan for this phase asked for coverage across three *policy methods*. That turned out
-    not to be fairly constructible — see the 28-02 summary: `expected_information_gain` is a
+    not to be fairly constructible — see the 32-02 summary: `expected_information_gain` is a
     pure function of a tool's position in the intent list, so a `select_experiment`
     discriminator would test disagreement with the planner's priority rather than reasoning;
     and a `generate_hypotheses` one is structurally unwinnable, because the planner

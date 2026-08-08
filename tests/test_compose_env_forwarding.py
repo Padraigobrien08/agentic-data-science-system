@@ -4,7 +4,7 @@ Settings documented in `.env.example` must actually reach the containers.
 A setting that `.env.example` tells an operator to set, but `docker-compose.yml` never forwards,
 fails in the worst possible way: silently. The operator sets it, the container never sees it,
 the code default applies, and nothing anywhere says so. Commit d350f04 fixed exactly this for
-`EDGAR_BACKEND_ALLOW_GUEST_DEMO`; phase 30 hit it again with
+`EDGAR_BACKEND_ALLOW_GUEST_DEMO`; phase 34 hit it again with
 `EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`, where the consequence was agent runs executing on the
 wrong engine and a Grafana dashboard that looked like broken instrumentation.
 
@@ -28,7 +28,7 @@ _ENV_EXAMPLE = _ROOT / ".env.example"
 #: Several are security-relevant — CORS origins, the auth rate limiter, the CSP header, and the
 #: SQLite guard — where "operator sets it and it has no effect" means a control they believe is
 #: configured is running on its code default. Shrinking this list is worthwhile work; it is not
-#: phase 30's work, and it is tracked here rather than nowhere.
+#: phase 34's work, and it is tracked here rather than nowhere.
 KNOWN_UNFORWARDED: frozenset[str] = frozenset(
     {
         # agent tuning
@@ -109,7 +109,7 @@ def test_the_debt_list_does_not_grow_stale() -> None:
 
 def test_the_settings_this_stack_actually_needs_are_forwarded() -> None:
     """
-    The specific ones phase 30 depends on, named so a regression is diagnosed rather than
+    The specific ones phase 34 depends on, named so a regression is diagnosed rather than
     puzzled over.
 
     Without the engine flag, agent runs execute on the deterministic EDGAR chain and emit no
