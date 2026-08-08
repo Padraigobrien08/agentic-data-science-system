@@ -18,7 +18,20 @@ from agentic.domain.common import DomainModel
 class LoopBudget(DomainModel):
     """Resource budget for one investigation run."""
 
-    max_experiments: int = Field(default=8, ge=1)
+    max_experiments: int = Field(
+        default=8,
+        ge=1,
+        description=(
+            "Experiments the whole investigation may run. This scales with the number of "
+            "hypotheses, not just the goal's difficulty: each claim draws its own candidates, "
+            "parameterised to its own metric. Measured against the deterministic policy, one "
+            "claim costs 2, two cost 3, three cost 7, and four reach this cap and terminate "
+            "`budget_exhausted`. Left at 8 so a realistic multi-part question (two or three "
+            "clauses) completes by default while a runaway one stops with a typed reason "
+            "rather than silently. Raise it if you routinely ask four-part questions — it "
+            "raises worst-case cost and latency proportionally."
+        ),
+    )
     max_parallel_experiments: int = Field(
         default=1,
         ge=1,

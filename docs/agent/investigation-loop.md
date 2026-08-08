@@ -67,6 +67,29 @@ synthesize conclusion (only after termination); record TerminationDecision; chec
   signal → hypotheses left `unresolved` and disposition
   `insufficient_evidence` (`test_insufficient_data_unresolved_conclusion`).
 
+## Multi-claim investigations
+
+A goal with two parts — "is growth slowing **and** is margin deteriorating?" — produces two
+hypotheses, and each is investigated on its own metric.
+
+- **Candidates are drawn per open hypothesis**, in hypothesis order then tool priority. Each
+  experiment's parameters come from the metric of the claim it targets
+  (`Hypothesis.metric_refs`), falling back to the interpretation's hint and then the manifest's
+  first metric.
+- **Deduplication is keyed on `(tool, metric)`.** One tool against two different columns answers
+  two different questions; the same tool against the same column twice is redundant. This is why
+  `InvestigationState.executed_requests` exists: a result records only a tool name, so the
+  request is the sole record of which claim an experiment addressed.
+- **Sufficiency waits for every claim** — see
+  [termination policy](termination-policy.md). Stopping at the first supported claim strands
+  the rest at `proposed`.
+- **A split outcome is `mixed`**, naming both the supported and the not-supported claims, with
+  confidence averaged across all of them rather than across the winners only.
+
+Ordering is a pure function of state — never set or dict iteration order — so experiment ids,
+batching, replay and diff stay deterministic. With a single hypothesis the candidate list is
+identical to what it was before multi-claim support existed.
+
 ## Bounded parallel experiments
 
 `LoopBudget.max_parallel_experiments` (default **1**) lets one iteration run several

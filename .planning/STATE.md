@@ -4,7 +4,7 @@ milestone: v1.5
 milestone_name: Durable Chat History
 status: Ready to plan
 stopped_at: v1.5 defined from live product testing
-last_updated: "2026-04-26T00:10:00.000Z"
+last_updated: "2026-08-08T19:00:00.000Z"
 progress:
   total_phases: 4
   completed_phases: 0
@@ -28,6 +28,17 @@ Plan: —
 Milestone: v1.5 Durable Chat History
 Status: Ready to plan
 Last activity: 2026-04-26 — defined `v1.5 Durable Chat History` after live testing showed `New chat` hides the previous conversation
+
+## Recently Shipped Outside the Sequence
+
+**v1.6 Measured Agency and Visible Observability** — shipped 2026-08-08, phases 31/32/34.
+An unplanned track that ran ahead of v1.5 and did not touch chat history. Numbered after v1.5
+because that number was already claimed here. See
+[the archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.6-ROADMAP.md).
+
+Phase 33 (Multi-Metric Investigations) is scoped but unexecuted and belongs to no milestone yet.
+
+The v1.5 position below is unaffected — that work has still not started.
 
 ## Milestone Snapshot
 

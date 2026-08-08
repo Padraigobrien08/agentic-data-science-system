@@ -1,0 +1,81 @@
+# Agency benchmark — manual only.
+#
+# Deliberately has no `pull_request` or `push` trigger: this workflow spends money and
+# depends on an external provider, so it must never be reachable from a PR. The free half
+# of the measurement — the deterministic fixture policy against the committed per-property
+# floors in agentic/evaluation/baselines/fixture_floors.json — runs in ci.yml's pytest job
+# on every PR and needs nothing from here.
+#
+# Results are uploaded as artifacts; publishing them is a deliberate, reviewed step
+# (docs/agent/agency-scoreboard.md), not something a workflow does on its own.
+name: Agency benchmark
+
+on:
+  workflow_dispatch:
+    inputs:
+      model:
+        description: "Model id to measure (must be priced in EDGAR_BACKEND_LLM_MODEL_PRICES)"
+        required: true
+        default: "gpt-5.4-mini"
+      trials:
+        description: "Suite runs per policy. One trial is an anecdote, not a measurement."
+        required: true
+        default: "5"
+      max_cost_usd:
+        description: "Suite-level spend ceiling; remaining trials are skipped once crossed"
+        required: true
+        default: "2.00"
+
+permissions:
+  contents: read
+
+jobs:
+  bench:
+    name: suite_agency_v1
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-python@v7
+        with:
+          python-version: "3.12"
+          cache: pip
+          cache-dependency-path: |
+            requirements-dev.lock
+            requirements.lock
+
+      - name: Install dependencies
+        run: pip install --upgrade pip && pip install -r requirements-dev.lock
+
+      - name: Run the agency benchmark
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+          EDGAR_BACKEND_OPENAI_API_KEY: ${{ secrets.EDGAR_BACKEND_OPENAI_API_KEY }}
+          # Prices are configuration, not a hardcoded table — an unpriced model reports
+          # $0.00, which would leave --max-cost-usd summing a quantity that is always zero.
+          # The harness refuses the row rather than run unprotected.
+          EDGAR_BACKEND_LLM_MODEL_PRICES: ${{ secrets.EDGAR_BACKEND_LLM_MODEL_PRICES }}
+        run: >
+          python -m backend.dev.agency_bench
+          --policy fixture
+          --policy model
+          --model "${{ inputs.model }}"
+          --trials "${{ inputs.trials }}"
+          --max-cost-usd "${{ inputs.max_cost_usd }}"
+          --format both
+          --out scoreboard
+
+      - name: Summarise
+        if: always()
+        run: cat scoreboard.md >> "$GITHUB_STEP_SUMMARY" || true
+
+      - name: Upload results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: agency-scoreboard
+          path: |
+            scoreboard.md
+            scoreboard.json
+          if-no-files-found: ignore

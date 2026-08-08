@@ -81,7 +81,7 @@
           "unit": "short",
           "decimals": 0,
           "color": {
-            "mode": "text"
+            "mode": "fixed"
           },
           "mappings": [
             {
@@ -106,7 +106,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -146,7 +146,7 @@
           "unit": "percentunit",
           "decimals": 1,
           "color": {
-            "mode": "text"
+            "mode": "fixed"
           },
           "mappings": [
             {
@@ -171,7 +171,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -211,7 +211,7 @@
           "unit": "short",
           "decimals": 1,
           "color": {
-            "mode": "text"
+            "mode": "fixed"
           },
           "mappings": [
             {
@@ -236,7 +236,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"
@@ -276,7 +276,7 @@
           "unit": "currencyUSD",
           "decimals": 2,
           "color": {
-            "mode": "text"
+            "mode": "fixed"
           },
           "mappings": [
             {
@@ -301,7 +301,7 @@
           "values": false
         },
         "textMode": "auto",
-        "colorMode": "value",
+        "colorMode": "none",
         "graphMode": "none",
         "justifyMode": "auto",
         "orientation": "auto"

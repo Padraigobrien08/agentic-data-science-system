@@ -1,0 +1,90 @@
+{
+  "model": "gpt-5.4-mini",
+  "prompt_version": "1.0.1",
+  "requested_trials": 5,
+  "rows": [
+    {
+      "label": "fixture",
+      "mean_cost_usd": 0.0,
+      "mean_pass_rate": 1.0,
+      "p95_latency_seconds": 0.0048,
+      "property_means": {
+        "avoids_redundant_experiments": 1.0,
+        "calibrated_confidence": 1.0,
+        "challenges_before_concluding": 1.0,
+        "path_adapts_to_goal": 1.0,
+        "preserves_contradicting_evidence": 1.0,
+        "reaches_the_right_disposition": 1.0,
+        "respects_budget": 1.0,
+        "revises_under_contradiction": 1.0,
+        "terminates_for_the_right_reason": 1.0
+      },
+      "tier": "core",
+      "total_cost_usd": 0.0,
+      "trials": 5,
+      "truncated": false,
+      "unstable_cases": []
+    },
+    {
+      "label": "fixture",
+      "mean_cost_usd": 0.0,
+      "mean_pass_rate": 0.0,
+      "p95_latency_seconds": 0.0059,
+      "property_means": {
+        "avoids_redundant_experiments": 1.0,
+        "calibrated_confidence": 0.0,
+        "path_adapts_to_goal": 0.0,
+        "reaches_the_right_disposition": 0.0,
+        "revises_under_contradiction": 0.0,
+        "terminates_for_the_right_reason": 0.0
+      },
+      "tier": "hard",
+      "total_cost_usd": 0.0,
+      "trials": 5,
+      "truncated": false,
+      "unstable_cases": []
+    },
+    {
+      "label": "gpt-5.4-mini",
+      "mean_cost_usd": 0.052365,
+      "mean_pass_rate": 1.0,
+      "p95_latency_seconds": 7.7896,
+      "property_means": {
+        "avoids_redundant_experiments": 1.0,
+        "calibrated_confidence": 1.0,
+        "challenges_before_concluding": 1.0,
+        "path_adapts_to_goal": 1.0,
+        "preserves_contradicting_evidence": 1.0,
+        "reaches_the_right_disposition": 1.0,
+        "respects_budget": 1.0,
+        "revises_under_contradiction": 1.0,
+        "terminates_for_the_right_reason": 1.0
+      },
+      "tier": "core",
+      "total_cost_usd": 0.261823,
+      "trials": 5,
+      "truncated": false,
+      "unstable_cases": []
+    },
+    {
+      "label": "gpt-5.4-mini",
+      "mean_cost_usd": 0.022676,
+      "mean_pass_rate": 0.6,
+      "p95_latency_seconds": 8.715,
+      "property_means": {
+        "avoids_redundant_experiments": 0.84,
+        "calibrated_confidence": 0.0,
+        "path_adapts_to_goal": 1.0,
+        "reaches_the_right_disposition": 0.6667,
+        "revises_under_contradiction": 0.5,
+        "terminates_for_the_right_reason": 1.0
+      },
+      "tier": "hard",
+      "total_cost_usd": 0.11338,
+      "trials": 5,
+      "truncated": false,
+      "unstable_cases": []
+    }
+  ],
+  "suite_id": "suite_agency_v2"
+}

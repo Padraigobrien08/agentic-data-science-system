@@ -3,6 +3,7 @@
 ## Milestones
 
 - [ ] **v1.5 Durable Chat History** — active · preserve prior conversations when `New chat` creates a fresh thread
+- [x] **v1.6 Measured Agency and Visible Observability** — shipped 2026-08-08 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.6-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.6-REQUIREMENTS.md) · unplanned track, shipped ahead of v1.5
 - [x] **v1.0 Hardening** — shipped 2026-04-17 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.0-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.0-REQUIREMENTS.md)
 - [x] **v1.1 Live Validation and Scale** — shipped 2026-04-18 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.1-MILESTONE-AUDIT.md)
 - [x] **v1.2 Chat-First Analysis Experience** — shipped 2026-04-19 · [archive](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-ROADMAP.md) · [requirements](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-REQUIREMENTS.md) · [audit](/Users/padraigobrien/agentic_data_science_system/.planning/milestones/v1.2-MILESTONE-AUDIT.md)
@@ -167,3 +168,4 @@ Plans:
 | v1.3 Narrative Answers and Visual Evidence | 17-21 | 15 | Complete | 2026-04-25 |
 | v1.4 Conversation-First Information Architecture | 22-26 | 15 | Complete | 2026-04-25 |
 | v1.5 Durable Chat History | 27-30 | 0 | Active | — |
+| v1.6 Measured Agency and Visible Observability | 31, 32, 34 | 8 | Complete | 2026-08-08 |

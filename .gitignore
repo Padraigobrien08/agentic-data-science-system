@@ -21,6 +21,11 @@ coverage.xml
 
 # Local env (docker compose / secrets)
 .env
+# Backups and variants hold the same secrets as .env itself; ``.env`` alone does not
+# cover them, so a copy like ``.env.bak.<date>`` would otherwise show up as untracked
+# and be one ``git add -A`` away from being committed.
+.env.*
+!.env.example
 
 # Local API database (Alembic / FastAPI dev)
 data/backend.db

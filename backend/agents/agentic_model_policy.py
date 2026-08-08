@@ -17,7 +17,14 @@ from __future__ import annotations
 import structlog
 
 from agentic.agent.fixture_policy import FixtureAgentPolicy
-from agentic.agent.policy import AgentPolicy, ModelAgentPolicy, Responder
+from agentic.agent.policy import (
+    DEFAULT_POLICY_PROMPTS,
+    AgentPolicy,
+    ModelAgentPolicy,
+    PolicyPrompts,
+    Responder,
+)
+from backend.agents.prompt_registry import AGENTIC_POLICY_ROLES, load_registered_prompt
 from backend.config.settings import Settings, get_settings
 from backend.llm.exceptions import ChatCompletionProviderError, LLMProviderConfigurationError
 from backend.llm.factory import get_chat_completion_provider
@@ -83,15 +90,62 @@ class CostTrackingResponder:
         return pending
 
 
+#: Prompt file version loaded for every agentic policy role. Bump when a new prompt
+#: version ships; the agency benchmark records this so results stay comparable.
+#:
+#: 1.0.1 — spell out which fields accept ``null``. Under 1.0.0 the critic answered a
+#: decline with ``"message": null``, which fails the non-nullable ``str`` and terminated
+#: the whole investigation with ``reason=error``. Every converging case was lost that way.
+AGENTIC_PROMPT_VERSION = "1.0.1"
+
+
 class CostAwareModelPolicy(ModelAgentPolicy):
     """:class:`ModelAgentPolicy` that reports spend, satisfying ``CostAwarePolicy``."""
 
-    def __init__(self, responder: CostTrackingResponder) -> None:
-        super().__init__(responder)
+    def __init__(
+        self,
+        responder: CostTrackingResponder,
+        *,
+        prompts: PolicyPrompts | None = None,
+        prompt_identity: dict[str, str] | None = None,
+    ) -> None:
+        super().__init__(responder, prompts=prompts)
         self._cost_source = responder
+        # Read by the agency benchmark so a scoreboard row names the exact prompts that
+        # produced it. Empty when the policy fell back to the domain defaults.
+        self.prompt_identity: dict[str, str] = dict(prompt_identity or {})
 
     def drain_cost_usd(self) -> float:
         return self._cost_source.drain_cost_usd()
+
+
+def _load_policy_prompts(
+    version: str = AGENTIC_PROMPT_VERSION,
+) -> tuple[PolicyPrompts, dict[str, str]]:
+    """
+    Load the four registered policy prompts, plus a ``prompt_id -> version`` identity map.
+
+    Never raises. A missing or malformed prompt file degrades to
+    :data:`~agentic.agent.policy.DEFAULT_POLICY_PROMPTS` rather than making the loop
+    unrunnable — the same never-raise-on-misconfiguration contract
+    :func:`build_agent_policy` already honours for an absent LLM provider.
+    """
+    try:
+        loaded = [load_registered_prompt(role, version) for role in AGENTIC_POLICY_ROLES]
+    except (FileNotFoundError, ValueError, OSError) as exc:
+        log.warning("agentic.policy.prompts_unavailable", version=version, error=str(exc))
+        return DEFAULT_POLICY_PROMPTS, {}
+    # Positional by AGENTIC_POLICY_ROLES order, which is documented to match the four
+    # AgentPolicy methods; named explicitly here so a reordering cannot silently swap them.
+    interpreter, generator, selector, critic = loaded
+    prompts = PolicyPrompts(
+        interpret_goal=interpreter.template.system_body,
+        generate_hypotheses=generator.template.system_body,
+        select_experiment=selector.template.system_body,
+        critique=critic.template.system_body,
+    )
+    identity = {p.prompt_id: p.prompt_version for p in loaded}
+    return prompts, identity
 
 
 def build_provider_responder(provider: ChatCompletionProvider, *, model: str) -> Responder:
@@ -117,5 +171,16 @@ def build_agent_policy(settings: Settings | None = None) -> AgentPolicy:
         return FixtureAgentPolicy()
     model = _agentic_model(s)
     prices = parse_model_prices(s.llm_model_prices)
-    log.info("agentic.policy.model_backed", model=model, priced=model in prices)
-    return CostAwareModelPolicy(CostTrackingResponder(provider, model=model, prices=prices))
+    prompts, identity = _load_policy_prompts()
+    log.info(
+        "agentic.policy.model_backed",
+        model=model,
+        priced=model in prices,
+        prompts=sorted(identity),
+        prompt_version=AGENTIC_PROMPT_VERSION if identity else "defaults",
+    )
+    return CostAwareModelPolicy(
+        CostTrackingResponder(provider, model=model, prices=prices),
+        prompts=prompts,
+        prompt_identity=identity,
+    )

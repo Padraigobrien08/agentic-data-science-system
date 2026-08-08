@@ -28,16 +28,29 @@ Stable:
 - deterministic EDGAR pipeline
 - chat UI with persisted runs and artifacts
 - evaluation and regression framework
-- agentic investigation loop: observability, budgets, replay/diff, agency evaluation
+- agentic investigation loop: observability, budgets, replay/diff
+- agency evaluation that discriminates: on its hard tier the deterministic baseline scores 0%
+  and `gpt-5.4-mini` 60%, stable across five trials — see
+  [the scoreboard](docs/agent/agency-scoreboard.md)
+- multi-claim investigations: a two-part question raises a claim per clause, each measured on
+  its own metric, and a split outcome is reported as `mixed` rather than rounded to the
+  supported half
 
 Known limits, stated plainly:
 
 - The agentic engine is **flag-gated and off by default**
   (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the deterministic EDGAR chain remains the
   default execution path.
-- The loop's reasoning is verified against a **deterministic fixture policy**, not a live
-  model. `suite_agency_v1` accepts any `AgentPolicy` precisely so a real model can be held
-  to the same bar — that measurement has not been run.
+- The agency suite covers two of the loop's four model-backed decisions. A case for
+  `select_experiment` is not fairly constructible, because `expected_information_gain` is fixed
+  by the planner's tool ordering —
+  [documented here](docs/agent/agency-evaluation.md#what-the-tier-does-not-cover).
+- On the benchmark case where the honest answer is "this data cannot answer that",
+  `gpt-5.4-mini` substitutes the nearest available metric and reports confidence 0.95 —
+  behaviour indistinguishable from the rule-engine baseline.
+- Asked a two-clause question, `gpt-5.4-mini` misreads it rather than answering half: it read
+  "is growth slowing *and* is margin holding up?" as a ranking problem and concluded
+  insufficient evidence. The loop can now investigate both clauses; the model does not ask it to.
 - The hosted MCP endpoint has no rate limiting, and its handshake/tool-listing is
   unauthenticated (tool *invocation* is not).
 - No CD pipeline, backup/restore runbook, or deployment target beyond single-host Compose.
@@ -47,6 +60,8 @@ In progress:
 - expanded ticker coverage
 - hosted demo environment
 - extended benchmark suites
+- a hard-tier case for `select_experiment`, the one model-backed decision the suite still
+  cannot fairly probe
 
 ## Product Screens
 
@@ -61,6 +76,24 @@ In progress:
 ### Deep-dive trace and inspection surface
 
 ![Run trace view](docs/screenshots/run-trace.png)
+
+### Agent loop observability
+
+![Agent loop dashboard](docs/screenshots/agent-loop-dashboard.png)
+
+A **seeded local run**: 210 investigations over 30 minutes against `gpt-5.4-mini`, $0.80 of
+tracked spend. Not production traffic — reproduce it yourself with
+[`scripts/seed-agent-activity.py`](scripts/seed-agent-activity.py), documented under
+[Populating the dashboard](docs/observability.md#populating-the-dashboard).
+
+The panels are built to answer whether the loop is actually *working*, and here they show it is:
+**median iterations 1.4** (it iterates rather than one-shotting), **seven distinct tools** with
+the mix shifting by goal (it adapts rather than running a fixed script), and hypothesis
+transitions including `→ rejected` (its own evidence overturns its claims). Decision latency
+separates the four model-backed components at ~2s from the six deterministic ones at ~5ms.
+
+`Component errors` and `Experiment failure rate by tool` read "No data" because nothing failed
+across those 210 runs. Left as-is rather than manufactured.
 
 ## Why this repo matters
 
