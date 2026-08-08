@@ -295,7 +295,7 @@ class Settings(BaseSettings):
         ),
     )
 
-    llm_model_prices: dict[str, dict[str, float]] = Field(
+    llm_model_prices: Annotated[dict[str, dict[str, float]], NoDecode] = Field(
         default_factory=dict,
         description=(
             "USD per one million tokens per model id, as JSON: "
@@ -454,6 +454,29 @@ class Settings(BaseSettings):
             return ""
         if isinstance(v, str):
             return v.strip()
+        return v
+
+    @field_validator("llm_model_prices", mode="before")
+    @classmethod
+    def _parse_model_prices(cls, v: object) -> object:
+        """Accept an empty value as "no prices configured".
+
+        Same trap as ``cors_allow_origins`` below: pydantic-settings JSON-decodes complex
+        fields *before* validators, so an empty string raises ``SettingsError`` at import and
+        every process that loads settings dies — api, worker, and the migrate job — with an
+        error that names the field but not the cause. `NoDecode` moves parsing here.
+
+        An empty value is the natural way to write "no prices", and it is what
+        ``docker-compose.yml`` sends for an unset ``${EDGAR_BACKEND_LLM_MODEL_PRICES:-}``.
+        """
+        if isinstance(v, str):
+            stripped = v.strip()
+            if not stripped:
+                return {}
+            try:
+                return json.loads(stripped)
+            except json.JSONDecodeError as exc:
+                raise ValueError(f"llm_model_prices is not valid JSON: {exc}") from exc
         return v
 
     @field_validator("cors_allow_origins", mode="before")
