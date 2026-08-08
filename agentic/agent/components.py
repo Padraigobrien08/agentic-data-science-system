@@ -644,15 +644,30 @@ class TerminationPolicy:
             return True, TerminationReason.repeated_failure
         if tracker.budget_exhausted():
             return True, TerminationReason.budget_exhausted
+        # Sufficiency means the *investigation* is done, not that one claim landed. Firing on the
+        # first supported hypothesis leaves every other claim stranded at `proposed` — the same
+        # single-metric bug this phase removes, relocated one step later.
+        #
+        # The bar is "nothing is still `proposed`", not `is_terminal()`. Only `rejected` is
+        # terminal in the transition graph — a supported claim may still be weakened — so
+        # requiring terminality would mean requiring every claim to be *rejected*. A claim past
+        # `proposed` has had evidence brought to bear on it; one still at `proposed` has had
+        # nothing run against it at all.
+        if any(h.status is HypothesisStatus.proposed for h in state.hypotheses):
+            return False, None
+
         supported = [h for h in state.hypotheses
                      if h.status is HypothesisStatus.supported and h.confidence >= self.SUFFICIENT_CONFIDENCE]
         if supported:
-            h = supported[0]
-            crits = [c for c in state.critiques if c.target.id == h.id]
+            # Every supported claim must have been challenged, or have no challenge left to run.
+            # One claim surviving a falsification says nothing about the others.
             unused = [t for t in intent_tools if t not in executed_tools]
-            tested = any((c.suggested_action or "") in executed_tools for c in crits)
-            if tested or not unused:
-                return True, TerminationReason.sufficient_evidence
+            for h in supported:
+                crits = [c for c in state.critiques if c.target.id == h.id]
+                tested = any((c.suggested_action or "") in executed_tools for c in crits)
+                if not tested and unused:
+                    return False, None
+            return True, TerminationReason.sufficient_evidence
         return False, None
 
     def finalize_no_candidates(self, state: InvestigationState, ran_any: bool) -> TerminationReason:
@@ -684,7 +699,22 @@ class ConclusionSynthesizer:
                 h.set_status(HypothesisStatus.unresolved)
 
         contradicting = [e.id for e in state.evidence if e.direction is EvidenceDirection.refutes]
-        if supported:
+        opposed = rejected + weakened
+        if supported and opposed:
+            # Checked before the `supported` branch on purpose. Falling through to it would
+            # report a run that found one thing true and another false as simply "supported",
+            # dropping the refutation from the headline and averaging its confidence away.
+            disposition = ConclusionDisposition.mixed
+            conf = round(
+                sum(h.confidence for h in supported + opposed) / len(supported + opposed), 4
+            )
+            statement = (
+                "Supported: " + "; ".join(h.statement for h in supported)
+                + " | Not supported: " + "; ".join(h.statement for h in opposed)
+            )
+            hyp_ids = [h.id for h in supported + opposed]
+            key_ev = [e.id for e in state.evidence]
+        elif supported:
             disposition = ConclusionDisposition.supported
             conf = round(sum(h.confidence for h in supported) / len(supported), 4)
             statement = "; ".join(h.statement for h in supported)

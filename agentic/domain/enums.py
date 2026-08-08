@@ -267,6 +267,15 @@ class ConclusionDisposition(str, Enum):
 
     supported = "supported"
     refuted = "refuted"
+    mixed = "mixed"
+    """Some claims held and others did not — a multi-claim outcome.
+
+    Distinct from ``inconclusive``, which means the evidence on a claim was equivocal. Here the
+    evidence was clear and it pointed different ways for different claims. Reporting such a run
+    as ``supported`` would drop a refutation the user explicitly asked about, which is the
+    overclaiming the agency suite exists to punish.
+    """
+
     inconclusive = "inconclusive"
     insufficient_evidence = "insufficient_evidence"
 
