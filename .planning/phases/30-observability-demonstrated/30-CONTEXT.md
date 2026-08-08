@@ -128,17 +128,17 @@ looks empty.
 </code_context>
 
 <open_decision>
-## Open Decision — blocks 30-02
+## Resolved Decision — 2026-08-07
 
-How should a seeded dashboard be captioned in the README?
+**How a seeded dashboard is captioned: option A — explicit.**
 
-- **A.** Explicit: "a seeded local run — deterministic policy, no model calls, zero spend".
-  Accurate, and the honesty is itself a signal.
-- **B.** Neutral: "the agent-loop dashboard", with the seeding procedure documented in
-  `docs/observability.md` but not in the caption.
+The caption states that the data comes from a seeded local run using the deterministic policy,
+with no model calls and zero spend. A caption that quietly implies production traffic would
+undercut the "Known limits, stated plainly" register the rest of the README earns its
+credibility from, and an honest one still demonstrates everything the dashboard is there to
+demonstrate.
 
-The hard rule "stop and ask on README claims about capability" applies. 30-01 can proceed
-without this; 30-02 cannot.
+30-02 is unblocked.
 
 </open_decision>
 

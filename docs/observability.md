@@ -39,6 +39,61 @@ Committing that token is not an option, so a one-shot `ops-token` service writes
 The worker's `:9100` endpoint is a plain `prometheus_client` server with no auth — it is
 not routed through FastAPI.
 
+## Populating the dashboard
+
+A freshly started stack has no agent activity, so every panel is empty. Worse, a *little*
+activity is misleading: seven of the thirteen panels are timeseries over `rate()` at a 15s
+scrape, so a couple of runs render a technically correct picture that shows nothing.
+
+`scripts/seed-agent-activity.py` supplies a varied workload.
+
+```bash
+docker compose -f docker-compose.yml -f docker-compose.observability.yml up -d
+python3 scripts/seed-agent-activity.py --duration 1800
+```
+
+Two settings are required and easy to miss:
+
+- **`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED=true` on both the api and the worker.** With it off,
+  runs execute on the deterministic EDGAR chain and emit no `edgar_agent_*` metrics at all —
+  which looks exactly like broken instrumentation.
+- **`EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION=true`**, unless you pass `--email` / `--password`
+  for an account that already exists.
+
+Give it around 20 minutes before judging the timeseries panels. Before concluding that data is
+missing, check Prometheus **Status ▸ Targets** — a failed scrape is indistinguishable from
+absent instrumentation on the dashboard itself.
+
+### Free and offline
+
+The seeder costs nothing. `build_agent_policy` falls back to the deterministic
+`FixtureAgentPolicy` when no LLM provider is configured, and that policy still drives every
+`edgar_agent_*` metric — components, experiments, hypothesis transitions, terminations.
+Datasets are small in-memory CSVs rendered from the agency suite's fixtures, so nothing reaches
+SEC either.
+
+Two consequences worth expecting rather than debugging:
+
+- **`edgar_agent_cost_usd_total` stays at zero.** The fixture policy has no token usage. This is
+  the same "cost tracking is opt-in" behaviour described below, not a broken metric.
+- **On a machine that *does* have a provider configured**, the backend uses the model policy and
+  these runs cost money. That is your standing configuration, not something the script enables.
+
+### What a healthy dashboard looks like
+
+The workload spans intents on purpose, because the dashboard's most useful signals are the ones
+that reveal a loop *not* working. After seeding, the three checks described below should visibly
+pass:
+
+| Check | Failing looks like | Should show |
+|---|---|---|
+| Is the loop iterating? | median iterations pinned at 1 | a spread above 1 |
+| Is it adapting to the goal? | a flat single-tool profile | several tools, mix shifting with intent |
+| Is it challenged by its own evidence? | only `→ supported` transitions | refuted and weakened transitions too |
+
+The seed catalogue also includes goals whose data cannot support them, so the termination
+breakdown shows more than `sufficient_evidence` and the per-tool failure panels are exercised.
+
 ## The agent loop dashboard
 
 Reads top to bottom, from outcome to cause:
