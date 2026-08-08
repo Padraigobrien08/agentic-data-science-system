@@ -1,8 +1,8 @@
 {
-  "recorded_on": "2026-08-07",
+  "recorded_on": "2026-08-08",
   "suite_id": "suite_agency_v2",
   "policy": "FixtureAgentPolicy",
-  "note": "Two bounds in opposite directions, both checked offline and free on every PR. CORE floors catch the agent getting worse: the fixture policy is deterministic — a test asserts that — so there is no sampling noise to absorb and the floors sit exactly at the observed baseline. HARD is a ceiling, not a floor: it catches the suite getting easier. The hard tier exists because suite_agency_v1 was saturated, so a rule engine starting to pass hard cases means either that the deterministic policy genuinely improved or that the cases went soft. Those need opposite fixes, so a breach is a deliberate, reviewed re-baseline and never a silent bump.",
+  "note": "Two bounds in opposite directions, both checked offline and free on every PR. CORE floors catch the agent getting worse: the fixture policy is deterministic \u2014 a test asserts that \u2014 so there is no sampling noise to absorb and the floors sit exactly at the observed baseline. HARD is a ceiling, not a floor: it catches the suite getting easier. The hard tier exists because suite_agency_v1 was saturated, so a rule engine starting to pass hard cases means either that the deterministic policy genuinely improved or that the cases went soft. Those need opposite fixes, so a breach is a deliberate, reviewed re-baseline and never a silent bump.",
   "core": {
     "pass_rate": 1.0,
     "properties": {
@@ -18,7 +18,7 @@
     }
   },
   "hard": {
-    "cases": 4,
+    "cases": 5,
     "max_pass_rate": 0.0
   }
 }

@@ -30,24 +30,27 @@ Stable:
 - evaluation and regression framework
 - agentic investigation loop: observability, budgets, replay/diff
 - agency evaluation that discriminates: on its hard tier the deterministic baseline scores 0%
-  and `gpt-5.4-mini` 75%, stable across five trials — see
+  and `gpt-5.4-mini` 60%, stable across five trials — see
   [the scoreboard](docs/agent/agency-scoreboard.md)
+- multi-claim investigations: a two-part question raises a claim per clause, each measured on
+  its own metric, and a split outcome is reported as `mixed` rather than rounded to the
+  supported half
 
 Known limits, stated plainly:
 
 - The agentic engine is **flag-gated and off by default**
   (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the deterministic EDGAR chain remains the
   default execution path.
-- The agency suite measures `interpret_goal` well and the loop's other two model-backed
-  decisions barely at all. Cases for them are not fairly constructible against the current
-  loop, for reasons that are themselves limitations —
+- The agency suite covers two of the loop's four model-backed decisions. A case for
+  `select_experiment` is not fairly constructible, because `expected_information_gain` is fixed
+  by the planner's tool ordering —
   [documented here](docs/agent/agency-evaluation.md#what-the-tier-does-not-cover).
-- **An investigation can examine one metric.** Every tool is parameterised from a single
-  `interpretation.metric_hint`, so a multi-part question ("is growth slowing *and* is margin
-  deteriorating?") strands its second hypothesis at `proposed` however well the agent reasons.
-- On the one benchmark case where the honest answer is "this data cannot answer that",
+- On the benchmark case where the honest answer is "this data cannot answer that",
   `gpt-5.4-mini` substitutes the nearest available metric and reports confidence 0.95 —
   behaviour indistinguishable from the rule-engine baseline.
+- Asked a two-clause question, `gpt-5.4-mini` misreads it rather than answering half: it read
+  "is growth slowing *and* is margin holding up?" as a ranking problem and concluded
+  insufficient evidence. The loop can now investigate both clauses; the model does not ask it to.
 - The hosted MCP endpoint has no rate limiting, and its handshake/tool-listing is
   unauthenticated (tool *invocation* is not).
 - No CD pipeline, backup/restore runbook, or deployment target beyond single-host Compose.
@@ -57,8 +60,8 @@ In progress:
 - expanded ticker coverage
 - hosted demo environment
 - extended benchmark suites
-- widening the agency hard tier beyond `interpret_goal`, which needs the loop's single-metric
-  limitation lifted first
+- a hard-tier case for `select_experiment`, the one model-backed decision the suite still
+  cannot fairly probe
 
 ## Product Screens
 

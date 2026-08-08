@@ -128,27 +128,30 @@ A case belongs in the hard tier when all three hold:
 | `ranking_goal_is_not_a_trend_goal` | "Which entity is worst" is a question about entities, not time — even though the word *growth* appears in it |
 | `grouping_dimension_is_inferred_from_the_question` | Two segments are named, the column holding them is not; the wrong grouping yields a true answer to a question nobody asked |
 | `unanswerable_premise_is_declined` | The dataset holds no complaint metric, so the question cannot be answered here — substituting the nearest rising metric produces a confident answer to the wrong question |
+| `two_part_goal_resolves_both_clauses` | A two-clause question needs an answer to both; answering only the first reads as a complete reply while silently dropping half the question |
 
 The last is the tier's counterweight. Every other case rewards reaching the right answer; that
 one rewards declining, so the tier cannot be cleared by being uniformly more assertive.
 
 ### What the tier does not cover
 
-All four defeat `interpret_goal`, across four different judgements — metric selection, intent
-selection, dimension selection, and premise validity. Cases targeting the other two model-backed
-decisions were attempted and are **not fairly constructible against the current loop**:
+The tier defeats **two** of the four model-backed decisions. Four cases target `interpret_goal`
+across different judgements — metric selection, intent selection, dimension selection, premise
+validity — and `two_part_goal_resolves_both_clauses` targets `generate_hypotheses`.
 
-- **`select_experiment`** — `expected_information_gain` is `0.85 - 0.1 * position` in the
-  intent's tool list, so a candidate's rank is fixed by the planner. A case where the
-  highest-gain candidate is wrong would test disagreement with the planner's priority order,
-  not reasoning.
-- **`generate_hypotheses`** — a two-part goal needs two claims about two metrics, but the
-  planner parameterises every tool from a single `interpretation.metric_hint`. A second
-  hypothesis about a second metric stays `proposed` forever, for *any* policy. That is a loop
-  limitation, not a policy failure, and a case built on it would fail a perfect agent.
+That last one was impossible until phase 33. The planner parameterised every tool from a single
+`interpretation.metric_hint`, so a second hypothesis about a second metric stayed `proposed`
+forever *for any policy*; a case built on it would have failed a perfect agent, which is why
+phase 32 dropped it. With experiments parameterised per claim and sufficiency waiting for every
+claim, it is now winnable and discriminating.
 
-Breadth is therefore enforced over the properties the tier exercises rather than over policy
-methods — a tier failing on only one or two properties would be cleared by a single narrow fix.
+**`select_experiment` remains uncovered**, and the reason is unchanged:
+`expected_information_gain` is `0.85 - 0.1 * position` in the intent's tool list, so a
+candidate's rank is fixed by the planner. A case where the highest-gain candidate is wrong would
+test disagreement with that ordering rather than reasoning.
+
+Breadth is also enforced over the properties the tier exercises — a tier failing on only one or
+two properties would be cleared by a single narrow fix.
 
 ### The headroom ceiling
 

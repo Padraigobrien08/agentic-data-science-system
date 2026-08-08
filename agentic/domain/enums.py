@@ -270,10 +270,13 @@ class ConclusionDisposition(str, Enum):
     mixed = "mixed"
     """Some claims held and others did not — a multi-claim outcome.
 
-    Distinct from ``inconclusive``, which means the evidence on a claim was equivocal. Here the
-    evidence was clear and it pointed different ways for different claims. Reporting such a run
-    as ``supported`` would drop a refutation the user explicitly asked about, which is the
-    overclaiming the agency suite exists to punish.
+    "Did not hold" covers refuted, weakened and unresolved: what matters to a reader is that
+    part of their question came back favourably and part did not. Distinct from
+    ``inconclusive``, which describes a single body of equivocal evidence rather than a split
+    across claims.
+
+    Reporting such a run as ``supported`` would tell the user their whole question was answered
+    favourably when it was not — the overclaiming the agency suite exists to punish.
     """
 
     inconclusive = "inconclusive"

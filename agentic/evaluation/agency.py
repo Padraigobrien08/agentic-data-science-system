@@ -174,6 +174,39 @@ def _statuses(investigation: Investigation) -> list[str]:
     return [h.status.value for h in investigation.state.hypotheses]
 
 
+#: Parameter names that identify the column an experiment measured, most specific first.
+_METRIC_PARAMS = ("value_column", "column", "metric_column", "x_column")
+
+
+def _work_units(investigation: Investigation) -> list[tuple[str, str | None]]:
+    """
+    The unit of redundant work: ``(tool, measured column)``.
+
+    Counting bare tool names was a proxy for "did the same work twice", and it was adequate
+    while an investigation could only examine one metric. Once each claim is measured on its own
+    column, running ``analyze_time_series_trend`` against two different metrics answers two
+    different questions — the proxy misreads legitimate multi-claim work as redundancy.
+
+    Falls back to tool names when ``executed_requests`` is empty, so an investigation persisted
+    before that field existed still scores rather than silently passing.
+    """
+    requests = investigation.state.executed_requests
+    if not requests:
+        return [(name, None) for name in _tools(investigation)]
+    units: list[tuple[str, str | None]] = []
+    for request in requests:
+        column = next(
+            (request.parameters[p] for p in _METRIC_PARAMS if request.parameters.get(p)), None
+        )
+        units.append((request.tool_name, column))
+    return units
+
+
+def _describe_unit(unit: tuple[str, str | None]) -> str:
+    tool, column = unit
+    return f"{tool}({column})" if column else tool
+
+
 def _challenge_tools(investigation: Investigation) -> list[str]:
     """
     Falsification tools a critique proposed that were actually executed.
@@ -292,11 +325,12 @@ def score_case(
         )
 
     if expectations.no_repeated_tools:
-        repeated = sorted({t for t in tools if tools.count(t) > 1})
+        units = _work_units(investigation)
+        repeated = sorted({u for u in units if units.count(u) > 1})
         _check(
             AgencyProperty.avoids_redundant_experiments,
             not repeated,
-            f"repeated experiments: {repeated}",
+            f"repeated experiments: {[_describe_unit(u) for u in repeated]}",
             outcomes,
         )
 

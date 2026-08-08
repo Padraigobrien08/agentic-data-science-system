@@ -205,6 +205,25 @@ def api_latency_rising(n: int = 12) -> pd.DataFrame:
     )
 
 
+def growth_slowing_margin_steady(n: int = 10) -> pd.DataFrame:
+    """
+    Two metrics whose honest answers differ: growth is clearly slowing, margin is clearly not.
+
+    A two-clause question over this data can only be answered correctly by investigating both
+    columns. Investigating just the first — the single-metric behaviour that existed before
+    phase 33 — produces a confident answer to half the question and silently drops the other
+    half, which reads as a complete answer.
+    """
+    return pd.DataFrame(
+        {
+            "company": ["acme"] * n,
+            "quarter": [f"2024-Q{q + 1}" for q in range(n)],
+            "revenue_growth_pct": [20.0 - 1.6 * q for q in range(n)],
+            "margin_pct": [31.0 + (q % 2) * 0.2 for q in range(n)],
+        }
+    )
+
+
 FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "clear_rising": clear_rising,
     "clear_falling": clear_falling,
@@ -219,6 +238,7 @@ FIXTURES: dict[str, Callable[[], pd.DataFrame]] = {
     "regional_revenue_spread": regional_revenue_spread,
     "plan_tier_separated": plan_tier_separated,
     "api_latency_rising": api_latency_rising,
+    "growth_slowing_margin_steady": growth_slowing_margin_steady,
 }
 
 

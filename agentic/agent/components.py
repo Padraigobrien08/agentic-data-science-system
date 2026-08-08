@@ -699,7 +699,11 @@ class ConclusionSynthesizer:
                 h.set_status(HypothesisStatus.unresolved)
 
         contradicting = [e.id for e in state.evidence if e.direction is EvidenceDirection.refutes]
-        opposed = rejected + weakened
+        # `unresolved` counts as not-held. It is not a refutation, but reporting a run as
+        # "supported" when half its claims could not be determined tells the user their whole
+        # question was answered favourably, which is the more misleading of the two errors.
+        unresolved = [h for h in state.hypotheses if h.status is HypothesisStatus.unresolved]
+        opposed = rejected + weakened + unresolved
         if supported and opposed:
             # Checked before the `supported` branch on purpose. Falling through to it would
             # report a run that found one thing true and another false as simply "supported",

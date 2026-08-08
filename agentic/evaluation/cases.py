@@ -60,6 +60,7 @@ MAX_ITERATIONS = "max_iterations"
 SUPPORTED = "supported"
 REFUTED = "refuted"
 INCONCLUSIVE = "inconclusive"
+MIXED = "mixed"
 
 
 class AgencyCase(DomainModel):
@@ -336,6 +337,26 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
         expectations=AgencyExpectations(
             hypothesis_status_not_in=[SUPPORTED],
             max_confidence=0.5,
+        ),
+    ),
+    AgencyCase(
+        case_id="two_part_goal_resolves_both_clauses",
+        description=(
+            "A question with two clauses needs an answer to both. Here the honest answers "
+            "differ — growth is clearly slowing, margin clearly is not — so investigating only "
+            "the first produces a confident, well-evidenced reply that reads as a complete "
+            "answer while silently dropping half the question."
+        ),
+        goal="is revenue growth slowing and is margin quality holding up?",
+        fixture_id="growth_slowing_margin_steady",
+        time_field="quarter",
+        entity_id_fields=["company"],
+        metric_field="revenue_growth_pct",
+        tier=CaseTier.hard,
+        expectations=AgencyExpectations(
+            # `mixed` is reachable only by raising *and* investigating both clauses: it needs
+            # one claim supported and another not, which a single-claim run cannot produce.
+            disposition_in=[MIXED],
         ),
     ),
 )
