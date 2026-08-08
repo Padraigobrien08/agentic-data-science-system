@@ -100,6 +100,12 @@ class InvestigationState(DomainModel):
     datasets: list[DatasetReference] = Field(default_factory=list)
     hypotheses: list[Hypothesis] = Field(default_factory=list)
     pending_experiments: list[ExperimentRequest] = Field(default_factory=list)
+    #: Requests whose result has been filed. Retained because the *result* records only a tool
+    #: name — the request is the sole record of which claim an experiment was testing and with
+    #: what parameters. Discarding it left the planner unable to tell "this tool already ran for
+    #: this claim" from "this tool already ran at all", which made a second hypothesis
+    #: uninvestigable: it was starved of every tool the first claim had used.
+    executed_requests: list[ExperimentRequest] = Field(default_factory=list)
     completed_experiments: list[ExperimentResult] = Field(default_factory=list)
     failed_experiments: list[ExperimentResult] = Field(default_factory=list)
     evidence: list[Evidence] = Field(default_factory=list)
@@ -128,10 +134,12 @@ class InvestigationState(DomainModel):
         return request
 
     def record_experiment_result(self, result: ExperimentResult) -> ExperimentResult:
-        """File a result under completed/failed and drop the matching pending request."""
+        """File a result under completed/failed and retire the matching pending request."""
+        retired = [r for r in self.pending_experiments if r.id == result.request_id]
         self.pending_experiments = [
             r for r in self.pending_experiments if r.id != result.request_id
         ]
+        self.executed_requests.extend(retired)
         if result.status == ExperimentStatus.failed:
             self.failed_experiments.append(result)
         else:

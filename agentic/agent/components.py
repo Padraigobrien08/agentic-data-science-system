@@ -163,9 +163,32 @@ class InvestigationPlanner:
     def __init__(self, registry: ExperimentRegistry) -> None:
         self._registry = registry
 
-    def _params_for(self, tool: str, interpretation: GoalInterpretation, manifest: DatasetManifest) -> dict:
+    @staticmethod
+    def _metric_for(
+        hypothesis: Hypothesis | None, interpretation: GoalInterpretation, manifest: DatasetManifest
+    ) -> str | None:
+        """
+        Which metric an experiment should measure, most specific source first.
+
+        The hypothesis wins: an experiment exists to test *a claim*, and a claim already knows
+        its own metric. Reading only ``interpretation.metric_hint`` — one value for the whole
+        investigation — is why a second hypothesis over a second metric could never be
+        investigated by any policy, however well it reasoned.
+        """
+        if hypothesis is not None and hypothesis.metric_refs:
+            return hypothesis.metric_refs[0]
         metrics = manifest.metric_names()
-        metric = interpretation.metric_hint or (metrics[0] if metrics else None)
+        return interpretation.metric_hint or (metrics[0] if metrics else None)
+
+    def _params_for(
+        self,
+        tool: str,
+        interpretation: GoalInterpretation,
+        manifest: DatasetManifest,
+        hypothesis: Hypothesis | None = None,
+    ) -> dict:
+        metrics = manifest.metric_names()
+        metric = self._metric_for(hypothesis, interpretation, manifest)
         dims = [c.name for c in manifest.columns if c.role.value == "dimension"]
         group = interpretation.group_hint or (dims[0] if dims else None)
         entity = manifest.entity_id_column().name if manifest.entity_id_column() else None
@@ -188,6 +211,22 @@ class InvestigationPlanner:
             return {"column_a": dims[0], "column_b": dims[1]} if len(dims) >= 2 else {}
         return {}  # profile_dataset, analyze_correlation, edgar_* take no/auto params
 
+    def _executed_pairs(
+        self, state: InvestigationState, interpretation: GoalInterpretation, manifest: DatasetManifest
+    ) -> set[tuple[str, str | None]]:
+        """``(tool, metric)`` combinations already run, resolved the same way they were planned.
+
+        Reads :attr:`InvestigationState.executed_requests` — the results themselves record only
+        a tool name, so they cannot say which claim, or which column, an experiment addressed.
+        """
+        pairs: set[tuple[str, str | None]] = set()
+        for request in state.executed_requests:
+            hyp = None
+            if request.target_hypothesis_ids:
+                hyp = state.find_hypothesis(request.target_hypothesis_ids[0])
+            pairs.add((request.tool_name, self._metric_for(hyp, interpretation, manifest)))
+        return pairs
+
     def _target_hypothesis(self, state: InvestigationState, metric: str | None) -> str | None:
         for h in state.open_hypotheses():
             if not h.metric_refs or (metric and metric in h.metric_refs):
@@ -205,17 +244,25 @@ class InvestigationPlanner:
             tools = EDGAR_INTENT_TOOLS.get(interpretation.intent, []) + tools
 
         out: list[ExperimentRequest] = []
-        seen: set[str] = set()
+        # Keyed by (tool, metric) rather than tool alone: running one tool against two different
+        # metrics answers two different questions, while running it twice against the same
+        # metric is the redundancy `executed_tools` was there to prevent.
+        seen: set[tuple[str, str | None]] = set()
+        done = self._executed_pairs(state, interpretation, manifest)
         n = len(state.pending_experiments) + len(state.completed_experiments) + len(state.failed_experiments)
 
         # falsification candidates from open critiques (unused tool, targets a hypothesis)
         for c in state.critiques:
             ftool = c.suggested_action
-            if not ftool or ftool in executed_tools or ftool in seen or tracker.tool_at_limit(ftool):
+            if not ftool or tracker.tool_at_limit(ftool):
+                continue
+            challenged = state.find_hypothesis(c.target.id)
+            key = (ftool, self._metric_for(challenged, interpretation, manifest))
+            if key in done or key in seen:
                 continue
             if not self._registry.has(ftool):
                 continue
-            params = self._params_for(ftool, interpretation, manifest)
+            params = self._params_for(ftool, interpretation, manifest, challenged)
             if not self._registry.get(ftool).validate(params=params, manifest=manifest).ok:
                 continue
             out.append(ExperimentRequest(
@@ -223,23 +270,34 @@ class InvestigationPlanner:
                 purpose=f"falsify hypothesis {c.target.id}", definition_id="falsification",
                 target_hypothesis_ids=[c.target.id], expected_information_gain=0.95,
                 provenance=_prov("investigation_planner")))
-            seen.add(ftool)
+            seen.add(key)
 
-        for prio, tool in enumerate(tools):
-            if tool in executed_tools or tool in seen or tracker.tool_at_limit(tool):
-                continue
-            if not self._registry.has(tool):
-                continue
-            params = self._params_for(tool, interpretation, manifest)
-            if not self._registry.get(tool).validate(params=params, manifest=manifest).ok:
-                continue
-            gain = round(max(0.3, 0.85 - 0.1 * prio), 4)
-            out.append(ExperimentRequest(
-                id=idgen.make("exp", n + len(out)), tool_name=tool, parameters=params,
-                purpose=f"{interpretation.intent.value} analysis via {tool}",
-                target_hypothesis_ids=[target] if target else [], expected_information_gain=gain,
-                provenance=_prov("investigation_planner")))
-            seen.add(tool)
+        # Every open claim gets candidates, in hypothesis order then tool priority — a pure
+        # function of state, never set or dict iteration order, so ids, batching, replay and
+        # diff stay deterministic. With a single open hypothesis this yields exactly the list
+        # it produced before, in the same order.
+        open_hypotheses = state.open_hypotheses() or [None]
+        for hypothesis in open_hypotheses:
+            hyp_target = hypothesis.id if hypothesis is not None else target
+            for prio, tool in enumerate(tools):
+                if tracker.tool_at_limit(tool):
+                    continue
+                key = (tool, self._metric_for(hypothesis, interpretation, manifest))
+                if key in done or key in seen:
+                    continue
+                if not self._registry.has(tool):
+                    continue
+                params = self._params_for(tool, interpretation, manifest, hypothesis)
+                if not self._registry.get(tool).validate(params=params, manifest=manifest).ok:
+                    continue
+                gain = round(max(0.3, 0.85 - 0.1 * prio), 4)
+                out.append(ExperimentRequest(
+                    id=idgen.make("exp", n + len(out)), tool_name=tool, parameters=params,
+                    purpose=f"{interpretation.intent.value} analysis via {tool}",
+                    target_hypothesis_ids=[hyp_target] if hyp_target else [],
+                    expected_information_gain=gain,
+                    provenance=_prov("investigation_planner")))
+                seen.add(key)
         return out
 
 
