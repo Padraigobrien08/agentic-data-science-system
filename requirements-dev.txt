@@ -4,7 +4,7 @@
 pytest>=8.0
 pytest-rerunfailures>=14.0  # auto-retry a rare cross-test ORM-aliasing flake (see issue #8)
 httpx>=0.28.1
-moto[s3]>=5.1.22
+moto[s3]>=5.2.2
 pyarrow>=15.0.0  # Parquet fixtures for the input-adapter tests (agentic/adapters)
 
 # Lint / type-check gate (see ruff.toml, mypy.ini, .github/workflows/ci.yml).
