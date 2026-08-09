@@ -14,4 +14,4 @@ mypy>=1.11
 # Coverage measurement + CI floor (see .coveragerc, .github/workflows/ci.yml).
 pytest-cov>=5.0.0
 # Supply-chain audit (see .github/workflows/security.yml).
-pip-audit>=2.7.3
+pip-audit>=2.10.1
