@@ -58,6 +58,12 @@ from backend.services.agentic_investigation_execution_service import (
 from backend.services.exceptions import InvalidStatusTransition, RunCancelledDuringExecution, RunLifecycleError
 from backend.services.run_lifecycle_service import RunLifecycleService
 from backend.services.run_queue_service import RunQueueService
+from backend.services.spend_guard import (
+    EngineNotEntitled,
+    SpendLimitExceeded,
+    assert_engine_entitled,
+    check_run_admission,
+)
 from edgar_project.orchestration.planner import Planner
 from edgar_project.orchestration.schemas import OrchestrationInput, PlanningOutcome
 
@@ -132,6 +138,33 @@ def route_preview(
     return _to_prompt_routing_preview_response(outcome)
 
 
+def _requested_engine(payload: object) -> str:
+    if not isinstance(payload, dict):
+        return ""
+    return str(payload.get("engine") or "").strip().lower()
+
+
+def guard_run_admission(db: DbSession, user, *, requested_engine: str = "") -> None:
+    """
+    Refuse a run that would exceed an entitlement or a spend ceiling.
+
+    Called before any path that puts a run into execution — create-with-enqueue, execute, and
+    retry — because refusing after the work has started spends exactly the money the guard
+    exists to protect. Creating a ``pending`` row is free and is deliberately not gated.
+    """
+    settings = get_settings()
+    try:
+        if requested_engine:
+            assert_engine_entitled(user, requested_engine, settings=settings)
+        check_run_admission(db, user, settings=settings)
+    except EngineNotEntitled as exc:
+        db.rollback()
+        raise HTTPException(status_code=403, detail=str(exc)) from exc
+    except SpendLimitExceeded as exc:
+        db.rollback()
+        raise HTTPException(status_code=429, detail=str(exc)) from exc
+
+
 @router.post("", response_model=AnalysisRunSummary, status_code=201)
 def create_run(
     body: AnalysisRunCreate,
@@ -142,6 +175,8 @@ def create_run(
 ) -> AnalysisRunSummary:
     """Create an analysis run in ``pending`` (orchestration execution is not started here)."""
     require_project_owned(db, body.project_id, user.id)
+    if body.enqueue_execution:
+        guard_run_admission(db, user, requested_engine=_requested_engine(body.input_payload_json))
     try:
         row = run_svc.create(
             body.project_id,
@@ -244,7 +279,8 @@ def retry_run(
     body: RunRetryRequest | None = None,
 ) -> AnalysisRunSummary:
     """Re-queue a finished non-success run for background execution."""
-    require_analysis_run_owned(db, run_id, user.id)
+    row_for_guard = require_analysis_run_owned(db, run_id, user.id)
+    guard_run_admission(db, user, requested_engine=_requested_engine(row_for_guard.input_payload_json))
     overrides = (
         body.enqueue_overrides.model_dump(exclude_none=True)
         if body is not None and body.enqueue_overrides is not None
@@ -566,6 +602,7 @@ def execute_run(
             status_code=409,
             detail="Run is already executing",
         )
+    guard_run_admission(db, user, requested_engine=_requested_engine(row.input_payload_json))
     engine = select_run_engine(row, get_settings())
     tc = getattr(request.state, "trace_carrier_for_jobs", None)
     api_tracer = get_tracer("backend.api.runs")

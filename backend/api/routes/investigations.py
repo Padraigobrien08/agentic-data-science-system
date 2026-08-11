@@ -9,6 +9,7 @@ from fastapi import APIRouter, HTTPException, Query, Request
 from backend.api.access_checks import require_investigation_owned, require_project_owned
 from backend.api.auth_deps import CurrentUserDep
 from backend.api.deps import DbSession
+from backend.api.routes.runs import guard_run_admission
 from backend.repositories.investigation_repository import SqlAlchemyInvestigationRepository
 from backend.schemas.investigation import (
     InvestigationCreateRequest,
@@ -23,6 +24,7 @@ from backend.services.investigation_create_service import (
     InvalidDatasetError,
     InvestigationCreateService,
 )
+from backend.services.spend_guard import ENGINE_AGENTIC
 
 router = APIRouter(prefix="/investigations", tags=["investigations"])
 
@@ -40,6 +42,9 @@ def create_investigation(
     larger datasets). Requires the agentic engine flag; owner-scoped to the target project.
     """
     require_project_owned(db, body.project_id, user.id)
+    # This route always drives the agentic engine, so the entitlement is checked explicitly
+    # rather than inferred from an ``engine`` field in a payload.
+    guard_run_admission(db, user, requested_engine=ENGINE_AGENTIC)
     service = InvestigationCreateService(db)
     kwargs = dict(
         project_id=body.project_id,
