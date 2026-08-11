@@ -944,6 +944,19 @@
             "title": "Email",
             "type": "string"
           },
+          "invite_code": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional. A matching code upgrades the new account to the adaptive tier (the agentic investigation engine). Registration succeeds either way \u2014 a wrong or absent code simply yields a standard account.",
+            "title": "Invite Code"
+          },
           "password": {
             "maxLength": 72,
             "minLength": 10,
@@ -971,6 +984,12 @@
           },
           "bootstrap_required": {
             "title": "Bootstrap Required",
+            "type": "boolean"
+          },
+          "invite_code_accepted": {
+            "default": false,
+            "description": "True when an invite code can upgrade a registration to the adaptive tier. Reveals only that the field is worth showing, never the code itself.",
+            "title": "Invite Code Accepted",
             "type": "boolean"
           }
         },
@@ -1021,6 +1040,19 @@
             "format": "email",
             "title": "Email",
             "type": "string"
+          },
+          "invite_code": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional. A matching code upgrades the new account to the adaptive tier (the agentic investigation engine). Registration succeeds either way \u2014 a wrong or absent code simply yields a standard account.",
+            "title": "Invite Code"
           },
           "password": {
             "maxLength": 72,
@@ -5281,8 +5313,23 @@
         "title": "TerminationView",
         "type": "object"
       },
+      "UserAccessTier": {
+        "description": "What a user is allowed to spend model budget on.\n\nOrdered by cost, cheapest first. ``guest`` is an auto-provisioned throwaway account and is\npinned to the deterministic engine regardless of the ``agentic_engine_enabled`` flag;\n``standard`` is a self-registered account (deterministic engine, narrative phases only);\n``adaptive`` is unlocked by the invite code and may run the agentic investigation loop.\n\nSee ``docs/decisions/2026-08-11-showcase-direction.md`` (D3, S0).",
+        "enum": [
+          "guest",
+          "standard",
+          "adaptive"
+        ],
+        "title": "UserAccessTier",
+        "type": "string"
+      },
       "UserRead": {
         "properties": {
+          "access_tier": {
+            "$ref": "#/components/schemas/UserAccessTier",
+            "default": "standard",
+            "description": "Spend entitlement: which engine this account may run and under which ceiling."
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -6193,6 +6240,196 @@
         "summary": "Append Message",
         "tags": [
           "conversations"
+        ]
+      }
+    },
+    "/v1/demos": {
+      "get": {
+        "description": "Published recorded investigations, oldest first. Unauthenticated.",
+        "operationId": "list_demos_v1_demos_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InvestigationSummary"
+                  },
+                  "title": "Response List Demos V1 Demos Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Demos",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}": {
+      "get": {
+        "description": "One published investigation in full: hypotheses, evidence, decisions, critiques,\nexperiments, conclusion, and timeline. Unauthenticated.",
+        "operationId": "get_demo_v1_demos__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvestigationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}/artifacts/{artifact_id}/content": {
+      "get": {
+        "description": "Stream the bytes of an artifact behind a published demo.",
+        "operationId": "get_demo_artifact_content_v1_demos__slug__artifacts__artifact_id__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "artifact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Artifact Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "``auto``: inline for text/json-like MIME types, else attachment.",
+            "in": "query",
+            "name": "disposition",
+            "required": false,
+            "schema": {
+              "default": "auto",
+              "description": "``auto``: inline for text/json-like MIME types, else attachment.",
+              "enum": [
+                "inline",
+                "attachment",
+                "auto"
+              ],
+              "title": "Disposition",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo Artifact Content",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}/artifacts/{artifact_id}/preview": {
+      "get": {
+        "description": "Bounded text/JSON preview of an artifact behind a published demo.",
+        "operationId": "get_demo_artifact_preview_v1_demos__slug__artifacts__artifact_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "artifact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Artifact Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtifactPreviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo Artifact Preview",
+        "tags": [
+          "demos"
         ]
       }
     },

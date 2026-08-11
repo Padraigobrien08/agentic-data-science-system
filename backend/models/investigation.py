@@ -74,6 +74,20 @@ class Investigation(Base):
         doc="Canonical/legacy run this investigation represents; run stays source of truth for legacy origin.",
     )
 
+    demo_slug: Mapped[str | None] = mapped_column(
+        String(64),
+        nullable=True,
+        unique=True,
+        index=True,
+        doc=(
+            "Non-null publishes this investigation to the unauthenticated replay tier at "
+            "/v1/demos/{slug}. A slug rather than a boolean so the public URL is stable and "
+            "shareable (it goes in the README), and so re-recording a demo means moving the "
+            "slug to the new row rather than editing a flag on two. Clearing it revokes "
+            "public access to the investigation *and* its artifacts immediately."
+        ),
+    )
+
     origin: Mapped[InvestigationOrigin] = mapped_column(
         str_enum_column(InvestigationOrigin, name="investigation_origin"),
         nullable=False,
