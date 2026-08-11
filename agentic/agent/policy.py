@@ -96,7 +96,8 @@ class AgentPolicy(Protocol):
     def interpret_goal(self, goal_text: str, *, capability_summary: dict) -> GoalInterpretation: ...
 
     def generate_hypotheses(
-        self, interpretation: GoalInterpretation, *, metric_names: list[str], dimension_names: list[str]
+        self, interpretation: GoalInterpretation, *, metric_names: list[str],
+        dimension_names: list[str], goal_text: str = "",
     ) -> HypothesisProposals: ...
 
     def select_experiment(self, *, goal_summary: dict, candidates: list[dict]) -> ExperimentChoice: ...
@@ -198,11 +199,18 @@ class ModelAgentPolicy:
         )
 
     def generate_hypotheses(
-        self, interpretation: GoalInterpretation, *, metric_names: list[str], dimension_names: list[str]
+        self, interpretation: GoalInterpretation, *, metric_names: list[str],
+        dimension_names: list[str], goal_text: str = "",
     ) -> HypothesisProposals:
+        # The goal text goes through as well as the interpretation. The interpretation is a
+        # classification — intent, one metric hint, a direction — and it cannot carry an
+        # alternative explanation the goal offered ("...or is rising volume the cause?").
+        # Without the original wording the generator cannot propose the competing claim, so
+        # the run measures the outcome alone and ends inconclusive by construction.
         return self._call(
             self._prompts.generate_hypotheses,
-            json.dumps({"interpretation": interpretation.model_dump(mode="json"),
+            json.dumps({"goal": goal_text,
+                        "interpretation": interpretation.model_dump(mode="json"),
                         "metrics": metric_names, "dimensions": dimension_names}),
             HypothesisProposals,
         )

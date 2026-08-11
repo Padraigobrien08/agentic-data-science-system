@@ -36,7 +36,7 @@ _TYPED_TERMINATION_REASONS = {r.value for r in TerminationReason}
 
 @pytest.fixture
 def session(monkeypatch) -> Iterator[Session]:
-    monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s: FixtureAgentPolicy())
+    monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s, **_: FixtureAgentPolicy())
     engine = create_engine("sqlite:///:memory:")
     Base.metadata.create_all(engine)
     s = sessionmaker(bind=engine, expire_on_commit=False)()

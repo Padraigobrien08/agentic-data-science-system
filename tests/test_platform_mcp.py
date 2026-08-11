@@ -48,7 +48,7 @@ def api(monkeypatch) -> Iterator[tuple[TestClient, str, dict[str, str]]]:
             db.close()
 
     monkeypatch.setattr(create_mod, "get_settings", lambda: Settings(agentic_engine_enabled=True))
-    monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s: FixtureAgentPolicy())
+    monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s, **_: FixtureAgentPolicy())
 
     app = create_app()
     app.dependency_overrides[get_db] = override_get_db

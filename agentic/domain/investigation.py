@@ -176,6 +176,12 @@ class InvestigationState(DomainModel):
 
     def set_conclusion(self, conclusion: Conclusion) -> None:
         self.current_conclusion = conclusion
+        # Investigation-level confidence is the conclusion's: it is the one number that
+        # describes the run as a whole. Left at its 0.0 default it read as "no confidence" on
+        # runs that had converged with sufficient evidence, and that is the value the
+        # investigation *summary* surfaces — so a converged demo listed itself at 0.0 while
+        # its own conclusion said otherwise.
+        self.confidence = conclusion.confidence
 
     def record_termination(self, decision: TerminationDecision) -> None:
         self.termination = decision
