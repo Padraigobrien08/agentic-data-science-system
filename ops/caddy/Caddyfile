@@ -1,0 +1,29 @@
+# TLS terminator for the hosted demo API. Caddy obtains and renews a Let's Encrypt
+# certificate automatically; the domain must already resolve to this host.
+#
+# The only thing exposed to the internet is this API. The frontend is on Vercel and calls it
+# server-side, so no browser ever talks to FastAPI directly and CORS stays closed.
+
+{$EDGAR_API_DOMAIN} {
+	encode zstd gzip
+
+	# Ops surfaces are token-gated in the app (OpsTokenDep), but there is no reason for them
+	# to be reachable from the public internet at all. Blocked here as well, so a
+	# misconfigured token cannot expose queue internals or Prometheus metrics.
+	@ops path /metrics /v1/worker/health
+	respond @ops 404
+
+	reverse_proxy api:8000 {
+		header_up X-Forwarded-For {remote_host}
+		header_up X-Forwarded-Proto {scheme}
+	}
+
+	# Trimmed access log: the API already emits structured request logs with a request id,
+	# so this exists to catch what never reaches the app (TLS failures, 502s).
+	log {
+		output file /data/access.log {
+			roll_size 10MiB
+			roll_keep 3
+		}
+	}
+}

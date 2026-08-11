@@ -25,7 +25,11 @@ coverage.xml
 # cover them, so a copy like ``.env.bak.<date>`` would otherwise show up as untracked
 # and be one ``git add -A`` away from being committed.
 .env.*
+# Templates only — these hold placeholders, never values. Each is negated by exact name
+# rather than by a pattern like `!.env.*.example`, so a real file that happens to match
+# (`.env.production.example.bak`) stays ignored.
 !.env.example
+!.env.production.example
 
 # Local API database (Alembic / FastAPI dev)
 data/backend.db
