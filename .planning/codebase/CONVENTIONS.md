@@ -34,7 +34,8 @@
 
 **Linting:**
 - Frontend linting is enforced by `frontend/.eslintrc.json` extending `next/core-web-vitals` and by `frontend/package.json` scripts such as `npm run lint`.
-- No dedicated backend lint or static-analysis command is configured in repo config or `.github/workflows/ci.yml`; backend quality currently relies on typed code plus `pytest`.
+- Backend lint is enforced by `ruff.toml` and runs as a blocking `python -m ruff check .` step in `.github/workflows/ci.yml`. Rules are narrow on purpose: `E4`/`E7`/`E9`/`F`/`W` plus `I`, with `E501` omitted and `E402` ignored.
+- Backend type checking is configured in `mypy.ini` and runs as a report-only (`continue-on-error`) `python -m mypy backend` step; the backend is not yet mypy-clean, so it surfaces regressions without blocking.
 - Keep suppressions narrow and justified. Existing examples are side-effect imports for ORM metadata (`import backend.models  # noqa: F401` in `tests/test_backend_foundation.py`), defensive boundary catches (`# noqa: BLE001` in `backend/api/routes/health.py`), and environment-only branches (`# pragma: no cover` in `backend/llm/openai_provider.py`).
 
 ## Import Organization
