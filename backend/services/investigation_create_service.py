@@ -116,12 +116,16 @@ class InvestigationCreateService:
         name: str,
         time_field: str | None,
         entity_id_fields: list[str],
+        source: str = "tabular",
+        entities: list[str] | None = None,
+        refresh: bool = False,
     ) -> InvestigationCreateResult:
         """Create and execute synchronously (best for small pasted datasets)."""
         run = self._prepare_run(
             project_id=project_id, user_id=user_id, goal=goal, dataset_format=dataset_format,
             csv_text=csv_text, records=records, name=name, time_field=time_field,
-            entity_id_fields=entity_id_fields,
+            entity_id_fields=entity_id_fields, source=source, entities=entities or [],
+            refresh=refresh,
         )
         result = AgenticInvestigationExecutionService(self._session).execute_analysis_run(run.id)
 
@@ -149,13 +153,17 @@ class InvestigationCreateService:
         name: str,
         time_field: str | None,
         entity_id_fields: list[str],
+        source: str = "tabular",
+        entities: list[str] | None = None,
+        refresh: bool = False,
         trace_carrier: dict[str, str] | None = None,
     ) -> InvestigationCreateResult:
         """Create and enqueue for background execution by the worker (robust for large datasets)."""
         run = self._prepare_run(
             project_id=project_id, user_id=user_id, goal=goal, dataset_format=dataset_format,
             csv_text=csv_text, records=records, name=name, time_field=time_field,
-            entity_id_fields=entity_id_fields,
+            entity_id_fields=entity_id_fields, source=source, entities=entities or [],
+            refresh=refresh,
         )
         RunQueueService(self._session).enqueue_after_create(run.id, None, trace_carrier=trace_carrier)
         self._session.commit()
@@ -179,6 +187,9 @@ class InvestigationCreateService:
         name: str,
         time_field: str | None,
         entity_id_fields: list[str],
+        source: str = "tabular",
+        entities: list[str] | None = None,
+        refresh: bool = False,
     ) -> AnalysisRun:
         """Validate the flag + dataset and create a ``pending`` agentic run (no execution)."""
         if not self._settings.agentic_engine_enabled:
@@ -190,9 +201,63 @@ class InvestigationCreateService:
         if not goal:
             raise InvalidDatasetError("A goal is required.")
 
-        resolved = self._resolve_records(dataset_format, csv_text, records)
+        payload = self._build_payload(
+            goal=goal,
+            source=source,
+            dataset_format=dataset_format,
+            csv_text=csv_text,
+            records=records,
+            name=name,
+            time_field=time_field,
+            entity_id_fields=entity_id_fields,
+            entities=entities or [],
+            refresh=refresh,
+        )
+        run = AnalysisRunService(self._session).create(
+            project_id,
+            initiated_by_user_id=user_id,
+            orchestration_goal_text=goal,
+            input_payload_json=payload,
+        )
+        self._session.flush()
+        return run
 
-        payload = {
+    def _build_payload(
+        self,
+        *,
+        goal: str,
+        source: str,
+        dataset_format: str,
+        csv_text: str | None,
+        records: list[dict] | None,
+        name: str,
+        time_field: str | None,
+        entity_id_fields: list[str],
+        entities: list[str],
+        refresh: bool,
+    ) -> dict:
+        """
+        The run payload for one investigation, per dataset source.
+
+        EDGAR mirrors the shape the deterministic recording path already uses (``tickers`` at
+        the top level *and* ``entities`` on the dataset): the execution service reads entities
+        from either, and matching the proven shape keeps one payload format across both entry
+        points rather than a second one only this route emits.
+        """
+        if (source or "tabular").strip().lower() == "edgar":
+            tickers = [t.strip().upper() for t in entities if t and t.strip()]
+            if not tickers:
+                raise InvalidDatasetError("At least one ticker is required for an EDGAR investigation.")
+            return {
+                "engine": ENGINE_AGENTIC,
+                "analysis_goal": goal,
+                "tickers": tickers,
+                "refresh": bool(refresh),
+                "dataset": {"adapter": "edgar", "entities": tickers},
+            }
+
+        resolved = self._resolve_records(dataset_format, csv_text, records)
+        return {
             "engine": ENGINE_AGENTIC,
             "analysis_goal": goal,
             "dataset": {
@@ -203,14 +268,6 @@ class InvestigationCreateService:
                 "entity_id_fields": entity_id_fields or [],
             },
         }
-        run = AnalysisRunService(self._session).create(
-            project_id,
-            initiated_by_user_id=user_id,
-            orchestration_goal_text=goal,
-            input_payload_json=payload,
-        )
-        self._session.flush()
-        return run
 
     def _resolve_records(
         self, dataset_format: str, csv_text: str | None, records: list[dict] | None

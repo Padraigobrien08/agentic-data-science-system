@@ -262,3 +262,169 @@ def test_http_create_other_users_project_is_404(api_ctx, monkeypatch) -> None:
         headers=other_headers,
     )
     assert r.status_code == 404
+
+
+# --- dataset source: EDGAR as one adapter among others ----------------------
+
+
+def test_edgar_source_builds_an_edgar_payload(session: Session, monkeypatch) -> None:
+    """
+    The route used to hardcode ``adapter: in_memory``, so EDGAR was unreachable through
+    /v1/investigations even though the execution layer already supported it. The payload here
+    must match the shape the recording path already proved works, or the run resolves to a
+    schema-only manifest and every EDGAR experiment degrades.
+    """
+    _force_fixture_policy(monkeypatch)
+    project_id, user_id = _seed_project(session)
+    svc = InvestigationCreateService(session, settings=_enabled_settings())
+    run = svc._prepare_run(
+        project_id=project_id,
+        user_id=user_id,
+        goal="has margin deteriorated?",
+        dataset_format="csv",
+        csv_text=None,
+        records=None,
+        name="edgar",
+        time_field=None,
+        entity_id_fields=[],
+        source="edgar",
+        entities=["aapl", " msft "],
+        refresh=True,
+    )
+    payload = run.input_payload_json
+    assert payload["engine"] == "agentic"
+    # Tickers are normalised and appear in *both* places the execution service reads them.
+    assert payload["tickers"] == ["AAPL", "MSFT"]
+    assert payload["dataset"] == {"adapter": "edgar", "entities": ["AAPL", "MSFT"]}
+    assert payload["refresh"] is True
+    assert "records" not in payload["dataset"]
+
+
+def test_tabular_source_is_unchanged_and_is_the_default(session: Session, monkeypatch) -> None:
+    """Callers written before `source` existed must be unaffected."""
+    _force_fixture_policy(monkeypatch)
+    project_id, user_id = _seed_project(session)
+    svc = InvestigationCreateService(session, settings=_enabled_settings())
+    run = svc._prepare_run(
+        project_id=project_id,
+        user_id=user_id,
+        goal="is revenue trending up?",
+        dataset_format="csv",
+        csv_text=CSV,
+        records=None,
+        name="rev",
+        time_field="period",
+        entity_id_fields=["entity"],
+    )
+    dataset = run.input_payload_json["dataset"]
+    assert dataset["adapter"] == "in_memory"
+    assert dataset["time_field"] == "period"
+    assert len(dataset["records"]) == 8
+    assert "tickers" not in run.input_payload_json
+
+
+def test_edgar_source_without_tickers_is_rejected(session: Session) -> None:
+    project_id, user_id = _seed_project(session)
+    svc = InvestigationCreateService(session, settings=_enabled_settings())
+    with pytest.raises(InvalidDatasetError, match="ticker"):
+        svc._prepare_run(
+            project_id=project_id,
+            user_id=user_id,
+            goal="anything",
+            dataset_format="csv",
+            csv_text=None,
+            records=None,
+            name="x",
+            time_field=None,
+            entity_id_fields=[],
+            source="edgar",
+            entities=["  "],
+        )
+
+
+def test_schema_rejects_an_edgar_dataset_with_no_entities() -> None:
+    from pydantic import ValidationError
+
+    from backend.schemas.investigation import InvestigationDatasetInput
+
+    with pytest.raises(ValidationError, match="entities"):
+        InvestigationDatasetInput(source="edgar", entities=[])
+
+
+def test_schema_caps_edgar_entities() -> None:
+    from pydantic import ValidationError
+
+    from backend.schemas.investigation import MAX_EDGAR_ENTITIES, InvestigationDatasetInput
+
+    ok = InvestigationDatasetInput(source="edgar", entities=["A"] * MAX_EDGAR_ENTITIES)
+    assert len(ok.entities) == MAX_EDGAR_ENTITIES
+    with pytest.raises(ValidationError, match="Too many tickers"):
+        InvestigationDatasetInput(source="edgar", entities=["A"] * (MAX_EDGAR_ENTITIES + 1))
+
+
+def test_schema_rejects_a_tabular_dataset_with_no_csv() -> None:
+    from pydantic import ValidationError
+
+    from backend.schemas.investigation import InvestigationDatasetInput
+
+    with pytest.raises(ValidationError, match="csv_text"):
+        InvestigationDatasetInput(source="tabular", format="csv", csv_text="   ")
+
+
+def test_http_edgar_investigation_queues_with_an_edgar_payload(api_ctx, monkeypatch) -> None:
+    """
+    The whole HTTP path for the unified entry, without touching the SEC.
+
+    Enqueued rather than executed on purpose: executing would build a panel from live filings.
+    What needs proving here is that the route, schema and service produce a run the execution
+    layer will resolve to the EDGAR adapter — the payload below is byte-identical to the one
+    ``scripts/record_demo.py edgar`` produces, which is the shape already verified end to end
+    against real filings.
+    """
+    client, project_id, h, factory = api_ctx
+    _enable_flag(monkeypatch)
+
+    r = client.post(
+        "/v1/investigations",
+        json={
+            "project_id": project_id,
+            "goal": "has margin quality deteriorated, or is revenue growth the explanation?",
+            "async_execution": True,
+            "dataset": {"source": "edgar", "entities": ["aapl", "msft"]},
+        },
+        headers=h,
+    )
+    assert r.status_code == 201, r.text
+    body = r.json()
+    assert body["queued"] is True
+
+    session = factory()
+    try:
+        run = session.get(AnalysisRun, uuid.UUID(body["analysis_run_id"]))
+        assert run is not None
+        assert run.input_payload_json["dataset"] == {
+            "adapter": "edgar",
+            "entities": ["AAPL", "MSFT"],
+        }
+        assert run.input_payload_json["tickers"] == ["AAPL", "MSFT"]
+        assert run.input_payload_json["engine"] == "agentic"
+    finally:
+        session.close()
+
+
+def test_http_edgar_investigation_without_tickers_returns_422(api_ctx, monkeypatch) -> None:
+    """Schema-level refusal, before any run row is created."""
+    client, project_id, h, _factory = api_ctx
+    _enable_flag(monkeypatch)
+
+    r = client.post(
+        "/v1/investigations",
+        json={
+            "project_id": project_id,
+            "goal": "anything",
+            "dataset": {"source": "edgar", "entities": []},
+        },
+        headers=h,
+    )
+    assert r.status_code == 422, r.text
+    assert "entities" in r.text

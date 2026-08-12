@@ -3095,7 +3095,7 @@
         "type": "object"
       },
       "InvestigationDatasetInput": {
-        "description": "A small tabular dataset for an agentic investigation (pasted CSV or inline records).",
+        "description": "What an investigation should run over.\n\n``source`` selects the adapter. It defaults to ``tabular`` so every caller written before\nEDGAR was reachable here keeps working unchanged \u2014 the field is additive, not a new\nrequired discriminator.\n\nThe fields are flat rather than a tagged union because the two sources overlap (both carry\na name and a goal-facing identity) and because a union would have broken that\ncompatibility. ``check_source_fields`` enforces which fields each source actually needs, so\nthe looseness is in the shape, not in the validation.",
         "properties": {
           "csv_text": {
             "anyOf": [
@@ -3107,6 +3107,14 @@
               }
             ],
             "title": "Csv Text"
+          },
+          "entities": {
+            "description": "Ticker symbols when source is 'edgar' (e.g. ['AAPL', 'MSFT']).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Entities",
+            "type": "array"
           },
           "entity_id_fields": {
             "items": {
@@ -3143,6 +3151,21 @@
               }
             ],
             "title": "Records"
+          },
+          "refresh": {
+            "default": false,
+            "description": "Force a fresh SEC fetch rather than reusing cached filings.",
+            "title": "Refresh",
+            "type": "boolean"
+          },
+          "source": {
+            "default": "tabular",
+            "enum": [
+              "tabular",
+              "edgar"
+            ],
+            "title": "Source",
+            "type": "string"
           },
           "time_field": {
             "anyOf": [
@@ -6990,7 +7013,7 @@
         ]
       },
       "post": {
-        "description": "Create an agentic investigation over a user-provided dataset and run it.\n\nSynchronous by default; ``async_execution=true`` enqueues it for the worker (robust for\nlarger datasets). Requires the agentic engine flag; owner-scoped to the target project.",
+        "description": "Create an agentic investigation over a dataset and run it.\n\n``dataset.source`` selects the adapter: ``tabular`` (pasted CSV or inline records, the\ndefault) or ``edgar`` (SEC filings for ``dataset.entities``). Both run the same loop over\nthe same evidence model \u2014 EDGAR is an adapter, not a separate product.\n\nSynchronous by default; ``async_execution=true`` enqueues it for the worker. Prefer async\nfor ``edgar``: the panel is built from live SEC fetches before the loop starts, which is\nfar too slow to hold an HTTP request open for.\n\nRequires the agentic engine flag; owner-scoped to the target project.",
         "operationId": "create_investigation_v1_investigations_post",
         "requestBody": {
           "content": {
