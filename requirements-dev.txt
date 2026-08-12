@@ -2,7 +2,7 @@
 -r requirements.txt
 -r requirements-backend.txt
 pytest>=9.1.1
-pytest-rerunfailures>=14.0  # auto-retry a rare cross-test ORM-aliasing flake (see issue #8)
+pytest-rerunfailures>=16.4  # auto-retry a rare cross-test ORM-aliasing flake (see issue #8)
 httpx>=0.28.1
 moto[s3]>=5.2.2
 pyarrow>=15.0.0  # Parquet fixtures for the input-adapter tests (agentic/adapters)
