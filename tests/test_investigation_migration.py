@@ -1,9 +1,9 @@
 """
 Migration tests for 014_investigation_persistence.
 
-The full Alembic chain is not SQLite-compatible (an earlier migration uses
-constraint ALTER), so 014's DDL is tested in isolation on SQLite here (offline).
-The full upgrade/downgrade chain is exercised on Postgres in
+Exercises 014's DDL in isolation on SQLite, so a failure points at this revision rather
+than at the chain. The whole chain now runs on SQLite too — see
+``test_migration_metadata_parity.py`` — and on Postgres in
 ``test_investigation_persistence_postgres.py`` (skipped without a Postgres URL).
 """
 

@@ -53,6 +53,7 @@ class AnalysisRun(Base):
         str_enum_column(AnalysisRunStatus, name="analysis_run_status"),
         nullable=False,
         default=AnalysisRunStatus.pending,
+        server_default=AnalysisRunStatus.pending.value,
         index=True,
     )
 

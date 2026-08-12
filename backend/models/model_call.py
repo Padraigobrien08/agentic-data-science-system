@@ -53,6 +53,7 @@ class ModelCall(Base):
         str_enum_column(ModelCallStatus, name="model_call_status"),
         nullable=False,
         default=ModelCallStatus.pending,
+        server_default=ModelCallStatus.pending.value,
         index=True,
     )
 

@@ -46,6 +46,7 @@ class EvaluationRun(Base):
         str_enum_column(EvaluationRunStatus, name="evaluation_run_status"),
         nullable=False,
         default=EvaluationRunStatus.pending,
+        server_default=EvaluationRunStatus.pending.value,
         index=True,
     )
 

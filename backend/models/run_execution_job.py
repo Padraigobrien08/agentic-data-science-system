@@ -33,6 +33,7 @@ class RunExecutionJob(Base):
         str_enum_column(RunExecutionJobStatus, name="run_execution_job_status"),
         nullable=False,
         default=RunExecutionJobStatus.pending,
+        server_default=RunExecutionJobStatus.pending.value,
         index=True,
     )
 
@@ -62,6 +63,9 @@ class RunExecutionJob(Base):
         Integer,
         nullable=False,
         default=1,
+        # 005 backfilled pre-existing rows to 0; new rows get 1 from the Python default
+        # above. The server default only exists so both differ the same way everywhere.
+        server_default="0",
         doc="1-based attempt number for this durable execution-attempt row.",
     )
 

@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, BigInteger, DateTime, ForeignKey, String, Uuid, func
+from sqlalchemy import JSON, BigInteger, DateTime, ForeignKey, Index, String, Uuid, func
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
@@ -21,6 +21,10 @@ if TYPE_CHECKING:
 
 class Artifact(Base):
     __tablename__ = "artifacts"
+    __table_args__ = (
+        # Retention sweeps select by age and skip already-pruned blobs; created by 011.
+        Index("ix_artifacts_created_at_blob_deleted_at", "created_at", "blob_deleted_at"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
 
@@ -53,6 +57,7 @@ class Artifact(Base):
         str_enum_column(ArtifactKind, name="artifact_kind"),
         nullable=False,
         default=ArtifactKind.other,
+        server_default=ArtifactKind.other.value,
         index=True,
     )
 

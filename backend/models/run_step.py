@@ -44,6 +44,7 @@ class RunStep(Base):
         str_enum_column(RunStepStatus, name="run_step_status"),
         nullable=False,
         default=RunStepStatus.pending,
+        server_default=RunStepStatus.pending.value,
         index=True,
     )
 
