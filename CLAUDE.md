@@ -57,6 +57,8 @@ Agentic Data Science System is an auditable agentic analysis platform over tabul
 - Docker Compose - Recommended full-stack orchestration documented in `docs/local-stack.md` and wrapped by `scripts/stack`.
 - Tailwind CSS `^3.4.16` - Utility styling configured in `frontend/tailwind.config.ts` and used from `frontend/src/app/globals.css`.
 - ESLint `^9.16.0` with `eslint-config-next` - Frontend linting from `frontend/.eslintrc.json` and `.github/workflows/ci.yml`.
+- Ruff `>=0.13.3,<0.14` - Backend/orchestration lint gate configured in `ruff.toml`, run as a blocking `python -m ruff check .` step in `.github/workflows/ci.yml`.
+- mypy `>=1.11` - Backend type checking configured in `mypy.ini`, run as a report-only (`continue-on-error`) `python -m mypy backend` step in `.github/workflows/ci.yml`.
 - Turbopack - Local frontend development uses `next dev --turbopack` in `frontend/package.json`.
 ## Key Dependencies
 - `pandas>=2.0` - Core dataframe pipeline for normalization, features, reporting, and evaluation in files such as `src/anomaly.py`, `src/report.py`, and `edgar_project/evaluation/analytical_checks.py`.
@@ -114,11 +116,12 @@ Agentic Data Science System is an auditable agentic analysis platform over tabul
 - Use `PascalCase` for TypeScript interfaces, type aliases, and component prop models (`ArtifactMetadata`, `RunStepDetail`, `PipelinePhaseView`, `Props` blocks in `frontend/src/components/*`).
 - Prefer explicit string-literal unions and typed wire mirrors over loose strings in frontend API code (`frontend/src/lib/api/types.ts`).
 ## Code Style
-- Python source follows Black-like layout even though no repo formatter config is detected. `pyproject.toml`, `ruff.toml`, `.flake8`, `.isort.cfg`, `.editorconfig`, and `.prettierrc*` are not present at repo root, so match the existing 4-space indentation, trailing commas in multiline literals, and typed signatures seen in `backend/main.py`, `backend/services/analysis_run_service.py`, and `backend/repositories/run_execution_job_repository.py`.
+- Python source follows Black-like layout, but no autoformatter runs: `pyproject.toml`, `.flake8`, `.isort.cfg`, `.editorconfig`, and `.prettierrc*` are absent, and `ruff.toml` configures the linter only (`ruff format` is not wired up). Match the existing 4-space indentation, trailing commas in multiline literals, and typed signatures seen in `backend/main.py`, `backend/services/analysis_run_service.py`, and `backend/repositories/run_execution_job_repository.py`.
 - Frontend TypeScript/TSX uses 2-space indentation, semicolons, and wrapped JSX props/children as seen in `frontend/src/components/runs/run-primary-answer.tsx`, `frontend/src/components/trace/planning-transparency-panel.tsx`, and `frontend/src/components/transparency/report-evidence-panel.tsx`.
 - Keep Python module docstrings at the top of files and use short JSDoc blocks only where the contract is subtle (`frontend/src/lib/run-pipeline-phases.ts`, `frontend/src/lib/api/types.ts`).
 - Frontend linting is enforced by `frontend/.eslintrc.json` extending `next/core-web-vitals` and by `frontend/package.json` scripts such as `npm run lint`.
-- No dedicated backend lint or static-analysis command is configured in repo config or `.github/workflows/ci.yml`; backend quality currently relies on typed code plus `pytest`.
+- Backend lint is **blocking** in CI: `python -m ruff check .` (see `ruff.toml`). Rules are deliberately narrow — `E4`/`E7`/`E9`/`F`/`W` plus `I` for import sorting, with `E501` omitted and `E402` ignored — so it catches real bugs and import hygiene, not line length. `alembic/versions`, `notebooks`, and `data` are excluded. Run it before pushing; misordered imports in a new file are the usual way to turn CI red.
+- `python -m mypy backend` (see `mypy.ini`) runs **report-only** (`continue-on-error`): the backend is not yet mypy-clean, so it surfaces regressions without blocking. Don't take a clean local `pytest` as evidence that CI will pass.
 - Keep suppressions narrow and justified. Existing examples are side-effect imports for ORM metadata (`import backend.models  # noqa: F401` in `tests/test_backend_foundation.py`), defensive boundary catches (`# noqa: BLE001` in `backend/api/routes/health.py`), and environment-only branches (`# pragma: no cover` in `backend/llm/openai_provider.py`).
 ## Import Organization
 - Use the `@/*` alias defined in `frontend/tsconfig.json` for frontend app imports (`@/components/...`, `@/lib/...`).
