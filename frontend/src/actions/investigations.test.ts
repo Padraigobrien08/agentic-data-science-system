@@ -130,10 +130,11 @@ describe("tabular source", () => {
 
 describe("shared validation", () => {
   it("requires a goal whichever source is chosen", async () => {
-    for (const fields of [
+    const cases: Record<string, string>[] = [
       { goal: "  ", source: "edgar", entities: "AAPL" },
       { goal: "  ", source: "tabular", csv: "a,b\n1,2" },
-    ]) {
+    ];
+    for (const fields of cases) {
       const result = await submit(fields);
       expect(result).toEqual({ error: expect.stringContaining("answer") });
     }

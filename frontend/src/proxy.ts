@@ -3,7 +3,7 @@ import { NextResponse } from "next/server";
 
 import { SESSION_COOKIE_NAME } from "@/lib/auth/constants";
 
-export function middleware(request: NextRequest) {
+export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
   if (!pathname.startsWith("/projects") && !pathname.startsWith("/artifacts")) {
     return NextResponse.next();
