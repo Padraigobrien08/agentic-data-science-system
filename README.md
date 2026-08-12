@@ -226,6 +226,7 @@ itself.
 | [`tests/`](tests/) | 1,177 tests: backend, orchestration, agency, regression |
 
 **Docs:** [local stack](docs/local-stack.md) · [deploy](docs/deploy.md) ·
+[performance](docs/performance.md) ·
 [architecture](docs/architecture/) · [the loop](docs/agent/investigation-loop.md) ·
 [observability](docs/observability.md) · [auth](docs/auth-api.md) ·
 [artifact delivery](docs/artifact-delivery.md) · [extending](docs/extending.md)
