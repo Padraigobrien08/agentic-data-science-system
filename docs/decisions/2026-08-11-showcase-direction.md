@@ -385,7 +385,7 @@ Remaining: swap the placeholder for the real URL once the host is up.
 | Item | Why not now |
 |---|---|
 | Unified BYO-data entry (EDGAR as one adapter) | Correct target architecture, largest frontend change in the set. D5 buys the generality claim far cheaper. |
-| v1.5 Durable Chat History (phases 27–30) | A real bug — `New chat` hides prior conversations — but it costs a reviewer nothing in a five-minute demo. Fix after the demo is up. |
+| ~~v1.5 Durable Chat History (phases 27–30)~~ | **Done 2026-08-12** (PR #68). The bug was real but misplaced: persistence and listing were already correct, and the fault was `ChatShell` reconciling instead of remounting across a thread change, so `useState(props)` kept the previous thread's messages, draft, and run-progress poll. Fixed with `key={conversationId}`. Reproducing before diagnosing is what moved the search from the data layer to the shell. |
 | O5 load / performance testing | Publishable, and would surface honest latency numbers for the loop. Genuinely useful; second in line after the demo ships. |
 | Replay HTTP route | Service-level only today. The replay *tier* can be served from persisted state without exposing replay-vs-baseline diffing over HTTP. |
 | MCP tool-call rate limiting; unauthenticated handshake | Real gaps. Mitigate for now by not exposing the MCP server publicly — bind loopback, document stdio use. |

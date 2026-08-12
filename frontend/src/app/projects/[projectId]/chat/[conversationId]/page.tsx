@@ -60,6 +60,13 @@ export default async function ConversationPage({
   return (
     <div className="fixed inset-0 overflow-hidden">
       <ChatShell
+        // Remount on thread change. Navigating between conversations keeps this component at
+        // the same position in the tree, so React reconciles rather than remounts — and every
+        // piece of shell state is seeded from props with `useState`, which only reads them on
+        // first mount. Without the key, opening an older chat left the previous thread's
+        // messages on screen, a half-typed draft in the composer, and its run-progress poll
+        // still running. All of that state is thread-scoped, so discarding it is the point.
+        key={conversationId}
         projectId={projectId}
         conversationId={conversationId}
         user={user}
