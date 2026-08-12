@@ -7,6 +7,7 @@ from uuid import UUID
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from backend.models.enums import UserAccessTier
 from backend.models.user import User
 
 
@@ -28,6 +29,7 @@ class UserService:
         hashed_password: str,
         display_name: str | None,
         is_admin: bool = False,
+        access_tier: UserAccessTier = UserAccessTier.standard,
     ) -> User:
         normalized = email.strip().lower()
         row = User(
@@ -35,6 +37,7 @@ class UserService:
             display_name=display_name,
             hashed_password=hashed_password,
             is_admin=is_admin,
+            access_tier=access_tier,
         )
         self._session.add(row)
         self._session.flush()

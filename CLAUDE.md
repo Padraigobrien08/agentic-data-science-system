@@ -3,15 +3,20 @@
 
 **Agentic Data Science System**
 
-Agentic Data Science System is a brownfield EDGAR analysis platform that combines a deterministic financial-analysis pipeline with a FastAPI backend, a background worker, MCP tooling, and a Next.js web app. It is built for operators and analysts who need traceable SEC-based runs, inspectable artifacts, and a path from local experimentation to a dependable multi-user product.
+Agentic Data Science System is an auditable agentic analysis platform over tabular data, with SEC EDGAR as the flagship dataset. It combines an adaptive investigation loop (`agentic/`), a deterministic financial-analysis pipeline (`src/`), a FastAPI backend, a background worker, two MCP servers, and a Next.js web app.
 
-**Core Value:** Every EDGAR run must produce trustworthy, isolated, auditable results that the user can inspect without ambiguity.
+**Core Value:** Every run must produce trustworthy, isolated, auditable results the user can inspect without ambiguity — every claim links to evidence, every experiment has typed inputs and outputs, every run is reproducible from persisted structured state.
+
+**Governing invariant:** the LLM plans and interprets; deterministic code computes. No number in a trace comes from a language model.
+
+**Current direction:** hosted showcase demo — see [`docs/decisions/2026-08-11-showcase-direction.md`](docs/decisions/2026-08-11-showcase-direction.md) for the active plan and [`docs/demo-script.md`](docs/demo-script.md) for the narrative it serves. That decisions file supersedes sequencing in `.planning/`.
 
 ### Constraints
 
 - **Tech stack**: Keep the existing Python + FastAPI + SQLAlchemy + Next.js + Postgres architecture — hardening should preserve established surfaces instead of forcing a rewrite
 - **Brownfield safety**: Prefer explicit seams and incremental migrations over invasive refactors — the current product already has working CLI, MCP, backend, and frontend flows
-- **Deterministic analysis**: Preserve the non-LLM numerical path in `src/` — run trust depends on keeping deterministic EDGAR computations inspectable
+- **Deterministic analysis**: Preserve the non-LLM numerical path in `src/` — run trust depends on keeping deterministic EDGAR computations inspectable. `agentic/domain` stays free of SQLAlchemy, and `agentic/` emits no logs/metrics directly (instrumentation goes through the `AgentObserver` seam)
+- **Honest outcomes**: Uncertainty and failure are valid results. `insufficient_evidence` and `rejected` hypotheses must surface as first-class outcomes, never as errors or silent degradation
 - **Compatibility**: Avoid breaking existing run APIs, artifact access patterns, and local development workflows unless a migration path is introduced — operators already rely on the current surfaces
 - **Security**: Defaults must be safe in deployed environments — current permissive defaults are acceptable for local development only
 - **Operational clarity**: Health, metrics, and retained run data must reflect real system state — false green signals are worse than noisy failures
@@ -169,9 +174,9 @@ Agentic Data Science System is a brownfield EDGAR analysis platform that combine
 - Contains: shared request wrapper `frontend/src/lib/api/client.ts`, API modules like `frontend/src/lib/api/runs.ts`, bearer-header extraction in `frontend/src/lib/auth/backend-auth.ts`, and artifact proxy routes in `frontend/src/app/api/artifacts/[artifactId]/content/route.ts`.
 - Depends on: `API_URL` resolution in `frontend/src/lib/api/config.ts` and the HttpOnly session cookie defined in `frontend/src/lib/auth/constants.ts`
 - Used by: server components, server actions, and middleware redirects
-- Purpose: Expose authenticated project, run, artifact, auth, health, and metrics endpoints.
+- Purpose: Expose authenticated project, conversation, run, investigation, evaluation, artifact, auth, health, and metrics endpoints.
 - Location: `backend/main.py`, `backend/api/router.py`, `backend/api/routes/`, `backend/api/auth_deps.py`, `backend/api/access_checks.py`
-- Contains: FastAPI app construction in `backend/main.py`, top-level route registration in `backend/api/router.py`, thin handlers such as `backend/api/routes/runs.py` and `backend/api/routes/artifacts.py`, and owner-scoped checks in `backend/api/access_checks.py`.
+- Contains: FastAPI app construction in `backend/main.py`, top-level route registration in `backend/api/router.py`, thin handlers such as `backend/api/routes/runs.py`, `backend/api/routes/investigations.py`, `backend/api/routes/conversations.py`, `backend/api/routes/evaluations.py`, and `backend/api/routes/artifacts.py`, plus owner-scoped checks in `backend/api/access_checks.py`. Security middleware lives in `backend/api/security_headers.py` and `backend/api/rate_limit.py`; ops routes (`/metrics`, `/v1/worker/health`) sit behind `OpsTokenDep`.
 - Depends on: dependency wiring in `backend/api/deps.py`, settings in `backend/config/settings.py`, service layer modules in `backend/services/`
 - Used by: `frontend/src/lib/api/*.ts`, manual HTTP clients, Compose smoke checks, and tests under `tests/`
 - Purpose: Enforce lifecycle rules, coordinate DB state changes, and persist analysis artifacts and traces.
@@ -184,6 +189,21 @@ Agentic Data Science System is a brownfield EDGAR analysis platform that combine
 - Contains: orchestration input construction, status transitions, `output_payload_json` persistence, `meta_json.ai_agents` enrichment, prompt registry lookups in `backend/agents/prompt_registry.py`, and optional LLM agent calls through `backend/services/recorded_chat_completion_service.py`.
 - Depends on: `edgar_project/orchestration/agent.py`, `backend/services/run_step_service.py`, `backend/services/tool_call_service.py`, `backend/services/artifact_service.py`, `backend/llm/factory.py`
 - Used by: synchronous `POST /v1/runs/{run_id}/execute` and the worker path in `backend/worker/loop.py`
+- Purpose: Run the adaptive investigation loop — hypotheses, experiment selection from intermediate results, evidence updates, critique, typed termination, and an evidence-linked conclusion.
+- Location: `agentic/agent/`, `agentic/domain/`, `agentic/experiments/`, `agentic/adapters/`, `agentic/evaluation/`
+- Contains: the ten-component loop in `agentic/agent/loop.py` and `components.py`, budgets and safety caps in `agentic/agent/budget.py`, the instrumentation seam in `agentic/agent/observer.py`, resume/replay/diff in `agentic/agent/{store,replay,diff}.py`, typed entities in `agentic/domain/`, the deterministic experiment registry in `agentic/experiments/`, and dataset adapters (EDGAR, tabular, in-memory) in `agentic/adapters/`.
+- Depends on: nothing in `backend/` or `edgar_project/` — the package is standalone and offline-safe. `agentic/domain` has no SQLAlchemy dependency; `agentic/` imports no structlog, OpenTelemetry, or prometheus.
+- Used by: `backend/services/agentic_investigation_execution_service.py` (the single wiring point, which also injects `backend/observability/agent_observer.py`), `backend/services/investigation_replay_service.py`, and the offline agency suite in `agentic/evaluation/`
+- Purpose: Persist investigation state and expose it read-only, owner-scoped.
+- Location: `backend/models/investigation.py`, `backend/models/investigation_entities.py`, `backend/repositories/investigation_repository.py`, `backend/services/investigation_store.py`, `backend/services/investigation_create_service.py`, `backend/api/routes/investigations.py`
+- Contains: the storage mapping for `InvestigationState` (hypotheses, evidence, experiments, decisions, critiques, conclusion), creation from a user-supplied dataset in `investigation_create_service.py`, and EDGAR panel materialization in `backend/services/edgar_panel_materializer.py`.
+- Depends on: `agentic/domain` for the typed entities it serializes; additive reversible Alembic migrations
+- Used by: `/v1/investigations` routes, the platform MCP server, and the frontend investigation surfaces under `frontend/src/app/projects/[projectId]/investigations/`
+- Purpose: Expose the platform itself over MCP — commission an investigation, read its hypotheses and evidence, fetch the artifacts behind them.
+- Location: `backend/mcp/`
+- Contains: 9 tools and 2 resources in `backend/mcp/server.py`, the HTTP client in `backend/mcp/client.py`, and the two trust models (stdio env token vs. per-request bearer) in `backend/mcp/auth.py`.
+- Depends on: the `/v1` API over HTTP — it is a client, not a second implementation, so auth, owner scoping, and 404-for-unauthorized are inherited rather than reimplemented. Shares `ToolResponseEnvelope` with the EDGAR server.
+- Used by: external MCP clients over stdio (`python -m backend.mcp`) or streamable-HTTP
 - Purpose: Validate orchestration requests, pick a plan template, hand planning to execution, and emit a typed `OrchestrationOutput`.
 - Location: `edgar_project/orchestration/`
 - Contains: coordinator `edgar_project/orchestration/agent.py`, pure planner `edgar_project/orchestration/planner.py`, executor `edgar_project/orchestration/executor.py`, handoff contract `edgar_project/orchestration/execution_contract.py`, mutable runtime state `edgar_project/orchestration/state.py`, and public wire schemas in `edgar_project/orchestration/schemas.py`.
@@ -252,7 +272,16 @@ Agentic Data Science System is a brownfield EDGAR analysis platform that combine
 - Responsibilities: normalize CLI arguments, run orchestration or benchmark flows, and print digests or JSON
 - Location: `edgar_project/mcp/server.py`
 - Triggers: `python -m edgar_project.mcp.server` or `python -m edgar_project.mcp server`
-- Responsibilities: expose MCP tool functions with validated arguments and JSON envelopes
+- Responsibilities: expose the deterministic EDGAR *computation* as MCP tools with validated arguments and JSON envelopes
+- Location: `backend/mcp/server.py`
+- Triggers: `python -m backend.mcp` (stdio) or `python -m backend.mcp --transport streamable-http`
+- Responsibilities: expose the *platform* as MCP tools and resources by calling `/v1` as the current caller; stdio uses `EDGAR_MCP_TOKEN`, hosted HTTP resolves each request's bearer header and never falls back to the environment token
+- Location: `backend/maintenance/retention.py`
+- Triggers: `python -m backend.maintenance.retention` (supports `--dry-run`)
+- Responsibilities: compact run payloads, redact model payloads, and clean artifact blobs per the configured retention windows
+- Location: `agentic/evaluation/__main__.py`
+- Triggers: `python -m agentic.evaluation`
+- Responsibilities: run the tiered agency benchmark against baselines and emit the scoreboard
 - Location: `main.py`
 - Triggers: `python3 main.py`
 - Responsibilities: run the Phase 1 pipeline directly against `config.DEFAULT_TICKERS` and write artifacts without the backend persistence shell

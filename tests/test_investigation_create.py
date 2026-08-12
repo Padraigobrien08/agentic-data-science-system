@@ -44,7 +44,7 @@ def _enabled_settings() -> Settings:
 
 def _force_fixture_policy(monkeypatch) -> None:
     """Keep runs offline/deterministic regardless of ambient LLM config."""
-    monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s: FixtureAgentPolicy())
+    monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s, **_: FixtureAgentPolicy())
 
 
 # --- CSV parsing (unit) -----------------------------------------------------

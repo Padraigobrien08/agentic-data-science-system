@@ -21,6 +21,7 @@ from backend.config.settings import get_settings, log_database_posture_once
 from backend.observability import install_edgar_telemetry_hooks, setup_observability_logging
 from backend.observability.middleware import ObservabilityMiddleware
 from backend.observability.tracing import setup_tracing
+from backend.services.spend_guard import log_spend_guard_posture
 
 
 def _ensure_database_parent_dir(database_url: str) -> None:
@@ -41,6 +42,7 @@ async def lifespan(_app: FastAPI) -> AsyncIterator[None]:
     level = getattr(logging, s.log_level.upper(), logging.INFO)
     setup_observability_logging(level=level, json_logs=s.observability_json_logs)
     log_database_posture_once(s)
+    log_spend_guard_posture(s)
     setup_tracing(service_name=s.otel_service_name)
     install_edgar_telemetry_hooks()
     _ensure_database_parent_dir(s.database_url)

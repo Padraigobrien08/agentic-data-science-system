@@ -16,6 +16,7 @@ from backend.api.deps import DbSession
 from backend.api.rate_limit import enforce_auth_rate_limit
 from backend.auth.tokens import create_access_token
 from backend.config.settings import get_settings
+from backend.models.enums import UserAccessTier
 from backend.models.project import Project
 from backend.models.user import User
 from backend.schemas.auth import (
@@ -40,6 +41,29 @@ _GUEST_DEMO_TICKERS = ["AAPL", "MSFT", "NVDA"]
 AuthRateLimit = Annotated[None, Depends(enforce_auth_rate_limit)]
 
 
+def _configured_invite_code(settings) -> str:
+    """The adaptive-tier invite code, or "" when no self-serve upgrade path exists."""
+    if settings.adaptive_invite_code is None:
+        return ""
+    return settings.adaptive_invite_code.get_secret_value().strip()
+
+
+def _tier_for_registration(submitted_code: str | None, settings) -> UserAccessTier:
+    """
+    Standard unless the submitted code matches the configured one.
+
+    Compared with ``compare_digest`` so the check does not leak the code's length or a
+    matching prefix through timing. ``/register`` is already IP rate-limited
+    (``enforce_auth_rate_limit``), which is what bounds guessing.
+    """
+    configured = _configured_invite_code(settings)
+    if not configured:
+        return UserAccessTier.standard
+    if submitted_code and compare_digest(submitted_code.strip(), configured):
+        return UserAccessTier.adaptive
+    return UserAccessTier.standard
+
+
 @router.get("/capabilities", response_model=AuthCapabilitiesResponse)
 def capabilities(db: DbSession) -> AuthCapabilitiesResponse:
     settings = get_settings()
@@ -48,6 +72,7 @@ def capabilities(db: DbSession) -> AuthCapabilitiesResponse:
         allow_open_registration=settings.allow_open_registration,
         bootstrap_required=not settings.allow_open_registration and not bootstrap_completed,
         bootstrap_completed=bootstrap_completed,
+        invite_code_accepted=bool(_configured_invite_code(settings)),
     )
 
 
@@ -68,6 +93,7 @@ def register(
             email=str(body.email),
             hashed_password=hash_password(body.password),
             display_name=body.display_name,
+            access_tier=_tier_for_registration(body.invite_code, settings),
         )
         db.commit()
     except IntegrityError:
@@ -106,6 +132,9 @@ def bootstrap_admin(
             hashed_password=hash_password(body.password),
             display_name=body.display_name,
             is_admin=True,
+            # The operator pays for this deployment and must be able to run every engine
+            # in it, including to reproduce a spend-limit report.
+            access_tier=UserAccessTier.adaptive,
         )
         db.commit()
     except IntegrityError:
@@ -142,12 +171,21 @@ def guest_session(db: DbSession, _rate_limit: AuthRateLimit = None) -> GuestSess
         raise HTTPException(status_code=403, detail="Guest demo access is disabled")
 
     users = UserService(db)
-    email = f"guest-{uuid.uuid4().hex[:16]}@demo.local"
+    # RFC 2606 reserved domain, so a synthesized guest address can never collide with a real
+    # one. It must also pass ``EmailStr``: ``UserRead`` validates ``email`` on the way *out*,
+    # so a special-use domain (``.local``, ``.invalid``, ``.test``) makes ``GET /auth/me``
+    # fail with a 500 for every guest — which breaks the whole guest tier, since the frontend
+    # layout loads the current user on each render.
+    email = f"guest-{uuid.uuid4().hex[:16]}@guest.example.com"
     try:
         user = users.create_with_password(
             email=email,
             hashed_password=hash_password(secrets.token_urlsafe(24)),
             display_name="Guest",
+            # Pins the guest to the deterministic engine no matter what a run requests, and
+            # applies the tightest run ceiling. Auto-provisioned accounts are the one identity
+            # an anonymous visitor can mint at will, so they get the smallest budget.
+            access_tier=UserAccessTier.guest,
         )
         db.flush()
         project = Project(

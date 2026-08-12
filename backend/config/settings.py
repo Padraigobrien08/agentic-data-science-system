@@ -250,6 +250,61 @@ class Settings(BaseSettings):
             "via ``input_payload_json['engine'] = 'agentic'`` (EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED)."
         ),
     )
+    # Spend guard — see ``backend.services.spend_guard`` and
+    # ``docs/decisions/2026-08-11-showcase-direction.md`` (S0).
+    #
+    # Two independent controls on purpose. The USD ceilings only bind when model pricing is
+    # configured (``llm_model_prices``); an unpriced deployment estimates every call at $0.00,
+    # so a cost-only guard would silently never fire. The *run-count* ceilings are always
+    # enforceable and are the real backstop.
+    adaptive_invite_code: SecretStr | None = Field(
+        default=None,
+        description=(
+            "Shared secret that upgrades a new registration to the ``adaptive`` tier "
+            "(the agentic loop). Unset (default) means there is no self-serve path to the "
+            "paid engine — correct for every deployment that is not the public demo."
+        ),
+    )
+    adaptive_max_runs_per_account: int = Field(
+        default=10,
+        ge=0,
+        description="Lifetime agentic-engine runs allowed per adaptive account; 0 disables the limit.",
+    )
+    adaptive_max_spend_usd_per_account: float = Field(
+        default=2.0,
+        ge=0.0,
+        description=(
+            "Lifetime estimated model spend allowed per adaptive account. "
+            "0 disables. Only binds when ``llm_model_prices`` is configured."
+        ),
+    )
+    standard_max_runs_per_account: int = Field(
+        default=25,
+        ge=0,
+        description="Lifetime deterministic-engine runs allowed per standard account; 0 disables.",
+    )
+    guest_max_runs_per_account: int = Field(
+        default=3,
+        ge=0,
+        description="Lifetime runs allowed per auto-provisioned guest account; 0 disables.",
+    )
+    global_monthly_max_runs: int = Field(
+        default=0,
+        ge=0,
+        description=(
+            "Kill switch: total runs started across all users in the current calendar month. "
+            "0 disables. Set this on any public deployment."
+        ),
+    )
+    global_monthly_max_spend_usd: float = Field(
+        default=0.0,
+        ge=0.0,
+        description=(
+            "Kill switch: total estimated model spend across all users in the current calendar "
+            "month. 0 disables. Only binds when ``llm_model_prices`` is configured."
+        ),
+    )
+
     openai_api_key: SecretStr | None = Field(
         default=None,
         description="OpenAI API key (EDGAR_BACKEND_OPENAI_API_KEY)",

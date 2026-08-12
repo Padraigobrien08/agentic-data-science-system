@@ -1,0 +1,100 @@
+# Deploy the backend stack to the demo host over SSH.
+#
+# Builds on the server rather than pushing an image from a registry. For this shape of
+# deployment that is the simpler correct choice: the heavy build (Next.js) is on Vercel, so the
+# server only builds a slim Python image, and skipping a registry removes credential handling
+# from both the workflow and the host.
+#
+# Manual by default. A portfolio demo has no reason to redeploy on every push to main, and a
+# push-triggered deploy that runs while a reviewer is looking at the site is worse than one you
+# choose. Flip the `push:` trigger on if that changes.
+#
+# Required repository secrets:
+#   DEPLOY_HOST         hostname or IP of the demo server
+#   DEPLOY_USER         SSH user (must be in the `docker` group)
+#   DEPLOY_SSH_KEY      private key, PEM format, no passphrase
+#   DEPLOY_PATH         absolute path of the checkout on the server (e.g. /srv/edgar)
+#
+# The server's `.env` is NOT managed here. It holds the OpenAI key and the JWT secret, and it
+# stays on the host — see docs/deploy.md.
+
+name: deploy
+
+on:
+  workflow_dispatch:
+    inputs:
+      skip_tests:
+        description: "Deploy without running the test suite first (emergency only)"
+        type: boolean
+        default: false
+
+concurrency:
+  group: deploy-demo
+  cancel-in-progress: false
+
+jobs:
+  test:
+    name: test
+    if: ${{ !inputs.skip_tests }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt -r requirements-backend.txt -r requirements-dev.txt
+      - name: pytest
+        run: PYTHONPATH=. python -m pytest tests/ -q
+      - name: ruff
+        run: python -m ruff check backend/ agentic/ tests/ alembic/ scripts/
+      - name: API contract is current
+        run: PYTHONPATH=. python scripts/export-openapi.py --check
+
+  deploy:
+    name: deploy
+    needs: [test]
+    # `always()` plus an explicit result check, so skip_tests can bypass the job but a genuine
+    # test failure still blocks — `needs` alone would skip deploy entirely when tests are skipped.
+    if: ${{ always() && (needs.test.result == 'success' || inputs.skip_tests) }}
+    runs-on: ubuntu-latest
+    environment: demo
+    steps:
+      - name: Add SSH key
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.DEPLOY_SSH_KEY }}" > ~/.ssh/id_deploy
+          chmod 600 ~/.ssh/id_deploy
+          ssh-keyscan -H "${{ secrets.DEPLOY_HOST }}" >> ~/.ssh/known_hosts
+
+      - name: Pull, build, migrate, restart
+        run: |
+          ssh -i ~/.ssh/id_deploy "${{ secrets.DEPLOY_USER }}@${{ secrets.DEPLOY_HOST }}" bash -euo pipefail <<'REMOTE'
+          cd "${{ secrets.DEPLOY_PATH }}"
+          git fetch --all --prune
+          git reset --hard origin/main
+          # Migrations run as their own compose service (`migrate`) with
+          # service_completed_successfully gating api/worker, so `up -d` applies them in order
+          # and refuses to start the app if they fail.
+          docker compose -f docker-compose.prod.yml up -d --build
+          docker compose -f docker-compose.prod.yml ps
+          REMOTE
+
+      - name: Verify the deployed API is healthy
+        run: |
+          for i in $(seq 1 30); do
+            code=$(curl -sS -o /tmp/health.json -w '%{http_code}' \
+              "https://${{ secrets.DEPLOY_HOST }}/v1/health" || echo 000)
+            if [ "$code" = "200" ]; then
+              echo "healthy:"; cat /tmp/health.json; exit 0
+            fi
+            echo "attempt $i: HTTP $code"; sleep 5
+          done
+          echo "API did not become healthy after deploy"; exit 1
+
+      - name: Published demos are still reachable without a token
+        # The replay tier is what an unauthenticated visitor sees. A deploy that leaves it
+        # empty or 500ing is a broken demo even if /health is green.
+        run: |
+          curl -fsS "https://${{ secrets.DEPLOY_HOST }}/v1/demos" | tee /tmp/demos.json
+          python -c "import json,sys; d=json.load(open('/tmp/demos.json')); sys.exit(0 if d else 'no demos published')"

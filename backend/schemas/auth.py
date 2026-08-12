@@ -12,6 +12,15 @@ class AuthRegisterBody(BaseModel):
     email: EmailStr
     password: str = Field(min_length=10, max_length=72)
     display_name: str | None = Field(default=None, max_length=256)
+    invite_code: str | None = Field(
+        default=None,
+        max_length=256,
+        description=(
+            "Optional. A matching code upgrades the new account to the adaptive tier "
+            "(the agentic investigation engine). Registration succeeds either way — a wrong "
+            "or absent code simply yields a standard account."
+        ),
+    )
 
 
 class AuthBootstrapBody(AuthRegisterBody):
@@ -43,3 +52,10 @@ class AuthCapabilitiesResponse(BaseModel):
     allow_open_registration: bool
     bootstrap_required: bool
     bootstrap_completed: bool
+    invite_code_accepted: bool = Field(
+        default=False,
+        description=(
+            "True when an invite code can upgrade a registration to the adaptive tier. "
+            "Reveals only that the field is worth showing, never the code itself."
+        ),
+    )

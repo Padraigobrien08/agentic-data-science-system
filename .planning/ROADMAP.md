@@ -1,5 +1,11 @@
 # Roadmap: Agentic Data Science System
 
+> **Superseded for sequencing (2026-08-11).** The active plan is
+> [`docs/decisions/2026-08-11-showcase-direction.md`](../docs/decisions/2026-08-11-showcase-direction.md).
+> This file and `STATE.md` remain accurate as history of shipped milestones, but the *next*
+> work is not v1.5 — v1.5 is explicitly deferred there. Note also that `STATE.md` predates the
+> phase-33 commits and understates what has shipped.
+
 ## Milestones
 
 - [ ] **v1.5 Durable Chat History** — active · preserve prior conversations when `New chat` creates a fresh thread

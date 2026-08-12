@@ -46,7 +46,7 @@ class _CostlyPolicy:
         self._pending += self._cost_per_call
         return self._inner.interpret_goal(goal_text, capability_summary=capability_summary)
 
-    def generate_hypotheses(self, interpretation, *, metric_names, dimension_names) -> HypothesisProposals:  # noqa: ANN001
+    def generate_hypotheses(self, interpretation, *, metric_names, dimension_names, goal_text="") -> HypothesisProposals:  # noqa: ANN001
         self._pending += self._cost_per_call
         return self._inner.generate_hypotheses(
             interpretation, metric_names=metric_names, dimension_names=dimension_names

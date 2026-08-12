@@ -78,6 +78,23 @@ class ModelCallStatus(str, enum.Enum):
     cancelled = "cancelled"
 
 
+class UserAccessTier(str, enum.Enum):
+    """
+    What a user is allowed to spend model budget on.
+
+    Ordered by cost, cheapest first. ``guest`` is an auto-provisioned throwaway account and is
+    pinned to the deterministic engine regardless of the ``agentic_engine_enabled`` flag;
+    ``standard`` is a self-registered account (deterministic engine, narrative phases only);
+    ``adaptive`` is unlocked by the invite code and may run the agentic investigation loop.
+
+    See ``docs/decisions/2026-08-11-showcase-direction.md`` (D3, S0).
+    """
+
+    guest = "guest"
+    standard = "standard"
+    adaptive = "adaptive"
+
+
 class ChatMessageRole(str, enum.Enum):
     """Author of a durable chat message."""
 

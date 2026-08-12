@@ -23,7 +23,7 @@ from backend.config.settings import Settings
 from backend.db.base import Base
 from backend.models.analysis_run import AnalysisRun
 from backend.models.artifact import Artifact
-from backend.models.enums import AnalysisRunStatus
+from backend.models.enums import AnalysisRunStatus, UserAccessTier
 from backend.models.investigation import Investigation as InvestigationRow
 from backend.models.investigation import OrchestrationCheckpoint
 from backend.models.investigation_entities import ExperimentResultArtifactLink
@@ -76,8 +76,11 @@ def _seed_run(
     *,
     input_payload: dict | None,
     status: AnalysisRunStatus = AnalysisRunStatus.pending,
+    access_tier: UserAccessTier = UserAccessTier.adaptive,
 ) -> AnalysisRun:
-    user = User(email=f"{uuid.uuid4().hex[:8]}@example.com")
+    # Defaults to the adaptive tier because this module tests the agentic engine, which
+    # requires the entitlement as well as the flag and the opt-in (see spend_guard).
+    user = User(email=f"{uuid.uuid4().hex[:8]}@example.com", access_tier=access_tier)
     session.add(user)
     session.flush()
     project = Project(owner_user_id=user.id, name="p")
@@ -118,6 +121,23 @@ def test_flag_on_without_optin_selects_edgar(session: Session) -> None:
 
 def test_flag_on_missing_payload_selects_edgar(session: Session) -> None:
     run = _seed_run(session, input_payload=None)
+    assert select_run_engine(run, Settings(agentic_engine_enabled=True)) == ENGINE_EDGAR
+
+
+def test_flag_on_with_optin_but_unentitled_user_selects_edgar(session: Session) -> None:
+    """The entitlement is the third condition: flag + opt-in alone must not buy the loop."""
+    run = _seed_run(
+        session, input_payload=_agentic_payload(), access_tier=UserAccessTier.standard
+    )
+    assert select_run_engine(run, Settings(agentic_engine_enabled=True)) == ENGINE_EDGAR
+
+
+def test_flag_on_with_optin_but_no_initiating_user_selects_edgar(session: Session) -> None:
+    """A run with no resolvable initiator must fail closed, not grant the paid engine."""
+    run = _seed_run(session, input_payload=_agentic_payload())
+    run.initiated_by_user_id = None
+    run.initiated_by_user = None
+    session.commit()
     assert select_run_engine(run, Settings(agentic_engine_enabled=True)) == ENGINE_EDGAR
 
 
