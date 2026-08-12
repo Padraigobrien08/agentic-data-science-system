@@ -1,7 +1,7 @@
 # Optional dev / CI — does not affect Phase 1 runtime
 -r requirements.txt
 -r requirements-backend.txt
-pytest>=8.0
+pytest>=9.1.1
 pytest-rerunfailures>=14.0  # auto-retry a rare cross-test ORM-aliasing flake (see issue #8)
 httpx>=0.28.1
 moto[s3]>=5.1.22
