@@ -4518,6 +4518,277 @@
         "title": "PromptRoutingPreviewResponse",
         "type": "object"
       },
+      "ReplayConclusionView": {
+        "properties": {
+          "confidence": {
+            "default": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "disposition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disposition"
+          },
+          "key_evidence_count": {
+            "default": 0,
+            "title": "Key Evidence Count",
+            "type": "integer"
+          },
+          "statement": {
+            "default": "",
+            "title": "Statement",
+            "type": "string"
+          }
+        },
+        "title": "ReplayConclusionView",
+        "type": "object"
+      },
+      "ReplayDiffView": {
+        "description": "The comparison, conclusion-first.\n\n``verdict`` is the answer to the question a replay is asked: ``identical``,\n``same_conclusion`` (the analysis held, the route to it changed) or ``diverged`` (the\nanswer itself changed). Reaching the same conclusion by a different path is a materially\ndifferent result from reaching a different conclusion, so they are not collapsed.",
+        "properties": {
+          "baseline_conclusion": {
+            "$ref": "#/components/schemas/ReplayConclusionView"
+          },
+          "baseline_evidence_count": {
+            "default": 0,
+            "title": "Baseline Evidence Count",
+            "type": "integer"
+          },
+          "baseline_id": {
+            "title": "Baseline Id",
+            "type": "string"
+          },
+          "baseline_iterations": {
+            "default": 0,
+            "title": "Baseline Iterations",
+            "type": "integer"
+          },
+          "baseline_status": {
+            "title": "Baseline Status",
+            "type": "string"
+          },
+          "baseline_termination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Termination"
+          },
+          "baseline_tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Baseline Tools",
+            "type": "array"
+          },
+          "candidate_conclusion": {
+            "$ref": "#/components/schemas/ReplayConclusionView"
+          },
+          "candidate_evidence_count": {
+            "default": 0,
+            "title": "Candidate Evidence Count",
+            "type": "integer"
+          },
+          "candidate_id": {
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "candidate_iterations": {
+            "default": 0,
+            "title": "Candidate Iterations",
+            "type": "integer"
+          },
+          "candidate_status": {
+            "title": "Candidate Status",
+            "type": "string"
+          },
+          "candidate_termination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Termination"
+          },
+          "candidate_tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Candidate Tools",
+            "type": "array"
+          },
+          "experiment_order_changed": {
+            "default": false,
+            "title": "Experiment Order Changed",
+            "type": "boolean"
+          },
+          "hypothesis_deltas": {
+            "items": {
+              "$ref": "#/components/schemas/ReplayHypothesisDelta"
+            },
+            "title": "Hypothesis Deltas",
+            "type": "array"
+          },
+          "summary": {
+            "description": "One line suitable for a log, a CLI, or a PR comment.",
+            "title": "Summary",
+            "type": "string"
+          },
+          "tools_only_in_baseline": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools Only In Baseline",
+            "type": "array"
+          },
+          "tools_only_in_candidate": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools Only In Candidate",
+            "type": "array"
+          },
+          "verdict": {
+            "description": "identical | same_conclusion | diverged",
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verdict",
+          "summary",
+          "baseline_id",
+          "candidate_id",
+          "baseline_status",
+          "candidate_status",
+          "baseline_conclusion",
+          "candidate_conclusion"
+        ],
+        "title": "ReplayDiffView",
+        "type": "object"
+      },
+      "ReplayHypothesisDelta": {
+        "properties": {
+          "baseline_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Confidence"
+          },
+          "baseline_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Status"
+          },
+          "candidate_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Confidence"
+          },
+          "candidate_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Status"
+          },
+          "hypothesis_id": {
+            "title": "Hypothesis Id",
+            "type": "string"
+          },
+          "statement_changed": {
+            "default": false,
+            "title": "Statement Changed",
+            "type": "boolean"
+          },
+          "status_changed": {
+            "default": false,
+            "title": "Status Changed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hypothesis_id"
+        ],
+        "title": "ReplayHypothesisDelta",
+        "type": "object"
+      },
+      "ReplayResponse": {
+        "properties": {
+          "analysis_run_id": {
+            "title": "Analysis Run Id",
+            "type": "string"
+          },
+          "candidate_persisted": {
+            "default": false,
+            "description": "Always false. The candidate is deliberately not stored \u2014 sharing a store with the baseline would overwrite the very run being compared against.",
+            "title": "Candidate Persisted",
+            "type": "boolean"
+          },
+          "diff": {
+            "$ref": "#/components/schemas/ReplayDiffView"
+          },
+          "investigation_id": {
+            "title": "Investigation Id",
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "same_dataset": {
+            "description": "False when the candidate ran against data other than the baseline's, in which case a divergence cannot be attributed to the policy change alone.",
+            "title": "Same Dataset",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "investigation_id",
+          "analysis_run_id",
+          "diff",
+          "same_dataset"
+        ],
+        "title": "ReplayResponse",
+        "type": "object"
+      },
       "RunEnqueueOverrides": {
         "description": "Optional overrides passed to the worker (same semantics as synchronous ``/execute``).",
         "properties": {
@@ -7102,6 +7373,55 @@
           }
         ],
         "summary": "Get Investigation",
+        "tags": [
+          "investigations"
+        ]
+      }
+    },
+    "/v1/investigations/{investigation_id}/replay": {
+      "post": {
+        "description": "Re-run this investigation under the currently configured policy and diff the outcome.\n\nAnswers \"did changing the model / prompt / budget change our answers, or only the route to\nthem?\" against a real persisted run. The verdict is conclusion-first: ``identical``,\n``same_conclusion``, or ``diverged``.\n\n**Admin only, and deliberately so.** A replay is a full investigation and costs real model\nspend, but the candidate is never persisted \u2014 that is a design decision in\n:mod:`agentic.agent.replay`, since sharing a store with the baseline would overwrite the\nrun being compared against. The consequence is that a replay produces no ``AnalysisRun``\nand no ``ModelCall`` rows, so :mod:`backend.services.spend_guard` cannot see or count it.\nAn endpoint that spends money invisibly to the ceilings must not be reachable by ordinary\naccounts.\n\n**Synchronous**, and as slow as the investigation it replays \u2014 tens of seconds against a\nreal model. There is no background variant: the candidate is not persisted, so there would\nbe nothing for a worker to hand back.\n\nRefuses with **409** when the baseline's dataset can no longer be reconstructed. Replay\nreuses the exact panel the baseline ran on; re-fetching would change the data underneath\nthe comparison and attribute to the policy a difference that came from the data.",
+        "operationId": "replay_investigation_route_v1_investigations__investigation_id__replay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "investigation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Investigation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replay Investigation Route",
         "tags": [
           "investigations"
         ]
