@@ -646,13 +646,24 @@ export interface InvestigationTermination {
   at_iteration: number | null;
 }
 
+/**
+ * What an investigation runs over. `source` selects the adapter and defaults to `tabular`
+ * server-side, so omitting it keeps the pre-EDGAR behaviour.
+ *
+ * Fields are mode-dependent: `tabular` uses `format`/`csv_text`/`records`, `edgar` uses
+ * `entities`. The backend validates which are required per source.
+ */
 export interface InvestigationDatasetInput {
-  format: "csv" | "records";
+  source?: "tabular" | "edgar";
+  format?: "csv" | "records";
   csv_text?: string;
   records?: Record<string, unknown>[];
   name?: string;
   time_field?: string | null;
   entity_id_fields?: string[];
+  /** Ticker symbols, when source is "edgar". */
+  entities?: string[];
+  refresh?: boolean;
 }
 
 export interface InvestigationCreateBody {

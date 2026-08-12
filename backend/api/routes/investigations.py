@@ -36,10 +36,17 @@ def create_investigation(
     db: DbSession,
     user: CurrentUserDep,
 ) -> InvestigationCreateResponse:
-    """Create an agentic investigation over a user-provided dataset and run it.
+    """Create an agentic investigation over a dataset and run it.
 
-    Synchronous by default; ``async_execution=true`` enqueues it for the worker (robust for
-    larger datasets). Requires the agentic engine flag; owner-scoped to the target project.
+    ``dataset.source`` selects the adapter: ``tabular`` (pasted CSV or inline records, the
+    default) or ``edgar`` (SEC filings for ``dataset.entities``). Both run the same loop over
+    the same evidence model — EDGAR is an adapter, not a separate product.
+
+    Synchronous by default; ``async_execution=true`` enqueues it for the worker. Prefer async
+    for ``edgar``: the panel is built from live SEC fetches before the loop starts, which is
+    far too slow to hold an HTTP request open for.
+
+    Requires the agentic engine flag; owner-scoped to the target project.
     """
     require_project_owned(db, body.project_id, user.id)
     # This route always drives the agentic engine, so the entitlement is checked explicitly
@@ -56,6 +63,9 @@ def create_investigation(
         name=body.dataset.name,
         time_field=body.dataset.time_field,
         entity_id_fields=body.dataset.entity_id_fields,
+        source=body.dataset.source,
+        entities=body.dataset.entities,
+        refresh=body.dataset.refresh,
     )
     try:
         if body.async_execution:
