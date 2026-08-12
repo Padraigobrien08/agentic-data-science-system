@@ -91,6 +91,17 @@ PYTHONPATH=. python3 -m edgar_project.cli evaluate          # offline regression
 PYTHONPATH=. python3 -m agentic.evaluation                  # agency benchmark
 ```
 
+`evaluate` defaults to the **offline fixture suite**, which is why it is the normal
+**developer fallback** and regression path — it touches no network and is safe to run in a
+loop. Pin one explicitly with `--suite-id suite_fixtures_v1`.
+
+Validation against **live SEC data stays operator-only** and requires an explicit opt-in, so
+no default command and no CI job can reach the network by accident:
+
+```bash
+PYTHONPATH=. python3 -m edgar_project.cli evaluate --suite-id suite_smoke --allow-live
+```
+
 To reproduce a recorded investigation yourself, see
 [`scripts/record_demo.py`](scripts/record_demo.py) — it publishes to the replay tier that serves
 the demo above.
