@@ -6,7 +6,7 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, Boolean, DateTime, String, Uuid, func
+from sqlalchemy import JSON, Boolean, DateTime, String, Uuid, false, func, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
@@ -28,8 +28,14 @@ class User(Base):
     display_name: Mapped[str | None] = mapped_column(String(256), nullable=True)
     hashed_password: Mapped[str | None] = mapped_column(String(255), nullable=True)
 
-    is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
-    is_admin: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    # ``true()``/``false()`` render as TRUE/FALSE on Postgres and 1/0 on SQLite, matching
+    # what 002 and 008 wrote; a literal would be rejected by one dialect or the other.
+    is_active: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=True, server_default=true()
+    )
+    is_admin: Mapped[bool] = mapped_column(
+        Boolean, nullable=False, default=False, server_default=false()
+    )
     preferences_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
 
     # Spend entitlement, not a permission: it decides which engine a run may use and which

@@ -33,6 +33,7 @@ from backend.repositories.investigation_repository import (
 
 # Reuse the module-scoped Postgres database fixture (creates + create_all + drops).
 from tests.postgres_queue_test_utils import postgres_session_factory, postgres_test_url  # noqa: F401
+from tests.test_migration_metadata_parity import metadata_differences
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 _INVESTIGATION_TABLES = {
@@ -144,6 +145,12 @@ def test_pg_full_migration_upgrade_downgrade() -> None:
 
         _run_alembic(target_url, "upgrade", "head")  # re-upgrade is clean
         assert _INVESTIGATION_TABLES.issubset(set(inspect(engine).get_table_names()))
+
+        # Postgres is the production backend, so the migrated schema must equal what
+        # ``create_all`` builds here too — not only on the SQLite path that
+        # ``test_migration_metadata_parity.py`` covers.
+        diffs = metadata_differences(target_url)
+        assert diffs == [], "migrations and Base.metadata disagree:\n" + "\n".join(diffs)
     finally:
         engine.dispose()
         with admin.connect() as conn:

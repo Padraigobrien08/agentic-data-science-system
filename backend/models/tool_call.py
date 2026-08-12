@@ -43,6 +43,7 @@ class ToolCall(Base):
         str_enum_column(ToolCallMcpStatus, name="tool_call_mcp_status"),
         nullable=False,
         default=ToolCallMcpStatus.success,
+        server_default=ToolCallMcpStatus.success.value,
         index=True,
     )
 

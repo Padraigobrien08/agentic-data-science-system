@@ -6,7 +6,17 @@ import uuid
 from datetime import datetime
 from typing import TYPE_CHECKING
 
-from sqlalchemy import JSON, DateTime, ForeignKey, String, Text, Uuid, func
+from sqlalchemy import (
+    JSON,
+    DateTime,
+    ForeignKey,
+    Index,
+    String,
+    Text,
+    UniqueConstraint,
+    Uuid,
+    func,
+)
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
@@ -17,6 +27,15 @@ if TYPE_CHECKING:
 
 class EvaluationCaseResult(Base):
     __tablename__ = "evaluation_case_results"
+    __table_args__ = (
+        # One row per case per run: ``replace_for_run`` deletes and reinserts wholesale,
+        # and ``get_for_run_case`` looks a case up by this pair. Created by 012.
+        UniqueConstraint("evaluation_run_id", "case_id", name="uq_evaluation_case_results_run_case"),
+        # Control-plane listings filter a run's cases by each of these. Created by 012.
+        Index("ix_evaluation_case_results_run_status", "evaluation_run_id", "status"),
+        Index("ix_evaluation_case_results_run_input_mode", "evaluation_run_id", "input_mode"),
+        Index("ix_evaluation_case_results_run_degradation", "evaluation_run_id", "degradation_class"),
+    )
 
     id: Mapped[uuid.UUID] = mapped_column(Uuid(as_uuid=True), primary_key=True, default=uuid.uuid4)
     evaluation_run_id: Mapped[uuid.UUID] = mapped_column(
