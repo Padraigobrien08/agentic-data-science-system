@@ -137,7 +137,8 @@ class HypothesisGenerator:
         proposals = _invoke_policy(
             tracker, self._policy,
             lambda: self._policy.generate_hypotheses(
-                interpretation, metric_names=manifest.metric_names(), dimension_names=dims))
+                interpretation, metric_names=manifest.metric_names(), dimension_names=dims,
+                goal_text=state.objective.objective))
         for i, p in enumerate(proposals.hypotheses):
             h = Hypothesis(
                 id=idgen.make("hyp", i), statement=p.statement, rationale=p.rationale,
@@ -593,10 +594,9 @@ class Critic:
         self, state: InvestigationState, interpretation: GoalInterpretation, manifest: DatasetManifest,
         executed_tools: set[str], tracker: BudgetTracker, idgen: DeterministicIds,
     ) -> None:
-        supported = [h for h in state.hypotheses if h.status is HypothesisStatus.supported]
-        if not supported:
+        h = self._claim_to_challenge(state)
+        if h is None:
             return
-        h = max(supported, key=lambda x: x.confidence)
         already = any(c.target.id == h.id for c in state.critiques)
         tools = list(INTENT_TOOLS.get(interpretation.intent, []))
         if is_edgar_manifest(manifest):
@@ -619,6 +619,42 @@ class Critic:
             rationale=proposal.rationale or "challenge strongest claim",
             targets=[EntityRef(kind=EntityKind.hypothesis, id=proposal.target_hypothesis_id)],
             chosen_option=proposal.falsification_tool, provenance=_prov("critic")))
+
+    @staticmethod
+    def _claim_to_challenge(state: InvestigationState) -> Hypothesis | None:
+        """
+        The claim most worth challenging, or ``None`` when nothing is.
+
+        A ``supported`` claim comes first — guarding against false confidence is the critic's
+        primary job, and this is the behaviour the agency suite's ``require_challenge``
+        property measures.
+
+        Failing that, a claim carrying **both** supporting and refuting evidence is challenged
+        too. Mixed evidence is precisely where a competing explanation is informative: the loop
+        has found the outcome moving and something arguing against it, and naming the
+        alternative is what tells them apart. Restricting the critic to supported claims meant
+        no run that ended inconclusive was ever challenged — the runs that most needed a second
+        reading got none.
+
+        A claim with no evidence, or one-sided evidence, is still left alone: there is nothing
+        to weigh, so a critique would be a note rather than a challenge.
+        """
+        supported = [h for h in state.hypotheses if h.status is HypothesisStatus.supported]
+        if supported:
+            return max(supported, key=lambda x: x.confidence)
+
+        mixed: list[Hypothesis] = []
+        for h in state.hypotheses:
+            if h.status in (HypothesisStatus.rejected, HypothesisStatus.unresolved):
+                continue
+            directions = {
+                e.direction for e in state.evidence if h.id in e.hypothesis_ids
+            }
+            if EvidenceDirection.supports in directions and EvidenceDirection.refutes in directions:
+                mixed.append(h)
+        if not mixed:
+            return None
+        return max(mixed, key=lambda x: x.confidence)
 
     def _registry_ok(self, _tool: str) -> bool:
         return True

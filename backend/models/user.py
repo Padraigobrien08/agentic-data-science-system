@@ -10,6 +10,8 @@ from sqlalchemy import JSON, Boolean, DateTime, String, Uuid, false, func, true
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from backend.db.base import Base
+from backend.models.enums import UserAccessTier
+from backend.models.types import str_enum_column
 
 if TYPE_CHECKING:
     from backend.models.analysis_run import AnalysisRun
@@ -35,6 +37,17 @@ class User(Base):
         Boolean, nullable=False, default=False, server_default=false()
     )
     preferences_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)
+
+    # Spend entitlement, not a permission: it decides which engine a run may use and which
+    # budget ceiling applies. Existing rows backfill to ``standard`` (the deterministic
+    # engine), so enabling the agentic flag cannot retroactively grant anyone the loop.
+    access_tier: Mapped[UserAccessTier] = mapped_column(
+        str_enum_column(UserAccessTier, name="user_access_tier"),
+        nullable=False,
+        default=UserAccessTier.standard,
+        server_default=UserAccessTier.standard.value,
+        index=True,
+    )
 
     created_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True),

@@ -944,6 +944,19 @@
             "title": "Email",
             "type": "string"
           },
+          "invite_code": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional. A matching code upgrades the new account to the adaptive tier (the agentic investigation engine). Registration succeeds either way \u2014 a wrong or absent code simply yields a standard account.",
+            "title": "Invite Code"
+          },
           "password": {
             "maxLength": 72,
             "minLength": 10,
@@ -971,6 +984,12 @@
           },
           "bootstrap_required": {
             "title": "Bootstrap Required",
+            "type": "boolean"
+          },
+          "invite_code_accepted": {
+            "default": false,
+            "description": "True when an invite code can upgrade a registration to the adaptive tier. Reveals only that the field is worth showing, never the code itself.",
+            "title": "Invite Code Accepted",
             "type": "boolean"
           }
         },
@@ -1021,6 +1040,19 @@
             "format": "email",
             "title": "Email",
             "type": "string"
+          },
+          "invite_code": {
+            "anyOf": [
+              {
+                "maxLength": 256,
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Optional. A matching code upgrades the new account to the adaptive tier (the agentic investigation engine). Registration succeeds either way \u2014 a wrong or absent code simply yields a standard account.",
+            "title": "Invite Code"
           },
           "password": {
             "maxLength": 72,
@@ -3063,7 +3095,7 @@
         "type": "object"
       },
       "InvestigationDatasetInput": {
-        "description": "A small tabular dataset for an agentic investigation (pasted CSV or inline records).",
+        "description": "What an investigation should run over.\n\n``source`` selects the adapter. It defaults to ``tabular`` so every caller written before\nEDGAR was reachable here keeps working unchanged \u2014 the field is additive, not a new\nrequired discriminator.\n\nThe fields are flat rather than a tagged union because the two sources overlap (both carry\na name and a goal-facing identity) and because a union would have broken that\ncompatibility. ``check_source_fields`` enforces which fields each source actually needs, so\nthe looseness is in the shape, not in the validation.",
         "properties": {
           "csv_text": {
             "anyOf": [
@@ -3075,6 +3107,14 @@
               }
             ],
             "title": "Csv Text"
+          },
+          "entities": {
+            "description": "Ticker symbols when source is 'edgar' (e.g. ['AAPL', 'MSFT']).",
+            "items": {
+              "type": "string"
+            },
+            "title": "Entities",
+            "type": "array"
           },
           "entity_id_fields": {
             "items": {
@@ -3111,6 +3151,21 @@
               }
             ],
             "title": "Records"
+          },
+          "refresh": {
+            "default": false,
+            "description": "Force a fresh SEC fetch rather than reusing cached filings.",
+            "title": "Refresh",
+            "type": "boolean"
+          },
+          "source": {
+            "default": "tabular",
+            "enum": [
+              "tabular",
+              "edgar"
+            ],
+            "title": "Source",
+            "type": "string"
           },
           "time_field": {
             "anyOf": [
@@ -4463,6 +4518,277 @@
         "title": "PromptRoutingPreviewResponse",
         "type": "object"
       },
+      "ReplayConclusionView": {
+        "properties": {
+          "confidence": {
+            "default": 0.0,
+            "title": "Confidence",
+            "type": "number"
+          },
+          "disposition": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Disposition"
+          },
+          "key_evidence_count": {
+            "default": 0,
+            "title": "Key Evidence Count",
+            "type": "integer"
+          },
+          "statement": {
+            "default": "",
+            "title": "Statement",
+            "type": "string"
+          }
+        },
+        "title": "ReplayConclusionView",
+        "type": "object"
+      },
+      "ReplayDiffView": {
+        "description": "The comparison, conclusion-first.\n\n``verdict`` is the answer to the question a replay is asked: ``identical``,\n``same_conclusion`` (the analysis held, the route to it changed) or ``diverged`` (the\nanswer itself changed). Reaching the same conclusion by a different path is a materially\ndifferent result from reaching a different conclusion, so they are not collapsed.",
+        "properties": {
+          "baseline_conclusion": {
+            "$ref": "#/components/schemas/ReplayConclusionView"
+          },
+          "baseline_evidence_count": {
+            "default": 0,
+            "title": "Baseline Evidence Count",
+            "type": "integer"
+          },
+          "baseline_id": {
+            "title": "Baseline Id",
+            "type": "string"
+          },
+          "baseline_iterations": {
+            "default": 0,
+            "title": "Baseline Iterations",
+            "type": "integer"
+          },
+          "baseline_status": {
+            "title": "Baseline Status",
+            "type": "string"
+          },
+          "baseline_termination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Termination"
+          },
+          "baseline_tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Baseline Tools",
+            "type": "array"
+          },
+          "candidate_conclusion": {
+            "$ref": "#/components/schemas/ReplayConclusionView"
+          },
+          "candidate_evidence_count": {
+            "default": 0,
+            "title": "Candidate Evidence Count",
+            "type": "integer"
+          },
+          "candidate_id": {
+            "title": "Candidate Id",
+            "type": "string"
+          },
+          "candidate_iterations": {
+            "default": 0,
+            "title": "Candidate Iterations",
+            "type": "integer"
+          },
+          "candidate_status": {
+            "title": "Candidate Status",
+            "type": "string"
+          },
+          "candidate_termination": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Termination"
+          },
+          "candidate_tools": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Candidate Tools",
+            "type": "array"
+          },
+          "experiment_order_changed": {
+            "default": false,
+            "title": "Experiment Order Changed",
+            "type": "boolean"
+          },
+          "hypothesis_deltas": {
+            "items": {
+              "$ref": "#/components/schemas/ReplayHypothesisDelta"
+            },
+            "title": "Hypothesis Deltas",
+            "type": "array"
+          },
+          "summary": {
+            "description": "One line suitable for a log, a CLI, or a PR comment.",
+            "title": "Summary",
+            "type": "string"
+          },
+          "tools_only_in_baseline": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools Only In Baseline",
+            "type": "array"
+          },
+          "tools_only_in_candidate": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Tools Only In Candidate",
+            "type": "array"
+          },
+          "verdict": {
+            "description": "identical | same_conclusion | diverged",
+            "title": "Verdict",
+            "type": "string"
+          }
+        },
+        "required": [
+          "verdict",
+          "summary",
+          "baseline_id",
+          "candidate_id",
+          "baseline_status",
+          "candidate_status",
+          "baseline_conclusion",
+          "candidate_conclusion"
+        ],
+        "title": "ReplayDiffView",
+        "type": "object"
+      },
+      "ReplayHypothesisDelta": {
+        "properties": {
+          "baseline_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Confidence"
+          },
+          "baseline_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Baseline Status"
+          },
+          "candidate_confidence": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Confidence"
+          },
+          "candidate_status": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Candidate Status"
+          },
+          "hypothesis_id": {
+            "title": "Hypothesis Id",
+            "type": "string"
+          },
+          "statement_changed": {
+            "default": false,
+            "title": "Statement Changed",
+            "type": "boolean"
+          },
+          "status_changed": {
+            "default": false,
+            "title": "Status Changed",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "hypothesis_id"
+        ],
+        "title": "ReplayHypothesisDelta",
+        "type": "object"
+      },
+      "ReplayResponse": {
+        "properties": {
+          "analysis_run_id": {
+            "title": "Analysis Run Id",
+            "type": "string"
+          },
+          "candidate_persisted": {
+            "default": false,
+            "description": "Always false. The candidate is deliberately not stored \u2014 sharing a store with the baseline would overwrite the very run being compared against.",
+            "title": "Candidate Persisted",
+            "type": "boolean"
+          },
+          "diff": {
+            "$ref": "#/components/schemas/ReplayDiffView"
+          },
+          "investigation_id": {
+            "title": "Investigation Id",
+            "type": "string"
+          },
+          "notes": {
+            "items": {
+              "type": "string"
+            },
+            "title": "Notes",
+            "type": "array"
+          },
+          "same_dataset": {
+            "description": "False when the candidate ran against data other than the baseline's, in which case a divergence cannot be attributed to the policy change alone.",
+            "title": "Same Dataset",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "investigation_id",
+          "analysis_run_id",
+          "diff",
+          "same_dataset"
+        ],
+        "title": "ReplayResponse",
+        "type": "object"
+      },
       "RunEnqueueOverrides": {
         "description": "Optional overrides passed to the worker (same semantics as synchronous ``/execute``).",
         "properties": {
@@ -5281,8 +5607,23 @@
         "title": "TerminationView",
         "type": "object"
       },
+      "UserAccessTier": {
+        "description": "What a user is allowed to spend model budget on.\n\nOrdered by cost, cheapest first. ``guest`` is an auto-provisioned throwaway account and is\npinned to the deterministic engine regardless of the ``agentic_engine_enabled`` flag;\n``standard`` is a self-registered account (deterministic engine, narrative phases only);\n``adaptive`` is unlocked by the invite code and may run the agentic investigation loop.\n\nSee ``docs/decisions/2026-08-11-showcase-direction.md`` (D3, S0).",
+        "enum": [
+          "guest",
+          "standard",
+          "adaptive"
+        ],
+        "title": "UserAccessTier",
+        "type": "string"
+      },
       "UserRead": {
         "properties": {
+          "access_tier": {
+            "$ref": "#/components/schemas/UserAccessTier",
+            "default": "standard",
+            "description": "Spend entitlement: which engine this account may run and under which ceiling."
+          },
           "created_at": {
             "format": "date-time",
             "title": "Created At",
@@ -6196,6 +6537,196 @@
         ]
       }
     },
+    "/v1/demos": {
+      "get": {
+        "description": "Published recorded investigations, oldest first. Unauthenticated.",
+        "operationId": "list_demos_v1_demos_get",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/InvestigationSummary"
+                  },
+                  "title": "Response List Demos V1 Demos Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          }
+        },
+        "summary": "List Demos",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}": {
+      "get": {
+        "description": "One published investigation in full: hypotheses, evidence, decisions, critiques,\nexperiments, conclusion, and timeline. Unauthenticated.",
+        "operationId": "get_demo_v1_demos__slug__get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/InvestigationDetail"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}/artifacts/{artifact_id}/content": {
+      "get": {
+        "description": "Stream the bytes of an artifact behind a published demo.",
+        "operationId": "get_demo_artifact_content_v1_demos__slug__artifacts__artifact_id__content_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "artifact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Artifact Id",
+              "type": "string"
+            }
+          },
+          {
+            "description": "``auto``: inline for text/json-like MIME types, else attachment.",
+            "in": "query",
+            "name": "disposition",
+            "required": false,
+            "schema": {
+              "default": "auto",
+              "description": "``auto``: inline for text/json-like MIME types, else attachment.",
+              "enum": [
+                "inline",
+                "attachment",
+                "auto"
+              ],
+              "title": "Disposition",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo Artifact Content",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}/artifacts/{artifact_id}/preview": {
+      "get": {
+        "description": "Bounded text/JSON preview of an artifact behind a published demo.",
+        "operationId": "get_demo_artifact_preview_v1_demos__slug__artifacts__artifact_id__preview_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "artifact_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Artifact Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ArtifactPreviewResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo Artifact Preview",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
     "/v1/evaluations": {
       "get": {
         "operationId": "list_evaluations_v1_evaluations_get",
@@ -6753,7 +7284,7 @@
         ]
       },
       "post": {
-        "description": "Create an agentic investigation over a user-provided dataset and run it.\n\nSynchronous by default; ``async_execution=true`` enqueues it for the worker (robust for\nlarger datasets). Requires the agentic engine flag; owner-scoped to the target project.",
+        "description": "Create an agentic investigation over a dataset and run it.\n\n``dataset.source`` selects the adapter: ``tabular`` (pasted CSV or inline records, the\ndefault) or ``edgar`` (SEC filings for ``dataset.entities``). Both run the same loop over\nthe same evidence model \u2014 EDGAR is an adapter, not a separate product.\n\nSynchronous by default; ``async_execution=true`` enqueues it for the worker. Prefer async\nfor ``edgar``: the panel is built from live SEC fetches before the loop starts, which is\nfar too slow to hold an HTTP request open for.\n\nRequires the agentic engine flag; owner-scoped to the target project.",
         "operationId": "create_investigation_v1_investigations_post",
         "requestBody": {
           "content": {
@@ -6842,6 +7373,55 @@
           }
         ],
         "summary": "Get Investigation",
+        "tags": [
+          "investigations"
+        ]
+      }
+    },
+    "/v1/investigations/{investigation_id}/replay": {
+      "post": {
+        "description": "Re-run this investigation under the currently configured policy and diff the outcome.\n\nAnswers \"did changing the model / prompt / budget change our answers, or only the route to\nthem?\" against a real persisted run. The verdict is conclusion-first: ``identical``,\n``same_conclusion``, or ``diverged``.\n\n**Admin only, and deliberately so.** A replay is a full investigation and costs real model\nspend, but the candidate is never persisted \u2014 that is a design decision in\n:mod:`agentic.agent.replay`, since sharing a store with the baseline would overwrite the\nrun being compared against. The consequence is that a replay produces no ``AnalysisRun``\nand no ``ModelCall`` rows, so :mod:`backend.services.spend_guard` cannot see or count it.\nAn endpoint that spends money invisibly to the ceilings must not be reachable by ordinary\naccounts.\n\n**Synchronous**, and as slow as the investigation it replays \u2014 tens of seconds against a\nreal model. There is no background variant: the candidate is not persisted, so there would\nbe nothing for a worker to hand back.\n\nRefuses with **409** when the baseline's dataset can no longer be reconstructed. Replay\nreuses the exact panel the baseline ran on; re-fetching would change the data underneath\nthe comparison and attribute to the policy a difference that came from the data.",
+        "operationId": "replay_investigation_route_v1_investigations__investigation_id__replay_post",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "investigation_id",
+            "required": true,
+            "schema": {
+              "format": "uuid",
+              "title": "Investigation Id",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ReplayResponse"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "security": [
+          {
+            "HTTPBearer": []
+          }
+        ],
+        "summary": "Replay Investigation Route",
         "tags": [
           "investigations"
         ]

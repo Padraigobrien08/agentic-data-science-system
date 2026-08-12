@@ -45,7 +45,7 @@ from agentic.experiments.descriptor import ArtifactType
 from backend.agents.agentic_model_policy import build_agent_policy
 from backend.config.settings import Settings, get_settings
 from backend.models.analysis_run import AnalysisRun
-from backend.models.enums import AnalysisRunStatus, ArtifactKind
+from backend.models.enums import AnalysisRunStatus, ArtifactKind, UserAccessTier
 from backend.models.investigation_entities import ExperimentResultRow
 from backend.observability.agent_observer import BackendAgentObserver
 from backend.observability.context import bind_run_context
@@ -117,16 +117,31 @@ def _loop_budget(settings: Settings) -> LoopBudget:
 def select_run_engine(row: AnalysisRun, settings: Settings | None = None) -> str:
     """Return the execution engine for a run.
 
-    The agentic engine is chosen only when the ``agentic_engine_enabled`` flag is on AND
-    the run explicitly opts in via ``input_payload_json['engine'] == 'agentic'``. In every
-    other case (default) the deterministic EDGAR engine is used, so existing behavior is
-    unchanged unless an operator both enables the flag and a run requests it.
+    The agentic engine requires **three** independent conditions, all of which must hold:
+    the ``agentic_engine_enabled`` flag is on, the run explicitly opts in via
+    ``input_payload_json['engine'] == 'agentic'``, and the initiating user holds the
+    ``adaptive`` access tier. In every other case the deterministic EDGAR engine is used.
+
+    The tier is read from the run's initiating user here rather than at the call sites, so
+    every dispatch path — the synchronous API route and the worker alike — is gated by the
+    same check and no caller can forget it. A run whose user cannot be resolved (detached
+    row, deleted account, legacy row with no initiator) falls back to the deterministic
+    engine: the failure mode of this function must never be "grants the engine that costs
+    money". See ``backend.services.spend_guard``.
     """
     s = settings if settings is not None else get_settings()
     if not s.agentic_engine_enabled:
         return ENGINE_EDGAR
     engine = str(_payload_dict(row.input_payload_json).get("engine") or "").strip().lower()
-    return ENGINE_AGENTIC if engine == ENGINE_AGENTIC else ENGINE_EDGAR
+    if engine != ENGINE_AGENTIC:
+        return ENGINE_EDGAR
+    try:
+        user = row.initiated_by_user
+    except Exception:  # noqa: BLE001 — detached row; fail closed rather than fail loud
+        return ENGINE_EDGAR
+    if user is None or user.access_tier is not UserAccessTier.adaptive:
+        return ENGINE_EDGAR
+    return ENGINE_AGENTIC
 
 
 @dataclass
@@ -165,7 +180,10 @@ class AgenticInvestigationExecutionService:
     ) -> None:
         self._session = session
         self._runs = run_service or AnalysisRunService(self._session)
-        self._policy_factory = policy_factory or (lambda s: build_agent_policy(s))
+        # Injected factories (tests, fixtures) take settings only. The default binds the
+        # session and run id so policy completions are persisted as ModelCall rows — see
+        # ``_build_policy``.
+        self._policy_factory = policy_factory
         self._artifact_service = artifact_service
         # Injectable so tests can supply a fixture panel instead of reaching the SEC.
         self._panel_materializer = panel_materializer or DeterministicEdgarPanelMaterializer()
@@ -239,7 +257,7 @@ class AgenticInvestigationExecutionService:
             # loop and can be ingested into the artifacts table + linked to their results.
             sink = InMemoryArtifactSink()
             loop = InvestigationLoop(
-                policy=self._policy_factory(settings),
+                policy=self._build_policy(settings, analysis_run_id),
                 artifact_sink=sink,
                 observer=BackendAgentObserver(analysis_run_id=str(analysis_run_id)),
             )
@@ -310,6 +328,22 @@ class AgenticInvestigationExecutionService:
             if candidate and str(candidate).strip():
                 return str(candidate).strip()
         return "Investigate the provided dataset for notable patterns."
+
+    def _build_policy(self, settings: Settings, analysis_run_id: UUID):
+        """
+        The loop's decision policy, bound to this run so its model calls are audited.
+
+        An injected factory (tests, the agency benchmark) takes settings only and is used
+        verbatim. The default binds the session and run id, so every policy completion is
+        persisted as a ``ModelCall`` — without which the loop's spend exists only in memory
+        and both ``GET /v1/runs/{id}/llm-usage`` and the per-account USD ceiling in
+        ``backend.services.spend_guard`` see nothing.
+        """
+        if self._policy_factory is not None:
+            return self._policy_factory(settings)
+        return build_agent_policy(
+            settings, session=self._session, analysis_run_id=analysis_run_id
+        )
 
     def _resolve_dataset(
         self, row: AnalysisRun, *, analysis_run_id: UUID, settings: Settings

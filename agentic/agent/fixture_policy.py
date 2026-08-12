@@ -54,7 +54,8 @@ class FixtureAgentPolicy:
         )
 
     def generate_hypotheses(
-        self, interpretation: GoalInterpretation, *, metric_names: list[str], dimension_names: list[str]
+        self, interpretation: GoalInterpretation, *, metric_names: list[str],
+        dimension_names: list[str], goal_text: str = "",
     ) -> HypothesisProposals:
         metric = interpretation.metric_hint or (metric_names[0] if metric_names else "value")
         intent = interpretation.intent

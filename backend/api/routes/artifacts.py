@@ -77,25 +77,20 @@ def _byte_stream(row: Artifact, *, settings: Settings) -> Iterator[bytes]:
         raise
 
 
-@router.get("/{artifact_id}/content")
-def get_artifact_content(
-    artifact_id: UUID,
-    art_svc: ArtifactServiceDep,
-    db: DbSession,
-    user: CurrentUserDep,
-    disposition: Annotated[
-        Literal["inline", "attachment", "auto"],
-        Query(description="``auto``: inline for text/json-like MIME types, else attachment."),
-    ] = "auto",
+def stream_artifact_content(
+    row: Artifact,
+    *,
+    settings: Settings,
+    disposition: str = "auto",
 ) -> StreamingResponse:
     """
-    Stream artifact bytes from the object store (``local:`` or future backends).
+    Build the streaming response for an already-authorized artifact.
 
-    Uses :func:`backend.storage.resolver.open_reader` — no raw filesystem paths in the response.
+    Split from the route so the public replay tier (``backend.api.routes.demos``) delivers
+    bytes through exactly this path. Authorization is the caller's job and differs between the
+    two — owner scoping here, demo publication there — but everything after it must not.
     """
-    row = require_artifact_readable(db, art_svc, artifact_id, user.id)
     _raise_if_blob_deleted(row)
-    settings = art_svc.settings
     _verify_storage_openable(row, settings=settings)
 
     if disposition == "auto":
@@ -123,22 +118,33 @@ def get_artifact_content(
     )
 
 
-@router.get("/{artifact_id}/preview", response_model=ArtifactPreviewResponse)
-def get_artifact_preview(
+@router.get("/{artifact_id}/content")
+def get_artifact_content(
     artifact_id: UUID,
     art_svc: ArtifactServiceDep,
     db: DbSession,
     user: CurrentUserDep,
-) -> ArtifactPreviewResponse:
+    disposition: Annotated[
+        Literal["inline", "attachment", "auto"],
+        Query(description="``auto``: inline for text/json-like MIME types, else attachment."),
+    ] = "auto",
+) -> StreamingResponse:
     """
-    Return a bounded UTF-8 text (or pretty JSON) preview for markdown/CSV/JSON/text artifacts.
+    Stream artifact bytes from the object store (``local:`` or future backends).
 
-    Zero-byte objects return ``text: ""`` with ``truncated: false``. See ``docs/artifact-delivery.md``
-    for preview eligibility and response fields.
-
-    Returns **415** when the artifact is not treated as text-previewable (e.g. binary).
+    Uses :func:`backend.storage.resolver.open_reader` — no raw filesystem paths in the response.
     """
     row = require_artifact_readable(db, art_svc, artifact_id, user.id)
+    return stream_artifact_content(row, settings=art_svc.settings, disposition=disposition)
+
+
+def build_artifact_preview(row: Artifact, *, settings: Settings) -> ArtifactPreviewResponse:
+    """
+    Bounded text/JSON preview for an already-authorized artifact.
+
+    Split from the route for the same reason as :func:`stream_artifact_content`: the public
+    replay tier must produce byte-identical previews, differing only in how access was granted.
+    """
     _raise_if_blob_deleted(row)
     if not artifact_previewable(row):
         raise HTTPException(
@@ -146,7 +152,6 @@ def get_artifact_preview(
             detail="Preview is not available for this media type; use GET …/content to download.",
         )
 
-    settings = art_svc.settings
     _verify_storage_openable(row, settings=settings)
 
     try:
@@ -190,6 +195,25 @@ def get_artifact_preview(
         total_bytes=row.byte_size,
         json_valid=json_valid,
     )
+
+
+@router.get("/{artifact_id}/preview", response_model=ArtifactPreviewResponse)
+def get_artifact_preview(
+    artifact_id: UUID,
+    art_svc: ArtifactServiceDep,
+    db: DbSession,
+    user: CurrentUserDep,
+) -> ArtifactPreviewResponse:
+    """
+    Return a bounded UTF-8 text (or pretty JSON) preview for markdown/CSV/JSON/text artifacts.
+
+    Zero-byte objects return ``text: ""`` with ``truncated: false``. See ``docs/artifact-delivery.md``
+    for preview eligibility and response fields.
+
+    Returns **415** when the artifact is not treated as text-previewable (e.g. binary).
+    """
+    row = require_artifact_readable(db, art_svc, artifact_id, user.id)
+    return build_artifact_preview(row, settings=art_svc.settings)
 
 
 @router.get("/{artifact_id}", response_model=ArtifactDetailResponse)

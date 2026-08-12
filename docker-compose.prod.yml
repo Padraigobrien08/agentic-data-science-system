@@ -1,0 +1,178 @@
+# Production stack for the hosted showcase demo: Caddy → API, plus worker, migrations and
+# retention against Postgres. See docs/deploy.md.
+#
+#   docker compose -f docker-compose.prod.yml up -d --build
+#
+# Standalone rather than an overlay on docker-compose.yml, deliberately: production config is
+# the thing you read at 2am, and a file that shows the whole topology beats one you have to
+# mentally merge. The cost is a duplicated env block; the benefit is that nothing is inherited
+# invisibly — notably `web`, which does NOT run here (the frontend is on Vercel).
+#
+# Differences from the local stack that matter:
+#   - No service publishes a host port except Caddy. The API is reachable only through TLS.
+#   - `web` is absent; Vercel serves the frontend and calls this API server-side.
+#   - Secrets have no defaults. Every one is `:?` so the stack refuses to start half-configured
+#     rather than silently coming up with a development posture on the public internet.
+
+name: edgar-prod
+
+x-backend-env: &backend_env
+  EDGAR_BACKEND_DATABASE_URL: postgresql+psycopg2://${POSTGRES_USER:?set in .env}:${POSTGRES_PASSWORD:?set in .env}@db:5432/${POSTGRES_DB:?set in .env}
+  EDGAR_BACKEND_ALLOW_SQLITE: "false"
+  EDGAR_BACKEND_JWT_SECRET: ${EDGAR_BACKEND_JWT_SECRET:?set in .env}
+  EDGAR_BACKEND_OPS_API_TOKEN: ${EDGAR_BACKEND_OPS_API_TOKEN:?set in .env}
+  EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN: ${EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN:?set in .env}
+  EDGAR_BACKEND_DEBUG: "false"
+  EDGAR_BACKEND_ALLOW_INSECURE_DEV_JWT: "false"
+
+  # Public demo posture. Registration is open but lands in the standard (deterministic) tier;
+  # the adaptive loop needs the invite code. See docs/decisions/2026-08-11-showcase-direction.md.
+  EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION: "true"
+  EDGAR_BACKEND_ALLOW_GUEST_DEMO: "true"
+  EDGAR_BACKEND_ADAPTIVE_INVITE_CODE: ${EDGAR_BACKEND_ADAPTIVE_INVITE_CODE:?set in .env}
+  EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED: "true"
+
+  # Spend guard. Run-count ceilings bind regardless of pricing; the USD ceilings only bind
+  # when LLM_MODEL_PRICES is set, so both are configured here — see backend/services/spend_guard.py.
+  EDGAR_BACKEND_GLOBAL_MONTHLY_MAX_RUNS: ${EDGAR_BACKEND_GLOBAL_MONTHLY_MAX_RUNS:-300}
+  EDGAR_BACKEND_GLOBAL_MONTHLY_MAX_SPEND_USD: ${EDGAR_BACKEND_GLOBAL_MONTHLY_MAX_SPEND_USD:-10}
+  EDGAR_BACKEND_GUEST_MAX_RUNS_PER_ACCOUNT: ${EDGAR_BACKEND_GUEST_MAX_RUNS_PER_ACCOUNT:-3}
+  EDGAR_BACKEND_STANDARD_MAX_RUNS_PER_ACCOUNT: ${EDGAR_BACKEND_STANDARD_MAX_RUNS_PER_ACCOUNT:-25}
+  EDGAR_BACKEND_ADAPTIVE_MAX_RUNS_PER_ACCOUNT: ${EDGAR_BACKEND_ADAPTIVE_MAX_RUNS_PER_ACCOUNT:-10}
+  EDGAR_BACKEND_ADAPTIVE_MAX_SPEND_USD_PER_ACCOUNT: ${EDGAR_BACKEND_ADAPTIVE_MAX_SPEND_USD_PER_ACCOUNT:-2}
+
+  EDGAR_BACKEND_ARTIFACT_STORAGE_ROOT: /var/lib/edgar/artifacts
+  EDGAR_BACKEND_ARTIFACT_STORAGE_BACKEND: local
+  EDGAR_BACKEND_RUN_WORKSPACE_ROOT: /var/lib/edgar/run_workspaces
+
+  EDGAR_BACKEND_LLM_PROVIDER: ${EDGAR_BACKEND_LLM_PROVIDER:-openai}
+  EDGAR_BACKEND_OPENAI_API_KEY: ${EDGAR_BACKEND_OPENAI_API_KEY:?set in .env}
+  EDGAR_BACKEND_AGENT_COMPLETION_MODEL: ${EDGAR_BACKEND_AGENT_COMPLETION_MODEL:-gpt-5.4-mini}
+  # Required for the USD ceilings to be enforceable at all — an unpriced model estimates at
+  # $0.00 and every dollar limit silently becomes a no-op.
+  EDGAR_BACKEND_LLM_MODEL_PRICES: ${EDGAR_BACKEND_LLM_MODEL_PRICES:?set in .env}
+
+  # Bound one investigation. Tighter than the defaults because visitors, not the operator,
+  # decide how many run.
+  EDGAR_BACKEND_AGENT_MAX_EXPERIMENTS: ${EDGAR_BACKEND_AGENT_MAX_EXPERIMENTS:-8}
+  EDGAR_BACKEND_AGENT_MAX_ELAPSED_SECONDS: ${EDGAR_BACKEND_AGENT_MAX_ELAPSED_SECONDS:-180}
+  EDGAR_BACKEND_AGENT_MAX_COST_USD: ${EDGAR_BACKEND_AGENT_MAX_COST_USD:-0.25}
+
+  EDGAR_BACKEND_RETENTION_RUN_PAYLOAD_DAYS: ${EDGAR_BACKEND_RETENTION_RUN_PAYLOAD_DAYS:-90}
+  EDGAR_BACKEND_RETENTION_MODEL_PAYLOAD_DAYS: ${EDGAR_BACKEND_RETENTION_MODEL_PAYLOAD_DAYS:-30}
+  EDGAR_BACKEND_RETENTION_ARTIFACT_BLOB_DAYS: ${EDGAR_BACKEND_RETENTION_ARTIFACT_BLOB_DAYS:-180}
+
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?set in .env}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:?set in .env}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  migrate:
+    build: .
+    image: edgar-backend:prod
+    restart: "no"
+    environment:
+      <<: *backend_env
+    command: ["alembic", "upgrade", "head"]
+    depends_on:
+      db:
+        condition: service_healthy
+
+  api:
+    build: .
+    image: edgar-backend:prod
+    restart: unless-stopped
+    environment:
+      <<: *backend_env
+    # No `ports:` — Caddy reaches it over the compose network. Publishing 8000 would expose
+    # the API without TLS alongside the TLS one, and /metrics with it.
+    expose:
+      - "8000"
+    volumes:
+      - artifacts:/var/lib/edgar/artifacts
+      - run_workspaces:/var/lib/edgar/run_workspaces
+      - validation:/app/validation
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+    healthcheck:
+      test:
+        [
+          "CMD-SHELL",
+          'python -c "import urllib.request; urllib.request.urlopen(\"http://127.0.0.1:8000/v1/health\")"',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 20s
+
+  worker:
+    build: .
+    image: edgar-backend:prod
+    restart: unless-stopped
+    environment:
+      <<: *backend_env
+      EDGAR_BACKEND_WORKER_METRICS_PORT: "9100"
+    volumes:
+      - artifacts:/var/lib/edgar/artifacts
+      - run_workspaces:/var/lib/edgar/run_workspaces
+      - validation:/app/validation
+    command: ["python", "-m", "backend.worker"]
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  retention:
+    build: .
+    image: edgar-backend:prod
+    restart: unless-stopped
+    environment:
+      <<: *backend_env
+    volumes:
+      - artifacts:/var/lib/edgar/artifacts
+      - run_workspaces:/var/lib/edgar/run_workspaces
+      - validation:/app/validation
+    command:
+      - sh
+      - -c
+      - "while true; do python -m backend.maintenance.retention --apply --json || true; sleep ${EDGAR_BACKEND_RETENTION_INTERVAL_SECONDS:-86400}; done"
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+
+  caddy:
+    image: caddy:2-alpine
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "443:443"
+    environment:
+      # Caddy provisions a Let's Encrypt certificate for this name on first boot, so it must
+      # resolve to this host before `up` or the challenge fails.
+      EDGAR_API_DOMAIN: ${EDGAR_API_DOMAIN:?set in .env}
+    volumes:
+      - ./ops/caddy/Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  pgdata:
+  artifacts:
+  run_workspaces:
+  validation:
+  caddy_data:
+  caddy_config:

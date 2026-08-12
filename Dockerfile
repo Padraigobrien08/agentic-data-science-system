@@ -24,6 +24,11 @@ COPY alembic ./alembic
 COPY alembic.ini ./
 COPY tests/__init__.py ./tests/__init__.py
 COPY tests/support ./tests/support
+# Operator tooling that has to run *inside* the deployed stack: recording a demo writes
+# artifact blobs to the container's artifact volume, so it cannot be run from a laptop against
+# the production database — the rows would point at object keys that exist nowhere.
+# See docs/deploy.md step 4.
+COPY scripts ./scripts
 COPY docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh \
     && useradd --create-home --shell /bin/bash --uid 1000 appuser \

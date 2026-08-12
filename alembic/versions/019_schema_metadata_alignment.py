@@ -1,12 +1,12 @@
 """Bring the migrated schema in line with ``Base.metadata``.
 
-Revision ID: 017_schema_metadata_alignment
-Revises: 016_interest_signals
+Revision ID: 019_schema_metadata_alignment
+Revises: 018_investigation_demo_slug
 Create Date: 2026-08-12
 
 A database built from migrations did not match one built from ``Base.metadata.create_all``
 — the schema the tests run against. ``alembic.autogenerate.compare_metadata`` reported 51
-differences at ``016``, all of them cases where a migration under-delivered what the ORM
+differences at ``018``, all of them cases where a migration under-delivered what the ORM
 already declares:
 
 * 35 indexes for columns declared ``index=True`` (mostly the ``014`` investigation tables),
@@ -42,8 +42,8 @@ from typing import Sequence, Union
 import sqlalchemy as sa
 from alembic import op
 
-revision: str = "017_schema_metadata_alignment"
-down_revision: Union[str, None] = "016_interest_signals"
+revision: str = "019_schema_metadata_alignment"
+down_revision: Union[str, None] = "018_investigation_demo_slug"
 branch_labels: Union[str, Sequence[str], None] = None
 depends_on: Union[str, Sequence[str], None] = None
 

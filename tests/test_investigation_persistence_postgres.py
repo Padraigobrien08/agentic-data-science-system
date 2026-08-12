@@ -31,10 +31,9 @@ from backend.repositories.investigation_repository import (
     SqlAlchemyInvestigationRepository,
 )
 
-from tests.test_migration_metadata_parity import metadata_differences
-
 # Reuse the module-scoped Postgres database fixture (creates + create_all + drops).
 from tests.postgres_queue_test_utils import postgres_session_factory, postgres_test_url  # noqa: F401
+from tests.test_migration_metadata_parity import metadata_differences
 
 REPO_ROOT = Path(__file__).resolve().parents[1]
 _INVESTIGATION_TABLES = {

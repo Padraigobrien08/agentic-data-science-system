@@ -64,7 +64,7 @@ def _policy(*metrics: str):
                 intent=AnalysisIntent.trend, metric_hint=metrics[0], direction="down"
             )
 
-        def generate_hypotheses(self, interpretation, *, metric_names, dimension_names):  # noqa: ANN001
+        def generate_hypotheses(self, interpretation, *, metric_names, dimension_names, goal_text=""):  # noqa: ANN001
             return HypothesisProposals(
                 hypotheses=[
                     HypothesisProposal(

@@ -3,7 +3,7 @@ Guard: a database built from migrations must match one built from ``Base.metadat
 
 The test suite builds its schema with ``Base.metadata.create_all``, so nothing else
 notices when a migration under-delivers what the ORM declares — that is exactly how the
-51 differences fixed by ``017_schema_metadata_alignment`` accumulated unseen. This runs
+51 differences fixed by ``019_schema_metadata_alignment`` accumulated unseen. This runs
 the real chain on SQLite and asserts Alembic's own autogenerate comparison finds nothing
 left to do, which fails the moment a new migration and its model disagree.
 
@@ -32,20 +32,37 @@ from backend.db.base import Base
 REPO_ROOT = Path(__file__).resolve().parents[1]
 
 
+#: Passed through to the migration subprocess. Everything else about the ambient
+#: environment is dropped: an exported ``EDGAR_BACKEND_DATABASE_URL`` or
+#: ``EDGAR_BACKEND_ALLOW_SQLITE=false`` on a developer machine would otherwise steer the
+#: run somewhere else entirely and fail here for reasons that have nothing to do with drift.
+_PASSTHROUGH_ENV = ("PATH", "HOME", "TMPDIR", "TEMP", "TMP", "LANG", "LC_ALL", "SYSTEMROOT")
+
+
 def run_alembic(url: str, *args: str) -> subprocess.CompletedProcess:
     """Drive the real CLI so ``alembic/env.py`` is exercised, not bypassed."""
-    env = dict(os.environ)
+    env = {k: os.environ[k] for k in _PASSTHROUGH_ENV if k in os.environ}
     env.update(
+        PYTHONPATH=str(REPO_ROOT),
         EDGAR_BACKEND_DATABASE_URL=url,
+        EDGAR_BACKEND_ALLOW_SQLITE="true",
         EDGAR_BACKEND_JWT_SECRET="pytest-jwt-secret-minimum-32-characters-long-x",
         EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION="true",
         EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN="t",
         EDGAR_BACKEND_OPS_API_TOKEN="t",
     )
-    return subprocess.run(
+    proc = subprocess.run(
         [sys.executable, "-m", "alembic", *args],
-        cwd=str(REPO_ROOT), env=env, capture_output=True, text=True, check=True,
+        cwd=str(REPO_ROOT), env=env, capture_output=True, text=True,
     )
+    if proc.returncode != 0:
+        # Alembic reports its real complaint on stderr and exits 255; without this the
+        # only thing a CI log shows is "returned non-zero exit status 255".
+        raise AssertionError(
+            f"`alembic {' '.join(args)}` failed with exit {proc.returncode}\n"
+            f"--- stdout ---\n{proc.stdout}\n--- stderr ---\n{proc.stderr}"
+        )
+    return proc
 
 
 def metadata_differences(url: str) -> list[str]:

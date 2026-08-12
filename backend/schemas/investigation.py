@@ -13,20 +13,67 @@ from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, model_validator
 
 from backend.models.investigation import Investigation as InvestigationRow
 
+#: Each ticker is a separate SEC fetch before the loop can start, so the panel build is linear
+#: in this number and a large list turns one request into a very long one.
+MAX_EDGAR_ENTITIES = 10
+
 
 class InvestigationDatasetInput(BaseModel):
-    """A small tabular dataset for an agentic investigation (pasted CSV or inline records)."""
+    """
+    What an investigation should run over.
 
+    ``source`` selects the adapter. It defaults to ``tabular`` so every caller written before
+    EDGAR was reachable here keeps working unchanged — the field is additive, not a new
+    required discriminator.
+
+    The fields are flat rather than a tagged union because the two sources overlap (both carry
+    a name and a goal-facing identity) and because a union would have broken that
+    compatibility. ``check_source_fields`` enforces which fields each source actually needs, so
+    the looseness is in the shape, not in the validation.
+    """
+
+    source: Literal["tabular", "edgar"] = "tabular"
+
+    # tabular
     format: Literal["csv", "records"] = "csv"
     csv_text: str | None = None
     records: list[dict] | None = None
     name: str = "dataset"
     time_field: str | None = None
     entity_id_fields: list[str] = Field(default_factory=list)
+
+    # edgar
+    entities: list[str] = Field(
+        default_factory=list,
+        description="Ticker symbols when source is 'edgar' (e.g. ['AAPL', 'MSFT']).",
+    )
+    refresh: bool = Field(
+        default=False,
+        description="Force a fresh SEC fetch rather than reusing cached filings.",
+    )
+
+    @model_validator(mode="after")
+    def check_source_fields(self) -> "InvestigationDatasetInput":
+        if self.source == "edgar":
+            cleaned = [t.strip().upper() for t in self.entities if t and t.strip()]
+            if not cleaned:
+                raise ValueError("source 'edgar' requires at least one ticker in 'entities'.")
+            if len(cleaned) > MAX_EDGAR_ENTITIES:
+                raise ValueError(
+                    f"Too many tickers ({len(cleaned)} > {MAX_EDGAR_ENTITIES}). Each one is a "
+                    "separate SEC fetch."
+                )
+            object.__setattr__(self, "entities", cleaned)
+            return self
+        if self.format == "csv" and not (self.csv_text or "").strip():
+            raise ValueError("source 'tabular' with format 'csv' requires 'csv_text'.")
+        if self.format == "records" and not self.records:
+            raise ValueError("source 'tabular' with format 'records' requires 'records'.")
+        return self
 
 
 class InvestigationCreateRequest(BaseModel):

@@ -194,6 +194,7 @@ def test_auth_capabilities_report_open_registration(auth_api_client: TestClient)
         "allow_open_registration": True,
         "bootstrap_required": False,
         "bootstrap_completed": False,
+        "invite_code_accepted": False,
     }
 
 

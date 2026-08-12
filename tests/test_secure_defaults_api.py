@@ -235,6 +235,7 @@ def test_secure_defaults_auth_capabilities_require_bootstrap(
         "allow_open_registration": False,
         "bootstrap_required": True,
         "bootstrap_completed": False,
+        "invite_code_accepted": False,
     }
 
 
@@ -249,6 +250,7 @@ def test_secure_defaults_auth_capabilities_switch_to_sign_in_only_after_bootstra
         "allow_open_registration": False,
         "bootstrap_required": False,
         "bootstrap_completed": True,
+        "invite_code_accepted": False,
     }
 
 

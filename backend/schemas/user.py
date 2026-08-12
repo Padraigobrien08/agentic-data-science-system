@@ -6,6 +6,7 @@ from uuid import UUID
 
 from pydantic import EmailStr, Field
 
+from backend.models.enums import UserAccessTier
 from backend.schemas.common import OrmSchema, TimestampedRead
 
 
@@ -27,4 +28,8 @@ class UserRead(TimestampedRead):
     display_name: str | None
     is_active: bool
     is_admin: bool
+    access_tier: UserAccessTier = Field(
+        default=UserAccessTier.standard,
+        description="Spend entitlement: which engine this account may run and under which ceiling.",
+    )
     preferences_json: dict | list | None = None
