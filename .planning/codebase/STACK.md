@@ -24,7 +24,7 @@
 
 **Package Manager:**
 - Python: `pip` (version not pinned) using `requirements.txt`, `requirements-backend.txt`, and `requirements-dev.txt`.
-- Python lockfile: missing. Dependency resolution is requirements-based, not lockfile-based.
+- Python lockfiles: present at `requirements.lock` and `requirements-dev.lock`. CI and Docker install from those; the loose `requirements*.txt` declare floors. `scripts/check-lockfile-drift.py` runs as a blocking CI job so a bumped floor cannot leave a stale lock.
 - Frontend: `npm` (version not pinned) using `frontend/package.json`.
 - Lockfile: present at `frontend/package-lock.json`.
 - Additional lockfile present: `frontend/pnpm-lock.yaml` exists, but CI, Docker, and docs all use `npm`, not `pnpm`.
