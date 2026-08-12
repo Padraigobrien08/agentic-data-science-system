@@ -357,10 +357,26 @@ Vercel project with `API_URL`, then run the two recordings from step 4 of the ru
 - The observability stack (`docker-compose.observability.yml`) stays **local-only** — Grafana
   and Prometheus on the demo box cost RAM the box does not have. Dashboards ship as screenshots.
 
-### S3 — README and demo narrative
+### S3 — README and demo narrative · **landed 2026-08-11**
 
-Rewrite the README around the five-minute path in [`demo-script.md`](../demo-script.md). The
-recorded trace is the centerpiece, not the feature list.
+Rewritten around the five-minute path in [`demo-script.md`](../demo-script.md): 367 lines → 228,
+and the recorded EDGAR investigation opens the file instead of a feature list.
+
+Every figure is from the published run and was checked against the database rather than
+recalled — 7 experiments, 7 evidence, 10 artifacts, 11 model calls, $0.0101, the two hypothesis
+statements and their confidences verbatim. All 36 local links resolve.
+
+The lead is that **the loop rejected the premise the question assumed**, and the second
+recording is presented as ending `insufficient_evidence` on purpose — a run that stops at "I
+cannot separate these" is a correct outcome, and saying so is more persuasive to this audience
+than a clean answer would be. Known limits stay in, sharpened: the model is named as the weak
+link, not the loop.
+
+Two things it deliberately does **not** claim: the hosted demo is marked *not yet live*
+(provisioning pending), and the Grafana stack is labelled local-only. Overstating either is
+exactly what the reviewer is checking for.
+
+Remaining: swap the placeholder for the real URL once the host is up.
 
 ---
 
