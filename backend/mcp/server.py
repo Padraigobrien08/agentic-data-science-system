@@ -29,6 +29,7 @@ from mcp.server.fastmcp import FastMCP
 
 from backend.mcp.auth import TokenUnavailable, TransportMode, resolve_token, set_transport_mode
 from backend.mcp.client import PlatformApiError, PlatformClient, PlatformNotConfigured
+from backend.mcp.rate_limit import McpRateLimited, get_limiter
 from edgar_project.mcp.schemas import (
     CODE_INTERNAL,
     CODE_VALIDATION,
@@ -43,6 +44,7 @@ mcp = FastMCP("edgar-investigation-platform")
 
 CODE_API = "PLATFORM_API_ERROR"
 CODE_NOT_CONFIGURED = "PLATFORM_NOT_CONFIGURED"
+CODE_RATE_LIMITED = "PLATFORM_RATE_LIMITED"
 
 #: Cap list responses so a tool call never floods an agent's context.
 MAX_LIST_LIMIT = 100
@@ -75,13 +77,39 @@ def _error(code: str, message: str, *, detail: str | None = None, http_status: i
     ).model_dump(mode="json")
 
 
+def _rate_limit_key() -> str | None:
+    """
+    The caller's token, for rate-limit keying only — never logged or stored raw.
+
+    Resolution failures are swallowed: an unresolvable caller still gets *a* budget (the
+    anonymous one) rather than an unlimited one. Refusing here instead would turn the limiter
+    into a second authentication path, which is not its job.
+    """
+    try:
+        return resolve_token()
+    except Exception:  # noqa: BLE001 — no token is a valid state; it buckets as anonymous
+        return None
+
+
 def _guarded(action: str, fn) -> dict[str, Any]:
     """
     Run one API-backed action, mapping failures onto the envelope contract.
 
     Errors never cross the MCP boundary as exceptions: an agent gets a typed envelope it
     can reason about instead of a transport-level failure.
+
+    The rate-limit check lives here rather than on each tool, so a tool added later is bounded
+    by construction — the same reason the engine gate sits inside ``select_run_engine``.
     """
+    try:
+        get_limiter().check(_rate_limit_key())
+    except McpRateLimited as exc:
+        return _error(
+            CODE_RATE_LIMITED,
+            str(exc),
+            detail=f"retry_after_seconds={exc.retry_after_seconds}",
+            http_status=429,
+        )
     try:
         return fn()
     except (TokenUnavailable, PlatformNotConfigured) as exc:

@@ -112,6 +112,28 @@ class Settings(BaseSettings):
         description="Sliding-window length (seconds) for auth rate limiting.",
     )
 
+    # Rate limiting for MCP tool invocations (``backend.mcp``). Keyed by caller identity
+    # rather than IP: over stdio there is no IP, and over HTTP the bearer token *is* the
+    # caller. In-process, like the auth limiter — see ``backend.mcp.rate_limit``.
+    mcp_rate_limit_enabled: bool = Field(
+        default=True,
+        description="Enable per-caller rate limiting on MCP tool invocations.",
+    )
+    mcp_rate_limit_max_calls: int = Field(
+        default=60,
+        ge=1,
+        description=(
+            "Max MCP tool invocations per caller within the window. Generous by design: an "
+            "agent legitimately makes many small reads, and the expensive tool "
+            "(start_investigation) is separately bounded by the spend guard on the API it calls."
+        ),
+    )
+    mcp_rate_limit_window_seconds: int = Field(
+        default=60,
+        ge=1,
+        description="Sliding-window length (seconds) for MCP tool rate limiting.",
+    )
+
     # Default file SQLite is for quick local API/tests without Docker. The documented stack uses Postgres
     # (see docker-compose.yml and docs/local-stack.md). Set EDGAR_BACKEND_ALLOW_SQLITE=false in production.
     database_url: str = Field(

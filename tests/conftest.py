@@ -13,6 +13,12 @@ os.environ.setdefault("EDGAR_BACKEND_ALLOW_OPEN_REGISTRATION", "true")
 os.environ.setdefault("EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN", "pytest-bootstrap-token")
 os.environ.setdefault("EDGAR_BACKEND_OPS_API_TOKEN", "pytest-ops-token")
 
+# The MCP limiter is process-wide, so every tool call in the whole session shares one bucket
+# and the suite would start failing on volume rather than on behaviour — a flake that appears
+# only once enough MCP tests exist, and looks like a broken tool rather than a full budget.
+# Tests that exercise the limiter build their own with explicit settings.
+os.environ.setdefault("EDGAR_BACKEND_MCP_RATE_LIMIT_ENABLED", "false")
+
 
 # --- no live model calls from the test suite --------------------------------
 #

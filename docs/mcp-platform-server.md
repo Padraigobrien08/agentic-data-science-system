@@ -110,8 +110,42 @@ reason about rather than a transport-level crash. A missing *or* unauthorized re
 relayed as `http_status: 404` without speculating about which it was — the API's ownership
 semantics pass through unchanged.
 
+## Rate limiting
+
+Tool invocations are bounded per caller — see
+[`backend/mcp/rate_limit.py`](../backend/mcp/rate_limit.py). The API's own limiter is keyed by
+IP and applied only to the unauthenticated auth endpoints, so it never covered calls that
+arrive with an already-issued token.
+
+Keyed by **caller, not IP**: over stdio there is no IP, and over streamable-HTTP every caller
+arrives at the same proxy. The bearer token is the identity in both transports, and it is what
+needs bounding. The key is a truncated SHA-256 of the token, never the token itself — this
+dictionary lives for the process lifetime.
+
+The check sits in the server's `_guarded` wrapper, which every tool passes through, so a tool
+added later is bounded without anyone remembering to bound it. Over-budget calls return the
+usual `ToolResponseEnvelope` with `PLATFORM_RATE_LIMITED` and `http_status: 429`, not an
+exception — a 429 is no exception to the rule that errors do not cross the MCP boundary as
+transport failures.
+
+| setting | default | |
+|---|---|---|
+| `EDGAR_BACKEND_MCP_RATE_LIMIT_ENABLED` | `true` | |
+| `EDGAR_BACKEND_MCP_RATE_LIMIT_MAX_CALLS` | `60` | per caller, per window |
+| `EDGAR_BACKEND_MCP_RATE_LIMIT_WINDOW_SECONDS` | `60` | |
+
+The default is generous on purpose: an agent legitimately makes many small reads, and the one
+expensive tool (`start_investigation`) is separately bounded by the spend guard on the API it
+calls, so the ceiling here is about request volume rather than cost.
+
+State is per-process, like the auth limiter. Under stdio that is exactly right — one
+subprocess per user. Under HTTP a second replica enforces its own budget independently; close
+that with a shared store or an ingress limiter if it ever matters.
+
 ## Follow-ups
 
-- No tool for replay/diff yet; `InvestigationReplayService` is service-level only.
-- No rate limiting on the hosted endpoint; the API's own auth rate limiting does not cover
-  tool invocations, which authenticate with an already-issued token.
+- No tool for replay/diff yet. `POST /v1/investigations/{id}/replay` now exists but is
+  admin-only, because replay spends model budget the spend guard cannot see — so exposing it
+  as an MCP tool needs that constraint carried across deliberately, not inherited by accident.
+- The handshake and tool listing are unauthenticated (schema only, no user data — normal for
+  MCP). Bind to loopback behind a reverse proxy to close it.
