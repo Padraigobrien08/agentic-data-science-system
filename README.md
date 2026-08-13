@@ -202,8 +202,10 @@ itself.
 - **The agentic engine is off by default** (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the
   deterministic EDGAR chain is the default execution path. The hosted demo enables it for
   invite-code accounts only, because the loop costs real money per question.
-- **The hosted MCP endpoint has no rate limiting**, and its handshake/tool-listing is
-  unauthenticated (tool *invocation* is not). Bind it to loopback behind a reverse proxy.
+- **The hosted MCP handshake/tool-listing is unauthenticated** (tool *invocation* is not,
+  and every tool call is rate-limited per caller —
+  [`rate_limit.py`](backend/mcp/rate_limit.py)). The handshake exposes schema only, which is
+  normal for MCP; bind it to loopback behind a reverse proxy to close it.
 - **No backup/restore runbook.** A [deliberate scope decision](docs/decisions/2026-08-11-showcase-direction.md)
   for a demo with no user data worth recovering, not an oversight. It reopens first if this ever
   takes real users.
