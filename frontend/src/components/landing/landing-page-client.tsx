@@ -56,8 +56,23 @@ type ActionConfig = {
   secondaryLabel: string;
 };
 
-function getActionConfig(isAuthenticated: boolean, projectId: string | null): ActionConfig {
+function getActionConfig(
+  isAuthenticated: boolean,
+  projectId: string | null,
+  staticShowcase: boolean,
+): ActionConfig {
   const loginNext = encodeURIComponent("/");
+  if (staticShowcase && !isAuthenticated) {
+    return {
+      badge: "Recorded runs",
+      title: "Watch the loop reason — recorded, not simulated.",
+      note: "This showcase serves real investigations recorded against live data and published unedited, including one that declined to answer. The live tiers run in the full deployment.",
+      primaryHref: "/demos",
+      primaryLabel: "Explore recorded investigations",
+      secondaryHref: "#workflow",
+      secondaryLabel: "Review the workflow",
+    };
+  }
   if (!isAuthenticated) {
     return {
       badge: "Live demo",
@@ -130,13 +145,44 @@ function DemoEntry() {
       )}
       {interest.error ? <p className="text-xs text-red-700">{interest.error}</p> : null}
       <p className="text-xs text-[var(--muted)]">
-        No sign-up required. Email is optional — just a signal of interest.
+        No sign-up required. Email is optional — just a signal of interest. Or{" "}
+        <Link href="/demos" className="underline">
+          browse the recorded investigations
+        </Link>{" "}
+        first.
       </p>
     </div>
   );
 }
 
-function ActionPanel({ config, isAuthenticated }: { config: ActionConfig; isAuthenticated: boolean }) {
+function RecordedRunsEntry({ config }: { config: ActionConfig }) {
+  return (
+    <div className="flex flex-wrap items-center gap-3">
+      <Link
+        href={config.primaryHref}
+        className="inline-flex min-h-11 items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-6 py-3 text-sm font-semibold text-white shadow-[0_18px_36px_-20px_rgba(31,111,255,0.56)] transition hover:-translate-y-0.5"
+      >
+        {config.primaryLabel} →
+      </Link>
+      <Link
+        href={config.secondaryHref}
+        className="inline-flex min-h-11 items-center justify-center rounded-full border border-[var(--border)] bg-white px-5 py-3 text-sm font-semibold text-[var(--foreground)] transition hover:-translate-y-0.5 hover:bg-white"
+      >
+        {config.secondaryLabel}
+      </Link>
+    </div>
+  );
+}
+
+function ActionPanel({
+  config,
+  isAuthenticated,
+  staticShowcase,
+}: {
+  config: ActionConfig;
+  isAuthenticated: boolean;
+  staticShowcase: boolean;
+}) {
   return (
     <div className="landing-reveal landing-reveal-delay-1 max-w-xl space-y-5">
       <div className="space-y-3">
@@ -159,6 +205,8 @@ function ActionPanel({ config, isAuthenticated }: { config: ActionConfig; isAuth
             {config.secondaryLabel}
           </Link>
         </div>
+      ) : staticShowcase ? (
+        <RecordedRunsEntry config={config} />
       ) : (
         <DemoEntry />
       )}
@@ -249,7 +297,15 @@ function HeroPreview() {
   );
 }
 
-function LandingHero({ config, isAuthenticated }: { config: ActionConfig; isAuthenticated: boolean }) {
+function LandingHero({
+  config,
+  isAuthenticated,
+  staticShowcase,
+}: {
+  config: ActionConfig;
+  isAuthenticated: boolean;
+  staticShowcase: boolean;
+}) {
   return (
     <section className="relative overflow-hidden px-2 py-6 sm:px-4 sm:py-10 lg:px-6 lg:py-14">
       <div className="absolute left-[-8%] top-[10%] h-56 w-56 rounded-full bg-[radial-gradient(circle,rgba(37,99,235,0.1),transparent_68%)] blur-3xl" />
@@ -271,7 +327,7 @@ function LandingHero({ config, isAuthenticated }: { config: ActionConfig; isAuth
           </p>
 
           <div className="mt-10">
-            <ActionPanel config={config} isAuthenticated={isAuthenticated} />
+            <ActionPanel config={config} isAuthenticated={isAuthenticated} staticShowcase={staticShowcase} />
           </div>
 
           <div className="landing-reveal landing-reveal-delay-2 mt-12 grid gap-5 border-t border-[rgba(23,32,51,0.08)] pt-6 sm:grid-cols-3">
@@ -387,7 +443,15 @@ function ExampleShowcase() {
   );
 }
 
-function ClosingStrip({ config, isAuthenticated }: { config: ActionConfig; isAuthenticated: boolean }) {
+function ClosingStrip({
+  config,
+  isAuthenticated,
+  staticShowcase,
+}: {
+  config: ActionConfig;
+  isAuthenticated: boolean;
+  staticShowcase: boolean;
+}) {
   return (
     <section className="relative overflow-hidden rounded-[2.2rem] border border-white/75 bg-[linear-gradient(135deg,rgba(255,255,255,0.78),rgba(255,255,255,0.62))] px-6 py-7 shadow-[0_34px_90px_-56px_rgba(19,31,57,0.72)] sm:px-8 sm:py-8">
       <div className="absolute inset-y-0 right-0 hidden w-1/2 bg-[radial-gradient(circle_at_top,rgba(31,111,255,0.15),transparent_58%)] lg:block" />
@@ -418,6 +482,13 @@ function ClosingStrip({ config, isAuthenticated }: { config: ActionConfig; isAut
                 {config.secondaryLabel}
               </Link>
             </>
+          ) : staticShowcase ? (
+            <Link
+              href={config.primaryHref}
+              className="inline-flex items-center justify-center rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-strong))] px-5 py-3 text-sm font-semibold text-white shadow-[0_18px_40px_-18px_rgba(31,111,255,0.8)] transition hover:-translate-y-0.5"
+            >
+              {config.primaryLabel} →
+            </Link>
           ) : (
             <form action={enterDemoAction}>
               <button
@@ -437,18 +508,20 @@ function ClosingStrip({ config, isAuthenticated }: { config: ActionConfig; isAut
 type Props = {
   isAuthenticated: boolean;
   projectId: string | null;
+  /** True when serving the committed static export with no live backend (D9). */
+  staticShowcase?: boolean;
 };
 
-export function LandingPageClient({ isAuthenticated, projectId }: Props) {
-  const config = getActionConfig(isAuthenticated, projectId);
+export function LandingPageClient({ isAuthenticated, projectId, staticShowcase = false }: Props) {
+  const config = getActionConfig(isAuthenticated, projectId, staticShowcase);
 
   return (
     <div className="mx-auto w-full max-w-[96rem] px-3 sm:px-5 lg:px-6 space-y-8 sm:space-y-10">
-      <LandingHero config={config} isAuthenticated={isAuthenticated} />
+      <LandingHero config={config} isAuthenticated={isAuthenticated} staticShowcase={staticShowcase} />
       <PlatformPillars />
       <WorkflowSection />
       <ExampleShowcase />
-      <ClosingStrip config={config} isAuthenticated={isAuthenticated} />
+      <ClosingStrip config={config} isAuthenticated={isAuthenticated} staticShowcase={staticShowcase} />
     </div>
   );
 }

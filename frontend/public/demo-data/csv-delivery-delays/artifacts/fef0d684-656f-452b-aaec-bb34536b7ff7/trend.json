@@ -1,0 +1,1 @@
+{"chart_type":"line","fits":[{"entity":"east","n":24,"r2":0.04338,"slope":0.000475},{"entity":"north","n":24,"r2":0.549318,"slope":-0.005337},{"entity":"south","n":24,"r2":0.017912,"slope":-0.000293},{"entity":"west","n":24,"r2":0.01154,"slope":0.000323}],"time":"month","value":"on_time_rate"}

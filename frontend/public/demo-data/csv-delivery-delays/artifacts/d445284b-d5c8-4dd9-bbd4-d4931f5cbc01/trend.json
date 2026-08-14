@@ -1,0 +1,1 @@
+{"chart_type":"line","fits":[{"entity":"east","n":24,"r2":0.836927,"slope":21.803478},{"entity":"north","n":24,"r2":0.681424,"slope":76.038261},{"entity":"south","n":24,"r2":0.818603,"slope":12.17087},{"entity":"west","n":24,"r2":0.717943,"slope":9.567826}],"time":"month","value":"order_volume"}

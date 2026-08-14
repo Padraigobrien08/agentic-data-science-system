@@ -2,6 +2,8 @@ import { redirect } from "next/navigation";
 
 import { AuthEntryGuidance } from "@/components/auth/auth-entry-guidance";
 import { LoginForm } from "@/components/auth/login-form";
+import { StaticShowcaseNotice } from "@/components/auth/static-showcase-notice";
+import { staticShowcase } from "@/lib/api/demos";
 import { getCurrentUser } from "@/lib/auth/session";
 import { getAuthCapabilities } from "@/lib/api/runs";
 
@@ -12,6 +14,9 @@ export default async function LoginPage({
 }: Readonly<{
   searchParams: Promise<{ next?: string }>;
 }>) {
+  if (staticShowcase()) {
+    return <StaticShowcaseNotice />;
+  }
   const { next } = await searchParams;
   const nextPath = next?.startsWith("/") && !next.startsWith("//") ? next : "/projects";
   const user = await getCurrentUser();

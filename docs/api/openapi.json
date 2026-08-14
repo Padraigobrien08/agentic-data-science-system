@@ -3279,6 +3279,17 @@
             "title": "Decisions",
             "type": "array"
           },
+          "demo_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Slug"
+          },
           "domain_id": {
             "anyOf": [
               {
@@ -3463,6 +3474,17 @@
             "format": "date-time",
             "title": "Created At",
             "type": "string"
+          },
+          "demo_slug": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Demo Slug"
           },
           "domain_id": {
             "anyOf": [

@@ -141,11 +141,25 @@ function formatBytes(n: number | null): string {
   return `${(n / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function ArtifactChip({ a }: Readonly<{ a: InvestigationArtifactRef }>) {
+function ArtifactChip({
+  a,
+  href,
+}: Readonly<{ a: InvestigationArtifactRef; href: string | null }>) {
   const size = formatBytes(a.byte_size);
+  if (href === null) {
+    return (
+      <span
+        className="inline-flex items-center gap-1.5 rounded-md border border-dashed border-neutral-200 px-2 py-1 font-mono text-xs text-neutral-400 dark:border-neutral-700"
+        title={`${a.name} — content not available in this showcase`}
+      >
+        <span className="truncate">{a.name}</span>
+        <span className="text-[10px] uppercase">{a.kind}</span>
+      </span>
+    );
+  }
   return (
     <a
-      href={`/api/artifacts/${a.id}/content?disposition=attachment`}
+      href={href}
       className="inline-flex items-center gap-1.5 rounded-md border border-neutral-200 px-2 py-1 font-mono text-xs text-neutral-600 transition-colors hover:border-neutral-400 hover:text-neutral-900 dark:border-neutral-700 dark:text-neutral-300 dark:hover:border-neutral-500 dark:hover:text-neutral-100"
       title={`Download ${a.name}${a.mime_type ? ` (${a.mime_type})` : ""}`}
     >
@@ -159,7 +173,10 @@ function ArtifactChip({ a }: Readonly<{ a: InvestigationArtifactRef }>) {
   );
 }
 
-function ExperimentRow({ x }: Readonly<{ x: ExperimentItem }>) {
+function ExperimentRow({
+  x,
+  artifactHref,
+}: Readonly<{ x: ExperimentItem; artifactHref: (a: InvestigationArtifactRef) => string | null }>) {
   const failed = x.status === "failed";
   return (
     <Card>
@@ -182,7 +199,7 @@ function ExperimentRow({ x }: Readonly<{ x: ExperimentItem }>) {
       {x.artifacts.length ? (
         <div className="mt-3 flex flex-wrap gap-2 border-t border-neutral-100 pt-3 dark:border-neutral-800">
           {x.artifacts.map((a) => (
-            <ArtifactChip key={a.id} a={a} />
+            <ArtifactChip key={a.id} a={a} href={artifactHref(a)} />
           ))}
         </div>
       ) : null}
@@ -190,10 +207,21 @@ function ExperimentRow({ x }: Readonly<{ x: ExperimentItem }>) {
   );
 }
 
+function defaultArtifactHref(a: InvestigationArtifactRef): string {
+  return `/api/artifacts/${a.id}/content?disposition=attachment`;
+}
+
 export function InvestigationDetailView({
   projectId,
   detail,
-}: Readonly<{ projectId: string; detail: Detail }>) {
+  artifactHref = defaultArtifactHref,
+}: Readonly<{
+  /** Null on the public demo surface, where there is no project to link back into. */
+  projectId: string | null;
+  detail: Detail;
+  /** Where an artifact's bytes live; the demo surface serves them without auth. */
+  artifactHref?: (a: InvestigationArtifactRef) => string | null;
+}>) {
   const status = investigationStatusTone(detail.status);
   const concl = detail.conclusion_detail;
   const openCritiques = detail.critiques.filter((c) => !c.resolved);
@@ -212,7 +240,7 @@ export function InvestigationDetailView({
           <span>confidence {formatConfidence(detail.confidence)}</span>
           {detail.adapter_id ? <span>· {detail.adapter_id}</span> : null}
           {detail.datasets[0] ? <span>· {detail.datasets[0].name}</span> : null}
-          {detail.analysis_run_id ? (
+          {projectId && detail.analysis_run_id ? (
             <Link
               href={`/projects/${projectId}/runs/${detail.analysis_run_id}/trace`}
               className="underline"
@@ -279,7 +307,7 @@ export function InvestigationDetailView({
         <Section title="Experiments" count={detail.experiments.length}>
           <div className="space-y-3">
             {detail.experiments.map((x) => (
-              <ExperimentRow key={x.id} x={x} />
+              <ExperimentRow key={x.id} x={x} artifactHref={artifactHref} />
             ))}
           </div>
         </Section>

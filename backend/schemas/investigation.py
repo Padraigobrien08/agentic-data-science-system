@@ -124,6 +124,9 @@ class InvestigationSummary(BaseModel):
     objective: str | None = None
     adapter_id: str | None = None
     conclusion: str | None = None
+    #: Public replay-tier slug when the investigation is published (see /v1/demos); the
+    #: listing is useless to a client without the URL segment that reaches the detail.
+    demo_slug: str | None = None
     counts: InvestigationCounts
     created_at: datetime
     updated_at: datetime
@@ -287,6 +290,7 @@ def build_summary(row: InvestigationRow) -> InvestigationSummary:
         objective=_goal_field(row, "objective"),
         adapter_id=_goal_field(row, "adapter_id"),
         conclusion=concl.statement if concl is not None else None,
+        demo_slug=row.demo_slug,
         counts=InvestigationCounts(
             hypotheses=len(row.hypotheses),
             evidence=len(row.evidence),
