@@ -1,7 +1,58 @@
 # Deploying the hosted demo
 
+Two deployments, and the first one is what is live today.
+
+| | Cost | Serves | Runbook |
+|---|---|---|---|
+| **Static replay showcase** | $0 | the recorded investigations, no backend | [below](#0-static-replay-showcase-vercel-only) |
+| **Full stack** | ~$0–12/mo | everything, including live runs | [§1 onward](#1-server) |
+
+The static showcase is not a stepping stone that gets deleted — it is the permanent floor
+under the live deployment, the thing the CV link degrades to instead of a 404
+([`decisions/2026-08-14-static-replay-showcase.md`](./decisions/2026-08-14-static-replay-showcase.md), D9/D10).
+
+---
+
+## 0. Static replay showcase (Vercel only)
+
+No server, no database, no API key. The frontend serves the published demos from a committed
+export, so the whole showcase is a Next.js app on Vercel's free tier.
+
+**Deploy:** import the repo, set **Root Directory** to `frontend`, and set **no environment
+variables at all**. `API_URL` being absent in a production build *is* the switch: the demo
+data source falls back to the committed export, and the auth pages render an honest "no live
+backend" notice instead of forms that would 500 on submit. Override locally with
+`DEMO_STATIC=1` (force static) or `DEMO_STATIC=0` (force live).
+
+**Refresh the export** after recording a new demo — it reads whichever database your `.env`
+points at, and writes into the working tree:
+
+```bash
+python3 scripts/export_demo_static.py
+```
+
+```bash
+python3 scripts/export_demo_static.py --check
+```
+
+`--check` exits non-zero when the committed JSON has drifted from the database. CI does not
+run it (no CI job has the recordings), so
+[`export.test.ts`](../frontend/src/lib/demo-static/export.test.ts) guards the committed
+artifact's internal consistency instead — every indexed slug has a detail document, every
+counted item is present, and every referenced artifact resolves to an exported blob.
+
+What the static tier does **not** serve: live runs, guest sessions, the adaptive tier, and
+the `/v1` + MCP endpoints. Say so wherever it is linked; a reviewer checking whether the
+claims match the deployment is exactly the audience.
+
+---
+
+## The full stack
+
 Frontend on Vercel, backend on one small VPS. Target cost is under $25/month all-in
 (see [`decisions/2026-08-11-showcase-direction.md`](./decisions/2026-08-11-showcase-direction.md), D6/D7).
+[D10](./decisions/2026-08-14-static-replay-showcase.md) retargets this at Oracle Cloud's
+Always Free ARM tier, which is a normal VM — every asset below applies unchanged.
 
 ```
    browser ──HTTPS──▶ Vercel (Next.js)

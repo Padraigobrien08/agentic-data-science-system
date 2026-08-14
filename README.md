@@ -69,8 +69,11 @@ Nearly every AI product on the market will confidently answer a question it cann
 
 ## Try it
 
-**Hosted demo:** _not yet live — provisioning pending. See
-[docs/deploy.md](docs/deploy.md)._
+**Hosted showcase:** _URL pending first deploy._ Both investigations above are browsable at
+`/demos` — the real persisted runs, rendered by the same components an authenticated user
+sees, served from a committed export with **no backend**. Live runs, guest sessions and the
+`/v1` + MCP endpoints need the full stack; see [docs/deploy.md](docs/deploy.md) for both
+topologies.
 
 Locally, the whole stack is one command:
 

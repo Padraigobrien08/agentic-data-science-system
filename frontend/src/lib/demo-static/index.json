@@ -1,0 +1,50 @@
+[
+  {
+    "adapter_id": "in_memory",
+    "analysis_run_id": "c37e44c1-8944-4261-839b-a9c5e1d39e65",
+    "conclusion": "Mixed evidence for: In the north region, service quality has degraded, as reflected by a decline in on_time_rate.; In the north region, rising order volume explains the worsening delivery times.",
+    "confidence": 0.4,
+    "counts": {
+      "critiques": 1,
+      "decisions": 22,
+      "evidence": 12,
+      "experiments": 6,
+      "hypotheses": 2,
+      "observations": 12,
+      "open_questions": 2
+    },
+    "created_at": "2026-08-11T21:29:58",
+    "demo_slug": "csv-delivery-delays",
+    "domain_id": "c37e44c1-8944-4261-839b-a9c5e1d39e65",
+    "id": "24cb78e3-8383-4501-95ab-8a67fb25e15f",
+    "objective": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?",
+    "origin": "native",
+    "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+    "status": "exhausted",
+    "updated_at": "2026-08-11T21:30:11"
+  },
+  {
+    "adapter_id": "edgar",
+    "analysis_run_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
+    "conclusion": "Supported: Revenue growth is the explanation for the observed margin change over the recent periods. | Not supported: Net margin has deteriorated over the recent periods for these companies.",
+    "confidence": 0.5,
+    "counts": {
+      "critiques": 1,
+      "decisions": 25,
+      "evidence": 7,
+      "experiments": 7,
+      "hypotheses": 2,
+      "observations": 5,
+      "open_questions": 2
+    },
+    "created_at": "2026-08-11T21:41:30",
+    "demo_slug": "edgar-margin-vs-growth",
+    "domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
+    "id": "4096b6e9-e24b-4fa8-b8e3-8ae19d902026",
+    "objective": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
+    "origin": "native",
+    "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
+    "status": "converged",
+    "updated_at": "2026-08-11T21:41:43"
+  }
+]

@@ -524,6 +524,8 @@ export interface InvestigationSummary {
   objective: string | null;
   adapter_id: string | null;
   conclusion: string | null;
+  /** Public replay-tier slug when published (see /v1/demos), else null. */
+  demo_slug: string | null;
   counts: InvestigationCounts;
   created_at: string;
   updated_at: string;

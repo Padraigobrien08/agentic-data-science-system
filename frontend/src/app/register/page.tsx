@@ -3,6 +3,8 @@ import { redirect } from "next/navigation";
 
 import { AuthEntryGuidance } from "@/components/auth/auth-entry-guidance";
 import { RegisterForm } from "@/components/auth/register-form";
+import { StaticShowcaseNotice } from "@/components/auth/static-showcase-notice";
+import { staticShowcase } from "@/lib/api/demos";
 import { getAuthCapabilities } from "@/lib/api/runs";
 import { getCurrentUser } from "@/lib/auth/session";
 
@@ -13,6 +15,9 @@ export default async function RegisterPage({
 }: Readonly<{
   searchParams: Promise<{ next?: string }>;
 }>) {
+  if (staticShowcase()) {
+    return <StaticShowcaseNotice />;
+  }
   const { next } = await searchParams;
   const user = await getCurrentUser();
   if (user) {
