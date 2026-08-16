@@ -8,9 +8,11 @@ accepting it, declines when the data cannot answer the question, and answers eve
 question that has more than one. Every check is derived from persisted typed state, so a verdict
 is reproducible and never a model judging a model.
 
-Two tiers. **Core** is the frozen `suite_agency_v1`, 13 cases. **Hard** is 5 cases admitted only
-if they defeat the deterministic baseline — see [the admission
-rule](agency-evaluation.md#admission-rule).
+Two tiers. **Core** was the frozen `suite_agency_v1`, 13 cases, when this was measured; it has
+since gained regression cases the baseline passes, so a fresh core run reports a larger total
+than the rows below. `suite_agency_v1` itself is unchanged, which is what keeps this
+measurement readable. **Hard** is 5 cases admitted only if they defeat the deterministic
+baseline — see [the admission rule](agency-evaluation.md#admission-rule).
 
 ## Result
 

@@ -308,6 +308,30 @@ re-roll until the answer is flattering.
 
 One-time cost: a few dollars. This is the best money in the plan.
 
+**Update 2026-08-14 — ranking goals were answered from the wrong end.**
+
+Found on the same delivery dataset: *"Which region has the weakest on-time delivery rate
+overall?"* was interpreted `ranking`, ran `rank_entities`, and recorded *"Top entity by
+mean(on_time_rate) is 'east'"* — the **best** region. `InvestigationPlanner._params_for` never
+passed `ascending`, and the tool defaults to descending, so every weakest/worst/lowest goal was
+answered with the strongest entity.
+
+`GoalInterpretation.direction` already existed to carry this; prompt **1.0.3** extends it from
+`trend` to `ranking` (weakest → `down`), the fixture policy reads superlatives via
+`parse_extreme`, and the planner turns `down` into `ascending=True`. `rank_entities` now says
+"Lowest entity" when it ranked ascending — a claim that named the top of a bottom-up ranking
+would be false about a correctly computed number, which is the one thing the deterministic
+layer must never produce.
+
+**What the loop got right, and what had to survive the fix:** it did *not* assert 'east' as the
+weakest region. The evidence was recorded `neutral`, the hypothesis left `unresolved`, and the
+run terminated `insufficient_evidence` at 0.2 — the honesty property this plan argues for,
+holding on a run whose parameters were wrong. That behaviour is unchanged: the equivalent run
+still declines at 0.2, now over the right entity. The new core case
+`weakest_entity_goal_ranks_from_the_bottom` pins the entity the ranking leads with; it
+deliberately does *not* cap confidence, because entities in that fixture genuinely do differ
+and a future policy that concluded so with evidence would be right to.
+
 ### S2 — Hosted deploy · **assets landed; provisioning is yours**
 
 Everything that can be built without your accounts is in place. Runbook:

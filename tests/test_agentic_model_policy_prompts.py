@@ -136,6 +136,22 @@ def test_every_prompt_names_its_nullable_fields() -> None:
         assert "never `null`" in body
 
 
+def test_the_goal_interpreter_prompt_asks_for_a_direction_on_ranking_goals() -> None:
+    """
+    A ranking goal reaches the ranking tool through `direction` and nowhere else, so a prompt
+    that scopes the field to `trend` — as 1.0.2 did — leaves every "which entity is weakest?"
+    goal answered with the strongest entity. The plumbing is now in place; this asserts the
+    prompt still tells the model to use it.
+    """
+    prompts, _ = _load_policy_prompts()
+    body = prompts.interpret_goal.lower()
+
+    assert "ranking" in body and "weakest" in body, (
+        "the goal interpreter prompt no longer explains what `direction` means for a ranking "
+        "goal; a null direction there is answered with the opposite entity"
+    )
+
+
 def test_missing_prompt_files_degrade_to_the_domain_defaults(monkeypatch) -> None:
     def _boom(role: str, version: str):
         raise FileNotFoundError(f"no prompt for {role} {version}")

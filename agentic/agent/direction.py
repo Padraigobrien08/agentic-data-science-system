@@ -4,6 +4,11 @@ Directional intent parsed from natural-language text.
 Shared by the fixture policy (interpreting a goal) and the evidence updater (reading what a
 hypothesis asserts), so the two can never disagree about what "up" means.
 
+Two questions are parsed here, and they are not the same one. :func:`parse_direction` reads
+*movement* — which way a series went. :func:`parse_extreme` reads *which end of a ranking* a
+goal is asking for. Both answer in the same ``up``/``down`` vocabulary because both end up in
+the same field, but the word lists are separate: "weakest" names a position, not a decline.
+
 Two rules matter here, and both were learned from a real failure:
 
 1. **Match on word boundaries, not substrings.** ``"rainfall_mm is increasing"`` contains the
@@ -56,12 +61,54 @@ _DOWN_PATTERNS: tuple[str, ...] = (
 )
 
 
+# Superlatives, which are a different question from movement: "is revenue falling" asks which
+# way a series moved, "which region is weakest" asks which end of a ranking to report. They are
+# kept in their own lists because the evidence updater reads a *hypothesis* with the movement
+# patterns above, and "the weakest region" is not a claim that anything went down.
+_BEST_PATTERNS: tuple[str, ...] = (
+    r"best\b",
+    r"strongest\b",
+    r"highest\b",
+    r"largest\b",
+    r"biggest\b",
+    r"greatest\b",
+    r"top\b",
+    r"leading\b",
+    r"maximum\b",
+)
+_WORST_PATTERNS: tuple[str, ...] = (
+    r"worst\b",
+    r"weakest\b",
+    r"lowest\b",
+    r"smallest\b",
+    r"poorest\b",
+    r"bottom\b",
+    r"laggard\w*",
+    r"minimum\b",
+)
+
+
 def _pattern(patterns: tuple[str, ...]) -> re.Pattern[str]:
     return re.compile(r"\b(?:" + "|".join(patterns) + r")", re.IGNORECASE)
 
 
 _UP_RE = _pattern(_UP_PATTERNS)
 _DOWN_RE = _pattern(_DOWN_PATTERNS)
+_BEST_RE = _pattern(_BEST_PATTERNS)
+_WORST_RE = _pattern(_WORST_PATTERNS)
+
+
+def _earliest(text: str, up: re.Pattern[str], down: re.Pattern[str]) -> Direction | None:
+    up_match = up.search(text)
+    down_match = down.search(text)
+    if up_match and down_match:
+        # Both stated: the earlier one is the claim, the later is usually context.
+        return "up" if up_match.start() < down_match.start() else "down"
+    if up_match:
+        return "up"
+    if down_match:
+        return "down"
+    return None
 
 
 def parse_direction(text: str) -> Direction | None:
@@ -76,16 +123,29 @@ def parse_direction(text: str) -> Direction | None:
     """
     if not text:
         return None
-    up = _UP_RE.search(text)
-    down = _DOWN_RE.search(text)
-    if up and down:
-        # Both stated: the earlier one is the claim, the later is usually context.
-        return "up" if up.start() < down.start() else "down"
-    if up:
-        return "up"
-    if down:
-        return "down"
-    return None
+    return _earliest(text, _UP_RE, _DOWN_RE)
+
+
+def parse_extreme(text: str) -> Direction | None:
+    """Which end of a ranking ``text`` asks about, or ``None`` when it names neither.
+
+    ``"up"`` is the strongest/highest entity, ``"down"`` the weakest/lowest — the same
+    vocabulary :attr:`~agentic.agent.policy.GoalInterpretation.direction` already uses, so a
+    ranking goal can travel to the planner through the field that exists rather than a second
+    one. Movement words are deliberately *not* consulted: "which region grew least" is a
+    question about the bottom of a ranking, and reading its "grew" as ``up`` would answer it
+    with the region that grew most.
+
+    >>> parse_extreme("which region has the weakest on-time delivery rate?")
+    'down'
+    >>> parse_extreme("which product sells best?")
+    'up'
+    >>> parse_extreme("rank regions by revenue") is None
+    True
+    """
+    if not text:
+        return None
+    return _earliest(text, _BEST_RE, _WORST_RE)
 
 
 def direction_sign(text: str) -> int | None:

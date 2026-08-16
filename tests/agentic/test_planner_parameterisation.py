@@ -128,6 +128,40 @@ def test_two_metric_tools_still_receive_two_columns() -> None:
     assert params["x_column"] != params["y_column"]
 
 
+# -- ranking direction --------------------------------------------------------
+#
+# `rank_entities` defaults to descending, so a ranking candidate built without `ascending`
+# reports the *strongest* entity whatever the goal asked. The planner is the only place that
+# can carry `interpretation.direction` to the tool, and until it did, every "which entity is
+# weakest?" goal was answered with the best one.
+
+
+def _ranking(direction: str | None) -> GoalInterpretation:
+    return GoalInterpretation(
+        intent=AnalysisIntent.ranking, metric_hint="revenue_growth_pct", direction=direction
+    )
+
+
+def _rank_params(direction: str | None) -> dict:
+    frame = _frame()
+    plan = _plan(_state("revenue_growth_pct"), _ranking(direction), _manifest(frame))
+    return next(r.parameters for r in plan if r.tool_name == "rank_entities")
+
+
+def test_a_weakest_entity_goal_ranks_ascending() -> None:
+    assert _rank_params("down").get("ascending") is True
+
+
+def test_a_strongest_entity_goal_keeps_the_default_ordering() -> None:
+    """`up` is already the tool's default; passing it explicitly would change nothing but the
+    fingerprint, and with it every replay diff."""
+    assert "ascending" not in _rank_params("up")
+
+
+def test_an_undirected_ranking_goal_keeps_the_default_ordering() -> None:
+    assert "ascending" not in _rank_params(None)
+
+
 # -- candidates across claims ------------------------------------------------
 
 

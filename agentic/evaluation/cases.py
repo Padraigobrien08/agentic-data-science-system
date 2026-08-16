@@ -22,6 +22,10 @@ belong in the tier.
 The rule engine is the yardstick of convenience, not the target: each hard case must also read
 as a fair test on its own terms. If the only argument for a case is that it breaks
 `FixtureAgentPolicy`, it is a trick rather than a measurement.
+
+:data:`CaseTier.core` may still grow, and that is not in tension with the freeze: a core case
+is one the deterministic baseline *passes*, so it guards a behaviour rather than measuring
+headroom, and `SUITE_V1_CASE_IDS` keeps the published subset intact underneath it.
 """
 
 from __future__ import annotations
@@ -180,6 +184,30 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
         expectations=AgencyExpectations(
             expect_any_tool=["analyze_time_series_trend", "detect_change_points"],
             forbid_tools=["compare_groups"],
+        ),
+    ),
+    AgencyCase(
+        case_id="weakest_entity_goal_ranks_from_the_bottom",
+        description=(
+            "Asking which entity is *weakest* must be answered with the weakest one. Ranking "
+            "descending here returns 'south', a correct number and the opposite answer, so "
+            "asserting that rank_entities ran would not catch it."
+        ),
+        goal="which region has the weakest revenue?",
+        fixture_id="regional_revenue_spread",
+        time_field="quarter",
+        entity_id_fields=["region"],
+        metric_field="revenue",
+        expectations=AgencyExpectations(
+            # north is the only region whose revenue declines, and it holds the lowest mean by
+            # a wide margin; south holds the highest. The two are unambiguous and far apart, so
+            # this asserts direction rather than a tie-break.
+            #
+            # Deliberately no confidence bound. The run that exposed this declined honestly —
+            # neutral evidence, `unresolved`, `insufficient_evidence` at 0.2 — and still does,
+            # but capping confidence would make that the *required* answer, and these regions
+            # genuinely do differ. A policy that concluded so on evidence would be right to.
+            expect_ranked_first="north",
         ),
     ),
     # -- input-agnosticism: a different domain, different column names --------
