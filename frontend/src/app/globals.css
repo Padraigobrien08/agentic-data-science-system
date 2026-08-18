@@ -370,3 +370,53 @@ body {
     --chart-4: #d4d4d8;
   }
 }
+
+/* ============================================================
+   Landing skin — the dark "auditable-loop" marketing surface.
+   Scoped tokens only; nothing else in the app mounts `.landing-dark`,
+   so the light app shell and the chat skin are untouched. Colours are
+   fixed rather than theme-reactive: this surface is authored dark, and
+   `dark:` utilities are inert here for the same reason they are on the
+   chat surface.
+   ============================================================ */
+.landing-dark {
+  color-scheme: dark;
+  font-family: var(--font-geist-sans, system-ui, sans-serif);
+  letter-spacing: -0.011em;
+
+  --ld-ink: #f4f5f7;
+  --ld-muted: #9ba1ac;
+  --ld-dim: #7b818c;
+  --ld-line: rgba(255, 255, 255, 0.09);
+  --ld-line-strong: rgba(255, 255, 255, 0.11);
+  --ld-cell: rgba(255, 255, 255, 0.022);
+  --ld-cell-raised: rgba(255, 255, 255, 0.045);
+  --ld-tint: rgba(129, 140, 248, 0.1);
+  --ld-blue: #60a5fa;
+  --ld-indigo: #a5b4fc;
+  --ld-indigo-ink: #dfe3ff;
+  --ld-green: #6ee7b7;
+  --ld-red: #fca5a5;
+  --ld-amber: #fcd34d;
+  --ld-shadow: 0 40px 90px -60px rgba(0, 0, 0, 0.9);
+
+  background: linear-gradient(180deg, #0e1116 0%, #0b0e13 38%, #12161d 100%);
+  color: var(--ld-ink);
+}
+
+.landing-dark .font-mono {
+  font-family: var(--font-geist-mono, ui-monospace, monospace);
+}
+
+/* Interior hairlines for edge-to-edge grids: every cell carries a right +
+   bottom rule and the wrapper clips the trailing ones, so the same markup
+   yields correct dividers at 1, 2 and 5 columns without per-breakpoint resets. */
+.landing-dark .ld-rule-grid {
+  margin-right: -1px;
+  margin-bottom: -1px;
+}
+
+.landing-dark .ld-rule-grid > * {
+  border-right: 1px solid var(--ld-line);
+  border-bottom: 1px solid var(--ld-line);
+}
