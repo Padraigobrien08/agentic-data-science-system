@@ -56,3 +56,8 @@ node_modules/
 !.impeccable/critique/
 frontend/.impeccable/*
 !frontend/.impeccable/critique/
+
+# Database snapshots from scripts/record_demo.py --dump: every row, including
+# password hashes. Never commit these.
+var/
+*.dump
