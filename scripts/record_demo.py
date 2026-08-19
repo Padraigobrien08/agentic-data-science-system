@@ -34,6 +34,7 @@ import csv
 import os
 import re
 import shutil
+import sqlite3
 import subprocess
 import sys
 from collections.abc import Sequence
@@ -140,6 +141,31 @@ def _dump_stamp() -> str:
     return datetime.now(timezone.utc).strftime("%Y%m%dT%H%M%SZ")
 
 
+def _dump_sqlite(url, dest: Path) -> bool:
+    """
+    Snapshot a SQLite database with the online backup API.
+
+    Running this script on the host (rather than in the compose network) uses the SQLite
+    default, which is a perfectly good recording store — but a recording with no snapshot is
+    the exact failure this flag exists to prevent, so "not Postgres" must not mean "no
+    insurance". `.backup()` rather than a file copy because it is safe against a concurrent
+    writer; a half-copied database would be worse than none.
+    """
+    source = Path(url.database or "")
+    if not source.is_file():
+        print(f"skip dump: no SQLite file at {source}")
+        return False
+
+    dest = dest.with_suffix(".sqlite")
+    with sqlite3.connect(source) as src, sqlite3.connect(dest) as out:
+        src.backup(out)
+
+    shown = dest.relative_to(REPO_ROOT) if dest.is_relative_to(REPO_ROOT) else dest
+    print(f"\ndump           {shown} ({dest.stat().st_size / 1024:.0f} KB, sqlite)")
+    print(f"               restore: cp {shown} {source}")
+    return True
+
+
 def _dump_database(dest: Path) -> bool:
     """
     Snapshot the whole database to ``dest`` (pg_custom format).
@@ -154,12 +180,14 @@ def _dump_database(dest: Path) -> bool:
         pg_restore --clean --if-exists -d "$EDGAR_BACKEND_DATABASE_URL" <dump>
     """
     url = make_url(get_settings().database_url)
-    if not url.drivername.startswith("postgresql"):
-        print(f"skip dump: {url.drivername} is not PostgreSQL")
-        return False
-
     dest = dest.resolve()
     dest.parent.mkdir(parents=True, exist_ok=True)
+
+    if url.drivername.startswith("sqlite"):
+        return _dump_sqlite(url, dest)
+    if not url.drivername.startswith("postgresql"):
+        print(f"skip dump: {url.drivername} is not a database this script can snapshot")
+        return False
     libpq = url.set(drivername="postgresql").render_as_string(hide_password=False)
 
     if shutil.which("pg_dump"):
