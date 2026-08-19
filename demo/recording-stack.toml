@@ -1,0 +1,135 @@
+# The demo recording stack — the goals worth paying for.
+#
+# Read `scripts/record_demo_batch.py --list` for a rendered view of this file.
+#
+# Two axes decide what belongs here, because a portfolio reviewer is judging the *loop*,
+# not any single answer:
+#
+#   1. Intent coverage. `AnalysisIntent` (trend, comparison, correlation, anomaly,
+#      distribution, ranking, association, profile) is what the goal interpreter resolves a
+#      question to, and it drives which experiments become candidates. Goals spread across
+#      intents make the planner visibly select different tool mixes — that is the README's
+#      "the mix shifts by goal" claim, demonstrated instead of asserted.
+#
+#   2. Outcome coverage. supported / rejected / mixed / insufficient_evidence. A set where
+#      everything concludes cleanly looks like a demo rig. The runs where a claim is
+#      overturned, or where the loop declines, are the ones that show the invariant is real.
+#
+# IMPORTANT — outcomes cannot be commissioned. A real model decides, so `expect` below is
+# what the goal is *aimed* at, never a promise. Over-record deliberately, then publish the
+# subset that covers the outcome space. Curating which runs to publish is honest; editing a
+# run is not.
+#
+# `slug` is only used when publishing, and publishing is always an explicit second step.
+
+[[recording]]
+id = "csv-delivery-delays"
+command = "csv"
+slug = "csv-delivery-delays"
+intent = "trend"
+expect = "insufficient_evidence"
+goal = "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?"
+why = """Already published and already the strongest asset in the set: it declines. Two
+competing explanations, neither cleanly separable in 96 rows, so the loop stops at
+insufficient_evidence rather than picking one. Keep it as the anchor."""
+
+[[recording]]
+id = "csv-staffing-vs-service"
+command = "csv"
+slug = "csv-staffing-vs-service"
+intent = "correlation"
+expect = "supported or rejected — a clean directional answer"
+goal = "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?"
+why = """The set needs one run that concludes cleanly, or the loop reads as unable to commit.
+A two-driver question over columns that genuinely covary routes to analyze_correlation and
+fit_simple_regression — a different tool mix from every other entry here."""
+
+[[recording]]
+id = "csv-regional-ranking"
+command = "csv"
+slug = "csv-regional-ranking"
+intent = "ranking"
+expect = "supported, with an effect-size caveat"
+goal = "Which region has the weakest on-time performance, and is the gap between regions large enough to act on?"
+why = """Ranking is the intent a naive tool would answer with a sorted list and stop. The
+second clause forces the loop past the ranking into whether the gap survives scrutiny, which
+is where rank_entities plus compare_groups and effect_size show up together."""
+
+[[recording]]
+id = "csv-distribution-honesty"
+command = "csv"
+slug = "csv-distribution-honesty"
+intent = "distribution"
+expect = "mixed — the mean holds centrally, tail behaviour does not"
+goal = "Is average delivery time a fair summary of our service, or is the mean hiding a long tail of late orders?"
+why = """A question about the honesty of a summary statistic, answered by a system whose
+thesis is that no number is fabricated. summarize_distribution is also the tool the critic
+nominated unprompted in the published EDGAR run, so it demonstrates twice over."""
+
+[[recording]]
+id = "csv-anomaly-months"
+command = "csv"
+slug = "csv-anomaly-months"
+intent = "anomaly"
+expect = "supported or weakened"
+goal = "Were there months where delivery performance broke from its own pattern, and were the breaks confined to one region?"
+why = """Routes to detect_change_points and detect_outliers, and the second clause makes a
+single change point insufficient — the loop has to check whether it generalises across
+regions before it can answer, which is a genuine second iteration rather than a padded one."""
+
+[[recording]]
+id = "edgar-margin-vs-growth"
+command = "edgar"
+slug = "edgar-margin-vs-growth"
+tickers = "AAPL,MSFT,NVDA"
+intent = "trend"
+expect = "mixed — one hypothesis supported, one rejected"
+goal = "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?"
+why = """Already published and the best trace in the set: h1 rejected at 0.05, the critic
+challenges the surviving claim on distributional grounds, the loop runs the nominated tool
+and only then reports h2 supported at 0.95. Re-record only if the export needs the model
+calls this run predates."""
+
+[[recording]]
+id = "edgar-peer-separation"
+command = "edgar"
+slug = "edgar-peer-separation"
+tickers = "AAPL,MSFT,NVDA"
+intent = "comparison"
+expect = "supported or weakened"
+goal = "Does NVDA's margin profile genuinely stand apart from AAPL and MSFT, or is the difference within normal variation between them?"
+why = """The only entry that exercises edgar_peer_comparison, and it is phrased so that
+"NVDA is higher" is not an answer — the loop has to reach for variation before it can
+separate a real gap from noise. Live SEC data, so this also proves the EDGAR path end to end."""
+
+[[recording]]
+id = "edgar-growth-breaks"
+command = "edgar"
+slug = "edgar-growth-breaks"
+tickers = "AAPL,MSFT,NVDA"
+intent = "anomaly"
+expect = "supported, possibly per-entity mixed"
+goal = "Were there quarters where revenue growth broke trend for any of these companies, and did the break persist or reverse?"
+why = """edgar_revenue_growth_analysis and edgar_trend_break_analysis over three entities,
+where the honest answer is likely different per company. A conclusion that differs by entity
+rather than collapsing to one verdict is hard to fake and reads as real analysis."""
+
+# ---------------------------------------------------------------------------------------
+# Deliberately NOT in the default set — enable with --include-known-limit.
+#
+# The README's first known limit is that on a question the data cannot answer, the model
+# substitutes the nearest available metric and reports confidence 0.95. This goal is built
+# to trigger exactly that. Publishing it would be the most honest thing on the site and the
+# most damaging out of context, so it is opt-in and should ship only alongside the framing
+# that it is a documented model failure the loop does not catch.
+[[recording]]
+id = "csv-unanswerable-moat"
+command = "csv"
+optional = true
+slug = "csv-unanswerable-moat"
+intent = "general"
+expect = "confidently wrong — this is the documented failure, not a bug to fix here"
+goal = "Which region has the strongest customer loyalty?"
+why = """Nothing in this dataset measures loyalty. The honest answer is that the question
+cannot be answered from these columns. Recording it captures the documented weakness in the
+same evidence format as everything else, which is worth more than describing it in prose."""
