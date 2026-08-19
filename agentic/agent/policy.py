@@ -73,6 +73,12 @@ class CritiqueProposal(DomainModel):
     falsification_tool: str | None = None
     message: str = ""
     rationale: str = ""
+    #: Another *currently supported* claim that cannot be true at the same time as
+    #: ``target_hypothesis_id``. Judging that two natural-language statements are mutually
+    #: exclusive is interpretation, so it belongs to the policy — but the model only
+    #: *reports* the conflict here. What that does to either claim's status and confidence
+    #: is computed by :class:`~agentic.agent.components.Critic`, never by the model.
+    contradicts_hypothesis_id: str | None = None
 
 
 # -- errors ------------------------------------------------------------------
@@ -102,7 +108,13 @@ class AgentPolicy(Protocol):
 
     def select_experiment(self, *, goal_summary: dict, candidates: list[dict]) -> ExperimentChoice: ...
 
-    def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal: ...
+    def critique(
+        self,
+        *,
+        strongest_claim: dict | None,
+        available_tools: list[str],
+        supported_claims: list[dict] | None = None,
+    ) -> CritiqueProposal: ...
 
 
 @runtime_checkable
@@ -157,8 +169,9 @@ class PolicyPrompts:
     )
     select_experiment: str = "Choose the most informative next experiment. Reply as ExperimentChoice JSON."
     critique: str = (
-        "Challenge the strongest current claim; suggest a falsification tool. "
-        "Reply as CritiqueProposal JSON."
+        "Challenge the strongest current claim; suggest a falsification tool. If two claims "
+        "in supported_claims cannot both be true, report the conflict in "
+        "contradicts_hypothesis_id. Reply as CritiqueProposal JSON."
     )
 
 
@@ -222,9 +235,19 @@ class ModelAgentPolicy:
             ExperimentChoice,
         )
 
-    def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal:
+    def critique(
+        self,
+        *,
+        strongest_claim: dict | None,
+        available_tools: list[str],
+        supported_claims: list[dict] | None = None,
+    ) -> CritiqueProposal:
         return self._call(
             self._prompts.critique,
-            json.dumps({"claim": strongest_claim, "tools": available_tools}),
+            json.dumps({
+                "claim": strongest_claim,
+                "tools": available_tools,
+                "supported_claims": supported_claims or [],
+            }),
             CritiqueProposal,
         )
