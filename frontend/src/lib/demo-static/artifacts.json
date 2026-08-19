@@ -11,6 +11,14 @@
     "ea7125b9-aa3f-47e7-83c7-e845384bb533": "/demo-data/csv-delivery-delays/artifacts/ea7125b9-aa3f-47e7-83c7-e845384bb533/distribution_summary.json",
     "fef0d684-656f-452b-aaec-bb34536b7ff7": "/demo-data/csv-delivery-delays/artifacts/fef0d684-656f-452b-aaec-bb34536b7ff7/trend.json"
   },
+  "csv-staffing-vs-service": {
+    "0f4717bb-df7d-4de4-83dd-cf18f96179cc": "/demo-data/csv-staffing-vs-service/artifacts/0f4717bb-df7d-4de4-83dd-cf18f96179cc/coefficients.csv",
+    "21b73443-d578-4bb9-baac-921d5783a6ed": "/demo-data/csv-staffing-vs-service/artifacts/21b73443-d578-4bb9-baac-921d5783a6ed/regression_fit.json",
+    "4b71864b-ad6a-4189-a146-e5bd86395974": "/demo-data/csv-staffing-vs-service/artifacts/4b71864b-ad6a-4189-a146-e5bd86395974/correlation_heatmap.json",
+    "62f5ae47-6357-4999-9eab-0a889d391518": "/demo-data/csv-staffing-vs-service/artifacts/62f5ae47-6357-4999-9eab-0a889d391518/correlation_matrix.csv",
+    "63ca8b51-0fbb-45bd-931d-1632e69869ee": "/demo-data/csv-staffing-vs-service/artifacts/63ca8b51-0fbb-45bd-931d-1632e69869ee/correlation_matrix.csv",
+    "bfb0059b-e4d5-4b72-a01c-fc8e850126d5": "/demo-data/csv-staffing-vs-service/artifacts/bfb0059b-e4d5-4b72-a01c-fc8e850126d5/correlation_heatmap.json"
+  },
   "edgar-margin-vs-growth": {
     "13391221-3462-494a-ac45-6fd2523d5b95": "/demo-data/edgar-margin-vs-growth/artifacts/13391221-3462-494a-ac45-6fd2523d5b95/trend.json",
     "2425a93d-7d66-452b-bf32-29aa56eac0a3": "/demo-data/edgar-margin-vs-growth/artifacts/2425a93d-7d66-452b-bf32-29aa56eac0a3/trend.json",

@@ -824,6 +824,14 @@ class TerminationPolicy:
         # contradiction, and a third claim standing does not make the conflicting pair go away.
         if self._unresolved_contradiction(state) is not None:
             return TerminationReason.insufficient_evidence
+        # Same bar `decide` applies: a claim still at `proposed` has had nothing run against
+        # it. Without this the two termination paths disagreed, and running out of candidate
+        # experiments could report `sufficient_evidence` with a rival explanation untested —
+        # a real run concluded "a genuine change rather than a seasonal artifact" at 0.95
+        # while the seasonality claim it raised was never examined. Ruling out an alternative
+        # the loop never tested is exactly the overreach this system exists to not commit.
+        if any(h.status is HypothesisStatus.proposed for h in state.hypotheses):
+            return TerminationReason.insufficient_evidence if ran_any else TerminationReason.no_valid_experiment
         supported = [h for h in state.hypotheses
                      if h.status is HypothesisStatus.supported and h.confidence >= self.SUFFICIENT_CONFIDENCE]
         if supported:

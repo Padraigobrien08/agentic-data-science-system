@@ -20,6 +20,27 @@
 # subset that covers the outcome space. Curating which runs to publish is honest; editing a
 # run is not.
 #
+# ---------------------------------------------------------------------------------------
+# What the first full sweep taught us (2026-08-19, 8 goals, $0.044)
+#
+# **Phrase every goal as two competing explanations.** The three goals shaped
+# "A, or is B the explanation?" produced 7-13 evidence items over 3-7 experiments with
+# multiple hypotheses and real critiques. The five shaped as a single question
+# ("which region is weakest?", "were there anomalous months?") produced *one* hypothesis,
+# one or two experiments, and ended `unresolved` at confidence 0.2 — runs that read as the
+# loop giving up rather than as rigour.
+#
+# The mechanism is documented in the prompt changelog: intent hard-gates the candidate
+# tools, so a narrow single-question intent can leave the planner with one experiment and a
+# premature stop. A goal naming two accounts forces at least two hypotheses, which keeps
+# candidates alive across iterations.
+#
+# This is the opposite of the caution recorded before that sweep, which guessed that "or"
+# framing was the risky one because it can produce mutually exclusive claims. It can — and
+# that is now caught by the contradiction check in the critic, which turns the risk into
+# the most interesting trace in the set.
+# ---------------------------------------------------------------------------------------
+#
 # `slug` is only used when publishing, and publishing is always an explicit second step.
 
 [[recording]]
@@ -38,44 +59,48 @@ id = "csv-staffing-vs-service"
 command = "csv"
 slug = "csv-staffing-vs-service"
 intent = "correlation"
-expect = "supported or rejected — a clean directional answer"
+expect = "insufficient_evidence — the two drivers cannot be separated in this data"
 goal = "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?"
-why = """The set needs one run that concludes cleanly, or the loop reads as unable to commit.
-A two-driver question over columns that genuinely covary routes to analyze_correlation and
-fit_simple_regression — a different tool mix from every other entry here."""
+why = """Published. The best trace in the set: both drivers find independent support, the
+critic notices that the two claims are mutually exclusive, and the loop weakens both and
+declines rather than picking one. 13 evidence items over 3 experiments. This is the run that
+shows the system catching itself, which is worth more than any clean answer here."""
 
 [[recording]]
 id = "csv-regional-ranking"
 command = "csv"
 slug = "csv-regional-ranking"
 intent = "ranking"
-expect = "supported, with an effect-size caveat"
-goal = "Which region has the weakest on-time performance, and is the gap between regions large enough to act on?"
-why = """Ranking is the intent a naive tool would answer with a sorted list and stop. The
-second clause forces the loop past the ranking into whether the gap survives scrutiny, which
-is where rank_entities plus compare_groups and effect_size show up together."""
+expect = "supported or weakened — a real gap, or one the workload explains"
+goal = "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?"
+why = """Rewritten after the first sweep. "Which region is weakest?" produced a single
+hypothesis, one rank_entities call and `unresolved` at 0.2 — a sorted list and a shrug.
+Naming the alternative account (workload, not quality) forces a second hypothesis and keeps
+compare_groups and effect_size alive as candidates after the ranking lands."""
 
 [[recording]]
 id = "csv-distribution-honesty"
 command = "csv"
 slug = "csv-distribution-honesty"
 intent = "distribution"
-expect = "mixed — the mean holds centrally, tail behaviour does not"
-goal = "Is average delivery time a fair summary of our service, or is the mean hiding a long tail of late orders?"
-why = """A question about the honesty of a summary statistic, answered by a system whose
-thesis is that no number is fabricated. summarize_distribution is also the tool the critic
-nominated unprompted in the published EDGAR run, so it demonstrates twice over."""
+expect = "mixed or weakened — which account the shape supports"
+goal = "Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?"
+why = """Rewritten after the first sweep, which produced one hypothesis and stopped at two
+experiments. Broad-shift versus heavy-tail are two accounts of the same mean, distinguishable
+only by looking at the distribution — so the goal is a question about the honesty of a
+summary statistic, put to a system whose thesis is that no number is fabricated."""
 
 [[recording]]
 id = "csv-anomaly-months"
 command = "csv"
 slug = "csv-anomaly-months"
 intent = "anomaly"
-expect = "supported or weakened"
-goal = "Were there months where delivery performance broke from its own pattern, and were the breaks confined to one region?"
-why = """Routes to detect_change_points and detect_outliers, and the second clause makes a
-single change point insufficient — the loop has to check whether it generalises across
-regions before it can answer, which is a genuine second iteration rather than a padded one."""
+expect = "supported or weakened — a discrete break, or steady drift"
+goal = "Did delivery performance break sharply in particular months, or has it drifted gradually the whole period with no real break at all?"
+why = """Rewritten after the first sweep, which produced one hypothesis and `unresolved`.
+Break-versus-drift is the sharpest pair available in this data: they predict different things
+about the same series, detect_change_points and analyze_time_series_trend answer different
+halves, and neither result alone settles it."""
 
 [[recording]]
 id = "edgar-margin-vs-growth"
@@ -96,11 +121,13 @@ command = "edgar"
 slug = "edgar-peer-separation"
 tickers = "AAPL,MSFT,NVDA"
 intent = "comparison"
-expect = "supported or weakened"
-goal = "Does NVDA's margin profile genuinely stand apart from AAPL and MSFT, or is the difference within normal variation between them?"
-why = """The only entry that exercises edgar_peer_comparison, and it is phrased so that
-"NVDA is higher" is not an answer — the loop has to reach for variation before it can
-separate a real gap from noise. Live SEC data, so this also proves the EDGAR path end to end."""
+expect = "supported or weakened — a durable gap, or one growth accounts for"
+goal = "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?"
+why = """Rewritten after the first sweep: the within-normal-variation framing produced one
+hypothesis, one edgar_peer_comparison call and `unresolved` at 0.2. Naming growth as the
+rival account gives the loop a second claim and a reason to bring
+edgar_revenue_growth_analysis alongside the peer comparison. Live SEC data, so this also
+proves the EDGAR path end to end."""
 
 [[recording]]
 id = "edgar-growth-breaks"
@@ -108,11 +135,12 @@ command = "edgar"
 slug = "edgar-growth-breaks"
 tickers = "AAPL,MSFT,NVDA"
 intent = "anomaly"
-expect = "supported, possibly per-entity mixed"
-goal = "Were there quarters where revenue growth broke trend for any of these companies, and did the break persist or reverse?"
-why = """edgar_revenue_growth_analysis and edgar_trend_break_analysis over three entities,
-where the honest answer is likely different per company. A conclusion that differs by entity
-rather than collapsing to one verdict is hard to fake and reads as real analysis."""
+expect = "mixed — likely different per company"
+goal = "Where revenue growth appears to break trend at these companies, is that a genuine change in the business, or an artefact of quarterly seasonality in the filings?"
+why = """Rewritten after the first sweep, which produced one hypothesis over four experiments
+and still ended `unresolved`. Real-break versus seasonality is the rival pair that actually
+threatens the finding, and it is the one a finance reviewer would raise first. Three entities
+mean the honest answer may differ per company, which is hard to fake."""
 
 # ---------------------------------------------------------------------------------------
 # Deliberately NOT in the default set — enable with --include-known-limit.

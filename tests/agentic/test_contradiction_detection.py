@@ -221,6 +221,37 @@ def test_a_third_standing_claim_does_not_rescue_sufficiency(state) -> None:
     )
 
 
+def test_running_out_of_experiments_with_an_untested_claim_is_not_sufficiency(state) -> None:
+    """
+    The two termination paths must apply the same bar.
+
+    ``decide`` already refuses to conclude while a claim sits at `proposed`, but
+    ``finalize_no_candidates`` did not — so a run that exhausted its candidates could report
+    `sufficient_evidence` with a rival explanation untested. One did: it concluded "a genuine
+    change rather than a seasonal artifact" at 0.95 while the seasonality claim it raised had
+    nothing run against it.
+    """
+    st = InvestigationState(objective=InvestigationGoal(objective="break or seasonality?"))
+    st.add_hypothesis(_supported("h-1", "The break is a genuine change.", 0.95))
+    st.add_hypothesis(Hypothesis(
+        id="h-2", statement="Seasonality explains the break.", rationale="", provenance=_PROV))
+
+    assert st.find_hypothesis("h-2").status is HypothesisStatus.proposed
+    assert TerminationPolicy().finalize_no_candidates(st, ran_any=True) is (
+        TerminationReason.insufficient_evidence
+    )
+
+
+def test_all_claims_tested_still_reaches_sufficiency(state) -> None:
+    """The guard must not make sufficiency unreachable."""
+    st = InvestigationState(objective=InvestigationGoal(objective="did it move?"))
+    st.add_hypothesis(_supported("h-1", "It moved.", 0.95))
+
+    assert TerminationPolicy().finalize_no_candidates(st, ran_any=True) is (
+        TerminationReason.sufficient_evidence
+    )
+
+
 # ------------------------------------------------------------------ what must NOT fire
 
 
