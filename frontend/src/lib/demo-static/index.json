@@ -70,5 +70,53 @@
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "exhausted",
     "updated_at": "2026-08-19T22:08:55"
+  },
+  {
+    "adapter_id": "in_memory",
+    "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+    "conclusion": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
+    "confidence": 0.4,
+    "counts": {
+      "critiques": 0,
+      "decisions": 15,
+      "evidence": 14,
+      "experiments": 4,
+      "hypotheses": 2,
+      "observations": 14,
+      "open_questions": 3
+    },
+    "created_at": "2026-08-19T22:11:09",
+    "demo_slug": "csv-regional-ranking",
+    "domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+    "id": "311f7b4d-5362-468e-884f-8b738e6060dd",
+    "objective": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?",
+    "origin": "native",
+    "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+    "status": "exhausted",
+    "updated_at": "2026-08-19T22:26:43"
+  },
+  {
+    "adapter_id": "edgar",
+    "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+    "conclusion": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+    "confidence": 0.95,
+    "counts": {
+      "critiques": 1,
+      "decisions": 13,
+      "evidence": 73,
+      "experiments": 3,
+      "hypotheses": 2,
+      "observations": 73,
+      "open_questions": 2
+    },
+    "created_at": "2026-08-19T22:11:27",
+    "demo_slug": "edgar-peer-separation",
+    "domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+    "id": "8f056b0a-8112-40ed-a611-c2dd3d5e2161",
+    "objective": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
+    "origin": "native",
+    "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
+    "status": "converged",
+    "updated_at": "2026-08-19T22:26:42"
   }
 ]

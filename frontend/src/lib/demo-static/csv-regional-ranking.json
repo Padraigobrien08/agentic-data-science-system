@@ -1,0 +1,1108 @@
+{
+  "adapter_id": "in_memory",
+  "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+  "conclusion": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
+  "conclusion_detail": {
+    "caveats": [
+      "termination: insufficient_evidence",
+      "1 contradicting evidence item(s) preserved",
+      "3 open question(s) remain"
+    ],
+    "confidence": 0.4,
+    "disposition": "inconclusive",
+    "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-concl-0",
+    "key_evidence_ids": [
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-0",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-1",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-2",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-3",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-4",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-5",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-6",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-7",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-8",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-9",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-10",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-11",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-12",
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-13"
+    ],
+    "statement": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
+    "supporting_hypothesis_ids": [
+      "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
+    ]
+  },
+  "confidence": 0.4,
+  "constraints": [],
+  "counts": {
+    "critiques": 0,
+    "decisions": 15,
+    "evidence": 14,
+    "experiments": 4,
+    "hypotheses": 2,
+    "observations": 14,
+    "open_questions": 3
+  },
+  "created_at": "2026-08-19T22:11:09",
+  "critiques": [],
+  "datasets": [
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_bd88bb0b606f47a085f50104b3e88d5f",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    }
+  ],
+  "decisions": [
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "propose_hypothesis",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-hyp-0",
+      "iteration": 0,
+      "rationale": "This tests whether the service-quality gap remains when volume is considered.",
+      "sequence": 0
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "propose_hypothesis",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-hyp-1",
+      "iteration": 0,
+      "rationale": "This tests the proposed alternative explanation directly on the cause metric.",
+      "sequence": 1
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "analyze_correlation",
+      "decision_type": "select_experiment",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-2",
+      "iteration": 0,
+      "rationale": "analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.",
+      "sequence": 2
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-3",
+      "iteration": 0,
+      "rationale": "recorded 6 evidence item(s) for analyze_correlation",
+      "sequence": 3
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-4",
+      "iteration": 0,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 4
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "analyze_correlation",
+      "decision_type": "select_experiment",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-5",
+      "iteration": 1,
+      "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
+      "sequence": 5
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-6",
+      "iteration": 0,
+      "rationale": "recorded 6 evidence item(s) for analyze_correlation",
+      "sequence": 6
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-7",
+      "iteration": 0,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 7
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "fit_simple_regression",
+      "decision_type": "select_experiment",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-8",
+      "iteration": 2,
+      "rationale": "This will establish the correlation estimate via simple regression, which best matches the goal and has the highest available information gain.",
+      "sequence": 8
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-9",
+      "iteration": 0,
+      "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
+      "sequence": 9
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-10",
+      "iteration": 0,
+      "rationale": "active (support=1, refute=0)",
+      "sequence": 10
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "fit_simple_regression",
+      "decision_type": "select_experiment",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-11",
+      "iteration": 3,
+      "rationale": "This will establish the strength and direction of the correlation via a simple regression fit.",
+      "sequence": 11
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-12",
+      "iteration": 0,
+      "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
+      "sequence": 12
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-13",
+      "iteration": 0,
+      "rationale": "weakened (support=0, refute=1)",
+      "sequence": 13
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "conclude",
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-concl-14",
+      "iteration": 0,
+      "rationale": "inconclusive (insufficient_evidence)",
+      "sequence": 14
+    }
+  ],
+  "demo_slug": "csv-regional-ranking",
+  "domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+  "events": [
+    {
+      "created_at": "2026-08-19T22:11:09",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "created",
+      "payload": {
+        "origin": "native"
+      },
+      "sequence": 0
+    },
+    {
+      "created_at": "2026-08-19T22:11:11",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 1
+    },
+    {
+      "created_at": "2026-08-19T22:11:12",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 2
+    },
+    {
+      "created_at": "2026-08-19T22:11:13",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 3
+    },
+    {
+      "created_at": "2026-08-19T22:11:14",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 4
+    },
+    {
+      "created_at": "2026-08-19T22:11:15",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 5
+    },
+    {
+      "created_at": "2026-08-19T22:11:15",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "exhausted"
+      },
+      "sequence": 6
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "'avg_delivery_days' and 'order_volume' are correlated (r=-0.62, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-0",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.619129,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.477972,
+          "ci_low": -0.729113,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.619129
+    },
+    {
+      "claim": "'avg_delivery_days' and 'on_time_rate' are correlated (r=-0.96, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-1",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.964074,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.946539,
+          "ci_low": -0.975929,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.964074
+    },
+    {
+      "claim": "'avg_delivery_days' and 'staff_count' are correlated (r=-0.79, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-2",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.789439,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.699695,
+          "ci_low": -0.854657,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.789439
+    },
+    {
+      "claim": "'order_volume' and 'on_time_rate' are correlated (r=0.58, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-3",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.582371,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.701009,
+          "ci_low": 0.432367,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.582371
+    },
+    {
+      "claim": "'order_volume' and 'staff_count' are correlated (r=0.96, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-4",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.96176,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.974369,
+          "ci_low": 0.943127,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.96176
+    },
+    {
+      "claim": "'on_time_rate' and 'staff_count' are correlated (r=0.75, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-5",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.750919,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.826914,
+          "ci_low": 0.647987,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.750919
+    },
+    {
+      "claim": "'avg_delivery_days' and 'order_volume' are correlated (r=-0.62, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-6",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.619129,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.477972,
+          "ci_low": -0.729113,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.619129
+    },
+    {
+      "claim": "'avg_delivery_days' and 'on_time_rate' are correlated (r=-0.96, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-7",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.964074,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.946539,
+          "ci_low": -0.975929,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.964074
+    },
+    {
+      "claim": "'avg_delivery_days' and 'staff_count' are correlated (r=-0.79, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-8",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.789439,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.699695,
+          "ci_low": -0.854657,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.789439
+    },
+    {
+      "claim": "'order_volume' and 'on_time_rate' are correlated (r=0.58, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-9",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.582371,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.701009,
+          "ci_low": 0.432367,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.582371
+    },
+    {
+      "claim": "'order_volume' and 'staff_count' are correlated (r=0.96, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-10",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.96176,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.974369,
+          "ci_low": 0.943127,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.96176
+    },
+    {
+      "claim": "'on_time_rate' and 'staff_count' are correlated (r=0.75, n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-11",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.750919,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.826914,
+          "ci_low": 0.647987,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.750919
+    },
+    {
+      "claim": "'avg_delivery_days' predicts 'order_volume' (R²=0.38, n=96).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-12",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linearity.",
+          "Homoscedastic, independent residuals.",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "intercept": 10222.893517,
+          "r2": 0.383321,
+          "resid_std": 951.603691,
+          "slope": -2062.972385
+        },
+        "effect_size": 0.383321,
+        "effect_size_kind": "r2",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -1534.008476,
+          "ci_low": -2591.936294,
+          "confidence_level": 0.95,
+          "std_error": 269.884504
+        },
+        "warnings": []
+      },
+      "strength": 0.383321
+    },
+    {
+      "claim": "'avg_delivery_days' predicts 'order_volume' (R²=0.38, n=96).",
+      "coverage": 1.0,
+      "direction": "refutes",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "57c5698c-9854-4b82-8f57-91138a5cc695"
+      ],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-13",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Linearity.",
+          "Homoscedastic, independent residuals.",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "intercept": 10222.893517,
+          "r2": 0.383321,
+          "resid_std": 951.603691,
+          "slope": -2062.972385
+        },
+        "effect_size": 0.383321,
+        "effect_size_kind": "r2",
+        "p_value": 0.0,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -1534.008476,
+          "ci_low": -2591.936294,
+          "confidence_level": 0.95,
+          "std_error": 269.884504
+        },
+        "warnings": []
+      },
+      "strength": 0.383321
+    }
+  ],
+  "experiments": [
+    {
+      "artifacts": [
+        {
+          "byte_size": 247,
+          "id": "c94b6dd9-20ef-4c0f-b607-a66c6f66e928",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "correlation_matrix"
+        },
+        {
+          "byte_size": 247,
+          "id": "a74b8a20-8c10-4b22-8e0b-a5c11e6a7e86",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "correlation_heatmap"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:12",
+      "error": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-res-0",
+      "metrics": {
+        "columns": 4.0,
+        "strong_pairs": 6.0
+      },
+      "request_domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-0",
+      "status": "succeeded",
+      "summary": "Correlated 4 columns; 6 strong pair(s).",
+      "tool_name": "analyze_correlation"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 247,
+          "id": "a456ebb5-be98-4330-b4e8-2c116f48f760",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "correlation_matrix"
+        },
+        {
+          "byte_size": 247,
+          "id": "60794381-14fa-4666-98fc-a3bd764bd128",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "correlation_heatmap"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:13",
+      "error": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-res-1",
+      "metrics": {
+        "columns": 4.0,
+        "strong_pairs": 6.0
+      },
+      "request_domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-2",
+      "status": "succeeded",
+      "summary": "Correlated 4 columns; 6 strong pair(s).",
+      "tool_name": "analyze_correlation"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 90,
+          "id": "b377d521-ce40-40f5-abd3-11cb24e56ee6",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "coefficients"
+        },
+        {
+          "byte_size": 113,
+          "id": "ec859ebe-2e06-4bbd-9f6f-4ecc19426efe",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "regression_fit"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:14",
+      "error": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-res-2",
+      "metrics": {
+        "intercept": 10222.893517,
+        "n": 96.0,
+        "r2": 0.383321,
+        "slope": -2062.972385
+      },
+      "request_domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-2",
+      "status": "succeeded",
+      "summary": "OLS order_volume ~ avg_delivery_days: R²=0.38.",
+      "tool_name": "fit_simple_regression"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 90,
+          "id": "e9ff1572-d224-4383-bd0c-6a23e78d21b2",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "coefficients"
+        },
+        {
+          "byte_size": 113,
+          "id": "87f01dda-207d-4c4c-82e7-fbb88add25e1",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "regression_fit"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:15",
+      "error": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-res-3",
+      "metrics": {
+        "intercept": 10222.893517,
+        "n": 96.0,
+        "r2": 0.383321,
+        "slope": -2062.972385
+      },
+      "request_domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-3",
+      "status": "succeeded",
+      "summary": "OLS order_volume ~ avg_delivery_days: R²=0.38.",
+      "tool_name": "fit_simple_regression"
+    }
+  ],
+  "hypotheses": [
+    {
+      "confidence": 0.5458,
+      "entity_refs": [],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+      "metric_refs": [
+        "on_time_rate"
+      ],
+      "prior_confidence": 0.5,
+      "rationale": "This tests whether the service-quality gap remains when volume is considered.",
+      "statement": "The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.",
+      "status": "unresolved"
+    },
+    {
+      "confidence": 0.3542,
+      "entity_refs": [],
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1",
+      "metric_refs": [
+        "order_volume"
+      ],
+      "prior_confidence": 0.5,
+      "rationale": "This tests the proposed alternative explanation directly on the cause metric.",
+      "statement": "The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
+      "status": "weakened"
+    }
+  ],
+  "id": "311f7b4d-5362-468e-884f-8b738e6060dd",
+  "objective": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?",
+  "observations": [
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_80f8d59318bd496eb384b3f30cf1f392",
+      "magnitude": -0.6191290613557787,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(avg_delivery_days,order_volume)=-0.62"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_229cf90d54d24c078eec8e2104247b06",
+      "magnitude": -0.964074485209477,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(avg_delivery_days,on_time_rate)=-0.96"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_ab1d76f3b33847e49d5c4e8e0149335a",
+      "magnitude": -0.7894390591599819,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(avg_delivery_days,staff_count)=-0.79"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_aea1e5689f7045738046db99a46ac9f1",
+      "magnitude": 0.5823712153185924,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(order_volume,on_time_rate)=0.58"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_9493aeef755c450884f6bf74c0e11058",
+      "magnitude": 0.9617597599308471,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(order_volume,staff_count)=0.96"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_13d13c28d8af44c6b09cb0e3434b47c6",
+      "magnitude": 0.7509193011707634,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(on_time_rate,staff_count)=0.75"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_115c0c489db24e5eb7ffecb1854539e1",
+      "magnitude": -0.6191290613557787,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(avg_delivery_days,order_volume)=-0.62"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_47b5ab6dfb934b59beceab646411a884",
+      "magnitude": -0.964074485209477,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(avg_delivery_days,on_time_rate)=-0.96"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_19feb586491949029ed2d0b1a2cda83c",
+      "magnitude": -0.7894390591599819,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(avg_delivery_days,staff_count)=-0.79"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_ba9f355f5b1c43f09c1a336c161d44b4",
+      "magnitude": 0.5823712153185924,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(order_volume,on_time_rate)=0.58"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_b03c1152467446378da2788a6f9c0a83",
+      "magnitude": 0.9617597599308471,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(order_volume,staff_count)=0.96"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_e2e822ce344840e3bef60b5da78b8724",
+      "magnitude": 0.7509193011707634,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(on_time_rate,staff_count)=0.75"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_7adf1393e77649ab88c161fe6f040753",
+      "magnitude": -2062.972385181998,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "order_volume ~ avg_delivery_days: slope=-2.06e+03, R²=0.38"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_9c455da646db4b8bbc6f8e177f938db2",
+      "magnitude": -2062.972385181998,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "order_volume ~ avg_delivery_days: slope=-2.06e+03, R²=0.38"
+    }
+  ],
+  "open_questions": [
+    {
+      "answer": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-q-0",
+      "priority": 0,
+      "question": "Does the on-time delivery gap persist after controlling for order volume?",
+      "related_hypothesis_ids": [
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
+      ],
+      "status": "open"
+    },
+    {
+      "answer": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-q-1",
+      "priority": 0,
+      "question": "Is the weakest region's order volume materially higher than other regions?",
+      "related_hypothesis_ids": [
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
+      ],
+      "status": "open"
+    },
+    {
+      "answer": null,
+      "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-q-follow-2",
+      "priority": 0,
+      "question": "Stronger evidence needed for: The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.",
+      "related_hypothesis_ids": [
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
+      ],
+      "status": "open"
+    }
+  ],
+  "origin": "native",
+  "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+  "status": "exhausted",
+  "success_criteria": [],
+  "termination": {
+    "at_iteration": 4,
+    "rationale": "terminated: insufficient_evidence",
+    "reason": "insufficient_evidence"
+  },
+  "updated_at": "2026-08-19T22:26:43"
+}

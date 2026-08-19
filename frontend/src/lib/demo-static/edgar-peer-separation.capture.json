@@ -1,0 +1,731 @@
+{
+  "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+  "chat": [
+    {
+      "created_at": "2026-08-19T22:11:39",
+      "id": "3f3520df-d646-4f77-a88d-036e13bf77f9",
+      "messages": [
+        {
+          "analysis_run_id": null,
+          "content": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
+          "created_at": "2026-08-19T22:11:39.622601",
+          "id": "1e2e5d1d-d1bb-49f4-8a90-4d18d5f9a0db",
+          "role": "user",
+          "sequence": 0,
+          "status": "complete"
+        },
+        {
+          "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+          "content": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+          "created_at": "2026-08-19T22:11:39.623043",
+          "id": "2f33fd97-d756-447a-8fb7-93e0391f4dd2",
+          "role": "assistant",
+          "sequence": 1,
+          "status": "complete"
+        }
+      ],
+      "title": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by re…"
+    }
+  ],
+  "demo_slug": "edgar-peer-separation",
+  "investigation_id": "8f056b0a-8112-40ed-a611-c2dd3d5e2161",
+  "model_calls": [
+    {
+      "completion_tokens": 55,
+      "error_detail": null,
+      "est_cost_usd": 0.00101925,
+      "finished_at": "2026-08-19T22:11:28.704646",
+      "id": "49117864-86d1-4de1-aa40-b488358456fd",
+      "latency_ms": 955,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1029,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Goal interpreter** for an adaptive data investigation loop. You receive an analytical goal in plain language plus the capabilities of the dataset that will answer it. You decide what kind of question is being asked. Everything downstream — which experiments become candidates, which hypotheses get generated — follows from this one call, so a wrong intent wastes the whole run.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question>\",\n \"capabilities\": {\"metrics\": [\"<numeric column>\", ...], \"dimensions\": [\"<categorical column>\", ...]}}\n```\n\n`metrics` and `dimensions` are the *only* column names that exist. A name not in those lists is not available, whatever the goal calls it.\n\n## Output\n\nReply with `GoalInterpretation` JSON and nothing else:\n\n```json\n{\"intent\": \"<one of the intents below>\",\n \"metric_hint\": \"<a name from capabilities.metrics, or null>\",\n \"group_hint\": \"<a name from capabilities.dimensions, or null>\",\n \"direction\": \"up\" | \"down\" | null,\n \"rationale\": \"<one sentence>\"}\n```\n\n### `intent` — choose exactly one\n\n| Intent | The goal is asking |\n|---|---|\n| `trend` | whether a metric moves over time |\n| `comparison` | whether a metric differs between groups |\n| `correlation` | whether two metrics move together |\n| `anomaly` | whether specific values are unusual |\n| `distribution` | what the shape or spread of a metric is |\n| `ranking` | which entities are highest or lowest |\n| `association` | whether two categorical fields are related |\n| `profile` | a broad description of the dataset |\n| `general` | none of the above fits |\n\nPrefer the *specific* intent over `general` when the goal supports one. `general` is the honest answer for a vague goal, not a way to avoid committing.\n\n### Reading the intent correctly\n\nThe intent decides which experiments are ever considered, so these three mistakes are the expensive ones:\n\n- **`comparison` means groups, never metrics.** It is for one metric across the values of a *dimension* — delivery time in `north` vs `south`. A goal contrasting two **metrics** (\"delivery time versus order volume\") is `correlation`, not `comparison`. Comparing a metric to \"the other metrics\" is not a question this dataset can answer, and reading it that way strands the run on a single experiment.\n- **A question about change over time is `trend`, even when it offers an explanation.** \"Has quality degraded, or is rising volume the cause?\" is asking whether a metric moved — `trend`, `metric_hint` on the metric whose movement is in question (here quality, not volume). The competing explanation is tested later by the loop; it does not change what is being asked.\n- **\"Does X explain Y?\" is `correlation`.** Set `metric_hint` to the metric being *explained* (the outcome), not the proposed cause.\n\nWhen a goal names both a time movement and a possible cause, `trend` is the better read: establishing that the movement is real comes before explaining it.\n\n### Which fields may be null\n\n**Only `metric_hint`, `group_hint` and `direction` accept `null`.** `intent` and `rationale` are strings — use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **Never invent a column.** `metric_hint` must appear verbatim in `capabilities.metrics`, `group_hint` verbatim in `capabilities.dimensions`. If the goal names something not present, use `null` — a null hint lets the loop pick, a hallucinated name breaks the experiment.\n- **`direction` is only meaningful for `trend`.** Set it when the goal asserts or asks about a specific movement (\"is revenue falling?\" → `down`). Use `null` when the goal asks about change without naming a direction (\"how has revenue moved?\").\n- **Do not smuggle a conclusion into `direction`.** It records what the goal asked about, not what you expect the data to show. The evidence decides that later.\n- Keep `rationale` to one sentence naming the signal in the goal you read the intent from.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": \"Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?\", \"capabilities\": {\"metrics\": [\"revenue\", \"net_income\", \"total_assets\", \"total_liabilities\", \"operating_cash_flow\", \"current_assets\", \"current_liabilities\", \"revenue_growth_qoq\", \"net_margin\", \"current_ratio\", \"debt_to_assets\"], \"dimensions\": []}}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"net_margin\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether margin differences are explained by revenue growth, which is a relationship between metrics rather than a group comparison.\"}",
+        "completion_tokens": 55,
+        "finish_reason": "stop",
+        "latency_ms": 955,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1029,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"intent\":\"correlation\",\"metric_hint\":\"net_margin\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether margin differences are explained by revenue growth, which is a relationship between metrics rather than a group comparison.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177488,
+          "id": "chatcmpl-EEinIqu64jKyuEHdRjWmTLVYHD17U",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 55,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1029,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1084
+          }
+        }
+      },
+      "sequence": 0,
+      "started_at": "2026-08-19T22:11:27.748374",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 168,
+      "error_detail": null,
+      "est_cost_usd": 0.00154125,
+      "finished_at": "2026-08-19T22:11:30.388955",
+      "id": "542a39f6-9de4-430b-9c27-d4f059ba1f42",
+      "latency_ms": 1681,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1047,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Hypothesis generator** for an adaptive data investigation loop. You turn an interpreted goal into claims the loop can actually test, and into open questions it should keep in view. A hypothesis that no experiment could disconfirm is worse than none: it will sit unresolved and consume budget.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question, verbatim>\",\n \"interpretation\": {\"intent\": \"...\", \"metric_hint\": \"...\", \"group_hint\": \"...\", \"direction\": \"up\"|\"down\"|null},\n \"metrics\": [\"<numeric column>\", ...],\n \"dimensions\": [\"<categorical column>\", ...]}\n```\n\n`interpretation` is a classification of the goal; `goal` is what was actually asked. Read both — the interpretation carries one metric hint and one direction, so anything the goal said beyond that (a named region, an alternative explanation, a time window) survives only in `goal`.\n\n## Output\n\nReply with `HypothesisProposals` JSON and nothing else:\n\n```json\n{\"hypotheses\": [\n   {\"statement\": \"<a falsifiable claim>\",\n    \"metric\": \"<a name from metrics, or null>\",\n    \"direction\": \"up\" | \"down\" | \"none\",\n    \"rationale\": \"<why this is worth testing>\"}],\n \"questions\": [\"<an open question the evidence should resolve>\", ...]}\n```\n\n`statement` must be non-empty. `direction` is one of exactly `up`, `down`, `none` — note this differs from the interpreter's field, which also allows `null`.\n\n### Which fields may be null\n\n**Only `metric` accepts `null`.** `statement`, `direction` and `rationale` are strings — `statement` must be non-empty; use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion. `hypotheses` and `questions` are lists: use `[]`, not `null`.\n\n## What makes a usable hypothesis\n\n- **Falsifiable.** State something a deterministic experiment over these columns could contradict. \"Revenue is increasing over time\" is testable. \"Revenue is interesting\" is not.\n- **Grounded in the available columns.** `metric` must appear verbatim in `metrics`, or be `null`. Never reference a column that was not supplied.\n- **Directional when the intent is `trend`.** Use the interpretation's `direction` when it has one; default to `up` only if the goal is directionally silent.\n- **Non-directional otherwise.** For `comparison`, `correlation`, `anomaly`, `association`, `distribution`, `ranking` and `profile`, use `\"none\"` — those claims are about difference or structure, not a direction of travel.\n\n## Calibration\n\nPropose the smallest set of claims that covers the goal — typically one, occasionally two when the goal genuinely contains two questions. Padding the list does not make the investigation more thorough; it splits a fixed experiment budget across claims the goal never asked about, and leaves more hypotheses unresolved at termination.\n\n### Competing explanations are a second claim, not padding\n\nWhen the goal offers an **alternative explanation** for the same observation — \"is quality degrading, *or* is rising volume the cause?\", \"did the change cause this, *or* was it seasonal?\" — propose **both** as separate hypotheses, each with its own `metric`.\n\nThis is the one case where a second claim is not padding but the entire question. Testing only the first cannot distinguish the two: evidence that the outcome moved is equally consistent with either explanation, so a run that measures the outcome alone ends inconclusive no matter how many experiments it spends. The alternative has to be measured on *its own* metric before the two can be told apart.\n\nWord each so a deterministic experiment could contradict it, and set `metric` to the column that claim is about — the outcome metric for the first, the proposed cause for the second.\n\nUse `questions` for what the evidence should clarify but which is not itself a claim to be supported or refuted — for example whether an observed movement is sustained or a one-off shift.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": \"Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?\", \"interpretation\": {\"intent\": \"correlation\", \"metric_hint\": \"net_margin\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks whether margin differences are explained by revenue growth, which is a relationship between metrics rather than a group comparison.\"}, \"metrics\": [\"revenue\", \"net_income\", \"total_assets\", \"total_liabilities\", \"operating_cash_flow\", \"current_assets\", \"current_liabilities\", \"revenue_growth_qoq\", \"net_margin\", \"current_ratio\", \"debt_to_assets\"], \"dimensions\": []}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.\",\"metric\":\"net_margin\",\"direction\":\"none\",\"rationale\":\"This directly tests the stated profitability explanation using the margin metric.\"},{\"statement\":\"NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.\",\"metric\":\"revenue_growth_qoq\",\"direction\":\"none\",\"rationale\":\"This tests the competing explanation by examining whether growth itself is the driver.\"}],\"questions\":[\"Is the margin advantage sustained across the same periods, or does it narrow when revenue growth is accounted for?\",\"Do the observed differences persist after comparing like-for-like periods?\"]}",
+        "completion_tokens": 168,
+        "finish_reason": "stop",
+        "latency_ms": 1681,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1047,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"hypotheses\":[{\"statement\":\"NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.\",\"metric\":\"net_margin\",\"direction\":\"none\",\"rationale\":\"This directly tests the stated profitability explanation using the margin metric.\"},{\"statement\":\"NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.\",\"metric\":\"revenue_growth_qoq\",\"direction\":\"none\",\"rationale\":\"This tests the competing explanation by examining whether growth itself is the driver.\"}],\"questions\":[\"Is the margin advantage sustained across the same periods, or does it narrow when revenue growth is accounted for?\",\"Do the observed differences persist after comparing like-for-like periods?\"]}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177489,
+          "id": "chatcmpl-EEinJF1ZtQnkYkd5wusaV6NWUC8V9",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 168,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1047,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1215
+          }
+        }
+      },
+      "sequence": 1,
+      "started_at": "2026-08-19T22:11:28.706391",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 31,
+      "error_detail": null,
+      "est_cost_usd": 0.000753,
+      "finished_at": "2026-08-19T22:11:33.943763",
+      "id": "f0e97997-7569-45ff-a8ef-41bffeff042e",
+      "latency_ms": 3536,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 818,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 3, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+        "completion_tokens": 31,
+        "finish_reason": "stop",
+        "latency_ms": 3536,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 818,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177493,
+          "id": "chatcmpl-EEinNUiEJlIGO0YCrKRfpAH8c7ASi",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 31,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 818,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 849
+          }
+        }
+      },
+      "sequence": 2,
+      "started_at": "2026-08-19T22:11:30.404889",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 144,
+      "error_detail": null,
+      "est_cost_usd": 0.00161625,
+      "finished_at": "2026-08-19T22:11:35.406955",
+      "id": "8fc97ab4-211c-4f42-a149-fdb3bb7dde44",
+      "latency_ms": 1386,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1291,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "role": "system"
+          },
+          {
+            "content": "{\"claim\": {\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"fit_simple_regression\"], \"supported_claims\": [{\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"statement\": \"NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.\", \"confidence\": 0.95}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Test whether the apparent margin advantage persists after controlling for revenue growth with a simple regression; if the effect disappears, the claim may be an artefact of faster growth rather than durable profitability.\",\"rationale\":\"The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.\"}",
+        "completion_tokens": 144,
+        "finish_reason": "stop",
+        "latency_ms": 1386,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1291,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Test whether the apparent margin advantage persists after controlling for revenue growth with a simple regression; if the effect disappears, the claim may be an artefact of faster growth rather than durable profitability.\",\"rationale\":\"The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177494,
+          "id": "chatcmpl-EEinOKHkF1arMD5txdI48vyDPdWfv",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 144,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1291,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1435
+          }
+        }
+      },
+      "sequence": 3,
+      "started_at": "2026-08-19T22:11:34.019823",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 38,
+      "error_detail": null,
+      "est_cost_usd": 0.0007695,
+      "finished_at": "2026-08-19T22:11:36.540327",
+      "id": "a5aad310-6997-4fab-88c4-9ccfe3b1ad22",
+      "latency_ms": 1082,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 798,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"falsify hypothesis ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the offered falsification test, so it best checks whether the current correlation hypothesis survives an independent challenge.\"}",
+        "completion_tokens": 38,
+        "finish_reason": "stop",
+        "latency_ms": 1082,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 798,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"This is the offered falsification test, so it best checks whether the current correlation hypothesis survives an independent challenge.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177495,
+          "id": "chatcmpl-EEinPptrcwhiRhvDad6Q91ApH5Q5U",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 38,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 798,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 836
+          }
+        }
+      },
+      "sequence": 4,
+      "started_at": "2026-08-19T22:11:35.457288",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 76,
+      "error_detail": null,
+      "est_cost_usd": 0.0013065,
+      "finished_at": "2026-08-19T22:11:37.498565",
+      "id": "2220b8ef-9c11-4952-aba7-fd6cef4a0325",
+      "latency_ms": 945,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1286,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "role": "system"
+          },
+          {
+            "content": "{\"claim\": {\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"statement\": \"NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.\", \"confidence\": 0.95}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"contradicts_hypothesis_id\": null,\"message\":\"\",\"rationale\":\"The claim is already critiqued, and there are no unused tools available to run a further falsification experiment. No contradiction with another supported claim is present.\"}",
+        "completion_tokens": 76,
+        "finish_reason": "stop",
+        "latency_ms": 945,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1286,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"contradicts_hypothesis_id\": null,\"message\":\"\",\"rationale\":\"The claim is already critiqued, and there are no unused tools available to run a further falsification experiment. No contradiction with another supported claim is present.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177496,
+          "id": "chatcmpl-EEinQ1ujFHfd1kPaLDMZgBbHVcPb5",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 76,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1286,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1362
+          }
+        }
+      },
+      "sequence": 5,
+      "started_at": "2026-08-19T22:11:36.551066",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 33,
+      "error_detail": null,
+      "est_cost_usd": 0.00069375,
+      "finished_at": "2026-08-19T22:11:38.391325",
+      "id": "ef5cb940-263a-4e6b-8465-968f2e0bd858",
+      "latency_ms": 884,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 727,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This directly establishes the correlation and has the highest expected information gain among the available candidates.\"}",
+        "completion_tokens": 33,
+        "finish_reason": "stop",
+        "latency_ms": 884,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 727,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"This directly establishes the correlation and has the highest expected information gain among the available candidates.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177497,
+          "id": "chatcmpl-EEinRjY1VhZwkg4g3YOEL0BxmZ9YI",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 33,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 727,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 760
+          }
+        }
+      },
+      "sequence": 6,
+      "started_at": "2026-08-19T22:11:37.506562",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 82,
+      "error_detail": null,
+      "est_cost_usd": 0.0013875,
+      "finished_at": "2026-08-19T22:11:39.555065",
+      "id": "c64e5727-d9d0-445e-b92d-11e4df1b9f15",
+      "latency_ms": 1136,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1358,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "role": "system"
+          },
+          {
+            "content": "{\"claim\": {\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0\", \"statement\": \"NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.\", \"confidence\": 0.95}, {\"id\": \"ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1\", \"statement\": \"NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.\", \"confidence\": 0.95}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"No challenge: the current claim has already been critiqued, and there are no unused tools available. The two supported claims are not a direct logical contradiction; they can both be true.\"}",
+        "completion_tokens": 82,
+        "finish_reason": "stop",
+        "latency_ms": 1136,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1358,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"No challenge: the current claim has already been critiqued, and there are no unused tools available. The two supported claims are not a direct logical contradiction; they can both be true.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177498,
+          "id": "chatcmpl-EEinSGppNPcXFpbJAhtQwoJ0LJbjC",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 82,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1358,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1440
+          }
+        }
+      },
+      "sequence": 7,
+      "started_at": "2026-08-19T22:11:38.416969",
+      "status": "success"
+    }
+  ],
+  "totals": {
+    "completion_tokens": 627,
+    "est_cost_usd": 0.009087,
+    "latency_ms": 11605,
+    "model_calls": 8,
+    "priced": true,
+    "prompt_tokens": 8354,
+    "total_tokens": 8981
+  }
+}

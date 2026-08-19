@@ -10,6 +10,10 @@ import detail1 from "./edgar-margin-vs-growth.json";
 import capture1 from "./edgar-margin-vs-growth.capture.json";
 import detail2 from "./csv-staffing-vs-service.json";
 import capture2 from "./csv-staffing-vs-service.capture.json";
+import detail3 from "./csv-regional-ranking.json";
+import capture3 from "./csv-regional-ranking.capture.json";
+import detail4 from "./edgar-peer-separation.json";
+import capture4 from "./edgar-peer-separation.capture.json";
 
 export const DEMO_INDEX = index as unknown as InvestigationSummary[];
 
@@ -17,6 +21,8 @@ export const DEMO_DETAILS: Record<string, InvestigationDetail> = {
   "csv-delivery-delays": detail0 as unknown as InvestigationDetail,
   "edgar-margin-vs-growth": detail1 as unknown as InvestigationDetail,
   "csv-staffing-vs-service": detail2 as unknown as InvestigationDetail,
+  "csv-regional-ranking": detail3 as unknown as InvestigationDetail,
+  "edgar-peer-separation": detail4 as unknown as InvestigationDetail,
 };
 
 /** Model calls and chat turns behind each demo — see backend/schemas/demo_capture.py. */
@@ -24,6 +30,8 @@ export const DEMO_CAPTURES: Record<string, DemoCapture> = {
   "csv-delivery-delays": capture0 as unknown as DemoCapture,
   "edgar-margin-vs-growth": capture1 as unknown as DemoCapture,
   "csv-staffing-vs-service": capture2 as unknown as DemoCapture,
+  "csv-regional-ranking": capture3 as unknown as DemoCapture,
+  "edgar-peer-separation": capture4 as unknown as DemoCapture,
 };
 
 export const DEMO_ARTIFACT_HREFS: Record<string, Record<string, string>> =
