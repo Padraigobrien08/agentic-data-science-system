@@ -7,16 +7,18 @@ import { SiteHeader } from "@/components/layout/site-header";
 import type { CurrentUser } from "@/lib/api/types";
 
 /**
- * Chrome switch across three surfaces:
+ * Chrome switch across four surfaces:
  * - Chat: full-viewport app; opts out of the header + padded main entirely.
+ * - Landing: ships its own dark header and edge-to-edge rules, so it opts out
+ *   of the shared header + padded main for the same reason chat does.
  * - Authenticated app (projects, artifacts): the zinc `.app-skin` shell, so leaving
  *   the chat to inspect runs/trace stays one visual system.
- * - Marketing (landing, auth): the standard warm shell.
+ * - Marketing (auth): the standard warm shell.
  */
 export function AppChrome({ user, children }: { user: CurrentUser | null; children: ReactNode }) {
   const pathname = usePathname() ?? "";
 
-  if (/\/chat(\/|$)/.test(pathname)) {
+  if (/\/chat(\/|$)/.test(pathname) || pathname === "/") {
     return <>{children}</>;
   }
 
