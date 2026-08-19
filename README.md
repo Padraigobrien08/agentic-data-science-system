@@ -134,8 +134,9 @@ flowchart LR
 
 The loop ([`agentic/`](agentic/)) interprets a goal, proposes hypotheses, chooses experiments
 from what it has learned so far, revises claims when evidence contradicts them, critiques its
-strongest claim, and stops for an explicit typed reason. Ten components, each small and
-deterministic, consuming typed policy decisions.
+strongest claim, refuses to conclude while two of its own claims disagree, and stops for an
+explicit typed reason. Ten components, each small and deterministic, consuming typed policy
+decisions.
 
 | | |
 |---|---|
@@ -143,6 +144,7 @@ deterministic, consuming typed policy decisions.
 | **Reproducible** | Deterministic IDs and per-iteration checkpoints; a resumed run reaches the same state as an uninterrupted one. |
 | **Comparable** | [Replay](docs/agent/replay-and-diff.md) a persisted investigation under a different model, prompt or budget and diff it — did the *answer* change, or only the route to it? |
 | **Measured** | [`suite_agency_v1`](docs/agent/agency-evaluation.md) scores reasoning quality: does it conclude when evidence supports it, revise when contradicted, decline when it cannot? On the hard tier the deterministic baseline scores 0% and `gpt-5.4-mini` 60%, stable across five trials — [scoreboard](docs/agent/agency-scoreboard.md). |
+| **Self-checking** | Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — one recorded run did exactly that, at 0.95 each. The critic is the only component that sees the supported set together, so it reports the conflict; deterministic code weakens both sides rather than picking one, and the run reports `insufficient_evidence` unless a further experiment settles it. A published demo shows this happening: [`csv-staffing-vs-service`](frontend/src/lib/demo-static/csv-staffing-vs-service.json). |
 | **Observable** | Every decision emits an OTel span (`agent.investigation → agent.iteration.N → agent.component.{name}`), a structured log, and Prometheus metrics. → [docs](docs/observability.md) |
 
 `agentic/` depends on nothing in `backend/`. It imports no structlog, no OpenTelemetry, no
@@ -202,6 +204,11 @@ itself.
   for `select_experiment` is not constructible, because `expected_information_gain` is fixed by
   the planner's tool ordering —
   [documented here](docs/agent/agency-evaluation.md#what-the-tier-does-not-cover).
+- **The contradiction check depends on the model noticing.** Deciding that two statements are
+  mutually exclusive is a judgement, so the critic makes it; what follows is deterministic, but
+  a conflict the model misses is not caught. The rule-engine baseline never reports one at all —
+  a policy guessing at semantic exclusivity would invent conflicts, which is worse than missing
+  them. So this catches the obvious cases, not all of them.
 - **The agentic engine is off by default** (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the
   deterministic EDGAR chain is the default execution path. The hosted demo enables it for
   invite-code accounts only, because the loop costs real money per question.
