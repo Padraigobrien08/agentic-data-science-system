@@ -1,7 +1,7 @@
 {
   "adapter_id": "edgar",
-  "analysis_run_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
-  "conclusion": "Supported: Revenue growth is the explanation for the observed margin change over the recent periods. | Not supported: Net margin has deteriorated over the recent periods for these companies.",
+  "analysis_run_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9",
+  "conclusion": "Supported: Revenue growth is the explanation for the observed margin change over recent periods. | Not supported: Net margin has deteriorated over recent periods at these companies.",
   "conclusion_detail": {
     "caveats": [
       "termination: sufficient_evidence",
@@ -10,20 +10,20 @@
     ],
     "confidence": 0.5,
     "disposition": "mixed",
-    "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-concl-0",
+    "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-concl-0",
     "key_evidence_ids": [
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-0",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-1",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-2",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-3",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-4",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-5",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-6"
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-0",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-1",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-2",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-3",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-4",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-5",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-6"
     ],
-    "statement": "Supported: Revenue growth is the explanation for the observed margin change over the recent periods. | Not supported: Net margin has deteriorated over the recent periods for these companies.",
+    "statement": "Supported: Revenue growth is the explanation for the observed margin change over recent periods. | Not supported: Net margin has deteriorated over recent periods at these companies.",
     "supporting_hypothesis_ids": [
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1",
-      "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-0"
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+      "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0"
     ]
   },
   "confidence": 0.5,
@@ -37,87 +37,87 @@
     "observations": 5,
     "open_questions": 2
   },
-  "created_at": "2026-08-11T21:41:30",
+  "created_at": "2026-08-20T21:19:14",
   "critiques": [
     {
       "critique_type": "competing_explanation",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-crit-0",
-      "message": "Challenge the supported hypothesis by checking whether the apparent support depends on a particular summary choice; if the distributional shape or outliers change the conclusion, the claim may be an artefact of aggregation rather than a robust pattern.",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-crit-0",
+      "message": "Challenge whether the apparent margin change is robust or an artefact of the revenue-growth summary by checking the underlying distribution of margins across periods; a distributional summary could show the change is driven by outliers or compositional shifts rather than revenue growth itself.",
       "resolved": false,
       "severity": "major",
       "suggested_action": "summarize_distribution",
-      "target_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1",
+      "target_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
       "target_kind": "hypothesis"
     }
   ],
   "datasets": [
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_da6035efc44f4cde867cfa4be0e86544",
-      "locator": "sha256:1579e1634ba2455efcc0915608e80915d3d5c63a106a6e7354b42385843c97d0",
+      "id": "dset_1ed90d15c11a46bebf339e6321a80015",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     }
@@ -127,7 +127,7 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-hyp-0",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-hyp-0",
       "iteration": 0,
       "rationale": "This directly tests the stated concern about margin quality worsening over time.",
       "sequence": 0
@@ -136,25 +136,25 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-hyp-1",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-hyp-1",
       "iteration": 0,
-      "rationale": "The goal explicitly asks whether revenue growth, rather than margin deterioration, explains the pattern, so this competing explanation should be tested on its own metric.",
+      "rationale": "The goal explicitly asks whether revenue growth, rather than margin deterioration alone, explains the pattern.",
       "sequence": 1
     },
     {
       "alternatives": [],
       "chosen_option": "edgar_trend_break_analysis",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-2",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-2",
       "iteration": 0,
-      "rationale": "edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.",
+      "rationale": "edgar_trend_break_analysis has the highest expected information gain for establishing the trend and its break structure.",
       "sequence": 2
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-3",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 1 evidence item(s) for edgar_trend_break_analysis",
       "sequence": 3
@@ -163,7 +163,7 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-4",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-4",
       "iteration": 0,
       "rationale": "active (support=0, refute=0)",
       "sequence": 4
@@ -172,17 +172,17 @@
       "alternatives": [],
       "chosen_option": "edgar_trend_break_analysis",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-5",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-5",
       "iteration": 1,
-      "rationale": "edgar_trend_break_analysis has the highest expected information gain and is the most direct next experiment for establishing the trend.",
+      "rationale": "edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.",
       "sequence": 5
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-6",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-6",
+      "iteration": 1,
       "rationale": "recorded 1 evidence item(s) for edgar_trend_break_analysis",
       "sequence": 6
     },
@@ -190,8 +190,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-7",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-7",
+      "iteration": 1,
       "rationale": "active (support=0, refute=0)",
       "sequence": 7
     },
@@ -199,7 +199,7 @@
       "alternatives": [],
       "chosen_option": "analyze_time_series_trend",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-8",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-8",
       "iteration": 2,
       "rationale": "Analyze the time series trend directly, since it has the highest expected information gain for the trend goal.",
       "sequence": 8
@@ -208,8 +208,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-9",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-9",
+      "iteration": 2,
       "rationale": "recorded 1 evidence item(s) for analyze_time_series_trend",
       "sequence": 9
     },
@@ -217,8 +217,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-10",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-10",
+      "iteration": 2,
       "rationale": "weakened (support=0, refute=1)",
       "sequence": 10
     },
@@ -226,17 +226,17 @@
       "alternatives": [],
       "chosen_option": "analyze_time_series_trend",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-11",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-11",
       "iteration": 3,
-      "rationale": "analyze_time_series_trend is the highest-information experiment for establishing the direction and strength of the trend.",
+      "rationale": "analyze_time_series_trend is the highest-information experiment for establishing the presence and direction of a trend.",
       "sequence": 11
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-12",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-12",
+      "iteration": 3,
       "rationale": "recorded 1 evidence item(s) for analyze_time_series_trend",
       "sequence": 12
     },
@@ -244,8 +244,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-13",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-13",
+      "iteration": 3,
       "rationale": "active (support=0, refute=0)",
       "sequence": 13
     },
@@ -253,17 +253,17 @@
       "alternatives": [],
       "chosen_option": "detect_change_points",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-14",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-14",
       "iteration": 4,
-      "rationale": "detect_change_points is the highest-gain available experiment for establishing whether the series exhibits trend shifts or regime changes.",
+      "rationale": "Detecting change points is the most informative next step for establishing whether a trend exists and where it shifts.",
       "sequence": 14
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-15",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-15",
+      "iteration": 4,
       "rationale": "recorded 1 evidence item(s) for detect_change_points",
       "sequence": 15
     },
@@ -271,8 +271,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-16",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-16",
+      "iteration": 4,
       "rationale": "rejected (support=0, refute=2)",
       "sequence": 16
     },
@@ -280,17 +280,17 @@
       "alternatives": [],
       "chosen_option": "detect_change_points",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-17",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-17",
       "iteration": 5,
-      "rationale": "detect_change_points is the highest-information next step for establishing whether the series has structural shifts consistent with a trend.",
+      "rationale": "detect_change_points is the highest-information experiment and would establish whether the series has structural shifts relevant to trend.",
       "sequence": 17
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-18",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-18",
+      "iteration": 5,
       "rationale": "recorded 1 evidence item(s) for detect_change_points",
       "sequence": 18
     },
@@ -298,8 +298,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-19",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-19",
+      "iteration": 5,
       "rationale": "supported (support=1, refute=0)",
       "sequence": 19
     },
@@ -307,26 +307,26 @@
       "alternatives": [],
       "chosen_option": "summarize_distribution",
       "decision_type": "request_critique",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-crit-20",
-      "iteration": 0,
-      "rationale": "The claim is supported, has not yet been critiqued, and there is an unused experiment available that could reveal whether the result survives a distribution-level check.",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-crit-20",
+      "iteration": 5,
+      "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
       "sequence": 20
     },
     {
       "alternatives": [],
       "chosen_option": "summarize_distribution",
       "decision_type": "select_experiment",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-sel-21",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-21",
       "iteration": 6,
-      "rationale": "This is the offered falsification step, and it would test whether the currently supported trend hypothesis fails under distributional summary.",
+      "rationale": "This falsification check would test whether the currently supported trend hypothesis fails under a distribution summary.",
       "sequence": 21
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-evd-22",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-22",
+      "iteration": 6,
       "rationale": "recorded 1 evidence item(s) for summarize_distribution",
       "sequence": 22
     },
@@ -334,8 +334,8 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-rev-23",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-23",
+      "iteration": 6,
       "rationale": "supported (support=1, refute=0)",
       "sequence": 23
     },
@@ -343,17 +343,17 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-dec-concl-24",
-      "iteration": 0,
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-concl-24",
+      "iteration": 7,
       "rationale": "mixed (sufficient_evidence)",
       "sequence": 24
     }
   ],
   "demo_slug": "edgar-margin-vs-growth",
-  "domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
+  "domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9",
   "events": [
     {
-      "created_at": "2026-08-11T21:41:30",
+      "created_at": "2026-08-20T21:19:14",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -363,7 +363,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-11T21:41:33",
+      "created_at": "2026-08-20T21:19:16",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -373,7 +373,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-11T21:41:35",
+      "created_at": "2026-08-20T21:19:17",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -383,7 +383,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-11T21:41:36",
+      "created_at": "2026-08-20T21:19:18",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -393,7 +393,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-11T21:41:37",
+      "created_at": "2026-08-20T21:19:19",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -403,7 +403,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-11T21:41:38",
+      "created_at": "2026-08-20T21:19:20",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -413,7 +413,7 @@
       "sequence": 5
     },
     {
-      "created_at": "2026-08-11T21:41:39",
+      "created_at": "2026-08-20T21:19:21",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -423,7 +423,7 @@
       "sequence": 6
     },
     {
-      "created_at": "2026-08-11T21:41:41",
+      "created_at": "2026-08-20T21:19:23",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -433,7 +433,7 @@
       "sequence": 7
     },
     {
-      "created_at": "2026-08-11T21:41:43",
+      "created_at": "2026-08-20T21:19:25",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -443,7 +443,7 @@
       "sequence": 8
     },
     {
-      "created_at": "2026-08-11T21:41:43",
+      "created_at": "2026-08-20T21:19:25",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -461,9 +461,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "044e74d1-4c38-4ace-ad3f-6acc580d8f25"
+        "52eb5ddc-f602-4356-a06b-14154a5cd977"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-0",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-0",
       "reliability": 0.8672566371681416,
       "statistics": {
         "assumptions": [],
@@ -488,9 +488,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "7f4da3f5-8535-4fad-9569-3329d59f7448"
+        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-1",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-1",
       "reliability": 0.8672566371681416,
       "statistics": {
         "assumptions": [],
@@ -509,15 +509,15 @@
       "strength": 0.0
     },
     {
-      "claim": "'net_margin' is increasing (slope=0.00271, R²=0.17).",
+      "claim": "'net_margin' is increasing (slope=0.00282, R²=0.19).",
       "coverage": 1.0,
       "direction": "refutes",
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "044e74d1-4c38-4ace-ad3f-6acc580d8f25"
+        "52eb5ddc-f602-4356-a06b-14154a5cd977"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-2",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-2",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -526,34 +526,34 @@
         ],
         "coverage": 1.0,
         "diagnostics": {
-          "r2": 0.171356,
-          "slope": 0.002711
+          "r2": 0.18589,
+          "slope": 0.002824
         },
-        "effect_size": 0.171356,
+        "effect_size": 0.18589,
         "effect_size_kind": "r2",
-        "p_value": 0.001824,
+        "p_value": 0.001053,
         "sample_size": 49,
         "schema_version": "1",
         "uncertainty": {
-          "ci_high": 0.004416,
-          "ci_low": 0.001007,
+          "ci_high": 0.004514,
+          "ci_low": 0.001134,
           "confidence_level": 0.95,
-          "std_error": 0.00087
+          "std_error": 0.000862
         },
         "warnings": []
       },
-      "strength": 0.171356
+      "strength": 0.18589
     },
     {
-      "claim": "'revenue_growth_qoq' is increasing (slope=0.00104, R²=0.00).",
+      "claim": "'revenue_growth_qoq' is increasing (slope=0.0014, R²=0.00).",
       "coverage": 0.938776,
       "direction": "neutral",
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "7f4da3f5-8535-4fad-9569-3329d59f7448"
+        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-3",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-3",
       "reliability": 0.6052631578947368,
       "statistics": {
         "assumptions": [
@@ -562,34 +562,34 @@
         ],
         "coverage": 0.938776,
         "diagnostics": {
-          "r2": 0.000387,
-          "slope": 0.00104
+          "r2": 0.0007,
+          "slope": 0.001399
         },
-        "effect_size": 0.000387,
+        "effect_size": 0.0007,
         "effect_size_kind": "r2",
-        "p_value": 0.896146,
+        "p_value": 0.860594,
         "sample_size": 46,
         "schema_version": "1",
         "uncertainty": {
-          "ci_high": 0.016661,
-          "ci_low": -0.014581,
+          "ci_high": 0.017018,
+          "ci_low": -0.014219,
           "confidence_level": 0.95,
-          "std_error": 0.00797
+          "std_error": 0.007969
         },
         "warnings": []
       },
-      "strength": 0.000387
+      "strength": 0.0007
     },
     {
-      "claim": "'net_margin' shifts by 0.184 around 2026-Q2.",
+      "claim": "'net_margin' shifts by 0.249 around 2026-Q2.",
       "coverage": 1.0,
       "direction": "refutes",
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "044e74d1-4c38-4ace-ad3f-6acc580d8f25"
+        "52eb5ddc-f602-4356-a06b-14154a5cd977"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-4",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-4",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -597,10 +597,10 @@
         ],
         "coverage": 1.0,
         "diagnostics": {
-          "shift": 0.184091,
-          "split_index": 46.0
+          "shift": 0.249152,
+          "split_index": 47.0
         },
-        "effect_size": 2.260484,
+        "effect_size": 3.177119,
         "effect_size_kind": "cohens_d",
         "p_value": null,
         "sample_size": 49,
@@ -617,9 +617,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "7f4da3f5-8535-4fad-9569-3329d59f7448"
+        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-5",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-5",
       "reliability": 0.6052631578947368,
       "statistics": {
         "assumptions": [
@@ -647,9 +647,9 @@
       "evidence_type": "descriptive_stat",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "7f4da3f5-8535-4fad-9569-3329d59f7448"
+        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
       ],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-evd-6",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-6",
       "reliability": 0.6052631578947368,
       "statistics": {
         "assumptions": [
@@ -676,20 +676,20 @@
       "artifacts": [
         {
           "byte_size": 62882,
-          "id": "8f8359b5-03ae-4004-97d1-a7f3e047e1ea",
+          "id": "15b278c8-1fd0-4fc7-b07d-11ee6cb5e15e",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_break_signals"
         }
       ],
-      "created_at": "2026-08-11T21:41:35",
+      "created_at": "2026-08-20T21:19:17",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-0",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-0",
       "metrics": {
         "shift_count": 0.0,
         "trend_break_rows": 196.0
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-0",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-0",
       "status": "succeeded",
       "summary": "Trend-break analysis: 0 shift(s).",
       "tool_name": "edgar_trend_break_analysis"
@@ -698,20 +698,20 @@
       "artifacts": [
         {
           "byte_size": 62882,
-          "id": "721ced06-8b50-4188-83aa-d2b2b6503b2f",
+          "id": "c3bcea77-eb1e-4cef-85f0-75d2398fb637",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_break_signals"
         }
       ],
-      "created_at": "2026-08-11T21:41:36",
+      "created_at": "2026-08-20T21:19:18",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-1",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-1",
       "metrics": {
         "shift_count": 0.0,
         "trend_break_rows": 196.0
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-4",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-4",
       "status": "succeeded",
       "summary": "Trend-break analysis: 0 shift(s).",
       "tool_name": "edgar_trend_break_analysis"
@@ -719,28 +719,28 @@
     {
       "artifacts": [
         {
-          "byte_size": 40,
-          "id": "cd26662f-6ec7-4128-b7d5-82c45601e1de",
+          "byte_size": 39,
+          "id": "97bced86-4321-471a-9fe8-e7587176358b",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_fits"
         },
         {
-          "byte_size": 121,
-          "id": "2425a93d-7d66-452b-bf32-29aa56eac0a3",
+          "byte_size": 120,
+          "id": "c9fbd8dc-7fb7-4811-ad85-f85ad0b9de9c",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "trend"
         }
       ],
-      "created_at": "2026-08-11T21:41:37",
+      "created_at": "2026-08-20T21:19:19",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-2",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-2",
       "metrics": {
-        "mean_slope": 0.002711,
+        "mean_slope": 0.002824,
         "series": 1.0
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-2",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-2",
       "status": "succeeded",
       "summary": "Fitted trend for 1 series of 'net_margin'.",
       "tool_name": "analyze_time_series_trend"
@@ -748,28 +748,28 @@
     {
       "artifacts": [
         {
-          "byte_size": 39,
-          "id": "6e8de749-3ec8-4845-941d-aa2453bdd3aa",
+          "byte_size": 38,
+          "id": "9a1a4237-d6de-44b2-b281-a23c0e46e4bc",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_fits"
         },
         {
-          "byte_size": 128,
-          "id": "13391221-3462-494a-ac45-6fd2523d5b95",
+          "byte_size": 127,
+          "id": "e48db198-a9e8-4283-8f58-6b6d46cff99d",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "trend"
         }
       ],
-      "created_at": "2026-08-11T21:41:38",
+      "created_at": "2026-08-20T21:19:20",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-3",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-3",
       "metrics": {
-        "mean_slope": 0.00104,
+        "mean_slope": 0.001399,
         "series": 1.0
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-5",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-5",
       "status": "succeeded",
       "summary": "Fitted trend for 1 series of 'revenue_growth_qoq'.",
       "tool_name": "analyze_time_series_trend"
@@ -778,21 +778,21 @@
       "artifacts": [
         {
           "byte_size": 114,
-          "id": "e8fd0df2-4a21-4be8-9ad6-5a0746a14f85",
+          "id": "c3a2ae43-ee5a-4568-b0db-2c38f34a2608",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "change_point"
         }
       ],
-      "created_at": "2026-08-11T21:41:39",
+      "created_at": "2026-08-20T21:19:21",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-4",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-4",
       "metrics": {
-        "shift": 0.184091,
-        "shift_score": 2.260484,
-        "split_index": 46.0
+        "shift": 0.249152,
+        "shift_score": 3.177119,
+        "split_index": 47.0
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-4",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-4",
       "status": "succeeded",
       "summary": "Change point in 'net_margin' at 2026-Q2.",
       "tool_name": "detect_change_points"
@@ -801,21 +801,21 @@
       "artifacts": [
         {
           "byte_size": 122,
-          "id": "f90ebeba-eacf-46ae-b10c-3c3070474c11",
+          "id": "eab35e26-26b8-479f-b985-d2dee976e65d",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "change_point"
         }
       ],
-      "created_at": "2026-08-11T21:41:41",
+      "created_at": "2026-08-20T21:19:23",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-5",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-5",
       "metrics": {
         "shift": 0.648694,
         "shift_score": 0.949094,
         "split_index": 43.0
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-5",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-5",
       "status": "succeeded",
       "summary": "Change point in 'revenue_growth_qoq' at 2026-Q2.",
       "tool_name": "detect_change_points"
@@ -824,28 +824,28 @@
       "artifacts": [
         {
           "byte_size": 200,
-          "id": "c825be71-1f53-4891-8aec-306f2f017d48",
+          "id": "28d5f7c3-73e0-4430-8c3e-c2641913925f",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "distribution"
         },
         {
           "byte_size": 124,
-          "id": "7df6e232-4b7a-4c2b-babe-6bfaca50b854",
+          "id": "28956e91-0ae6-4795-b7d8-b6409a35e625",
           "kind": "json",
           "mime_type": "application/json",
           "name": "distribution_summary"
         }
       ],
-      "created_at": "2026-08-11T21:41:43",
+      "created_at": "2026-08-20T21:19:25",
       "error": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-res-6",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-res-6",
       "metrics": {
         "mean": 0.340501,
         "n": 46.0,
         "std": 0.70976
       },
-      "request_domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9-exp-6",
+      "request_domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-6",
       "status": "succeeded",
       "summary": "Summarized distribution of 'revenue_growth_qoq' (n=46).",
       "tool_name": "summarize_distribution"
@@ -855,62 +855,62 @@
     {
       "confidence": 0.05,
       "entity_refs": [],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-0",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
       "metric_refs": [
         "net_margin"
       ],
       "prior_confidence": 0.5,
       "rationale": "This directly tests the stated concern about margin quality worsening over time.",
-      "statement": "Net margin has deteriorated over the recent periods for these companies.",
+      "statement": "Net margin has deteriorated over recent periods at these companies.",
       "status": "rejected"
     },
     {
       "confidence": 0.95,
       "entity_refs": [],
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
       "metric_refs": [
         "revenue_growth_qoq"
       ],
       "prior_confidence": 0.5,
-      "rationale": "The goal explicitly asks whether revenue growth, rather than margin deterioration, explains the pattern, so this competing explanation should be tested on its own metric.",
-      "statement": "Revenue growth is the explanation for the observed margin change over the recent periods.",
+      "rationale": "The goal explicitly asks whether revenue growth, rather than margin deterioration alone, explains the pattern.",
+      "statement": "Revenue growth is the explanation for the observed margin change over recent periods.",
       "status": "supported"
     }
   ],
-  "id": "4096b6e9-e24b-4fa8-b8e3-8ae19d902026",
+  "id": "80fbdfdc-00d2-4d07-bb0f-57fea2e5b73b",
   "objective": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
   "observations": [
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8bbae5ea85e24301927921210c39798c",
-      "magnitude": 0.002711324000856044,
+      "id": "obs_a869eceb169c40eb89be0747eb76df60",
+      "magnitude": 0.002823974143226845,
       "metric_ref": "net_margin",
       "observation_type": "trend",
-      "statement": "net_margin slope=0.00271"
+      "statement": "net_margin slope=0.00282"
     },
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_23cf5f5002b04358a5db5cc9bcc6a5db",
-      "magnitude": 0.0010403537913982342,
+      "id": "obs_a950e1b9ea53478ab57071ab2100294c",
+      "magnitude": 0.0013994741810213396,
       "metric_ref": "revenue_growth_qoq",
       "observation_type": "trend",
-      "statement": "revenue_growth_qoq slope=0.00104"
+      "statement": "revenue_growth_qoq slope=0.0014"
     },
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_79659211d40046a0878b490beedba534",
-      "magnitude": 0.1840913838079335,
+      "id": "obs_39109b379cd74232b8c7e5dfd8489a63",
+      "magnitude": 0.24915204953578352,
       "metric_ref": "net_margin",
       "observation_type": "trend",
-      "statement": "Largest mean shift in 'net_margin' at 2026-Q2 (shift=0.184)."
+      "statement": "Largest mean shift in 'net_margin' at 2026-Q2 (shift=0.249)."
     },
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8f05cfdee03b418eab42efb9c824af3b",
+      "id": "obs_11925e61c4e1408d9900ed189599224c",
       "magnitude": 0.6486936726237161,
       "metric_ref": "revenue_growth_qoq",
       "observation_type": "trend",
@@ -919,7 +919,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_1370122c9e8740619a5ffdc84635611f",
+      "id": "obs_a469fea8101d48c5a7a259c0deb6bbfd",
       "magnitude": 0.34050071378368635,
       "metric_ref": "revenue_growth_qoq",
       "observation_type": "value",
@@ -929,23 +929,23 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-q-0",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-q-0",
       "priority": 0,
-      "question": "Is the margin change sustained across the recent periods or just a one-off move?",
+      "question": "Is the margin change sustained across the recent periods, or is it a one-off fluctuation?",
       "related_hypothesis_ids": [
-        "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-0",
-        "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "c387bb23-e481-44d6-a25b-7177a8d272b9-q-1",
+      "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-q-1",
       "priority": 0,
-      "question": "Do companies with stronger revenue growth show the same margin pattern as those with weaker growth?",
+      "question": "Do companies with stronger revenue growth show the same margin pattern as those with weaker revenue growth?",
       "related_hypothesis_ids": [
-        "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-0",
-        "c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1"
       ],
       "status": "open"
     }
@@ -968,5 +968,5 @@
     "rationale": "terminated: sufficient_evidence",
     "reason": "sufficient_evidence"
   },
-  "updated_at": "2026-08-11T21:41:43"
+  "updated_at": "2026-08-20T21:21:10"
 }

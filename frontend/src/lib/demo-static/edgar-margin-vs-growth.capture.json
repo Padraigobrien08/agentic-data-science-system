@@ -1,20 +1,46 @@
 {
-  "analysis_run_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
-  "chat": [],
+  "analysis_run_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9",
+  "chat": [
+    {
+      "created_at": "2026-08-20T21:19:25",
+      "id": "fd1120c6-aa65-4e44-af3c-0b6d42923f0c",
+      "messages": [
+        {
+          "analysis_run_id": null,
+          "content": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
+          "created_at": "2026-08-20T21:19:25.356320",
+          "id": "f9524619-ba93-408b-be05-c616f1b900b8",
+          "role": "user",
+          "sequence": 0,
+          "status": "complete"
+        },
+        {
+          "analysis_run_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9",
+          "content": "Supported: Revenue growth is the explanation for the observed margin change over recent periods. | Not supported: Net margin has deteriorated over recent periods at these companies.",
+          "created_at": "2026-08-20T21:19:25.356828",
+          "id": "35ab0a9d-e030-4e15-9885-00b2dd2e5789",
+          "role": "assistant",
+          "sequence": 1,
+          "status": "complete"
+        }
+      ],
+      "title": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?"
+    }
+  ],
   "demo_slug": "edgar-margin-vs-growth",
-  "investigation_id": "4096b6e9-e24b-4fa8-b8e3-8ae19d902026",
+  "investigation_id": "80fbdfdc-00d2-4d07-bb0f-57fea2e5b73b",
   "model_calls": [
     {
       "completion_tokens": 54,
       "error_detail": null,
       "est_cost_usd": 0.00100275,
-      "finished_at": "2026-08-11T21:41:31.791232",
-      "id": "8bc81ccc-5e0f-4030-b279-c4f456736ad5",
-      "latency_ms": 1095,
+      "finished_at": "2026-08-20T21:19:15.531808",
+      "id": "d153e014-ebff-4404-98dc-d29c47bb4dc0",
+      "latency_ms": 1059,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 1013,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -38,10 +64,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"intent\":\"trend\",\"metric_hint\":\"net_margin\",\"group_hint\":null,\"direction\":\"down\",\"rationale\":\"The goal asks whether margin quality has deteriorated over recent periods, which is a change-over-time question about net margin.\"}",
+        "assistant_text": "{\"intent\":\"trend\",\"metric_hint\":\"net_margin\",\"group_hint\":null,\"direction\":\"down\",\"rationale\":\"The goal asks whether margin quality has deteriorated over recent periods, which is a change-over-time question about net_margin.\"}",
         "completion_tokens": 54,
         "finish_reason": "stop",
-        "latency_ms": 1095,
+        "latency_ms": 1059,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 1013,
         "raw_response": {
@@ -53,7 +79,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"intent\":\"trend\",\"metric_hint\":\"net_margin\",\"group_hint\":null,\"direction\":\"down\",\"rationale\":\"The goal asks whether margin quality has deteriorated over recent periods, which is a change-over-time question about net margin.\"}",
+                "content": "{\"intent\":\"trend\",\"metric_hint\":\"net_margin\",\"group_hint\":null,\"direction\":\"down\",\"rationale\":\"The goal asks whether margin quality has deteriorated over recent periods, which is a change-over-time question about net_margin.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -61,9 +87,10 @@
               }
             }
           ],
-          "created": 1786484491,
-          "id": "chatcmpl-EBoVvvQOUh6QP3mQVhV8opV1akPHL",
+          "created": 1787260754,
+          "id": "chatcmpl-EF4SIYFACs5MPQXcA0aa8nKdMBL91",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
@@ -78,6 +105,7 @@
             "prompt_tokens": 1013,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
             "total_tokens": 1067
@@ -85,20 +113,20 @@
         }
       },
       "sequence": 0,
-      "started_at": "2026-08-11T21:41:30.693593",
+      "started_at": "2026-08-20T21:19:14.471280",
       "status": "success"
     },
     {
-      "completion_tokens": 154,
+      "completion_tokens": 145,
       "error_detail": null,
-      "est_cost_usd": 0.00146625,
-      "finished_at": "2026-08-11T21:41:33.309213",
-      "id": "378f5b4d-0e03-4ee2-a878-afe789f4a958",
-      "latency_ms": 1513,
+      "est_cost_usd": 0.00142575,
+      "finished_at": "2026-08-20T21:19:16.958715",
+      "id": "efdd9948-c487-4d22-8e97-4469ea8727c1",
+      "latency_ms": 1422,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 1031,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -111,7 +139,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": \"Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?\", \"interpretation\": {\"intent\": \"trend\", \"metric_hint\": \"net_margin\", \"group_hint\": null, \"direction\": \"down\", \"rationale\": \"The goal asks whether margin quality has deteriorated over recent periods, which is a change-over-time question about net margin.\"}, \"metrics\": [\"revenue\", \"net_income\", \"total_assets\", \"total_liabilities\", \"operating_cash_flow\", \"current_assets\", \"current_liabilities\", \"revenue_growth_qoq\", \"net_margin\", \"current_ratio\", \"debt_to_assets\"], \"dimensions\": []}",
+            "content": "{\"goal\": \"Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?\", \"interpretation\": {\"intent\": \"trend\", \"metric_hint\": \"net_margin\", \"group_hint\": null, \"direction\": \"down\", \"rationale\": \"The goal asks whether margin quality has deteriorated over recent periods, which is a change-over-time question about net_margin.\"}, \"metrics\": [\"revenue\", \"net_income\", \"total_assets\", \"total_liabilities\", \"operating_cash_flow\", \"current_assets\", \"current_liabilities\", \"revenue_growth_qoq\", \"net_margin\", \"current_ratio\", \"debt_to_assets\"], \"dimensions\": []}",
             "role": "user"
           }
         ],
@@ -122,10 +150,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"Net margin has deteriorated over the recent periods for these companies.\",\"metric\":\"net_margin\",\"direction\":\"down\",\"rationale\":\"This directly tests the stated concern about margin quality worsening over time.\"},{\"statement\":\"Revenue growth is the explanation for the observed margin change over the recent periods.\",\"metric\":\"revenue_growth_qoq\",\"direction\":\"up\",\"rationale\":\"The goal explicitly asks whether revenue growth, rather than margin deterioration, explains the pattern, so this competing explanation should be tested on its own metric.\"}],\"questions\":[\"Is the margin change sustained across the recent periods or just a one-off move?\",\"Do companies with stronger revenue growth show the same margin pattern as those with weaker growth?\"]}",
-        "completion_tokens": 154,
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"Net margin has deteriorated over recent periods at these companies.\",\"metric\":\"net_margin\",\"direction\":\"down\",\"rationale\":\"This directly tests the stated concern about margin quality worsening over time.\"},{\"statement\":\"Revenue growth is the explanation for the observed margin change over recent periods.\",\"metric\":\"revenue_growth_qoq\",\"direction\":\"up\",\"rationale\":\"The goal explicitly asks whether revenue growth, rather than margin deterioration alone, explains the pattern.\"}],\"questions\":[\"Is the margin change sustained across the recent periods, or is it a one-off fluctuation?\",\"Do companies with stronger revenue growth show the same margin pattern as those with weaker revenue growth?\"]}",
+        "completion_tokens": 145,
         "finish_reason": "stop",
-        "latency_ms": 1513,
+        "latency_ms": 1422,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 1031,
         "raw_response": {
@@ -137,7 +165,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"Net margin has deteriorated over the recent periods for these companies.\",\"metric\":\"net_margin\",\"direction\":\"down\",\"rationale\":\"This directly tests the stated concern about margin quality worsening over time.\"},{\"statement\":\"Revenue growth is the explanation for the observed margin change over the recent periods.\",\"metric\":\"revenue_growth_qoq\",\"direction\":\"up\",\"rationale\":\"The goal explicitly asks whether revenue growth, rather than margin deterioration, explains the pattern, so this competing explanation should be tested on its own metric.\"}],\"questions\":[\"Is the margin change sustained across the recent periods or just a one-off move?\",\"Do companies with stronger revenue growth show the same margin pattern as those with weaker growth?\"]}",
+                "content": "{\"hypotheses\":[{\"statement\":\"Net margin has deteriorated over recent periods at these companies.\",\"metric\":\"net_margin\",\"direction\":\"down\",\"rationale\":\"This directly tests the stated concern about margin quality worsening over time.\"},{\"statement\":\"Revenue growth is the explanation for the observed margin change over recent periods.\",\"metric\":\"revenue_growth_qoq\",\"direction\":\"up\",\"rationale\":\"The goal explicitly asks whether revenue growth, rather than margin deterioration alone, explains the pattern.\"}],\"questions\":[\"Is the margin change sustained across the recent periods, or is it a one-off fluctuation?\",\"Do companies with stronger revenue growth show the same margin pattern as those with weaker revenue growth?\"]}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -145,14 +173,15 @@
               }
             }
           ],
-          "created": 1786484492,
-          "id": "chatcmpl-EBoVw6K1PuVOxvfalPospbvIGHJva",
+          "created": 1787260755,
+          "id": "chatcmpl-EF4SJTp9pkMZRXe33yOA7jAD14Zpt",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 154,
+            "completion_tokens": 145,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -162,27 +191,28 @@
             "prompt_tokens": 1031,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1185
+            "total_tokens": 1176
           }
         }
       },
       "sequence": 1,
-      "started_at": "2026-08-11T21:41:31.794064",
+      "started_at": "2026-08-20T21:19:15.534068",
       "status": "success"
     },
     {
       "completion_tokens": 37,
       "error_detail": null,
       "est_cost_usd": 0.00091725,
-      "finished_at": "2026-08-11T21:41:35.206931",
-      "id": "ad38ceb6-895b-487f-a923-b9ebab30e81e",
-      "latency_ms": 1792,
+      "finished_at": "2026-08-20T21:19:17.677116",
+      "id": "7caf35bd-dc01-40be-ae63-dfc2a272ee6c",
+      "latency_ms": 697,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 1001,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -206,10 +236,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.\"}",
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain for establishing the trend and its break structure.\"}",
         "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 1792,
+        "latency_ms": 697,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 1001,
         "raw_response": {
@@ -221,7 +251,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain for establishing the trend and its break structure.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -229,9 +259,10 @@
               }
             }
           ],
-          "created": 1786484493,
-          "id": "chatcmpl-EBoVx216UeqxVKPaUWGogIuGSZQu9",
+          "created": 1787260757,
+          "id": "chatcmpl-EF4SLLDiWeDes0TvZVAjtPEKZ0Wud",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
@@ -246,6 +277,7 @@
             "prompt_tokens": 1001,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
             "total_tokens": 1038
@@ -253,20 +285,20 @@
         }
       },
       "sequence": 2,
-      "started_at": "2026-08-11T21:41:33.347035",
+      "started_at": "2026-08-20T21:19:16.978925",
       "status": "success"
     },
     {
-      "completion_tokens": 40,
+      "completion_tokens": 37,
       "error_detail": null,
-      "est_cost_usd": 0.000894,
-      "finished_at": "2026-08-11T21:41:36.027013",
-      "id": "e22d07bb-3176-4a10-b13c-6ea83d89d69f",
-      "latency_ms": 742,
+      "est_cost_usd": 0.0008805,
+      "finished_at": "2026-08-20T21:19:18.557671",
+      "id": "805d9722-988d-45f5-965a-58dc8f636223",
+      "latency_ms": 757,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 952,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -290,10 +322,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":3,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain and is the most direct next experiment for establishing the trend.\"}",
-        "completion_tokens": 40,
+        "assistant_text": "{\"request_index\":3,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.\"}",
+        "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 742,
+        "latency_ms": 757,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 952,
         "raw_response": {
@@ -305,7 +337,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":3,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain and is the most direct next experiment for establishing the trend.\"}",
+                "content": "{\"request_index\":3,\"rationale\":\"edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -313,14 +345,15 @@
               }
             }
           ],
-          "created": 1786484495,
-          "id": "chatcmpl-EBoVzT0V0KK5IUVJX0iNbe75cG7kQ",
+          "created": 1787260758,
+          "id": "chatcmpl-EF4SMYtOXploHy94FaKgPMulhI8CU",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 40,
+            "completion_tokens": 37,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -330,27 +363,28 @@
             "prompt_tokens": 952,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 992
+            "total_tokens": 989
           }
         }
       },
       "sequence": 3,
-      "started_at": "2026-08-11T21:41:35.283870",
+      "started_at": "2026-08-20T21:19:17.800116",
       "status": "success"
     },
     {
       "completion_tokens": 36,
       "error_detail": null,
       "est_cost_usd": 0.00083925,
-      "finished_at": "2026-08-11T21:41:37.261787",
-      "id": "1c951e05-8b48-44d4-87e8-d4ee1dc3e786",
-      "latency_ms": 1162,
+      "finished_at": "2026-08-20T21:19:19.738582",
+      "id": "672255b3-6383-4722-a639-6293e39b82d1",
+      "latency_ms": 1065,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 903,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -377,7 +411,7 @@
         "assistant_text": "{\"request_index\":0,\"rationale\":\"Analyze the time series trend directly, since it has the highest expected information gain for the trend goal.\"}",
         "completion_tokens": 36,
         "finish_reason": "stop",
-        "latency_ms": 1162,
+        "latency_ms": 1065,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 903,
         "raw_response": {
@@ -397,9 +431,10 @@
               }
             }
           ],
-          "created": 1786484496,
-          "id": "chatcmpl-EBoW089OTv1Gtu2JMLa1vvbbB0rGl",
+          "created": 1787260759,
+          "id": "chatcmpl-EF4SNAZksUl9Mfos9Rb9pf1ojQniW",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
@@ -414,6 +449,7 @@
             "prompt_tokens": 903,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
             "total_tokens": 939
@@ -421,20 +457,20 @@
         }
       },
       "sequence": 4,
-      "started_at": "2026-08-11T21:41:36.098650",
+      "started_at": "2026-08-20T21:19:18.673015",
       "status": "success"
     },
     {
       "completion_tokens": 37,
       "error_detail": null,
       "est_cost_usd": 0.00080775,
-      "finished_at": "2026-08-11T21:41:38.295078",
-      "id": "4a456888-26ff-4c61-9c68-995a44f52674",
-      "latency_ms": 1016,
+      "finished_at": "2026-08-20T21:19:20.495957",
+      "id": "f7ac4bf6-552f-43c5-a4bd-05ecfcb24a45",
+      "latency_ms": 729,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 855,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -458,10 +494,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the direction and strength of the trend.\"}",
+        "assistant_text": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the presence and direction of a trend.\"}",
         "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 1016,
+        "latency_ms": 729,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 855,
         "raw_response": {
@@ -473,7 +509,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the direction and strength of the trend.\"}",
+                "content": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the presence and direction of a trend.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -481,9 +517,10 @@
               }
             }
           ],
-          "created": 1786484497,
-          "id": "chatcmpl-EBoW1CzK30PruHBJQPehDXaocEgeB",
+          "created": 1787260760,
+          "id": "chatcmpl-EF4SOai7gYy1frvc8YlsssXY3VQbT",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
@@ -498,6 +535,7 @@
             "prompt_tokens": 855,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
             "total_tokens": 892
@@ -505,20 +543,20 @@
         }
       },
       "sequence": 5,
-      "started_at": "2026-08-11T21:41:37.277933",
+      "started_at": "2026-08-20T21:19:19.764960",
       "status": "success"
     },
     {
-      "completion_tokens": 38,
+      "completion_tokens": 37,
       "error_detail": null,
-      "est_cost_usd": 0.00077625,
-      "finished_at": "2026-08-11T21:41:39.110305",
-      "id": "5a850a4f-5a0c-46c0-884e-bd9c0b571c53",
-      "latency_ms": 789,
+      "est_cost_usd": 0.00077175,
+      "finished_at": "2026-08-20T21:19:21.160527",
+      "id": "3299be3d-fd9a-428c-8d19-df296665e82d",
+      "latency_ms": 633,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 807,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -542,10 +580,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"detect_change_points is the highest-gain available experiment for establishing whether the series exhibits trend shifts or regime changes.\"}",
-        "completion_tokens": 38,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"Detecting change points is the most informative next step for establishing whether a trend exists and where it shifts.\"}",
+        "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 789,
+        "latency_ms": 633,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 807,
         "raw_response": {
@@ -557,7 +595,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"detect_change_points is the highest-gain available experiment for establishing whether the series exhibits trend shifts or regime changes.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"Detecting change points is the most informative next step for establishing whether a trend exists and where it shifts.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -565,14 +603,15 @@
               }
             }
           ],
-          "created": 1786484498,
-          "id": "chatcmpl-EBoW2LVxc7BARMLFX82aBWrGWStxR",
+          "created": 1787260760,
+          "id": "chatcmpl-EF4SODTHD1SENxtLU3EDbqtwhUnKL",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 38,
+            "completion_tokens": 37,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -582,27 +621,28 @@
             "prompt_tokens": 807,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 845
+            "total_tokens": 844
           }
         }
       },
       "sequence": 6,
-      "started_at": "2026-08-11T21:41:38.319546",
+      "started_at": "2026-08-20T21:19:20.525294",
       "status": "success"
     },
     {
-      "completion_tokens": 38,
+      "completion_tokens": 37,
       "error_detail": null,
-      "est_cost_usd": 0.00071175,
-      "finished_at": "2026-08-11T21:41:39.840520",
-      "id": "4fba43c7-b23e-4767-8316-60668da5adc3",
-      "latency_ms": 705,
+      "est_cost_usd": 0.00070725,
+      "finished_at": "2026-08-20T21:19:21.973513",
+      "id": "f91e1c0e-4cdc-4585-be71-d8c959f3b65a",
+      "latency_ms": 744,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 721,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -626,10 +666,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"detect_change_points is the highest-information next step for establishing whether the series has structural shifts consistent with a trend.\"}",
-        "completion_tokens": 38,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"detect_change_points is the highest-information experiment and would establish whether the series has structural shifts relevant to trend.\"}",
+        "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 705,
+        "latency_ms": 744,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 721,
         "raw_response": {
@@ -641,7 +681,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"detect_change_points is the highest-information next step for establishing whether the series has structural shifts consistent with a trend.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"detect_change_points is the highest-information experiment and would establish whether the series has structural shifts relevant to trend.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -649,14 +689,15 @@
               }
             }
           ],
-          "created": 1786484499,
-          "id": "chatcmpl-EBoW3kPa8hLoCElHDFkvB043Hu6Fo",
+          "created": 1787260761,
+          "id": "chatcmpl-EF4SP8nEydyErC5YR1pbAizxs3NiU",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 38,
+            "completion_tokens": 37,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -666,27 +707,28 @@
             "prompt_tokens": 721,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 759
+            "total_tokens": 758
           }
         }
       },
       "sequence": 7,
-      "started_at": "2026-08-11T21:41:39.134231",
+      "started_at": "2026-08-20T21:19:21.227852",
       "status": "success"
     },
     {
-      "completion_tokens": 138,
+      "completion_tokens": 154,
       "error_detail": null,
-      "est_cost_usd": 0.00118425,
-      "finished_at": "2026-08-11T21:41:41.224658",
-      "id": "b2f373e5-c3dc-4ce1-bdb3-3dd4daaf848a",
-      "latency_ms": 1372,
+      "est_cost_usd": 0.00164325,
+      "finished_at": "2026-08-20T21:19:23.351050",
+      "id": "ee739f52-bcff-4c6e-be1b-410bde1f4338",
+      "latency_ms": 1361,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 751,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 1267,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -695,11 +737,11 @@
         },
         "messages": [
           {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"summarize_distribution\"]}",
+            "content": "{\"claim\": {\"id\": \"fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"summarize_distribution\"], \"supported_claims\": [{\"id\": \"fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\", \"statement\": \"Revenue growth is the explanation for the observed margin change over recent periods.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -710,12 +752,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1\",\"falsification_tool\":\"summarize_distribution\",\"message\":\"Challenge the supported hypothesis by checking whether the apparent support depends on a particular summary choice; if the distributional shape or outliers change the conclusion, the claim may be an artefact of aggregation rather than a robust pattern.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could reveal whether the result survives a distribution-level check.\"}",
-        "completion_tokens": 138,
+        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\",\"falsification_tool\":\"summarize_distribution\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge whether the apparent margin change is robust or an artefact of the revenue-growth summary by checking the underlying distribution of margins across periods; a distributional summary could show the change is driven by outliers or compositional shifts rather than revenue growth itself.\",\"rationale\":\"The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.\"}",
+        "completion_tokens": 154,
         "finish_reason": "stop",
-        "latency_ms": 1372,
+        "latency_ms": 1361,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 751,
+        "prompt_tokens": 1267,
         "raw_response": {
           "choices": [
             {
@@ -725,7 +767,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1\",\"falsification_tool\":\"summarize_distribution\",\"message\":\"Challenge the supported hypothesis by checking whether the apparent support depends on a particular summary choice; if the distributional shape or outliers change the conclusion, the claim may be an artefact of aggregation rather than a robust pattern.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could reveal whether the result survives a distribution-level check.\"}",
+                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\",\"falsification_tool\":\"summarize_distribution\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge whether the apparent margin change is robust or an artefact of the revenue-growth summary by checking the underlying distribution of margins across periods; a distributional summary could show the change is driven by outliers or compositional shifts rather than revenue growth itself.\",\"rationale\":\"The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -733,44 +775,46 @@
               }
             }
           ],
-          "created": 1786484500,
-          "id": "chatcmpl-EBoW4GpT7Z6NZL9yFgUWjQGN2HZ2K",
+          "created": 1787260762,
+          "id": "chatcmpl-EF4SQEhlo2UnwQyVeDP2Gg6B4SSDc",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 138,
+            "completion_tokens": 154,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 751,
+            "prompt_tokens": 1267,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 889
+            "total_tokens": 1421
           }
         }
       },
       "sequence": 8,
-      "started_at": "2026-08-11T21:41:39.850296",
+      "started_at": "2026-08-20T21:19:21.987799",
       "status": "success"
     },
     {
-      "completion_tokens": 40,
+      "completion_tokens": 34,
       "error_detail": null,
-      "est_cost_usd": 0.00070725,
-      "finished_at": "2026-08-11T21:41:41.988346",
-      "id": "64edb052-68df-4d41-9c5b-2bd95a7f8bd2",
-      "latency_ms": 741,
+      "est_cost_usd": 0.000681,
+      "finished_at": "2026-08-20T21:19:24.239951",
+      "id": "1f9324d7-131f-46ac-a2c5-cc95983de677",
+      "latency_ms": 860,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 703,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 704,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -783,7 +827,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"summarize_distribution\", \"purpose\": \"falsify hypothesis c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1\", \"expected_information_gain\": 0.95, \"falsification\": true}]}",
+            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"summarize_distribution\", \"purpose\": \"falsify hypothesis fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\", \"expected_information_gain\": 0.95, \"falsification\": true}]}",
             "role": "user"
           }
         ],
@@ -794,12 +838,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the offered falsification step, and it would test whether the currently supported trend hypothesis fails under distributional summary.\"}",
-        "completion_tokens": 40,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This falsification check would test whether the currently supported trend hypothesis fails under a distribution summary.\"}",
+        "completion_tokens": 34,
         "finish_reason": "stop",
-        "latency_ms": 741,
+        "latency_ms": 860,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 703,
+        "prompt_tokens": 704,
         "raw_response": {
           "choices": [
             {
@@ -809,7 +853,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This is the offered falsification step, and it would test whether the currently supported trend hypothesis fails under distributional summary.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"This falsification check would test whether the currently supported trend hypothesis fails under a distribution summary.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -817,44 +861,46 @@
               }
             }
           ],
-          "created": 1786484501,
-          "id": "chatcmpl-EBoW5VGPlko8JbjfmKiywXwFx4dBK",
+          "created": 1787260763,
+          "id": "chatcmpl-EF4SRBzaXPD3rw8pDGszt1cRTPiyj",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 40,
+            "completion_tokens": 34,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 703,
+            "prompt_tokens": 704,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 743
+            "total_tokens": 738
           }
         }
       },
       "sequence": 9,
-      "started_at": "2026-08-11T21:41:41.246018",
+      "started_at": "2026-08-20T21:19:23.377600",
       "status": "success"
     },
     {
-      "completion_tokens": 63,
+      "completion_tokens": 77,
       "error_detail": null,
-      "est_cost_usd": 0.000843,
-      "finished_at": "2026-08-11T21:41:43.119338",
-      "id": "73ef9e10-eb3a-494c-bc8a-929a40ac9eae",
-      "latency_ms": 1123,
+      "est_cost_usd": 0.001293,
+      "finished_at": "2026-08-20T21:19:25.304830",
+      "id": "08a5742c-4938-42c6-b232-65f8676116e6",
+      "latency_ms": 1053,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 746,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 1262,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -863,11 +909,11 @@
         },
         "messages": [
           {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"c387bb23-e481-44d6-a25b-7177a8d272b9-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": []}",
+            "content": "{\"claim\": {\"id\": \"fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1\", \"statement\": \"Revenue growth is the explanation for the observed margin change over recent periods.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -878,12 +924,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim has already been critiqued, and there are no unused falsification tools available, so the conditions for a challenge are not met.\"}",
-        "completion_tokens": 63,
+        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The current claim has already been critiqued, and there are no unused tools available to run a further falsification experiment. No contradiction among supported claims is present.\"}",
+        "completion_tokens": 77,
         "finish_reason": "stop",
-        "latency_ms": 1123,
+        "latency_ms": 1053,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 746,
+        "prompt_tokens": 1262,
         "raw_response": {
           "choices": [
             {
@@ -893,7 +939,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim has already been critiqued, and there are no unused falsification tools available, so the conditions for a challenge are not met.\"}",
+                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The current claim has already been critiqued, and there are no unused tools available to run a further falsification experiment. No contradiction among supported claims is present.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -901,41 +947,43 @@
               }
             }
           ],
-          "created": 1786484502,
-          "id": "chatcmpl-EBoW625XSAhhYOte84HP4C0TNaGVH",
+          "created": 1787260764,
+          "id": "chatcmpl-EF4SSfiIQdRr5VOXbQimHaZoD6oVA",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 63,
+            "completion_tokens": 77,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 746,
+            "prompt_tokens": 1262,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 809
+            "total_tokens": 1339
           }
         }
       },
       "sequence": 10,
-      "started_at": "2026-08-11T21:41:41.994113",
+      "started_at": "2026-08-20T21:19:24.249759",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 675,
-    "est_cost_usd": 0.01015,
-    "latency_ms": 12050,
+    "completion_tokens": 685,
+    "est_cost_usd": 0.01097,
+    "latency_ms": 10380,
     "model_calls": 11,
     "priced": true,
-    "prompt_tokens": 9483,
-    "total_tokens": 10158
+    "prompt_tokens": 10516,
+    "total_tokens": 11201
   }
 }

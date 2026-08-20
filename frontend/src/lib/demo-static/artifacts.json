@@ -30,16 +30,16 @@
     "f3346a4b-187e-4d60-bd1e-54e4b714654a": "/demo-data/csv-staffing-vs-service/artifacts/f3346a4b-187e-4d60-bd1e-54e4b714654a/correlation_matrix.csv"
   },
   "edgar-margin-vs-growth": {
-    "13391221-3462-494a-ac45-6fd2523d5b95": "/demo-data/edgar-margin-vs-growth/artifacts/13391221-3462-494a-ac45-6fd2523d5b95/trend.json",
-    "2425a93d-7d66-452b-bf32-29aa56eac0a3": "/demo-data/edgar-margin-vs-growth/artifacts/2425a93d-7d66-452b-bf32-29aa56eac0a3/trend.json",
-    "6e8de749-3ec8-4845-941d-aa2453bdd3aa": "/demo-data/edgar-margin-vs-growth/artifacts/6e8de749-3ec8-4845-941d-aa2453bdd3aa/trend_fits.csv",
-    "721ced06-8b50-4188-83aa-d2b2b6503b2f": "/demo-data/edgar-margin-vs-growth/artifacts/721ced06-8b50-4188-83aa-d2b2b6503b2f/trend_break_signals.csv",
-    "7df6e232-4b7a-4c2b-babe-6bfaca50b854": "/demo-data/edgar-margin-vs-growth/artifacts/7df6e232-4b7a-4c2b-babe-6bfaca50b854/distribution_summary.json",
-    "8f8359b5-03ae-4004-97d1-a7f3e047e1ea": "/demo-data/edgar-margin-vs-growth/artifacts/8f8359b5-03ae-4004-97d1-a7f3e047e1ea/trend_break_signals.csv",
-    "c825be71-1f53-4891-8aec-306f2f017d48": "/demo-data/edgar-margin-vs-growth/artifacts/c825be71-1f53-4891-8aec-306f2f017d48/distribution.json",
-    "cd26662f-6ec7-4128-b7d5-82c45601e1de": "/demo-data/edgar-margin-vs-growth/artifacts/cd26662f-6ec7-4128-b7d5-82c45601e1de/trend_fits.csv",
-    "e8fd0df2-4a21-4be8-9ad6-5a0746a14f85": "/demo-data/edgar-margin-vs-growth/artifacts/e8fd0df2-4a21-4be8-9ad6-5a0746a14f85/change_point.json",
-    "f90ebeba-eacf-46ae-b10c-3c3070474c11": "/demo-data/edgar-margin-vs-growth/artifacts/f90ebeba-eacf-46ae-b10c-3c3070474c11/change_point.json"
+    "15b278c8-1fd0-4fc7-b07d-11ee6cb5e15e": "/demo-data/edgar-margin-vs-growth/artifacts/15b278c8-1fd0-4fc7-b07d-11ee6cb5e15e/trend_break_signals.csv",
+    "28956e91-0ae6-4795-b7d8-b6409a35e625": "/demo-data/edgar-margin-vs-growth/artifacts/28956e91-0ae6-4795-b7d8-b6409a35e625/distribution_summary.json",
+    "28d5f7c3-73e0-4430-8c3e-c2641913925f": "/demo-data/edgar-margin-vs-growth/artifacts/28d5f7c3-73e0-4430-8c3e-c2641913925f/distribution.json",
+    "97bced86-4321-471a-9fe8-e7587176358b": "/demo-data/edgar-margin-vs-growth/artifacts/97bced86-4321-471a-9fe8-e7587176358b/trend_fits.csv",
+    "9a1a4237-d6de-44b2-b281-a23c0e46e4bc": "/demo-data/edgar-margin-vs-growth/artifacts/9a1a4237-d6de-44b2-b281-a23c0e46e4bc/trend_fits.csv",
+    "c3a2ae43-ee5a-4568-b0db-2c38f34a2608": "/demo-data/edgar-margin-vs-growth/artifacts/c3a2ae43-ee5a-4568-b0db-2c38f34a2608/change_point.json",
+    "c3bcea77-eb1e-4cef-85f0-75d2398fb637": "/demo-data/edgar-margin-vs-growth/artifacts/c3bcea77-eb1e-4cef-85f0-75d2398fb637/trend_break_signals.csv",
+    "c9fbd8dc-7fb7-4811-ad85-f85ad0b9de9c": "/demo-data/edgar-margin-vs-growth/artifacts/c9fbd8dc-7fb7-4811-ad85-f85ad0b9de9c/trend.json",
+    "e48db198-a9e8-4283-8f58-6b6d46cff99d": "/demo-data/edgar-margin-vs-growth/artifacts/e48db198-a9e8-4283-8f58-6b6d46cff99d/trend.json",
+    "eab35e26-26b8-479f-b985-d2dee976e65d": "/demo-data/edgar-margin-vs-growth/artifacts/eab35e26-26b8-479f-b985-d2dee976e65d/change_point.json"
   },
   "edgar-peer-separation": {
     "6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b": "/demo-data/edgar-peer-separation/artifacts/6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b/correlation_heatmap.json",

@@ -33,39 +33,6 @@
     "updated_at": "2026-08-11T21:30:11"
   },
   {
-    "adapter_id": "edgar",
-    "analysis_run_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
-    "conclusion": "Supported: Revenue growth is the explanation for the observed margin change over the recent periods. | Not supported: Net margin has deteriorated over the recent periods for these companies.",
-    "confidence": 0.5,
-    "counts": {
-      "critiques": 1,
-      "decisions": 25,
-      "evidence": 7,
-      "experiments": 7,
-      "hypotheses": 2,
-      "observations": 5,
-      "open_questions": 2
-    },
-    "created_at": "2026-08-11T21:41:30",
-    "demo_slug": "edgar-margin-vs-growth",
-    "domain_id": "c387bb23-e481-44d6-a25b-7177a8d272b9",
-    "id": "4096b6e9-e24b-4fa8-b8e3-8ae19d902026",
-    "objective": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
-    "origin": "native",
-    "outcome": {
-      "claims_rejected": 1,
-      "claims_supported": 1,
-      "claims_unresolved": 0,
-      "claims_weakened": 0,
-      "contradiction_found": false,
-      "kind": "mixed",
-      "termination_reason": "sufficient_evidence"
-    },
-    "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
-    "status": "converged",
-    "updated_at": "2026-08-11T21:41:43"
-  },
-  {
     "adapter_id": "in_memory",
     "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
     "conclusion": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
@@ -163,5 +130,38 @@
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "exhausted",
     "updated_at": "2026-08-20T19:02:52"
+  },
+  {
+    "adapter_id": "edgar",
+    "analysis_run_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9",
+    "conclusion": "Supported: Revenue growth is the explanation for the observed margin change over recent periods. | Not supported: Net margin has deteriorated over recent periods at these companies.",
+    "confidence": 0.5,
+    "counts": {
+      "critiques": 1,
+      "decisions": 25,
+      "evidence": 7,
+      "experiments": 7,
+      "hypotheses": 2,
+      "observations": 5,
+      "open_questions": 2
+    },
+    "created_at": "2026-08-20T21:19:14",
+    "demo_slug": "edgar-margin-vs-growth",
+    "domain_id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9",
+    "id": "80fbdfdc-00d2-4d07-bb0f-57fea2e5b73b",
+    "objective": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
+    "origin": "native",
+    "outcome": {
+      "claims_rejected": 1,
+      "claims_supported": 1,
+      "claims_unresolved": 0,
+      "claims_weakened": 0,
+      "contradiction_found": false,
+      "kind": "mixed",
+      "termination_reason": "sufficient_evidence"
+    },
+    "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
+    "status": "converged",
+    "updated_at": "2026-08-20T21:21:10"
   }
 ]
