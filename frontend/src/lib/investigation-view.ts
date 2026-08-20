@@ -40,6 +40,64 @@ export function investigationStatusTone(status: string): Tone {
   }
 }
 
+const INDIGO = "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300";
+
+/**
+ * How a run ended, phrased for a reader rather than for the database.
+ *
+ * `investigationStatusTone` reports the stored status, which is the wrong headline in the
+ * case that matters most here: a run that correctly declined is stored as `exhausted`, and
+ * a newcomer reads that as a crash. `outcome.kind` is classified server-side
+ * (`InvestigationOutcome`); only the wording and colour are decided here.
+ *
+ * Declined is deliberately not red. Declining is a correct outcome in this system, and
+ * colouring it like a failure would contradict the thing the demos exist to show.
+ */
+export function outcomeTone(kind: string): Tone {
+  switch (kind) {
+    case "supported":
+      return { label: "Concluded", className: GREEN };
+    case "mixed":
+      return { label: "Mixed verdict", className: BLUE };
+    case "declined":
+      return { label: "Declined to answer", className: AMBER };
+    case "contradicted":
+      return { label: "Caught its own contradiction", className: INDIGO };
+    case "stopped":
+      return { label: "Stopped early", className: NEUTRAL };
+    default:
+      return { label: titleize(kind), className: NEUTRAL };
+  }
+}
+
+/** One line of plain English for what the run actually established. */
+export function outcomeSummary(outcome: {
+  kind: string;
+  claims_supported: number;
+  claims_rejected: number;
+  claims_weakened: number;
+  claims_unresolved: number;
+}): string {
+  const { claims_supported: s, claims_rejected: r } = outcome;
+  const notStanding = outcome.claims_rejected + outcome.claims_weakened + outcome.claims_unresolved;
+  switch (outcome.kind) {
+    case "supported":
+      return `${s} claim${s === 1 ? "" : "s"} stood up to the evidence.`;
+    case "mixed":
+      return `${s} claim${s === 1 ? "" : "s"} stood, ${notStanding} did not.`;
+    case "declined":
+      return notStanding
+        ? `No claim survived the evidence; ${notStanding} did not hold.`
+        : "The loop found nothing it could stand behind.";
+    case "contradicted":
+      return "Two claims could not both be true, so neither was allowed to stand.";
+    case "stopped":
+      return "The run was cut off before it reached a view of the evidence.";
+    default:
+      return r ? `${r} claim${r === 1 ? "" : "s"} rejected.` : "";
+  }
+}
+
 export function hypothesisStatusTone(status: string): Tone {
   switch (status) {
     case "supported":

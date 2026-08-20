@@ -3369,6 +3369,9 @@
             "title": "Origin",
             "type": "string"
           },
+          "outcome": {
+            "$ref": "#/components/schemas/InvestigationOutcome"
+          },
           "project_id": {
             "anyOf": [
               {
@@ -3414,10 +3417,61 @@
           "origin",
           "status",
           "counts",
+          "outcome",
           "created_at",
           "updated_at"
         ],
         "title": "InvestigationDetail",
+        "type": "object"
+      },
+      "InvestigationOutcome": {
+        "description": "How a run actually ended, classified from persisted state.\n\n``status`` alone is misleading in the place it matters most: a run that correctly declined\nto answer is stored as ``exhausted``, which reads to a newcomer as a failure. The honest\nheadline is the *outcome* \u2014 did claims stand, did they conflict, did the loop decline \u2014\nand that needs the termination reason, the claim statuses and the critique types together.\n\nClassified here rather than in each client so the API, the static export and any future\nsurface agree on what a run was. The wording of the label is a presentation decision and\nstays with the caller; this is only the classification and the counts behind it.",
+        "properties": {
+          "claims_rejected": {
+            "default": 0,
+            "title": "Claims Rejected",
+            "type": "integer"
+          },
+          "claims_supported": {
+            "default": 0,
+            "title": "Claims Supported",
+            "type": "integer"
+          },
+          "claims_unresolved": {
+            "default": 0,
+            "title": "Claims Unresolved",
+            "type": "integer"
+          },
+          "claims_weakened": {
+            "default": 0,
+            "title": "Claims Weakened",
+            "type": "integer"
+          },
+          "contradiction_found": {
+            "default": false,
+            "title": "Contradiction Found",
+            "type": "boolean"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          },
+          "termination_reason": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Termination Reason"
+          }
+        },
+        "required": [
+          "kind"
+        ],
+        "title": "InvestigationOutcome",
         "type": "object"
       },
       "InvestigationSummary": {
@@ -3517,6 +3571,9 @@
             "title": "Origin",
             "type": "string"
           },
+          "outcome": {
+            "$ref": "#/components/schemas/InvestigationOutcome"
+          },
           "project_id": {
             "anyOf": [
               {
@@ -3544,6 +3601,7 @@
           "origin",
           "status",
           "counts",
+          "outcome",
           "created_at",
           "updated_at"
         ],

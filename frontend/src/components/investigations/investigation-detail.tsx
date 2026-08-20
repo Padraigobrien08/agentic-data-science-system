@@ -16,6 +16,8 @@ import {
   formatConfidence,
   hypothesisStatusTone,
   investigationStatusTone,
+  outcomeSummary,
+  outcomeTone,
   titleize,
 } from "@/lib/investigation-view";
 
@@ -234,8 +236,17 @@ export function InvestigationDetailView({
           <h1 className="text-xl font-semibold text-neutral-900 dark:text-neutral-100">
             {detail.objective ?? "Investigation"}
           </h1>
-          <Pill tone={status} />
+          {/* Outcome leads, stored status follows. A run that correctly declined is stored
+              as `exhausted`, and that word is read as a crash by anyone meeting the page
+              cold — which is most of the audience for the recorded runs. */}
+          <div className="flex flex-wrap items-center gap-2">
+            <Pill tone={outcomeTone(detail.outcome.kind)} />
+            <Pill tone={status} />
+          </div>
         </div>
+        <p className="text-sm text-neutral-700 dark:text-neutral-200">
+          {outcomeSummary(detail.outcome)}
+        </p>
         <div className="flex flex-wrap items-center gap-x-4 gap-y-1 font-mono text-xs text-neutral-500 dark:text-neutral-400">
           <span>confidence {formatConfidence(detail.confidence)}</span>
           {detail.adapter_id ? <span>· {detail.adapter_id}</span> : null}

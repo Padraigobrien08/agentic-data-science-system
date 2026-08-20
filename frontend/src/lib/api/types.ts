@@ -513,6 +513,24 @@ export interface InvestigationCounts {
   open_questions: number;
 }
 
+/**
+ * How a run ended, classified server-side from persisted state.
+ *
+ * Distinct from `status`: a run that correctly declined is stored as `exhausted`, which is
+ * not what happened from a reader's point of view. See `InvestigationOutcome` in
+ * `backend/schemas/investigation.py` — the classification lives there so every client agrees.
+ */
+export interface InvestigationOutcome {
+  /** contradicted | mixed | supported | declined | stopped */
+  kind: string;
+  termination_reason: string | null;
+  claims_supported: number;
+  claims_rejected: number;
+  claims_weakened: number;
+  claims_unresolved: number;
+  contradiction_found: boolean;
+}
+
 export interface InvestigationSummary {
   id: string;
   domain_id: string | null;
@@ -527,6 +545,7 @@ export interface InvestigationSummary {
   /** Public replay-tier slug when published (see /v1/demos), else null. */
   demo_slug: string | null;
   counts: InvestigationCounts;
+  outcome: InvestigationOutcome;
   created_at: string;
   updated_at: string;
 }

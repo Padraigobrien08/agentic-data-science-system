@@ -3562,6 +3562,15 @@
     }
   ],
   "origin": "native",
+  "outcome": {
+    "claims_rejected": 0,
+    "claims_supported": 2,
+    "claims_unresolved": 0,
+    "claims_weakened": 0,
+    "contradiction_found": false,
+    "kind": "supported",
+    "termination_reason": "sufficient_evidence"
+  },
   "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
   "status": "converged",
   "success_criteria": [],
