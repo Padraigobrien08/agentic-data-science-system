@@ -9,6 +9,7 @@ the structured state that makes agency inspectable rather than hidden in prompts
 
 from __future__ import annotations
 
+from collections import Counter
 from datetime import datetime
 from typing import Any, Literal
 from uuid import UUID
@@ -113,6 +114,73 @@ class InvestigationCounts(BaseModel):
     open_questions: int = 0
 
 
+class InvestigationOutcome(BaseModel):
+    """
+    How a run actually ended, classified from persisted state.
+
+    ``status`` alone is misleading in the place it matters most: a run that correctly declined
+    to answer is stored as ``exhausted``, which reads to a newcomer as a failure. The honest
+    headline is the *outcome* — did claims stand, did they conflict, did the loop decline —
+    and that needs the termination reason, the claim statuses and the critique types together.
+
+    Classified here rather than in each client so the API, the static export and any future
+    surface agree on what a run was. The wording of the label is a presentation decision and
+    stays with the caller; this is only the classification and the counts behind it.
+    """
+
+    #: contradicted | mixed | supported | declined | stopped
+    kind: str
+    termination_reason: str | None = None
+    claims_supported: int = 0
+    claims_rejected: int = 0
+    claims_weakened: int = 0
+    claims_unresolved: int = 0
+    #: True when the loop found two of its own supported claims mutually exclusive.
+    contradiction_found: bool = False
+
+
+#: Terminations where the loop was cut off rather than reaching a view of the evidence.
+_STOPPED_EARLY = {"budget_exhausted", "safety_constraint", "repeated_failure", "user_stop"}
+
+
+def _build_outcome(row: InvestigationRow) -> InvestigationOutcome:
+    counts = Counter(str(h.status) for h in row.hypotheses)
+    termination = row.termination_json if isinstance(row.termination_json, dict) else {}
+    reason = termination.get("reason")
+    reason = str(reason) if reason is not None else None
+
+    contradiction = any(
+        str(c.critique_type) == "contradiction" and not c.resolved for c in row.critiques
+    )
+    supported = counts.get("supported", 0)
+    rejected = counts.get("rejected", 0)
+    weakened = counts.get("weakened", 0)
+    unresolved = counts.get("unresolved", 0)
+
+    if contradiction:
+        # Ordered first deliberately: a run holding two claims that cannot both be true has
+        # not concluded anything, whatever else its claims say.
+        kind = "contradicted"
+    elif reason in _STOPPED_EARLY:
+        kind = "stopped"
+    elif supported and (rejected or weakened or unresolved):
+        kind = "mixed"
+    elif supported:
+        kind = "supported"
+    else:
+        kind = "declined"
+
+    return InvestigationOutcome(
+        kind=kind,
+        termination_reason=reason,
+        claims_supported=supported,
+        claims_rejected=rejected,
+        claims_weakened=weakened,
+        claims_unresolved=unresolved,
+        contradiction_found=contradiction,
+    )
+
+
 class InvestigationSummary(BaseModel):
     id: UUID
     domain_id: str | None = None
@@ -128,6 +196,8 @@ class InvestigationSummary(BaseModel):
     #: listing is useless to a client without the URL segment that reaches the detail.
     demo_slug: str | None = None
     counts: InvestigationCounts
+    #: How the run ended, classified from persisted state — see :class:`InvestigationOutcome`.
+    outcome: InvestigationOutcome
     created_at: datetime
     updated_at: datetime
 
@@ -300,6 +370,7 @@ def build_summary(row: InvestigationRow) -> InvestigationSummary:
             critiques=len(row.critiques),
             open_questions=len(row.open_questions),
         ),
+        outcome=_build_outcome(row),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )

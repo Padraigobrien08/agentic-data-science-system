@@ -1,0 +1,3583 @@
+{
+  "adapter_id": "edgar",
+  "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+  "conclusion": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+  "conclusion_detail": {
+    "caveats": [
+      "termination: sufficient_evidence",
+      "2 open question(s) remain"
+    ],
+    "confidence": 0.95,
+    "disposition": "supported",
+    "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-concl-0",
+    "key_evidence_ids": [
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72"
+    ],
+    "statement": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+    "supporting_hypothesis_ids": [
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+    ]
+  },
+  "confidence": 0.95,
+  "constraints": [],
+  "counts": {
+    "critiques": 1,
+    "decisions": 13,
+    "evidence": 73,
+    "experiments": 3,
+    "hypotheses": 2,
+    "observations": 73,
+    "open_questions": 2
+  },
+  "created_at": "2026-08-19T22:11:27",
+  "critiques": [
+    {
+      "critique_type": "competing_explanation",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-crit-0",
+      "message": "Test whether the apparent margin advantage persists after controlling for revenue growth with a simple regression; if the effect disappears, the claim may be an artefact of faster growth rather than durable profitability.",
+      "resolved": false,
+      "severity": "major",
+      "suggested_action": "fit_simple_regression",
+      "target_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "target_kind": "hypothesis"
+    }
+  ],
+  "datasets": [
+    {
+      "content_hash": null,
+      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
+      "name": "EDGAR panel (features.csv)",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
+      "name": "EDGAR panel (features.csv)",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
+      "name": "EDGAR panel (features.csv)",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
+      "name": "EDGAR panel (features.csv)",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
+      "name": "EDGAR panel (features.csv)",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
+      "name": "EDGAR panel (features.csv)",
+      "row_count": null
+    }
+  ],
+  "decisions": [
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "propose_hypothesis",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-0",
+      "iteration": 0,
+      "rationale": "This directly tests the stated profitability explanation using the margin metric.",
+      "sequence": 0
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "propose_hypothesis",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-1",
+      "iteration": 0,
+      "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
+      "sequence": 1
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "analyze_correlation",
+      "decision_type": "select_experiment",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-2",
+      "iteration": 0,
+      "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
+      "sequence": 2
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-3",
+      "iteration": 0,
+      "rationale": "recorded 36 evidence item(s) for analyze_correlation",
+      "sequence": 3
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-4",
+      "iteration": 0,
+      "rationale": "supported (support=36, refute=0)",
+      "sequence": 4
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "fit_simple_regression",
+      "decision_type": "request_critique",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-crit-5",
+      "iteration": 0,
+      "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
+      "sequence": 5
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "fit_simple_regression",
+      "decision_type": "select_experiment",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-6",
+      "iteration": 1,
+      "rationale": "This is the offered falsification test, so it best checks whether the current correlation hypothesis survives an independent challenge.",
+      "sequence": 6
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-7",
+      "iteration": 0,
+      "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
+      "sequence": 7
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-8",
+      "iteration": 0,
+      "rationale": "supported (support=37, refute=0)",
+      "sequence": 8
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "analyze_correlation",
+      "decision_type": "select_experiment",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-9",
+      "iteration": 2,
+      "rationale": "This directly establishes the correlation and has the highest expected information gain among the available candidates.",
+      "sequence": 9
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-10",
+      "iteration": 0,
+      "rationale": "recorded 36 evidence item(s) for analyze_correlation",
+      "sequence": 10
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-11",
+      "iteration": 0,
+      "rationale": "supported (support=36, refute=0)",
+      "sequence": 11
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "conclude",
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-concl-12",
+      "iteration": 0,
+      "rationale": "supported (sufficient_evidence)",
+      "sequence": 12
+    }
+  ],
+  "demo_slug": "edgar-peer-separation",
+  "domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+  "events": [
+    {
+      "created_at": "2026-08-19T22:11:27",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "created",
+      "payload": {
+        "origin": "native"
+      },
+      "sequence": 0
+    },
+    {
+      "created_at": "2026-08-19T22:11:30",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 1
+    },
+    {
+      "created_at": "2026-08-19T22:11:35",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 2
+    },
+    {
+      "created_at": "2026-08-19T22:11:37",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 3
+    },
+    {
+      "created_at": "2026-08-19T22:11:39",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 4
+    },
+    {
+      "created_at": "2026-08-19T22:11:39",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "converged"
+      },
+      "sequence": 5
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "'revenue' and 'net_income' are correlated (r=0.95, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.953676,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.973743,
+          "ci_low": 0.918902,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.953676
+    },
+    {
+      "claim": "'revenue' and 'total_assets' are correlated (r=0.58, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.577838,
+        "effect_size_kind": "pearson_r",
+        "p_value": 6.2e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.738963,
+          "ci_low": 0.354193,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.577838
+    },
+    {
+      "claim": "'revenue' and 'total_liabilities' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.780942,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.870892,
+          "ci_low": 0.640369,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.780942
+    },
+    {
+      "claim": "'revenue' and 'operating_cash_flow' are correlated (r=0.96, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.964943,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.980179,
+          "ci_low": 0.938359,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.964943
+    },
+    {
+      "claim": "'revenue' and 'current_assets' are correlated (r=0.53, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.526379,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.000265,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.703453,
+          "ci_low": 0.287778,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.526379
+    },
+    {
+      "claim": "'revenue' and 'current_liabilities' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.776441,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.868103,
+          "ci_low": 0.633575,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.776441
+    },
+    {
+      "claim": "'revenue' and 'current_ratio' are correlated (r=-0.70, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.697878,
+        "effect_size_kind": "pearson_r",
+        "p_value": 1e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.518416,
+          "ci_low": -0.81846,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.697878
+    },
+    {
+      "claim": "'revenue' and 'debt_to_assets' are correlated (r=0.76, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.75757,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.856343,
+          "ci_low": 0.605323,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.75757
+    },
+    {
+      "claim": "'net_income' and 'total_assets' are correlated (r=0.64, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.640958,
+        "effect_size_kind": "pearson_r",
+        "p_value": 9e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.781331,
+          "ci_low": 0.438859,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.640958
+    },
+    {
+      "claim": "'net_income' and 'total_liabilities' are correlated (r=0.74, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.74434,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.848038,
+          "ci_low": 0.585744,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.74434
+    },
+    {
+      "claim": "'net_income' and 'operating_cash_flow' are correlated (r=0.99, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.988185,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.993354,
+          "ci_low": 0.979038,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.988185
+    },
+    {
+      "claim": "'net_income' and 'current_assets' are correlated (r=0.60, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.599531,
+        "effect_size_kind": "pearson_r",
+        "p_value": 3.3e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.753669,
+          "ci_low": 0.382883,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.599531
+    },
+    {
+      "claim": "'net_income' and 'current_liabilities' are correlated (r=0.76, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.75513,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.854815,
+          "ci_low": 0.601698,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.75513
+    },
+    {
+      "claim": "'net_income' and 'current_ratio' are correlated (r=-0.68, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.680391,
+        "effect_size_kind": "pearson_r",
+        "p_value": 2e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.493639,
+          "ci_low": -0.807159,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.680391
+    },
+    {
+      "claim": "'net_income' and 'debt_to_assets' are correlated (r=0.60, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.60487,
+        "effect_size_kind": "pearson_r",
+        "p_value": 2.8e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.757265,
+          "ci_low": 0.390009,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.60487
+    },
+    {
+      "claim": "'total_assets' and 'total_liabilities' are correlated (r=0.88, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.883877,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.933147,
+          "ci_low": 0.802017,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.883877
+    },
+    {
+      "claim": "'total_assets' and 'operating_cash_flow' are correlated (r=0.67, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.667744,
+        "effect_size_kind": "pearson_r",
+        "p_value": 4e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.798928,
+          "ci_low": 0.475908,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.667744
+    },
+    {
+      "claim": "'total_assets' and 'current_assets' are correlated (r=0.92, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.915082,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.951452,
+          "ci_low": 0.853508,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.915082
+    },
+    {
+      "claim": "'total_assets' and 'current_liabilities' are correlated (r=0.87, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.873668,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.927101,
+          "ci_low": 0.78543,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.873668
+    },
+    {
+      "claim": "'total_assets' and 'current_ratio' are correlated (r=-0.83, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.830834,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.717193,
+          "ci_low": -0.901431,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.830834
+    },
+    {
+      "claim": "'total_liabilities' and 'operating_cash_flow' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.779,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.869689,
+          "ci_low": 0.637435,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.779
+    },
+    {
+      "claim": "'total_liabilities' and 'current_assets' are correlated (r=0.83, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.831426,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.90179,
+          "ci_low": 0.718123,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.831426
+    },
+    {
+      "claim": "'total_liabilities' and 'current_liabilities' are correlated (r=0.98, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.982496,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.990142,
+          "ci_low": 0.969013,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.982496
+    },
+    {
+      "claim": "'total_liabilities' and 'current_ratio' are correlated (r=-0.91, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.909054,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.843467,
+          "ci_low": -0.947937,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.909054
+    },
+    {
+      "claim": "'total_liabilities' and 'debt_to_assets' are correlated (r=0.84, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.838732,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.906202,
+          "ci_low": 0.729614,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.838732
+    },
+    {
+      "claim": "'operating_cash_flow' and 'current_assets' are correlated (r=0.61, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.61331,
+        "effect_size_kind": "pearson_r",
+        "p_value": 2.1e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.762931,
+          "ci_low": 0.401327,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.61331
+    },
+    {
+      "claim": "'operating_cash_flow' and 'current_liabilities' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.777161,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.868549,
+          "ci_low": 0.63466,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.777161
+    },
+    {
+      "claim": "'operating_cash_flow' and 'current_ratio' are correlated (r=-0.71, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.708233,
+        "effect_size_kind": "pearson_r",
+        "p_value": 1e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.533231,
+          "ci_low": -0.825107,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.708233
+    },
+    {
+      "claim": "'operating_cash_flow' and 'debt_to_assets' are correlated (r=0.65, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.645961,
+        "effect_size_kind": "pearson_r",
+        "p_value": 8e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.784635,
+          "ci_low": 0.445728,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.645961
+    },
+    {
+      "claim": "'current_assets' and 'current_liabilities' are correlated (r=0.80, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.797977,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.881398,
+          "ci_low": 0.666287,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.797977
+    },
+    {
+      "claim": "'current_assets' and 'current_ratio' are correlated (r=-0.79, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.792654,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.658154,
+          "ci_low": -0.878124,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.792654
+    },
+    {
+      "claim": "'current_assets' and 'debt_to_assets' are correlated (r=0.51, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.508169,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.00043,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.690672,
+          "ci_low": 0.264813,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.508169
+    },
+    {
+      "claim": "'current_liabilities' and 'current_ratio' are correlated (r=-0.89, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.894274,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.819038,
+          "ci_low": -0.939274,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.894274
+    },
+    {
+      "claim": "'current_liabilities' and 'debt_to_assets' are correlated (r=0.80, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.804356,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.885311,
+          "ci_low": 0.676075,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.804356
+    },
+    {
+      "claim": "'net_margin' and 'debt_to_assets' are correlated (r=-0.50, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.504449,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.000474,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.260155,
+          "ci_low": -0.688046,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.504449
+    },
+    {
+      "claim": "'current_ratio' and 'debt_to_assets' are correlated (r=-0.76, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.759127,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.607639,
+          "ci_low": -0.857317,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.759127
+    },
+    {
+      "claim": "'revenue' predicts 'net_income' (R²=0.91, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "69551368-9c67-4e7b-9a11-3f59c3603589"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linearity.",
+          "Homoscedastic, independent residuals.",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "intercept": 4842483654.728045,
+          "r2": 0.909498,
+          "resid_std": 6956211588.413614,
+          "slope": 0.256593
+        },
+        "effect_size": 0.909498,
+        "effect_size_kind": "r2",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.279733,
+          "ci_low": 0.233452,
+          "confidence_level": 0.95,
+          "std_error": 0.011807
+        },
+        "warnings": []
+      },
+      "strength": 0.909498
+    },
+    {
+      "claim": "'revenue' and 'net_income' are correlated (r=0.95, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.953676,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.973743,
+          "ci_low": 0.918902,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.953676
+    },
+    {
+      "claim": "'revenue' and 'total_assets' are correlated (r=0.58, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.577838,
+        "effect_size_kind": "pearson_r",
+        "p_value": 6.2e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.738963,
+          "ci_low": 0.354193,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.577838
+    },
+    {
+      "claim": "'revenue' and 'total_liabilities' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.780942,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.870892,
+          "ci_low": 0.640369,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.780942
+    },
+    {
+      "claim": "'revenue' and 'operating_cash_flow' are correlated (r=0.96, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.964943,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.980179,
+          "ci_low": 0.938359,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.964943
+    },
+    {
+      "claim": "'revenue' and 'current_assets' are correlated (r=0.53, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.526379,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.000265,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.703453,
+          "ci_low": 0.287778,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.526379
+    },
+    {
+      "claim": "'revenue' and 'current_liabilities' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.776441,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.868103,
+          "ci_low": 0.633575,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.776441
+    },
+    {
+      "claim": "'revenue' and 'current_ratio' are correlated (r=-0.70, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.697878,
+        "effect_size_kind": "pearson_r",
+        "p_value": 1e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.518416,
+          "ci_low": -0.81846,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.697878
+    },
+    {
+      "claim": "'revenue' and 'debt_to_assets' are correlated (r=0.76, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.75757,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.856343,
+          "ci_low": 0.605323,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.75757
+    },
+    {
+      "claim": "'net_income' and 'total_assets' are correlated (r=0.64, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.640958,
+        "effect_size_kind": "pearson_r",
+        "p_value": 9e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.781331,
+          "ci_low": 0.438859,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.640958
+    },
+    {
+      "claim": "'net_income' and 'total_liabilities' are correlated (r=0.74, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.74434,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.848038,
+          "ci_low": 0.585744,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.74434
+    },
+    {
+      "claim": "'net_income' and 'operating_cash_flow' are correlated (r=0.99, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.988185,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.993354,
+          "ci_low": 0.979038,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.988185
+    },
+    {
+      "claim": "'net_income' and 'current_assets' are correlated (r=0.60, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.599531,
+        "effect_size_kind": "pearson_r",
+        "p_value": 3.3e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.753669,
+          "ci_low": 0.382883,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.599531
+    },
+    {
+      "claim": "'net_income' and 'current_liabilities' are correlated (r=0.76, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.75513,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.854815,
+          "ci_low": 0.601698,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.75513
+    },
+    {
+      "claim": "'net_income' and 'current_ratio' are correlated (r=-0.68, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.680391,
+        "effect_size_kind": "pearson_r",
+        "p_value": 2e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.493639,
+          "ci_low": -0.807159,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.680391
+    },
+    {
+      "claim": "'net_income' and 'debt_to_assets' are correlated (r=0.60, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.60487,
+        "effect_size_kind": "pearson_r",
+        "p_value": 2.8e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.757265,
+          "ci_low": 0.390009,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.60487
+    },
+    {
+      "claim": "'total_assets' and 'total_liabilities' are correlated (r=0.88, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.883877,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.933147,
+          "ci_low": 0.802017,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.883877
+    },
+    {
+      "claim": "'total_assets' and 'operating_cash_flow' are correlated (r=0.67, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.667744,
+        "effect_size_kind": "pearson_r",
+        "p_value": 4e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.798928,
+          "ci_low": 0.475908,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.667744
+    },
+    {
+      "claim": "'total_assets' and 'current_assets' are correlated (r=0.92, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.915082,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.951452,
+          "ci_low": 0.853508,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.915082
+    },
+    {
+      "claim": "'total_assets' and 'current_liabilities' are correlated (r=0.87, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.873668,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.927101,
+          "ci_low": 0.78543,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.873668
+    },
+    {
+      "claim": "'total_assets' and 'current_ratio' are correlated (r=-0.83, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.830834,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.717193,
+          "ci_low": -0.901431,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.830834
+    },
+    {
+      "claim": "'total_liabilities' and 'operating_cash_flow' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.779,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.869689,
+          "ci_low": 0.637435,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.779
+    },
+    {
+      "claim": "'total_liabilities' and 'current_assets' are correlated (r=0.83, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.831426,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.90179,
+          "ci_low": 0.718123,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.831426
+    },
+    {
+      "claim": "'total_liabilities' and 'current_liabilities' are correlated (r=0.98, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.982496,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.990142,
+          "ci_low": 0.969013,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.982496
+    },
+    {
+      "claim": "'total_liabilities' and 'current_ratio' are correlated (r=-0.91, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.909054,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.843467,
+          "ci_low": -0.947937,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.909054
+    },
+    {
+      "claim": "'total_liabilities' and 'debt_to_assets' are correlated (r=0.84, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.838732,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.906202,
+          "ci_low": 0.729614,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.838732
+    },
+    {
+      "claim": "'operating_cash_flow' and 'current_assets' are correlated (r=0.61, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.61331,
+        "effect_size_kind": "pearson_r",
+        "p_value": 2.1e-05,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.762931,
+          "ci_low": 0.401327,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.61331
+    },
+    {
+      "claim": "'operating_cash_flow' and 'current_liabilities' are correlated (r=0.78, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.777161,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.868549,
+          "ci_low": 0.63466,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.777161
+    },
+    {
+      "claim": "'operating_cash_flow' and 'current_ratio' are correlated (r=-0.71, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.708233,
+        "effect_size_kind": "pearson_r",
+        "p_value": 1e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.533231,
+          "ci_low": -0.825107,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.708233
+    },
+    {
+      "claim": "'operating_cash_flow' and 'debt_to_assets' are correlated (r=0.65, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.645961,
+        "effect_size_kind": "pearson_r",
+        "p_value": 8e-06,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.784635,
+          "ci_low": 0.445728,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.645961
+    },
+    {
+      "claim": "'current_assets' and 'current_liabilities' are correlated (r=0.80, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.797977,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.881398,
+          "ci_low": 0.666287,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.797977
+    },
+    {
+      "claim": "'current_assets' and 'current_ratio' are correlated (r=-0.79, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.792654,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.658154,
+          "ci_low": -0.878124,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.792654
+    },
+    {
+      "claim": "'current_assets' and 'debt_to_assets' are correlated (r=0.51, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.508169,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.00043,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.690672,
+          "ci_low": 0.264813,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.508169
+    },
+    {
+      "claim": "'current_liabilities' and 'current_ratio' are correlated (r=-0.89, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.894274,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.819038,
+          "ci_low": -0.939274,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.894274
+    },
+    {
+      "claim": "'current_liabilities' and 'debt_to_assets' are correlated (r=0.80, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": 0.804356,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.885311,
+          "ci_low": 0.676075,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.804356
+    },
+    {
+      "claim": "'net_margin' and 'debt_to_assets' are correlated (r=-0.50, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.504449,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.000474,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.260155,
+          "ci_low": -0.688046,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.504449
+    },
+    {
+      "claim": "'current_ratio' and 'debt_to_assets' are correlated (r=-0.76, n=49).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "statistical_test",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+      ],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72",
+      "reliability": 0.620253164556962,
+      "statistics": {
+        "assumptions": [
+          "Linear association (Pearson).",
+          "p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": -0.759127,
+        "effect_size_kind": "pearson_r",
+        "p_value": 0.0,
+        "sample_size": 49,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": -0.607639,
+          "ci_low": -0.857317,
+          "confidence_level": 0.95,
+          "std_error": null
+        },
+        "warnings": []
+      },
+      "strength": 0.759127
+    }
+  ],
+  "experiments": [
+    {
+      "artifacts": [
+        {
+          "byte_size": 1387,
+          "id": "b0f35ccf-f352-47a1-86c8-40921bc2639e",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "correlation_matrix"
+        },
+        {
+          "byte_size": 1307,
+          "id": "ca2d675a-fbf8-4580-b5dd-938683c4802d",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "correlation_heatmap"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:35",
+      "error": null,
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-0",
+      "metrics": {
+        "columns": 11.0,
+        "strong_pairs": 36.0
+      },
+      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-0",
+      "status": "succeeded",
+      "summary": "Correlated 11 columns; 36 strong pair(s).",
+      "tool_name": "analyze_correlation"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 79,
+          "id": "b9d44db2-32b5-4991-b93f-142707a7da5d",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "coefficients"
+        },
+        {
+          "byte_size": 102,
+          "id": "99dd89c6-3428-47ca-929a-cf01e7c3e2d6",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "regression_fit"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:37",
+      "error": null,
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-1",
+      "metrics": {
+        "intercept": 4842483654.728045,
+        "n": 49.0,
+        "r2": 0.909498,
+        "slope": 0.256593
+      },
+      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-1",
+      "status": "succeeded",
+      "summary": "OLS net_income ~ revenue: R²=0.91.",
+      "tool_name": "fit_simple_regression"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 1387,
+          "id": "9990a831-3dba-464a-bae1-d6b50700759b",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "correlation_matrix"
+        },
+        {
+          "byte_size": 1307,
+          "id": "6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "correlation_heatmap"
+        }
+      ],
+      "created_at": "2026-08-19T22:11:39",
+      "error": null,
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-2",
+      "metrics": {
+        "columns": 11.0,
+        "strong_pairs": 36.0
+      },
+      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-2",
+      "status": "succeeded",
+      "summary": "Correlated 11 columns; 36 strong pair(s).",
+      "tool_name": "analyze_correlation"
+    }
+  ],
+  "hypotheses": [
+    {
+      "confidence": 0.95,
+      "entity_refs": [],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "metric_refs": [
+        "net_margin"
+      ],
+      "prior_confidence": 0.5,
+      "rationale": "This directly tests the stated profitability explanation using the margin metric.",
+      "statement": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.",
+      "status": "supported"
+    },
+    {
+      "confidence": 0.95,
+      "entity_refs": [],
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+      "metric_refs": [
+        "revenue_growth_qoq"
+      ],
+      "prior_confidence": 0.5,
+      "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
+      "statement": "NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+      "status": "supported"
+    }
+  ],
+  "id": "8f056b0a-8112-40ed-a611-c2dd3d5e2161",
+  "objective": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
+  "observations": [
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_8ed21b80d2624713b9190043997293e2",
+      "magnitude": 0.953676093897126,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,net_income)=0.95"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_1279a904c44b46028644362dac293b87",
+      "magnitude": 0.5778382033825593,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,total_assets)=0.58"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_3e6581e0d02443f9bd322fdb1dc72995",
+      "magnitude": 0.7809419578276104,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,total_liabilities)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_6b8a36a05cbd46d9bbf8cf6a4aabb9da",
+      "magnitude": 0.9649426797093267,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,operating_cash_flow)=0.96"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_7fc7d5ce27c14d97995bc2d4c9f72e23",
+      "magnitude": 0.5263787187437607,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,current_assets)=0.53"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_882b953673a44f96adb285e4f677f832",
+      "magnitude": 0.7764414247959724,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,current_liabilities)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_6b4005f5846340c8ae01cfe06930e685",
+      "magnitude": -0.6978784865338288,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,current_ratio)=-0.70"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_c7173677492d4860add6143e9c50f147",
+      "magnitude": 0.7575696861491573,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,debt_to_assets)=0.76"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_6d118d5debe3454c81c4530c153904b1",
+      "magnitude": 0.6409576268287619,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,total_assets)=0.64"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_4465d482c36d40319b2dd964c0a41887",
+      "magnitude": 0.7443404643002431,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,total_liabilities)=0.74"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_6c9941244d19479d8646df0cbcd1d09f",
+      "magnitude": 0.9881849165985215,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,operating_cash_flow)=0.99"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_3d25c75f5c8047b295e30284b8ebc0df",
+      "magnitude": 0.5995310630240922,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,current_assets)=0.60"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_f05e58c3973d40a1b31edcf65c4c7e8d",
+      "magnitude": 0.7551303575409323,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,current_liabilities)=0.76"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_781d2275a3274a2d9e5ef87388c95db8",
+      "magnitude": -0.6803910223988244,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,current_ratio)=-0.68"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_d948faf8e5ca49348239a21825075491",
+      "magnitude": 0.6048700192652681,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,debt_to_assets)=0.60"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_73977f87583544ad8e6dd8e16104ac98",
+      "magnitude": 0.8838774380655743,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,total_liabilities)=0.88"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_0392a246207d49dda15d3e73d376ef9f",
+      "magnitude": 0.6677444094126498,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,operating_cash_flow)=0.67"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_d49fb97f93d84dbcadb3cbf37c3d1c43",
+      "magnitude": 0.9150815651330793,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,current_assets)=0.92"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_492a74ccbce04e7796114d939b262d62",
+      "magnitude": 0.8736681974727112,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,current_liabilities)=0.87"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_851309272b0f4be586f01c5ac46848ed",
+      "magnitude": -0.8308335201143805,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,current_ratio)=-0.83"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_af3fdbc267a641a28dcec69abc6e97fb",
+      "magnitude": 0.7790002874639467,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,operating_cash_flow)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_cf4278e79fb54f0ea152d8cafd63da15",
+      "magnitude": 0.8314264045065276,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,current_assets)=0.83"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_8bcc16bd5b6f4f598936ef7f0cc4513e",
+      "magnitude": 0.9824960196470658,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,current_liabilities)=0.98"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_a97cd29f0ffc42c4aa3a173e3d683e5d",
+      "magnitude": -0.9090542980809503,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,current_ratio)=-0.91"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_1c0d55a68a3a41dbb83b669577e9c239",
+      "magnitude": 0.838731884730247,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,debt_to_assets)=0.84"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_5dd24bf8dd4447f5b1c2aee88dfc0572",
+      "magnitude": 0.6133104366069685,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,current_assets)=0.61"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_f8405eb3acea474d884b3013eca69afa",
+      "magnitude": 0.7771609910215529,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,current_liabilities)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_f89051deb48e4cf0a6c0114b61a2716d",
+      "magnitude": -0.7082328462686301,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,current_ratio)=-0.71"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_8f6c66b96ca543a5b70fc4ddf6ecf0cf",
+      "magnitude": 0.6459614942732606,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,debt_to_assets)=0.65"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_84d78cc4753745f4a4505d659f17de70",
+      "magnitude": 0.7979769023551934,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_assets,current_liabilities)=0.80"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_9bc90536b145498781f364b890018eeb",
+      "magnitude": -0.7926538622160821,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_assets,current_ratio)=-0.79"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_dfc86cf8435b4d00a7b02773922867ac",
+      "magnitude": 0.5081693874307459,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_assets,debt_to_assets)=0.51"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_f67420e6bea14f7bb9c3178d95dc0925",
+      "magnitude": -0.8942738107197148,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_liabilities,current_ratio)=-0.89"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_4d7632168a7f47dca226310bb96d3eae",
+      "magnitude": 0.8043557161262684,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_liabilities,debt_to_assets)=0.80"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_33262ee7c79443c5b75186bdcdeda207",
+      "magnitude": -0.5044486896952208,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_margin,debt_to_assets)=-0.50"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_2747ce9865364bb58a6327f27649047d",
+      "magnitude": -0.7591266516328758,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_ratio,debt_to_assets)=-0.76"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_a4dc97a5fcd544d29ed31160af4744de",
+      "magnitude": 0.256592627325654,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "net_income ~ revenue: slope=0.257, R²=0.91"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_d243e40aed3e43008219fe5e20f3dcc5",
+      "magnitude": 0.953676093897126,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,net_income)=0.95"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_2eac9020ffe94da19f1d0d6f822104bb",
+      "magnitude": 0.5778382033825593,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,total_assets)=0.58"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_7cce95e5a064448b913fbae2c9a16c6a",
+      "magnitude": 0.7809419578276104,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,total_liabilities)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_96859ef5db0c49bbbb27a39bcd835f2c",
+      "magnitude": 0.9649426797093267,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,operating_cash_flow)=0.96"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_021535f328584a4abef6524ef444eb12",
+      "magnitude": 0.5263787187437607,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,current_assets)=0.53"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_0f957d44fe35440eafbf67442e86e787",
+      "magnitude": 0.7764414247959724,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,current_liabilities)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_bce9b0ce9888412abf74e1325bc70882",
+      "magnitude": -0.6978784865338288,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,current_ratio)=-0.70"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_8e8145f0c23c4012abec32ccaadb6bf6",
+      "magnitude": 0.7575696861491573,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(revenue,debt_to_assets)=0.76"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_5937024c7d5c4e0fb03c308b84f6edc9",
+      "magnitude": 0.6409576268287619,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,total_assets)=0.64"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_79e05e6b80a84193bc754898ce224a8e",
+      "magnitude": 0.7443404643002431,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,total_liabilities)=0.74"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_b53a2847d7fe4b5bab05608cbdec8904",
+      "magnitude": 0.9881849165985215,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,operating_cash_flow)=0.99"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_fa4f5789b9e04b2596a2e7f5a43747ba",
+      "magnitude": 0.5995310630240922,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,current_assets)=0.60"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_7d4672282161494ba1780002c8bcb4d5",
+      "magnitude": 0.7551303575409323,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,current_liabilities)=0.76"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_6cf8dfa20d1748b9a15a155965f18a52",
+      "magnitude": -0.6803910223988244,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,current_ratio)=-0.68"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_eac7aa6ee97c46b6a4041d32819249e5",
+      "magnitude": 0.6048700192652681,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_income,debt_to_assets)=0.60"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_774354237ad44bfbb3f66fdd1ad940f0",
+      "magnitude": 0.8838774380655743,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,total_liabilities)=0.88"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_4a838f7b35f940daa3548ac9766b6feb",
+      "magnitude": 0.6677444094126498,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,operating_cash_flow)=0.67"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_3f363b62b7494dfabef90310392f6ac1",
+      "magnitude": 0.9150815651330793,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,current_assets)=0.92"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_02b632ff9ec64c6cbbd6a831754dda85",
+      "magnitude": 0.8736681974727112,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,current_liabilities)=0.87"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_8c42edb6335043eb91c4646f0f562c80",
+      "magnitude": -0.8308335201143805,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_assets,current_ratio)=-0.83"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_a7ab752ab25f40678c8bbba499b43ba6",
+      "magnitude": 0.7790002874639467,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,operating_cash_flow)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_e72417a79bcf4e5c83571af5f43b42c3",
+      "magnitude": 0.8314264045065276,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,current_assets)=0.83"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_5dfb882165a440ac8268707377ebc4fc",
+      "magnitude": 0.9824960196470658,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,current_liabilities)=0.98"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_d2bcf3b2cbd5474792a4b7046c95c1b7",
+      "magnitude": -0.9090542980809503,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,current_ratio)=-0.91"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_178e3c1a049340b5b6f869fa6c82ea35",
+      "magnitude": 0.838731884730247,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(total_liabilities,debt_to_assets)=0.84"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_f6f9f2521e7048b98d46be096e97dad6",
+      "magnitude": 0.6133104366069685,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,current_assets)=0.61"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_355199105fca4321a91abe8e539a4d4b",
+      "magnitude": 0.7771609910215529,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,current_liabilities)=0.78"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_97b85abf148849f8af85d5170decd952",
+      "magnitude": -0.7082328462686301,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,current_ratio)=-0.71"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_19051ef832d44425a47cbaf0c46e8e5d",
+      "magnitude": 0.6459614942732606,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(operating_cash_flow,debt_to_assets)=0.65"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_262573d31d89495183ee73e683e7c5c3",
+      "magnitude": 0.7979769023551934,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_assets,current_liabilities)=0.80"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_74b371bcf56940578d599df1a0328a0c",
+      "magnitude": -0.7926538622160821,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_assets,current_ratio)=-0.79"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_484894dea57c4a0d81c3ce5c894c3688",
+      "magnitude": 0.5081693874307459,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_assets,debt_to_assets)=0.51"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_c4aa3c0445ec496289510787c46c3226",
+      "magnitude": -0.8942738107197148,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_liabilities,current_ratio)=-0.89"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_ef3cfeadfe6c4c65aaec2bb108e57033",
+      "magnitude": 0.8043557161262684,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_liabilities,debt_to_assets)=0.80"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_c9e8ce32462e4f31afa83529a186b652",
+      "magnitude": -0.5044486896952208,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(net_margin,debt_to_assets)=-0.50"
+    },
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_c9857986620347f18d32e813862ff436",
+      "magnitude": -0.7591266516328758,
+      "metric_ref": null,
+      "observation_type": "comparison",
+      "statement": "corr(current_ratio,debt_to_assets)=-0.76"
+    }
+  ],
+  "open_questions": [
+    {
+      "answer": null,
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-q-0",
+      "priority": 0,
+      "question": "Is the margin advantage sustained across the same periods, or does it narrow when revenue growth is accounted for?",
+      "related_hypothesis_ids": [
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+      ],
+      "status": "open"
+    },
+    {
+      "answer": null,
+      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-q-1",
+      "priority": 0,
+      "question": "Do the observed differences persist after comparing like-for-like periods?",
+      "related_hypothesis_ids": [
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+      ],
+      "status": "open"
+    }
+  ],
+  "origin": "native",
+  "outcome": {
+    "claims_rejected": 0,
+    "claims_supported": 2,
+    "claims_unresolved": 0,
+    "claims_weakened": 0,
+    "contradiction_found": false,
+    "kind": "supported",
+    "termination_reason": "sufficient_evidence"
+  },
+  "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
+  "status": "converged",
+  "success_criteria": [],
+  "termination": {
+    "at_iteration": 3,
+    "rationale": "terminated: sufficient_evidence",
+    "reason": "sufficient_evidence"
+  },
+  "updated_at": "2026-08-19T22:26:42"
+}

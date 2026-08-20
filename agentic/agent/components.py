@@ -42,7 +42,13 @@ from agentic.experiments.record import ExperimentExecutionRecord
 from .budget import BudgetTracker
 from .direction import direction_sign
 from .ids import DeterministicIds
-from .policy import AgentPolicy, AnalysisIntent, GoalInterpretation, drain_policy_cost
+from .policy import (
+    AgentPolicy,
+    AnalysisIntent,
+    CritiqueProposal,
+    GoalInterpretation,
+    drain_policy_cost,
+)
 
 # Intent -> ordered candidate tools (general layer). Order encodes priority.
 INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
@@ -587,6 +593,12 @@ class HypothesisUpdater:
 
 
 class Critic:
+    #: Ceiling applied to both sides of a contradiction. Two claims that cannot both hold
+    #: must not sit at high confidence while the conflict is open; capping rather than
+    #: zeroing keeps whatever evidence each has, because the conflict says one of them is
+    #: wrong, not which one.
+    CONTRADICTION_CONFIDENCE_CAP = 0.5
+
     def __init__(self, policy: AgentPolicy) -> None:
         self._policy = policy
 
@@ -602,12 +614,26 @@ class Critic:
         if is_edgar_manifest(manifest):
             tools = EDGAR_INTENT_TOOLS.get(interpretation.intent, []) + tools
         available = [t for t in tools if t not in executed_tools and self._registry_ok(t)]
+        # Every supported claim, so the policy can see that two of them disagree. Nothing
+        # else in the loop compares claims to each other: the hypothesis updater scores each
+        # one against its own evidence, which is exactly how a claim and its negation both
+        # reached `supported`.
+        supported_claims = [
+            {"id": x.id, "statement": x.statement, "confidence": x.confidence}
+            for x in state.hypotheses
+            if x.status is HypothesisStatus.supported
+        ]
         proposal = _invoke_policy(
             tracker, self._policy,
             lambda: self._policy.critique(
                 strongest_claim={"id": h.id, "status": h.status.value, "confidence": h.confidence,
                                  "already_critiqued": already},
-                available_tools=available))
+                available_tools=available,
+                supported_claims=supported_claims))
+
+        if self._record_contradiction(state, proposal, idgen, asked_about=h):
+            return
+
         if not proposal.should_challenge or not proposal.target_hypothesis_id or not proposal.falsification_tool:
             return
         state.add_critique(Critique(
@@ -619,6 +645,74 @@ class Critic:
             rationale=proposal.rationale or "challenge strongest claim",
             targets=[EntityRef(kind=EntityKind.hypothesis, id=proposal.target_hypothesis_id)],
             chosen_option=proposal.falsification_tool, provenance=_prov("critic")))
+
+    def _record_contradiction(
+        self, state: InvestigationState, proposal: CritiqueProposal, idgen: DeterministicIds,
+        *, asked_about: Hypothesis,
+    ) -> bool:
+        """
+        Act on a reported conflict between two supported claims. True when one was recorded.
+
+        The model supplies only the judgement that two statements are mutually exclusive.
+        Everything that follows is computed here: which claims are affected, what status they
+        take, and what confidence they carry. Both sides are weakened rather than one being
+        picked, because the conflict establishes that they cannot both hold — not which of
+        them is wrong. Choosing a winner on the model's say-so would be the loop asserting a
+        finding no evidence supports.
+        """
+        other_id = proposal.contradicts_hypothesis_id
+        # A contradiction is reported independently of an ordinary challenge, and in practice
+        # arrives *with* a decline: once the claim has been critiqued and no tools are left,
+        # the policy answers `should_challenge: false` with a null target and still names the
+        # conflict. Requiring a target here dropped exactly the report this exists to catch.
+        # The claim the critic was asked about is the other side of the pair by construction.
+        target_id = proposal.target_hypothesis_id or asked_about.id
+        if not other_id or other_id == target_id:
+            return False
+
+        target = state.find_hypothesis(target_id)
+        other = state.find_hypothesis(other_id)
+        # Only a live conflict counts. A claim already rejected or weakened is not being
+        # asserted, so there is nothing to contradict.
+        if target is None or other is None:
+            return False
+        # Both must still be asserted. This also dedupes: recording weakens the pair, so a
+        # later call cannot re-fire on it unless fresh evidence restores both to supported —
+        # at which point recording again is the right behaviour.
+        if target.status is not HypothesisStatus.supported or other.status is not HypothesisStatus.supported:
+            return False
+
+        state.add_critique(Critique(
+            id=idgen.make("crit", len(state.critiques)),
+            critique_type=CritiqueType.contradiction,
+            severity=CritiqueSeverity.major,
+            target=EntityRef(kind=EntityKind.hypothesis, id=target.id),
+            message=proposal.message or (
+                f"'{target.statement}' and '{other.statement}' cannot both hold; "
+                f"the evidence gathered so far supports each independently."
+            ),
+            suggested_action=proposal.falsification_tool,
+            provenance=_prov("critic"),
+        ))
+
+        for claim in (target, other):
+            claim.set_status(HypothesisStatus.weakened)
+            claim.set_confidence(round(min(claim.confidence, self.CONTRADICTION_CONFIDENCE_CAP), 4))
+            state.record_decision(AgentDecision(
+                id=idgen.make("dec-contra", len(state.decisions)),
+                decision_type=DecisionType.revise_confidence,
+                rationale=f"weakened: contradicts {other.id if claim is target else target.id}",
+                targets=[EntityRef(kind=EntityKind.hypothesis, id=claim.id)],
+                provenance=_prov("critic"),
+            ))
+
+        state.add_open_question(OpenQuestion(
+            id=idgen.make("q-contra", len(state.open_questions)),
+            question=f"Which of these holds, if either: '{target.statement}' or '{other.statement}'?",
+            related_hypothesis_ids=[target.id, other.id],
+            provenance=_prov("critic"),
+        ))
+        return True
 
     @staticmethod
     def _claim_to_challenge(state: InvestigationState) -> Hypothesis | None:
@@ -692,6 +786,18 @@ class TerminationPolicy:
         if any(h.status is HypothesisStatus.proposed for h in state.hypotheses):
             return False, None
 
+        # A live contradiction is disqualifying on its own. The loop is holding two claims
+        # that cannot both be true, so whatever else it has established, it has not
+        # established this — and reporting `sufficient_evidence` here would publish a
+        # conclusion the run's own record refutes. Run the discriminating experiment if the
+        # critic named one and it has not been tried; otherwise say so plainly.
+        contradiction = self._unresolved_contradiction(state)
+        if contradiction is not None:
+            suggested = contradiction.suggested_action or ""
+            if suggested and suggested not in executed_tools:
+                return False, None
+            return True, TerminationReason.insufficient_evidence
+
         supported = [h for h in state.hypotheses
                      if h.status is HypothesisStatus.supported and h.confidence >= self.SUFFICIENT_CONFIDENCE]
         if supported:
@@ -706,7 +812,26 @@ class TerminationPolicy:
             return True, TerminationReason.sufficient_evidence
         return False, None
 
+    @staticmethod
+    def _unresolved_contradiction(state: InvestigationState) -> Critique | None:
+        for c in state.critiques:
+            if c.critique_type is CritiqueType.contradiction and not c.resolved:
+                return c
+        return None
+
     def finalize_no_candidates(self, state: InvestigationState, ran_any: bool) -> TerminationReason:
+        # Checked before `supported`: running out of experiments does not settle a
+        # contradiction, and a third claim standing does not make the conflicting pair go away.
+        if self._unresolved_contradiction(state) is not None:
+            return TerminationReason.insufficient_evidence
+        # Same bar `decide` applies: a claim still at `proposed` has had nothing run against
+        # it. Without this the two termination paths disagreed, and running out of candidate
+        # experiments could report `sufficient_evidence` with a rival explanation untested —
+        # a real run concluded "a genuine change rather than a seasonal artifact" at 0.95
+        # while the seasonality claim it raised was never examined. Ruling out an alternative
+        # the loop never tested is exactly the overreach this system exists to not commit.
+        if any(h.status is HypothesisStatus.proposed for h in state.hypotheses):
+            return TerminationReason.insufficient_evidence if ran_any else TerminationReason.no_valid_experiment
         supported = [h for h in state.hypotheses
                      if h.status is HypothesisStatus.supported and h.confidence >= self.SUFFICIENT_CONFIDENCE]
         if supported:

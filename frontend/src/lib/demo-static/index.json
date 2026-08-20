@@ -19,6 +19,15 @@
     "id": "24cb78e3-8383-4501-95ab-8a67fb25e15f",
     "objective": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?",
     "origin": "native",
+    "outcome": {
+      "claims_rejected": 0,
+      "claims_supported": 0,
+      "claims_unresolved": 0,
+      "claims_weakened": 2,
+      "contradiction_found": false,
+      "kind": "declined",
+      "termination_reason": "insufficient_evidence"
+    },
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "exhausted",
     "updated_at": "2026-08-11T21:30:11"
@@ -43,8 +52,116 @@
     "id": "4096b6e9-e24b-4fa8-b8e3-8ae19d902026",
     "objective": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
     "origin": "native",
+    "outcome": {
+      "claims_rejected": 1,
+      "claims_supported": 1,
+      "claims_unresolved": 0,
+      "claims_weakened": 0,
+      "contradiction_found": false,
+      "kind": "mixed",
+      "termination_reason": "sufficient_evidence"
+    },
     "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
     "status": "converged",
     "updated_at": "2026-08-11T21:41:43"
+  },
+  {
+    "adapter_id": "in_memory",
+    "analysis_run_id": "fcf85162-4b76-43bf-a024-eda45df5920f",
+    "conclusion": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with on-time rate than staffing level is.",
+    "confidence": 0.4,
+    "counts": {
+      "critiques": 2,
+      "decisions": 15,
+      "evidence": 13,
+      "experiments": 3,
+      "hypotheses": 2,
+      "observations": 13,
+      "open_questions": 3
+    },
+    "created_at": "2026-08-19T22:00:58",
+    "demo_slug": "csv-staffing-vs-service",
+    "domain_id": "fcf85162-4b76-43bf-a024-eda45df5920f",
+    "id": "857b3d0d-8b98-4185-9f40-5f81ad057dfd",
+    "objective": "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?",
+    "origin": "native",
+    "outcome": {
+      "claims_rejected": 0,
+      "claims_supported": 0,
+      "claims_unresolved": 0,
+      "claims_weakened": 2,
+      "contradiction_found": true,
+      "kind": "contradicted",
+      "termination_reason": "insufficient_evidence"
+    },
+    "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+    "status": "exhausted",
+    "updated_at": "2026-08-19T22:08:55"
+  },
+  {
+    "adapter_id": "in_memory",
+    "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+    "conclusion": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
+    "confidence": 0.4,
+    "counts": {
+      "critiques": 0,
+      "decisions": 15,
+      "evidence": 14,
+      "experiments": 4,
+      "hypotheses": 2,
+      "observations": 14,
+      "open_questions": 3
+    },
+    "created_at": "2026-08-19T22:11:09",
+    "demo_slug": "csv-regional-ranking",
+    "domain_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+    "id": "311f7b4d-5362-468e-884f-8b738e6060dd",
+    "objective": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?",
+    "origin": "native",
+    "outcome": {
+      "claims_rejected": 0,
+      "claims_supported": 0,
+      "claims_unresolved": 1,
+      "claims_weakened": 1,
+      "contradiction_found": false,
+      "kind": "declined",
+      "termination_reason": "insufficient_evidence"
+    },
+    "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+    "status": "exhausted",
+    "updated_at": "2026-08-19T22:26:43"
+  },
+  {
+    "adapter_id": "edgar",
+    "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+    "conclusion": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+    "confidence": 0.95,
+    "counts": {
+      "critiques": 1,
+      "decisions": 13,
+      "evidence": 73,
+      "experiments": 3,
+      "hypotheses": 2,
+      "observations": 73,
+      "open_questions": 2
+    },
+    "created_at": "2026-08-19T22:11:27",
+    "demo_slug": "edgar-peer-separation",
+    "domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+    "id": "8f056b0a-8112-40ed-a611-c2dd3d5e2161",
+    "objective": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
+    "origin": "native",
+    "outcome": {
+      "claims_rejected": 0,
+      "claims_supported": 2,
+      "claims_unresolved": 0,
+      "claims_weakened": 0,
+      "contradiction_found": false,
+      "kind": "supported",
+      "termination_reason": "sufficient_evidence"
+    },
+    "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
+    "status": "converged",
+    "updated_at": "2026-08-19T22:26:42"
   }
 ]

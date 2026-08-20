@@ -100,7 +100,17 @@ class FixtureAgentPolicy:
         best = min(candidates, key=key)
         return ExperimentChoice(request_index=best["index"], rationale="max information gain")
 
-    def critique(self, *, strongest_claim: dict | None, available_tools: list[str]) -> CritiqueProposal:
+    def critique(
+        self,
+        *,
+        strongest_claim: dict | None,
+        available_tools: list[str],
+        # Accepted for protocol conformance and deliberately unused: deciding that two
+        # statements are mutually exclusive is a judgement, and a rule engine that guessed at
+        # it would report contradictions this policy cannot actually detect. Leaving it None
+        # also keeps the published agency scores comparable across this change.
+        supported_claims: list[dict] | None = None,
+    ) -> CritiqueProposal:
         if not strongest_claim or not available_tools:
             return CritiqueProposal(should_challenge=False, rationale="nothing to challenge")
         # Challenge a supported, not-yet-challenged claim with an unused falsification tool.

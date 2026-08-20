@@ -56,7 +56,7 @@ class _CostlyPolicy:
         self._pending += self._cost_per_call
         return self._inner.select_experiment(goal_summary=goal_summary, candidates=candidates)
 
-    def critique(self, *, strongest_claim, available_tools) -> CritiqueProposal:  # noqa: ANN001
+    def critique(self, *, strongest_claim, available_tools, **_) -> CritiqueProposal:  # noqa: ANN001
         self._pending += self._cost_per_call
         return self._inner.critique(
             strongest_claim=strongest_claim, available_tools=available_tools

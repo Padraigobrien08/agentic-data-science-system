@@ -137,7 +137,13 @@ class CostTrackingResponder:
 #: category error. Intent hard-gates the candidate tools, so that one call left the run with a
 #: single experiment and a premature ``insufficient_evidence``. Only the goal-interpreter file
 #: changed; the other three are copies of 1.0.1, since one constant versions all four.
-AGENTIC_PROMPT_VERSION = "1.0.2"
+#: 1.0.3 — teach the critic to report a contradiction between two supported claims. Nothing
+#: else compares claims to each other: the hypothesis updater scores each against its own
+#: evidence, so a claim and its negation both reached `supported` at 0.95 in a real recording
+#: and the run still reported `sufficient_evidence`. The critic is the only component that
+#: sees the supported set together. Only the critic file changed; the other three are copies
+#: of 1.0.2, since one constant versions all four.
+AGENTIC_PROMPT_VERSION = "1.0.3"
 
 
 class CostAwareModelPolicy(ModelAgentPolicy):

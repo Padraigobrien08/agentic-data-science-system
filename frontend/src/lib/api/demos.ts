@@ -1,7 +1,9 @@
 import "server-only";
 
+import type { DemoCapture } from "@/lib/demo-static/capture-types";
 import {
   DEMO_ARTIFACT_HREFS,
+  DEMO_CAPTURES,
   DEMO_DETAILS,
   DEMO_INDEX,
 } from "@/lib/demo-static/generated";
@@ -46,6 +48,21 @@ export async function getDemo(slug: string): Promise<InvestigationDetail | null>
     }
     throw e;
   }
+}
+
+/**
+ * The model calls and chat turns behind a published demo, or null when unavailable.
+ *
+ * Unlike the rest of this module there is no live counterpart: raw model payloads are
+ * admin-gated on `/v1` (`require_admin_debug_access`), and publishing a demo is a separate
+ * deliberate act over a run an operator chose to expose. So the bundle ships only with the
+ * static export, and callers must treat null as normal rather than as an error.
+ */
+export async function getDemoCapture(slug: string): Promise<DemoCapture | null> {
+  if (!staticShowcase()) {
+    return null;
+  }
+  return DEMO_CAPTURES[slug] ?? null;
 }
 
 /**

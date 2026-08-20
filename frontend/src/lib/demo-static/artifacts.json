@@ -11,6 +11,24 @@
     "ea7125b9-aa3f-47e7-83c7-e845384bb533": "/demo-data/csv-delivery-delays/artifacts/ea7125b9-aa3f-47e7-83c7-e845384bb533/distribution_summary.json",
     "fef0d684-656f-452b-aaec-bb34536b7ff7": "/demo-data/csv-delivery-delays/artifacts/fef0d684-656f-452b-aaec-bb34536b7ff7/trend.json"
   },
+  "csv-regional-ranking": {
+    "60794381-14fa-4666-98fc-a3bd764bd128": "/demo-data/csv-regional-ranking/artifacts/60794381-14fa-4666-98fc-a3bd764bd128/correlation_heatmap.json",
+    "87f01dda-207d-4c4c-82e7-fbb88add25e1": "/demo-data/csv-regional-ranking/artifacts/87f01dda-207d-4c4c-82e7-fbb88add25e1/regression_fit.json",
+    "a456ebb5-be98-4330-b4e8-2c116f48f760": "/demo-data/csv-regional-ranking/artifacts/a456ebb5-be98-4330-b4e8-2c116f48f760/correlation_matrix.csv",
+    "a74b8a20-8c10-4b22-8e0b-a5c11e6a7e86": "/demo-data/csv-regional-ranking/artifacts/a74b8a20-8c10-4b22-8e0b-a5c11e6a7e86/correlation_heatmap.json",
+    "b377d521-ce40-40f5-abd3-11cb24e56ee6": "/demo-data/csv-regional-ranking/artifacts/b377d521-ce40-40f5-abd3-11cb24e56ee6/coefficients.csv",
+    "c94b6dd9-20ef-4c0f-b607-a66c6f66e928": "/demo-data/csv-regional-ranking/artifacts/c94b6dd9-20ef-4c0f-b607-a66c6f66e928/correlation_matrix.csv",
+    "e9ff1572-d224-4383-bd0c-6a23e78d21b2": "/demo-data/csv-regional-ranking/artifacts/e9ff1572-d224-4383-bd0c-6a23e78d21b2/coefficients.csv",
+    "ec859ebe-2e06-4bbd-9f6f-4ecc19426efe": "/demo-data/csv-regional-ranking/artifacts/ec859ebe-2e06-4bbd-9f6f-4ecc19426efe/regression_fit.json"
+  },
+  "csv-staffing-vs-service": {
+    "0f4717bb-df7d-4de4-83dd-cf18f96179cc": "/demo-data/csv-staffing-vs-service/artifacts/0f4717bb-df7d-4de4-83dd-cf18f96179cc/coefficients.csv",
+    "21b73443-d578-4bb9-baac-921d5783a6ed": "/demo-data/csv-staffing-vs-service/artifacts/21b73443-d578-4bb9-baac-921d5783a6ed/regression_fit.json",
+    "4b71864b-ad6a-4189-a146-e5bd86395974": "/demo-data/csv-staffing-vs-service/artifacts/4b71864b-ad6a-4189-a146-e5bd86395974/correlation_heatmap.json",
+    "62f5ae47-6357-4999-9eab-0a889d391518": "/demo-data/csv-staffing-vs-service/artifacts/62f5ae47-6357-4999-9eab-0a889d391518/correlation_matrix.csv",
+    "63ca8b51-0fbb-45bd-931d-1632e69869ee": "/demo-data/csv-staffing-vs-service/artifacts/63ca8b51-0fbb-45bd-931d-1632e69869ee/correlation_matrix.csv",
+    "bfb0059b-e4d5-4b72-a01c-fc8e850126d5": "/demo-data/csv-staffing-vs-service/artifacts/bfb0059b-e4d5-4b72-a01c-fc8e850126d5/correlation_heatmap.json"
+  },
   "edgar-margin-vs-growth": {
     "13391221-3462-494a-ac45-6fd2523d5b95": "/demo-data/edgar-margin-vs-growth/artifacts/13391221-3462-494a-ac45-6fd2523d5b95/trend.json",
     "2425a93d-7d66-452b-bf32-29aa56eac0a3": "/demo-data/edgar-margin-vs-growth/artifacts/2425a93d-7d66-452b-bf32-29aa56eac0a3/trend.json",
@@ -22,5 +40,13 @@
     "cd26662f-6ec7-4128-b7d5-82c45601e1de": "/demo-data/edgar-margin-vs-growth/artifacts/cd26662f-6ec7-4128-b7d5-82c45601e1de/trend_fits.csv",
     "e8fd0df2-4a21-4be8-9ad6-5a0746a14f85": "/demo-data/edgar-margin-vs-growth/artifacts/e8fd0df2-4a21-4be8-9ad6-5a0746a14f85/change_point.json",
     "f90ebeba-eacf-46ae-b10c-3c3070474c11": "/demo-data/edgar-margin-vs-growth/artifacts/f90ebeba-eacf-46ae-b10c-3c3070474c11/change_point.json"
+  },
+  "edgar-peer-separation": {
+    "6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b": "/demo-data/edgar-peer-separation/artifacts/6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b/correlation_heatmap.json",
+    "9990a831-3dba-464a-bae1-d6b50700759b": "/demo-data/edgar-peer-separation/artifacts/9990a831-3dba-464a-bae1-d6b50700759b/correlation_matrix.csv",
+    "99dd89c6-3428-47ca-929a-cf01e7c3e2d6": "/demo-data/edgar-peer-separation/artifacts/99dd89c6-3428-47ca-929a-cf01e7c3e2d6/regression_fit.json",
+    "b0f35ccf-f352-47a1-86c8-40921bc2639e": "/demo-data/edgar-peer-separation/artifacts/b0f35ccf-f352-47a1-86c8-40921bc2639e/correlation_matrix.csv",
+    "b9d44db2-32b5-4991-b93f-142707a7da5d": "/demo-data/edgar-peer-separation/artifacts/b9d44db2-32b5-4991-b93f-142707a7da5d/coefficients.csv",
+    "ca2d675a-fbf8-4580-b5dd-938683c4802d": "/demo-data/edgar-peer-separation/artifacts/ca2d675a-fbf8-4580-b5dd-938683c4802d/correlation_heatmap.json"
   }
 }

@@ -6,9 +6,13 @@ import { InterestForm } from "@/components/landing/interest-form";
 const REPO_URL = "https://github.com/Padraigobrien08/agentic-data-science-system";
 
 /**
- * The five loop properties, in the order the README states them. Each is a claim
- * the repository can be held to, so the wording tracks the README rather than
- * paraphrasing it upward.
+ * Loop properties, in the order the README states them. Each is a claim the repository can
+ * be held to, so the wording tracks the README rather than paraphrasing it upward.
+ *
+ * The README also lists **Self-checking** (the loop refusing to conclude while two of its own
+ * claims disagree). It is omitted here because this strip is a five-column rule grid by
+ * design; a sixth cell would leave an orphan. Worth revisiting — it is arguably a stronger
+ * claim than Comparable.
  */
 const PILLARS = [
   {
@@ -87,7 +91,33 @@ type Cta = {
   closingNote: string;
 };
 
-function getCta(isAuthenticated: boolean, projectId: string | null, staticShowcase: boolean): Cta {
+const NUMBER_WORDS = ["", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"];
+
+/**
+ * "five recorded investigations", counted from the published set rather than written down.
+ *
+ * The count was hardcoded as "two" in four places and went stale the moment a third demo was
+ * published — on a page whose whole claim is that its numbers are not made up. A count of 0
+ * means it could not be determined (no backend), so the phrasing drops the number rather
+ * than asserting there are none.
+ */
+function recordedRuns(count: number): string {
+  if (count < 1) return "recorded investigations";
+  const word = NUMBER_WORDS[count] ?? String(count);
+  return `${word} recorded investigation${count === 1 ? "" : "s"}`;
+}
+
+function sentenceCase(s: string): string {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+function getCta(
+  isAuthenticated: boolean,
+  projectId: string | null,
+  staticShowcase: boolean,
+  demoCount: number,
+): Cta {
+  const runs = recordedRuns(demoCount);
   if (staticShowcase && !isAuthenticated) {
     return {
       primaryHref: "/demos",
@@ -97,7 +127,7 @@ function getCta(isAuthenticated: boolean, projectId: string | null, staticShowca
       navLabel: "recorded runs →",
       navHref: "/demos",
       closingNote:
-        "Two recorded investigations, published exactly as they ended. One of them stopped at insufficient_evidence.",
+        `${sentenceCase(runs)}, published exactly as they ended. Not all of them reached an answer.`,
     };
   }
   if (!isAuthenticated) {
@@ -109,7 +139,7 @@ function getCta(isAuthenticated: boolean, projectId: string | null, staticShowca
       navLabel: "live demo →",
       navHref: "/demos",
       closingNote:
-        "Run it yourself, or read two recorded investigations published exactly as they ended. One of them stopped at insufficient_evidence.",
+        `Run it yourself, or read the ${runs} published exactly as they ended. Not all of them reached an answer.`,
     };
   }
   if (!projectId) {
@@ -120,7 +150,7 @@ function getCta(isAuthenticated: boolean, projectId: string | null, staticShowca
       showInterest: false,
       navLabel: "chats →",
       navHref: "/projects",
-      closingNote: "Start a chat to commission a run, or read the two recorded investigations.",
+      closingNote: `Start a chat to commission a run, or read the ${runs}.`,
     };
   }
   return {
@@ -130,7 +160,7 @@ function getCta(isAuthenticated: boolean, projectId: string | null, staticShowca
     showInterest: false,
     navLabel: "open chat →",
     navHref: `/projects/${projectId}/chat`,
-    closingNote: "Pick up where you left off, or read the two recorded investigations.",
+    closingNote: `Pick up where you left off, or read the ${runs}.`,
   };
 }
 
@@ -538,6 +568,8 @@ type Props = {
   /** True when serving the committed static export with no live backend (D9). */
   staticShowcase?: boolean;
   userEmail?: string | null;
+  /** How many investigations are published, counted rather than written down. */
+  demoCount?: number;
 };
 
 export function LandingPage({
@@ -545,8 +577,9 @@ export function LandingPage({
   projectId,
   staticShowcase = false,
   userEmail = null,
+  demoCount = 0,
 }: Props) {
-  const cta = getCta(isAuthenticated, projectId, staticShowcase);
+  const cta = getCta(isAuthenticated, projectId, staticShowcase, demoCount);
 
   return (
     <div className="landing-dark min-h-screen w-full">

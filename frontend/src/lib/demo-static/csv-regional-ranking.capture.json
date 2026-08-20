@@ -1,0 +1,559 @@
+{
+  "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+  "chat": [
+    {
+      "created_at": "2026-08-19T22:11:15",
+      "id": "ef449185-aff5-4491-aa98-d259fb398148",
+      "messages": [
+        {
+          "analysis_run_id": null,
+          "content": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?",
+          "created_at": "2026-08-19T22:11:15.263727",
+          "id": "d80ee567-f11d-41e1-966b-eec463baaabd",
+          "role": "user",
+          "sequence": 0,
+          "status": "complete"
+        },
+        {
+          "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+          "content": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
+          "created_at": "2026-08-19T22:11:15.265505",
+          "id": "ed10c4c4-4e3a-4533-adfe-1ce1f02e5f46",
+          "role": "assistant",
+          "sequence": 1,
+          "status": "complete"
+        }
+      ],
+      "title": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume t…"
+    }
+  ],
+  "demo_slug": "csv-regional-ranking",
+  "investigation_id": "311f7b4d-5362-468e-884f-8b738e6060dd",
+  "model_calls": [
+    {
+      "completion_tokens": 57,
+      "error_detail": null,
+      "est_cost_usd": 0.00099675,
+      "finished_at": "2026-08-19T22:11:10.215840",
+      "id": "8fcfb329-2189-4255-8494-5ae8074cf706",
+      "latency_ms": 1176,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 987,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Goal interpreter** for an adaptive data investigation loop. You receive an analytical goal in plain language plus the capabilities of the dataset that will answer it. You decide what kind of question is being asked. Everything downstream — which experiments become candidates, which hypotheses get generated — follows from this one call, so a wrong intent wastes the whole run.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question>\",\n \"capabilities\": {\"metrics\": [\"<numeric column>\", ...], \"dimensions\": [\"<categorical column>\", ...]}}\n```\n\n`metrics` and `dimensions` are the *only* column names that exist. A name not in those lists is not available, whatever the goal calls it.\n\n## Output\n\nReply with `GoalInterpretation` JSON and nothing else:\n\n```json\n{\"intent\": \"<one of the intents below>\",\n \"metric_hint\": \"<a name from capabilities.metrics, or null>\",\n \"group_hint\": \"<a name from capabilities.dimensions, or null>\",\n \"direction\": \"up\" | \"down\" | null,\n \"rationale\": \"<one sentence>\"}\n```\n\n### `intent` — choose exactly one\n\n| Intent | The goal is asking |\n|---|---|\n| `trend` | whether a metric moves over time |\n| `comparison` | whether a metric differs between groups |\n| `correlation` | whether two metrics move together |\n| `anomaly` | whether specific values are unusual |\n| `distribution` | what the shape or spread of a metric is |\n| `ranking` | which entities are highest or lowest |\n| `association` | whether two categorical fields are related |\n| `profile` | a broad description of the dataset |\n| `general` | none of the above fits |\n\nPrefer the *specific* intent over `general` when the goal supports one. `general` is the honest answer for a vague goal, not a way to avoid committing.\n\n### Reading the intent correctly\n\nThe intent decides which experiments are ever considered, so these three mistakes are the expensive ones:\n\n- **`comparison` means groups, never metrics.** It is for one metric across the values of a *dimension* — delivery time in `north` vs `south`. A goal contrasting two **metrics** (\"delivery time versus order volume\") is `correlation`, not `comparison`. Comparing a metric to \"the other metrics\" is not a question this dataset can answer, and reading it that way strands the run on a single experiment.\n- **A question about change over time is `trend`, even when it offers an explanation.** \"Has quality degraded, or is rising volume the cause?\" is asking whether a metric moved — `trend`, `metric_hint` on the metric whose movement is in question (here quality, not volume). The competing explanation is tested later by the loop; it does not change what is being asked.\n- **\"Does X explain Y?\" is `correlation`.** Set `metric_hint` to the metric being *explained* (the outcome), not the proposed cause.\n\nWhen a goal names both a time movement and a possible cause, `trend` is the better read: establishing that the movement is real comes before explaining it.\n\n### Which fields may be null\n\n**Only `metric_hint`, `group_hint` and `direction` accept `null`.** `intent` and `rationale` are strings — use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **Never invent a column.** `metric_hint` must appear verbatim in `capabilities.metrics`, `group_hint` verbatim in `capabilities.dimensions`. If the goal names something not present, use `null` — a null hint lets the loop pick, a hallucinated name breaks the experiment.\n- **`direction` is only meaningful for `trend`.** Set it when the goal asserts or asks about a specific movement (\"is revenue falling?\" → `down`). Use `null` when the goal asks about change without naming a direction (\"how has revenue moved?\").\n- **Do not smuggle a conclusion into `direction`.** It records what the goal asked about, not what you expect the data to show. The evidence decides that later.\n- Keep `rationale` to one sentence naming the signal in the goal you read the intent from.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": \"The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?\", \"capabilities\": {\"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether the weakest region's on-time delivery is explained by order volume, which is a relationship between two metrics.\"}",
+        "completion_tokens": 57,
+        "finish_reason": "stop",
+        "latency_ms": 1176,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 987,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether the weakest region's on-time delivery is explained by order volume, which is a relationship between two metrics.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177469,
+          "id": "chatcmpl-EEimzEVu3kvQvc9P935ynabR35zmq",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 57,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 987,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1044
+          }
+        }
+      },
+      "sequence": 0,
+      "started_at": "2026-08-19T22:11:09.036285",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 143,
+      "error_detail": null,
+      "est_cost_usd": 0.00139875,
+      "finished_at": "2026-08-19T22:11:11.606656",
+      "id": "f693ca86-5bd6-49c5-88f3-18ade015f151",
+      "latency_ms": 1385,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1007,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Hypothesis generator** for an adaptive data investigation loop. You turn an interpreted goal into claims the loop can actually test, and into open questions it should keep in view. A hypothesis that no experiment could disconfirm is worse than none: it will sit unresolved and consume budget.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question, verbatim>\",\n \"interpretation\": {\"intent\": \"...\", \"metric_hint\": \"...\", \"group_hint\": \"...\", \"direction\": \"up\"|\"down\"|null},\n \"metrics\": [\"<numeric column>\", ...],\n \"dimensions\": [\"<categorical column>\", ...]}\n```\n\n`interpretation` is a classification of the goal; `goal` is what was actually asked. Read both — the interpretation carries one metric hint and one direction, so anything the goal said beyond that (a named region, an alternative explanation, a time window) survives only in `goal`.\n\n## Output\n\nReply with `HypothesisProposals` JSON and nothing else:\n\n```json\n{\"hypotheses\": [\n   {\"statement\": \"<a falsifiable claim>\",\n    \"metric\": \"<a name from metrics, or null>\",\n    \"direction\": \"up\" | \"down\" | \"none\",\n    \"rationale\": \"<why this is worth testing>\"}],\n \"questions\": [\"<an open question the evidence should resolve>\", ...]}\n```\n\n`statement` must be non-empty. `direction` is one of exactly `up`, `down`, `none` — note this differs from the interpreter's field, which also allows `null`.\n\n### Which fields may be null\n\n**Only `metric` accepts `null`.** `statement`, `direction` and `rationale` are strings — `statement` must be non-empty; use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion. `hypotheses` and `questions` are lists: use `[]`, not `null`.\n\n## What makes a usable hypothesis\n\n- **Falsifiable.** State something a deterministic experiment over these columns could contradict. \"Revenue is increasing over time\" is testable. \"Revenue is interesting\" is not.\n- **Grounded in the available columns.** `metric` must appear verbatim in `metrics`, or be `null`. Never reference a column that was not supplied.\n- **Directional when the intent is `trend`.** Use the interpretation's `direction` when it has one; default to `up` only if the goal is directionally silent.\n- **Non-directional otherwise.** For `comparison`, `correlation`, `anomaly`, `association`, `distribution`, `ranking` and `profile`, use `\"none\"` — those claims are about difference or structure, not a direction of travel.\n\n## Calibration\n\nPropose the smallest set of claims that covers the goal — typically one, occasionally two when the goal genuinely contains two questions. Padding the list does not make the investigation more thorough; it splits a fixed experiment budget across claims the goal never asked about, and leaves more hypotheses unresolved at termination.\n\n### Competing explanations are a second claim, not padding\n\nWhen the goal offers an **alternative explanation** for the same observation — \"is quality degrading, *or* is rising volume the cause?\", \"did the change cause this, *or* was it seasonal?\" — propose **both** as separate hypotheses, each with its own `metric`.\n\nThis is the one case where a second claim is not padding but the entire question. Testing only the first cannot distinguish the two: evidence that the outcome moved is equally consistent with either explanation, so a run that measures the outcome alone ends inconclusive no matter how many experiments it spends. The alternative has to be measured on *its own* metric before the two can be told apart.\n\nWord each so a deterministic experiment could contradict it, and set `metric` to the column that claim is about — the outcome metric for the first, the proposed cause for the second.\n\nUse `questions` for what the evidence should clarify but which is not itself a claim to be supported or refuted — for example whether an observed movement is sustained or a one-off shift.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": \"The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?\", \"interpretation\": {\"intent\": \"correlation\", \"metric_hint\": \"on_time_rate\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks whether the weakest region's on-time delivery is explained by order volume, which is a relationship between two metrics.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This tests whether the service-quality gap remains when volume is considered.\"},{\"statement\":\"The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the proposed alternative explanation directly on the cause metric.\"}],\"questions\":[\"Does the on-time delivery gap persist after controlling for order volume?\",\"Is the weakest region's order volume materially higher than other regions?\"]}",
+        "completion_tokens": 143,
+        "finish_reason": "stop",
+        "latency_ms": 1385,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1007,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"hypotheses\":[{\"statement\":\"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This tests whether the service-quality gap remains when volume is considered.\"},{\"statement\":\"The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the proposed alternative explanation directly on the cause metric.\"}],\"questions\":[\"Does the on-time delivery gap persist after controlling for order volume?\",\"Is the weakest region's order volume materially higher than other regions?\"]}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177470,
+          "id": "chatcmpl-EEin0MFym80X1F8baBe2akViZ9shS",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 143,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1007,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1150
+          }
+        }
+      },
+      "sequence": 1,
+      "started_at": "2026-08-19T22:11:10.219906",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 36,
+      "error_detail": null,
+      "est_cost_usd": 0.0007755,
+      "finished_at": "2026-08-19T22:11:12.553919",
+      "id": "44862f18-d763-4528-8342-c3ce27e66549",
+      "latency_ms": 910,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 818,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 3, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.\"}",
+        "completion_tokens": 36,
+        "finish_reason": "stop",
+        "latency_ms": 910,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 818,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177472,
+          "id": "chatcmpl-EEin2ZphybLMvoaMkaWUaLxoUQPlY",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 36,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 818,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 854
+          }
+        }
+      },
+      "sequence": 2,
+      "started_at": "2026-08-19T22:11:11.642827",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 31,
+      "error_detail": null,
+      "est_cost_usd": 0.00071925,
+      "finished_at": "2026-08-19T22:11:13.411499",
+      "id": "695abccd-0334-4661-b854-8526f77cdd38",
+      "latency_ms": 809,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 773,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":1,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+        "completion_tokens": 31,
+        "finish_reason": "stop",
+        "latency_ms": 809,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 773,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":1,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177472,
+          "id": "chatcmpl-EEin2Im1XvPlPRhW99bvZptqL16VU",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 31,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 773,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 804
+          }
+        }
+      },
+      "sequence": 3,
+      "started_at": "2026-08-19T22:11:12.601377",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 39,
+      "error_detail": null,
+      "est_cost_usd": 0.0007215,
+      "finished_at": "2026-08-19T22:11:14.285948",
+      "id": "31fe6312-297c-4460-9457-12173c0657f7",
+      "latency_ms": 838,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 728,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the correlation estimate via simple regression, which best matches the goal and has the highest available information gain.\"}",
+        "completion_tokens": 39,
+        "finish_reason": "stop",
+        "latency_ms": 838,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 728,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"This will establish the correlation estimate via simple regression, which best matches the goal and has the highest available information gain.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177473,
+          "id": "chatcmpl-EEin3BnE5Kv4CFAlehBQQW0aVsoX4",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 39,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 728,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 767
+          }
+        }
+      },
+      "sequence": 4,
+      "started_at": "2026-08-19T22:11:13.446315",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 32,
+      "error_detail": null,
+      "est_cost_usd": 0.0006555,
+      "finished_at": "2026-08-19T22:11:15.199677",
+      "id": "82d8fe51-78e9-4218-87ec-367e1e4e1263",
+      "latency_ms": 881,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 682,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the strength and direction of the correlation via a simple regression fit.\"}",
+        "completion_tokens": 32,
+        "finish_reason": "stop",
+        "latency_ms": 881,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 682,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"This will establish the strength and direction of the correlation via a simple regression fit.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787177474,
+          "id": "chatcmpl-EEin4g4Mor0Vm4ucTDUOfDAezSXJu",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 32,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 682,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 714
+          }
+        }
+      },
+      "sequence": 5,
+      "started_at": "2026-08-19T22:11:14.317553",
+      "status": "success"
+    }
+  ],
+  "totals": {
+    "completion_tokens": 338,
+    "est_cost_usd": 0.005267,
+    "latency_ms": 5999,
+    "model_calls": 6,
+    "priced": true,
+    "prompt_tokens": 4995,
+    "total_tokens": 5333
+  }
+}

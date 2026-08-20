@@ -42,6 +42,10 @@ def _enabled_settings() -> Settings:
     return Settings(agentic_engine_enabled=True)
 
 
+def _disabled_settings() -> Settings:
+    return Settings(agentic_engine_enabled=False)
+
+
 def _force_fixture_policy(monkeypatch) -> None:
     """Keep runs offline/deterministic regardless of ambient LLM config."""
     monkeypatch.setattr(exec_mod, "build_agent_policy", lambda s, **_: FixtureAgentPolicy())
@@ -149,8 +153,21 @@ def _enable_flag(monkeypatch) -> None:
     monkeypatch.setattr(create_mod, "get_settings", _enabled_settings)
 
 
-def test_http_create_disabled_returns_409(api_ctx) -> None:
-    client, project_id, h, _factory = api_ctx  # flag off by default
+def _disable_flag(monkeypatch) -> None:
+    """
+    Pin the flag off rather than inheriting it.
+
+    The default is off, but a developer recording demos sets
+    ``EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED=true`` in ``.env``, which Settings reads — so a
+    test that leans on the ambient default asserts nothing on that machine and passes only
+    by luck on CI.
+    """
+    monkeypatch.setattr(create_mod, "get_settings", _disabled_settings)
+
+
+def test_http_create_disabled_returns_409(api_ctx, monkeypatch) -> None:
+    client, project_id, h, _factory = api_ctx
+    _disable_flag(monkeypatch)
     r = client.post(
         "/v1/investigations",
         json={"project_id": project_id, "goal": "g", "dataset": {"format": "csv", "csv_text": CSV}},

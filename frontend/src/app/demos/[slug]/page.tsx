@@ -2,8 +2,9 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
+import { CapturePanel } from "@/components/demos/capture-panel";
 import { InvestigationDetailView } from "@/components/investigations/investigation-detail";
-import { demoArtifactHref, getDemo } from "@/lib/api/demos";
+import { demoArtifactHref, getDemo, getDemoCapture } from "@/lib/api/demos";
 
 export const dynamic = "force-dynamic";
 
@@ -26,6 +27,8 @@ export default async function DemoDetailPage({
   if (!detail) {
     notFound();
   }
+  // Null in live mode, where these payloads are admin-gated — the page renders without it.
+  const capture = await getDemoCapture(slug);
 
   return (
     <div className="mx-auto max-w-3xl space-y-5 p-4">
@@ -42,6 +45,7 @@ export default async function DemoDetailPage({
         detail={detail}
         artifactHref={(a) => demoArtifactHref(slug, String(a.id))}
       />
+      {capture ? <CapturePanel capture={capture} /> : null}
     </div>
   );
 }

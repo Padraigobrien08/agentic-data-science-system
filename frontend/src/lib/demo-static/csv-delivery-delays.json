@@ -1153,6 +1153,15 @@
     }
   ],
   "origin": "native",
+  "outcome": {
+    "claims_rejected": 0,
+    "claims_supported": 0,
+    "claims_unresolved": 0,
+    "claims_weakened": 2,
+    "contradiction_found": false,
+    "kind": "declined",
+    "termination_reason": "insufficient_evidence"
+  },
   "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
   "status": "exhausted",
   "success_criteria": [],

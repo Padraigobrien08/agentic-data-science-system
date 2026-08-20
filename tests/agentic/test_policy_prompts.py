@@ -104,9 +104,14 @@ def test_defaults_are_unchanged_from_the_pre_injection_literals() -> None:
     assert DEFAULT_POLICY_PROMPTS.select_experiment == (
         "Choose the most informative next experiment. Reply as ExperimentChoice JSON."
     )
+    # The critique default has moved on from the pre-injection literal, deliberately: the
+    # policy contract gained `contradicts_hypothesis_id`, and a default prompt that never
+    # mentions it means a standalone `agentic/` — the offline path these defaults exist for —
+    # could never report a contradiction between two supported claims.
     assert DEFAULT_POLICY_PROMPTS.critique == (
-        "Challenge the strongest current claim; suggest a falsification tool. "
-        "Reply as CritiqueProposal JSON."
+        "Challenge the strongest current claim; suggest a falsification tool. If two claims "
+        "in supported_claims cannot both be true, report the conflict in "
+        "contradicts_hypothesis_id. Reply as CritiqueProposal JSON."
     )
 
 

@@ -140,7 +140,7 @@ def test_a_critic_that_never_challenges_fails_the_suite() -> None:
     """
 
     class _NeverChallenges(FixtureAgentPolicy):
-        def critique(self, *, strongest_claim, available_tools):  # noqa: ANN001, ANN201
+        def critique(self, *, strongest_claim, available_tools, **_):  # noqa: ANN001, ANN201
             return CritiqueProposal(should_challenge=False, rationale="never challenges")
 
     report = run_agency_suite(policy=_NeverChallenges())

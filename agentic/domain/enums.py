@@ -243,6 +243,10 @@ class CritiqueType(str, Enum):
     overreach = "overreach"
     competing_explanation = "competing_explanation"
     reproducibility = "reproducibility"
+    #: Two claims the loop holds as `supported` cannot both be true. Distinct from
+    #: `competing_explanation`, which offers an *alternative* account of one claim; this is
+    #: the loop disagreeing with itself, and it blocks `sufficient_evidence` outright.
+    contradiction = "contradiction"
 
 
 class CritiqueSeverity(str, Enum):
