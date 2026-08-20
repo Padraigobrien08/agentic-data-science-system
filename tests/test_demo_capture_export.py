@@ -264,6 +264,57 @@ def test_export_refuses_when_an_artifact_blob_was_pruned(exporting) -> None:
     assert "pruned" in str(excinfo.value)
 
 
+def test_orphaned_blobs_from_a_previous_publish_are_pruned(exporting, tmp_path) -> None:
+    """
+    Artifact ids are per-run, so re-publishing a slug strands the previous run's blobs.
+
+    Nothing removed them, so every re-publish left a full set of dead files behind, committed
+    and served forever. Two rounds of that were cleaned up by hand before this existed.
+    """
+    export_module, factory = exporting
+    _seed_published(factory, with_artifact=True)
+
+    root = tmp_path / "frontend" / "public" / "demo-data" / "a-demo" / "artifacts"
+    stale = root / "0f4717bb-df7d-4de4-83dd-cf18f96179cc"
+    stale.mkdir(parents=True)
+    (stale / "coefficients.csv").write_text("old,run\n", encoding="utf-8")
+
+    export_module.build_export()
+
+    assert not stale.exists()
+    # The blobs this export actually wrote survive.
+    assert any(p.is_dir() for p in root.iterdir())
+
+
+def test_pruning_leaves_directories_the_exporter_did_not_write(exporting, tmp_path) -> None:
+    """Scoped to artifact-id-shaped names so it cannot delete something put there by hand."""
+    export_module, factory = exporting
+    _seed_published(factory, with_artifact=True)
+
+    root = tmp_path / "frontend" / "public" / "demo-data" / "a-demo" / "artifacts"
+    root.mkdir(parents=True, exist_ok=True)
+    hand_written = root / "README-notes"
+    hand_written.mkdir()
+
+    export_module.build_export()
+
+    assert hand_written.exists()
+
+
+def test_check_mode_never_deletes(exporting, tmp_path) -> None:
+    """`--check` is a read-only verification; it must not prune as a side effect."""
+    export_module, factory = exporting
+    _seed_published(factory, with_artifact=True)
+
+    root = tmp_path / "frontend" / "public" / "demo-data" / "a-demo" / "artifacts"
+    stale = root / "0f4717bb-df7d-4de4-83dd-cf18f96179cc"
+    stale.mkdir(parents=True)
+
+    export_module.build_export(prune=False)
+
+    assert stale.exists()
+
+
 def test_healthy_export_emits_a_capture_bundle_alongside_the_detail(exporting) -> None:
     export_module, factory = exporting
     _seed_published(factory, with_artifact=True)

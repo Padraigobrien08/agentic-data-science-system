@@ -37,6 +37,7 @@ from __future__ import annotations
 import argparse
 import json
 import re
+import shutil
 import sys
 import unicodedata
 from pathlib import Path
@@ -61,6 +62,10 @@ from backend.storage.resolver import open_reader  # noqa: E402
 
 STATIC_DIR = REPO_ROOT / "frontend" / "src" / "lib" / "demo-static"
 BLOB_DIR = REPO_ROOT / "frontend" / "public" / "demo-data"
+
+#: Blob directories the exporter writes are named by artifact id; pruning matches only these
+#: so it can never remove something a human put under public/demo-data by hand.
+UUID_DIR = re.compile(r"[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}")
 
 #: Names come from experiment metadata; keep only characters safe in a URL path segment.
 _FILENAME_SAFE = re.compile(r"[^A-Za-z0-9._-]+")
@@ -133,7 +138,35 @@ def _capture_for(db, row, *, prices) -> tuple[object, list[str]]:
     )
 
 
-def build_export(*, allow_degraded: bool = False) -> tuple[dict[str, str], int]:
+def _prune_orphan_blobs(artifact_hrefs: dict[str, dict[str, str]]) -> None:
+    """
+    Delete blob directories no published demo references any more.
+
+    Artifact ids are per-run, so re-publishing a slug under a fresh recording writes a new set
+    of directories and strands the old one. Nothing removed them, so every re-publish left a
+    full set of dead files behind — committed, deployed and served forever. Scoped to slugs in
+    this export and to directories named like the artifact ids the exporter itself writes, so
+    it can only remove things this script created.
+    """
+    # Resolved from REPO_ROOT at call time, exactly as the write path does. The module-level
+    # BLOB_DIR is fixed at import, so using it here would prune a different tree than the one
+    # just written whenever REPO_ROOT is redirected — which is how the tests run.
+    blob_root = REPO_ROOT / "frontend" / "public" / "demo-data"
+    for slug, hrefs in artifact_hrefs.items():
+        root = blob_root / slug / "artifacts"
+        if not root.is_dir():
+            continue
+        keep = {href.rsplit("/", 2)[-2] for href in hrefs.values()}
+        for child in root.iterdir():
+            if not child.is_dir() or child.name in keep:
+                continue
+            if not UUID_DIR.fullmatch(child.name):
+                continue
+            shutil.rmtree(child)
+            print(f"pruned orphaned blob {slug}/{child.name}")
+
+
+def build_export(*, allow_degraded: bool = False, prune: bool = True) -> tuple[dict[str, str], int]:
     """Render every file of the export as {relative path: content}; blobs counted separately."""
     settings = get_settings()
     prices = parse_model_prices(settings.llm_model_prices)
@@ -191,6 +224,9 @@ def build_export(*, allow_degraded: bool = False) -> tuple[dict[str, str], int]:
                     blob_bytes += len(data)
                     hrefs[str(ref.id)] = f"/demo-data/{slug}/artifacts/{ref.id}/{filename}"
             artifact_hrefs[slug] = hrefs
+
+        if prune:
+            _prune_orphan_blobs(artifact_hrefs)
 
         text_files["src/lib/demo-static/artifacts.json"] = _dump(artifact_hrefs)
         text_files["src/lib/demo-static/generated.ts"] = _generated_ts(
@@ -266,7 +302,7 @@ def main(argv: list[str] | None = None) -> None:
     )
     args = parser.parse_args(argv)
 
-    text_files, blob_bytes = build_export(allow_degraded=args.allow_degraded)
+    text_files, blob_bytes = build_export(allow_degraded=args.allow_degraded, prune=not args.check)
 
     if args.check:
         stale = []

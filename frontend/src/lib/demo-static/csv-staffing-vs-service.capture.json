@@ -1,24 +1,24 @@
 {
-  "analysis_run_id": "fcf85162-4b76-43bf-a024-eda45df5920f",
+  "analysis_run_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
   "chat": [
     {
-      "created_at": "2026-08-19T22:01:09",
-      "id": "8a1e0b82-5dca-4431-8357-e5d7aa963cbb",
+      "created_at": "2026-08-20T19:02:30",
+      "id": "f92fd75f-6570-4bd2-a146-523147cb3ca1",
       "messages": [
         {
           "analysis_run_id": null,
           "content": "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?",
-          "created_at": "2026-08-19T22:01:09.410036",
-          "id": "1fe29f35-2f99-47f4-83a0-9ca22c28fea2",
+          "created_at": "2026-08-20T19:02:30.404145",
+          "id": "a50c65b7-db67-4673-8c19-f3df7e946835",
           "role": "user",
           "sequence": 0,
           "status": "complete"
         },
         {
-          "analysis_run_id": "fcf85162-4b76-43bf-a024-eda45df5920f",
-          "content": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with on-time rate than staffing level is.",
-          "created_at": "2026-08-19T22:01:09.410880",
-          "id": "3cc1709a-cf73-42ce-8512-c362773dc016",
+          "analysis_run_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
+          "content": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with staffing level than with on-time rate.",
+          "created_at": "2026-08-20T19:02:30.406082",
+          "id": "c8dc42c2-7b90-40c9-b911-22cb53c64d3b",
           "role": "assistant",
           "sequence": 1,
           "status": "complete"
@@ -28,15 +28,15 @@
     }
   ],
   "demo_slug": "csv-staffing-vs-service",
-  "investigation_id": "857b3d0d-8b98-4185-9f40-5f81ad057dfd",
+  "investigation_id": "2026414b-3de7-4578-a6da-f312ec15ef5f",
   "model_calls": [
     {
       "completion_tokens": 53,
       "error_detail": null,
       "est_cost_usd": 0.000972,
-      "finished_at": "2026-08-19T22:00:59.637007",
-      "id": "4c16615e-94cd-4f38-b35e-2e52e4191b1d",
-      "latency_ms": 932,
+      "finished_at": "2026-08-20T19:02:20.252081",
+      "id": "84fb5c02-6411-415c-a107-4ccec8c08944",
+      "latency_ms": 1978,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 978,
@@ -67,7 +67,7 @@
         "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether staffing level and order volume explain on-time rate, which is a relationship between metrics.\"}",
         "completion_tokens": 53,
         "finish_reason": "stop",
-        "latency_ms": 932,
+        "latency_ms": 1978,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 978,
         "raw_response": {
@@ -87,8 +87,8 @@
               }
             }
           ],
-          "created": 1787176859,
-          "id": "chatcmpl-EEid9GvNqwDOYM6dpVZ4p2gR8Yh9y",
+          "created": 1787252539,
+          "id": "chatcmpl-EF2JnSNAwyh3bZxc0BHvOL9gjlM9T",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -113,16 +113,16 @@
         }
       },
       "sequence": 0,
-      "started_at": "2026-08-19T22:00:58.703889",
+      "started_at": "2026-08-20T19:02:18.270616",
       "status": "success"
     },
     {
-      "completion_tokens": 137,
+      "completion_tokens": 127,
       "error_detail": null,
-      "est_cost_usd": 0.001362,
-      "finished_at": "2026-08-19T22:01:00.932182",
-      "id": "a492854b-ca7d-43be-98cc-41dc4acfd0bf",
-      "latency_ms": 1292,
+      "est_cost_usd": 0.001317,
+      "finished_at": "2026-08-20T19:02:21.507992",
+      "id": "894c8231-4f31-4897-a600-dcfa5a894f07",
+      "latency_ms": 1249,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 994,
@@ -150,10 +150,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"On-time rate is more strongly associated with staffing level than with order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This directly tests whether staffing level is the better explanatory factor for service quality.\"},{\"statement\":\"Order volume is more strongly associated with on-time rate than staffing level is.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the competing explanation that volume is the stronger driver of service quality.\"}],\"questions\":[\"Which factor better explains variation in on-time rate?\",\"Is any observed relationship stable across the available data, or driven by a few outliers?\"]}",
-        "completion_tokens": 137,
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"On-time rate is more strongly associated with staffing level than with order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This directly tests the stated question about which factor better explains service quality.\"},{\"statement\":\"Order volume is more strongly associated with staffing level than with on-time rate.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This captures the competing explanation that volume, not staffing, is the stronger driver.\"}],\"questions\":[\"Is any observed relationship stable across the available time window, or driven by a short-lived spike?\"]}",
+        "completion_tokens": 127,
         "finish_reason": "stop",
-        "latency_ms": 1292,
+        "latency_ms": 1249,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 994,
         "raw_response": {
@@ -165,7 +165,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"On-time rate is more strongly associated with staffing level than with order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This directly tests whether staffing level is the better explanatory factor for service quality.\"},{\"statement\":\"Order volume is more strongly associated with on-time rate than staffing level is.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the competing explanation that volume is the stronger driver of service quality.\"}],\"questions\":[\"Which factor better explains variation in on-time rate?\",\"Is any observed relationship stable across the available data, or driven by a few outliers?\"]}",
+                "content": "{\"hypotheses\":[{\"statement\":\"On-time rate is more strongly associated with staffing level than with order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This directly tests the stated question about which factor better explains service quality.\"},{\"statement\":\"Order volume is more strongly associated with staffing level than with on-time rate.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This captures the competing explanation that volume, not staffing, is the stronger driver.\"}],\"questions\":[\"Is any observed relationship stable across the available time window, or driven by a short-lived spike?\"]}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -173,15 +173,15 @@
               }
             }
           ],
-          "created": 1787176860,
-          "id": "chatcmpl-EEidAbjcxdsw1zN0V4w2K86Yf89mn",
+          "created": 1787252540,
+          "id": "chatcmpl-EF2JoymlAD133F79XlxEEI0zJzylX",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 137,
+            "completion_tokens": 127,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -194,21 +194,21 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1131
+            "total_tokens": 1121
           }
         }
       },
       "sequence": 1,
-      "started_at": "2026-08-19T22:00:59.638371",
+      "started_at": "2026-08-20T19:02:20.257040",
       "status": "success"
     },
     {
-      "completion_tokens": 33,
+      "completion_tokens": 31,
       "error_detail": null,
-      "est_cost_usd": 0.000762,
-      "finished_at": "2026-08-19T22:01:01.778412",
-      "id": "b285617e-50c0-4b22-9ac7-a7e6865056ec",
-      "latency_ms": 837,
+      "est_cost_usd": 0.000753,
+      "finished_at": "2026-08-20T19:02:22.461237",
+      "id": "0982f68e-e968-4d68-98d9-e5d68ef9f917",
+      "latency_ms": 916,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 818,
@@ -236,10 +236,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This directly estimates the correlation and has the highest expected information gain among the available candidates.\"}",
-        "completion_tokens": 33,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+        "completion_tokens": 31,
         "finish_reason": "stop",
-        "latency_ms": 837,
+        "latency_ms": 916,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 818,
         "raw_response": {
@@ -251,7 +251,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This directly estimates the correlation and has the highest expected information gain among the available candidates.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -259,15 +259,15 @@
               }
             }
           ],
-          "created": 1787176861,
-          "id": "chatcmpl-EEidBmthJTlgIODEioMwgd94QejSu",
+          "created": 1787252542,
+          "id": "chatcmpl-EF2JqaJ5uavAyazd3hytp5B4XDfd9",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 33,
+            "completion_tokens": 31,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -280,24 +280,24 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 851
+            "total_tokens": 849
           }
         }
       },
       "sequence": 2,
-      "started_at": "2026-08-19T22:01:00.940063",
+      "started_at": "2026-08-20T19:02:21.543139",
       "status": "success"
     },
     {
       "completion_tokens": 152,
       "error_detail": null,
-      "est_cost_usd": 0.001632,
-      "finished_at": "2026-08-19T22:01:03.183535",
-      "id": "8e823ca4-de38-4af8-bc8f-da319fa7e9fb",
-      "latency_ms": 1392,
+      "est_cost_usd": 0.001638,
+      "finished_at": "2026-08-20T19:02:26.042348",
+      "id": "489409bb-b12a-43b1-9591-99de17e852e6",
+      "latency_ms": 3562,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1264,
+      "prompt_tokens": 1272,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -311,7 +311,7 @@
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"fit_simple_regression\"], \"supported_claims\": [{\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}]}",
+            "content": "{\"claim\": {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"fit_simple_regression\"], \"supported_claims\": [{\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -322,12 +322,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Test whether the apparent stronger association with staffing level persists under a simple regression that does not adjust for order volume; if the result weakens or reverses, the current support may be an artefact of model specification or confounding.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so one adversarial check is warranted before concluding.\"}",
+        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge the association claim with a simpler regression that can test whether the apparent staffing effect persists once order volume is modeled directly; the current support could reflect confounding or model specification rather than a stronger relationship with staffing.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so it should be challenged before the loop concludes.\"}",
         "completion_tokens": 152,
         "finish_reason": "stop",
-        "latency_ms": 1392,
+        "latency_ms": 3562,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1264,
+        "prompt_tokens": 1272,
         "raw_response": {
           "choices": [
             {
@@ -337,7 +337,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Test whether the apparent stronger association with staffing level persists under a simple regression that does not adjust for order volume; if the result weakens or reverses, the current support may be an artefact of model specification or confounding.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so one adversarial check is warranted before concluding.\"}",
+                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge the association claim with a simpler regression that can test whether the apparent staffing effect persists once order volume is modeled directly; the current support could reflect confounding or model specification rather than a stronger relationship with staffing.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so it should be challenged before the loop concludes.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -345,8 +345,8 @@
               }
             }
           ],
-          "created": 1787176862,
-          "id": "chatcmpl-EEidCQraPgccSO6CxFPnDAgGKFCPJ",
+          "created": 1787252544,
+          "id": "chatcmpl-EF2JsQEMPQUx2hd72xl1vUSGYPu7h",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -360,30 +360,30 @@
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1264,
+            "prompt_tokens": 1272,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1416
+            "total_tokens": 1424
           }
         }
       },
       "sequence": 3,
-      "started_at": "2026-08-19T22:01:01.789831",
+      "started_at": "2026-08-20T19:02:22.477923",
       "status": "success"
     },
     {
       "completion_tokens": 33,
       "error_detail": null,
-      "est_cost_usd": 0.00074325,
-      "finished_at": "2026-08-19T22:01:04.258074",
-      "id": "64b1d9d5-3597-4de5-9bb9-5fc51722efea",
-      "latency_ms": 1046,
+      "est_cost_usd": 0.000747,
+      "finished_at": "2026-08-20T19:02:26.832308",
+      "id": "21efb0d8-f916-43bb-852c-b5c5e775cd45",
+      "latency_ms": 756,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 793,
+      "prompt_tokens": 798,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -397,7 +397,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"falsify hypothesis fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"falsify hypothesis 755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
             "role": "user"
           }
         ],
@@ -408,12 +408,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the offered falsification test and would directly challenge the currently supported correlation hypothesis.\"}",
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the preferred falsification step and would directly challenge the currently supported correlation hypothesis.\"}",
         "completion_tokens": 33,
         "finish_reason": "stop",
-        "latency_ms": 1046,
+        "latency_ms": 756,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 793,
+        "prompt_tokens": 798,
         "raw_response": {
           "choices": [
             {
@@ -423,7 +423,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This is the offered falsification test and would directly challenge the currently supported correlation hypothesis.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"This is the preferred falsification step and would directly challenge the currently supported correlation hypothesis.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -431,8 +431,8 @@
               }
             }
           ],
-          "created": 1787176863,
-          "id": "chatcmpl-EEidDsUyL6HH8Q6mRXZb1nI48ow4z",
+          "created": 1787252546,
+          "id": "chatcmpl-EF2JuJpGkZzlVfcLa17Dw5CxAO89z",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -446,30 +446,30 @@
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 793,
+            "prompt_tokens": 798,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 826
+            "total_tokens": 831
           }
         }
       },
       "sequence": 4,
-      "started_at": "2026-08-19T22:01:03.209778",
+      "started_at": "2026-08-20T19:02:26.075413",
       "status": "success"
     },
     {
-      "completion_tokens": 77,
+      "completion_tokens": 74,
       "error_detail": null,
-      "est_cost_usd": 0.00129075,
-      "finished_at": "2026-08-19T22:01:05.825924",
-      "id": "294e26a1-1fea-405a-9b44-2c4cac033857",
-      "latency_ms": 1559,
+      "est_cost_usd": 0.00128325,
+      "finished_at": "2026-08-20T19:02:27.764219",
+      "id": "8a4bda22-fe78-41c9-a47f-a90e6f8d0890",
+      "latency_ms": 922,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1259,
+      "prompt_tokens": 1267,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -483,7 +483,7 @@
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}]}",
+            "content": "{\"claim\": {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -494,12 +494,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The current claim has already been critiqued, and there are no unused tools available for a further falsification challenge. No contradiction with another supported claim is present.\"}",
-        "completion_tokens": 77,
+        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The claim has already been critiqued, and there are no unused tools available for a further challenge. No contradiction with another supported claim is present.\"}",
+        "completion_tokens": 74,
         "finish_reason": "stop",
-        "latency_ms": 1559,
+        "latency_ms": 922,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1259,
+        "prompt_tokens": 1267,
         "raw_response": {
           "choices": [
             {
@@ -509,7 +509,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\": false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The current claim has already been critiqued, and there are no unused tools available for a further falsification challenge. No contradiction with another supported claim is present.\"}",
+                "content": "{\"should_challenge\": false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The claim has already been critiqued, and there are no unused tools available for a further challenge. No contradiction with another supported claim is present.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -517,42 +517,42 @@
               }
             }
           ],
-          "created": 1787176865,
-          "id": "chatcmpl-EEidFohAwbfkAaKn7KhIotwMvgB1v",
+          "created": 1787252547,
+          "id": "chatcmpl-EF2JvTObd8lVv99830DV4jja2baWR",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 77,
+            "completion_tokens": 74,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1259,
+            "prompt_tokens": 1267,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1336
+            "total_tokens": 1341
           }
         }
       },
       "sequence": 5,
-      "started_at": "2026-08-19T22:01:04.265278",
+      "started_at": "2026-08-20T19:02:26.839891",
       "status": "success"
     },
     {
-      "completion_tokens": 33,
+      "completion_tokens": 29,
       "error_detail": null,
-      "est_cost_usd": 0.00069375,
-      "finished_at": "2026-08-19T22:01:06.720943",
-      "id": "973d9c42-037c-47dc-a5a6-5a189ff534f3",
-      "latency_ms": 869,
+      "est_cost_usd": 0.00067575,
+      "finished_at": "2026-08-20T19:02:28.814177",
+      "id": "53de7ec1-3275-4932-b108-0dad56bd1194",
+      "latency_ms": 1028,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 727,
@@ -580,10 +580,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This directly estimates the correlation and has the highest expected information gain among the available candidates.\"}",
-        "completion_tokens": 33,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This directly establishes the correlation estimate with the highest expected information gain.\"}",
+        "completion_tokens": 29,
         "finish_reason": "stop",
-        "latency_ms": 869,
+        "latency_ms": 1028,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 727,
         "raw_response": {
@@ -595,7 +595,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This directly estimates the correlation and has the highest expected information gain among the available candidates.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"This directly establishes the correlation estimate with the highest expected information gain.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -603,15 +603,15 @@
               }
             }
           ],
-          "created": 1787176866,
-          "id": "chatcmpl-EEidG9GBYmV4II0KKVwU6ulFhwBkc",
+          "created": 1787252548,
+          "id": "chatcmpl-EF2Jwv0ZE7h63Z0H0MIIyjuWpi727",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 33,
+            "completion_tokens": 29,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -624,24 +624,24 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 760
+            "total_tokens": 756
           }
         }
       },
       "sequence": 6,
-      "started_at": "2026-08-19T22:01:05.849948",
+      "started_at": "2026-08-20T19:02:27.784504",
       "status": "success"
     },
     {
-      "completion_tokens": 150,
+      "completion_tokens": 147,
       "error_detail": null,
-      "est_cost_usd": 0.00166125,
-      "finished_at": "2026-08-19T22:01:09.358539",
-      "id": "26c06ba2-e807-4d32-916a-0d283fef6583",
-      "latency_ms": 2625,
+      "est_cost_usd": 0.00165675,
+      "finished_at": "2026-08-20T19:02:30.341358",
+      "id": "65e8ac77-b06f-4555-9b5c-ed958f3c6ad8",
+      "latency_ms": 1512,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1315,
+      "prompt_tokens": 1327,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -655,7 +655,7 @@
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}, {\"id\": \"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-1\", \"statement\": \"Order volume is more strongly associated with on-time rate than staffing level is.\", \"confidence\": 0.95}]}",
+            "content": "{\"claim\": {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}, {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1\", \"statement\": \"Order volume is more strongly associated with staffing level than with on-time rate.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -666,12 +666,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-1\",\"message\":\"The two supported claims are mutually contradictory: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with on-time rate than staffing level is.\",\"rationale\":\"A contradiction between supported claims outranks an ordinary challenge. However, the current claim has already been critiqued and there are no unused tools available, so no further challenge can be proposed here.\"}",
-        "completion_tokens": 150,
+        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1\",\"message\":\"The two supported claims are mutually incompatible: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with staffing level than with on-time rate. Both cannot be true at the same time.\",\"rationale\":\"A contradiction between supported claims outranks an ordinary challenge, and there are no unused tools available to discriminate between them.\"}",
+        "completion_tokens": 147,
         "finish_reason": "stop",
-        "latency_ms": 2625,
+        "latency_ms": 1512,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1315,
+        "prompt_tokens": 1327,
         "raw_response": {
           "choices": [
             {
@@ -681,7 +681,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"fcf85162-4b76-43bf-a024-eda45df5920f-hyp-1\",\"message\":\"The two supported claims are mutually contradictory: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with on-time rate than staffing level is.\",\"rationale\":\"A contradiction between supported claims outranks an ordinary challenge. However, the current claim has already been critiqued and there are no unused tools available, so no further challenge can be proposed here.\"}",
+                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1\",\"message\":\"The two supported claims are mutually incompatible: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with staffing level than with on-time rate. Both cannot be true at the same time.\",\"rationale\":\"A contradiction between supported claims outranks an ordinary challenge, and there are no unused tools available to discriminate between them.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -689,43 +689,43 @@
               }
             }
           ],
-          "created": 1787176867,
-          "id": "chatcmpl-EEidHMc1PNQueScrjkf7EDtPMak32",
+          "created": 1787252549,
+          "id": "chatcmpl-EF2JxVp3L34JP0L6g7CUuSIiDJ2Ql",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 150,
+            "completion_tokens": 147,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1315,
+            "prompt_tokens": 1327,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1465
+            "total_tokens": 1474
           }
         }
       },
       "sequence": 7,
-      "started_at": "2026-08-19T22:01:06.731037",
+      "started_at": "2026-08-20T19:02:28.827931",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 668,
-    "est_cost_usd": 0.009117,
-    "latency_ms": 10552,
+    "completion_tokens": 646,
+    "est_cost_usd": 0.009043,
+    "latency_ms": 11923,
     "model_calls": 8,
     "priced": true,
-    "prompt_tokens": 8148,
-    "total_tokens": 8816
+    "prompt_tokens": 8181,
+    "total_tokens": 8827
   }
 }

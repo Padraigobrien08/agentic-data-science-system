@@ -91,6 +91,14 @@ def _prov(agent_id: str) -> Provenance:
     return Provenance(source=ProvenanceSource.agent_llm, agent_id=agent_id)
 
 
+def _quote(statement: str, *, limit: int = 120) -> str:
+    """A claim quoted for prose, shortened at a word boundary so it reads as a sentence."""
+    text = " ".join(statement.split())
+    if len(text) > limit:
+        text = text[:limit].rsplit(" ", 1)[0] + "…"
+    return f"“{text}”"
+
+
 def _sign(x: float | None) -> int:
     if x is None or not math.isfinite(x) or abs(x) < 1e-9:
         return 0
@@ -381,7 +389,7 @@ class ExperimentSelector:
         state.add_experiment_request(chosen)
         state.record_decision(AgentDecision(
             id=idgen.make("dec-sel", len(state.decisions)), decision_type=DecisionType.select_experiment,
-            rationale=rationale, iteration=state.budget.iterations_used,
+            rationale=rationale,
             targets=[EntityRef(kind=EntityKind.experiment_request, id=chosen.id)],
             chosen_option=chosen.tool_name, provenance=_prov("experiment_selector")))
 
@@ -696,13 +704,20 @@ class Critic:
         ))
 
         for claim in (target, other):
+            conflicting = other if claim is target else target
             claim.set_status(HypothesisStatus.weakened)
             claim.set_confidence(round(min(claim.confidence, self.CONTRADICTION_CONFIDENCE_CAP), 4))
             state.record_decision(AgentDecision(
                 id=idgen.make("dec-contra", len(state.decisions)),
                 decision_type=DecisionType.revise_confidence,
-                rationale=f"weakened: contradicts {other.id if claim is target else target.id}",
-                targets=[EntityRef(kind=EntityKind.hypothesis, id=claim.id)],
+                # The id of the conflicting claim goes in `targets`, where a reader can follow
+                # it and a client can link it. A rationale is prose and is read as prose, so
+                # naming the claim beats printing its primary key.
+                rationale=f"weakened: cannot hold at the same time as {_quote(conflicting.statement)}",
+                targets=[
+                    EntityRef(kind=EntityKind.hypothesis, id=claim.id),
+                    EntityRef(kind=EntityKind.hypothesis, id=conflicting.id),
+                ],
                 provenance=_prov("critic"),
             ))
 

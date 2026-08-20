@@ -169,12 +169,54 @@ def test_a_contradiction_critique_and_open_question_are_recorded(state) -> None:
     assert {"h-a", "h-b"} == set(state.open_questions[0].related_hypothesis_ids)
 
 
+def _contradiction_decisions(state):
+    return [d for d in state.decisions if "cannot hold at the same time" in d.rationale]
+
+
 def test_both_claims_get_a_recorded_decision(state) -> None:
     """A status change with no decision behind it is a number with no provenance."""
     _run_critic(state, CONTRADICTION)
 
-    targeted = {d.targets[0].id for d in state.decisions if "contradicts" in d.rationale}
+    targeted = {d.targets[0].id for d in _contradiction_decisions(state)}
     assert targeted == {"h-a", "h-b"}
+
+
+def test_the_rationale_names_the_conflicting_claim_rather_than_its_id(state) -> None:
+    """
+    A rationale is prose and is read as prose.
+
+    This used to render as `weakened: contradicts fcf85162-…-hyp-1` in the published trace,
+    which tells a reader nothing they can act on.
+    """
+    _run_critic(state, CONTRADICTION)
+
+    rationales = [d.rationale for d in _contradiction_decisions(state)]
+    assert len(rationales) == 2
+    for text in rationales:
+        assert "h-a" not in text and "h-b" not in text
+    # Each side names the *other* claim, not itself.
+    assert any("Volume is a stronger driver" in t for t in rationales)
+    assert any("Staffing is the stronger driver" in t for t in rationales)
+
+
+def test_the_conflicting_claim_is_reachable_as_a_target(state) -> None:
+    """The id belongs in structured targets, where a client can follow the link."""
+    _run_critic(state, CONTRADICTION)
+
+    for d in _contradiction_decisions(state):
+        assert {t.id for t in d.targets} == {"h-a", "h-b"}
+        # The claim being revised stays first, so existing readers of targets[0] still work.
+        assert d.targets[0].id != d.targets[1].id
+
+
+def test_a_long_claim_is_shortened_at_a_word_boundary() -> None:
+    """Statements are free text; a rationale that runs to 400 characters is not prose."""
+    from agentic.agent.components import _quote
+
+    quoted = _quote("word " * 60)
+    assert len(quoted) < 130
+    assert quoted.endswith("…”")
+    assert "wor…" not in quoted  # cut between words, not through one
 
 
 def test_a_contradiction_blocks_sufficient_evidence(state) -> None:
