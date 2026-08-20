@@ -167,6 +167,19 @@ class InvestigationState(DomainModel):
         return question
 
     def record_decision(self, decision: AgentDecision) -> AgentDecision:
+        """
+        Append a decision, stamping the iteration it was made in.
+
+        Stamped here rather than at the call sites because leaving it to them did not work:
+        `AgentDecision.iteration` defaults to 0, six of the seven components never passed it,
+        and the whole trace rendered as `iter 0` — a list of decisions that could not be read
+        as a sequence. Every component already routes through this method, so this is the one
+        place the loop's own counter is reachable and cannot be forgotten by the next one.
+
+        A decision always describes something happening now, so the current iteration is
+        always the right answer; nothing needs to record a decision as of another iteration.
+        """
+        decision.iteration = self.budget.iterations_used
         self.decisions.append(decision)
         return decision
 

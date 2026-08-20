@@ -381,7 +381,7 @@ class ExperimentSelector:
         state.add_experiment_request(chosen)
         state.record_decision(AgentDecision(
             id=idgen.make("dec-sel", len(state.decisions)), decision_type=DecisionType.select_experiment,
-            rationale=rationale, iteration=state.budget.iterations_used,
+            rationale=rationale,
             targets=[EntityRef(kind=EntityKind.experiment_request, id=chosen.id)],
             chosen_option=chosen.tool_name, provenance=_prov("experiment_selector")))
 
