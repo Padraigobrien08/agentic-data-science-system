@@ -22,12 +22,12 @@
     "ec859ebe-2e06-4bbd-9f6f-4ecc19426efe": "/demo-data/csv-regional-ranking/artifacts/ec859ebe-2e06-4bbd-9f6f-4ecc19426efe/regression_fit.json"
   },
   "csv-staffing-vs-service": {
-    "4f46d544-2d22-4223-9f36-8ab8049047b0": "/demo-data/csv-staffing-vs-service/artifacts/4f46d544-2d22-4223-9f36-8ab8049047b0/correlation_heatmap.json",
-    "7ba0ab4c-e66c-42f2-935e-69b7c54dba53": "/demo-data/csv-staffing-vs-service/artifacts/7ba0ab4c-e66c-42f2-935e-69b7c54dba53/correlation_matrix.csv",
-    "a22c1862-dc8e-4960-aa58-0e5127768218": "/demo-data/csv-staffing-vs-service/artifacts/a22c1862-dc8e-4960-aa58-0e5127768218/regression_fit.json",
-    "a7291ab0-8ffa-42e2-bfdc-1a775d36d353": "/demo-data/csv-staffing-vs-service/artifacts/a7291ab0-8ffa-42e2-bfdc-1a775d36d353/coefficients.csv",
-    "ac1c63d8-9967-4fee-aa38-efa138c284ad": "/demo-data/csv-staffing-vs-service/artifacts/ac1c63d8-9967-4fee-aa38-efa138c284ad/correlation_heatmap.json",
-    "e702f074-59c2-4c96-b192-c2f42715ed92": "/demo-data/csv-staffing-vs-service/artifacts/e702f074-59c2-4c96-b192-c2f42715ed92/correlation_matrix.csv"
+    "018744e3-3264-4842-8a28-41e110e4a59a": "/demo-data/csv-staffing-vs-service/artifacts/018744e3-3264-4842-8a28-41e110e4a59a/regression_fit.json",
+    "02ab7f5b-1f55-41ea-b814-96e7a4cd0a10": "/demo-data/csv-staffing-vs-service/artifacts/02ab7f5b-1f55-41ea-b814-96e7a4cd0a10/correlation_matrix.csv",
+    "03f41115-883f-48c6-a1c8-3122eb88b15d": "/demo-data/csv-staffing-vs-service/artifacts/03f41115-883f-48c6-a1c8-3122eb88b15d/correlation_heatmap.json",
+    "6da4cb6d-2a42-4a50-951a-6678ae8bce6b": "/demo-data/csv-staffing-vs-service/artifacts/6da4cb6d-2a42-4a50-951a-6678ae8bce6b/coefficients.csv",
+    "c0b74c5f-e18d-4091-a302-f6f3c396eb29": "/demo-data/csv-staffing-vs-service/artifacts/c0b74c5f-e18d-4091-a302-f6f3c396eb29/correlation_heatmap.json",
+    "f3346a4b-187e-4d60-bd1e-54e4b714654a": "/demo-data/csv-staffing-vs-service/artifacts/f3346a4b-187e-4d60-bd1e-54e4b714654a/correlation_matrix.csv"
   },
   "edgar-margin-vs-growth": {
     "13391221-3462-494a-ac45-6fd2523d5b95": "/demo-data/edgar-margin-vs-growth/artifacts/13391221-3462-494a-ac45-6fd2523d5b95/trend.json",

@@ -133,8 +133,8 @@
   },
   {
     "adapter_id": "in_memory",
-    "analysis_run_id": "1d13c360-5f67-4904-8770-4d72537b3fb9",
-    "conclusion": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is a stronger driver of service quality than staffing level.",
+    "analysis_run_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
+    "conclusion": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with staffing level than with on-time rate.",
     "confidence": 0.4,
     "counts": {
       "critiques": 2,
@@ -143,12 +143,12 @@
       "experiments": 3,
       "hypotheses": 2,
       "observations": 13,
-      "open_questions": 3
+      "open_questions": 2
     },
-    "created_at": "2026-08-20T18:28:14",
+    "created_at": "2026-08-20T19:02:18",
     "demo_slug": "csv-staffing-vs-service",
-    "domain_id": "1d13c360-5f67-4904-8770-4d72537b3fb9",
-    "id": "d3f7ca60-51f0-4a18-894b-83e604326c6c",
+    "domain_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
+    "id": "2026414b-3de7-4578-a6da-f312ec15ef5f",
     "objective": "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?",
     "origin": "native",
     "outcome": {
@@ -162,6 +162,6 @@
     },
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "exhausted",
-    "updated_at": "2026-08-20T18:29:30"
+    "updated_at": "2026-08-20T19:02:52"
   }
 ]
