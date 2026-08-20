@@ -1781,6 +1781,14 @@
           "sequence": {
             "title": "Sequence",
             "type": "integer"
+          },
+          "targets": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/EntityRefItem"
+            },
+            "title": "Targets",
+            "type": "array"
           }
         },
         "required": [
@@ -1791,6 +1799,24 @@
           "iteration"
         ],
         "title": "DecisionItem",
+        "type": "object"
+      },
+      "EntityRefItem": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "string"
+          },
+          "kind": {
+            "title": "Kind",
+            "type": "string"
+          }
+        },
+        "required": [
+          "kind",
+          "id"
+        ],
+        "title": "EntityRefItem",
         "type": "object"
       },
       "EvaluationCaseResultRead": {

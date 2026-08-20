@@ -117,7 +117,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-hyp-0",
       "iteration": 0,
       "rationale": "This directly tests the stated question about which factor better explains service quality.",
-      "sequence": 0
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -126,7 +132,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-hyp-1",
       "iteration": 0,
       "rationale": "This captures the competing explanation that volume, not staffing, is the stronger driver.",
-      "sequence": 1
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -135,7 +147,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-sel-2",
       "iteration": 0,
       "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
-      "sequence": 2
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -144,7 +162,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 6 evidence item(s) for analyze_correlation",
-      "sequence": 3
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -153,7 +177,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-rev-4",
       "iteration": 0,
       "rationale": "supported (support=6, refute=0)",
-      "sequence": 4
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -162,7 +192,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-crit-5",
       "iteration": 0,
       "rationale": "The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so it should be challenged before the loop concludes.",
-      "sequence": 5
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -171,7 +207,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-sel-6",
       "iteration": 1,
       "rationale": "This is the preferred falsification step and would directly challenge the currently supported correlation hypothesis.",
-      "sequence": 6
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-exp-1",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -180,7 +222,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-evd-7",
       "iteration": 1,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
-      "sequence": 7
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -189,7 +237,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-rev-8",
       "iteration": 1,
       "rationale": "supported (support=7, refute=0)",
-      "sequence": 8
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -198,7 +252,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-sel-9",
       "iteration": 2,
       "rationale": "This directly establishes the correlation estimate with the highest expected information gain.",
-      "sequence": 9
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -207,7 +267,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-evd-10",
       "iteration": 2,
       "rationale": "recorded 6 evidence item(s) for analyze_correlation",
-      "sequence": 10
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -216,7 +282,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-rev-11",
       "iteration": 2,
       "rationale": "supported (support=6, refute=0)",
-      "sequence": 11
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -225,7 +297,17 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-contra-12",
       "iteration": 2,
       "rationale": "weakened: cannot hold at the same time as “Order volume is more strongly associated with staffing level than with on-time rate.”",
-      "sequence": 12
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -234,7 +316,17 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-contra-13",
       "iteration": 2,
       "rationale": "weakened: cannot hold at the same time as “On-time rate is more strongly associated with staffing level than with order volume.”",
-      "sequence": 13
+      "sequence": 13,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -243,7 +335,13 @@
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-concl-14",
       "iteration": 3,
       "rationale": "inconclusive (insufficient_evidence)",
-      "sequence": 14
+      "sequence": 14,
+      "targets": [
+        {
+          "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-concl-0",
+          "kind": "conclusion"
+        }
+      ]
     }
   ],
   "demo_slug": "csv-staffing-vs-service",
@@ -318,7 +416,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-0",
       "reliability": 0.7619047619047619,
@@ -351,7 +449,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-1",
       "reliability": 0.7619047619047619,
@@ -384,7 +482,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-2",
       "reliability": 0.7619047619047619,
@@ -417,7 +515,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-3",
       "reliability": 0.7619047619047619,
@@ -450,7 +548,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-4",
       "reliability": 0.7619047619047619,
@@ -483,7 +581,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-5",
       "reliability": 0.7619047619047619,
@@ -516,7 +614,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-6",
       "reliability": 0.7619047619047619,
@@ -555,7 +653,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-7",
       "reliability": 0.7619047619047619,
@@ -588,7 +686,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-8",
       "reliability": 0.7619047619047619,
@@ -621,7 +719,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-9",
       "reliability": 0.7619047619047619,
@@ -654,7 +752,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-10",
       "reliability": 0.7619047619047619,
@@ -687,7 +785,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-11",
       "reliability": 0.7619047619047619,
@@ -720,7 +818,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
       ],
       "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-12",
       "reliability": 0.7619047619047619,

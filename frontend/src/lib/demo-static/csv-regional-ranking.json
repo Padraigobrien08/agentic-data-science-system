@@ -104,7 +104,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-hyp-0",
       "iteration": 0,
       "rationale": "This tests whether the service-quality gap remains when volume is considered.",
-      "sequence": 0
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -113,7 +119,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-hyp-1",
       "iteration": 0,
       "rationale": "This tests the proposed alternative explanation directly on the cause metric.",
-      "sequence": 1
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -122,7 +134,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-2",
       "iteration": 0,
       "rationale": "analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.",
-      "sequence": 2
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -131,7 +149,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 6 evidence item(s) for analyze_correlation",
-      "sequence": 3
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -140,7 +164,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-4",
       "iteration": 0,
       "rationale": "active (support=0, refute=0)",
-      "sequence": 4
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -149,7 +179,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-5",
       "iteration": 1,
       "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
-      "sequence": 5
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -158,7 +194,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-6",
       "iteration": 0,
       "rationale": "recorded 6 evidence item(s) for analyze_correlation",
-      "sequence": 6
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -167,7 +209,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-7",
       "iteration": 0,
       "rationale": "active (support=0, refute=0)",
-      "sequence": 7
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -176,7 +224,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-8",
       "iteration": 2,
       "rationale": "This will establish the correlation estimate via simple regression, which best matches the goal and has the highest available information gain.",
-      "sequence": 8
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -185,7 +239,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-9",
       "iteration": 0,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
-      "sequence": 9
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -194,7 +254,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-10",
       "iteration": 0,
       "rationale": "active (support=1, refute=0)",
-      "sequence": 10
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -203,7 +269,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-sel-11",
       "iteration": 3,
       "rationale": "This will establish the strength and direction of the correlation via a simple regression fit.",
-      "sequence": 11
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-exp-3",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -212,7 +284,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-evd-12",
       "iteration": 0,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
-      "sequence": 12
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -221,7 +299,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-rev-13",
       "iteration": 0,
       "rationale": "weakened (support=0, refute=1)",
-      "sequence": 13
+      "sequence": 13,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -230,7 +314,13 @@
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-dec-concl-14",
       "iteration": 0,
       "rationale": "inconclusive (insufficient_evidence)",
-      "sequence": 14
+      "sequence": 14,
+      "targets": [
+        {
+          "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-concl-0",
+          "kind": "conclusion"
+        }
+      ]
     }
   ],
   "demo_slug": "csv-regional-ranking",
@@ -315,7 +405,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-0",
       "reliability": 0.7619047619047619,
@@ -348,7 +438,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-1",
       "reliability": 0.7619047619047619,
@@ -381,7 +471,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-2",
       "reliability": 0.7619047619047619,
@@ -414,7 +504,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-3",
       "reliability": 0.7619047619047619,
@@ -447,7 +537,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-4",
       "reliability": 0.7619047619047619,
@@ -480,7 +570,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-5",
       "reliability": 0.7619047619047619,
@@ -513,7 +603,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-6",
       "reliability": 0.7619047619047619,
@@ -546,7 +636,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-7",
       "reliability": 0.7619047619047619,
@@ -579,7 +669,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-8",
       "reliability": 0.7619047619047619,
@@ -612,7 +702,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-9",
       "reliability": 0.7619047619047619,
@@ -645,7 +735,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-10",
       "reliability": 0.7619047619047619,
@@ -678,7 +768,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-11",
       "reliability": 0.7619047619047619,
@@ -711,7 +801,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "a4b57651-b222-4dc7-8f74-b72396ee531f"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-0"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-12",
       "reliability": 0.7619047619047619,
@@ -750,7 +840,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "57c5698c-9854-4b82-8f57-91138a5cc695"
+        "3b819527-80a5-43d7-a896-f8a8a3a9e947-hyp-1"
       ],
       "id": "3b819527-80a5-43d7-a896-f8a8a3a9e947-evd-13",
       "reliability": 0.7619047619047619,

@@ -167,7 +167,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-0",
       "iteration": 0,
       "rationale": "This directly tests the stated profitability explanation using the margin metric.",
-      "sequence": 0
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -176,7 +182,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-1",
       "iteration": 0,
       "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
-      "sequence": 1
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -185,7 +197,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-2",
       "iteration": 0,
       "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
-      "sequence": 2
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -194,7 +212,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 36 evidence item(s) for analyze_correlation",
-      "sequence": 3
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -203,7 +227,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-4",
       "iteration": 0,
       "rationale": "supported (support=36, refute=0)",
-      "sequence": 4
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -212,7 +242,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-crit-5",
       "iteration": 0,
       "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
-      "sequence": 5
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -221,7 +257,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-6",
       "iteration": 1,
       "rationale": "This is the offered falsification test, so it best checks whether the current correlation hypothesis survives an independent challenge.",
-      "sequence": 6
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-1",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -230,7 +272,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-7",
       "iteration": 0,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
-      "sequence": 7
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -239,7 +287,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-8",
       "iteration": 0,
       "rationale": "supported (support=37, refute=0)",
-      "sequence": 8
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -248,7 +302,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-9",
       "iteration": 2,
       "rationale": "This directly establishes the correlation and has the highest expected information gain among the available candidates.",
-      "sequence": 9
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -257,7 +317,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-10",
       "iteration": 0,
       "rationale": "recorded 36 evidence item(s) for analyze_correlation",
-      "sequence": 10
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -266,7 +332,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-11",
       "iteration": 0,
       "rationale": "supported (support=36, refute=0)",
-      "sequence": 11
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -275,7 +347,13 @@
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-concl-12",
       "iteration": 0,
       "rationale": "supported (sufficient_evidence)",
-      "sequence": 12
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-concl-0",
+          "kind": "conclusion"
+        }
+      ]
     }
   ],
   "demo_slug": "edgar-peer-separation",
@@ -350,7 +428,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
       "reliability": 0.620253164556962,
@@ -383,7 +461,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
       "reliability": 0.620253164556962,
@@ -416,7 +494,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
       "reliability": 0.620253164556962,
@@ -449,7 +527,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
       "reliability": 0.620253164556962,
@@ -482,7 +560,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
       "reliability": 0.620253164556962,
@@ -515,7 +593,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
       "reliability": 0.620253164556962,
@@ -548,7 +626,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
       "reliability": 0.620253164556962,
@@ -581,7 +659,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
       "reliability": 0.620253164556962,
@@ -614,7 +692,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
       "reliability": 0.620253164556962,
@@ -647,7 +725,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
       "reliability": 0.620253164556962,
@@ -680,7 +758,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
       "reliability": 0.620253164556962,
@@ -713,7 +791,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
       "reliability": 0.620253164556962,
@@ -746,7 +824,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
       "reliability": 0.620253164556962,
@@ -779,7 +857,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
       "reliability": 0.620253164556962,
@@ -812,7 +890,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
       "reliability": 0.620253164556962,
@@ -845,7 +923,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
       "reliability": 0.620253164556962,
@@ -878,7 +956,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
       "reliability": 0.620253164556962,
@@ -911,7 +989,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
       "reliability": 0.620253164556962,
@@ -944,7 +1022,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
       "reliability": 0.620253164556962,
@@ -977,7 +1055,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
       "reliability": 0.620253164556962,
@@ -1010,7 +1088,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
       "reliability": 0.620253164556962,
@@ -1043,7 +1121,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
       "reliability": 0.620253164556962,
@@ -1076,7 +1154,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
       "reliability": 0.620253164556962,
@@ -1109,7 +1187,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
       "reliability": 0.620253164556962,
@@ -1142,7 +1220,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
       "reliability": 0.620253164556962,
@@ -1175,7 +1253,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
       "reliability": 0.620253164556962,
@@ -1208,7 +1286,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
       "reliability": 0.620253164556962,
@@ -1241,7 +1319,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
       "reliability": 0.620253164556962,
@@ -1274,7 +1352,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
       "reliability": 0.620253164556962,
@@ -1307,7 +1385,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
       "reliability": 0.620253164556962,
@@ -1340,7 +1418,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
       "reliability": 0.620253164556962,
@@ -1373,7 +1451,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
       "reliability": 0.620253164556962,
@@ -1406,7 +1484,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
       "reliability": 0.620253164556962,
@@ -1439,7 +1517,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
       "reliability": 0.620253164556962,
@@ -1472,7 +1550,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
       "reliability": 0.620253164556962,
@@ -1505,7 +1583,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
       "reliability": 0.620253164556962,
@@ -1538,7 +1616,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
       "reliability": 0.620253164556962,
@@ -1577,7 +1655,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
       "reliability": 0.620253164556962,
@@ -1610,7 +1688,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
       "reliability": 0.620253164556962,
@@ -1643,7 +1721,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
       "reliability": 0.620253164556962,
@@ -1676,7 +1754,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
       "reliability": 0.620253164556962,
@@ -1709,7 +1787,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
       "reliability": 0.620253164556962,
@@ -1742,7 +1820,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
       "reliability": 0.620253164556962,
@@ -1775,7 +1853,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
       "reliability": 0.620253164556962,
@@ -1808,7 +1886,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
       "reliability": 0.620253164556962,
@@ -1841,7 +1919,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
       "reliability": 0.620253164556962,
@@ -1874,7 +1952,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
       "reliability": 0.620253164556962,
@@ -1907,7 +1985,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
       "reliability": 0.620253164556962,
@@ -1940,7 +2018,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
       "reliability": 0.620253164556962,
@@ -1973,7 +2051,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
       "reliability": 0.620253164556962,
@@ -2006,7 +2084,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
       "reliability": 0.620253164556962,
@@ -2039,7 +2117,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
       "reliability": 0.620253164556962,
@@ -2072,7 +2150,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
       "reliability": 0.620253164556962,
@@ -2105,7 +2183,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
       "reliability": 0.620253164556962,
@@ -2138,7 +2216,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
       "reliability": 0.620253164556962,
@@ -2171,7 +2249,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
       "reliability": 0.620253164556962,
@@ -2204,7 +2282,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
       "reliability": 0.620253164556962,
@@ -2237,7 +2315,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
       "reliability": 0.620253164556962,
@@ -2270,7 +2348,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
       "reliability": 0.620253164556962,
@@ -2303,7 +2381,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
       "reliability": 0.620253164556962,
@@ -2336,7 +2414,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
       "reliability": 0.620253164556962,
@@ -2369,7 +2447,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
       "reliability": 0.620253164556962,
@@ -2402,7 +2480,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
       "reliability": 0.620253164556962,
@@ -2435,7 +2513,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
       "reliability": 0.620253164556962,
@@ -2468,7 +2546,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
       "reliability": 0.620253164556962,
@@ -2501,7 +2579,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
       "reliability": 0.620253164556962,
@@ -2534,7 +2612,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
       "reliability": 0.620253164556962,
@@ -2567,7 +2645,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
       "reliability": 0.620253164556962,
@@ -2600,7 +2678,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
       "reliability": 0.620253164556962,
@@ -2633,7 +2711,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
       "reliability": 0.620253164556962,
@@ -2666,7 +2744,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
       "reliability": 0.620253164556962,
@@ -2699,7 +2777,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
       "reliability": 0.620253164556962,
@@ -2732,7 +2810,7 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
       ],
       "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72",
       "reliability": 0.620253164556962,

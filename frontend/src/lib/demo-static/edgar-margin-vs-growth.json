@@ -130,7 +130,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-hyp-0",
       "iteration": 0,
       "rationale": "This directly tests the stated concern about margin quality worsening over time.",
-      "sequence": 0
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -139,7 +145,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-hyp-1",
       "iteration": 0,
       "rationale": "The goal explicitly asks whether revenue growth, rather than margin deterioration alone, explains the pattern.",
-      "sequence": 1
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -148,7 +160,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-2",
       "iteration": 0,
       "rationale": "edgar_trend_break_analysis has the highest expected information gain for establishing the trend and its break structure.",
-      "sequence": 2
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -157,7 +175,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 1 evidence item(s) for edgar_trend_break_analysis",
-      "sequence": 3
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -166,7 +190,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-4",
       "iteration": 0,
       "rationale": "active (support=0, refute=0)",
-      "sequence": 4
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -175,7 +205,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-5",
       "iteration": 1,
       "rationale": "edgar_trend_break_analysis has the highest expected information gain for establishing the trend and any breakpoints.",
-      "sequence": 5
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-4",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -184,7 +220,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-6",
       "iteration": 1,
       "rationale": "recorded 1 evidence item(s) for edgar_trend_break_analysis",
-      "sequence": 6
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -193,7 +235,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-7",
       "iteration": 1,
       "rationale": "active (support=0, refute=0)",
-      "sequence": 7
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -202,7 +250,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-8",
       "iteration": 2,
       "rationale": "Analyze the time series trend directly, since it has the highest expected information gain for the trend goal.",
-      "sequence": 8
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -211,7 +265,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-9",
       "iteration": 2,
       "rationale": "recorded 1 evidence item(s) for analyze_time_series_trend",
-      "sequence": 9
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -220,7 +280,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-10",
       "iteration": 2,
       "rationale": "weakened (support=0, refute=1)",
-      "sequence": 10
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -229,7 +295,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-11",
       "iteration": 3,
       "rationale": "analyze_time_series_trend is the highest-information experiment for establishing the presence and direction of a trend.",
-      "sequence": 11
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-5",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -238,7 +310,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-12",
       "iteration": 3,
       "rationale": "recorded 1 evidence item(s) for analyze_time_series_trend",
-      "sequence": 12
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -247,7 +325,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-13",
       "iteration": 3,
       "rationale": "active (support=0, refute=0)",
-      "sequence": 13
+      "sequence": 13,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -256,7 +340,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-14",
       "iteration": 4,
       "rationale": "Detecting change points is the most informative next step for establishing whether a trend exists and where it shifts.",
-      "sequence": 14
+      "sequence": 14,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-4",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -265,7 +355,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-15",
       "iteration": 4,
       "rationale": "recorded 1 evidence item(s) for detect_change_points",
-      "sequence": 15
+      "sequence": 15,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -274,7 +370,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-16",
       "iteration": 4,
       "rationale": "rejected (support=0, refute=2)",
-      "sequence": 16
+      "sequence": 16,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -283,7 +385,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-17",
       "iteration": 5,
       "rationale": "detect_change_points is the highest-information experiment and would establish whether the series has structural shifts relevant to trend.",
-      "sequence": 17
+      "sequence": 17,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-5",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -292,7 +400,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-18",
       "iteration": 5,
       "rationale": "recorded 1 evidence item(s) for detect_change_points",
-      "sequence": 18
+      "sequence": 18,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -301,7 +415,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-19",
       "iteration": 5,
       "rationale": "supported (support=1, refute=0)",
-      "sequence": 19
+      "sequence": 19,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -310,7 +430,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-crit-20",
       "iteration": 5,
       "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
-      "sequence": 20
+      "sequence": 20,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -319,7 +445,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-sel-21",
       "iteration": 6,
       "rationale": "This falsification check would test whether the currently supported trend hypothesis fails under a distribution summary.",
-      "sequence": 21
+      "sequence": 21,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-exp-6",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -328,7 +460,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-evd-22",
       "iteration": 6,
       "rationale": "recorded 1 evidence item(s) for summarize_distribution",
-      "sequence": 22
+      "sequence": 22,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -337,7 +475,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-rev-23",
       "iteration": 6,
       "rationale": "supported (support=1, refute=0)",
-      "sequence": 23
+      "sequence": 23,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
@@ -346,7 +490,13 @@
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-dec-concl-24",
       "iteration": 7,
       "rationale": "mixed (sufficient_evidence)",
-      "sequence": 24
+      "sequence": 24,
+      "targets": [
+        {
+          "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-concl-0",
+          "kind": "conclusion"
+        }
+      ]
     }
   ],
   "demo_slug": "edgar-margin-vs-growth",
@@ -461,7 +611,7 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "52eb5ddc-f602-4356-a06b-14154a5cd977"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-0",
       "reliability": 0.8672566371681416,
@@ -488,7 +638,7 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-1",
       "reliability": 0.8672566371681416,
@@ -515,7 +665,7 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "52eb5ddc-f602-4356-a06b-14154a5cd977"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-2",
       "reliability": 0.620253164556962,
@@ -551,7 +701,7 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-3",
       "reliability": 0.6052631578947368,
@@ -587,7 +737,7 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "52eb5ddc-f602-4356-a06b-14154a5cd977"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-0"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-4",
       "reliability": 0.620253164556962,
@@ -617,7 +767,7 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-5",
       "reliability": 0.6052631578947368,
@@ -647,7 +797,7 @@
       "evidence_type": "descriptive_stat",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "9a4f18c4-759c-4cab-b1c6-94ae0ec1bdd4"
+        "fdeecd17-970e-4b84-8d99-99aa32d7aae9-hyp-1"
       ],
       "id": "fdeecd17-970e-4b84-8d99-99aa32d7aae9-evd-6",
       "reliability": 0.6052631578947368,
