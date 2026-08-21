@@ -1,6 +1,14 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
@@ -38,30 +46,59 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-type Props = {
-  projectId: string;
+type BaseProps = {
   conversationId: string;
   user?: CurrentUser | null;
-  tickers: string[];
-  backgroundDelivery: ChatBackgroundDelivery;
   initialMessages: ChatMessage[];
   chatThreads: ChatThreadSummary[];
   className?: string;
 };
 
+type LiveProps = BaseProps & {
+  readOnly?: false;
+  projectId: string;
+  tickers: string[];
+  backgroundDelivery: ChatBackgroundDelivery;
+  header?: never;
+  rail?: never;
+};
+
+/**
+ * Replay tier: a recorded run, shown in the product's own chat rather than a lookalike.
+ *
+ * A union rather than a `readOnly` flag on flat props, because read-only is not one
+ * suppression but several, and the type is what stops a caller applying half of them: with
+ * `readOnly: true` there is no project to scope, no delivery health to report, and nothing
+ * to send — so those props are gone, and `header`/`rail` are only available here.
+ */
+type ReadOnlyProps = BaseProps & {
+  readOnly: true;
+  projectId?: never;
+  tickers?: never;
+  backgroundDelivery?: never;
+  /** Replaces the scope header, which has nothing to say about a finished run. */
+  header?: ReactNode;
+  /** Docked beside the conversation on wide viewports — the trace, for demos. */
+  rail?: ReactNode;
+};
+
+type Props = LiveProps | ReadOnlyProps;
+
 /**
  * One visible conversation thread, hydrated from persisted messages and extended in place.
  */
-export function ChatShell({
-  projectId,
-  conversationId,
-  user,
-  tickers,
-  backgroundDelivery,
-  initialMessages,
-  chatThreads,
-  className,
-}: Props) {
+export function ChatShell(props: Props) {
+  const { conversationId, user, initialMessages, chatThreads, className } = props;
+  // Narrowed once, here, so the render below cannot reach a live-only prop from a read-only
+  // branch (or the reverse) — `readOnly` alone is a boolean and narrows nothing.
+  const replay = props.readOnly === true ? props : null;
+  const live = props.readOnly === true ? null : props;
+  const readOnly = replay !== null;
+  // Both are only reachable through affordances that read-only mode does not render; the
+  // fallbacks exist so the hooks below stay unconditional.
+  const projectId = live?.projectId ?? "";
+  const liveTickers = live?.tickers;
+  const tickers = useMemo(() => liveTickers ?? [], [liveTickers]);
   const router = useRouter();
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
   const [isEditingScope, setIsEditingScope] = useState(false);
@@ -208,6 +245,7 @@ export function ChatShell({
 
   // Accelerators: ⌘K / Ctrl+K opens the palette, ⌘⇧O / Ctrl+Shift+O starts a new chat.
   useEffect(() => {
+    if (readOnly) return;
     const onKey = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (!mod) return;
@@ -223,7 +261,7 @@ export function ChatShell({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [startNewChat]);
+  }, [startNewChat, readOnly]);
 
   const onSend = async (text: string, requestId: string) => {
     setSendError(undefined);
@@ -347,17 +385,22 @@ export function ChatShell({
         className,
       )}
     >
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={paletteCommands} />
+      {readOnly ? null : (
+        <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={paletteCommands} />
+      )}
       <ChatSidebar
         conversationId={conversationId}
         user={user}
         scopeTickers={scopeTickers}
-        newConversationAction={newConversationAction}
-        deleteConversationAction={boundDeleteConversationAction}
+        newConversationAction={readOnly ? undefined : newConversationAction}
+        deleteConversationAction={readOnly ? undefined : boundDeleteConversationAction}
         chatThreads={chatThreads}
+        readOnly={readOnly}
       />
       <SidebarInset className="bg-[var(--background)]">
-        <header className="border-b border-[var(--border)] px-4 py-2.5">
+        {replay ? replay.header : null}
+        {live ? (
+          <header className="border-b border-[var(--border)] px-4 py-2.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 flex-wrap items-center gap-1.5">
               <span className="text-[10.5px] font-medium uppercase tracking-[0.1em] text-[var(--muted)]">
@@ -424,17 +467,36 @@ export function ChatShell({
               ) : null}
             </form>
           ) : null}
-        </header>
-        <ChatMessageList messages={messages} onPickPrompt={handlePickPrompt} onStop={handleStop} />
-        <ChatComposer
-          backgroundDelivery={backgroundDelivery}
-          error={sendError}
-          disabled={isRunning}
-          onSend={onSend}
-          value={draft}
-          onValueChange={setDraft}
-          inputRef={composerInputRef}
-        />
+          </header>
+        ) : null}
+        {replay ? (
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <ChatMessageList messages={messages} />
+            </div>
+            {replay.rail ? (
+              // Below `lg` the rail would halve an already narrow conversation, so it is
+              // dropped and the header's link to the full record carries the trace instead.
+              <aside className="scrollbar-hidden hidden w-[26rem] shrink-0 overflow-y-auto border-l border-[var(--border)] px-5 py-5 lg:block">
+                {replay.rail}
+              </aside>
+            ) : null}
+          </div>
+        ) : null}
+        {live ? (
+          <>
+            <ChatMessageList messages={messages} onPickPrompt={handlePickPrompt} onStop={handleStop} />
+            <ChatComposer
+              backgroundDelivery={live.backgroundDelivery}
+              error={sendError}
+              disabled={isRunning}
+              onSend={onSend}
+              value={draft}
+              onValueChange={setDraft}
+              inputRef={composerInputRef}
+            />
+          </>
+        ) : null}
       </SidebarInset>
     </SidebarProvider>
   );

@@ -6,6 +6,9 @@ import { usePathname } from "next/navigation";
 import { SiteHeader } from "@/components/layout/site-header";
 import type { CurrentUser } from "@/lib/api/types";
 
+/** A recorded run viewer — the chat surface itself, so it gets the chat's chrome (none). */
+const DEMO_RUN = /^\/demos\/[^/]+$/;
+
 /**
  * Chrome switch across four surfaces:
  * - Chat: full-viewport app; opts out of the header + padded main entirely.
@@ -18,7 +21,10 @@ import type { CurrentUser } from "@/lib/api/types";
 export function AppChrome({ user, children }: { user: CurrentUser | null; children: ReactNode }) {
   const pathname = usePathname() ?? "";
 
-  if (/\/chat(\/|$)/.test(pathname) || pathname === "/") {
+  // `/demos/<slug>` renders the real ChatShell full-viewport. Leaving the site header above
+  // it would both break the illusion and leave a row of links focusable behind a fixed
+  // overlay; `/demos/<slug>/trace` is a document, not the app, and keeps the header.
+  if (/\/chat(\/|$)/.test(pathname) || pathname === "/" || DEMO_RUN.test(pathname)) {
     return <>{children}</>;
   }
 

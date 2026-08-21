@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
+import { ChatRecordedAnswer } from "./chat-recorded-answer";
 import { ChatRunAnswerCard } from "./chat-run-answer-card";
 import { ChatRunProgress } from "./chat-run-progress";
 import type { ChatMessage } from "./types";
@@ -158,6 +159,8 @@ export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
               <div className="w-full max-w-[76rem]">
                 {m.pending ? (
                   <ChatRunProgress view={m.phaseView} onStop={onStop} />
+                ) : m.recordedAnswer ? (
+                  <ChatRecordedAnswer answer={m.recordedAnswer} />
                 ) : m.answerCard ? (
                   <div className="mx-auto max-w-[66rem]">
                     <ChatRunAnswerCard

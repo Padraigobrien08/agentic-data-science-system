@@ -257,4 +257,98 @@ describe("ChatShell", () => {
       screen.getByText("Open trace to inspect what failed, then retry with narrower wording or refreshed SEC data."),
     ).toBeTruthy();
   });
+
+  describe("read-only (replay tier)", () => {
+    const recorded: ChatMessage[] = [
+      {
+        id: "demo-user-inv-1",
+        role: "user",
+        content: "Does staffing or volume drive service times?",
+        createdAt: "2026-08-20T19:02:18Z",
+      },
+      {
+        id: "demo-assistant-inv-1",
+        role: "assistant",
+        content: "Two claims could not both be true, so neither was allowed to stand.",
+        recordedAnswer: {
+          headline: "Two claims could not both be true, so neither was allowed to stand.",
+          conclusion: null,
+          claims: [{ id: "h-a", statement: "staffing drives it", status: "weakened", confidence: 0.5 }],
+          openQuestions: ["which of the two holds?"],
+          footnote: "15 decisions, 3 experiments, 13 evidence items.",
+        },
+        createdAt: "2026-08-20T19:02:30Z",
+      },
+    ];
+    const threads: ChatThreadSummary[] = [
+      {
+        id: "a-demo",
+        title: "Does staffing or volume drive service times?",
+        href: "/demos/a-demo",
+        hasMessages: true,
+        updatedAt: "2026-08-20T19:02:30Z",
+      },
+    ];
+
+    function renderReplay() {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          header={<header>recorded · declined</header>}
+          rail={<aside>The trace</aside>}
+        />,
+      );
+    }
+
+    // Every one of these controls would reach a backend that is not there on the replay
+    // tier. Absent, not disabled — a demo that offers a composer and then fails is worse
+    // than one that never offered.
+    it("renders no affordance that would need a backend", () => {
+      renderReplay();
+
+      expect(screen.queryByLabelText("Message input")).toBeNull();
+      expect(screen.queryByRole("button", { name: "New chat" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Delete Does staffing or volume drive service times?" }),
+      ).toBeNull();
+      expect(screen.queryByRole("button", { name: "Sign out" })).toBeNull();
+      expect(screen.queryByText("Edit scope")).toBeNull();
+      expect(screen.queryByLabelText(/Open command palette/)).toBeNull();
+      expect(screen.queryByText("Scope")).toBeNull();
+    });
+
+    it("shows the recorded answer, the supplied header, and the docked trace", () => {
+      renderReplay();
+
+      expect(screen.getByText("recorded · declined")).toBeTruthy();
+      // Twice: the question in the transcript, and the run's row in the sidebar.
+      expect(screen.getAllByText("Does staffing or volume drive service times?")).toHaveLength(2);
+      expect(
+        screen.getByText("Two claims could not both be true, so neither was allowed to stand."),
+      ).toBeTruthy();
+      expect(screen.getByText("staffing drives it")).toBeTruthy();
+      expect(screen.getByText("which of the two holds?")).toBeTruthy();
+      expect(screen.getByText("15 decisions, 3 experiments, 13 evidence items.")).toBeTruthy();
+      expect(screen.getByText("The trace")).toBeTruthy();
+    });
+
+    it("keeps the sidebar as the run switcher, named for what it lists", () => {
+      renderReplay();
+
+      expect(screen.getAllByText("Recorded runs").length).toBeGreaterThan(0);
+      expect(screen.queryByText("History")).toBeNull();
+      expect(screen.getByRole("link", { name: /Does staffing or volume drive service times/ })).toBeTruthy();
+    });
+
+    it("leaves the command palette shortcut inert", () => {
+      renderReplay();
+
+      fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+      expect(screen.queryByPlaceholderText(/Search/i)).toBeNull();
+    });
+  });
 });

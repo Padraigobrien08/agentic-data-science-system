@@ -4,6 +4,7 @@
  */
 
 import type { AnalysisRunStatus, BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
+import type { ComposedAnswer } from "@/lib/demo-answer";
 import type { PipelinePhaseView } from "@/lib/run-pipeline-phases";
 import type { ChatAnswerCardView } from "@/lib/run-primary-view";
 
@@ -28,6 +29,11 @@ export type ChatAssistantMessage = {
   rewriteSuggestions?: string[];
   routingReason?: string;
   answerCard?: ChatAnswerCardView;
+  /**
+   * A recorded run's answer, composed from persisted investigation state. Set only on the
+   * replay tier, where there is no run view model to build an `answerCard` from.
+   */
+  recordedAnswer?: ComposedAnswer;
   runId?: string;
   runHref?: string;
   deepDiveHref?: string;
