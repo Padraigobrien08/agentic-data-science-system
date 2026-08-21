@@ -29,7 +29,14 @@ export function AppChrome({ user, children }: { user: CurrentUser | null; childr
     </>
   );
 
-  if (pathname.startsWith("/projects") || pathname.startsWith("/artifacts")) {
+  // `/demos` is the product being shown, so it wears the product's skin rather than the
+  // marketing shell. Without this it kept the light warm shell: hardcoded light colours that
+  // ignored the reader's dark-mode preference, and a visual break from everything else.
+  if (
+    pathname.startsWith("/projects") ||
+    pathname.startsWith("/artifacts") ||
+    pathname.startsWith("/demos")
+  ) {
     return (
       <div className="app-skin min-h-screen bg-[var(--background)] text-[var(--foreground)]">{shell}</div>
     );
