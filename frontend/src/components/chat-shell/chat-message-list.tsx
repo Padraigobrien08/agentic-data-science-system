@@ -59,10 +59,16 @@ type Props = {
   messages: ChatMessage[];
   onPickPrompt?: (goal: string) => void;
   onStop?: () => void;
-  /** Docks the trace for a run beside the conversation. Absent = no docking available. */
-  onOpenTrace?: (runId: string) => void;
-  /** The run whose trace is currently docked, so its control reads as pressed. */
-  openTraceRunId?: string | null;
+  /**
+   * Docks a trace beside the conversation. The key identifies which one: a live answer is
+   * keyed by its run, a recorded answer by its message — the replay tier has exactly one
+   * trace, so the id only has to be stable, not resolvable.
+   *
+   * Absent = this surface cannot dock, and no control is offered.
+   */
+  onInspectTrace?: (key: string) => void;
+  /** The trace currently docked, so its control reads as pressed. */
+  openTraceKey?: string | null;
 };
 
 function EmptyState({ onPickPrompt }: { onPickPrompt?: (goal: string) => void }) {
@@ -129,8 +135,8 @@ export function ChatMessageList({
   messages,
   onPickPrompt,
   onStop,
-  onOpenTrace,
-  openTraceRunId,
+  onInspectTrace,
+  openTraceKey,
 }: Props) {
   return (
     <div
@@ -160,6 +166,9 @@ export function ChatMessageList({
             return <SystemStrip key={m.id} content={m.content} />;
           }
           const note = deliveryNote(m);
+          // A live answer is keyed by its run; a recorded one by its message, since the
+          // replay tier holds a single trace and only needs a stable handle for it.
+          const traceKey = onInspectTrace ? (m.runId ?? (m.recordedAnswer ? m.id : null)) : null;
           return (
             <article
               key={m.id}
@@ -210,16 +219,18 @@ export function ChatMessageList({
                   <p className="mx-auto mt-3 max-w-[52rem] text-[11px] leading-5 text-[var(--muted)]">{note}</p>
                 ) : null}
                 {/* Docks the trace rather than navigating: the answer and the reason for it
-                    are worth reading side by side. The card's own nav keeps the full page. */}
-                {onOpenTrace && m.runId && !m.pending ? (
-                  <div className="mx-auto mt-3 max-w-[52rem]">
+                    are worth reading side by side. The card's own nav keeps the full page.
+                    Hidden below `lg`, where there is no room to dock into and the control
+                    would do nothing when pressed. */}
+                {traceKey && !m.pending ? (
+                  <div className="mx-auto mt-3 hidden max-w-[52rem] lg:block">
                     <button
                       type="button"
-                      onClick={() => onOpenTrace(m.runId!)}
-                      aria-pressed={openTraceRunId === m.runId}
+                      onClick={() => onInspectTrace?.(traceKey)}
+                      aria-pressed={openTraceKey === traceKey}
                       className="rounded-control border border-[var(--border)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] aria-pressed:border-[var(--accent)] aria-pressed:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
                     >
-                      {openTraceRunId === m.runId ? "hide trace" : "show trace"}
+                      {openTraceKey === traceKey ? "hide trace" : "inspect trace"}
                     </button>
                   </div>
                 ) : null}

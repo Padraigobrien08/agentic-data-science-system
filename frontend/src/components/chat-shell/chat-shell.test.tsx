@@ -322,7 +322,7 @@ describe("ChatShell", () => {
       expect(screen.queryByText("Scope")).toBeNull();
     });
 
-    it("shows the recorded answer, the supplied header, and the docked trace", () => {
+    it("shows the recorded answer and the supplied header", () => {
       renderReplay();
 
       expect(screen.getByText("recorded · declined")).toBeTruthy();
@@ -334,7 +334,41 @@ describe("ChatShell", () => {
       expect(screen.getByText("staffing drives it")).toBeTruthy();
       expect(screen.getByText("which of the two holds?")).toBeTruthy();
       expect(screen.getByText("15 decisions, 3 experiments, 13 evidence items.")).toBeTruthy();
+    });
+
+    // The answer is what the reader came for; the trace is what lets them disbelieve it.
+    // Offered on the answer, not imposed beside it.
+    it("keeps the trace collapsed until the answer's control asks for it", () => {
+      renderReplay();
+
+      expect(screen.queryByText("The trace")).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: "inspect trace" }));
+
       expect(screen.getByText("The trace")).toBeTruthy();
+    });
+
+    it("collapses it again from the same control", () => {
+      renderReplay();
+
+      fireEvent.click(screen.getByRole("button", { name: "inspect trace" }));
+      fireEvent.click(screen.getByRole("button", { name: "hide trace" }));
+
+      expect(screen.queryByText("The trace")).toBeNull();
+    });
+
+    it("offers no trace control when the surface supplies no rail", () => {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          composer={{ state: "locked", lock: LOCK }}
+        />,
+      );
+
+      expect(screen.queryByRole("button", { name: "inspect trace" })).toBeNull();
     });
 
     it("keeps the sidebar as the run switcher, named for what it lists", () => {

@@ -137,8 +137,10 @@ export function ChatShell(props: Props) {
   const [sendError, setSendError] = useState<string | undefined>(undefined);
   // Replay only: the fork-to-workspace action navigates, so the box stays busy until it does.
   const [isForking, setIsForking] = useState(false);
-  // The run whose trace is docked beside the conversation, or null for none.
-  const [openTraceRunId, setOpenTraceRunId] = useState<string | null>(null);
+  // Which trace is docked beside the conversation, or null for none. Starts closed on both
+  // surfaces: the answer is what the reader came for, and the trace is what lets them
+  // disbelieve it — offered, not imposed.
+  const [openTraceKey, setOpenTraceKey] = useState<string | null>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeRequestId = useRef<string | null>(null);
@@ -365,8 +367,8 @@ export function ChatShell(props: Props) {
     }
   };
 
-  const toggleTrace = useCallback((runId: string) => {
-    setOpenTraceRunId((open) => (open === runId ? null : runId));
+  const toggleTrace = useCallback((key: string) => {
+    setOpenTraceKey((open) => (open === key ? null : key));
   }, []);
 
   const replayComposer = replay?.composer;
@@ -526,7 +528,11 @@ export function ChatShell(props: Props) {
         {replay ? (
           <div className="flex min-h-0 flex-1 overflow-hidden">
             <div className="flex min-h-0 flex-1 flex-col">
-              <ChatMessageList messages={messages} />
+              <ChatMessageList
+                messages={messages}
+                onInspectTrace={replay.rail ? toggleTrace : undefined}
+                openTraceKey={openTraceKey}
+              />
               <ChatComposer
                 backgroundDelivery={REPLAY_DELIVERY}
                 lock={replay.composer.state === "locked" ? replay.composer.lock : undefined}
@@ -541,7 +547,7 @@ export function ChatShell(props: Props) {
                 inputRef={composerInputRef}
               />
             </div>
-            {replay.rail ? (
+            {replay.rail && openTraceKey ? (
               // Below `lg` the rail would halve an already narrow conversation, so it is
               // dropped and the header's link to the full record carries the trace instead.
               <aside className="scrollbar-hidden hidden w-[26rem] shrink-0 overflow-y-auto border-l border-[var(--border)] px-5 py-5 lg:block">
@@ -557,8 +563,8 @@ export function ChatShell(props: Props) {
                 messages={messages}
                 onPickPrompt={handlePickPrompt}
                 onStop={handleStop}
-                onOpenTrace={toggleTrace}
-                openTraceRunId={openTraceRunId}
+                onInspectTrace={toggleTrace}
+                openTraceKey={openTraceKey}
               />
               <ChatComposer
                 backgroundDelivery={live.backgroundDelivery}
@@ -572,15 +578,15 @@ export function ChatShell(props: Props) {
             </div>
             {/* Same dock as the replay tier, and dropped below `lg` for the same reason:
                 the conversation column is already narrow there. */}
-            {openTraceRunId ? (
+            {openTraceKey ? (
               <aside className="scrollbar-hidden hidden w-[26rem] shrink-0 overflow-y-auto border-l border-[var(--border)] px-5 py-5 lg:block">
                 <ChatTraceRail
                   // Keyed by run: opening a different trace is a fresh load, not a
                   // reconciliation that would leave the previous run's steps on screen.
-                  key={openTraceRunId}
-                  runId={openTraceRunId}
-                  fullTraceHref={`/projects/${projectId}/runs/${openTraceRunId}/trace`}
-                  onClose={() => setOpenTraceRunId(null)}
+                  key={openTraceKey}
+                  runId={openTraceKey}
+                  fullTraceHref={`/projects/${projectId}/runs/${openTraceKey}/trace`}
+                  onClose={() => setOpenTraceKey(null)}
                 />
               </aside>
             ) : null}
