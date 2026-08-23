@@ -1334,6 +1334,17 @@
             "title": "Key Evidence Ids",
             "type": "array"
           },
+          "narrative": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Narrative"
+          },
           "statement": {
             "title": "Statement",
             "type": "string"

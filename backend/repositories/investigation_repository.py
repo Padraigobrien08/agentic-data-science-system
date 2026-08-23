@@ -534,7 +534,8 @@ class SqlAlchemyInvestigationRepository:
 
     def _conclusion_row(self, inv_id: UUID, c: Conclusion) -> ConclusionRow:
         return ConclusionRow(
-            investigation_id=inv_id, domain_id=c.id, statement=c.statement, disposition=c.disposition.value,
+            investigation_id=inv_id, domain_id=c.id, statement=c.statement, narrative=c.narrative,
+            disposition=c.disposition.value,
             confidence=c.confidence, supporting_hypothesis_ids_json=list(c.supporting_hypothesis_ids),
             key_evidence_ids_json=list(c.key_evidence_ids), caveats_json=list(c.caveats),
             open_question_ids_json=list(c.open_question_ids), provenance_json=_json(c.provenance),

@@ -382,7 +382,10 @@ class InvestigationLoop:
                   store: InvestigationStore, reason: TerminationReason,
                   tracker: BudgetTracker, started_at: float) -> Investigation:
         with self._timed(inv.id, LoopComponent.conclusion_synthesizer):
-            self._synth.synthesize(state, reason, idgen)
+            self._synth.synthesize(
+                state, reason, idgen,
+                policy=self.policy, question=state.objective.objective,
+            )
         state.record_termination(make_termination(reason, state, idgen))
         inv.set_status(_TERMINAL_STATUS.get(reason, InvestigationStatus.exhausted))
         store.save(inv)
@@ -397,7 +400,10 @@ class InvestigationLoop:
         """Malformed model output / internal error -> terminate safely with a conclusion."""
         if state.termination is None:
             with self._timed(inv.id, LoopComponent.conclusion_synthesizer):
-                self._synth.synthesize(state, reason, idgen)
+                self._synth.synthesize(
+                    state, reason, idgen,
+                    policy=self.policy, question=state.objective.objective,
+                )
             state.record_termination(make_termination(reason, state, idgen))
         if inv.status not in (InvestigationStatus.converged, InvestigationStatus.exhausted, InvestigationStatus.failed):
             # created -> planning -> running -> failed (respect the transition graph)

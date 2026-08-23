@@ -301,6 +301,9 @@ class OpenQuestionItem(BaseModel):
 class ConclusionItem(BaseModel):
     id: str
     statement: str
+    #: The finding as prose, when the run recorded one whose every figure was verified
+    #: against its own state. Null is ordinary — `statement` is the answer of record.
+    narrative: str | None = None
     disposition: str
     confidence: float
     caveats: list[str] = []
@@ -491,7 +494,8 @@ def build_detail(row: InvestigationRow) -> InvestigationDetail:
     conclusion_detail = None
     if concl is not None:
         conclusion_detail = ConclusionItem(
-            id=concl.domain_id, statement=concl.statement, disposition=concl.disposition,
+            id=concl.domain_id, statement=concl.statement, narrative=concl.narrative,
+            disposition=concl.disposition,
             confidence=concl.confidence, caveats=[str(x) for x in _as_list(concl.caveats_json)],
             supporting_hypothesis_ids=[str(x) for x in _as_list(concl.supporting_hypothesis_ids_json)],
             key_evidence_ids=[str(x) for x in _as_list(concl.key_evidence_ids_json)],

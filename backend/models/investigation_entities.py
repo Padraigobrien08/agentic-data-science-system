@@ -256,6 +256,10 @@ class ConclusionRow(Base):
     )
     domain_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
     statement: Mapped[str] = mapped_column(Text, nullable=False)
+    #: The finding written as prose, when the policy wrote one and every figure in it was
+    #: verified against recorded state. Nullable because that is the ordinary outcome for a
+    #: policy that cannot write, and because `statement` is the answer of record either way.
+    narrative: Mapped[str | None] = mapped_column(Text, nullable=True)
     disposition: Mapped[str] = mapped_column(String(64), nullable=False, index=True)
     confidence: Mapped[float] = mapped_column(Float, nullable=False, default=0.5)
     supporting_hypothesis_ids_json: Mapped[dict | list | None] = mapped_column(JSON, nullable=True)

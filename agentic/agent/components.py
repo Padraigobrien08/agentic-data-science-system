@@ -42,12 +42,14 @@ from agentic.experiments.record import ExperimentExecutionRecord
 from .budget import BudgetTracker
 from .direction import direction_sign
 from .ids import DeterministicIds
+from .narrative import AllowedNumbers, verify_narrative
 from .policy import (
     AgentPolicy,
     AnalysisIntent,
     CritiqueProposal,
     GoalInterpretation,
     drain_policy_cost,
+    narrate_answer,
 )
 
 # Intent -> ordered candidate tools (general layer). Order encodes priority.
@@ -863,7 +865,13 @@ class TerminationPolicy:
 
 class ConclusionSynthesizer:
     def synthesize(
-        self, state: InvestigationState, reason: TerminationReason, idgen: DeterministicIds,
+        self,
+        state: InvestigationState,
+        reason: TerminationReason,
+        idgen: DeterministicIds,
+        *,
+        policy: object | None = None,
+        question: str = "",
     ) -> Conclusion:
         supported = [h for h in state.hypotheses if h.status is HypothesisStatus.supported]
         rejected = [h for h in state.hypotheses if h.status is HypothesisStatus.rejected]
@@ -927,6 +935,7 @@ class ConclusionSynthesizer:
 
         conclusion = Conclusion(
             id=idgen.make("concl", 0), statement=statement, disposition=disposition, confidence=conf,
+            narrative=self._narrate(state, policy, question, disposition, conf),
             supporting_hypothesis_ids=hyp_ids, key_evidence_ids=key_ev, caveats=caveats,
             open_question_ids=[q.id for q in state.open_questions], provenance=_prov("conclusion_synthesizer"))
         state.set_conclusion(conclusion)
@@ -935,6 +944,52 @@ class ConclusionSynthesizer:
             rationale=f"{disposition.value} ({reason.value})",
             targets=[EntityRef(kind=EntityKind.conclusion, id=conclusion.id)], provenance=_prov("conclusion_synthesizer")))
         return conclusion
+
+    @staticmethod
+    def _narrate(
+        state: InvestigationState,
+        policy: object | None,
+        question: str,
+        disposition: ConclusionDisposition,
+        confidence: float,
+    ) -> str | None:
+        """
+        The finding as prose, when a policy can write one that survives verification.
+
+        The findings handed over are already-computed values, and the check on the way back
+        is what matters: a figure the run never recorded discards the whole narrative and
+        the caller keeps its deterministic statement. Returning ``None`` is an ordinary
+        outcome here, not a failure.
+        """
+        if policy is None:
+            return None
+
+        claims = [
+            {"statement": h.statement, "status": h.status.value, "confidence": h.confidence}
+            for h in state.hypotheses
+        ]
+        counts = {
+            "hypotheses": len(state.hypotheses),
+            "evidence": len(state.evidence),
+            "experiments": len(state.completed_experiments),
+            "supported": sum(1 for h in state.hypotheses if h.status is HypothesisStatus.supported),
+            "open_questions": len(state.open_questions),
+        }
+        findings = {
+            "disposition": disposition.value,
+            "confidence": confidence,
+            "claims": claims,
+            "counts": counts,
+        }
+
+        written = narrate_answer(policy, question=question, findings=findings)
+        if written is None:
+            return None
+
+        allowed = AllowedNumbers().add_many_counts(counts).add_confidence(confidence)
+        for h in state.hypotheses:
+            allowed.add_confidence(h.confidence)
+        return verify_narrative(written, allowed)
 
 
 def make_termination(reason: TerminationReason, state: InvestigationState, idgen: DeterministicIds) -> TerminationDecision:
