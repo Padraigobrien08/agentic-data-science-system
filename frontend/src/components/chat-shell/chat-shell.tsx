@@ -32,6 +32,7 @@ import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
 import { ChatComposer, type ComposerLock } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
+import { ChatTraceRail } from "./chat-trace-rail";
 import { CommandPalette, type PaletteCommand } from "./command-palette";
 import { HelpHint } from "./help-hint";
 import type {
@@ -136,6 +137,8 @@ export function ChatShell(props: Props) {
   const [sendError, setSendError] = useState<string | undefined>(undefined);
   // Replay only: the fork-to-workspace action navigates, so the box stays busy until it does.
   const [isForking, setIsForking] = useState(false);
+  // The run whose trace is docked beside the conversation, or null for none.
+  const [openTraceRunId, setOpenTraceRunId] = useState<string | null>(null);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeRequestId = useRef<string | null>(null);
@@ -362,6 +365,10 @@ export function ChatShell(props: Props) {
     }
   };
 
+  const toggleTrace = useCallback((runId: string) => {
+    setOpenTraceRunId((open) => (open === runId ? null : runId));
+  }, []);
+
   const replayComposer = replay?.composer;
   const onStartFromReplay = useCallback(
     async (text: string) => {
@@ -544,18 +551,40 @@ export function ChatShell(props: Props) {
           </div>
         ) : null}
         {live ? (
-          <>
-            <ChatMessageList messages={messages} onPickPrompt={handlePickPrompt} onStop={handleStop} />
-            <ChatComposer
-              backgroundDelivery={live.backgroundDelivery}
-              error={sendError}
-              disabled={isRunning}
-              onSend={onSend}
-              value={draft}
-              onValueChange={setDraft}
-              inputRef={composerInputRef}
-            />
-          </>
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <ChatMessageList
+                messages={messages}
+                onPickPrompt={handlePickPrompt}
+                onStop={handleStop}
+                onOpenTrace={toggleTrace}
+                openTraceRunId={openTraceRunId}
+              />
+              <ChatComposer
+                backgroundDelivery={live.backgroundDelivery}
+                error={sendError}
+                disabled={isRunning}
+                onSend={onSend}
+                value={draft}
+                onValueChange={setDraft}
+                inputRef={composerInputRef}
+              />
+            </div>
+            {/* Same dock as the replay tier, and dropped below `lg` for the same reason:
+                the conversation column is already narrow there. */}
+            {openTraceRunId ? (
+              <aside className="scrollbar-hidden hidden w-[26rem] shrink-0 overflow-y-auto border-l border-[var(--border)] px-5 py-5 lg:block">
+                <ChatTraceRail
+                  // Keyed by run: opening a different trace is a fresh load, not a
+                  // reconciliation that would leave the previous run's steps on screen.
+                  key={openTraceRunId}
+                  runId={openTraceRunId}
+                  fullTraceHref={`/projects/${projectId}/runs/${openTraceRunId}/trace`}
+                  onClose={() => setOpenTraceRunId(null)}
+                />
+              </aside>
+            ) : null}
+          </div>
         ) : null}
       </SidebarInset>
     </SidebarProvider>

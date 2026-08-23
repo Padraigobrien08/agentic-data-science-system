@@ -59,6 +59,10 @@ type Props = {
   messages: ChatMessage[];
   onPickPrompt?: (goal: string) => void;
   onStop?: () => void;
+  /** Docks the trace for a run beside the conversation. Absent = no docking available. */
+  onOpenTrace?: (runId: string) => void;
+  /** The run whose trace is currently docked, so its control reads as pressed. */
+  openTraceRunId?: string | null;
 };
 
 function EmptyState({ onPickPrompt }: { onPickPrompt?: (goal: string) => void }) {
@@ -121,7 +125,13 @@ function SystemStrip({ content }: { content: string }) {
 /**
  * Conversation strip: user and assistant chat bubbles.
  */
-export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
+export function ChatMessageList({
+  messages,
+  onPickPrompt,
+  onStop,
+  onOpenTrace,
+  openTraceRunId,
+}: Props) {
   return (
     <div
       className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 md:px-6 md:py-5 lg:px-10"
@@ -198,6 +208,20 @@ export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
                 ) : null}
                 {note ? (
                   <p className="mx-auto mt-3 max-w-[52rem] text-[11px] leading-5 text-[var(--muted)]">{note}</p>
+                ) : null}
+                {/* Docks the trace rather than navigating: the answer and the reason for it
+                    are worth reading side by side. The card's own nav keeps the full page. */}
+                {onOpenTrace && m.runId && !m.pending ? (
+                  <div className="mx-auto mt-3 max-w-[52rem]">
+                    <button
+                      type="button"
+                      onClick={() => onOpenTrace(m.runId!)}
+                      aria-pressed={openTraceRunId === m.runId}
+                      className="rounded-control border border-[var(--border)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] aria-pressed:border-[var(--accent)] aria-pressed:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                    >
+                      {openTraceRunId === m.runId ? "hide trace" : "show trace"}
+                    </button>
+                  </div>
                 ) : null}
               </div>
             </article>
