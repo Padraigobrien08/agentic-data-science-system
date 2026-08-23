@@ -29,7 +29,7 @@ import type { PipelinePhaseView } from "@/lib/run-pipeline-phases";
 import type { CurrentUser } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
-import { ChatComposer } from "./chat-composer";
+import { ChatComposer, type ComposerLock } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
 import { CommandPalette, type PaletteCommand } from "./command-palette";
@@ -59,8 +59,11 @@ type LiveProps = BaseProps & {
   projectId: string;
   tickers: string[];
   backgroundDelivery: ChatBackgroundDelivery;
+  /** Prefills the composer — a question carried in from a recorded run. */
+  initialDraft?: string;
   header?: never;
   rail?: never;
+  composer?: never;
 };
 
 /**
@@ -80,6 +83,28 @@ type ReadOnlyProps = BaseProps & {
   header?: ReactNode;
   /** Docked beside the conversation on wide viewports — the trace, for demos. */
   rail?: ReactNode;
+  /** What the composer can do here. See `ReplayComposer`. */
+  composer: ReplayComposer;
+};
+
+/**
+ * The composer is always on screen on the replay tier, and whether it works is a fact about
+ * the deployment rather than a property of the page: no backend, or no account, and it is
+ * locked with the reason on it; a clone with its own backend and keys finds it live, with
+ * nothing to switch on.
+ *
+ * `ready` sends into the reader's own workspace, not into the recording. A recorded run is
+ * immutable, and its scope is not theirs — appending to it would be a fiction.
+ */
+export type ReplayComposer =
+  | { state: "locked"; lock: ComposerLock }
+  | { state: "ready"; placeholder: string; start: (goal: string) => Promise<void> };
+
+/** No queue behind a recording, so the composer's degraded-delivery banner never applies. */
+const REPLAY_DELIVERY: ChatBackgroundDelivery = {
+  delivery_mode: "sync_only",
+  background_available: false,
+  detail: "Recorded run.",
 };
 
 type Props = LiveProps | ReadOnlyProps;
@@ -106,9 +131,11 @@ export function ChatShell(props: Props) {
   // Resolved after mount so the shortcut hints never cause a hydration mismatch.
   const [modKey, setModKey] = useState("Ctrl");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(live?.initialDraft ?? "");
   const [isRunning, setIsRunning] = useState(false);
   const [sendError, setSendError] = useState<string | undefined>(undefined);
+  // Replay only: the fork-to-workspace action navigates, so the box stays busy until it does.
+  const [isForking, setIsForking] = useState(false);
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeRequestId = useRef<string | null>(null);
@@ -335,6 +362,26 @@ export function ChatShell(props: Props) {
     }
   };
 
+  const replayComposer = replay?.composer;
+  const onStartFromReplay = useCallback(
+    async (text: string) => {
+      if (replayComposer?.state !== "ready") return;
+      setSendError(undefined);
+      setIsForking(true);
+      try {
+        await replayComposer.start(text);
+      } catch (e) {
+        // A server-action redirect throws by design and is handled by the router; anything
+        // else left the reader stuck with a cleared box and no explanation.
+        if (e instanceof Error && e.message.includes("NEXT_REDIRECT")) throw e;
+        setSendError("Could not open a workspace for that question. Try again.");
+        setDraft(text);
+        setIsForking(false);
+      }
+    },
+    [replayComposer],
+  );
+
   const paletteCommands: PaletteCommand[] = useMemo(() => {
     const actions: PaletteCommand[] = [
       {
@@ -473,6 +520,19 @@ export function ChatShell(props: Props) {
           <div className="flex min-h-0 flex-1 overflow-hidden">
             <div className="flex min-h-0 flex-1 flex-col">
               <ChatMessageList messages={messages} />
+              <ChatComposer
+                backgroundDelivery={REPLAY_DELIVERY}
+                lock={replay.composer.state === "locked" ? replay.composer.lock : undefined}
+                placeholder={
+                  replay.composer.state === "ready" ? replay.composer.placeholder : undefined
+                }
+                disabled={isForking}
+                error={sendError}
+                onSend={onStartFromReplay}
+                value={draft}
+                onValueChange={setDraft}
+                inputRef={composerInputRef}
+              />
             </div>
             {replay.rail ? (
               // Below `lg` the rail would halve an already narrow conversation, so it is

@@ -2,11 +2,13 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 
-import { ChatShell } from "@/components/chat-shell/chat-shell";
+import { startAnalysisFromDemoAction } from "@/actions/demos";
+import { ChatShell, type ReplayComposer } from "@/components/chat-shell/chat-shell";
 import { TraceRail } from "@/components/demos/trace-rail";
 import { Pill } from "@/components/investigations/pill";
 import { getDemo, getDemoCapture, listDemos } from "@/lib/api/demos";
 import { demoMessages, demoThreads } from "@/lib/demo-chat";
+import { resolveDemoRunGate, type DemoRunGate } from "@/lib/demo-run-gate";
 import { formatConfidence, outcomeTone } from "@/lib/investigation-view";
 
 export const dynamic = "force-dynamic";
@@ -19,6 +21,69 @@ export async function generateMetadata({
   return {
     title: detail?.objective ?? "Recorded investigation",
     description: detail?.conclusion ?? undefined,
+  };
+}
+
+/**
+ * The composer's state, said plainly.
+ *
+ * Each locked case names the one thing that is missing and how to remove it, because the
+ * lock is the most interesting thing on the page for a reader deciding whether any of this
+ * is real: it is the difference between a screenshot and a running system with the power
+ * switch off.
+ */
+function replayComposer(gate: DemoRunGate): ReplayComposer {
+  if (gate.kind === "ready") {
+    return {
+      state: "ready",
+      placeholder: "Ask your own question…",
+      start: startAnalysisFromDemoAction,
+    };
+  }
+  if (gate.kind === "signed_out") {
+    return {
+      state: "locked",
+      lock: {
+        short: "Sign in to ask your own question",
+        detail: (
+          <>
+            This run is a recording, but the backend behind it is live. Sign in and the
+            composer starts a new analysis in your own workspace.
+          </>
+        ),
+      },
+    };
+  }
+  if (gate.kind === "no_workspace") {
+    return {
+      state: "locked",
+      lock: {
+        short: "Create a workspace to ask your own question",
+        detail: (
+          <>
+            You are signed in, but have no workspace yet. Create one and this composer starts
+            a new analysis in it.
+          </>
+        ),
+      },
+    };
+  }
+  return {
+    state: "locked",
+    lock: {
+      short: "Recorded run — this build has no backend attached",
+      detail: (
+        <>
+          The published showcase is a static export: the runs are real, but there is no
+          server here to run new ones against.{" "}
+          <span className="text-[var(--foreground)]">
+            Clone the repo, point it at a database and your own model API key, and this
+            composer goes live
+          </span>{" "}
+          — nothing to switch on, it reads the deployment.
+        </>
+      ),
+    },
   };
 }
 
@@ -41,6 +106,7 @@ export default async function DemoChatPage({
   // Null in live mode, where model payloads are admin-gated; the page renders without it.
   const capture = await getDemoCapture(slug);
   const demos = await listDemos();
+  const gate = await resolveDemoRunGate();
   const fullTraceHref = `/demos/${slug}/trace`;
 
   const header = (
@@ -87,6 +153,7 @@ export default async function DemoChatPage({
         chatThreads={demoThreads(demos)}
         header={header}
         rail={<TraceRail detail={detail} fullTraceHref={fullTraceHref} />}
+        composer={replayComposer(gate)}
         className="h-full min-h-0"
       />
     </div>

@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ChatShell } from "@/components/chat-shell/chat-shell";
+import { ChatShell, type ReplayComposer } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
 // The command palette navigates between chats via the app router, which is not
@@ -290,7 +290,12 @@ describe("ChatShell", () => {
       },
     ];
 
-    function renderReplay() {
+    const LOCK = {
+      short: "Recorded run — this build has no backend attached",
+      detail: "Clone the repo and point it at your own backend.",
+    };
+
+    function renderReplay(composer: ReplayComposer = { state: "locked", lock: LOCK }) {
       render(
         <ChatShell
           readOnly
@@ -299,17 +304,14 @@ describe("ChatShell", () => {
           chatThreads={threads}
           header={<header>recorded · declined</header>}
           rail={<aside>The trace</aside>}
+          composer={composer}
         />,
       );
     }
 
-    // Every one of these controls would reach a backend that is not there on the replay
-    // tier. Absent, not disabled — a demo that offers a composer and then fails is worse
-    // than one that never offered.
     it("renders no affordance that would need a backend", () => {
       renderReplay();
 
-      expect(screen.queryByLabelText("Message input")).toBeNull();
       expect(screen.queryByRole("button", { name: "New chat" })).toBeNull();
       expect(
         screen.queryByRole("button", { name: "Delete Does staffing or volume drive service times?" }),
@@ -349,6 +351,48 @@ describe("ChatShell", () => {
       fireEvent.keyDown(window, { key: "k", metaKey: true });
 
       expect(screen.queryByPlaceholderText(/Search/i)).toBeNull();
+    });
+
+    // The composer stays on screen and says why it cannot send. Removing it would make the
+    // page read as a surface that has no composer, which is not what is true here.
+    it("shows a locked composer carrying its own reason", () => {
+      renderReplay();
+
+      const input = screen.getByLabelText("Message input");
+      expect((input as HTMLTextAreaElement).disabled).toBe(true);
+      expect((input as HTMLTextAreaElement).placeholder).toBe(LOCK.short);
+      expect(screen.getByRole("button", { name: "Sending is unavailable" })).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "Send" })).toBeNull();
+    });
+
+    it("reveals the full reason on hover, and keeps it reachable without one", () => {
+      renderReplay();
+
+      const input = screen.getByLabelText("Message input");
+      // Described-by is set whether or not the tooltip is open, so the reason is announced
+      // to a screen reader that never hovers.
+      expect(input.getAttribute("aria-describedby")).toBeTruthy();
+      expect(screen.queryByRole("tooltip")).toBeNull();
+
+      fireEvent.mouseEnter(input.closest("div.relative")!);
+
+      expect(screen.getByRole("tooltip").textContent).toBe(LOCK.detail);
+    });
+
+    it("sends into the reader's own workspace once the deployment can run", async () => {
+      const start = vi.fn().mockResolvedValue(undefined);
+      renderReplay({ state: "ready", placeholder: "Ask your own question…", start });
+
+      const input = screen.getByLabelText("Message input") as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+      expect(input.placeholder).toBe("Ask your own question…");
+
+      fireEvent.change(input, { target: { value: "Is churn seasonal?" } });
+      fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
+
+      expect(start).toHaveBeenCalledWith("Is churn seasonal?");
+      // The recording is immutable: the question must not be appended to this transcript.
+      expect(screen.queryByText("Is churn seasonal?")).toBeNull();
     });
   });
 });

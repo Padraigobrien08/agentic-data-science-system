@@ -14,10 +14,15 @@ export const dynamic = "force-dynamic";
 /** One durable conversation thread — the conversation-first primary product surface. */
 export default async function ConversationPage({
   params,
+  searchParams,
 }: Readonly<{
   params: Promise<{ projectId: string; conversationId: string }>;
+  searchParams?: Promise<{ goal?: string }>;
 }>) {
   const { projectId, conversationId } = await params;
+  // Carried in from a recorded run: the question is loaded but not sent, so the reader sees
+  // it beside their own scope before anything runs against it.
+  const goal = (await searchParams)?.goal;
 
   let project;
   let backgroundDelivery: BackgroundDeliveryHealth = {
@@ -74,6 +79,7 @@ export default async function ConversationPage({
         backgroundDelivery={backgroundDelivery}
         initialMessages={history.messages}
         chatThreads={history.chatThreads}
+        initialDraft={goal}
         className="h-full min-h-0"
       />
     </div>
