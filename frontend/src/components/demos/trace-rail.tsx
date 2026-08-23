@@ -1,8 +1,10 @@
 import Link from "next/link";
 
+import { TraceTimeline } from "@/components/trace/trace-timeline";
 import type { InvestigationDetail } from "@/lib/api/types";
 import { formatConfidence } from "@/lib/investigation-view";
-import { decisionGlyph, decisionLabel, groupDecisionsByIteration, traceSections } from "@/lib/trace-view";
+import { investigationTimeline } from "@/lib/trace-timeline";
+import { traceSections } from "@/lib/trace-view";
 
 /**
  * The trace, docked beside the answer.
@@ -19,7 +21,7 @@ export function TraceRail({
   detail,
   fullTraceHref,
 }: Readonly<{ detail: InvestigationDetail; fullTraceHref: string }>) {
-  const iterations = groupDecisionsByIteration(detail.decisions, detail.hypotheses);
+  const groups = investigationTimeline(detail.decisions, detail.hypotheses);
   const sections = traceSections(detail);
 
   return (
@@ -30,8 +32,8 @@ export function TraceRail({
             The trace
           </p>
           <p className={`mt-0.5 ${MONO} text-[var(--chat-faint)]`}>
-            {detail.counts.decisions} decisions · {iterations.length} iteration
-            {iterations.length === 1 ? "" : "s"}
+            {detail.counts.decisions} decisions · {groups.length} iteration
+            {groups.length === 1 ? "" : "s"}
           </p>
         </div>
         <Link href={fullTraceHref} className={`${MONO} text-[var(--accent)] hover:underline`}>
@@ -39,60 +41,7 @@ export function TraceRail({
         </Link>
       </div>
 
-      <ol className="space-y-0">
-        {iterations.map((it) => (
-          <li key={it.iteration} className={`relative border-l ${RULE} pb-4 pl-4`}>
-            <span
-              className="absolute -left-[3px] top-1.5 h-1.5 w-1.5 rounded-full bg-[var(--chat-faint)]"
-              aria-hidden
-            />
-            <p className={`${MONO} font-medium text-[var(--foreground)]`}>
-              {it.label}
-              <span className="font-normal text-[var(--chat-faint)]">
-                {" · "}
-                {it.decisionCount} decision{it.decisionCount === 1 ? "" : "s"}
-                {it.hasContradiction ? " · contradiction" : ""}
-              </span>
-            </p>
-            <div className="mt-2 space-y-2">
-              {it.rows.map((row) =>
-                row.kind === "contradiction" ? (
-                  <div
-                    key={row.decisions[0].id}
-                    className={`rounded-md border ${RULE} bg-[var(--chat-accent-soft)] p-2.5`}
-                  >
-                    <p className={`${MONO} uppercase tracking-[0.08em] text-[var(--status-info-ink)]`}>
-                      One event · {row.decisions.length} revisions
-                    </p>
-                    <p className="mt-1 text-[12.5px] leading-snug text-[var(--foreground)]">
-                      Both claims weakened: they cannot hold at the same time as each other.
-                    </p>
-                  </div>
-                ) : (
-                  <div key={row.decision.id} className="flex gap-2">
-                    <span className={`${MONO} select-none text-[var(--chat-faint)]`} aria-hidden>
-                      {decisionGlyph(row.decision.decision_type)}
-                    </span>
-                    <div className="min-w-0">
-                      <p className="text-[12.5px] leading-snug text-[var(--foreground)]">
-                        {decisionLabel(row.decision.decision_type)}
-                        {row.decision.chosen_option ? (
-                          <span className={`${MONO} ml-1.5 text-[var(--accent)]`}>
-                            {row.decision.chosen_option}
-                          </span>
-                        ) : null}
-                      </p>
-                      <p className="mt-0.5 text-[11.5px] leading-snug text-[var(--muted)]">
-                        {row.decision.rationale}
-                      </p>
-                    </div>
-                  </div>
-                ),
-              )}
-            </div>
-          </li>
-        ))}
-      </ol>
+      <TraceTimeline groups={groups} emptyLabel="No decisions recorded." />
 
       {/* Counts, as the way into the full record rather than as decoration. */}
       <div className={`divide-y overflow-hidden rounded-lg border ${RULE} divide-[var(--border)]`}>

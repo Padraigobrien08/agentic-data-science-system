@@ -20,14 +20,9 @@ import {
   outcomeTone,
   titleize,
 } from "@/lib/investigation-view";
-import {
-  type ContradictionEvent,
-  decisionGlyph,
-  decisionLabel,
-  groupDecisionsByIteration,
-  groupEvidenceByClaim,
-  traceSections,
-} from "@/lib/trace-view";
+import { investigationTimeline } from "@/lib/trace-timeline";
+import { groupEvidenceByClaim, traceSections } from "@/lib/trace-view";
+import { TraceTimeline } from "@/components/trace/trace-timeline";
 
 import { Pill } from "./pill";
 
@@ -142,96 +137,6 @@ function ClaimCard({
   );
 }
 
-/**
- * A contradiction, rendered as the single act it was.
- *
- * The loop weakens both claims in one step, but records one decision per claim. Shown as two
- * rows they read as unrelated confidence revisions and the reader has to infer the link;
- * shown as one they read as what happened.
- */
-function ContradictionRow({ event }: Readonly<{ event: ContradictionEvent }>) {
-  return (
-    <li
-      className={`rounded-lg border ${RULE} bg-[var(--chat-accent-soft)] p-3`}
-    >
-      <div className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-        <span
-          className={`${MONO} uppercase tracking-[0.08em] text-[var(--status-info-ink)]`}
-        >
-          One event · {event.decisions.length} confidence revisions
-        </span>
-        <span className={`${MONO} text-[var(--chat-faint)]`}>
-          {event.decisions.map((d) => d.id.split("-").slice(-2).join("-")).join(" · ")}
-        </span>
-      </div>
-      <p className="mt-2 text-sm text-[var(--foreground)]">
-        Both claims weakened: they cannot hold at the same time as each other.
-      </p>
-      {/* Status and where the claim landed — deliberately not a before/after arrow. The
-          confidence immediately before the contradiction is not recorded anywhere:
-          `prior_confidence` is the claim's original prior, so both sides here would read
-          "50% → 50%" and imply the contradiction changed nothing. */}
-      <div className="mt-2 space-y-1">
-        {event.claims.map((c) => (
-          <p
-            key={c.id}
-            className={`border-l pl-3 ${RULE} text-[13px] leading-snug text-[var(--muted)]`}
-          >
-            {c.statement}
-            <span className={`${MONO} ml-2 text-[var(--chat-faint)]`}>
-              {c.status} · {formatConfidence(c.confidence)}
-            </span>
-          </p>
-        ))}
-      </div>
-    </li>
-  );
-}
-
-function DecisionRow({ d }: Readonly<{ d: DecisionItem }>) {
-  return (
-    <li className="flex gap-3">
-      <span className={`mt-0.5 select-none ${MONO} text-[var(--chat-faint)]`} aria-hidden>
-        {decisionGlyph(d.decision_type)}
-      </span>
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-medium text-[var(--foreground)]">
-          {decisionLabel(d.decision_type)}
-          {d.chosen_option ? (
-            <span className={`${MONO} ml-2 font-normal text-[var(--accent)]`}>
-              → {d.chosen_option}
-            </span>
-          ) : null}
-        </p>
-        <p className="text-sm leading-snug text-[var(--muted)]">{d.rationale}</p>
-      </div>
-    </li>
-  );
-}
-
-/**
- * Decisions under the iteration they were made in.
- *
- * The loop is a loop, and a flat list of fifteen rows hides that. The gutter makes each pass
- * legible as a pass — and makes it obvious when one iteration did the work and the rest
- * confirmed it.
- */
-function IterationBlock({
-  label,
-  meta,
-  rows,
-}: Readonly<{ label: string; meta: string; rows: React.ReactNode }>) {
-  return (
-    <div className={`grid gap-x-4 border-b ${RULE} py-4 sm:grid-cols-[104px_1fr]`}>
-      <div>
-        <p className={`${MONO} font-medium text-[var(--foreground)]`}>{label}</p>
-        <p className={`mt-0.5 ${MONO} text-[var(--chat-faint)]`}>{meta}</p>
-      </div>
-      <ol className="mt-2 space-y-3 sm:mt-0">{rows}</ol>
-    </div>
-  );
-}
-
 function formatBytes(n: number | null): string {
   if (n === null || !Number.isFinite(n)) return "";
   if (n < 1024) return `${n} B`;
@@ -342,7 +247,7 @@ export function InvestigationDetailView({
 }>) {
   const status = investigationStatusTone(detail.status);
   const concl = detail.conclusion_detail;
-  const iterations = groupDecisionsByIteration(detail.decisions, detail.hypotheses);
+  const iterations = investigationTimeline(detail.decisions, detail.hypotheses);
   const claimGroups = groupEvidenceByClaim(detail.evidence, detail.hypotheses);
   const sections = traceSections(detail);
   const critiques = [...detail.critiques].sort((a, b) => Number(a.resolved) - Number(b.resolved));
@@ -421,22 +326,9 @@ export function InvestigationDetailView({
             count={detail.decisions.length}
             note={`${iterations.length} iteration${iterations.length === 1 ? "" : "s"}`}
           />
-          {iterations.map((it) => (
-            <IterationBlock
-              key={it.iteration}
-              label={it.label}
-              meta={`${it.decisionCount} decision${it.decisionCount === 1 ? "" : "s"}${
-                it.hasContradiction ? " · contradiction" : ""
-              }`}
-              rows={it.rows.map((row) =>
-                row.kind === "contradiction" ? (
-                  <ContradictionRow key={row.decisions[0].id} event={row} />
-                ) : (
-                  <DecisionRow key={row.decision.id} d={row.decision} />
-                ),
-              )}
-            />
-          ))}
+          {/* Same component the docked rail renders, at page density — so a reader who
+              learned the trace in the chat is reading the same thing here. */}
+          <TraceTimeline groups={iterations} density="comfortable" />
         </section>
       ) : null}
 
