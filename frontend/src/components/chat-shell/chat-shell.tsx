@@ -84,6 +84,14 @@ type ReadOnlyProps = BaseProps & {
   header?: ReactNode;
   /** Docked beside the conversation on wide viewports — the trace, for demos. */
   rail?: ReactNode;
+  /**
+   * Open the rail on first render. The demo pages do: the trace beside the answer is the
+   * thing those pages exist to show, so hiding it behind a click buries the point. The live
+   * chat does not — there the answer is the work and the trace is the audit.
+   *
+   * Uncontrolled: this seeds the toggle, it does not hold it open.
+   */
+  defaultRailOpen?: boolean;
   /** What the composer can do here. See `ReplayComposer`. */
   composer: ReplayComposer;
 };
@@ -137,10 +145,15 @@ export function ChatShell(props: Props) {
   const [sendError, setSendError] = useState<string | undefined>(undefined);
   // Replay only: the fork-to-workspace action navigates, so the box stays busy until it does.
   const [isForking, setIsForking] = useState(false);
-  // Which trace is docked beside the conversation, or null for none. Starts closed on both
-  // surfaces: the answer is what the reader came for, and the trace is what lets them
-  // disbelieve it — offered, not imposed.
-  const [openTraceKey, setOpenTraceKey] = useState<string | null>(null);
+  // Which trace is docked beside the conversation, or null for none. Seeded from the
+  // surface: a demo opens on its recorded answer's trace, the live chat opens on nothing.
+  // Keyed the same way the control keys it, so the button reads "hide trace" on arrival
+  // rather than offering to open what is already open.
+  const [openTraceKey, setOpenTraceKey] = useState<string | null>(() =>
+    replay?.defaultRailOpen && replay.rail
+      ? (initialMessages.find((m) => m.role === "assistant" && m.recordedAnswer)?.id ?? null)
+      : null,
+  );
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeRequestId = useRef<string | null>(null);

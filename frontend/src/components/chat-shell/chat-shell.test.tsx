@@ -357,6 +357,43 @@ describe("ChatShell", () => {
       expect(screen.queryByText("The trace")).toBeNull();
     });
 
+    // The demo pages exist to show the trace beside the answer, so they open on it. The
+    // control still reflects reality: it offers to hide, not to open what is already open.
+    it("opens on the trace when the surface asks for it, and still collapses", () => {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          rail={<aside>The trace</aside>}
+          composer={{ state: "locked", lock: LOCK }}
+          defaultRailOpen
+        />,
+      );
+
+      expect(screen.getByText("The trace")).toBeTruthy();
+
+      fireEvent.click(screen.getByRole("button", { name: "hide trace" }));
+
+      expect(screen.queryByText("The trace")).toBeNull();
+    });
+
+    it("stays closed when asked to open but given no rail to open", () => {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          composer={{ state: "locked", lock: LOCK }}
+          defaultRailOpen
+        />,
+      );
+
+      expect(screen.queryByRole("button", { name: "hide trace" })).toBeNull();
+    });
+
     it("offers no trace control when the surface supplies no rail", () => {
       render(
         <ChatShell

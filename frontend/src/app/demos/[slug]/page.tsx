@@ -153,6 +153,7 @@ export default async function DemoChatPage({
         chatThreads={demoThreads(demos)}
         header={header}
         rail={<TraceRail detail={detail} fullTraceHref={fullTraceHref} />}
+        defaultRailOpen
         composer={replayComposer(gate)}
         className="h-full min-h-0"
       />
