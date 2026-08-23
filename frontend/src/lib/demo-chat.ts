@@ -84,5 +84,22 @@ export function demoThreads(demos: InvestigationSummary[]): ChatThreadSummary[] 
       href: `/demos/${d.demo_slug}`,
       hasMessages: true,
       updatedAt: d.updated_at,
+      recorded: true,
     }));
+}
+
+/**
+ * The reader's own conversations and the published runs, in one list, newest first.
+ *
+ * Merged rather than sectioned because they answer the same question — what has been asked
+ * here before — and a recorded run is the most useful thing in an empty account's sidebar.
+ * The `recorded` flag is what keeps them honest: badged in the list, and not deletable.
+ */
+export function mergedThreads(
+  own: ChatThreadSummary[],
+  demos: InvestigationSummary[],
+): ChatThreadSummary[] {
+  return [...own, ...demoThreads(demos)].sort(
+    (a, b) => new Date(b.updatedAt).getTime() - new Date(a.updatedAt).getTime(),
+  );
 }

@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ChatShell } from "@/components/chat-shell/chat-shell";
 import { ApiError } from "@/lib/api/errors";
+import { listDemos } from "@/lib/api/demos";
 import { getProject } from "@/lib/api/projects";
 import { getBackgroundDeliveryHealth } from "@/lib/api/runs";
 import { getCurrentUser } from "@/lib/auth/session";
 import { buildConversationHistory } from "@/lib/chat-run-history";
+import { mergedThreads } from "@/lib/demo-chat";
 import type { BackgroundDeliveryHealth } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
@@ -62,6 +64,10 @@ export default async function ConversationPage({
     throw e;
   }
 
+  // Published runs sit in the same history list as the reader's own chats. A failure here
+  // costs the showcase rows, not the conversation — the chat must still open without them.
+  const demos = await listDemos().catch(() => []);
+
   return (
     <div className="fixed inset-0 overflow-hidden">
       <ChatShell
@@ -78,7 +84,7 @@ export default async function ConversationPage({
         tickers={project.tickers ?? []}
         backgroundDelivery={backgroundDelivery}
         initialMessages={history.messages}
-        chatThreads={history.chatThreads}
+        chatThreads={mergedThreads(history.chatThreads, demos)}
         initialDraft={goal}
         className="h-full min-h-0"
       />

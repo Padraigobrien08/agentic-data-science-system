@@ -67,6 +67,12 @@ export type ChatThreadSummary = {
   href: string;
   hasMessages: boolean;
   updatedAt: string;
+  /**
+   * A published run rather than one of this reader's conversations. Sits in the same
+   * chronological list — it is history either way — but badged, because someone scanning
+   * their own chats should never mistake the showcase for something they ran.
+   */
+  recorded?: boolean;
 };
 
 export type ChatBackgroundDelivery = BackgroundDeliveryHealth;

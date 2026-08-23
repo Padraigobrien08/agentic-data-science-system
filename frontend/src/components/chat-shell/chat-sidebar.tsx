@@ -121,17 +121,27 @@ export function ChatSidebar({
                       title={thread.title}
                     >
                       <Link href={thread.href}>
-                        <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                        {thread.recorded ? (
+                          <History className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                        ) : (
+                          <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                        )}
                         {open ? (
                           <div className="min-w-0 flex-1">
                             <span className="line-clamp-2 block text-[13px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
                               {thread.title}
                             </span>
+                            {thread.recorded ? (
+                              <span className="mt-1 inline-flex rounded-chip border border-[hsl(var(--sidebar-border))] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[hsl(var(--sidebar-foreground)/0.6)]">
+                                recorded
+                              </span>
+                            ) : null}
                           </div>
                         ) : null}
                       </Link>
                     </SidebarMenuButton>
-                    {open && deleteConversationAction ? (
+                    {/* A published run is not this reader's to delete. */}
+                    {open && deleteConversationAction && !thread.recorded ? (
                       <form
                         action={deleteConversationAction}
                         onSubmit={() => setConfirmingId(null)}

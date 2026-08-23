@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 
 import type { InvestigationDetail, InvestigationSummary } from "@/lib/api/types";
-import { demoMessages, demoThreads, recordedQuestion } from "@/lib/demo-chat";
+import type { ChatThreadSummary } from "@/components/chat-shell/types";
+import { demoMessages, demoThreads, mergedThreads, recordedQuestion } from "@/lib/demo-chat";
 import type { DemoCapture } from "@/lib/demo-static/capture-types";
 
 function detail(over: Partial<InvestigationDetail> = {}): InvestigationDetail {
@@ -146,6 +147,7 @@ describe("demoThreads", () => {
         href: "/demos/a-demo",
         hasMessages: true,
         updatedAt: "2026-08-20T19:02:30Z",
+        recorded: true,
       },
     ]);
   });
@@ -156,5 +158,37 @@ describe("demoThreads", () => {
 
   it("names a run with no objective instead of rendering a blank row", () => {
     expect(demoThreads([summary("a-demo", null)])[0].title).toBe("Recorded investigation");
+  });
+});
+
+describe("mergedThreads", () => {
+  const own = (id: string, updatedAt: string): ChatThreadSummary => ({
+    id,
+    title: id,
+    href: `/projects/p/chat/${id}`,
+    hasMessages: true,
+    updatedAt,
+  });
+  const demo = (slug: string, updatedAt: string): InvestigationSummary =>
+    ({ ...detail(), demo_slug: slug, objective: slug, updated_at: updatedAt }) as InvestigationSummary;
+
+  it("interleaves recorded runs with the reader's own chats, newest first", () => {
+    const merged = mergedThreads(
+      [own("mine-old", "2026-08-01T00:00:00Z"), own("mine-new", "2026-08-30T00:00:00Z")],
+      [demo("recorded", "2026-08-15T00:00:00Z")],
+    );
+
+    expect(merged.map((t) => t.id)).toEqual(["mine-new", "recorded", "mine-old"]);
+  });
+
+  it("marks only the published runs, so the reader can tell them apart", () => {
+    const merged = mergedThreads([own("mine", "2026-08-01T00:00:00Z")], [demo("rec", "2026-08-02T00:00:00Z")]);
+
+    expect(merged.find((t) => t.id === "rec")?.recorded).toBe(true);
+    expect(merged.find((t) => t.id === "mine")?.recorded).toBeUndefined();
+  });
+
+  it("is just the reader's own chats when nothing is published", () => {
+    expect(mergedThreads([own("mine", "2026-08-01T00:00:00Z")], [])).toHaveLength(1);
   });
 });
