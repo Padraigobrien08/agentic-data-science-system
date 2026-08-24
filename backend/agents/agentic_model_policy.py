@@ -170,7 +170,7 @@ def _load_policy_prompts(
     version: str = AGENTIC_PROMPT_VERSION,
 ) -> tuple[PolicyPrompts, dict[str, str]]:
     """
-    Load the four registered policy prompts, plus a ``prompt_id -> version`` identity map.
+    Load the registered policy prompts, plus a ``prompt_id -> version`` identity map.
 
     Never raises. A missing or malformed prompt file degrades to
     :data:`~agentic.agent.policy.DEFAULT_POLICY_PROMPTS` rather than making the loop
@@ -184,12 +184,13 @@ def _load_policy_prompts(
         return DEFAULT_POLICY_PROMPTS, {}
     # Positional by AGENTIC_POLICY_ROLES order, which is documented to match the four
     # AgentPolicy methods; named explicitly here so a reordering cannot silently swap them.
-    interpreter, generator, selector, critic = loaded
+    interpreter, generator, selector, critic, writer = loaded
     prompts = PolicyPrompts(
         interpret_goal=interpreter.template.system_body,
         generate_hypotheses=generator.template.system_body,
         select_experiment=selector.template.system_body,
         critique=critic.template.system_body,
+        write_answer=writer.template.system_body,
     )
     identity = {p.prompt_id: p.prompt_version for p in loaded}
     return prompts, identity

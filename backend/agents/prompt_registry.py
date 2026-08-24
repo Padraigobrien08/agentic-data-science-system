@@ -27,16 +27,21 @@ AGENT_PROMPT_IDS: dict[str, str] = {
     "agentic_hypothesis_generator": "edgar.agentic.hypothesis_generator",
     "agentic_experiment_selector": "edgar.agentic.experiment_selector",
     "agentic_critic": "edgar.agentic.critic",
+    # Not one of the four decisions: writing the settled finding as prose is an optional
+    # policy extension (`NarratingPolicy`), and the loop concludes without it.
+    "agentic_answer_writer": "edgar.agentic.answer_writer",
 }
 
 #: The agentic policy roles, in the order the loop calls them. Consumed by
-#: :mod:`backend.agents.agentic_model_policy` to build a ``PolicyPrompts`` container;
-#: the order matches ``AgentPolicy``'s four methods.
+#: :mod:`backend.agents.agentic_model_policy` to build a ``PolicyPrompts`` container.
+#: The first four match ``AgentPolicy``'s four methods; the last is the optional
+#: narration extension.
 AGENTIC_POLICY_ROLES: tuple[str, ...] = (
     "agentic_goal_interpreter",
     "agentic_hypothesis_generator",
     "agentic_experiment_selector",
     "agentic_critic",
+    "agentic_answer_writer",
 )
 
 
