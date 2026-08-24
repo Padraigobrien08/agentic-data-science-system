@@ -1,6 +1,6 @@
 import "server-only";
 
-import type { DemoCapture } from "@/lib/demo-static/capture-types";
+import type { DemoCapture, DemoChatThread } from "@/lib/demo-static/capture-types";
 import {
   DEMO_ARTIFACT_HREFS,
   DEMO_CAPTURES,
@@ -63,6 +63,27 @@ export async function getDemoCapture(slug: string): Promise<DemoCapture | null> 
     return null;
   }
   return DEMO_CAPTURES[slug] ?? null;
+}
+
+/**
+ * The conversation recorded against a published demo.
+ *
+ * Unlike the capture bundle above this *does* have a live counterpart: the turns are not
+ * the sensitive part, and a deployment with a backend was otherwise unable to show the
+ * question a run was asked — every demo opened on an answer to an invisible question.
+ * Static mode reads the same turns out of the committed capture.
+ */
+export async function getDemoChat(slug: string): Promise<DemoChatThread[]> {
+  if (staticShowcase()) {
+    return DEMO_CAPTURES[slug]?.chat ?? [];
+  }
+  try {
+    return await apiGet<DemoChatThread[]>(`/v1/demos/${encodeURIComponent(slug)}/chat`);
+  } catch {
+    // A recorded run is still worth showing without its prompt; the caller falls back to
+    // stating the goal rather than inventing a question.
+    return [];
+  }
 }
 
 /**

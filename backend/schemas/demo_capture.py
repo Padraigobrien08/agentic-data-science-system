@@ -149,6 +149,25 @@ def build_demo_capture(
     totals.total_tokens = totals.prompt_tokens + totals.completion_tokens
     totals.est_cost_usd = round(totals.est_cost_usd, 6)
 
+    return DemoCapture(
+        demo_slug=demo_slug,
+        investigation_id=investigation_id,
+        analysis_run_id=analysis_run_id,
+        totals=totals,
+        model_calls=calls,
+        chat=build_demo_chat(conversation_rows),
+    )
+
+
+def build_demo_chat(conversation_rows: list[Any]) -> list[DemoChatThread]:
+    """
+    Just the recorded conversation, with no model payloads anywhere near it.
+
+    Separate from :func:`build_demo_capture` because the two have different audiences. Raw
+    prompts and responses are admin-gated on ``/v1``; the question a person typed is the
+    least sensitive thing in the bundle and is the whole point of a recorded run — without
+    it a demo opens on an answer to a question nobody can see.
+    """
     threads: list[DemoChatThread] = []
     for convo in sorted(conversation_rows, key=lambda c: c.created_at):
         messages = sorted(convo.messages, key=lambda m: m.created_at)
@@ -171,12 +190,4 @@ def build_demo_capture(
                 ],
             )
         )
-
-    return DemoCapture(
-        demo_slug=demo_slug,
-        investigation_id=investigation_id,
-        analysis_run_id=analysis_run_id,
-        totals=totals,
-        model_calls=calls,
-        chat=threads,
-    )
+    return threads

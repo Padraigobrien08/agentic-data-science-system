@@ -26,6 +26,8 @@ from sqlalchemy import select
 from sqlalchemy.orm import Session
 
 from backend.models.artifact import Artifact
+from backend.models.chat_message import ChatMessage
+from backend.models.conversation import Conversation
 from backend.models.investigation import Investigation
 
 #: Lowercase, digits, single hyphens. Restrictive because the slug is a public URL segment
@@ -74,6 +76,25 @@ def get_published(db: Session, slug: str) -> Investigation:
     if row is None:
         raise DemoNotFound(slug)
     return row
+
+
+def get_published_conversations(db: Session, slug: str) -> list[Conversation]:
+    """
+    The conversations recorded against a published demo's run.
+
+    Reached only through :func:`get_published`, so publication is the authorization here as
+    it is everywhere else on this surface: unpublish the investigation and the transcript
+    stops being readable in the same breath as the rest of it.
+
+    Empty is normal — runs recorded before chat capture have no thread at all.
+    """
+    investigation = get_published(db, slug)
+    if investigation.analysis_run_id is None:
+        return []
+    convo_ids = select(ChatMessage.conversation_id).where(
+        ChatMessage.analysis_run_id == investigation.analysis_run_id
+    )
+    return list(db.scalars(select(Conversation).where(Conversation.id.in_(convo_ids))).all())
 
 
 def get_published_artifact(db: Session, slug: str, artifact_id: UUID) -> Artifact:

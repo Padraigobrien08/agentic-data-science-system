@@ -9,11 +9,11 @@
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 import type { InvestigationDetail, InvestigationSummary } from "@/lib/api/types";
 import { composeAnswer } from "@/lib/demo-answer";
-import type { DemoCapture } from "@/lib/demo-static/capture-types";
+import type { DemoChatThread } from "@/lib/demo-static/capture-types";
 
 /** The question a run was actually asked, or null when no turn was recorded. */
-export function recordedQuestion(capture: DemoCapture | null): string | null {
-  for (const thread of capture?.chat ?? []) {
+export function recordedQuestion(chat: DemoChatThread[] | null): string | null {
+  for (const thread of chat ?? []) {
     for (const message of thread.messages) {
       if (message.role === "user" && message.content?.trim()) {
         return message.content;
@@ -32,9 +32,9 @@ export function recordedQuestion(capture: DemoCapture | null): string | null {
  */
 export function demoMessages(
   detail: InvestigationDetail,
-  capture: DemoCapture | null,
+  chat: DemoChatThread[] | null,
 ): ChatMessage[] {
-  const asked = recordedQuestion(capture);
+  const asked = recordedQuestion(chat);
   const answer = composeAnswer(detail);
   const messages: ChatMessage[] = [];
 

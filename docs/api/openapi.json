@@ -1812,6 +1812,104 @@
         "title": "DecisionItem",
         "type": "object"
       },
+      "DemoChatMessage": {
+        "properties": {
+          "analysis_run_id": {
+            "anyOf": [
+              {
+                "format": "uuid",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Analysis Run Id"
+          },
+          "content": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Content"
+          },
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "role": {
+            "title": "Role",
+            "type": "string"
+          },
+          "sequence": {
+            "title": "Sequence",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          }
+        },
+        "required": [
+          "sequence",
+          "id",
+          "role",
+          "status",
+          "created_at"
+        ],
+        "title": "DemoChatMessage",
+        "type": "object"
+      },
+      "DemoChatThread": {
+        "description": "The conversation the run was commissioned from, when it was recorded with ``--chat``.",
+        "properties": {
+          "created_at": {
+            "format": "date-time",
+            "title": "Created At",
+            "type": "string"
+          },
+          "id": {
+            "format": "uuid",
+            "title": "Id",
+            "type": "string"
+          },
+          "messages": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/DemoChatMessage"
+            },
+            "title": "Messages",
+            "type": "array"
+          },
+          "title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Title"
+          }
+        },
+        "required": [
+          "id",
+          "created_at"
+        ],
+        "title": "DemoChatThread",
+        "type": "object"
+      },
       "EntityRefItem": {
         "properties": {
           "id": {
@@ -6847,6 +6945,53 @@
           }
         },
         "summary": "Get Demo Artifact Preview",
+        "tags": [
+          "demos"
+        ]
+      }
+    },
+    "/v1/demos/{slug}/chat": {
+      "get": {
+        "description": "The conversation recorded against a published demo. Unauthenticated.\n\nOnly the turns \u2014 never the model payloads behind them, which stay admin-gated. The two\nused to travel together in one bundle, which meant a live deployment could not show the\nquestion a run was asked without also exposing raw prompts and responses. They are\ndifferent things with different audiences, so they are served separately.\n\nAn empty list is a normal answer: runs recorded before chat capture have no thread.",
+        "operationId": "get_demo_chat_v1_demos__slug__chat_get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "slug",
+            "required": true,
+            "schema": {
+              "title": "Slug",
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/DemoChatThread"
+                  },
+                  "title": "Response Get Demo Chat V1 Demos  Slug  Chat Get",
+                  "type": "array"
+                }
+              }
+            },
+            "description": "Successful Response"
+          },
+          "422": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "description": "Validation Error"
+          }
+        },
+        "summary": "Get Demo Chat",
         "tags": [
           "demos"
         ]

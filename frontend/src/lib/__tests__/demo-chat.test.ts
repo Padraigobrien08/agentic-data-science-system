@@ -3,7 +3,7 @@ import { describe, expect, it } from "vitest";
 import type { InvestigationDetail, InvestigationSummary } from "@/lib/api/types";
 import type { ChatThreadSummary } from "@/components/chat-shell/types";
 import { demoMessages, demoThreads, mergedThreads, recordedQuestion } from "@/lib/demo-chat";
-import type { DemoCapture } from "@/lib/demo-static/capture-types";
+import type { DemoChatThread } from "@/lib/demo-static/capture-types";
 
 function detail(over: Partial<InvestigationDetail> = {}): InvestigationDetail {
   return {
@@ -47,33 +47,23 @@ function detail(over: Partial<InvestigationDetail> = {}): InvestigationDetail {
   };
 }
 
-function capture(messages: Array<{ role: string; content: string | null }>): DemoCapture {
-  return {
-    demo_slug: "a-demo",
-    investigation_id: "inv-1",
-    analysis_run_id: "run-1",
-    totals: {
-      model_calls: 1, prompt_tokens: 1, completion_tokens: 1,
-      total_tokens: 2, latency_ms: 10, est_cost_usd: 0.001, priced: true,
-    },
-    model_calls: [],
-    chat: [
-      {
-        id: "c1",
-        title: "t",
+function capture(messages: Array<{ role: string; content: string | null }>): DemoChatThread[] {
+  return [
+    {
+      id: "c1",
+      title: "t",
+      created_at: "2026-08-20T19:02:18Z",
+      messages: messages.map((m, i) => ({
+        sequence: i,
+        id: `m${i}`,
+        role: m.role,
+        status: "complete",
+        content: m.content,
+        analysis_run_id: null,
         created_at: "2026-08-20T19:02:18Z",
-        messages: messages.map((m, i) => ({
-          sequence: i,
-          id: `m${i}`,
-          role: m.role,
-          status: "complete",
-          content: m.content,
-          analysis_run_id: null,
-          created_at: "2026-08-20T19:02:18Z",
-        })),
-      },
-    ],
-  };
+      })),
+    },
+  ];
 }
 
 describe("recordedQuestion", () => {

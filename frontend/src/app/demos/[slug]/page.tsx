@@ -6,7 +6,7 @@ import { startAnalysisFromDemoAction } from "@/actions/demos";
 import { ChatShell, type ReplayComposer } from "@/components/chat-shell/chat-shell";
 import { TraceRail } from "@/components/demos/trace-rail";
 import { Pill } from "@/components/investigations/pill";
-import { getDemo, getDemoCapture, listDemos } from "@/lib/api/demos";
+import { getDemo, getDemoChat, listDemos } from "@/lib/api/demos";
 import { demoMessages, demoThreads } from "@/lib/demo-chat";
 import { resolveDemoRunGate, type DemoRunGate } from "@/lib/demo-run-gate";
 import { formatConfidence, outcomeTone } from "@/lib/investigation-view";
@@ -103,8 +103,8 @@ export default async function DemoChatPage({
   if (!detail) {
     notFound();
   }
-  // Null in live mode, where model payloads are admin-gated; the page renders without it.
-  const capture = await getDemoCapture(slug);
+  // Served on both tiers now: the turns are public, the model payloads behind them are not.
+  const chat = await getDemoChat(slug);
   const demos = await listDemos();
   const gate = await resolveDemoRunGate();
   const fullTraceHref = `/demos/${slug}/trace`;
@@ -149,7 +149,7 @@ export default async function DemoChatPage({
         key={slug}
         readOnly
         conversationId={slug}
-        initialMessages={demoMessages(detail, capture)}
+        initialMessages={demoMessages(detail, chat)}
         chatThreads={demoThreads(demos)}
         header={header}
         rail={<TraceRail detail={detail} fullTraceHref={fullTraceHref} />}
