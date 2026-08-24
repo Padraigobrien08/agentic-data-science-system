@@ -64,9 +64,21 @@ def test_number_words_are_checked_like_digits() -> None:
     assert verify_narrative("Three claims held.", a) is None
 
 
-def test_none_and_no_are_treated_as_zero() -> None:
-    a = allowed(counts=[0])
-    assert verify_narrative("No claim survived the evidence.", a) is not None
+def test_function_words_are_not_read_as_figures() -> None:
+    # Learned from real output: checking "no" and "one" as numerals discarded five of eight
+    # recorded narratives, almost all over an ordinary negation. Prose has to survive its own
+    # vocabulary — the strictness that matters is on digits.
+    a = allowed(counts=[2])
+
+    assert verify_narrative("There was no decisive confirmation either way.", a) is not None
+    assert verify_narrative("The stronger one could not be identified.", a) is not None
+    assert verify_narrative("Neither claim held, and one of the two was weakened.", a) is not None
+
+
+def test_a_true_zero_is_still_sayable() -> None:
+    # A claim with nothing against it has zero refuting items, and the run knows it.
+    a = allowed(counts=[0, 3])
+    assert verify_narrative("It was carried by 3 items with 0 against.", a) is not None
 
 
 def test_thousands_separators_are_understood() -> None:

@@ -27,12 +27,19 @@ _NUMERIC = re.compile(r"\d[\d,]*(?:\.\d+)?%?")
 
 # Small number words carry the same risk as digits — "both claims held" is a claim about a
 # count. Bounded at twenty on purpose: beyond that, prose says the digits.
+#
+# `no`, `one` and `half` are deliberately absent, and that is a concession learned from real
+# output. As numerals they are indistinguishable from their far more common function-word
+# senses — "no decisive confirmation", "the stronger one", "one of the two" — so checking
+# them rejected honest prose at a rate that made the whole feature unusable: five of eight
+# recorded narratives were discarded, most of them over the word "no". Digits stay strict,
+# which is where a fabricated statistic actually lives; unambiguous count words stay checked.
 _WORD_NUMBERS: dict[str, float] = {
-    "zero": 0, "no": 0, "one": 1, "two": 2, "three": 3, "four": 4, "five": 5,
+    "zero": 0, "two": 2, "three": 3, "four": 4, "five": 5,
     "six": 6, "seven": 7, "eight": 8, "nine": 9, "ten": 10, "eleven": 11,
     "twelve": 12, "thirteen": 13, "fourteen": 14, "fifteen": 15, "sixteen": 16,
     "seventeen": 17, "eighteen": 18, "nineteen": 19, "twenty": 20,
-    "both": 2, "neither": 2, "half": 0.5,
+    "both": 2, "neither": 2,
 }
 
 _WORD_RE = re.compile(r"\b(" + "|".join(_WORD_NUMBERS) + r")\b", re.IGNORECASE)

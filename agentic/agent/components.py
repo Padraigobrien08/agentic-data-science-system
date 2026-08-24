@@ -969,12 +969,16 @@ class ConclusionSynthesizer:
         # sentences needs something true to say in them; without this the only material is
         # the claim statements, and the extra length turns into padding or into figures the
         # run never produced.
-        supporting: dict[str, int] = {}
-        refuting: dict[str, int] = {}
+        # Seeded at zero for every claim, not just the ones with evidence. A claim with
+        # nothing against it genuinely has *zero* refuting items, and that is a fact the run
+        # holds — leaving it out of the allowed set made "no refuting evidence" unsayable.
+        supporting: dict[str, int] = {h.id: 0 for h in state.hypotheses}
+        refuting: dict[str, int] = {h.id: 0 for h in state.hypotheses}
         for e in state.evidence:
             bucket = refuting if e.direction is EvidenceDirection.refutes else supporting
             for hid in e.hypothesis_ids:
-                bucket[hid] = bucket.get(hid, 0) + 1
+                if hid in bucket:
+                    bucket[hid] += 1
 
         claims = [
             {
