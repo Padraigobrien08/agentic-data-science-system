@@ -108,6 +108,14 @@ def test_an_empty_answer_is_treated_as_no_answer() -> None:
     assert _synthesize(_Writes("   ")).narrative is None
 
 
+def test_a_figure_from_the_widened_findings_verifies() -> None:
+    # The evidence split per claim is handed over so a longer answer has something true to
+    # say; it must therefore also be admitted by the check, or the writer is trapped.
+    policy = _Writes("Both claims held at 95%, with 0 evidence items against either.")
+
+    assert _synthesize(policy).narrative is not None
+
+
 def test_the_policy_is_given_the_question_and_computed_findings() -> None:
     policy = _Writes("It held.")
     _synthesize(policy, question="why did service slip?")
@@ -119,3 +127,8 @@ def test_the_policy_is_given_the_question_and_computed_findings() -> None:
     assert findings["counts"]["supported"] == 2
     # Values, already computed — the policy is never asked to do arithmetic.
     assert [c["confidence"] for c in findings["claims"]] == [0.95, 0.95]
+    # Material for a longer answer: how each claim was carried, what ran, where it stopped.
+    assert findings["claims"][0]["supporting_evidence"] == 0
+    assert findings["stopped_because"] == "sufficient_evidence"
+    assert findings["experiments_run"] == []
+    assert findings["open_questions"] == []

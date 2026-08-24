@@ -935,7 +935,7 @@ class ConclusionSynthesizer:
 
         conclusion = Conclusion(
             id=idgen.make("concl", 0), statement=statement, disposition=disposition, confidence=conf,
-            narrative=self._narrate(state, policy, question, disposition, conf),
+            narrative=self._narrate(state, policy, question, disposition, conf, reason),
             supporting_hypothesis_ids=hyp_ids, key_evidence_ids=key_ev, caveats=caveats,
             open_question_ids=[q.id for q in state.open_questions], provenance=_prov("conclusion_synthesizer"))
         state.set_conclusion(conclusion)
@@ -952,6 +952,7 @@ class ConclusionSynthesizer:
         question: str,
         disposition: ConclusionDisposition,
         confidence: float,
+        reason: TerminationReason,
     ) -> str | None:
         """
         The finding as prose, when a policy can write one that survives verification.
@@ -964,8 +965,25 @@ class ConclusionSynthesizer:
         if policy is None:
             return None
 
+        # Per-claim evidence, split by direction. A writer asked for more than a couple of
+        # sentences needs something true to say in them; without this the only material is
+        # the claim statements, and the extra length turns into padding or into figures the
+        # run never produced.
+        supporting: dict[str, int] = {}
+        refuting: dict[str, int] = {}
+        for e in state.evidence:
+            bucket = refuting if e.direction is EvidenceDirection.refutes else supporting
+            for hid in e.hypothesis_ids:
+                bucket[hid] = bucket.get(hid, 0) + 1
+
         claims = [
-            {"statement": h.statement, "status": h.status.value, "confidence": h.confidence}
+            {
+                "statement": h.statement,
+                "status": h.status.value,
+                "confidence": h.confidence,
+                "supporting_evidence": supporting.get(h.id, 0),
+                "refuting_evidence": refuting.get(h.id, 0),
+            }
             for h in state.hypotheses
         ]
         counts = {
@@ -975,20 +993,33 @@ class ConclusionSynthesizer:
             "supported": sum(1 for h in state.hypotheses if h.status is HypothesisStatus.supported),
             "open_questions": len(state.open_questions),
         }
+        dataset = state.datasets[0] if state.datasets else None
         findings = {
             "disposition": disposition.value,
             "confidence": confidence,
             "claims": claims,
             "counts": counts,
+            # What was actually run, and what the run refused to settle. Both are things a
+            # reader wants and neither can be inferred from the claims alone.
+            "experiments_run": [x.tool_name for x in state.completed_experiments],
+            "stopped_because": reason.value,
+            "open_questions": [q.question for q in state.open_questions],
+            "dataset": (
+                {"name": dataset.name, "row_count": dataset.row_count} if dataset else None
+            ),
         }
 
         written = narrate_answer(policy, question=question, findings=findings)
         if written is None:
             return None
 
+        # Every figure handed over is a figure the prose may state, and nothing else is.
         allowed = AllowedNumbers().add_many_counts(counts).add_confidence(confidence)
         for h in state.hypotheses:
             allowed.add_confidence(h.confidence)
+        allowed.add_many_counts(supporting).add_many_counts(refuting)
+        if dataset is not None:
+            allowed.add_count(dataset.row_count)
         return verify_narrative(written, allowed)
 
 
