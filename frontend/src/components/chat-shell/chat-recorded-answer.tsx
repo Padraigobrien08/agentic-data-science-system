@@ -5,77 +5,70 @@ import { formatConfidence, hypothesisStatusTone } from "@/lib/investigation-view
 /**
  * The assistant turn of a *recorded* run.
  *
- * The live product renders `ChatRunAnswerCard` from a run's view model. A recorded run has
- * no such view model — the export carries the investigation, not the run's answer payload —
- * so its turn is composed from persisted investigation state instead (`composeAnswer`).
+ * Plain prose on the page, the way every chat interface renders an assistant reply — no
+ * card, no border, no panel. It was boxed before, and a box says "widget" when the thing
+ * inside it is just an answer to a question.
  *
- * Deliberately a third branch rather than a synthesised `ChatAnswerCardView`: filling that
- * shape from an investigation would mean inventing the fields it does not have, and the
- * replay tier rests on nothing here being invented.
+ * The claim-by-claim breakdown that used to sit here is gone rather than restyled: the trace
+ * rail already lists every claim with the same status and the same confidence, and the prose
+ * already names what happened to each. Three renderings of one fact is two too many.
+ *
+ * What survives beside the prose is the provenance line — what ran, over what, and where it
+ * stopped — because that is the part a reader cannot get from the sentences.
  */
 
 const MONO = "font-mono text-[11px]";
-const RULE = "border-[var(--border)]";
 
 export function ChatRecordedAnswer({ answer }: Readonly<{ answer: ComposedAnswer }>) {
   return (
-    <div
-      className={`mx-auto max-w-[52rem] rounded-card border ${RULE} bg-[var(--surface)] px-5 py-4 text-[15px] leading-7 text-[var(--foreground)]`}
-    >
-      {/* The run's own written answer leads when it produced one. It is what the product
-          actually replied, so it is the answer — the headline and conclusion below are the
-          scaffolding that stands in when no narrative survived verification. */}
+    <div className="mx-auto max-w-[52rem] text-[15px] leading-7 text-[var(--foreground)]">
       {answer.narrative ? (
-        <div className="space-y-3">
+        <div className="space-y-4">
           {/* Index keys: a recorded narrative is fixed text that never reorders, and two
               paragraphs can legitimately begin with the same words. */}
-          {answer.narrative
-            .split(/\n{2,}/)
-            .map((para, i) => <p key={i}>{para.trim()}</p>)}
+          {answer.narrative.split(/\n{2,}/).map((para, i) => (
+            <p key={i}>{para.trim()}</p>
+          ))}
         </div>
       ) : (
-        <>
-          <p className="font-medium">{answer.headline}</p>
-          {answer.conclusion ? (
-            <p className="mt-3 text-[var(--muted)]">{answer.conclusion}</p>
+        // No narrative survived verification, so the structured record *is* the answer here
+        // and has to carry it. Still unboxed — same turn, less to say.
+        <div className="space-y-3">
+          <p>{answer.headline}</p>
+          {answer.conclusion ? <p className="text-[var(--muted)]">{answer.conclusion}</p> : null}
+          {answer.claims.length ? (
+            <ul className="space-y-1.5 pt-1">
+              {answer.claims.map((c) => (
+                <li key={c.id} className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                  <Pill tone={hypothesisStatusTone(c.status)} />
+                  <span className="min-w-0 flex-1 text-[14px] leading-6">{c.statement}</span>
+                  <span className={`${MONO} text-[var(--chat-faint)]`}>
+                    {formatConfidence(c.confidence)}
+                  </span>
+                </li>
+              ))}
+            </ul>
           ) : null}
-        </>
+          {/* Only in the fallback. A narrative states what was left open in its own words;
+              repeating it as a list beneath would say the same thing twice. */}
+          {answer.openQuestions.length ? (
+            <div className="pt-1">
+              <p className={`${MONO} uppercase tracking-[0.08em] text-[var(--chat-faint)]`}>
+                Left open on purpose
+              </p>
+              <ul className="mt-1.5 space-y-1">
+                {answer.openQuestions.map((q) => (
+                  <li key={q} className="text-[14px] leading-6 text-[var(--muted)]">
+                    {q}
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : null}
+        </div>
       )}
 
-      {answer.claims.length ? (
-        <ul className={`mt-4 space-y-2 border-t ${RULE} pt-4`}>
-          {answer.claims.map((c) => (
-            <li key={c.id} className="flex flex-wrap items-baseline justify-between gap-x-3 gap-y-1">
-              <span className="min-w-0 flex-1 text-[14px] leading-6">{c.statement}</span>
-              <span className="flex shrink-0 items-center gap-2">
-                <Pill tone={hypothesisStatusTone(c.status)} />
-                <span className={`${MONO} text-[var(--chat-faint)]`}>
-                  {formatConfidence(c.confidence)}
-                </span>
-              </span>
-            </li>
-          ))}
-        </ul>
-      ) : null}
-
-      {answer.openQuestions.length ? (
-        <div className={`mt-4 border-t ${RULE} pt-4`}>
-          <p className={`${MONO} uppercase tracking-[0.08em] text-[var(--chat-faint)]`}>
-            Left open on purpose
-          </p>
-          <ul className="mt-2 space-y-1.5">
-            {answer.openQuestions.map((q) => (
-              <li key={q} className="text-[14px] leading-6 text-[var(--muted)]">
-                {q}
-              </li>
-            ))}
-          </ul>
-        </div>
-      ) : null}
-
-      <p className={`mt-4 border-t ${RULE} pt-3 ${MONO} text-[var(--chat-faint)]`}>
-        {answer.footnote}
-      </p>
+      <p className={`mt-4 ${MONO} text-[var(--chat-faint)]`}>{answer.footnote}</p>
     </div>
   );
 }

@@ -192,7 +192,10 @@ export function ChatMessageList({
                     />
                   </div>
                 ) : (
-                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap break-words rounded-card border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[15px] leading-7 text-[var(--foreground)]">
+                  // Plain prose, not a card. An assistant reply with nothing structured to
+                  // show is just text, and boxing it made every answer look like a widget.
+                  // `ChatRunAnswerCard` above stays a card — it has charts and evidence in it.
+                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap break-words text-[15px] leading-7 text-[var(--foreground)]">
                     {m.content}
                   </div>
                 )}
