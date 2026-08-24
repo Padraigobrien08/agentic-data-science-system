@@ -124,3 +124,40 @@ def test_candidate_order_is_deterministic(run: int) -> None:
     second = [(r.id, r.tool_name, tuple(r.target_hypothesis_ids)) for r in _candidates(_state("on_time_rate", "on_time_rate"))]
 
     assert first == second
+
+
+def test_the_rival_claim_is_actually_scored_end_to_end() -> None:
+    """
+    The whole chain, because three separate places read `target_hypothesis_ids[0]` and fixing
+    any two of them left the rival exactly as stuck: the planner names both claims, the
+    evidence updater files against both, and the hypothesis updater has to score both. A run
+    with all three fixed but this one still reading `[0]` produced experiments naming hyp-1,
+    evidence linked to hyp-1, and hyp-1 sitting at `proposed`.
+    """
+    from agentic.agent.components import EvidenceUpdater, HypothesisUpdater
+    from agentic.domain import Evidence, EvidenceDirection, ExperimentRequest
+    from agentic.domain.enums import EvidenceType, ExperimentStatus, HypothesisStatus
+    from agentic.domain.evidence import SourceReference
+    from agentic.experiments.record import ExperimentExecutionRecord
+
+    state = _state("on_time_rate", "on_time_rate")
+    request = ExperimentRequest(
+        id="exp-0", definition_id="d", tool_name="analyze_correlation",
+        target_hypothesis_ids=["hyp-0", "hyp-1"], purpose="test both", provenance=_PROV,
+    )
+    src = SourceReference(kind="experiment_result", ref="res-0")
+    record = ExperimentExecutionRecord(
+        id="res-0", request_id="exp-0", tool_name="analyze_correlation",
+        tool_version="1.0", status=ExperimentStatus.succeeded, provenance=_PROV,
+        evidence=[
+            Evidence(id="raw-0", claim="observed", evidence_type=EvidenceType.statistical_test,
+                     source_reference=src, direction=EvidenceDirection.supports,
+                     strength=0.8, reliability=0.8, coverage=0.8, provenance=_PROV)
+        ],
+    )
+
+    EvidenceUpdater().update(state, record, request, DeterministicIds("inv"))
+    HypothesisUpdater().update(state, request, DeterministicIds("inv"))
+
+    stuck = [h.id for h in state.hypotheses if h.status is HypothesisStatus.proposed]
+    assert not stuck, f"claims never scored: {stuck}"

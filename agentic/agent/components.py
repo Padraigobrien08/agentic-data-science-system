@@ -597,8 +597,18 @@ class HypothesisUpdater:
     SUPPORT_THRESHOLD = 0.5
 
     def update(self, state: InvestigationState, request: ExperimentRequest, idgen: DeterministicIds) -> None:
-        target = request.target_hypothesis_ids[0] if request.target_hypothesis_ids else None
-        h = state.find_hypothesis(target) if target else None
+        # Score every claim the experiment was raised to test. Reading only the first was the
+        # last of three places that did so: the planner then named both claims and the
+        # evidence updater filed against both, but the rival was still never scored, so it
+        # sat at `proposed` and the loop kept declining with an untested alternative standing.
+        for target in request.target_hypothesis_ids or []:
+            self._score(state, target, request, idgen)
+
+    def _score(
+        self, state: InvestigationState, target: str, request: ExperimentRequest,
+        idgen: DeterministicIds,
+    ) -> None:
+        h = state.find_hypothesis(target)
         if h is None or h.is_terminal():
             return
         if h.status is HypothesisStatus.proposed:
