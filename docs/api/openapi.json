@@ -2612,6 +2612,14 @@
             ],
             "title": "Summary"
           },
+          "target_hypothesis_ids": {
+            "default": [],
+            "items": {
+              "type": "string"
+            },
+            "title": "Target Hypothesis Ids",
+            "type": "array"
+          },
           "tool_name": {
             "title": "Tool Name",
             "type": "string"

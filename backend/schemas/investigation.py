@@ -244,6 +244,11 @@ class ExperimentItem(BaseModel):
     metrics: dict | None = None
     error: dict | None = None
     request_domain_id: str | None = None
+    #: The claims this experiment was raised to test, in the same domain-id space as
+    #: `hypotheses[].id`. Empty when the request behind it was not recorded — true of every
+    #: run before the request-persistence fix, so a reader must treat empty as "unknown"
+    #: rather than "tested nothing".
+    target_hypothesis_ids: list[str] = []
     created_at: datetime
     artifacts: list[ArtifactRef] = []
 
@@ -437,12 +442,14 @@ def _artifact_ref(link) -> ArtifactRef:
     )
 
 
-def _experiment(x) -> ExperimentItem:
+def _experiment(x, request_targets: dict[str, list[str]] | None = None) -> ExperimentItem:
+    targets = (request_targets or {}).get(x.request_domain_id or "", [])
     return ExperimentItem(
         id=x.domain_id, tool_name=x.tool_name, status=x.status, summary=x.summary,
         metrics=x.metrics_json if isinstance(x.metrics_json, dict) else None,
         error=x.error_json if isinstance(x.error_json, dict) else None,
-        request_domain_id=x.request_domain_id, created_at=x.created_at,
+        request_domain_id=x.request_domain_id, target_hypothesis_ids=targets,
+        created_at=x.created_at,
         artifacts=[_artifact_ref(link) for link in x.artifact_links],
     )
 
@@ -502,6 +509,12 @@ def build_detail(row: InvestigationRow) -> InvestigationDetail:
         )
     # Primary key -> domain id, so evidence links come out in the id space every other item
     # in this response is keyed by. Built once from rows already loaded.
+    # Which claims each experiment was raised to test, keyed by the request domain id the
+    # result carries. Already domain ids on both sides, so nothing to resolve.
+    request_targets = {
+        r.domain_id: [str(x) for x in _as_list(r.target_hypothesis_ids_json)]
+        for r in row.experiment_requests
+    }
     hypothesis_domain_ids = {str(h.id): h.domain_id for h in row.hypotheses}
     experiment_domain_ids = {str(x.id): x.domain_id for x in row.experiment_results}
     return InvestigationDetail(
@@ -511,7 +524,10 @@ def build_detail(row: InvestigationRow) -> InvestigationDetail:
         termination=_termination(row),
         hypotheses=[_hypothesis(h) for h in row.hypotheses],
         evidence=[_evidence(e, hypothesis_domain_ids, experiment_domain_ids) for e in row.evidence],
-        experiments=[_experiment(x) for x in sorted(row.experiment_results, key=lambda r: r.created_at)],
+        experiments=[
+            _experiment(x, request_targets)
+            for x in sorted(row.experiment_results, key=lambda r: r.created_at)
+        ],
         observations=[_observation(o) for o in row.observations],
         decisions=[_decision(d) for d in sorted(row.decisions, key=lambda d: d.sequence)],
         critiques=[_critique(c) for c in row.critiques],
