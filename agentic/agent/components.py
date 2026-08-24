@@ -59,8 +59,17 @@ INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
     AnalysisIntent.correlation: ["analyze_correlation", "fit_simple_regression"],
     AnalysisIntent.anomaly: ["detect_outliers", "summarize_distribution"],
     AnalysisIntent.ranking: ["rank_entities", "compare_groups"],
-    AnalysisIntent.association: ["test_association"],
-    AnalysisIntent.distribution: ["summarize_distribution", "profile_dataset"],
+    # Second tool for the same reason as `distribution` above: with only `test_association`
+    # available, a goal resolving here could state a rival explanation and never run anything
+    # against it. `compare_groups` answers the usual one — that the association is really a
+    # difference between the groups themselves.
+    AnalysisIntent.association: ["test_association", "compare_groups"],
+    # `detect_outliers` belongs here, not only under `anomaly`. "Is a small tail dragging the
+    # mean up?" is a distribution question whose rival explanation is literally outliers, and
+    # without the tool the planner had nothing to raise against that claim — a real run left
+    # it at `proposed` after exhausting both other tools, and the loop correctly refused to
+    # conclude while an untested alternative stood.
+    AnalysisIntent.distribution: ["summarize_distribution", "profile_dataset", "detect_outliers"],
     AnalysisIntent.profile: ["profile_dataset", "summarize_distribution"],
     AnalysisIntent.general: ["profile_dataset", "summarize_distribution"],
 }

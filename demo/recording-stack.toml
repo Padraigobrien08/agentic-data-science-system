@@ -136,11 +136,15 @@ slug = "edgar-growth-breaks"
 tickers = "AAPL,MSFT,NVDA"
 intent = "anomaly"
 expect = "mixed — likely different per company"
-goal = "Where revenue growth appears to break trend at these companies, is that a genuine change in the business, or an artefact of quarterly seasonality in the filings?"
-why = """Rewritten after the first sweep, which produced one hypothesis over four experiments
-and still ended `unresolved`. Real-break versus seasonality is the rival pair that actually
-threatens the finding, and it is the one a finance reviewer would raise first. Three entities
-mean the honest answer may differ per company, which is hard to fake."""
+goal = "Where revenue growth appears to break trend at these companies, is that a sustained change in the business, or is it driven by a few unusually extreme quarters?"
+why = """Rewritten twice. The first sweep produced one hypothesis and `unresolved`; the second
+named quarterly *seasonality* as the rival, which reads well and cannot be tested — there is no
+seasonality tool in the registry, so the claim sat at `proposed` while every trend tool ran, and
+the loop correctly refused to conclude with an untested alternative standing.
+
+The rival is now extreme quarters, which `detect_outliers` answers directly. Same shape of
+question, same reviewer instinct, but a rival the toolset can actually falsify. A goal whose
+alternative no experiment can reach is a goal that can only end unresolved."""
 
 # ---------------------------------------------------------------------------------------
 # Deliberately NOT in the default set — enable with --include-known-limit.
