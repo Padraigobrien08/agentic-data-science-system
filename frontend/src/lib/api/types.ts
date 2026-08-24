@@ -590,6 +590,12 @@ export interface ExperimentItem {
   metrics: Record<string, unknown> | null;
   error: Record<string, unknown> | null;
   request_domain_id: string | null;
+  /**
+   * The claims this experiment was raised to test, in the same id space as
+   * `HypothesisItem.id`. Empty on every run recorded before experiment requests were
+   * persisted — read it as unknown, never as "tested nothing".
+   */
+  target_hypothesis_ids: string[];
   created_at: string;
   artifacts: InvestigationArtifactRef[];
 }

@@ -1,9 +1,9 @@
 import Link from "next/link";
 
-import { TraceTimeline } from "@/components/trace/trace-timeline";
+import { ClaimTrackList } from "@/components/trace/claim-track-list";
 import type { InvestigationDetail } from "@/lib/api/types";
 import { formatConfidence } from "@/lib/investigation-view";
-import { investigationTimeline } from "@/lib/trace-timeline";
+import { claimTrace } from "@/lib/trace-claims";
 import { traceSections } from "@/lib/trace-view";
 
 /**
@@ -21,7 +21,7 @@ export function TraceRail({
   detail,
   fullTraceHref,
 }: Readonly<{ detail: InvestigationDetail; fullTraceHref: string }>) {
-  const groups = investigationTimeline(detail.decisions, detail.hypotheses);
+  const trace = claimTrace(detail);
   const sections = traceSections(detail);
 
   return (
@@ -32,8 +32,8 @@ export function TraceRail({
             The trace
           </p>
           <p className={`mt-0.5 ${MONO} text-[var(--chat-faint)]`}>
-            {detail.counts.decisions} decisions · {groups.length} iteration
-            {groups.length === 1 ? "" : "s"}
+            {trace.claims.length} claim{trace.claims.length === 1 ? "" : "s"} ·{" "}
+            {detail.counts.decisions} decisions
           </p>
         </div>
         <Link href={fullTraceHref} className={`${MONO} text-[var(--accent)] hover:underline`}>
@@ -41,7 +41,7 @@ export function TraceRail({
         </Link>
       </div>
 
-      <TraceTimeline groups={groups} emptyLabel="No decisions recorded." />
+      <ClaimTrackList trace={trace} />
 
       {/* Counts, as the way into the full record rather than as decoration. */}
       <div className={`divide-y overflow-hidden rounded-lg border ${RULE} divide-[var(--border)]`}>

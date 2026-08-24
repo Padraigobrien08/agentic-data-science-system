@@ -195,6 +195,7 @@ function experiment(id: string, tool: string): ExperimentItem {
     metrics: null,
     error: null,
     request_domain_id: null,
+    target_hypothesis_ids: [],
     created_at: "2026-08-20T19:02:26Z",
     artifacts: [],
   };
