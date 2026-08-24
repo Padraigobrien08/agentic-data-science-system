@@ -182,3 +182,22 @@ describe("mergedThreads", () => {
     expect(mergedThreads([own("mine", "2026-08-01T00:00:00Z")], [])).toHaveLength(1);
   });
 });
+
+describe("demoNote", () => {
+  it("frames the run that is published because it failed", async () => {
+    const { demoNote } = await import("@/lib/demo-notes");
+    const note = demoNote("csv-unanswerable-moat");
+
+    expect(note).not.toBeNull();
+    // The framing has to say the run is wrong. A neutral "note" beside a confident wrong
+    // answer is worse than none — it reads as a footnote rather than a correction.
+    expect(note!.body).toMatch(/fails|cannot be answered/i);
+    expect(note!.label).toBe("known limit");
+  });
+
+  it("leaves an ordinary run unframed", async () => {
+    const { demoNote } = await import("@/lib/demo-notes");
+
+    expect(demoNote("csv-staffing-vs-service")).toBeNull();
+  });
+});

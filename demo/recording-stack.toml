@@ -146,6 +146,42 @@ The rival is now extreme quarters, which `detect_outliers` answers directly. Sam
 question, same reviewer instinct, but a rival the toolset can actually falsify. A goal whose
 alternative no experiment can reach is a goal that can only end unresolved."""
 
+[[recording]]
+id = "csv-region-ranking-cause"
+command = "csv"
+slug = "csv-region-ranking-cause"
+intent = "ranking"
+expect = "mixed — the ordering is real, its cause may not be"
+goal = "Rank the regions by on-time delivery. Is the ordering a stable difference in how the regions perform, or does it just reflect how much order volume each one carries?"
+why = """Covers `ranking`, which nothing else in the set reaches, and the README's claim that
+the tool mix shifts by goal is only demonstrated if the planner is seen choosing
+rank_entities and compare_groups rather than the correlation pair every other CSV goal
+draws. Two accounts of one ordering, so both claims measure on_time_rate and the shared-metric
+path is exercised on a real run."""
+
+[[recording]]
+id = "csv-staffing-association"
+command = "csv"
+slug = "csv-staffing-association"
+intent = "association"
+expect = "supported or weakened — a real association, or a regional artefact"
+goal = "Is there an association between staffing level and whether a region hits its on-time target, or is the apparent link really just a difference between the regions themselves?"
+why = """The only `association` goal in the set, and the intent whose tool list was one entry
+long until `compare_groups` was added — the rival account here ("it is really the regions
+differing") is exactly what that second tool answers, so this run is also the check that the
+fix works on live data rather than only in a unit test."""
+
+[[recording]]
+id = "csv-profile-shape"
+command = "csv"
+slug = "csv-profile-shape"
+intent = "profile"
+expect = "inconclusive is a fair outcome — profiling rarely settles a causal pair"
+goal = "Across the whole dataset, does delivery performance vary mainly month to month, or mainly between regions?"
+why = """Covers `profile`. Also the most likely of the three to end honestly unresolved:
+profile tools describe shape rather than test a causal claim, and a set where every run
+concludes reads as a rig. Recorded for coverage; publish only if the trace is legible."""
+
 # ---------------------------------------------------------------------------------------
 # Deliberately NOT in the default set — enable with --include-known-limit.
 #

@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { Pill } from "@/components/investigations/pill";
 import { listDemos } from "@/lib/api/demos";
+import { demoNote } from "@/lib/demo-notes";
 import { formatConfidence, outcomeSummary, outcomeTone } from "@/lib/investigation-view";
 
 export const dynamic = "force-dynamic";
@@ -62,9 +63,18 @@ export default async function DemosPage() {
               <p className="text-sm font-medium text-[var(--foreground)]">
                 {d.objective ?? "Investigation"}
               </p>
-              {/* The outcome, not the stored status: `exhausted` reads as a crash to someone
-                  meeting this page cold, and half these runs declined on purpose. */}
-              <Pill tone={outcomeTone(d.outcome.kind)} />
+              <span className="flex shrink-0 items-center gap-2">
+                {/* Flagged here too: a reader scanning the list should know which run is on
+                    the site because it failed, before they open it. */}
+                {d.demo_slug && demoNote(d.demo_slug) ? (
+                  <span className="rounded-chip border border-[color:var(--status-warning-border)] bg-[var(--status-warning-bg)] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[color:var(--status-warning-ink)]">
+                    {demoNote(d.demo_slug)!.label}
+                  </span>
+                ) : null}
+                {/* The outcome, not the stored status: `exhausted` reads as a crash to someone
+                    meeting this page cold, and half these runs declined on purpose. */}
+                <Pill tone={outcomeTone(d.outcome.kind)} />
+              </span>
             </div>
             <p className="mt-2 text-sm text-[var(--foreground)]">
               {outcomeSummary(d.outcome)}

@@ -8,6 +8,7 @@ import { TraceRail } from "@/components/demos/trace-rail";
 import { Pill } from "@/components/investigations/pill";
 import { getDemo, getDemoChat, listDemos } from "@/lib/api/demos";
 import { demoMessages, demoThreads } from "@/lib/demo-chat";
+import { demoNote } from "@/lib/demo-notes";
 import { resolveDemoRunGate, type DemoRunGate } from "@/lib/demo-run-gate";
 import { formatConfidence, outcomeTone } from "@/lib/investigation-view";
 
@@ -107,6 +108,8 @@ export default async function DemoChatPage({
   const chat = await getDemoChat(slug);
   const demos = await listDemos();
   const gate = await resolveDemoRunGate();
+  // Editorial framing, for the one published run that is on the site because it failed.
+  const note = demoNote(slug);
   const fullTraceHref = `/demos/${slug}/trace`;
 
   // Keyed because these are created here and rendered as siblings inside a client
@@ -119,6 +122,11 @@ export default async function DemoChatPage({
             recorded
           </span>
           <Pill tone={outcomeTone(detail.outcome.kind)} />
+          {note ? (
+            <span className="rounded-chip border border-[color:var(--status-warning-border)] bg-[var(--status-warning-bg)] px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-[color:var(--status-warning-ink)]">
+              {note.label}
+            </span>
+          ) : null}
           <span className="font-mono text-[11px] text-[var(--chat-faint)]">
             confidence {formatConfidence(detail.confidence)}
           </span>
@@ -139,6 +147,13 @@ export default async function DemoChatPage({
           </Link>
         </div>
       </div>
+      {/* Above the conversation, not only on the index a reader may never see. A confident
+          wrong answer needs its framing attached to it. */}
+      {note ? (
+        <p className="mt-2.5 rounded-control border border-[color:var(--status-warning-border)] bg-[var(--status-warning-bg)] px-3 py-2.5 text-[12.5px] leading-6 text-[color:var(--status-warning-ink)]">
+          {note.body}
+        </p>
+      ) : null}
     </header>
   );
 
