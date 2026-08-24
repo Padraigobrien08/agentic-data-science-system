@@ -12,6 +12,8 @@ present and is the answer of record; the narrative is a bonus that has to earn i
 
 from __future__ import annotations
 
+import pytest
+
 from agentic.agent.components import ConclusionSynthesizer
 from agentic.agent.ids import DeterministicIds
 from agentic.agent.policy import AnswerNarration
@@ -132,3 +134,40 @@ def test_the_policy_is_given_the_question_and_computed_findings() -> None:
     assert findings["stopped_because"] == "sufficient_evidence"
     assert findings["experiments_run"] == []
     assert findings["open_questions"] == []
+
+
+def test_writing_the_answer_is_counted_against_the_budget() -> None:
+    """
+    A model call the budget cannot see makes a run look cheaper than it was. Recorded, never
+    gated: the run has already terminated by this point, so refusing the call would cost the
+    answer without saving the spend.
+    """
+    from agentic.agent.budget import BudgetTracker, LoopBudget, SafetyLimits
+
+    class _Priced:
+        def write_answer(self, *, question: str, findings: dict) -> AnswerNarration:
+            return AnswerNarration(answer="It held.")
+
+        def drain_cost_usd(self) -> float:
+            return 0.004
+
+    tracker = BudgetTracker(LoopBudget(), SafetyLimits())
+    before = tracker.model_calls_used
+
+    ConclusionSynthesizer().synthesize(
+        _state(), TerminationReason.sufficient_evidence, DeterministicIds("inv"),
+        policy=_Priced(), question="q", tracker=tracker,
+    )
+
+    assert tracker.model_calls_used == before + 1
+    assert tracker.cost_used_usd == pytest.approx(0.004)
+
+
+def test_the_conclusion_still_forms_without_a_tracker() -> None:
+    # Callers outside the loop (tests, replay) have no budget to charge.
+    concl = ConclusionSynthesizer().synthesize(
+        _state(), TerminationReason.sufficient_evidence, DeterministicIds("inv"),
+        policy=_Writes("It held."), question="q",
+    )
+
+    assert concl.narrative == "It held."

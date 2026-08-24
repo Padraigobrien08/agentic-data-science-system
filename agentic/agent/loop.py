@@ -384,7 +384,7 @@ class InvestigationLoop:
         with self._timed(inv.id, LoopComponent.conclusion_synthesizer):
             self._synth.synthesize(
                 state, reason, idgen,
-                policy=self.policy, question=state.objective.objective,
+                policy=self.policy, question=state.objective.objective, tracker=tracker,
             )
         state.record_termination(make_termination(reason, state, idgen))
         inv.set_status(_TERMINAL_STATUS.get(reason, InvestigationStatus.exhausted))
@@ -402,7 +402,7 @@ class InvestigationLoop:
             with self._timed(inv.id, LoopComponent.conclusion_synthesizer):
                 self._synth.synthesize(
                     state, reason, idgen,
-                    policy=self.policy, question=state.objective.objective,
+                    policy=self.policy, question=state.objective.objective, tracker=tracker,
                 )
             state.record_termination(make_termination(reason, state, idgen))
         if inv.status not in (InvestigationStatus.converged, InvestigationStatus.exhausted, InvestigationStatus.failed):
