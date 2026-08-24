@@ -22,9 +22,25 @@ export function ChatRecordedAnswer({ answer }: Readonly<{ answer: ComposedAnswer
     <div
       className={`mx-auto max-w-[52rem] rounded-card border ${RULE} bg-[var(--surface)] px-5 py-4 text-[15px] leading-7 text-[var(--foreground)]`}
     >
-      <p className="font-medium">{answer.headline}</p>
-
-      {answer.conclusion ? <p className="mt-3 text-[var(--muted)]">{answer.conclusion}</p> : null}
+      {/* The run's own written answer leads when it produced one. It is what the product
+          actually replied, so it is the answer — the headline and conclusion below are the
+          scaffolding that stands in when no narrative survived verification. */}
+      {answer.narrative ? (
+        <div className="space-y-3">
+          {/* Index keys: a recorded narrative is fixed text that never reorders, and two
+              paragraphs can legitimately begin with the same words. */}
+          {answer.narrative
+            .split(/\n{2,}/)
+            .map((para, i) => <p key={i}>{para.trim()}</p>)}
+        </div>
+      ) : (
+        <>
+          <p className="font-medium">{answer.headline}</p>
+          {answer.conclusion ? (
+            <p className="mt-3 text-[var(--muted)]">{answer.conclusion}</p>
+          ) : null}
+        </>
+      )}
 
       {answer.claims.length ? (
         <ul className={`mt-4 space-y-2 border-t ${RULE} pt-4`}>

@@ -1,24 +1,24 @@
 {
-  "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
+  "analysis_run_id": "9c231479-7ac7-49f8-becf-faad00a1e1d6",
   "chat": [
     {
-      "created_at": "2026-08-19T22:11:15",
-      "id": "ef449185-aff5-4491-aa98-d259fb398148",
+      "created_at": "2026-08-24T13:36:51",
+      "id": "87c8b36d-7e43-4c17-8926-69894eb3b527",
       "messages": [
         {
           "analysis_run_id": null,
           "content": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?",
-          "created_at": "2026-08-19T22:11:15.263727",
-          "id": "d80ee567-f11d-41e1-966b-eec463baaabd",
+          "created_at": "2026-08-24T13:36:51.066075",
+          "id": "2f53e78b-67dd-498f-82d0-dacf7aeb83f7",
           "role": "user",
           "sequence": 0,
           "status": "complete"
         },
         {
-          "analysis_run_id": "3b819527-80a5-43d7-a896-f8a8a3a9e947",
-          "content": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.",
-          "created_at": "2026-08-19T22:11:15.265505",
-          "id": "ed10c4c4-4e3a-4533-adfe-1ce1f02e5f46",
+          "analysis_run_id": "9c231479-7ac7-49f8-becf-faad00a1e1d6",
+          "content": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its lower on-time delivery.",
+          "created_at": "2026-08-24T13:36:51.066638",
+          "id": "c27697a6-3797-413b-a6ea-7f2482646a83",
           "role": "assistant",
           "sequence": 1,
           "status": "complete"
@@ -28,15 +28,15 @@
     }
   ],
   "demo_slug": "csv-regional-ranking",
-  "investigation_id": "311f7b4d-5362-468e-884f-8b738e6060dd",
+  "investigation_id": "b6c6defe-68dc-49a2-82ab-56ff3c46e1d0",
   "model_calls": [
     {
-      "completion_tokens": 57,
+      "completion_tokens": 59,
       "error_detail": null,
-      "est_cost_usd": 0.00099675,
-      "finished_at": "2026-08-19T22:11:10.215840",
-      "id": "8fcfb329-2189-4255-8494-5ae8074cf706",
-      "latency_ms": 1176,
+      "est_cost_usd": 0.00100575,
+      "finished_at": "2026-08-24T13:36:42.240211",
+      "id": "a1aa3b0b-aa5c-4af8-81b1-d5461472312b",
+      "latency_ms": 1248,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 987,
@@ -64,10 +64,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether the weakest region's on-time delivery is explained by order volume, which is a relationship between two metrics.\"}",
-        "completion_tokens": 57,
+        "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether the weakest region's on-time delivery is explained by another metric, order volume, which is a relationship between metrics.\"}",
+        "completion_tokens": 59,
         "finish_reason": "stop",
-        "latency_ms": 1176,
+        "latency_ms": 1248,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 987,
         "raw_response": {
@@ -79,7 +79,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether the weakest region's on-time delivery is explained by order volume, which is a relationship between two metrics.\"}",
+                "content": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether the weakest region's on-time delivery is explained by another metric, order volume, which is a relationship between metrics.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -87,15 +87,15 @@
               }
             }
           ],
-          "created": 1787177469,
-          "id": "chatcmpl-EEimzEVu3kvQvc9P935ynabR35zmq",
+          "created": 1787578601,
+          "id": "chatcmpl-EGP8r562G72GWlOIqJBVIhFWlxB90",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 57,
+            "completion_tokens": 59,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -108,24 +108,24 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1044
+            "total_tokens": 1046
           }
         }
       },
       "sequence": 0,
-      "started_at": "2026-08-19T22:11:09.036285",
+      "started_at": "2026-08-24T13:36:40.990874",
       "status": "success"
     },
     {
-      "completion_tokens": 143,
+      "completion_tokens": 155,
       "error_detail": null,
-      "est_cost_usd": 0.00139875,
-      "finished_at": "2026-08-19T22:11:11.606656",
-      "id": "f693ca86-5bd6-49c5-88f3-18ade015f151",
-      "latency_ms": 1385,
+      "est_cost_usd": 0.00145425,
+      "finished_at": "2026-08-24T13:36:43.967947",
+      "id": "05dc3b1c-5e70-4e4f-aa93-70c08a8cd2b7",
+      "latency_ms": 1723,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1007,
+      "prompt_tokens": 1009,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -139,7 +139,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": \"The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?\", \"interpretation\": {\"intent\": \"correlation\", \"metric_hint\": \"on_time_rate\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks whether the weakest region's on-time delivery is explained by order volume, which is a relationship between two metrics.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
+            "content": "{\"goal\": \"The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?\", \"interpretation\": {\"intent\": \"correlation\", \"metric_hint\": \"on_time_rate\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks whether the weakest region's on-time delivery is explained by another metric, order volume, which is a relationship between metrics.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
             "role": "user"
           }
         ],
@@ -150,12 +150,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This tests whether the service-quality gap remains when volume is considered.\"},{\"statement\":\"The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the proposed alternative explanation directly on the cause metric.\"}],\"questions\":[\"Does the on-time delivery gap persist after controlling for order volume?\",\"Is the weakest region's order volume materially higher than other regions?\"]}",
-        "completion_tokens": 143,
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This tests whether the service-quality gap remains when volume is considered.\"},{\"statement\":\"The weakest region carries higher order volume than other regions, and that higher volume explains its lower on-time delivery.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the competing explanation that volume, not service quality, is driving the observed weakness.\"}],\"questions\":[\"Is the on-time delivery gap sustained after controlling for order volume, or does it disappear?\",\"Does the weakest region have unusually high order volume relative to other regions?\"]}",
+        "completion_tokens": 155,
         "finish_reason": "stop",
-        "latency_ms": 1385,
+        "latency_ms": 1723,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1007,
+        "prompt_tokens": 1009,
         "raw_response": {
           "choices": [
             {
@@ -165,7 +165,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This tests whether the service-quality gap remains when volume is considered.\"},{\"statement\":\"The weakest region carries higher order volume than other regions, and that higher volume explains its weaker on-time delivery.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the proposed alternative explanation directly on the cause metric.\"}],\"questions\":[\"Does the on-time delivery gap persist after controlling for order volume?\",\"Is the weakest region's order volume materially higher than other regions?\"]}",
+                "content": "{\"hypotheses\":[{\"statement\":\"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This tests whether the service-quality gap remains when volume is considered.\"},{\"statement\":\"The weakest region carries higher order volume than other regions, and that higher volume explains its lower on-time delivery.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This tests the competing explanation that volume, not service quality, is driving the observed weakness.\"}],\"questions\":[\"Is the on-time delivery gap sustained after controlling for order volume, or does it disappear?\",\"Does the weakest region have unusually high order volume relative to other regions?\"]}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -173,42 +173,42 @@
               }
             }
           ],
-          "created": 1787177470,
-          "id": "chatcmpl-EEin0MFym80X1F8baBe2akViZ9shS",
+          "created": 1787578603,
+          "id": "chatcmpl-EGP8tfkRdxxq7hf3DI4fOkPrk8DPK",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 143,
+            "completion_tokens": 155,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1007,
+            "prompt_tokens": 1009,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1150
+            "total_tokens": 1164
           }
         }
       },
       "sequence": 1,
-      "started_at": "2026-08-19T22:11:10.219906",
+      "started_at": "2026-08-24T13:36:42.242747",
       "status": "success"
     },
     {
-      "completion_tokens": 36,
+      "completion_tokens": 31,
       "error_detail": null,
-      "est_cost_usd": 0.0007755,
-      "finished_at": "2026-08-19T22:11:12.553919",
-      "id": "44862f18-d763-4528-8342-c3ce27e66549",
-      "latency_ms": 910,
+      "est_cost_usd": 0.000753,
+      "finished_at": "2026-08-24T13:36:45.005926",
+      "id": "4b5fe571-d72f-4608-8349-2134bb6499a3",
+      "latency_ms": 1019,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 818,
@@ -236,10 +236,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.\"}",
-        "completion_tokens": 36,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+        "completion_tokens": 31,
         "finish_reason": "stop",
-        "latency_ms": 910,
+        "latency_ms": 1019,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 818,
         "raw_response": {
@@ -251,7 +251,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -259,15 +259,15 @@
               }
             }
           ],
-          "created": 1787177472,
-          "id": "chatcmpl-EEin2ZphybLMvoaMkaWUaLxoUQPlY",
+          "created": 1787578604,
+          "id": "chatcmpl-EGP8uiJRKxeoAd7DNKuAUtdcwk53h",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 36,
+            "completion_tokens": 31,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -280,21 +280,21 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 854
+            "total_tokens": 849
           }
         }
       },
       "sequence": 2,
-      "started_at": "2026-08-19T22:11:11.642827",
+      "started_at": "2026-08-24T13:36:43.985220",
       "status": "success"
     },
     {
       "completion_tokens": 31,
       "error_detail": null,
       "est_cost_usd": 0.00071925,
-      "finished_at": "2026-08-19T22:11:13.411499",
-      "id": "695abccd-0334-4661-b854-8526f77cdd38",
-      "latency_ms": 809,
+      "finished_at": "2026-08-24T13:36:46.119199",
+      "id": "c06305d1-1edf-4e03-a883-2c800739b138",
+      "latency_ms": 1079,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 773,
@@ -325,7 +325,7 @@
         "assistant_text": "{\"request_index\":1,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
         "completion_tokens": 31,
         "finish_reason": "stop",
-        "latency_ms": 809,
+        "latency_ms": 1079,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 773,
         "raw_response": {
@@ -345,8 +345,8 @@
               }
             }
           ],
-          "created": 1787177472,
-          "id": "chatcmpl-EEin2Im1XvPlPRhW99bvZptqL16VU",
+          "created": 1787578605,
+          "id": "chatcmpl-EGP8vkacA0dPpFfpWpHoT4WJwt2Tf",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -371,16 +371,16 @@
         }
       },
       "sequence": 3,
-      "started_at": "2026-08-19T22:11:12.601377",
+      "started_at": "2026-08-24T13:36:45.038451",
       "status": "success"
     },
     {
-      "completion_tokens": 39,
+      "completion_tokens": 38,
       "error_detail": null,
-      "est_cost_usd": 0.0007215,
-      "finished_at": "2026-08-19T22:11:14.285948",
-      "id": "31fe6312-297c-4460-9457-12173c0657f7",
-      "latency_ms": 838,
+      "est_cost_usd": 0.000717,
+      "finished_at": "2026-08-24T13:36:47.065021",
+      "id": "7a8d44c2-5762-42fb-8fcc-5a9e0161476d",
+      "latency_ms": 908,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 728,
@@ -408,10 +408,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the correlation estimate via simple regression, which best matches the goal and has the highest available information gain.\"}",
-        "completion_tokens": 39,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the correlation estimate via simple regression, which is the highest-value available step for the stated goal.\"}",
+        "completion_tokens": 38,
         "finish_reason": "stop",
-        "latency_ms": 838,
+        "latency_ms": 908,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 728,
         "raw_response": {
@@ -423,7 +423,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This will establish the correlation estimate via simple regression, which best matches the goal and has the highest available information gain.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"This will establish the correlation estimate via simple regression, which is the highest-value available step for the stated goal.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -431,15 +431,15 @@
               }
             }
           ],
-          "created": 1787177473,
-          "id": "chatcmpl-EEin3BnE5Kv4CFAlehBQQW0aVsoX4",
+          "created": 1787578606,
+          "id": "chatcmpl-EGP8wL72Y1ewFfX2MhXBrrdfv6tsM",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 39,
+            "completion_tokens": 38,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -452,21 +452,21 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 767
+            "total_tokens": 766
           }
         }
       },
       "sequence": 4,
-      "started_at": "2026-08-19T22:11:13.446315",
+      "started_at": "2026-08-24T13:36:46.154982",
       "status": "success"
     },
     {
-      "completion_tokens": 32,
+      "completion_tokens": 30,
       "error_detail": null,
-      "est_cost_usd": 0.0006555,
-      "finished_at": "2026-08-19T22:11:15.199677",
-      "id": "82d8fe51-78e9-4218-87ec-367e1e4e1263",
-      "latency_ms": 881,
+      "est_cost_usd": 0.0006465,
+      "finished_at": "2026-08-24T13:36:49.029617",
+      "id": "e78525e9-d7ca-47cd-a681-f9afe9937ad6",
+      "latency_ms": 1941,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 682,
@@ -494,10 +494,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the strength and direction of the correlation via a simple regression fit.\"}",
-        "completion_tokens": 32,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"Fit the simple regression to establish the strength and direction of the correlation.\"}",
+        "completion_tokens": 30,
         "finish_reason": "stop",
-        "latency_ms": 881,
+        "latency_ms": 1941,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 682,
         "raw_response": {
@@ -509,7 +509,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This will establish the strength and direction of the correlation via a simple regression fit.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"Fit the simple regression to establish the strength and direction of the correlation.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -517,15 +517,15 @@
               }
             }
           ],
-          "created": 1787177474,
-          "id": "chatcmpl-EEin4g4Mor0Vm4ucTDUOfDAezSXJu",
+          "created": 1787578608,
+          "id": "chatcmpl-EGP8yFHGLsEBRzWhRskNteCEzhlCy",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 32,
+            "completion_tokens": 30,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -538,22 +538,108 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 714
+            "total_tokens": 712
           }
         }
       },
       "sequence": 5,
-      "started_at": "2026-08-19T22:11:14.317553",
+      "started_at": "2026-08-24T13:36:47.087195",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 185,
+      "error_detail": null,
+      "est_cost_usd": 0.002157,
+      "finished_at": "2026-08-24T13:36:51.031542",
+      "id": "20111aae-6894-4a7c-82b1-ba2f99ad1836",
+      "latency_ms": 1971,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1766,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
+            "role": "system"
+          },
+          {
+            "content": "{\"question\": \"The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?\", \"findings\": {\"disposition\": \"inconclusive\", \"confidence\": 0.4, \"claims\": [{\"statement\": \"The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\", \"status\": \"unresolved\", \"confidence\": 0.5458, \"supporting_evidence\": 7, \"refuting_evidence\": 0}, {\"statement\": \"The weakest region carries higher order volume than other regions, and that higher volume explains its lower on-time delivery.\", \"status\": \"weakened\", \"confidence\": 0.3542, \"supporting_evidence\": 6, \"refuting_evidence\": 1}], \"counts\": {\"hypotheses\": 2, \"evidence\": 14, \"experiments\": 4, \"supported\": 0, \"open_questions\": 3}, \"experiments_run\": [\"analyze_correlation\", \"analyze_correlation\", \"fit_simple_regression\", \"fit_simple_regression\"], \"stopped_because\": \"insufficient_evidence\", \"open_questions\": [\"Is the on-time delivery gap sustained after controlling for order volume, or does it disappear?\", \"Does the weakest region have unusually high order volume relative to other regions?\", \"Stronger evidence needed for: The weakest region's on-time delivery is genuinely lower than other regions, even after accounting for order volume.\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": null}}}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"answer\":\"The evidence did not separate the two explanations. The run ended inconclusive, so it could not say whether the weakest region’s on-time delivery reflects a real service-quality gap or is mainly explained by the order volume that region carries.\\n\\nThe claim that the weakest region is genuinely lower on on-time delivery even after accounting for order volume remained unresolved. The competing claim — that higher order volume explains the lower on-time delivery — was weakened, but not rejected, so it lost some support without being ruled out. In other words, neither explanation won cleanly.\\n\\nThe question was tested with two correlation analyses and two simple regressions. The loop stopped because there was insufficient evidence, and three questions remained open: whether the gap persists after controlling for order volume, whether the weakest region actually has unusually high volume, and whether stronger evidence would support the service-quality-gap explanation.\"}",
+        "completion_tokens": 185,
+        "finish_reason": "stop",
+        "latency_ms": 1971,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1766,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"answer\":\"The evidence did not separate the two explanations. The run ended inconclusive, so it could not say whether the weakest region’s on-time delivery reflects a real service-quality gap or is mainly explained by the order volume that region carries.\\n\\nThe claim that the weakest region is genuinely lower on on-time delivery even after accounting for order volume remained unresolved. The competing claim — that higher order volume explains the lower on-time delivery — was weakened, but not rejected, so it lost some support without being ruled out. In other words, neither explanation won cleanly.\\n\\nThe question was tested with two correlation analyses and two simple regressions. The loop stopped because there was insufficient evidence, and three questions remained open: whether the gap persists after controlling for order volume, whether the weakest region actually has unusually high volume, and whether stronger evidence would support the service-quality-gap explanation.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787578609,
+          "id": "chatcmpl-EGP8zgGTG3HSq1HikMvrgztMk4BJr",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 185,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1766,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 1280
+            },
+            "total_tokens": 1951
+          }
+        }
+      },
+      "sequence": 6,
+      "started_at": "2026-08-24T13:36:49.059166",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 338,
-    "est_cost_usd": 0.005267,
-    "latency_ms": 5999,
-    "model_calls": 6,
+    "completion_tokens": 529,
+    "est_cost_usd": 0.007453,
+    "latency_ms": 9889,
+    "model_calls": 7,
     "priced": true,
-    "prompt_tokens": 4995,
-    "total_tokens": 5333
+    "prompt_tokens": 6763,
+    "total_tokens": 7292
   }
 }

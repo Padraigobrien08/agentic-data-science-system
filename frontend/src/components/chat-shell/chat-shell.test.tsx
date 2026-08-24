@@ -271,6 +271,7 @@ describe("ChatShell", () => {
         role: "assistant",
         content: "Two claims could not both be true, so neither was allowed to stand.",
         recordedAnswer: {
+          narrative: null,
           headline: "Two claims could not both be true, so neither was allowed to stand.",
           conclusion: null,
           claims: [{ id: "h-a", statement: "staffing drives it", status: "weakened", confidence: 0.5 }],

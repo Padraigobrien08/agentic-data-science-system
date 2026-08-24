@@ -180,3 +180,31 @@ describe("composeAnswer", () => {
     expect(answer.footnote).toBe("0 decisions, 0 experiments, 0 evidence items.");
   });
 });
+
+describe("composeAnswer narrative", () => {
+  it("carries the run's own written answer when it recorded one", () => {
+    const answer = composeAnswer(
+      detail({
+        conclusion_detail: {
+          statement: "the structured statement",
+          narrative: "The claim held. It was tested twice and survived both.",
+        } as never,
+      }),
+    );
+
+    expect(answer.narrative).toBe("The claim held. It was tested twice and survived both.");
+    // The structured answer stays available — the narrative supplements it, never replaces
+    // the record.
+    expect(answer.conclusion).toBe("the structured statement");
+  });
+
+  it("reports no narrative rather than substituting the statement for one", () => {
+    // Ordinary: the run wrote nothing, or what it wrote cited a figure that did not verify.
+    const answer = composeAnswer(
+      detail({ conclusion_detail: { statement: "s", narrative: null } as never }),
+    );
+
+    expect(answer.narrative).toBeNull();
+    expect(answer.headline).toBeTruthy();
+  });
+});

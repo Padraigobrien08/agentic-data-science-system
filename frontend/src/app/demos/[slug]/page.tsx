@@ -109,8 +109,10 @@ export default async function DemoChatPage({
   const gate = await resolveDemoRunGate();
   const fullTraceHref = `/demos/${slug}/trace`;
 
+  // Keyed because these are created here and rendered as siblings inside a client
+  // component; React cannot infer a static position across that boundary.
   const header = (
-    <header className="border-b border-[var(--border)] px-4 py-2.5">
+    <header key="demo-header" className="border-b border-[var(--border)] px-4 py-2.5">
       <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
         <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="rounded-chip border border-[var(--border)] px-1.5 py-0.5 font-mono text-[11px] uppercase tracking-[0.08em] text-[var(--muted)]">
@@ -152,7 +154,7 @@ export default async function DemoChatPage({
         initialMessages={demoMessages(detail, chat)}
         chatThreads={demoThreads(demos)}
         header={header}
-        rail={<TraceRail detail={detail} fullTraceHref={fullTraceHref} />}
+        rail={<TraceRail key="demo-rail" detail={detail} fullTraceHref={fullTraceHref} />}
         defaultRailOpen
         composer={replayComposer(gate)}
         className="h-full min-h-0"

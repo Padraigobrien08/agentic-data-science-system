@@ -21,6 +21,15 @@ export type AnswerClaim = {
 };
 
 export type ComposedAnswer = {
+  /**
+   * The run's own written answer, when it produced one that passed verification.
+   *
+   * Preferred over everything else below when present: it is what the product actually
+   * replied, and the rest of this object is the scaffolding that stands in when it did not.
+   * Never written here — composed answers are assembled from state, and this one was
+   * recorded.
+   */
+  narrative: string | null;
   /** One line naming what the run established, from the outcome classification. */
   headline: string;
   /** The recorded conclusion, when the run reached one. */
@@ -50,6 +59,7 @@ export function composeAnswer(detail: InvestigationDetail): ComposedAnswer {
   const stopped = detail.termination?.reason ? `, stopping at ${detail.termination.reason}` : "";
 
   return {
+    narrative: detail.conclusion_detail?.narrative ?? null,
     headline: outcomeSummary(detail.outcome),
     conclusion: detail.conclusion_detail?.statement ?? detail.conclusion ?? null,
     claims: detail.hypotheses.map((h) => ({

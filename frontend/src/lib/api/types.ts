@@ -654,6 +654,12 @@ export interface OpenQuestionItem {
 export interface ConclusionItem {
   id: string;
   statement: string;
+  /**
+   * The finding written as prose by the run itself, when it wrote one and every figure in
+   * it was verified against recorded state. Null is ordinary — `statement` is the
+   * deterministic answer of record and is always present.
+   */
+  narrative: string | null;
   disposition: string;
   confidence: number;
   caveats: string[];

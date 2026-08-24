@@ -1,97 +1,98 @@
 {
   "adapter_id": "edgar",
-  "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
-  "conclusion": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+  "analysis_run_id": "d520cd31-8548-460a-b35b-a32cb9db98a6",
+  "conclusion": "Supported: NVDA's net_margin advantage over AAPL and MSFT reflects a durable difference in profitability rather than being fully explained by faster revenue growth over the same periods. | Not supported: NVDA's revenue_growth_qoq is higher than AAPL's and MSFT's over the same periods, and this growth difference explains the margin advantage.",
   "conclusion_detail": {
     "caveats": [
       "termination: sufficient_evidence",
       "2 open question(s) remain"
     ],
-    "confidence": 0.95,
-    "disposition": "supported",
-    "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-concl-0",
+    "confidence": 0.725,
+    "disposition": "mixed",
+    "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-concl-0",
     "key_evidence_ids": [
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72"
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-0",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-1",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-2",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-3",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-4",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-5",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-6",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-7",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-8",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-9",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-10",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-11",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-12",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-13",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-14",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-15",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-16",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-17",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-18",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-19",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-20",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-21",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-22",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-23",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-24",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-25",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-26",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-27",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-28",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-29",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-30",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-31",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-32",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-33",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-34",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-35",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-36",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-37",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-38",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-39",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-40",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-41",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-42",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-43",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-44",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-45",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-46",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-47",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-48",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-49",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-50",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-51",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-52",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-53",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-54",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-55",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-56",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-57",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-58",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-59",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-60",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-61",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-62",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-63",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-64",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-65",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-66",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-67",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-68",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-69",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-70",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-71",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-72"
     ],
-    "statement": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+    "narrative": "The run found a mixed answer. NVDA’s margin advantage over AAPL and MSFT was supported as a durable profitability difference, but the idea that faster revenue growth over the same periods explains that advantage remained unresolved.\n\nThe first claim held with strong support and no refuting evidence: NVDA’s net margin advantage looked like a real profitability difference, not something fully explained away by growth. The second claim also had substantial supporting evidence, but it did not reach a settled conclusion, so the growth explanation was not confirmed or rejected.\n\nThe evidence came from a correlation analysis, then a simple regression, then another correlation analysis. The loop stopped because it had sufficient evidence for a mixed verdict, but two questions remained open: whether the margin advantage persisted across periods or was only a one-off spike, and whether controlling for revenue growth would remove most or all of the margin gap.",
+    "statement": "Supported: NVDA's net_margin advantage over AAPL and MSFT reflects a durable difference in profitability rather than being fully explained by faster revenue growth over the same periods. | Not supported: NVDA's revenue_growth_qoq is higher than AAPL's and MSFT's over the same periods, and this growth difference explains the margin advantage.",
     "supporting_hypothesis_ids": [
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
+      "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
     ]
   },
-  "confidence": 0.95,
+  "confidence": 0.725,
   "constraints": [],
   "counts": {
     "critiques": 1,
@@ -102,58 +103,58 @@
     "observations": 73,
     "open_questions": 2
   },
-  "created_at": "2026-08-19T22:11:27",
+  "created_at": "2026-08-24T13:37:26",
   "critiques": [
     {
       "critique_type": "competing_explanation",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-crit-0",
-      "message": "Test whether the apparent margin advantage persists after controlling for revenue growth with a simple regression; if the effect disappears, the claim may be an artefact of faster growth rather than durable profitability.",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-crit-0",
+      "message": "Test whether NVDA's net_margin advantage still holds after controlling for revenue growth with a simple regression; if the advantage disappears, the current interpretation may be an artefact of growth differences rather than durable profitability.",
       "resolved": false,
       "severity": "major",
       "suggested_action": "fit_simple_regression",
-      "target_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "target_id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
       "target_kind": "hypothesis"
     }
   ],
   "datasets": [
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_c50315f313464cda9241756bbf1a2b66",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_c50315f313464cda9241756bbf1a2b66",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_c50315f313464cda9241756bbf1a2b66",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_c50315f313464cda9241756bbf1a2b66",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_c50315f313464cda9241756bbf1a2b66",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_c50315f313464cda9241756bbf1a2b66",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
@@ -164,13 +165,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-0",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-hyp-0",
       "iteration": 0,
-      "rationale": "This directly tests the stated profitability explanation using the margin metric.",
+      "rationale": "This directly tests the observed margin gap as the primary outcome.",
       "sequence": 0,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -179,13 +180,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-1",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-hyp-1",
       "iteration": 0,
-      "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
+      "rationale": "This tests the proposed alternative explanation on its own metric so the two explanations can be distinguished.",
       "sequence": 1,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -194,13 +195,13 @@
       "alternatives": [],
       "chosen_option": "analyze_correlation",
       "decision_type": "select_experiment",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-2",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-sel-2",
       "iteration": 0,
       "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
       "sequence": 2,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-exp-0",
           "kind": "experiment_request"
         }
       ]
@@ -209,13 +210,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-3",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 36 evidence item(s) for analyze_correlation",
       "sequence": 3,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -224,13 +225,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-4",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-rev-4",
       "iteration": 0,
       "rationale": "supported (support=36, refute=0)",
       "sequence": 4,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -239,13 +240,13 @@
       "alternatives": [],
       "chosen_option": "fit_simple_regression",
       "decision_type": "request_critique",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-crit-5",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-crit-5",
       "iteration": 0,
-      "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
+      "rationale": "The claim is supported and has not yet been critiqued, and there is an unused tool available that can directly probe the alternative explanation before the loop concludes.",
       "sequence": 5,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -254,13 +255,13 @@
       "alternatives": [],
       "chosen_option": "fit_simple_regression",
       "decision_type": "select_experiment",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-6",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-sel-6",
       "iteration": 1,
-      "rationale": "This is the offered falsification test, so it best checks whether the current correlation hypothesis survives an independent challenge.",
+      "rationale": "This regression run can directly falsify the currently supported correlation hypothesis, which is the strongest next step.",
       "sequence": 6,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-1",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-exp-1",
           "kind": "experiment_request"
         }
       ]
@@ -269,13 +270,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-7",
-      "iteration": 0,
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-evd-7",
+      "iteration": 1,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
       "sequence": 7,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -284,13 +285,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-8",
-      "iteration": 0,
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-rev-8",
+      "iteration": 1,
       "rationale": "supported (support=37, refute=0)",
       "sequence": 8,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -299,13 +300,13 @@
       "alternatives": [],
       "chosen_option": "analyze_correlation",
       "decision_type": "select_experiment",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-9",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-sel-9",
       "iteration": 2,
-      "rationale": "This directly establishes the correlation and has the highest expected information gain among the available candidates.",
+      "rationale": "This directly estimates the correlation, which is the most informative next step for the stated goal.",
       "sequence": 9,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-2",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-exp-2",
           "kind": "experiment_request"
         }
       ]
@@ -314,13 +315,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-10",
-      "iteration": 0,
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-evd-10",
+      "iteration": 2,
       "rationale": "recorded 36 evidence item(s) for analyze_correlation",
       "sequence": 10,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -329,13 +330,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-11",
-      "iteration": 0,
-      "rationale": "supported (support=36, refute=0)",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-rev-11",
+      "iteration": 2,
+      "rationale": "active (support=0, refute=0)",
       "sequence": 11,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -344,23 +345,23 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-concl-12",
-      "iteration": 0,
-      "rationale": "supported (sufficient_evidence)",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-dec-concl-12",
+      "iteration": 3,
+      "rationale": "mixed (sufficient_evidence)",
       "sequence": 12,
       "targets": [
         {
-          "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-concl-0",
+          "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-concl-0",
           "kind": "conclusion"
         }
       ]
     }
   ],
   "demo_slug": "edgar-peer-separation",
-  "domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+  "domain_id": "d520cd31-8548-460a-b35b-a32cb9db98a6",
   "events": [
     {
-      "created_at": "2026-08-19T22:11:27",
+      "created_at": "2026-08-24T13:37:26",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -370,7 +371,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-19T22:11:30",
+      "created_at": "2026-08-24T13:37:29",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -380,7 +381,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-19T22:11:35",
+      "created_at": "2026-08-24T13:37:32",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -390,7 +391,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-19T22:11:37",
+      "created_at": "2026-08-24T13:37:34",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -400,7 +401,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-19T22:11:39",
+      "created_at": "2026-08-24T13:37:37",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -410,7 +411,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-19T22:11:39",
+      "created_at": "2026-08-24T13:37:39",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -428,9 +429,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-0",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -461,9 +462,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-1",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -494,9 +495,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-2",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -527,9 +528,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-3",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -560,9 +561,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-4",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -593,9 +594,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-5",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -626,9 +627,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-6",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -659,9 +660,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-7",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -692,9 +693,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-8",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -725,9 +726,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-9",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -758,9 +759,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-10",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -791,9 +792,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-11",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -824,9 +825,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-12",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -857,9 +858,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-13",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -890,9 +891,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-14",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -923,9 +924,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-15",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -956,9 +957,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-16",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -989,9 +990,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-17",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1022,9 +1023,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-18",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1055,9 +1056,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-19",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1088,9 +1089,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-20",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1121,9 +1122,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-21",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1154,9 +1155,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-22",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1187,9 +1188,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-23",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1220,9 +1221,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-24",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1253,9 +1254,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-25",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1286,9 +1287,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-26",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1319,9 +1320,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-27",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1352,9 +1353,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-28",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1385,9 +1386,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-29",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1418,9 +1419,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-30",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1451,9 +1452,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-31",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1484,9 +1485,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-32",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1517,9 +1518,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-33",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1550,9 +1551,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-34",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1583,9 +1584,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-35",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1616,9 +1617,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-36",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1651,13 +1652,13 @@
     {
       "claim": "'revenue' and 'net_income' are correlated (r=0.95, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-37",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1684,13 +1685,13 @@
     {
       "claim": "'revenue' and 'total_assets' are correlated (r=0.58, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-38",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1717,13 +1718,13 @@
     {
       "claim": "'revenue' and 'total_liabilities' are correlated (r=0.78, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-39",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1750,13 +1751,13 @@
     {
       "claim": "'revenue' and 'operating_cash_flow' are correlated (r=0.96, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-40",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1783,13 +1784,13 @@
     {
       "claim": "'revenue' and 'current_assets' are correlated (r=0.53, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-41",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1816,13 +1817,13 @@
     {
       "claim": "'revenue' and 'current_liabilities' are correlated (r=0.78, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-42",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1849,13 +1850,13 @@
     {
       "claim": "'revenue' and 'current_ratio' are correlated (r=-0.70, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-43",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1882,13 +1883,13 @@
     {
       "claim": "'revenue' and 'debt_to_assets' are correlated (r=0.76, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-44",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1915,13 +1916,13 @@
     {
       "claim": "'net_income' and 'total_assets' are correlated (r=0.64, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-45",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1948,13 +1949,13 @@
     {
       "claim": "'net_income' and 'total_liabilities' are correlated (r=0.74, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-46",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1981,13 +1982,13 @@
     {
       "claim": "'net_income' and 'operating_cash_flow' are correlated (r=0.99, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-47",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2014,13 +2015,13 @@
     {
       "claim": "'net_income' and 'current_assets' are correlated (r=0.60, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-48",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2047,13 +2048,13 @@
     {
       "claim": "'net_income' and 'current_liabilities' are correlated (r=0.76, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-49",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2080,13 +2081,13 @@
     {
       "claim": "'net_income' and 'current_ratio' are correlated (r=-0.68, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-50",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2113,13 +2114,13 @@
     {
       "claim": "'net_income' and 'debt_to_assets' are correlated (r=0.60, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-51",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2146,13 +2147,13 @@
     {
       "claim": "'total_assets' and 'total_liabilities' are correlated (r=0.88, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-52",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2179,13 +2180,13 @@
     {
       "claim": "'total_assets' and 'operating_cash_flow' are correlated (r=0.67, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-53",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2212,13 +2213,13 @@
     {
       "claim": "'total_assets' and 'current_assets' are correlated (r=0.92, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-54",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2245,13 +2246,13 @@
     {
       "claim": "'total_assets' and 'current_liabilities' are correlated (r=0.87, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-55",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2278,13 +2279,13 @@
     {
       "claim": "'total_assets' and 'current_ratio' are correlated (r=-0.83, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-56",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2311,13 +2312,13 @@
     {
       "claim": "'total_liabilities' and 'operating_cash_flow' are correlated (r=0.78, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-57",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2344,13 +2345,13 @@
     {
       "claim": "'total_liabilities' and 'current_assets' are correlated (r=0.83, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-58",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2377,13 +2378,13 @@
     {
       "claim": "'total_liabilities' and 'current_liabilities' are correlated (r=0.98, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-59",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2410,13 +2411,13 @@
     {
       "claim": "'total_liabilities' and 'current_ratio' are correlated (r=-0.91, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-60",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2443,13 +2444,13 @@
     {
       "claim": "'total_liabilities' and 'debt_to_assets' are correlated (r=0.84, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-61",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2476,13 +2477,13 @@
     {
       "claim": "'operating_cash_flow' and 'current_assets' are correlated (r=0.61, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-62",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2509,13 +2510,13 @@
     {
       "claim": "'operating_cash_flow' and 'current_liabilities' are correlated (r=0.78, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-63",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2542,13 +2543,13 @@
     {
       "claim": "'operating_cash_flow' and 'current_ratio' are correlated (r=-0.71, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-64",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2575,13 +2576,13 @@
     {
       "claim": "'operating_cash_flow' and 'debt_to_assets' are correlated (r=0.65, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-65",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2608,13 +2609,13 @@
     {
       "claim": "'current_assets' and 'current_liabilities' are correlated (r=0.80, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-66",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2641,13 +2642,13 @@
     {
       "claim": "'current_assets' and 'current_ratio' are correlated (r=-0.79, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-67",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2674,13 +2675,13 @@
     {
       "claim": "'current_assets' and 'debt_to_assets' are correlated (r=0.51, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-68",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2707,13 +2708,13 @@
     {
       "claim": "'current_liabilities' and 'current_ratio' are correlated (r=-0.89, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-69",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2740,13 +2741,13 @@
     {
       "claim": "'current_liabilities' and 'debt_to_assets' are correlated (r=0.80, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-70",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2773,13 +2774,13 @@
     {
       "claim": "'net_margin' and 'debt_to_assets' are correlated (r=-0.50, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-71",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2806,13 +2807,13 @@
     {
       "claim": "'current_ratio' and 'debt_to_assets' are correlated (r=-0.76, n=49).",
       "coverage": 1.0,
-      "direction": "supports",
+      "direction": "neutral",
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-evd-72",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2842,89 +2843,98 @@
       "artifacts": [
         {
           "byte_size": 1387,
-          "id": "b0f35ccf-f352-47a1-86c8-40921bc2639e",
+          "id": "3dc4cb3b-2d06-458d-bbf8-58a9e4c5f2a2",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "correlation_matrix"
         },
         {
           "byte_size": 1307,
-          "id": "ca2d675a-fbf8-4580-b5dd-938683c4802d",
+          "id": "5545d1a4-7e42-40aa-9137-69456d960baa",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "correlation_heatmap"
         }
       ],
-      "created_at": "2026-08-19T22:11:35",
+      "created_at": "2026-08-24T13:37:32",
       "error": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-0",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-res-0",
       "metrics": {
         "columns": 11.0,
         "strong_pairs": 36.0
       },
-      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-0",
+      "request_domain_id": "d520cd31-8548-460a-b35b-a32cb9db98a6-exp-0",
       "status": "succeeded",
       "summary": "Correlated 11 columns; 36 strong pair(s).",
+      "target_hypothesis_ids": [
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
+      ],
       "tool_name": "analyze_correlation"
     },
     {
       "artifacts": [
         {
           "byte_size": 79,
-          "id": "b9d44db2-32b5-4991-b93f-142707a7da5d",
+          "id": "51153ab7-2530-4abd-8d10-139171435808",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "coefficients"
         },
         {
           "byte_size": 102,
-          "id": "99dd89c6-3428-47ca-929a-cf01e7c3e2d6",
+          "id": "ca4ed99d-72c5-469f-aba2-3a531894c912",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "regression_fit"
         }
       ],
-      "created_at": "2026-08-19T22:11:37",
+      "created_at": "2026-08-24T13:37:34",
       "error": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-1",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-res-1",
       "metrics": {
         "intercept": 4842483654.728045,
         "n": 49.0,
         "r2": 0.909498,
         "slope": 0.256593
       },
-      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-1",
+      "request_domain_id": "d520cd31-8548-460a-b35b-a32cb9db98a6-exp-1",
       "status": "succeeded",
       "summary": "OLS net_income ~ revenue: R²=0.91.",
+      "target_hypothesis_ids": [
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0"
+      ],
       "tool_name": "fit_simple_regression"
     },
     {
       "artifacts": [
         {
           "byte_size": 1387,
-          "id": "9990a831-3dba-464a-bae1-d6b50700759b",
+          "id": "89f3331c-e8dd-4ea5-bb5e-f8b2d05dfc4a",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "correlation_matrix"
         },
         {
           "byte_size": 1307,
-          "id": "6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b",
+          "id": "cac29c91-2e7f-4a8d-8d23-d76c7ae5dc27",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "correlation_heatmap"
         }
       ],
-      "created_at": "2026-08-19T22:11:39",
+      "created_at": "2026-08-24T13:37:37",
       "error": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-2",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-res-2",
       "metrics": {
         "columns": 11.0,
         "strong_pairs": 36.0
       },
-      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-2",
+      "request_domain_id": "d520cd31-8548-460a-b35b-a32cb9db98a6-exp-2",
       "status": "succeeded",
       "summary": "Correlated 11 columns; 36 strong pair(s).",
+      "target_hypothesis_ids": [
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
+      ],
       "tool_name": "analyze_correlation"
     }
   ],
@@ -2932,35 +2942,35 @@
     {
       "confidence": 0.95,
       "entity_refs": [],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
       "metric_refs": [
         "net_margin"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This directly tests the stated profitability explanation using the margin metric.",
-      "statement": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.",
+      "rationale": "This directly tests the observed margin gap as the primary outcome.",
+      "statement": "NVDA's net_margin advantage over AAPL and MSFT reflects a durable difference in profitability rather than being fully explained by faster revenue growth over the same periods.",
       "status": "supported"
     },
     {
-      "confidence": 0.95,
+      "confidence": 0.5,
       "entity_refs": [],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1",
       "metric_refs": [
         "revenue_growth_qoq"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
-      "statement": "NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
-      "status": "supported"
+      "rationale": "This tests the proposed alternative explanation on its own metric so the two explanations can be distinguished.",
+      "statement": "NVDA's revenue_growth_qoq is higher than AAPL's and MSFT's over the same periods, and this growth difference explains the margin advantage.",
+      "status": "unresolved"
     }
   ],
-  "id": "8f056b0a-8112-40ed-a611-c2dd3d5e2161",
+  "id": "3c23616f-3587-47ec-8365-93f31b0140a4",
   "objective": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
   "observations": [
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8ed21b80d2624713b9190043997293e2",
+      "id": "obs_1301ec32f3744776afae240bd47a0ce6",
       "magnitude": 0.953676093897126,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2969,7 +2979,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_1279a904c44b46028644362dac293b87",
+      "id": "obs_a29920d916a8411a8b4e3d0de9367314",
       "magnitude": 0.5778382033825593,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2978,7 +2988,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3e6581e0d02443f9bd322fdb1dc72995",
+      "id": "obs_ba4eed4f0adc4519928bc51a087a2940",
       "magnitude": 0.7809419578276104,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2987,7 +2997,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6b8a36a05cbd46d9bbf8cf6a4aabb9da",
+      "id": "obs_07dd013aa5d04bfcb2faafd9bd026e73",
       "magnitude": 0.9649426797093267,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2996,7 +3006,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_7fc7d5ce27c14d97995bc2d4c9f72e23",
+      "id": "obs_94cbd644d4e44a5387023ab6fd0e5aa9",
       "magnitude": 0.5263787187437607,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3005,7 +3015,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_882b953673a44f96adb285e4f677f832",
+      "id": "obs_b436f15aad674e0d81d885b1d5fcb849",
       "magnitude": 0.7764414247959724,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3014,7 +3024,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6b4005f5846340c8ae01cfe06930e685",
+      "id": "obs_c4094acee0f343d9ae07614710169041",
       "magnitude": -0.6978784865338288,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3023,7 +3033,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c7173677492d4860add6143e9c50f147",
+      "id": "obs_641bcc12c4794c9cac065d2b3f7d8d4b",
       "magnitude": 0.7575696861491573,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3032,7 +3042,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6d118d5debe3454c81c4530c153904b1",
+      "id": "obs_25ef3e1c41fb400d94dbb5aa04fd8aa6",
       "magnitude": 0.6409576268287619,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3041,7 +3051,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_4465d482c36d40319b2dd964c0a41887",
+      "id": "obs_c7bc84e04a59460789f58dcbaf36e8f4",
       "magnitude": 0.7443404643002431,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3050,7 +3060,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6c9941244d19479d8646df0cbcd1d09f",
+      "id": "obs_ce42021b221d42409191d6fdd3a1147b",
       "magnitude": 0.9881849165985215,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3059,7 +3069,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3d25c75f5c8047b295e30284b8ebc0df",
+      "id": "obs_cd20130c21f543949501097c6b471fb7",
       "magnitude": 0.5995310630240922,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3068,7 +3078,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f05e58c3973d40a1b31edcf65c4c7e8d",
+      "id": "obs_19fb001229a54b549d4988ce19699f8b",
       "magnitude": 0.7551303575409323,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3077,7 +3087,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_781d2275a3274a2d9e5ef87388c95db8",
+      "id": "obs_14f3c5b0688a43658140ec1f04b2d00f",
       "magnitude": -0.6803910223988244,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3086,7 +3096,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d948faf8e5ca49348239a21825075491",
+      "id": "obs_37b35334f9704b5faf7d7d6d2006ba48",
       "magnitude": 0.6048700192652681,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3095,7 +3105,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_73977f87583544ad8e6dd8e16104ac98",
+      "id": "obs_0d161c4bc51a4b9e8821e91273cb886f",
       "magnitude": 0.8838774380655743,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3104,7 +3114,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_0392a246207d49dda15d3e73d376ef9f",
+      "id": "obs_db08e201190c46038a90c9b3294c4169",
       "magnitude": 0.6677444094126498,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3113,7 +3123,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d49fb97f93d84dbcadb3cbf37c3d1c43",
+      "id": "obs_a45fdcd0f80048f68e811e4021ebabf6",
       "magnitude": 0.9150815651330793,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3122,7 +3132,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_492a74ccbce04e7796114d939b262d62",
+      "id": "obs_9c56811805304035981e6ddb3d946905",
       "magnitude": 0.8736681974727112,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3131,7 +3141,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_851309272b0f4be586f01c5ac46848ed",
+      "id": "obs_c57957b395564737b8eddb4d6b053304",
       "magnitude": -0.8308335201143805,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3140,7 +3150,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_af3fdbc267a641a28dcec69abc6e97fb",
+      "id": "obs_091130a93f9048ed9beb2ce8b6b70180",
       "magnitude": 0.7790002874639467,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3149,7 +3159,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_cf4278e79fb54f0ea152d8cafd63da15",
+      "id": "obs_259ce336899348fab8c2b7a7aba8f568",
       "magnitude": 0.8314264045065276,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3158,7 +3168,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8bcc16bd5b6f4f598936ef7f0cc4513e",
+      "id": "obs_a418c0833d4545d28a0222ffbba03518",
       "magnitude": 0.9824960196470658,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3167,7 +3177,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_a97cd29f0ffc42c4aa3a173e3d683e5d",
+      "id": "obs_3ab3ea647b274d84899e09459edb2739",
       "magnitude": -0.9090542980809503,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3176,7 +3186,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_1c0d55a68a3a41dbb83b669577e9c239",
+      "id": "obs_2349817336db4b35bdf68b8174233d0b",
       "magnitude": 0.838731884730247,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3185,7 +3195,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_5dd24bf8dd4447f5b1c2aee88dfc0572",
+      "id": "obs_767ea829c9cf40468a50d465a264a85e",
       "magnitude": 0.6133104366069685,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3194,7 +3204,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f8405eb3acea474d884b3013eca69afa",
+      "id": "obs_e471c82222324ef991e25945b4872628",
       "magnitude": 0.7771609910215529,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3203,7 +3213,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f89051deb48e4cf0a6c0114b61a2716d",
+      "id": "obs_08c3df0fcc084dabb01f908f7a8708b3",
       "magnitude": -0.7082328462686301,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3212,7 +3222,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8f6c66b96ca543a5b70fc4ddf6ecf0cf",
+      "id": "obs_137397b154ca4faaaafb3ac1e7b3ea16",
       "magnitude": 0.6459614942732606,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3221,7 +3231,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_84d78cc4753745f4a4505d659f17de70",
+      "id": "obs_c671fccb2a3246e9be9d0a3b0c19ef9b",
       "magnitude": 0.7979769023551934,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3230,7 +3240,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_9bc90536b145498781f364b890018eeb",
+      "id": "obs_0f90a294bf204ee0970e5da129a45ce9",
       "magnitude": -0.7926538622160821,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3239,7 +3249,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_dfc86cf8435b4d00a7b02773922867ac",
+      "id": "obs_82d8b4b9b79f44bb80c2bd619795c747",
       "magnitude": 0.5081693874307459,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3248,7 +3258,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f67420e6bea14f7bb9c3178d95dc0925",
+      "id": "obs_0981af9156cd4fd6a7940f1ff980e29c",
       "magnitude": -0.8942738107197148,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3257,7 +3267,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_4d7632168a7f47dca226310bb96d3eae",
+      "id": "obs_3a245c7890e14502b853d2a9ad688968",
       "magnitude": 0.8043557161262684,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3266,7 +3276,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_33262ee7c79443c5b75186bdcdeda207",
+      "id": "obs_d85cbefd12b04f68b2a8555b96827427",
       "magnitude": -0.5044486896952208,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3275,7 +3285,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_2747ce9865364bb58a6327f27649047d",
+      "id": "obs_3c131369d5394c9c8cf4a1465717b7fb",
       "magnitude": -0.7591266516328758,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3284,7 +3294,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_a4dc97a5fcd544d29ed31160af4744de",
+      "id": "obs_a3d2f13973264b27bf9550c4c1a07edb",
       "magnitude": 0.256592627325654,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3293,7 +3303,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d243e40aed3e43008219fe5e20f3dcc5",
+      "id": "obs_d3062f9fefa54cf29450f3b9a8ffa746",
       "magnitude": 0.953676093897126,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3302,7 +3312,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_2eac9020ffe94da19f1d0d6f822104bb",
+      "id": "obs_d89a758c39784bb79e8aec3d635c2ea2",
       "magnitude": 0.5778382033825593,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3311,7 +3321,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_7cce95e5a064448b913fbae2c9a16c6a",
+      "id": "obs_0935581447624b63914b1689d1850fd5",
       "magnitude": 0.7809419578276104,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3320,7 +3330,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_96859ef5db0c49bbbb27a39bcd835f2c",
+      "id": "obs_a8aa792e9d4149f3aab94921fc368701",
       "magnitude": 0.9649426797093267,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3329,7 +3339,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_021535f328584a4abef6524ef444eb12",
+      "id": "obs_e388e0cf55034e66afdc580699972181",
       "magnitude": 0.5263787187437607,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3338,7 +3348,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_0f957d44fe35440eafbf67442e86e787",
+      "id": "obs_1b2ac15e23c644ce9d8f257c8ff41db3",
       "magnitude": 0.7764414247959724,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3347,7 +3357,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_bce9b0ce9888412abf74e1325bc70882",
+      "id": "obs_82358a17c1fb470fa73c9b7e89837dbe",
       "magnitude": -0.6978784865338288,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3356,7 +3366,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8e8145f0c23c4012abec32ccaadb6bf6",
+      "id": "obs_5171bbae16b0438282de6e8945cffa7b",
       "magnitude": 0.7575696861491573,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3365,7 +3375,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_5937024c7d5c4e0fb03c308b84f6edc9",
+      "id": "obs_6784fe2fbd87480082bee39cdf416848",
       "magnitude": 0.6409576268287619,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3374,7 +3384,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_79e05e6b80a84193bc754898ce224a8e",
+      "id": "obs_6e162ccfbef941d5a3cf18e8428df5db",
       "magnitude": 0.7443404643002431,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3383,7 +3393,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_b53a2847d7fe4b5bab05608cbdec8904",
+      "id": "obs_fd06e6aa956e4d698f7c1747f4ecd6a9",
       "magnitude": 0.9881849165985215,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3392,7 +3402,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_fa4f5789b9e04b2596a2e7f5a43747ba",
+      "id": "obs_1ee97928ff80402c966814a7d8eacaa4",
       "magnitude": 0.5995310630240922,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3401,7 +3411,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_7d4672282161494ba1780002c8bcb4d5",
+      "id": "obs_d628ca150e50460a93f5ec200f3d1c7d",
       "magnitude": 0.7551303575409323,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3410,7 +3420,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6cf8dfa20d1748b9a15a155965f18a52",
+      "id": "obs_df1c8fa248794b7690c01a96cadd4723",
       "magnitude": -0.6803910223988244,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3419,7 +3429,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_eac7aa6ee97c46b6a4041d32819249e5",
+      "id": "obs_0125288d4bc04628bc55fa37fdcac1bb",
       "magnitude": 0.6048700192652681,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3428,7 +3438,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_774354237ad44bfbb3f66fdd1ad940f0",
+      "id": "obs_7495c033159243539eba54e933825c46",
       "magnitude": 0.8838774380655743,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3437,7 +3447,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_4a838f7b35f940daa3548ac9766b6feb",
+      "id": "obs_f1dd963a5972447cbf1d565f544957f4",
       "magnitude": 0.6677444094126498,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3446,7 +3456,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3f363b62b7494dfabef90310392f6ac1",
+      "id": "obs_c6939b3200954dda9d7ca75c286bb390",
       "magnitude": 0.9150815651330793,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3455,7 +3465,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_02b632ff9ec64c6cbbd6a831754dda85",
+      "id": "obs_2046f50a95274b8aaf1d8b79d9f46260",
       "magnitude": 0.8736681974727112,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3464,7 +3474,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8c42edb6335043eb91c4646f0f562c80",
+      "id": "obs_a92052539dd54958847d2aa8271863a1",
       "magnitude": -0.8308335201143805,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3473,7 +3483,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_a7ab752ab25f40678c8bbba499b43ba6",
+      "id": "obs_9810cebc0ad248af880423bcac5ef75d",
       "magnitude": 0.7790002874639467,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3482,7 +3492,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_e72417a79bcf4e5c83571af5f43b42c3",
+      "id": "obs_6c93290daf344b10bf89eb7142eaccae",
       "magnitude": 0.8314264045065276,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3491,7 +3501,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_5dfb882165a440ac8268707377ebc4fc",
+      "id": "obs_b10f0283140c4926b253b594eb175c4d",
       "magnitude": 0.9824960196470658,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3500,7 +3510,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d2bcf3b2cbd5474792a4b7046c95c1b7",
+      "id": "obs_e2bf69f1567b42cb8da119671b8214ea",
       "magnitude": -0.9090542980809503,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3509,7 +3519,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_178e3c1a049340b5b6f869fa6c82ea35",
+      "id": "obs_1e3826a9276b4dad9a693015ad8ff8a1",
       "magnitude": 0.838731884730247,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3518,7 +3528,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f6f9f2521e7048b98d46be096e97dad6",
+      "id": "obs_52550b6bde084dc89e3448627fbad733",
       "magnitude": 0.6133104366069685,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3527,7 +3537,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_355199105fca4321a91abe8e539a4d4b",
+      "id": "obs_b3a4bb6428da4f5cbde5ac8089ad6976",
       "magnitude": 0.7771609910215529,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3536,7 +3546,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_97b85abf148849f8af85d5170decd952",
+      "id": "obs_a5fcb67f1528499aa2958fc40bca5642",
       "magnitude": -0.7082328462686301,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3545,7 +3555,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_19051ef832d44425a47cbaf0c46e8e5d",
+      "id": "obs_15652bb8e61143afa4f5c2bd919b176a",
       "magnitude": 0.6459614942732606,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3554,7 +3564,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_262573d31d89495183ee73e683e7c5c3",
+      "id": "obs_54be58f2c6fd4f58992a089559767a57",
       "magnitude": 0.7979769023551934,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3563,7 +3573,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_74b371bcf56940578d599df1a0328a0c",
+      "id": "obs_577ccffbb8784d17aca7ec92ce90f16a",
       "magnitude": -0.7926538622160821,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3572,7 +3582,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_484894dea57c4a0d81c3ce5c894c3688",
+      "id": "obs_d6fbca8ccae74da68d92114c7c298d09",
       "magnitude": 0.5081693874307459,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3581,7 +3591,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c4aa3c0445ec496289510787c46c3226",
+      "id": "obs_aba214adbcba4dd3af21c3e48315f229",
       "magnitude": -0.8942738107197148,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3590,7 +3600,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_ef3cfeadfe6c4c65aaec2bb108e57033",
+      "id": "obs_56c10086482840bf8208e2cef1819297",
       "magnitude": 0.8043557161262684,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3599,7 +3609,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c9e8ce32462e4f31afa83529a186b652",
+      "id": "obs_5acbb7a023cb4428b16a7197dff4c363",
       "magnitude": -0.5044486896952208,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3608,7 +3618,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c9857986620347f18d32e813862ff436",
+      "id": "obs_8a74b1e88a56419eab0023351ec7e243",
       "magnitude": -0.7591266516328758,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3618,23 +3628,23 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-q-0",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-q-0",
       "priority": 0,
-      "question": "Is the margin advantage sustained across the same periods, or does it narrow when revenue growth is accounted for?",
+      "question": "Is the margin advantage persistent across periods, or only a one-off spike?",
       "related_hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-q-1",
+      "id": "d520cd31-8548-460a-b35b-a32cb9db98a6-q-1",
       "priority": 0,
-      "question": "Do the observed differences persist after comparing like-for-like periods?",
+      "question": "Does controlling for revenue growth remove most or all of the margin gap?",
       "related_hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-0",
+        "d520cd31-8548-460a-b35b-a32cb9db98a6-hyp-1"
       ],
       "status": "open"
     }
@@ -3642,11 +3652,11 @@
   "origin": "native",
   "outcome": {
     "claims_rejected": 0,
-    "claims_supported": 2,
-    "claims_unresolved": 0,
+    "claims_supported": 1,
+    "claims_unresolved": 1,
     "claims_weakened": 0,
     "contradiction_found": false,
-    "kind": "supported",
+    "kind": "mixed",
     "termination_reason": "sufficient_evidence"
   },
   "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
@@ -3657,5 +3667,5 @@
     "rationale": "terminated: sufficient_evidence",
     "reason": "sufficient_evidence"
   },
-  "updated_at": "2026-08-19T22:26:42"
+  "updated_at": "2026-08-24T13:41:11"
 }
