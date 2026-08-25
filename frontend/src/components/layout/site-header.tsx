@@ -3,6 +3,7 @@ import Link from "next/link";
 import { logoutAction } from "@/actions/auth";
 import { InvestigationsNavLink } from "@/components/investigations/investigations-nav-link";
 import type { CurrentUser } from "@/lib/api/types";
+import { PRODUCT_NAME } from "@/lib/brand";
 
 type Props = {
   user: CurrentUser | null;
@@ -14,7 +15,7 @@ export function SiteHeader({ user }: Props) {
       <div className="mx-auto flex h-16 max-w-[90rem] items-center justify-between gap-4 px-3 sm:px-5 lg:px-6">
         <Link href="/" className="inline-flex items-center gap-3">
           <span className="h-4 w-4 rounded-full bg-[linear-gradient(135deg,var(--accent),var(--accent-warm))] shadow-[0_0_24px_rgba(31,111,255,0.24)]" />
-          <span className="text-[1rem] font-semibold tracking-[-0.04em] text-[var(--foreground)]">EDGAR Analysis</span>
+          <span className="text-[1rem] font-semibold tracking-[-0.04em] text-[var(--foreground)]">{PRODUCT_NAME}</span>
         </Link>
         <div className="flex items-center gap-3 text-xs">
           {user ? (

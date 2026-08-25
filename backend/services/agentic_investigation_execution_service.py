@@ -38,7 +38,7 @@ from agentic.adapters.tabular import LocalTabularAdapter
 from agentic.agent.budget import LoopBudget
 from agentic.agent.loop import InvestigationLoop
 from agentic.domain import Investigation, InvestigationStatus
-from agentic.domain.manifest import DatasetManifest
+from agentic.domain.manifest import DatasetManifest, DatasetOrigin
 from agentic.experiments import InMemoryArtifactSink
 from agentic.experiments.artifacts import ArtifactRecord
 from agentic.experiments.descriptor import ArtifactType
@@ -97,6 +97,24 @@ _ARTIFACT_KIND: dict[ArtifactType, tuple[ArtifactKind, str]] = {
 
 def _payload_dict(payload: Any) -> dict[str, Any]:
     return payload if isinstance(payload, dict) else {}
+
+
+def _dataset_origin(dataset: Mapping[str, Any], *, adapter_id: str) -> DatasetOrigin:
+    """
+    Where a run's rows came from, for the reader of the published trace.
+
+    EDGAR is live by construction — the adapter fetches filings. Everything else has to be
+    declared, and an undeclared dataset stays ``unknown`` rather than being assumed real: the
+    showcase publishes runs over generated data next to runs over SEC filings, and the whole
+    argument for it collapses if a reader has to guess which is which.
+    """
+    if adapter_id == "edgar":
+        return DatasetOrigin.live
+    declared = str(dataset.get("dataset_origin") or "").strip()
+    try:
+        return DatasetOrigin(declared) if declared else DatasetOrigin.unknown
+    except ValueError:
+        return DatasetOrigin.unknown
 
 
 def _loop_budget(settings: Settings) -> LoopBudget:
@@ -355,7 +373,13 @@ class AgenticInvestigationExecutionService:
         )
         materialized = materializer.materialize()
         manifest = DatasetManifestBuilder().build(
-            materialized, adapter_id=adapter_id, adapter_version=adapter_version
+            materialized,
+            adapter_id=adapter_id,
+            adapter_version=adapter_version,
+            # Declared by whoever commissioned the run; EDGAR is live by construction.
+            # Unknown when nobody said, which is the honest default — a client showing
+            # provenance must never report data as real because the field was left blank.
+            origin=_dataset_origin(dataset, adapter_id=adapter_id),
         )
         return _ResolvedDataset(manifest=manifest, frame=materialized.frame, adapter_id=adapter_id)
 

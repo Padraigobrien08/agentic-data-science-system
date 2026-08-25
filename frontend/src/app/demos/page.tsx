@@ -22,22 +22,65 @@ export const metadata: Metadata = {
  * restating them.
  */
 function outcomeBlurb(kinds: string[]): string {
-  const set = new Set(kinds);
+  const count = (kind: string) => kinds.filter((k) => k === kind).length;
+  const plural = (n: number, one: string, many: string) => (n === 1 ? one : many);
   const notes: string[] = [];
-  const declined = kinds.filter((k) => k === "declined").length;
+
+  const declined = count("declined");
   if (declined) {
-    notes.push(declined === 1 ? "one declined to answer" : `${declined} declined to answer`);
+    notes.push(plural(declined, "one declined to answer", `${declined} declined to answer`));
   }
-  if (set.has("contradicted")) {
-    notes.push("one caught itself holding two claims that could not both be true");
+  const unanswerable = count("unanswerable");
+  if (unanswerable) {
+    notes.push(
+      plural(
+        unanswerable,
+        "one found the question unanswerable from the data it had",
+        `${unanswerable} found their question unanswerable from the data they had`,
+      ),
+    );
+  }
+  const refuted = count("refuted");
+  if (refuted) {
+    notes.push(plural(refuted, "one disproved its own claims", `${refuted} disproved their own claims`));
+  }
+  const contradicted = count("contradicted");
+  if (contradicted) {
+    notes.push(
+      plural(
+        contradicted,
+        "one caught itself holding two claims that could not both be true",
+        `${contradicted} caught themselves holding two claims that could not both be true`,
+      ),
+    );
   }
   if (!notes.length) return "";
-  return ` — ${notes.join(", and ")}`;
+  const last = notes.pop()!;
+  return ` — ${notes.length ? `${notes.join(", ")}, and ${last}` : last}`;
+}
+
+/**
+ * "against live SEC filings and generated data", derived from what the runs actually used.
+ *
+ * The footer said "against live data" flat out while four of six published runs analysed a
+ * generated CSV. Nobody wrote that to mislead — it was true when the only runs were EDGAR —
+ * but a showcase whose argument is that it reports what it can and cannot support cannot be
+ * the least accurate thing on its own page.
+ */
+function sourceBlurb(origins: string[]): string {
+  const set = new Set(origins);
+  const parts: string[] = [];
+  if (set.has("live")) parts.push("live SEC filings");
+  if (set.has("synthetic")) parts.push("a generated operational dataset");
+  if (set.has("user_upload")) parts.push("uploaded data");
+  if (!parts.length) return "recorded data";
+  return parts.length === 1 ? parts[0] : `${parts.slice(0, -1).join(", ")} and ${parts.at(-1)}`;
 }
 
 export default async function DemosPage() {
   const demos = await listDemos();
   const blurb = outcomeBlurb(demos.map((d) => d.outcome.kind));
+  const sources = sourceBlurb(demos.map((d) => d.dataset_origin));
 
   return (
     <div className="mx-auto max-w-3xl space-y-8 p-4">
@@ -74,6 +117,11 @@ export default async function DemosPage() {
                 {/* The outcome, not the stored status: `exhausted` reads as a crash to someone
                     meeting this page cold, and half these runs declined on purpose. */}
                 <Pill tone={outcomeTone(d.outcome.kind)} />
+                {/* Whether this run analysed real data. A set that mixes live filings with
+                    generated rows has to say which is which on the card itself. */}
+                <span className="rounded-chip border border-[var(--border)] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[var(--chat-faint)]">
+                  {d.dataset_origin === "live" ? "live data" : d.dataset_origin}
+                </span>
               </span>
             </div>
             <p className="mt-2 text-sm text-[var(--foreground)]">
@@ -84,9 +132,11 @@ export default async function DemosPage() {
             ) : null}
             <p className="mt-3 font-mono text-xs text-[var(--chat-faint)]">
               stopped: {d.outcome.termination_reason ?? "unknown"} · confidence{" "}
-              {formatConfidence(d.confidence)} · {d.counts.hypotheses} hypotheses ·{" "}
-              {d.counts.experiments} experiments · {d.counts.evidence} evidence ·{" "}
-              {d.counts.critiques} critique{d.counts.critiques === 1 ? "" : "s"}
+              {formatConfidence(d.confidence)} · {d.counts.hypotheses} hypothes
+              {d.counts.hypotheses === 1 ? "is" : "es"} ·{" "}
+              {d.counts.experiments} experiment{d.counts.experiments === 1 ? "" : "s"} ·{" "}
+              {d.counts.evidence} evidence · {d.counts.critiques} critique
+              {d.counts.critiques === 1 ? "" : "s"}
             </p>
           </Link>
         ))}
@@ -100,7 +150,7 @@ export default async function DemosPage() {
         >
           scripts/record_demo.py
         </a>{" "}
-        against live data, then published unedited. A run that ends{" "}
+        against {sources}, then published unedited. A run that ends{" "}
         <span className="font-mono">insufficient_evidence</span> is a correct outcome, not a
         failed one.
       </p>

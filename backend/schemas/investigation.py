@@ -17,6 +17,8 @@ from uuid import UUID
 from pydantic import BaseModel, Field, model_validator
 
 from backend.models.investigation import Investigation as InvestigationRow
+from backend.models.investigation import InvestigationDataset
+from backend.models.investigation_entities import CritiqueRow
 
 #: Each ticker is a separate SEC fetch before the loop can start, so the panel build is linear
 #: in this number and a large list turns one request into a very long one.
@@ -46,6 +48,9 @@ class InvestigationDatasetInput(BaseModel):
     name: str = "dataset"
     time_field: str | None = None
     entity_id_fields: list[str] = Field(default_factory=list)
+    #: Where these rows came from, declared by the caller. Surfaced on the published run so a
+    #: reader never has to infer whether a demo analysed real data; EDGAR sets it itself.
+    dataset_origin: Literal["live", "synthetic", "user_upload", "unknown"] = "unknown"
 
     # edgar
     entities: list[str] = Field(
@@ -128,7 +133,7 @@ class InvestigationOutcome(BaseModel):
     stays with the caller; this is only the classification and the counts behind it.
     """
 
-    #: contradicted | mixed | supported | declined | stopped
+    #: unanswerable | contradicted | mixed | supported | refuted | declined | stopped
     kind: str
     termination_reason: str | None = None
     claims_supported: int = 0
@@ -143,22 +148,87 @@ class InvestigationOutcome(BaseModel):
 _STOPPED_EARLY = {"budget_exhausted", "safety_constraint", "repeated_failure", "user_stop"}
 
 
+def _dataset_item(row: InvestigationDataset) -> "DatasetItem":
+    """
+    One dataset as the API serves it, including where its rows came from.
+
+    Lineage lives inside the persisted manifest rather than in its own columns, so it is read
+    back out here. Defaulting ``origin`` to ``unknown`` rather than to ``live`` is the point:
+    a run recorded before this field existed cannot be shown to have used real data, and
+    saying so is cheaper than being wrong about it.
+    """
+    manifest = getattr(row, "manifest_json", None)
+    provenance = manifest.get("provenance") if isinstance(manifest, dict) else None
+    provenance = provenance if isinstance(provenance, dict) else {}
+    return DatasetItem(
+        id=row.domain_id,
+        name=row.name,
+        locator=row.locator,
+        row_count=row.row_count,
+        content_hash=row.content_hash,
+        source=provenance.get("source"),
+        origin=str(provenance.get("origin") or "unknown"),
+    )
+
+
+def _summary_origin(row: InvestigationRow) -> str:
+    """One origin for the whole run, for the listing. ``mixed`` when its datasets disagree."""
+    origins = {_dataset_item(d).origin for d in row.datasets}
+    if not origins:
+        return "unknown"
+    return origins.pop() if len(origins) == 1 else "mixed"
+
+
+def _pair_was_separated(statuses: dict[str, str], critique: CritiqueRow) -> bool:
+    """
+    True when evidence left exactly one side of a contradiction standing.
+
+    Read-model mirror of ``agentic.agent.components._contradiction_is_settled``, and needed
+    only for rows written before the loop maintained ``resolved`` itself. Returns False when
+    the second side is unknown — a conflict whose pairing was never recorded cannot be shown
+    to have been settled, and guessing in the permissive direction would hide a live one.
+    """
+    other = getattr(critique, "conflicts_with_id", None)
+    target = str(getattr(critique, "target_id", "") or "")
+    if not other or not target:
+        return False
+    pair = [statuses.get(target), statuses.get(str(other))]
+    if any(s is None for s in pair):
+        return False
+    return sum(1 for s in pair if s == "supported") == 1
+
+
 def _build_outcome(row: InvestigationRow) -> InvestigationOutcome:
     counts = Counter(str(h.status) for h in row.hypotheses)
     termination = row.termination_json if isinstance(row.termination_json, dict) else {}
     reason = termination.get("reason")
     reason = str(reason) if reason is not None else None
 
+    # Persisted `resolved` is now maintained by the loop (a conflict is settled when evidence
+    # leaves exactly one of the pair standing), so this reads it rather than recomputing.
+    # Guarded by the claim statuses as well: a run stored before the loop learned to settle
+    # conflicts has `resolved=False` on a pair the evidence plainly separated, and reporting
+    # that as a live contradiction would misdescribe every historical row.
+    statuses = {str(h.domain_id): str(h.status) for h in row.hypotheses}
     contradiction = any(
-        str(c.critique_type) == "contradiction" and not c.resolved for c in row.critiques
+        str(c.critique_type) == "contradiction"
+        and not c.resolved
+        and not _pair_was_separated(statuses, c)
+        for c in row.critiques
     )
     supported = counts.get("supported", 0)
     rejected = counts.get("rejected", 0)
     weakened = counts.get("weakened", 0)
     unresolved = counts.get("unresolved", 0)
 
-    if contradiction:
-        # Ordered first deliberately: a run holding two claims that cannot both be true has
+    if reason == "unanswerable_premise":
+        # Ordered first: this run never got as far as having claims to classify, and the
+        # distinction it carries is the one a reader most needs. "Declined" says the evidence
+        # did not settle it; "unanswerable" says no evidence here could, which is the
+        # difference between running more analysis and bringing a different dataset.
+        kind = "unanswerable"
+    elif contradiction:
+        # Ordered next deliberately: a run holding two claims that cannot both be true has
         # not concluded anything, whatever else its claims say.
         kind = "contradicted"
     elif reason in _STOPPED_EARLY:
@@ -167,6 +237,13 @@ def _build_outcome(row: InvestigationRow) -> InvestigationOutcome:
         kind = "mixed"
     elif supported:
         kind = "supported"
+    elif rejected and not (weakened or unresolved):
+        # Every claim was actively overturned by the run's own evidence. Distinct from
+        # `declined`, which says the evidence did not settle the matter: this run settled it,
+        # and the answer was no. Collapsing the two reported "no claim survived the evidence"
+        # for a run that had in fact disproved its own hypotheses — the strongest thing an
+        # investigation can do, described as a failure to conclude.
+        kind = "refuted"
     else:
         kind = "declined"
 
@@ -198,6 +275,11 @@ class InvestigationSummary(BaseModel):
     counts: InvestigationCounts
     #: How the run ended, classified from persisted state — see :class:`InvestigationOutcome`.
     outcome: InvestigationOutcome
+    #: Where this run's data came from — ``live``, ``synthetic``, ``user_upload`` or
+    #: ``unknown``. On the *summary* because the listing is where a reader decides what a set
+    #: of runs is worth, and a set that mixes real filings with generated rows has to say so
+    #: there rather than one detail page down. ``mixed`` when a run spans several sources.
+    dataset_origin: str = "unknown"
     created_at: datetime
     updated_at: datetime
 
@@ -289,6 +371,9 @@ class CritiqueItem(BaseModel):
     severity: str
     target_kind: str
     target_id: str
+    #: The other claim, when this is a ``contradiction``. Lets a client show both sides of a
+    #: conflict and check for itself whether the run went on to separate them.
+    conflicts_with_id: str | None = None
     message: str
     suggested_action: str | None = None
     resolved: bool = False
@@ -322,6 +407,11 @@ class DatasetItem(BaseModel):
     locator: str | None = None
     row_count: int | None = None
     content_hash: str | None = None
+    #: Human-readable lineage, e.g. "SEC EDGAR companyfacts (AAPL, MSFT, NVDA)".
+    source: str | None = None
+    #: live | synthetic | user_upload | unknown. Served so a client never has to guess
+    #: whether a published run analysed real data — see ``DatasetOrigin``.
+    origin: str = "unknown"
 
 
 class EventItem(BaseModel):
@@ -389,6 +479,7 @@ def build_summary(row: InvestigationRow) -> InvestigationSummary:
             open_questions=len(row.open_questions),
         ),
         outcome=_build_outcome(row),
+        dataset_origin=_summary_origin(row),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )
@@ -477,7 +568,8 @@ def _decision(d) -> DecisionItem:
 def _critique(c) -> CritiqueItem:
     return CritiqueItem(
         id=c.domain_id, critique_type=c.critique_type, severity=c.severity, target_kind=c.target_kind,
-        target_id=c.target_id, message=c.message, suggested_action=c.suggested_action, resolved=c.resolved,
+        target_id=c.target_id, conflicts_with_id=c.conflicts_with_id,
+        message=c.message, suggested_action=c.suggested_action, resolved=c.resolved,
     )
 
 
@@ -533,11 +625,7 @@ def build_detail(row: InvestigationRow) -> InvestigationDetail:
         critiques=[_critique(c) for c in row.critiques],
         open_questions=[_open_question(q) for q in sorted(row.open_questions, key=lambda q: -q.priority)],
         conclusion_detail=conclusion_detail,
-        datasets=[
-            DatasetItem(id=d.domain_id, name=d.name, locator=d.locator, row_count=d.row_count,
-                        content_hash=d.content_hash)
-            for d in row.datasets
-        ],
+        datasets=[_dataset_item(d) for d in row.datasets],
         events=[
             EventItem(sequence=e.sequence, event_type=e.event_type, entity_kind=e.entity_kind,
                       entity_id=e.entity_id, payload=e.payload_json if isinstance(e.payload_json, dict) else None,

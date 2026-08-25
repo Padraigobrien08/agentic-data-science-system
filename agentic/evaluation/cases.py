@@ -337,6 +337,13 @@ AGENCY_CASES: tuple[AgencyCase, ...] = (
         expectations=AgencyExpectations(
             hypothesis_status_not_in=[SUPPORTED],
             max_confidence=0.5,
+            # Not merely a low-confidence answer. A policy that substitutes `p99_latency_ms`
+            # and then hedges lands inside `max_confidence` too, and a recorded demo did
+            # exactly that — it passed this case while measuring the wrong thing. Requiring
+            # the typed reason is what separates declining from getting lucky on a weak proxy.
+            termination_reason_in=["unanswerable_premise"],
+            # And it must not have measured anything before deciding.
+            max_experiments=0,
         ),
     ),
     AgencyCase(

@@ -24,7 +24,7 @@ from abc import ABC, abstractmethod
 
 from pydantic import BaseModel, Field
 
-from agentic.domain.manifest import DatasetManifest
+from agentic.domain.manifest import DatasetManifest, DatasetOrigin
 
 from .capabilities import SourceCapabilityDescriptor
 from .manifest_builder import DatasetManifestBuilder
@@ -84,6 +84,20 @@ class InputAdapter(ABC):
     def _manifest_builder(self) -> DatasetManifestBuilder:
         return DatasetManifestBuilder()
 
+    def dataset_origin(self, request: AdapterRequest) -> DatasetOrigin:
+        """
+        Where this adapter's rows come from. Override when the adapter knows.
+
+        ``unknown`` rather than a cheerful default: an adapter that has not been taught the
+        difference should say it does not know, so a client showing provenance never claims
+        data is live on the strength of nobody having thought about it.
+        """
+        declared = str(request.parameters.get("dataset_origin") or "").strip()
+        try:
+            return DatasetOrigin(declared) if declared else DatasetOrigin.unknown
+        except ValueError:
+            return DatasetOrigin.unknown
+
     def build_manifest(self, request: AdapterRequest) -> DatasetManifest:
         """Materialize and profile the request into a full dataset manifest."""
         materialized = self.materializer(request).materialize()
@@ -91,4 +105,5 @@ class InputAdapter(ABC):
             materialized,
             adapter_id=self.adapter_id,
             adapter_version=self.adapter_version,
+            origin=self.dataset_origin(request),
         )

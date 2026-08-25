@@ -101,6 +101,16 @@ class InvestigationDiff(DomainModel):
     baseline_evidence_count: int = 0
     candidate_evidence_count: int = 0
 
+    #: Entity ids that differ between the two runs.
+    #:
+    #: Compared because they were not, and the omission hid a real defect: goal, dataset,
+    #: manifest, observation, artifact and reproducibility ids were minted with ``uuid4`` and
+    #: differed on every run, while this diff looked only at tools, conclusions, terminations
+    #: and hypothesis statuses. ``test_replay_under_identical_conditions_is_identical``
+    #: therefore passed against a system whose "deterministic ids" were nothing of the kind.
+    #: A verdict of ``identical`` now means identical.
+    identity_drift: list[str] = Field(default_factory=list)
+
     @property
     def conclusion_changed(self) -> bool:
         return self.baseline_conclusion != self.candidate_conclusion
@@ -123,6 +133,8 @@ class InvestigationDiff(DomainModel):
                 parts.append("different experiments")
             if self.changed_hypotheses:
                 parts.append(f"{len(self.changed_hypotheses)} hypothesis status change(s)")
+            if self.identity_drift:
+                parts.append(f"{', '.join(self.identity_drift)} ids differ")
             detail = ", ".join(parts) or "different internal path"
             return f"same conclusion via a different route ({detail})"
         reasons = []
@@ -140,6 +152,29 @@ class InvestigationDiff(DomainModel):
 def _tools(investigation: Investigation) -> list[str]:
     results = investigation.state.completed_experiments + investigation.state.failed_experiments
     return [r.tool_name for r in results]
+
+
+def _identity(investigation: Investigation) -> dict[str, list[str]]:
+    """Every id a reproducible run is expected to reproduce, grouped by what it names."""
+    state = investigation.state
+    results = state.completed_experiments + state.failed_experiments
+    return {
+        "goal": [state.objective.id],
+        "dataset": [d.id for d in state.datasets],
+        "manifest": [d.manifest.manifest_id for d in state.datasets if d.manifest is not None],
+        "hypothesis": [h.id for h in state.hypotheses],
+        "evidence": [e.id for e in state.evidence],
+        "experiment": [r.id for r in results],
+        "observation": [o.id for o in state.observations],
+        "artifact": [a for r in results for a in r.artifact_ids],
+        "reproducibility": [r.reproducibility.id for r in results],
+    }
+
+
+def _identity_drift(baseline: Investigation, candidate: Investigation) -> list[str]:
+    """The kinds of id that differ, named rather than enumerated — one line per kind."""
+    base, cand = _identity(baseline), _identity(candidate)
+    return [kind for kind in sorted(base) if base[kind] != cand.get(kind, [])]
 
 
 def _termination(investigation: Investigation) -> str | None:
@@ -187,10 +222,14 @@ def diff_investigations(baseline: Investigation, candidate: Investigation) -> In
     conclusion_changed = baseline_conclusion != candidate_conclusion
     termination_changed = baseline_termination != candidate_termination
     order_changed = baseline_tools != candidate_tools
+    drift = _identity_drift(baseline, candidate)
 
     if conclusion_changed or termination_changed:
         verdict = DiffVerdict.diverged
-    elif order_changed or baseline.status is not candidate.status:
+    elif order_changed or baseline.status is not candidate.status or drift:
+        # Identity drift is a route difference, not a different answer: the run reached the
+        # same conclusion by the same tools, but did not reproduce. Reporting that as
+        # `identical` is what let non-deterministic ids sit undetected behind a green test.
         verdict = DiffVerdict.same_conclusion
     else:
         verdict = DiffVerdict.identical
@@ -217,6 +256,7 @@ def diff_investigations(baseline: Investigation, candidate: Investigation) -> In
         tools_only_in_candidate=sorted(candidate_set - baseline_set),
         experiment_order_changed=order_changed,
         hypothesis_deltas=deltas,
+        identity_drift=drift,
         baseline_iterations=baseline.state.budget.iterations_used,
         candidate_iterations=candidate.state.budget.iterations_used,
         baseline_evidence_count=len(baseline.state.evidence),

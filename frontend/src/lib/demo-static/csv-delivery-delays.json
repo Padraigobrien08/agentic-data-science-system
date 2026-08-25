@@ -1,35 +1,35 @@
 {
   "adapter_id": "in_memory",
-  "analysis_run_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
-  "conclusion": "Supported: Rising order volume in the north region explains the worsening delivery times over the period under study. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
+  "analysis_run_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942",
+  "conclusion": "Supported: Rising order volume in the north region is contributing to the worsening delivery times. | Not supported: Average delivery days in the north region have increased, indicating service quality is degrading.",
   "conclusion_detail": {
     "caveats": [
       "termination: sufficient_evidence",
-      "2 contradicting evidence item(s) preserved",
+      "1 contradicting evidence item(s) preserved",
       "2 open question(s) remain"
     ],
-    "confidence": 0.7756,
+    "confidence": 0.7791,
     "disposition": "mixed",
-    "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-concl-0",
+    "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-concl-0",
     "key_evidence_ids": [
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-0",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-1",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-2",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-3",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-4",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-5",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-6",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-7",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-8"
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-0",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-1",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-2",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-3",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-4",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-5",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-6",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-7",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-8"
     ],
-    "narrative": "The run found a mixed picture. Delivery performance in the north region did worsen, but that decline was not strong enough to stand on its own as a clean service-quality degradation story. Rising order volume did explain the worsening delivery times, and that was the stronger finding.\n\nThe decline in on-time delivery was weakened: there was some evidence for it, but there was also evidence against it. By contrast, the volume explanation was supported with no refuting evidence, so the data pointed more clearly to demand pressure than to a pure drop in service quality.\n\nThe run tested this with two time-series trend analyses and a change-point detection step, then stopped because it had sufficient evidence. Two questions remained open: whether the deterioration was sustained or just a short-lived spike, and whether staffing changes also helped explain the shift.",
-    "statement": "Supported: Rising order volume in the north region explains the worsening delivery times over the period under study. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
+    "narrative": "The evidence was mixed: delivery times in the north region did worsen, but the run did not support treating that as clear service-quality degradation on its own. Rising order volume was supported as a contributor to the slower deliveries.\n\nThe first claim was weakened: there were 3 supporting evidence items and 1 refuting evidence item for the idea that average delivery days increased in a way that indicated degrading service quality. The second claim was supported: it had 5 supporting evidence items and no refuting evidence for the explanation that rising order volume was contributing to the delay.\n\nThe run used 3 experiments: two time-series trend analyses and a change-point detection step. It stopped because there was sufficient evidence for a mixed conclusion, but 2 open questions remained: whether the delivery-time increase was sustained or just a one-off shift, and whether staff_count or on_time_rate would separate service degradation from volume-driven delay. The dataset had 96 rows.",
+    "statement": "Supported: Rising order volume in the north region is contributing to the worsening delivery times. | Not supported: Average delivery days in the north region have increased, indicating service quality is degrading.",
     "supporting_hypothesis_ids": [
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
-      "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
+      "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0"
     ]
   },
-  "confidence": 0.7756,
+  "confidence": 0.7791,
   "constraints": [],
   "counts": {
     "critiques": 1,
@@ -40,61 +40,30 @@
     "observations": 9,
     "open_questions": 2
   },
-  "created_at": "2026-08-24T16:13:25",
+  "created_at": "2026-08-25T20:02:04",
   "critiques": [
     {
+      "conflicts_with_id": null,
       "critique_type": "competing_explanation",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-crit-0",
-      "message": "Test whether the worsening delivery times and rising order volume actually change together over the same period, or whether delivery times worsened at a different point than volume rose. A timing mismatch would suggest the explanation is an artefact rather than a causal account.",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-crit-0",
+      "message": "Test whether the apparent worsening delivery times are actually driven by a structural change point rather than rising order volume; if delivery times shift before or independently of volume, the current causal story is weakened.",
       "resolved": false,
       "severity": "major",
       "suggested_action": "detect_change_points",
-      "target_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+      "target_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
       "target_kind": "hypothesis"
     }
   ],
+  "dataset_origin": "synthetic",
   "datasets": [
     {
-      "content_hash": null,
-      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
+      "content_hash": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dset-0",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
+      "origin": "synthetic",
+      "row_count": 96,
+      "source": "operational_delivery"
     }
   ],
   "decisions": [
@@ -102,13 +71,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-hyp-0",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-hyp-0",
       "iteration": 0,
-      "rationale": "This directly tests whether service quality is degrading, as suggested by the goal and interpretation.",
+      "rationale": "This directly tests the observed worsening in delivery times.",
       "sequence": 0,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -117,13 +86,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-hyp-1",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-hyp-1",
       "iteration": 0,
-      "rationale": "The goal explicitly raises volume growth as an alternative explanation, so it should be tested separately from service quality.",
+      "rationale": "This tests the alternative explanation that higher demand, rather than degraded service quality, is driving the change.",
       "sequence": 1,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -132,13 +101,13 @@
       "alternatives": [],
       "chosen_option": "analyze_time_series_trend",
       "decision_type": "select_experiment",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-sel-2",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-sel-2",
       "iteration": 0,
-      "rationale": "analyze_time_series_trend is the highest-gain experiment for establishing the presence and direction of a trend.",
+      "rationale": "analyze_time_series_trend has the highest expected information gain for establishing the trend directly.",
       "sequence": 2,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-0",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-exp-0",
           "kind": "experiment_request"
         }
       ]
@@ -147,13 +116,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-evd-3",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 4 evidence item(s) for analyze_time_series_trend",
       "sequence": 3,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -162,13 +131,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-rev-4",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-rev-4",
       "iteration": 0,
-      "rationale": "weakened (support=2, refute=2)",
+      "rationale": "weakened (support=3, refute=1)",
       "sequence": 4,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -177,13 +146,13 @@
       "alternatives": [],
       "chosen_option": "analyze_time_series_trend",
       "decision_type": "select_experiment",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-sel-5",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-sel-5",
       "iteration": 1,
-      "rationale": "analyze_time_series_trend is the highest-information experiment for establishing the direction and shape of the trend.",
+      "rationale": "analyze_time_series_trend is the highest-information experiment for establishing the trend directly.",
       "sequence": 5,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-3",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-exp-3",
           "kind": "experiment_request"
         }
       ]
@@ -192,13 +161,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-evd-6",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-evd-6",
       "iteration": 1,
       "rationale": "recorded 4 evidence item(s) for analyze_time_series_trend",
       "sequence": 6,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -207,13 +176,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-rev-7",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-rev-7",
       "iteration": 1,
       "rationale": "supported (support=4, refute=0)",
       "sequence": 7,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -222,13 +191,13 @@
       "alternatives": [],
       "chosen_option": "detect_change_points",
       "decision_type": "request_critique",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-crit-8",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-crit-8",
       "iteration": 1,
-      "rationale": "The claim is supported and has not yet been critiqued, and there are unused tools available. A change-point check can directly challenge the proposed explanation by looking for aligned versus misaligned shifts in the two series.",
+      "rationale": "The claim is supported and uncritiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
       "sequence": 8,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -237,13 +206,13 @@
       "alternatives": [],
       "chosen_option": "detect_change_points",
       "decision_type": "select_experiment",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-sel-9",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-sel-9",
       "iteration": 2,
-      "rationale": "This is the offered falsification step and would test whether the current trend hypothesis is actually supported or should be rejected.",
+      "rationale": "This change-point test can directly falsify the current trend hypothesis and has the highest expected information gain.",
       "sequence": 9,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-2",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-exp-2",
           "kind": "experiment_request"
         }
       ]
@@ -252,13 +221,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-evd-10",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-evd-10",
       "iteration": 2,
       "rationale": "recorded 1 evidence item(s) for detect_change_points",
       "sequence": 10,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -267,13 +236,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-rev-11",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-rev-11",
       "iteration": 2,
       "rationale": "supported (support=5, refute=0)",
       "sequence": 11,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -282,23 +251,23 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-concl-12",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-dec-concl-12",
       "iteration": 3,
       "rationale": "mixed (sufficient_evidence)",
       "sequence": 12,
       "targets": [
         {
-          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-concl-0",
+          "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-concl-0",
           "kind": "conclusion"
         }
       ]
     }
   ],
   "demo_slug": "csv-delivery-delays",
-  "domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
+  "domain_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942",
   "events": [
     {
-      "created_at": "2026-08-24T16:13:25",
+      "created_at": "2026-08-25T20:02:04",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -308,7 +277,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-24T16:13:34",
+      "created_at": "2026-08-25T20:02:07",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -318,7 +287,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-24T16:13:38",
+      "created_at": "2026-08-25T20:02:10",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -328,7 +297,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-24T16:13:42",
+      "created_at": "2026-08-25T20:02:13",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -338,7 +307,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-24T16:13:46",
+      "created_at": "2026-08-25T20:02:16",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -348,7 +317,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-24T16:13:48",
+      "created_at": "2026-08-25T20:02:18",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -360,51 +329,15 @@
   ],
   "evidence": [
     {
-      "claim": "'on_time_rate' for east is increasing (slope=0.000475, R²=0.04).",
-      "coverage": 1.0,
-      "direction": "refutes",
-      "evidence_type": "trend_break",
-      "experiment_result_id": null,
-      "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
-      ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-0",
-      "reliability": 0.4444444444444444,
-      "statistics": {
-        "assumptions": [
-          "Equal-spaced periods.",
-          "Linear trend; p-value via normal approximation."
-        ],
-        "coverage": 1.0,
-        "diagnostics": {
-          "r2": 0.04338,
-          "slope": 0.000475
-        },
-        "effect_size": 0.04338,
-        "effect_size_kind": "r2",
-        "p_value": 0.317883,
-        "sample_size": 24,
-        "schema_version": "1",
-        "uncertainty": {
-          "ci_high": 0.001406,
-          "ci_low": -0.000457,
-          "confidence_level": 0.95,
-          "std_error": 0.000475
-        },
-        "warnings": []
-      },
-      "strength": 0.04338
-    },
-    {
-      "claim": "'on_time_rate' for north is decreasing (slope=-0.00534, R²=0.55).",
+      "claim": "'avg_delivery_days' for east is increasing (slope=0.00178, R²=0.02).",
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-0",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-1",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-0",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -413,34 +346,70 @@
         ],
         "coverage": 1.0,
         "diagnostics": {
-          "r2": 0.549318,
-          "slope": -0.005337
+          "r2": 0.023988,
+          "slope": 0.001778
         },
-        "effect_size": 0.549318,
+        "effect_size": 0.023988,
+        "effect_size_kind": "r2",
+        "p_value": 0.462136,
+        "sample_size": 24,
+        "schema_version": "1",
+        "uncertainty": {
+          "ci_high": 0.006518,
+          "ci_low": -0.002962,
+          "confidence_level": 0.95,
+          "std_error": 0.002418
+        },
+        "warnings": []
+      },
+      "strength": 0.023988
+    },
+    {
+      "claim": "'avg_delivery_days' for north is increasing (slope=0.0396, R²=0.54).",
+      "coverage": 1.0,
+      "direction": "supports",
+      "evidence_type": "trend_break",
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-0",
+      "hypothesis_ids": [
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0"
+      ],
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-1",
+      "reliability": 0.4444444444444444,
+      "statistics": {
+        "assumptions": [
+          "Equal-spaced periods.",
+          "Linear trend; p-value via normal approximation."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "r2": 0.541081,
+          "slope": 0.039604
+        },
+        "effect_size": 0.541081,
         "effect_size_kind": "r2",
         "p_value": 0.0,
         "sample_size": 24,
         "schema_version": "1",
         "uncertainty": {
-          "ci_high": -0.003317,
-          "ci_low": -0.007356,
+          "ci_high": 0.054845,
+          "ci_low": 0.024363,
           "confidence_level": 0.95,
-          "std_error": 0.001031
+          "std_error": 0.007776
         },
         "warnings": []
       },
-      "strength": 0.549318
+      "strength": 0.541081
     },
     {
-      "claim": "'on_time_rate' for south is decreasing (slope=-0.000293, R²=0.02).",
+      "claim": "'avg_delivery_days' for south is increasing (slope=0.0027, R²=0.09).",
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-0",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-2",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-2",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -449,34 +418,34 @@
         ],
         "coverage": 1.0,
         "diagnostics": {
-          "r2": 0.017912,
-          "slope": -0.000293
+          "r2": 0.085127,
+          "slope": 0.002704
         },
-        "effect_size": 0.017912,
+        "effect_size": 0.085127,
         "effect_size_kind": "r2",
-        "p_value": 0.526442,
+        "p_value": 0.152502,
         "sample_size": 24,
         "schema_version": "1",
         "uncertainty": {
-          "ci_high": 0.000614,
-          "ci_low": -0.0012,
+          "ci_high": 0.006409,
+          "ci_low": -0.001,
           "confidence_level": 0.95,
-          "std_error": 0.000463
+          "std_error": 0.00189
         },
         "warnings": []
       },
-      "strength": 0.017912
+      "strength": 0.085127
     },
     {
-      "claim": "'on_time_rate' for west is increasing (slope=0.000323, R²=0.01).",
+      "claim": "'avg_delivery_days' for west is decreasing (slope=-0.000178, R²=0.00).",
       "coverage": 1.0,
       "direction": "refutes",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-0",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-3",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-3",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -485,34 +454,34 @@
         ],
         "coverage": 1.0,
         "diagnostics": {
-          "r2": 0.01154,
-          "slope": 0.000323
+          "r2": 0.000132,
+          "slope": -0.000178
         },
-        "effect_size": 0.01154,
+        "effect_size": 0.000132,
         "effect_size_kind": "r2",
-        "p_value": 0.612301,
+        "p_value": 0.957009,
         "sample_size": 24,
         "schema_version": "1",
         "uncertainty": {
-          "ci_high": 0.00157,
-          "ci_low": -0.000925,
+          "ci_high": 0.006303,
+          "ci_low": -0.00666,
           "confidence_level": 0.95,
-          "std_error": 0.000637
+          "std_error": 0.003307
         },
         "warnings": []
       },
-      "strength": 0.01154
+      "strength": 0.000132
     },
     {
       "claim": "'order_volume' for east is increasing (slope=21.8, R²=0.84).",
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-1",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-4",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-4",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -544,11 +513,11 @@
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-1",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-5",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-5",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -580,11 +549,11 @@
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-1",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-6",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-6",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -616,11 +585,11 @@
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-1",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-7",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-7",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -652,11 +621,11 @@
       "coverage": 1.0,
       "direction": "supports",
       "evidence_type": "trend_break",
-      "experiment_result_id": null,
+      "experiment_result_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-2",
       "hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-8",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-evd-8",
       "reliability": 0.6095238095238096,
       "statistics": {
         "assumptions": [
@@ -684,32 +653,32 @@
     {
       "artifacts": [
         {
-          "byte_size": 124,
-          "id": "582bc4ed-6999-483a-b8e2-1e289223e642",
+          "byte_size": 125,
+          "id": "f0f3d971-a0fd-4949-8d57-83925a52f4e5",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_fits"
         },
         {
-          "byte_size": 294,
-          "id": "6f8385ee-112d-41eb-b031-772358393a02",
+          "byte_size": 300,
+          "id": "3f1e51cc-9077-4582-bada-c48678c4c779",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "trend"
         }
       ],
-      "created_at": "2026-08-24T16:13:38",
+      "created_at": "2026-08-25T20:02:10",
       "error": null,
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-res-0",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-0",
       "metrics": {
-        "mean_slope": -0.001208,
+        "mean_slope": 0.010977,
         "series": 4.0
       },
-      "request_domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-0",
+      "request_domain_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-exp-0",
       "status": "succeeded",
-      "summary": "Fitted trend for 4 series of 'on_time_rate'.",
+      "summary": "Fitted trend for 4 series of 'avg_delivery_days'.",
       "target_hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0"
       ],
       "tool_name": "analyze_time_series_trend"
     },
@@ -717,31 +686,31 @@
       "artifacts": [
         {
           "byte_size": 126,
-          "id": "82e0f2a8-2d12-40c6-9509-ef6db50fa834",
+          "id": "d68203ab-5f9e-45a5-aa58-697f5db7957a",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_fits"
         },
         {
           "byte_size": 296,
-          "id": "7f2b2be7-2057-445e-9c52-23a8d77bb178",
+          "id": "2832a253-06bd-4439-af1b-83625484918e",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "trend"
         }
       ],
-      "created_at": "2026-08-24T16:13:42",
+      "created_at": "2026-08-25T20:02:13",
       "error": null,
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-res-1",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-1",
       "metrics": {
         "mean_slope": 29.895109,
         "series": 4.0
       },
-      "request_domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-3",
+      "request_domain_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-exp-3",
       "status": "succeeded",
       "summary": "Fitted trend for 4 series of 'order_volume'.",
       "target_hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
       "tool_name": "analyze_time_series_trend"
     },
@@ -749,98 +718,98 @@
       "artifacts": [
         {
           "byte_size": 118,
-          "id": "eb9ca6c1-1767-440c-9bb0-9fd0092d04a0",
+          "id": "5ce4c4b1-0d6d-4a17-ba4f-11c21f5211c5",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "change_point"
         }
       ],
-      "created_at": "2026-08-24T16:13:46",
+      "created_at": "2026-08-25T20:02:16",
       "error": null,
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-res-2",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-res-2",
       "metrics": {
         "shift": 569.684783,
         "shift_score": 0.474709,
         "split_index": 92.0
       },
-      "request_domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-2",
+      "request_domain_id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-exp-2",
       "status": "succeeded",
       "summary": "Change point in 'order_volume' at 2025-12-01.",
       "target_hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
       "tool_name": "detect_change_points"
     }
   ],
   "hypotheses": [
     {
-      "confidence": 0.6012,
+      "confidence": 0.6082,
       "entity_refs": [],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0",
       "metric_refs": [
-        "on_time_rate"
+        "avg_delivery_days"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This directly tests whether service quality is degrading, as suggested by the goal and interpretation.",
-      "statement": "On-time delivery performance in the north region has declined over the period under study.",
+      "rationale": "This directly tests the observed worsening in delivery times.",
+      "statement": "Average delivery days in the north region have increased, indicating service quality is degrading.",
       "status": "weakened"
     },
     {
       "confidence": 0.95,
       "entity_refs": [],
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1",
       "metric_refs": [
         "order_volume"
       ],
       "prior_confidence": 0.5,
-      "rationale": "The goal explicitly raises volume growth as an alternative explanation, so it should be tested separately from service quality.",
-      "statement": "Rising order volume in the north region explains the worsening delivery times over the period under study.",
+      "rationale": "This tests the alternative explanation that higher demand, rather than degraded service quality, is driving the change.",
+      "statement": "Rising order volume in the north region is contributing to the worsening delivery times.",
       "status": "supported"
     }
   ],
-  "id": "b1b602c2-f6f3-458b-b7c2-49e3ac9cb03d",
+  "id": "1ee3951f-922c-4f28-bf03-b412ef248028",
   "objective": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?",
   "observations": [
     {
       "entity_ref": "east",
-      "experiment_result_id": null,
-      "id": "obs_9e646cb0666941faaa72bc5ffe8f915f",
-      "magnitude": 0.00047478260869562595,
-      "metric_ref": "on_time_rate",
+      "experiment_result_id": "2913d6a1-6b73-486b-bb4e-9f375fdd293f",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-0-0",
+      "magnitude": 0.0017782608695651506,
+      "metric_ref": "avg_delivery_days",
       "observation_type": "trend",
-      "statement": "on_time_rate for east slope=0.000475"
+      "statement": "avg_delivery_days for east slope=0.00178"
     },
     {
       "entity_ref": "north",
-      "experiment_result_id": null,
-      "id": "obs_6d5f08eb49604da09e8a83c64e9340b0",
-      "magnitude": -0.005336521739130447,
-      "metric_ref": "on_time_rate",
+      "experiment_result_id": "2913d6a1-6b73-486b-bb4e-9f375fdd293f",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-0-1",
+      "magnitude": 0.03960434782608693,
+      "metric_ref": "avg_delivery_days",
       "observation_type": "trend",
-      "statement": "on_time_rate for north slope=-0.00534"
+      "statement": "avg_delivery_days for north slope=0.0396"
     },
     {
       "entity_ref": "south",
-      "experiment_result_id": null,
-      "id": "obs_88c42379ce194f1b8f4d3b26f8ec7e33",
-      "magnitude": -0.0002930434782608853,
-      "metric_ref": "on_time_rate",
+      "experiment_result_id": "2913d6a1-6b73-486b-bb4e-9f375fdd293f",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-0-2",
+      "magnitude": 0.002704347826086937,
+      "metric_ref": "avg_delivery_days",
       "observation_type": "trend",
-      "statement": "on_time_rate for south slope=-0.000293"
+      "statement": "avg_delivery_days for south slope=0.0027"
     },
     {
       "entity_ref": "west",
-      "experiment_result_id": null,
-      "id": "obs_ab32772c81a64afaa436746d0fa51669",
-      "magnitude": 0.00032260869565216895,
-      "metric_ref": "on_time_rate",
+      "experiment_result_id": "2913d6a1-6b73-486b-bb4e-9f375fdd293f",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-0-3",
+      "magnitude": -0.00017826086956533339,
+      "metric_ref": "avg_delivery_days",
       "observation_type": "trend",
-      "statement": "on_time_rate for west slope=0.000323"
+      "statement": "avg_delivery_days for west slope=-0.000178"
     },
     {
       "entity_ref": "east",
-      "experiment_result_id": null,
-      "id": "obs_b604a68827dd45d0a103eb620bd11973",
+      "experiment_result_id": "ad64e737-21ed-47fd-8541-5c855dadd483",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-1-0",
       "magnitude": 21.80347826086952,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -848,8 +817,8 @@
     },
     {
       "entity_ref": "north",
-      "experiment_result_id": null,
-      "id": "obs_545d21c189e345858e1f540a08a2b220",
+      "experiment_result_id": "ad64e737-21ed-47fd-8541-5c855dadd483",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-1-1",
       "magnitude": 76.03826086956515,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -857,8 +826,8 @@
     },
     {
       "entity_ref": "south",
-      "experiment_result_id": null,
-      "id": "obs_948ab5726b824db99cc6ac1d54e7f646",
+      "experiment_result_id": "ad64e737-21ed-47fd-8541-5c855dadd483",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-1-2",
       "magnitude": 12.170869565217327,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -866,8 +835,8 @@
     },
     {
       "entity_ref": "west",
-      "experiment_result_id": null,
-      "id": "obs_5f41bf2c01c44590ad15200d0f0ec50a",
+      "experiment_result_id": "ad64e737-21ed-47fd-8541-5c855dadd483",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-1-3",
       "magnitude": 9.5678260869565,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -875,8 +844,8 @@
     },
     {
       "entity_ref": null,
-      "experiment_result_id": null,
-      "id": "obs_59b4cc92e1c74263b3f530f19cc61346",
+      "experiment_result_id": "6cb46ebb-bc45-4c8d-84f7-e555b982c783",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-obs-2-0",
       "magnitude": 569.6847826086955,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -886,23 +855,23 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-q-0",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-q-0",
       "priority": 0,
-      "question": "Is the deterioration sustained over time or driven by a short-lived spike?",
+      "question": "Is the increase in delivery times sustained over time or a one-off shift?",
       "related_hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0",
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-q-1",
+      "id": "71248f4b-27c7-4b6f-8a0d-6cc781d68942-q-1",
       "priority": 0,
-      "question": "Does any change in staffing help explain the delivery-time shift?",
+      "question": "Do changes in staff_count or on_time_rate help distinguish service degradation from volume-driven delay?",
       "related_hypothesis_ids": [
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
-        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-0",
+        "71248f4b-27c7-4b6f-8a0d-6cc781d68942-hyp-1"
       ],
       "status": "open"
     }
@@ -917,7 +886,7 @@
     "kind": "mixed",
     "termination_reason": "sufficient_evidence"
   },
-  "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+  "project_id": "b12f872d-c96c-4b4c-997a-6f9c841ded96",
   "status": "converged",
   "success_criteria": [],
   "termination": {
@@ -925,5 +894,5 @@
     "rationale": "terminated: sufficient_evidence",
     "reason": "sufficient_evidence"
   },
-  "updated_at": "2026-08-25T11:44:41"
+  "updated_at": "2026-08-25T20:07:04"
 }

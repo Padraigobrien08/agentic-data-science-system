@@ -1,4 +1,4 @@
-# Agency Evaluation (`suite_agency_v1`)
+# Agency Evaluation (`suite_agency_v2`)
 
 The benchmark suites in `edgar_project/evaluation/` check **outputs**: did the pipeline
 produce the right artifacts with the right numbers. That is necessary, and it is unchanged.
@@ -8,7 +8,9 @@ It says nothing about the question an agentic system actually has to answer well
 > Given evidence, does the loop draw the right conclusion, revise when contradicted, and
 > decline when the data cannot support a claim?
 
-`suite_agency_v1` measures that.
+`suite_agency_v2` measures that. It is the suite the runner executes; `suite_agency_v1` is
+the frozen 13-case **core tier** inside it, kept under its own id because published results
+cite it. `--tier hard` adds the five cases the deterministic baseline is designed to fail.
 
 ```bash
 python -m agentic.evaluation
@@ -132,6 +134,13 @@ A case belongs in the hard tier when all three hold:
 
 The last is the tier's counterweight. Every other case rewards reaching the right answer; that
 one rewards declining, so the tier cannot be cleared by being uniformly more assertive.
+
+`unanswerable_premise_is_declined` asserts more than a low confidence, and the difference is
+the point. A policy that substitutes `p99_latency_ms` and then hedges lands inside
+`max_confidence` too — a recorded demo did exactly that, passing this case while measuring the
+wrong thing, then reporting the hedge as a principled decline. The case now requires the typed
+`unanswerable_premise` termination *and* zero experiments, so declining is distinguishable from
+getting lucky on a weak proxy.
 
 ### What the tier does not cover
 

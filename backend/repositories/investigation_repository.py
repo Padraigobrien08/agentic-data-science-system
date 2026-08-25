@@ -389,7 +389,15 @@ class SqlAlchemyInvestigationRepository:
     def _persist_children(self, row: Investigation, state: InvestigationState, *, initial: bool) -> None:
         inv_id = row.id
 
+        # Deduped like every other child. `_persist_children` runs on every checkpoint save,
+        # and datasets were the one entity inserted unconditionally — so a run that
+        # checkpointed seven times served seven identical dataset rows, and the read model
+        # dutifully rendered the same dataset seven times.
+        existing_ds = self._existing_domain_ids(InvestigationDataset, inv_id) if not initial else set()
         for dref in state.datasets:
+            if dref.id in existing_ds:
+                continue
+            existing_ds.add(dref.id)
             self._s.add(InvestigationDataset(
                 investigation_id=inv_id, domain_id=dref.id, name=dref.name,
                 data_source_json=None, locator=dref.locator, content_hash=dref.content_hash,
@@ -431,11 +439,23 @@ class SqlAlchemyInvestigationRepository:
                 error_json=_json(res.error), provenance_json=_json(res.provenance),
             ))
 
+        self._s.flush()  # results must exist before anything can point at them
+
+        # Domain id -> row id for the results just written. Evidence and observations carry
+        # the *domain* result id (`<seed>-res-N`), while the columns holding the link are
+        # foreign keys to `experiment_results.id`. Without this translation the link is
+        # silently dropped at the persistence boundary even when the loop wrote it correctly,
+        # which is how the read model came to serve `experiment_result_id: null` for every
+        # evidence row in every published run.
+        res_by_domain = {r.domain_id: r.id for r in self._s.scalars(
+            select(ExperimentResultRow).where(ExperimentResultRow.investigation_id == inv_id)).all()}
+
         existing_obs = self._existing_domain_ids(ObservationRow, inv_id) if not initial else set()
         for obs in state.observations:
             if obs.id in existing_obs:
                 continue
-            self._s.add(self._observation_row(inv_id, obs))
+            self._s.add(self._observation_row(
+                inv_id, obs, experiment_result_id=res_by_domain.get(obs.experiment_result_id or "")))
 
         self._s.flush()  # ensure hypotheses/results exist before evidence links
 
@@ -445,7 +465,8 @@ class SqlAlchemyInvestigationRepository:
         for ev in state.evidence:
             if ev.id in existing_ev:
                 continue
-            ev_row = self._evidence_row(inv_id, ev)
+            ev_row = self._evidence_row(
+                inv_id, ev, experiment_result_id=res_by_domain.get(ev.experiment_result_id or ""))
             self._s.add(ev_row)
             self._s.flush()
             for hid in ev.hypothesis_ids:
@@ -468,10 +489,19 @@ class SqlAlchemyInvestigationRepository:
         existing_crit = self._existing_domain_ids(CritiqueRow, inv_id) if not initial else set()
         for c in state.critiques:
             if c.id in existing_crit:
+                # `resolved` changes *after* the critique is written — a contradiction is
+                # settled by a later experiment — so skipping the row wholesale left every
+                # persisted critique frozen as unresolved no matter what the run went on to
+                # establish. Same shape as the hypothesis-status update above.
+                crit_row = self._s.scalar(select(CritiqueRow).where(
+                    CritiqueRow.investigation_id == inv_id, CritiqueRow.domain_id == c.id))
+                if crit_row is not None:
+                    crit_row.resolved = c.resolved
                 continue
             self._s.add(CritiqueRow(
                 investigation_id=inv_id, domain_id=c.id, critique_type=c.critique_type.value,
                 severity=c.severity.value, target_kind=c.target.kind.value, target_id=c.target.id,
+                conflicts_with_id=c.conflicts_with_id,
                 message=c.message, suggested_action=c.suggested_action, resolved=c.resolved,
                 provenance_json=_json(c.provenance),
             ))
@@ -528,10 +558,13 @@ class SqlAlchemyInvestigationRepository:
             provenance_json=_json(obs.provenance),
         )
 
-    def _evidence_row(self, inv_id: UUID, ev: Evidence) -> EvidenceRow:
+    def _evidence_row(
+        self, inv_id: UUID, ev: Evidence, *, experiment_result_id: UUID | None = None
+    ) -> EvidenceRow:
         return EvidenceRow(
             investigation_id=inv_id, domain_id=ev.id, evidence_type=ev.evidence_type.value, claim=ev.claim,
             direction=ev.direction.value, strength=ev.strength, reliability=ev.reliability, coverage=ev.coverage,
+            experiment_result_id=experiment_result_id,
             source_reference_json=_json(ev.source_reference), payload_reference_json=_json(ev.payload_reference),
             statistics_json=_json(ev.statistics), provenance_json=_json(ev.provenance),
         )

@@ -1,24 +1,24 @@
 {
-  "analysis_run_id": "138ecd93-59ad-42ed-818e-3e95f220393e",
+  "analysis_run_id": "33f61356-de85-490c-a911-6a3c605d6086",
   "chat": [
     {
-      "created_at": "2026-08-24T16:15:59",
-      "id": "f25f4db2-0ba8-4cb7-8729-2fb30253470f",
+      "created_at": "2026-08-25T20:03:07",
+      "id": "c7f5e309-e236-4d3f-8e8b-35881963f7b0",
       "messages": [
         {
           "analysis_run_id": null,
           "content": "Which region has the strongest customer loyalty?",
-          "created_at": "2026-08-24T16:15:59.082869",
-          "id": "0a63619e-9a2b-4c13-8515-f7168297f711",
+          "created_at": "2026-08-25T20:03:07.235761",
+          "id": "32b61fa0-0f96-482f-9fb1-6b6181575a58",
           "role": "user",
           "sequence": 0,
           "status": "complete"
         },
         {
-          "analysis_run_id": "138ecd93-59ad-42ed-818e-3e95f220393e",
-          "content": "Insufficient evidence to resolve the investigation goal.",
-          "created_at": "2026-08-24T16:15:59.083585",
-          "id": "acae63c3-3286-46be-a146-2e68668abeb6",
+          "analysis_run_id": "33f61356-de85-490c-a911-6a3c605d6086",
+          "content": "This dataset cannot answer the question as asked: the data holds no measure of customer loyalty",
+          "created_at": "2026-08-25T20:03:07.237071",
+          "id": "17f5278c-b3e5-4d95-a356-f565bc6c030b",
           "role": "assistant",
           "sequence": 1,
           "status": "complete"
@@ -28,19 +28,19 @@
     }
   ],
   "demo_slug": "csv-unanswerable-moat",
-  "investigation_id": "a1323f12-f8fe-406b-92dc-104f5ba610bd",
+  "investigation_id": "0c405d62-3580-4f2c-a15d-2490953b4790",
   "model_calls": [
     {
-      "completion_tokens": 46,
+      "completion_tokens": 62,
       "error_detail": null,
-      "est_cost_usd": 0.00093225,
-      "finished_at": "2026-08-24T16:15:54.187538",
-      "id": "719bf3d4-6bd8-4fbf-97a9-bfa74cf98539",
-      "latency_ms": 1884,
+      "est_cost_usd": 0.00166425,
+      "finished_at": "2026-08-25T20:03:05.775006",
+      "id": "4719bceb-6981-4e6d-a118-7c8ee409cd12",
+      "latency_ms": 1361,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 967,
-      "prompt_version": "1.0.3",
+      "prompt_tokens": 1847,
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -49,11 +49,11 @@
         },
         "messages": [
           {
-            "content": "**Goal interpreter** for an adaptive data investigation loop. You receive an analytical goal in plain language plus the capabilities of the dataset that will answer it. You decide what kind of question is being asked. Everything downstream — which experiments become candidates, which hypotheses get generated — follows from this one call, so a wrong intent wastes the whole run.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question>\",\n \"capabilities\": {\"metrics\": [\"<numeric column>\", ...], \"dimensions\": [\"<categorical column>\", ...]}}\n```\n\n`metrics` and `dimensions` are the *only* column names that exist. A name not in those lists is not available, whatever the goal calls it.\n\n## Output\n\nReply with `GoalInterpretation` JSON and nothing else:\n\n```json\n{\"intent\": \"<one of the intents below>\",\n \"metric_hint\": \"<a name from capabilities.metrics, or null>\",\n \"group_hint\": \"<a name from capabilities.dimensions, or null>\",\n \"direction\": \"up\" | \"down\" | null,\n \"rationale\": \"<one sentence>\"}\n```\n\n### `intent` — choose exactly one\n\n| Intent | The goal is asking |\n|---|---|\n| `trend` | whether a metric moves over time |\n| `comparison` | whether a metric differs between groups |\n| `correlation` | whether two metrics move together |\n| `anomaly` | whether specific values are unusual |\n| `distribution` | what the shape or spread of a metric is |\n| `ranking` | which entities are highest or lowest |\n| `association` | whether two categorical fields are related |\n| `profile` | a broad description of the dataset |\n| `general` | none of the above fits |\n\nPrefer the *specific* intent over `general` when the goal supports one. `general` is the honest answer for a vague goal, not a way to avoid committing.\n\n### Reading the intent correctly\n\nThe intent decides which experiments are ever considered, so these three mistakes are the expensive ones:\n\n- **`comparison` means groups, never metrics.** It is for one metric across the values of a *dimension* — delivery time in `north` vs `south`. A goal contrasting two **metrics** (\"delivery time versus order volume\") is `correlation`, not `comparison`. Comparing a metric to \"the other metrics\" is not a question this dataset can answer, and reading it that way strands the run on a single experiment.\n- **A question about change over time is `trend`, even when it offers an explanation.** \"Has quality degraded, or is rising volume the cause?\" is asking whether a metric moved — `trend`, `metric_hint` on the metric whose movement is in question (here quality, not volume). The competing explanation is tested later by the loop; it does not change what is being asked.\n- **\"Does X explain Y?\" is `correlation`.** Set `metric_hint` to the metric being *explained* (the outcome), not the proposed cause.\n\nWhen a goal names both a time movement and a possible cause, `trend` is the better read: establishing that the movement is real comes before explaining it.\n\n### Which fields may be null\n\n**Only `metric_hint`, `group_hint` and `direction` accept `null`.** `intent` and `rationale` are strings — use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **Never invent a column.** `metric_hint` must appear verbatim in `capabilities.metrics`, `group_hint` verbatim in `capabilities.dimensions`. If the goal names something not present, use `null` — a null hint lets the loop pick, a hallucinated name breaks the experiment.\n- **`direction` is only meaningful for `trend`.** Set it when the goal asserts or asks about a specific movement (\"is revenue falling?\" → `down`). Use `null` when the goal asks about change without naming a direction (\"how has revenue moved?\").\n- **Do not smuggle a conclusion into `direction`.** It records what the goal asked about, not what you expect the data to show. The evidence decides that later.\n- Keep `rationale` to one sentence naming the signal in the goal you read the intent from.",
+            "content": "**Goal interpreter** for an adaptive data investigation loop. You receive an analytical goal in plain language plus the capabilities of the dataset that will answer it. You decide what kind of question is being asked. Everything downstream — which experiments become candidates, which hypotheses get generated — follows from this one call, so a wrong intent wastes the whole run.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question>\",\n \"capabilities\": {\"metrics\": [\"<numeric column>\", ...],\n                  \"dimensions\": [\"<categorical column>\", ...],\n                  \"entity_column\": \"<column identifying the unit of analysis, or null>\",\n                  \"entities\": [\"<entity in scope>\", ...]}}\n```\n\n`metrics` and `dimensions` are the *only* column names that exist. A name not in those lists is not available, whatever the goal calls it.\n\n`entities` are the units the rows are about — tickers, regions, services. **They are comparable even when `dimensions` is empty**, because they live in `entity_column` rather than in a categorical column. An EDGAR panel is the normal case: no dimensions at all, and every comparison between companies runs off `entity_column`.\n\n## Output\n\nReply with `GoalInterpretation` JSON and nothing else:\n\n```json\n{\"intent\": \"<one of the intents below>\",\n \"metric_hint\": \"<a name from capabilities.metrics, or null>\",\n \"group_hint\": \"<a name from capabilities.dimensions, or null>\",\n \"direction\": \"up\" | \"down\" | null,\n \"answerable\": true | false,\n \"unsupported_concept\": \"<what the data does not measure, or null>\",\n \"rationale\": \"<one sentence>\"}\n```\n\n### `intent` — choose exactly one\n\n| Intent | The goal is asking |\n|---|---|\n| `trend` | whether a metric moves over time |\n| `comparison` | whether a metric differs between groups |\n| `correlation` | whether two metrics move together |\n| `anomaly` | whether specific values are unusual |\n| `distribution` | what the shape or spread of a metric is |\n| `ranking` | which entities are highest or lowest |\n| `association` | whether two categorical fields are related |\n| `profile` | a broad description of the dataset |\n| `general` | none of the above fits |\n\nPrefer the *specific* intent over `general` when the goal supports one. `general` is the honest answer for a vague goal, not a way to avoid committing.\n\n### Reading the intent correctly\n\nThe intent decides which experiments are ever considered, so these three mistakes are the expensive ones:\n\n- **`comparison` means groups, never metrics.** It is for one metric across the values of a *dimension* — delivery time in `north` vs `south`. A goal contrasting two **metrics** (\"delivery time versus order volume\") is `correlation`, not `comparison`. Comparing a metric to \"the other metrics\" is not a question this dataset can answer, and reading it that way strands the run on a single experiment.\n- **A question about change over time is `trend`, even when it offers an explanation.** \"Has quality degraded, or is rising volume the cause?\" is asking whether a metric moved — `trend`, `metric_hint` on the metric whose movement is in question (here quality, not volume). The competing explanation is tested later by the loop; it does not change what is being asked.\n- **\"Does X explain Y?\" is `correlation`.** Set `metric_hint` to the metric being *explained* (the outcome), not the proposed cause.\n\nWhen a goal names both a time movement and a possible cause, `trend` is the better read: establishing that the movement is real comes before explaining it.\n\n### `answerable` — the one call nothing downstream can undo\n\nSet `answerable: false` when the goal asks about **something none of these columns measure**,\nand name the missing thing in `unsupported_concept` (\"customer loyalty\", \"complaint volume\",\n\"churn\"). The loop then stops and says so. Nothing is run, nothing is claimed, and the user\nlearns they need different data.\n\nThe failure this exists to prevent is subtle and it has happened. Asked \"which region has the\nstrongest customer loyalty?\" over a dataset of delivery days, order volume and on-time rate,\nthe honest answer is that loyalty is not in here. What came back instead was a ranking of\nregions by *average delivery days*, presented as a finding about loyalty. The run then hedged,\nwhich made it look careful — but only because that proxy's signal happened to be weak. A\nstronger proxy would have produced a confident, well-evidenced answer to a question nobody\nasked, and there is no way for a reader to tell those two apart.\n\nSo the test is not \"can I find something to measure?\". It is **\"is the thing being asked about\nin this list?\"**. A column that correlates with the concept, or stands in for it, or is the\nclosest available — those are all `answerable: false`. Adjacent is not the same.\n\n### Computed is not missing\n\nThe opposite error is just as costly, and it is easier to make. **A quantity the loop would\n*derive* from these columns is answerable.** The loop compares, ranks, correlates, fits and\ndetects change points — that is what it is for. Almost nothing worth asking is a column you\ncan read off directly.\n\n- \"NVDA's margin advantage over AAPL and MSFT\" → `net_margin` compared across `entities`. **Answerable.** No column is named \"margin advantage\" and none needs to be.\n- \"Is the north region worse?\" → a metric compared across `entities` or a dimension. **Answerable.**\n- \"Did performance break in particular months?\" → a metric over time. **Answerable.**\n- \"Which region has the strongest customer loyalty?\" → nothing here measures loyalty at all. **Not answerable.**\n\nThe difference is whether any column *bears on* the concept. A comparison, a trend or a ratio\nbetween columns you were given is arithmetic the loop performs. A concept no column touches is\nmissing data. Only the second is `answerable: false`.\n\n**An empty `dimensions` list is never itself a reason to decline.** Check `entities` before\nconcluding that a comparison has nothing to run on.\n\n`answerable: true` is the ordinary case and the default. A goal that names a real column, or\nthat asks something the listed columns genuinely cover even if it words them differently\n(\"delivery speed\" for `avg_delivery_days`), is answerable. Declining a question the data *can*\naddress is its own failure, and the loop has no way to recover from it either.\n\n### Which fields may be null\n\n**Only `metric_hint`, `group_hint` and `direction` accept `null`.** `intent` and `rationale` are strings — use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **Never invent a column.** `metric_hint` must appear verbatim in `capabilities.metrics`, `group_hint` verbatim in `capabilities.dimensions`. If the goal names something not present, use `null` — a null hint lets the loop pick, a hallucinated name breaks the experiment.\n- **Never substitute a metric for a concept the data lacks.** If you find yourself reaching for the *closest* column rather than the right one, that is `answerable: false`, not a `metric_hint`.\n- **`unsupported_concept` is prose for a person**, not a column name: what the goal asked about that this dataset does not contain. Leave it `null` when `answerable` is `true`.\n- **`direction` is only meaningful for `trend`.** Set it when the goal asserts or asks about a specific movement (\"is revenue falling?\" → `down`). Use `null` when the goal asks about change without naming a direction (\"how has revenue moved?\").\n- **Do not smuggle a conclusion into `direction`.** It records what the goal asked about, not what you expect the data to show. The evidence decides that later.\n- Keep `rationale` to one sentence naming the signal in the goal you read the intent from.",
             "role": "system"
           },
           {
-            "content": "{\"goal\": \"Which region has the strongest customer loyalty?\", \"capabilities\": {\"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}}",
+            "content": "{\"goal\": \"Which region has the strongest customer loyalty?\", \"capabilities\": {\"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": [], \"entity_column\": \"region\", \"entities\": [\"east\", \"north\", \"south\", \"west\"]}}",
             "role": "user"
           }
         ],
@@ -64,12 +64,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"intent\":\"ranking\",\"metric_hint\":null,\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks which entity is highest on customer loyalty, which is a ranking question.\"}",
-        "completion_tokens": 46,
+        "assistant_text": "{\"intent\":\"general\",\"metric_hint\":null,\"group_hint\":null,\"direction\":null,\"answerable\":false,\"unsupported_concept\":\"customer loyalty\",\"rationale\":\"The goal asks about customer loyalty, which is not measured by any available metric or dimension in this dataset.\"}",
+        "completion_tokens": 62,
         "finish_reason": "stop",
-        "latency_ms": 1884,
+        "latency_ms": 1361,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 967,
+        "prompt_tokens": 1847,
         "raw_response": {
           "choices": [
             {
@@ -79,7 +79,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"intent\":\"ranking\",\"metric_hint\":null,\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks which entity is highest on customer loyalty, which is a ranking question.\"}",
+                "content": "{\"intent\":\"general\",\"metric_hint\":null,\"group_hint\":null,\"direction\":null,\"answerable\":false,\"unsupported_concept\":\"customer loyalty\",\"rationale\":\"The goal asks about customer loyalty, which is not measured by any available metric or dimension in this dataset.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -87,301 +87,129 @@
               }
             }
           ],
-          "created": 1787588153,
-          "id": "chatcmpl-EGRcv7MePWPTswrF3wle9r2L1ktex",
+          "created": 1787688184,
+          "id": "chatcmpl-EGreK8RD3R7LTHSvT3hnk4I9Rbamn",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 46,
+            "completion_tokens": 62,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 967,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cache_write_tokens": null,
-              "cached_tokens": 0
-            },
-            "total_tokens": 1013
-          }
-        }
-      },
-      "sequence": 0,
-      "started_at": "2026-08-24T16:15:52.302015",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 124,
-      "error_detail": null,
-      "est_cost_usd": 0.00128925,
-      "finished_at": "2026-08-24T16:15:56.120042",
-      "id": "b74a01d4-7751-41fc-a724-9d16a282e28c",
-      "latency_ms": 1927,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 975,
-      "prompt_version": "1.0.3",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Hypothesis generator** for an adaptive data investigation loop. You turn an interpreted goal into claims the loop can actually test, and into open questions it should keep in view. A hypothesis that no experiment could disconfirm is worse than none: it will sit unresolved and consume budget.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question, verbatim>\",\n \"interpretation\": {\"intent\": \"...\", \"metric_hint\": \"...\", \"group_hint\": \"...\", \"direction\": \"up\"|\"down\"|null},\n \"metrics\": [\"<numeric column>\", ...],\n \"dimensions\": [\"<categorical column>\", ...]}\n```\n\n`interpretation` is a classification of the goal; `goal` is what was actually asked. Read both — the interpretation carries one metric hint and one direction, so anything the goal said beyond that (a named region, an alternative explanation, a time window) survives only in `goal`.\n\n## Output\n\nReply with `HypothesisProposals` JSON and nothing else:\n\n```json\n{\"hypotheses\": [\n   {\"statement\": \"<a falsifiable claim>\",\n    \"metric\": \"<a name from metrics, or null>\",\n    \"direction\": \"up\" | \"down\" | \"none\",\n    \"rationale\": \"<why this is worth testing>\"}],\n \"questions\": [\"<an open question the evidence should resolve>\", ...]}\n```\n\n`statement` must be non-empty. `direction` is one of exactly `up`, `down`, `none` — note this differs from the interpreter's field, which also allows `null`.\n\n### Which fields may be null\n\n**Only `metric` accepts `null`.** `statement`, `direction` and `rationale` are strings — `statement` must be non-empty; use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion. `hypotheses` and `questions` are lists: use `[]`, not `null`.\n\n## What makes a usable hypothesis\n\n- **Falsifiable.** State something a deterministic experiment over these columns could contradict. \"Revenue is increasing over time\" is testable. \"Revenue is interesting\" is not.\n- **Grounded in the available columns.** `metric` must appear verbatim in `metrics`, or be `null`. Never reference a column that was not supplied.\n- **Directional when the intent is `trend`.** Use the interpretation's `direction` when it has one; default to `up` only if the goal is directionally silent.\n- **Non-directional otherwise.** For `comparison`, `correlation`, `anomaly`, `association`, `distribution`, `ranking` and `profile`, use `\"none\"` — those claims are about difference or structure, not a direction of travel.\n\n## Calibration\n\nPropose the smallest set of claims that covers the goal — typically one, occasionally two when the goal genuinely contains two questions. Padding the list does not make the investigation more thorough; it splits a fixed experiment budget across claims the goal never asked about, and leaves more hypotheses unresolved at termination.\n\n### Competing explanations are a second claim, not padding\n\nWhen the goal offers an **alternative explanation** for the same observation — \"is quality degrading, *or* is rising volume the cause?\", \"did the change cause this, *or* was it seasonal?\" — propose **both** as separate hypotheses, each with its own `metric`.\n\nThis is the one case where a second claim is not padding but the entire question. Testing only the first cannot distinguish the two: evidence that the outcome moved is equally consistent with either explanation, so a run that measures the outcome alone ends inconclusive no matter how many experiments it spends. The alternative has to be measured on *its own* metric before the two can be told apart.\n\nWord each so a deterministic experiment could contradict it, and set `metric` to the column that claim is about — the outcome metric for the first, the proposed cause for the second.\n\nUse `questions` for what the evidence should clarify but which is not itself a claim to be supported or refuted — for example whether an observed movement is sustained or a one-off shift.",
-            "role": "system"
-          },
-          {
-            "content": "{\"goal\": \"Which region has the strongest customer loyalty?\", \"interpretation\": {\"intent\": \"ranking\", \"metric_hint\": null, \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks which entity is highest on customer loyalty, which is a ranking question.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"Customer loyalty differs across regions, so one region will rank highest on the loyalty metric once regions are compared.\",\"metric\":null,\"direction\":\"none\",\"rationale\":\"The question is a ranking comparison across regions, but no loyalty metric is available in the supplied metrics. This claim is still testable as a difference in regional performance if a loyalty proxy is measured.\"}],\"questions\":[\"Which region ranks highest on the available proxy for customer loyalty, if any?\",\"Is the apparent leader stable across the observation window or driven by a short-lived spike?\"]}",
-        "completion_tokens": 124,
-        "finish_reason": "stop",
-        "latency_ms": 1927,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 975,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"Customer loyalty differs across regions, so one region will rank highest on the loyalty metric once regions are compared.\",\"metric\":null,\"direction\":\"none\",\"rationale\":\"The question is a ranking comparison across regions, but no loyalty metric is available in the supplied metrics. This claim is still testable as a difference in regional performance if a loyalty proxy is measured.\"}],\"questions\":[\"Which region ranks highest on the available proxy for customer loyalty, if any?\",\"Is the apparent leader stable across the observation window or driven by a short-lived spike?\"]}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1787588154,
-          "id": "chatcmpl-EGRcwGTw3JMujPwEwddLB9rmiKOKw",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "moderation": null,
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 124,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 975,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cache_write_tokens": null,
-              "cached_tokens": 0
-            },
-            "total_tokens": 1099
-          }
-        }
-      },
-      "sequence": 1,
-      "started_at": "2026-08-24T16:15:54.190403",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 32,
-      "error_detail": null,
-      "est_cost_usd": 0.000651,
-      "finished_at": "2026-08-24T16:15:57.311409",
-      "id": "4597b179-9268-4678-aba3-f7d30c054b45",
-      "latency_ms": 1172,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 676,
-      "prompt_version": "1.0.3",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
-            "role": "system"
-          },
-          {
-            "content": "{\"goal\": {\"intent\": \"ranking\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"rank_entities\", \"purpose\": \"ranking analysis via rank_entities\", \"expected_information_gain\": 0.85, \"falsification\": false}]}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This directly advances the ranking goal by producing the entity order needed for the analysis.\"}",
-        "completion_tokens": 32,
-        "finish_reason": "stop",
-        "latency_ms": 1172,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 676,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This directly advances the ranking goal by producing the entity order needed for the analysis.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1787588156,
-          "id": "chatcmpl-EGRcyFH5xrUIyncEK2W0SmTKcBPca",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "moderation": null,
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 32,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 676,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cache_write_tokens": null,
-              "cached_tokens": 0
-            },
-            "total_tokens": 708
-          }
-        }
-      },
-      "sequence": 2,
-      "started_at": "2026-08-24T16:15:56.137695",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 134,
-      "error_detail": null,
-      "est_cost_usd": 0.00183075,
-      "finished_at": "2026-08-24T16:15:59.045968",
-      "id": "e95b73fc-762b-4065-9eba-470542d0a75d",
-      "latency_ms": 1680,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 1637,
-      "prompt_version": "1.0.3",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
-            "role": "system"
-          },
-          {
-            "content": "{\"question\": \"Which region has the strongest customer loyalty?\", \"findings\": {\"disposition\": \"insufficient_evidence\", \"confidence\": 0.2, \"claims\": [{\"statement\": \"Customer loyalty differs across regions, so one region will rank highest on the loyalty metric once regions are compared.\", \"status\": \"unresolved\", \"confidence\": 0.5, \"supporting_evidence\": 1, \"refuting_evidence\": 0}], \"counts\": {\"hypotheses\": 1, \"evidence\": 1, \"experiments\": 1, \"supported\": 0, \"open_questions\": 2}, \"experiments_run\": [\"rank_entities\"], \"stopped_because\": \"insufficient_evidence\", \"open_questions\": [\"Which region ranks highest on the available proxy for customer loyalty, if any?\", \"Is the apparent leader stable across the observation window or driven by a short-lived spike?\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": null}}}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"answer\":\"The run did not establish which region has the strongest customer loyalty. The overall result was insufficient evidence, so no region could be confirmed as the leader.\\n\\nThe single claim it tested stayed unresolved: the data gave some support for the idea that loyalty differs across regions, but not enough to show that one region clearly ranked highest on the loyalty metric. The run used a ranking step, then stopped because the evidence was still too thin.\\n\\nTwo questions remained open: which region, if any, ranks highest on the available proxy for customer loyalty, and whether any apparent leader is stable or just a short-lived spike.\"}",
-        "completion_tokens": 134,
-        "finish_reason": "stop",
-        "latency_ms": 1680,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1637,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"answer\":\"The run did not establish which region has the strongest customer loyalty. The overall result was insufficient evidence, so no region could be confirmed as the leader.\\n\\nThe single claim it tested stayed unresolved: the data gave some support for the idea that loyalty differs across regions, but not enough to show that one region clearly ranked highest on the loyalty metric. The run used a ranking step, then stopped because the evidence was still too thin.\\n\\nTwo questions remained open: which region, if any, ranks highest on the available proxy for customer loyalty, and whether any apparent leader is stable or just a short-lived spike.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1787588157,
-          "id": "chatcmpl-EGRczt3at1HXZLvh2QEph9T2yhWIX",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "moderation": null,
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 134,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 1637,
+            "prompt_tokens": 1847,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 1280
             },
-            "total_tokens": 1771
+            "total_tokens": 1909
           }
         }
       },
-      "sequence": 3,
-      "started_at": "2026-08-24T16:15:57.364485",
+      "sequence": 0,
+      "started_at": "2026-08-25T20:03:04.413267",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 86,
+      "error_detail": null,
+      "est_cost_usd": 0.00184425,
+      "finished_at": "2026-08-25T20:03:07.191945",
+      "id": "21fd4d3d-a7c5-4136-9a30-42437e868b87",
+      "latency_ms": 1411,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1943,
+      "prompt_version": "1.0.5",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\" | \"unanswerable\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- **Say what each figure counts, in the same clause.** \"7 experiments\", \"9 evidence items\", \"95% confidence\", \"3 open questions\". A bare number is rejected even when the value is right, because nothing in the sentence identifies which quantity it is — and a checker that cannot tell has to assume the worst.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- **Never attach a figure to a metric or column.** You are given no measured values at all — not one. You may say a claim *about* revenue was supported; you may not say what revenue was, which way it moved, or by how much. \"Net margin fell 5%\" is invented even if `0.05` appears in `findings` as somebody's confidence.\n- **Ratios are figures without digits.** \"Twice as fast\", \"roughly doubled\", \"an order of magnitude\", \"by a factor of three\", \"fell by half\" — the run computed none of these, so none of them may be written. Comparing things the run *did* record is fine: \"more refuting evidence than supporting evidence\", \"the stronger of the two claims\".\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## When the question could not be asked of this data\n\n`unanswerable` is different from every outcome above, and the difference is the whole point.\nThe others mean the analysis ran and did not settle the matter — which invites more evidence\nof the same kind. `unanswerable` means the dataset holds nothing that bears on the question,\nso no amount of the available data would help.\n\nWrite it as exactly that. Name what is missing, say plainly that this data cannot answer it,\nand **do not offer the nearest available metric as a consolation** — not even as a suggestion.\nThe run declined precisely so that a confident answer about something else did not get made;\nreintroducing it in prose gives back the thing that was refused.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
+            "role": "system"
+          },
+          {
+            "content": "{\"question\": \"Which region has the strongest customer loyalty?\", \"findings\": {\"disposition\": \"unanswerable\", \"confidence\": 0.0, \"claims\": [], \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0, \"supported\": 0, \"open_questions\": 1}, \"experiments_run\": [], \"stopped_because\": \"unanswerable_premise\", \"open_questions\": [\"Which dataset measures customer loyalty?\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": 96}}}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"answer\":\"This dataset cannot answer which region has the strongest customer loyalty. The run found no claim to test and stopped because the premise was unanswerable: it did not identify which dataset or field measures customer loyalty.\\n\\nNo experiments were run, so there was no evidence to compare regions. The only open question left was which dataset measures customer loyalty, and that was not settled here.\"}",
+        "completion_tokens": 86,
+        "finish_reason": "stop",
+        "latency_ms": 1411,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1943,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"answer\":\"This dataset cannot answer which region has the strongest customer loyalty. The run found no claim to test and stopped because the premise was unanswerable: it did not identify which dataset or field measures customer loyalty.\\n\\nNo experiments were run, so there was no evidence to compare regions. The only open question left was which dataset measures customer loyalty, and that was not settled here.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787688186,
+          "id": "chatcmpl-EGreM5MJR2xVSpGBJeZ18DKFPdfDe",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 86,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1943,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 1792
+            },
+            "total_tokens": 2029
+          }
+        }
+      },
+      "sequence": 1,
+      "started_at": "2026-08-25T20:03:05.780042",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 336,
-    "est_cost_usd": 0.004703,
-    "latency_ms": 6663,
-    "model_calls": 4,
+    "completion_tokens": 148,
+    "est_cost_usd": 0.003508,
+    "latency_ms": 2772,
+    "model_calls": 2,
     "priced": true,
-    "prompt_tokens": 4255,
-    "total_tokens": 4591
+    "prompt_tokens": 3790,
+    "total_tokens": 3938
   }
 }

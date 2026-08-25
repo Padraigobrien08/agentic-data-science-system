@@ -46,6 +46,21 @@ class GoalInterpretation(DomainModel):
     group_hint: str | None = None
     direction: Literal["up", "down"] | None = None
     rationale: str = ""
+    #: False when the goal asks about something the dataset does not measure.
+    #:
+    #: Deciding that "customer loyalty" is not answerable from delivery times is a judgement
+    #: about meaning, so it belongs to the policy — but the policy only *reports* it here.
+    #: What follows is computed: the loop stops, proposes nothing, runs nothing, and says so.
+    #:
+    #: This field exists because the alternative is what actually happened. With no typed way
+    #: to decline, a model asked an unanswerable question picked the nearest available metric,
+    #: and the loop dutifully ranked regions by average delivery days under a claim about
+    #: loyalty. It then reported ``insufficient_evidence`` — not because the premise was
+    #: broken, but because the proxy's signal was weak. The right answer for the wrong reason
+    #: is indistinguishable from luck, and it stops being right the moment the proxy is strong.
+    answerable: bool = True
+    #: What the goal asks for that the data does not contain. Prose, shown to the user.
+    unsupported_concept: str | None = None
 
 
 class HypothesisProposal(DomainModel):
@@ -212,7 +227,14 @@ class PolicyPrompts:
     is what keeps ``agentic/`` free of a dependency on the backend.
     """
 
-    interpret_goal: str = "Interpret the analytical goal. Reply as GoalInterpretation JSON."
+    interpret_goal: str = (
+        "Interpret the analytical goal. The capability summary lists every column that "
+        "exists; a concept the goal names that is not measured by any of them cannot be "
+        "answered here, however close another column sounds. In that case set "
+        "answerable=false and put the missing concept in unsupported_concept — do not "
+        "substitute the nearest metric, because a confident answer about something the user "
+        "did not ask is worse than no answer. Reply as GoalInterpretation JSON."
+    )
     generate_hypotheses: str = (
         "Propose falsifiable hypotheses and open questions. Reply as HypothesisProposals JSON."
     )
@@ -224,10 +246,16 @@ class PolicyPrompts:
     )
     write_answer: str = (
         "Write the finding as a short, direct answer to the question, in plain prose. "
-        "State only figures present in the findings you are given, copied exactly; if you "
-        "are unsure of a figure, describe the result without it. Do not invent counts, "
-        "percentages or dates. Say plainly when nothing was established. "
-        "Reply as AnswerNarration JSON."
+        "State only figures present in the findings you are given, copied exactly, and name "
+        "what each one counts in the same clause ('7 experiments', '95% confidence') — a "
+        "bare number with nothing saying what it is will be rejected. The findings contain "
+        "no measured values, so never attach a figure to a column or metric: you may say a "
+        "claim about revenue was supported, never what revenue was or by how much it moved. "
+        "Do not state ratios either ('twice as fast', 'roughly doubled', 'an order of "
+        "magnitude') — those are figures too, and the run did not compute them. Comparing "
+        "what the run recorded ('more refuting than supporting evidence') is fine. "
+        "If you are unsure of a figure, describe the result without it. Say plainly when "
+        "nothing was established. Reply as AnswerNarration JSON."
     )
 
 

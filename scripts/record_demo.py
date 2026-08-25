@@ -443,6 +443,16 @@ def build_parser() -> argparse.ArgumentParser:
     c.add_argument("--path", type=Path, default=DEFAULT_CSV)
     c.add_argument("--time-field", default="month")
     c.add_argument("--entity-fields", default="region")
+    # Defaults to `synthetic` because the default dataset is generated
+    # (scripts/build_demo_dataset.py). A published run over invented rows that does not say so
+    # asks the reader to assume it is real, which is the opposite of what this showcase claims
+    # to be about. Override for a genuinely external CSV.
+    c.add_argument(
+        "--origin",
+        choices=["synthetic", "live", "user_upload", "unknown"],
+        default="synthetic",
+        help="Where these rows came from; surfaced to readers of the published run.",
+    )
 
     e = sub.add_parser("edgar", parents=[common], help="Record over live SEC data.")
     e.add_argument("--tickers", default="AAPL,MSFT,NVDA")
@@ -468,9 +478,10 @@ def main(argv: Sequence[str] | None = None) -> int:
                 "records": records,
                 "time_field": args.time_field,
                 "entity_id_fields": [f.strip() for f in args.entity_fields.split(",") if f.strip()],
+                "dataset_origin": args.origin,
             },
         }
-        print(f"dataset: {args.path.name} ({len(records)} rows)")
+        print(f"dataset: {args.path.name} ({len(records)} rows, origin={args.origin})")
         return _execute(
             payload,
             goal=args.goal,

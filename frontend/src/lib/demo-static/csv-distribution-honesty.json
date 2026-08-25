@@ -1,6 +1,6 @@
 {
   "adapter_id": "in_memory",
-  "analysis_run_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+  "analysis_run_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c",
   "conclusion": "Insufficient evidence to resolve the investigation goal.",
   "conclusion_detail": {
     "caveats": [
@@ -9,13 +9,13 @@
     ],
     "confidence": 0.2,
     "disposition": "insufficient_evidence",
-    "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-concl-0",
+    "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-concl-0",
     "key_evidence_ids": [],
-    "narrative": "The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift affecting most orders or from a small tail of very late orders pulling the mean up.\n\nBoth tested claims stayed unresolved. The broad-shift explanation had some supporting evidence, but so did the tail-driven explanation, and neither was strong enough to stand on its own. In other words, the run found signs pointing in both directions rather than a clear winner.\n\nIt tested the distribution summary, then a dataset profile, then outlier detection. The loop stopped because it ran out of evidence, not because the question was settled. What remains open is whether the increase has been sustained or was a one-off spike, and how much of the change in the mean comes from the upper tail versus the central bulk of orders.",
+    "narrative": "The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift across most orders or from a small tail of very late orders.\n\nBoth tested claims stayed unresolved. The broad-shift explanation had 3 supporting evidence items and no refuting evidence, and the tail-of-late-orders explanation also had 3 supporting evidence items and no refuting evidence. Neither claim was supported strongly enough to stand on its own.\n\nThe run used a distribution summary, a dataset profile, and an outlier check on the 96-row operational_delivery dataset, then stopped because there was insufficient evidence. What remained open was whether the increase was spread across the distribution or concentrated in a few extreme delays, and whether the median or typical delivery time had moved rather than only the upper tail.",
     "statement": "Insufficient evidence to resolve the investigation goal.",
     "supporting_hypothesis_ids": [
-      "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
-      "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
+      "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
     ]
   },
   "confidence": 0.2,
@@ -29,50 +29,18 @@
     "observations": 1,
     "open_questions": 2
   },
-  "created_at": "2026-08-24T16:14:17",
+  "created_at": "2026-08-25T20:02:25",
   "critiques": [],
+  "dataset_origin": "synthetic",
   "datasets": [
     {
-      "content_hash": null,
-      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "content_hash": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dset-0",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
+      "origin": "synthetic",
+      "row_count": 96,
+      "source": "operational_delivery"
     }
   ],
   "decisions": [
@@ -80,13 +48,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-hyp-0",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-hyp-0",
       "iteration": 0,
-      "rationale": "This tests the broad-shift explanation directly against the observed increase in the mean.",
+      "rationale": "This is the main distributional explanation to test against the observed increase in the mean.",
       "sequence": 0,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -95,13 +63,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-hyp-1",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-hyp-1",
       "iteration": 0,
-      "rationale": "This tests the alternative explanation that the mean is being pulled up by outliers rather than a general slowdown.",
+      "rationale": "This competing explanation can be contradicted if the increase is widespread rather than concentrated in a few extreme orders.",
       "sequence": 1,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -110,13 +78,13 @@
       "alternatives": [],
       "chosen_option": "summarize_distribution",
       "decision_type": "select_experiment",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-sel-2",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-sel-2",
       "iteration": 0,
-      "rationale": "summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution.",
+      "rationale": "summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution shape and spread.",
       "sequence": 2,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-exp-0",
           "kind": "experiment_request"
         }
       ]
@@ -125,17 +93,17 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-evd-3",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 2 evidence item(s) for summarize_distribution",
       "sequence": 3,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         },
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -144,13 +112,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-4",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-rev-4",
       "iteration": 0,
       "rationale": "active (support=0, refute=0)",
       "sequence": 4,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -159,13 +127,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-5",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-rev-5",
       "iteration": 0,
       "rationale": "active (support=0, refute=0)",
       "sequence": 5,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -174,13 +142,13 @@
       "alternatives": [],
       "chosen_option": "profile_dataset",
       "decision_type": "select_experiment",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-sel-6",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-sel-6",
       "iteration": 1,
-      "rationale": "profile_dataset is the highest-information experiment for establishing the overall distribution shape and summary characteristics.",
+      "rationale": "profile_dataset is the highest-information next step for establishing the dataset’s distribution.",
       "sequence": 6,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-exp-1",
           "kind": "experiment_request"
         }
       ]
@@ -189,17 +157,17 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-evd-7",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-evd-7",
       "iteration": 1,
       "rationale": "recorded 2 evidence item(s) for profile_dataset",
       "sequence": 7,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         },
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -208,13 +176,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-8",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-rev-8",
       "iteration": 1,
       "rationale": "active (support=0, refute=0)",
       "sequence": 8,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -223,13 +191,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-9",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-rev-9",
       "iteration": 1,
       "rationale": "active (support=0, refute=0)",
       "sequence": 9,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -238,13 +206,13 @@
       "alternatives": [],
       "chosen_option": "detect_outliers",
       "decision_type": "select_experiment",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-sel-10",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-sel-10",
       "iteration": 2,
-      "rationale": "Detecting outliers would establish whether the distribution has extreme values or anomalies that materially affect its shape.",
+      "rationale": "Detecting outliers would establish whether the distribution has extreme values or heavy tails that materially affect its shape.",
       "sequence": 10,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-2",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-exp-2",
           "kind": "experiment_request"
         }
       ]
@@ -253,17 +221,17 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-evd-11",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-evd-11",
       "iteration": 2,
       "rationale": "recorded 2 evidence item(s) for detect_outliers",
       "sequence": 11,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         },
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -272,13 +240,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-12",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-rev-12",
       "iteration": 2,
       "rationale": "active (support=0, refute=0)",
       "sequence": 12,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -287,13 +255,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-13",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-rev-13",
       "iteration": 2,
       "rationale": "active (support=0, refute=0)",
       "sequence": 13,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -302,23 +270,23 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-concl-14",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-dec-concl-14",
       "iteration": 3,
       "rationale": "insufficient_evidence (insufficient_evidence)",
       "sequence": 14,
       "targets": [
         {
-          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-concl-0",
+          "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-concl-0",
           "kind": "conclusion"
         }
       ]
     }
   ],
   "demo_slug": "csv-distribution-honesty",
-  "domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+  "domain_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c",
   "events": [
     {
-      "created_at": "2026-08-24T16:14:17",
+      "created_at": "2026-08-25T20:02:25",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -328,7 +296,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-24T16:14:23",
+      "created_at": "2026-08-25T20:02:28",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -338,7 +306,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-24T16:14:24",
+      "created_at": "2026-08-25T20:02:29",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -348,7 +316,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-24T16:14:26",
+      "created_at": "2026-08-25T20:02:30",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -358,7 +326,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-24T16:14:27",
+      "created_at": "2026-08-25T20:02:31",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -368,7 +336,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-24T16:14:30",
+      "created_at": "2026-08-25T20:02:32",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -384,11 +352,11 @@
       "coverage": 1.0,
       "direction": "neutral",
       "evidence_type": "descriptive_stat",
-      "experiment_result_id": null,
+      "experiment_result_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-0",
       "hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0"
       ],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-0",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-evd-0",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -414,11 +382,11 @@
       "coverage": 1.0,
       "direction": "neutral",
       "evidence_type": "descriptive_stat",
-      "experiment_result_id": null,
+      "experiment_result_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-0",
       "hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-1",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-evd-1",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -444,11 +412,11 @@
       "coverage": 1.0,
       "direction": "neutral",
       "evidence_type": "data_quality",
-      "experiment_result_id": null,
+      "experiment_result_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-1",
       "hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0"
       ],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-2",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-evd-2",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [],
@@ -469,11 +437,11 @@
       "coverage": 1.0,
       "direction": "neutral",
       "evidence_type": "data_quality",
-      "experiment_result_id": null,
+      "experiment_result_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-1",
       "hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-3",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-evd-3",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [],
@@ -494,11 +462,11 @@
       "coverage": 1.0,
       "direction": "neutral",
       "evidence_type": "anomaly_flag",
-      "experiment_result_id": null,
+      "experiment_result_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-2",
       "hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0"
       ],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-4",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-evd-4",
       "reliability": 0.6095238095238096,
       "statistics": {
         "assumptions": [
@@ -526,11 +494,11 @@
       "coverage": 1.0,
       "direction": "neutral",
       "evidence_type": "anomaly_flag",
-      "experiment_result_id": null,
+      "experiment_result_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-2",
       "hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-5",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-evd-5",
       "reliability": 0.6095238095238096,
       "statistics": {
         "assumptions": [
@@ -559,33 +527,33 @@
       "artifacts": [
         {
           "byte_size": 165,
-          "id": "511b8229-d578-485f-b45b-3efdba920444",
+          "id": "5ed3f494-db76-4f41-92d8-2836cd1d9cd4",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "distribution"
         },
         {
           "byte_size": 104,
-          "id": "9259c88e-f1d6-4e6e-9f9b-c1bc9dfb889b",
+          "id": "4c32f0fa-667e-4f42-9c39-7757ccbd5200",
           "kind": "json",
           "mime_type": "application/json",
           "name": "distribution_summary"
         }
       ],
-      "created_at": "2026-08-24T16:14:24",
+      "created_at": "2026-08-25T20:02:29",
       "error": null,
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-res-0",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-0",
       "metrics": {
         "mean": 3.029896,
         "n": 96.0,
         "std": 0.363676
       },
-      "request_domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-0",
+      "request_domain_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-exp-0",
       "status": "succeeded",
       "summary": "Summarized distribution of 'avg_delivery_days' (n=96).",
       "target_hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
       "tool_name": "summarize_distribution"
     },
@@ -593,33 +561,33 @@
       "artifacts": [
         {
           "byte_size": 401,
-          "id": "5b17a0e8-2783-4218-9d33-2035d92cd4cb",
+          "id": "50b7d6ba-b2de-43a2-ac79-d586f814ea91",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "column_profile"
         },
         {
           "byte_size": 61,
-          "id": "55fb9697-9c4e-4173-b1eb-9563e2de1792",
+          "id": "90a499e4-92e0-4cc3-98d3-cdd0cd3c5618",
           "kind": "json",
           "mime_type": "application/json",
           "name": "dataset_profile"
         }
       ],
-      "created_at": "2026-08-24T16:14:26",
+      "created_at": "2026-08-25T20:02:30",
       "error": null,
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-res-1",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-1",
       "metrics": {
         "column_count": 6.0,
         "overall_missing_ratio": 0.0,
         "row_count": 96.0
       },
-      "request_domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-1",
+      "request_domain_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-exp-1",
       "status": "succeeded",
       "summary": "Profiled 6 columns over 96 rows.",
       "target_hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
       "tool_name": "profile_dataset"
     },
@@ -627,33 +595,33 @@
       "artifacts": [
         {
           "byte_size": 81,
-          "id": "57cf1177-0491-4a0d-8757-7c91849783a0",
+          "id": "93bc9db8-567d-4c6d-b1c8-de38ac28a79f",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "outliers"
         },
         {
           "byte_size": 105,
-          "id": "aee96dcd-08ae-49f5-80ff-5b9d36d90972",
+          "id": "70d45267-e1d2-4788-adae-0bcd79cc4b3b",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "outliers"
         }
       ],
-      "created_at": "2026-08-24T16:14:27",
+      "created_at": "2026-08-25T20:02:30",
       "error": null,
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-res-2",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-res-2",
       "metrics": {
         "max_score": 2.804983,
         "outlier_count": 0.0,
         "outlier_fraction": 0.0
       },
-      "request_domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-2",
+      "request_domain_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-exp-2",
       "status": "succeeded",
       "summary": "0 outlier(s) in 'avg_delivery_days' via zscore.",
       "target_hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
       "tool_name": "detect_outliers"
     }
@@ -662,35 +630,35 @@
     {
       "confidence": 0.5,
       "entity_refs": [],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
       "metric_refs": [
         "avg_delivery_days"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This tests the broad-shift explanation directly against the observed increase in the mean.",
-      "statement": "The rise in average delivery time reflects a broad shift: delivery times are higher for most orders, not just a small tail of late orders.",
+      "rationale": "This is the main distributional explanation to test against the observed increase in the mean.",
+      "statement": "The rise in average delivery time is driven by a broad shift affecting most orders, not just a small tail of very late orders.",
       "status": "unresolved"
     },
     {
       "confidence": 0.5,
       "entity_refs": [],
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1",
       "metric_refs": [
         "avg_delivery_days"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This tests the alternative explanation that the mean is being pulled up by outliers rather than a general slowdown.",
-      "statement": "The rise in average delivery time is primarily caused by a small tail of very late orders, while most orders have not materially changed.",
+      "rationale": "This competing explanation can be contradicted if the increase is widespread rather than concentrated in a few extreme orders.",
+      "statement": "A small tail of very late orders is responsible for the higher average delivery time.",
       "status": "unresolved"
     }
   ],
-  "id": "580343ee-959d-46c4-a7b0-b5c632678ddf",
+  "id": "9c95df64-663a-442f-b094-5c8b183e0e9b",
   "objective": "Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?",
   "observations": [
     {
       "entity_ref": null,
-      "experiment_result_id": null,
-      "id": "obs_7009eb03e7e24e0e98f471277a5887ef",
+      "experiment_result_id": "336e426b-16dd-4160-9d94-8c55d9479f6a",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-obs-0-0",
       "magnitude": 3.0298958333333332,
       "metric_ref": "avg_delivery_days",
       "observation_type": "value",
@@ -700,23 +668,23 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-q-0",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-q-0",
       "priority": 0,
-      "question": "Has the increase in average delivery time been sustained over time, or is it a one-off spike?",
+      "question": "Is the increase in delivery time sustained across the distribution, or concentrated in a small number of extreme delays?",
       "related_hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-q-1",
+      "id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-q-1",
       "priority": 0,
-      "question": "How much of the change in the mean is explained by the upper tail versus the central bulk of orders?",
+      "question": "Has the median or typical delivery time moved, or only the upper tail?",
       "related_hypothesis_ids": [
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
-        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-0",
+        "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c-hyp-1"
       ],
       "status": "open"
     }
@@ -731,7 +699,7 @@
     "kind": "declined",
     "termination_reason": "insufficient_evidence"
   },
-  "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+  "project_id": "b12f872d-c96c-4b4c-997a-6f9c841ded96",
   "status": "exhausted",
   "success_criteria": [],
   "termination": {
@@ -739,5 +707,5 @@
     "rationale": "terminated: insufficient_evidence",
     "reason": "insufficient_evidence"
   },
-  "updated_at": "2026-08-25T11:44:42"
+  "updated_at": "2026-08-25T20:07:05"
 }

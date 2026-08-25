@@ -19,7 +19,7 @@ from __future__ import annotations
 from pathlib import Path
 
 from agentic.domain.enums import ColumnRole, DatasetKind, Modality, SemanticType
-from agentic.domain.manifest import ColumnSpec, DatasetManifest
+from agentic.domain.manifest import ColumnSpec, DatasetManifest, DatasetOrigin
 
 from .base import AdapterInfo, AdapterRequest, InputAdapter
 from .capabilities import PermittedOperation, SourceCapabilityDescriptor, SourceType
@@ -182,6 +182,10 @@ class EDGARAdapter(InputAdapter):
             adapter_version=self.adapter_version,
             description="EDGAR panel manifest.",
             extra_provenance=extra,
+            # These are real filings. Saying so explicitly is what lets the showcase label a
+            # run over live SEC data as live, and a run over generated rows as generated,
+            # instead of leaving a reader to infer it from the dataset's name.
+            origin=DatasetOrigin.live,
         )
 
 

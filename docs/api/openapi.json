@@ -1618,6 +1618,17 @@
       },
       "CritiqueItem": {
         "properties": {
+          "conflicts_with_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conflicts With Id"
+          },
           "critique_type": {
             "title": "Critique Type",
             "type": "string"
@@ -1736,6 +1747,11 @@
             "title": "Name",
             "type": "string"
           },
+          "origin": {
+            "default": "unknown",
+            "title": "Origin",
+            "type": "string"
+          },
           "row_count": {
             "anyOf": [
               {
@@ -1746,6 +1762,17 @@
               }
             ],
             "title": "Row Count"
+          },
+          "source": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Source"
           }
         },
         "required": [
@@ -3251,6 +3278,17 @@
             ],
             "title": "Csv Text"
           },
+          "dataset_origin": {
+            "default": "unknown",
+            "enum": [
+              "live",
+              "synthetic",
+              "user_upload",
+              "unknown"
+            ],
+            "title": "Dataset Origin",
+            "type": "string"
+          },
           "entities": {
             "description": "Ticker symbols when source is 'edgar' (e.g. ['AAPL', 'MSFT']).",
             "items": {
@@ -3405,6 +3443,11 @@
             },
             "title": "Critiques",
             "type": "array"
+          },
+          "dataset_origin": {
+            "default": "unknown",
+            "title": "Dataset Origin",
+            "type": "string"
           },
           "datasets": {
             "default": [],
@@ -3670,6 +3713,11 @@
           "created_at": {
             "format": "date-time",
             "title": "Created At",
+            "type": "string"
+          },
+          "dataset_origin": {
+            "default": "unknown",
+            "title": "Dataset Origin",
             "type": "string"
           },
           "demo_slug": {

@@ -11,7 +11,8 @@ import { claimTrace, claimVerdict } from "@/lib/trace-claims";
 function detail(over: Partial<InvestigationDetail> = {}): InvestigationDetail {
   return {
     id: "inv-1", domain_id: "inv-1", analysis_run_id: "run-1", project_id: null,
-    origin: "native", status: "converged", confidence: 0.95, objective: "why?",
+    origin: "native",
+    dataset_origin: "synthetic", status: "converged", confidence: 0.95, objective: "why?",
     adapter_id: "edgar", conclusion: null, demo_slug: "d",
     counts: {
       hypotheses: 0, evidence: 0, experiments: 0, observations: 0,

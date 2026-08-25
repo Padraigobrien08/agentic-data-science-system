@@ -95,8 +95,18 @@ def test_defaults_are_unchanged_from_the_pre_injection_literals() -> None:
     The defaults are the exact strings that were inline before the seam existed, so
     a no-argument ``ModelAgentPolicy`` behaves identically to the previous version.
     """
+    # Moved on from the pre-injection literal for the same reason the critique default did,
+    # below: `GoalInterpretation` gained `answerable`/`unsupported_concept`, and a default
+    # prompt that never mentions them means a standalone `agentic/` can never decline an
+    # unanswerable question — it would substitute the nearest metric instead, which is the
+    # failure the field exists to stop.
     assert DEFAULT_POLICY_PROMPTS.interpret_goal == (
-        "Interpret the analytical goal. Reply as GoalInterpretation JSON."
+        "Interpret the analytical goal. The capability summary lists every column that "
+        "exists; a concept the goal names that is not measured by any of them cannot be "
+        "answered here, however close another column sounds. In that case set "
+        "answerable=false and put the missing concept in unsupported_concept — do not "
+        "substitute the nearest metric, because a confident answer about something the user "
+        "did not ask is worse than no answer. Reply as GoalInterpretation JSON."
     )
     assert DEFAULT_POLICY_PROMPTS.generate_hypotheses == (
         "Propose falsifiable hypotheses and open questions. Reply as HypothesisProposals JSON."

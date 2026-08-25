@@ -2,6 +2,11 @@
 Deterministic inline chart previews derived from trusted pipeline artifacts.
 
 The backend owns D-01/D-04/D-05 chart eligibility so chat rendering stays read-only.
+
+Period ordering comes through ``edgar_project.mcp.adapters``, not from ``src`` directly: the
+backend reaches deterministic computation only across that seam, so the EDGAR core stays
+replaceable without the API layer knowing. This file imported ``src.metric_extraction``
+straight for a while, and it was the only place in ``backend/`` that did.
 """
 
 from __future__ import annotations
@@ -11,12 +16,12 @@ from typing import Any
 
 import pandas as pd
 
+from edgar_project.mcp.adapters import sort_period_key
 from edgar_project.mcp.schemas import (
     ARTIFACT_KEY_FEATURES,
     ARTIFACT_KEY_PEER_SIGNALS,
     ARTIFACT_KEY_TREND_BREAKS,
 )
-from src.metric_extraction import sort_period_key
 
 _TREND_SIGNAL_PRIORITY = {
     "strong_shift": 0,

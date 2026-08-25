@@ -285,6 +285,13 @@ class ConclusionDisposition(str, Enum):
 
     inconclusive = "inconclusive"
     insufficient_evidence = "insufficient_evidence"
+    unanswerable = "unanswerable"
+    """The question cannot be answered from this data at all.
+
+    Not a weaker ``insufficient_evidence``: that one means the analysis ran and did not
+    settle the matter, which invites more evidence of the same kind. This one means no amount
+    of the *available* data would help, because the thing being asked about is not in it.
+    """
 
 
 # ---------------------------------------------------------------------------
@@ -313,6 +320,15 @@ class TerminationReason(str, Enum):
 
     sufficient_evidence = "sufficient_evidence"
     insufficient_evidence = "insufficient_evidence"
+    unanswerable_premise = "unanswerable_premise"
+    """The goal asks about something this dataset does not measure.
+
+    Distinct from ``insufficient_evidence`` on purpose, and the distinction is the whole
+    point: "I ran the analysis and it was inconclusive" and "there is nothing here that
+    could answer this" are different answers, and only the second tells the user to bring
+    different data. Collapsing them let a run substitute the nearest available metric,
+    hedge on the result, and report the hedge as a principled decline.
+    """
     max_iterations = "max_iterations"
     budget_exhausted = "budget_exhausted"
     no_valid_experiment = "no_valid_experiment"

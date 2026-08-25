@@ -69,6 +69,7 @@ def create_investigation(
         source=body.dataset.source,
         entities=body.dataset.entities,
         refresh=body.dataset.refresh,
+        dataset_origin=body.dataset.dataset_origin,
     )
     try:
         if body.async_execution:

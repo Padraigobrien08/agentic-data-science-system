@@ -2,8 +2,14 @@ import Link from "next/link";
 
 import { enterDemoAction } from "@/actions/auth";
 import { InterestForm } from "@/components/landing/interest-form";
+import { DEMO_DETAILS } from "@/lib/demo-static/generated";
+import { PRODUCT_NAME } from "@/lib/brand";
+import { buildLandingCounts, buildLandingTrace, type TraceLine } from "@/lib/landing-trace";
 
 const REPO_URL = "https://github.com/Padraigobrien08/agentic-data-science-system";
+
+/** The run the hero shows. Live SEC filings, and the one that overturns its own premise. */
+const FLAGSHIP_SLUG = "edgar-margin-vs-growth";
 
 /**
  * Loop properties, in the order the README states them. Each is a claim the repository can
@@ -70,8 +76,9 @@ const SURFACES = [
  * uncertainty cannot soften these without undermining itself.
  */
 const LIMITS = [
-  "The model is the weak link here, not the loop. On the hardest benchmark case it substitutes the nearest available metric and reports confidence 0.95 anyway.",
+  "Declining an unanswerable question is still a model judgement. What follows is deterministic — the loop stops, claims nothing, runs nothing — but a broken premise it does not notice is not caught.",
   "Two of the loop's four model-backed decisions are covered by the agency suite. A fair case for select_experiment is not constructible, and that is documented.",
+  "Mutual exclusivity is read from the goal's phrasing, not its meaning. Claims that are incompatible but not posed as alternatives still fall to the critic, which is best-effort.",
   "Single replica. Auth rate limiting is in-process, so a second API replica would enforce it independently.",
 ] as const;
 
@@ -194,7 +201,7 @@ function Header({ cta, userEmail }: { cta: Cta; userEmail: string | null }) {
         <Link href="/" className="flex items-center gap-2.5">
           <span className="h-4 w-4 rounded bg-[linear-gradient(135deg,#7dd3fc,#818cf8)]" />
           <span className="whitespace-nowrap text-[13.5px] font-semibold tracking-[-0.02em]">
-            auditable-loop
+            {PRODUCT_NAME}
           </span>
           <span className="font-mono rounded border border-[var(--ld-line)] px-[7px] py-0.5 text-[10.5px] text-[var(--ld-muted)]">
             v1
@@ -230,57 +237,44 @@ function Header({ cta, userEmail }: { cta: Cta; userEmail: string | null }) {
   );
 }
 
+const TONE_CLASS: Record<TraceLine["tone"], string> = {
+  muted: "text-[var(--ld-dim)]",
+  tool: "text-[var(--ld-indigo)]",
+  supported: "text-[var(--ld-green)]",
+  rejected: "text-[var(--ld-red)]",
+  terminal: "text-[var(--ld-blue)]",
+};
+
 /**
- * The trace is the real `edgar-margin-vs-growth` demo, not an illustration:
- * every id, confidence and count below matches the published export.
+ * The real `edgar-margin-vs-growth` run, read out of the published export at build time.
+ *
+ * This panel used to be hand-typed, with a comment asserting that every figure in it matched
+ * the export. The counts did; the iteration stamps had drifted by four, and one line
+ * advertised evidence as "artifact · linked" when the export's evidence carried no such link
+ * at all. Deriving it is not a refactor for tidiness — it is the difference between a page
+ * that claims its numbers are checkable and a page whose numbers are checked.
  */
 function TracePanel() {
+  const detail = DEMO_DETAILS[FLAGSHIP_SLUG];
+  if (!detail) return null;
+  const lines = buildLandingTrace(detail);
+
   return (
     <div className="font-mono w-full overflow-hidden rounded-xl border border-[var(--ld-line-strong)] bg-[var(--ld-cell)] text-xs text-[#d3d7de] shadow-[var(--ld-shadow)]">
       <div className="flex justify-between border-b border-[var(--ld-line)] bg-[var(--ld-cell-raised)] px-6 py-3.5">
         <span>investigation.trace</span>
+        <span className="text-[var(--ld-dim)]">{FLAGSHIP_SLUG}</span>
       </div>
       <div className="overflow-x-auto px-6 py-5 leading-[2.1]">
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 1</span> interpret_goal{" "}
-          <span className="text-[var(--ld-dim)]">→ 2 hypotheses</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 1</span> select_experiment{" "}
-          <span className="text-[var(--ld-indigo)]">edgar_trend_break_analysis</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 2</span> evidence[1..3]{" "}
-          <span className="text-[var(--ld-dim)]">artifact · linked</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 2</span> revise_claim{" "}
-          <span className="text-[var(--ld-red)]">h1 → rejected (0.05)</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 3</span> critique{" "}
-          <span className="text-[var(--ld-dim)]">challenges h2: skew or outliers?</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 3</span> nominated{" "}
-          <span className="text-[var(--ld-indigo)]">summarize_distribution</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 4</span> ran it{" "}
-          <span className="text-[var(--ld-dim)]">· critique acted on, not noted</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">iter 4</span> h2{" "}
-          <span className="text-[var(--ld-green)]">supported (0.95)</span>
-        </p>
-        <p className="whitespace-nowrap">
-          <span className="text-[var(--ld-dim)]">stop</span>{" "}
-          <span className="text-[var(--ld-blue)]">sufficient_evidence</span>{" "}
-          <span className="text-[var(--ld-dim)]">· conclusion: mixed</span>
-        </p>
+        {lines.map((line, i) => (
+          <p key={`${line.event}-${i}`} className="whitespace-nowrap">
+            <span className="text-[var(--ld-dim)]">{line.stamp}</span> {line.event}{" "}
+            <span className={TONE_CLASS[line.tone]}>{line.detail}</span>
+          </p>
+        ))}
       </div>
       <div className="border-t border-[var(--ld-line)] bg-[var(--ld-cell-raised)] px-6 py-3.5 text-[var(--ld-muted)]">
-        7 experiments · 7 evidence · 10 artifacts
+        {buildLandingCounts(detail)}
       </div>
     </div>
   );
@@ -452,8 +446,16 @@ function McpSection() {
             <p className="m-0 whitespace-nowrap text-[var(--ld-muted)]">
               <span className="text-[var(--ld-dim)]">→</span> investigation_id, budget, adapter
             </p>
+            {/*
+              Tool and resource names below are the ones `backend/mcp/server.py` actually
+              registers, and `landing-mcp.test.ts` checks them against it. They used to be
+              neither: the panel showed `resources/read hypotheses` and `evidence/7`, and the
+              server exposes no such resources — hypotheses and evidence are tools, and the
+              only two resources are `artifact://` and `investigation://{id}/conclusion`. A
+              reader who tried to follow this transcript would have got a method-not-found.
+            */}
             <p className="mt-5 whitespace-nowrap text-[var(--ld-ink)]">
-              resources/read <span className="text-[var(--ld-blue)]">hypotheses</span>
+              tools/call <span className="text-[var(--ld-blue)]">list_hypotheses</span>
             </p>
             <p className="m-0 whitespace-nowrap text-[var(--ld-muted)]">
               <span className="text-[var(--ld-dim)]">→</span> 2 claims ·{" "}
@@ -461,10 +463,11 @@ function McpSection() {
               <span className="text-[var(--ld-red)]">rejected</span>
             </p>
             <p className="mt-5 whitespace-nowrap text-[var(--ld-ink)]">
-              resources/read <span className="text-[var(--ld-blue)]">evidence/7</span>
+              resources/read{" "}
+              <span className="text-[var(--ld-blue)]">investigation://{"{id}"}/conclusion</span>
             </p>
             <p className="m-0 whitespace-nowrap text-[var(--ld-muted)]">
-              <span className="text-[var(--ld-dim)]">→</span> artifact ref → rows
+              <span className="text-[var(--ld-dim)]">→</span> evidence → artifact ref → rows
             </p>
           </div>
           <div className="grid grid-cols-1 gap-px border-t border-[var(--ld-line)] bg-[var(--ld-line)] sm:grid-cols-3">

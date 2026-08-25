@@ -354,6 +354,8 @@ export interface ModelCallApiItem {
   updated_at: string;
   request_payload_json: Record<string, unknown> | unknown[] | null;
   response_payload_json: Record<string, unknown> | unknown[] | null;
+  /** Set when retention has cleared the payloads: absent prompts vs never-captured ones. */
+  payloads_redacted_at: string | null;
 }
 
 export interface RunTraceModelCallPreview extends RunTraceCollectionSummary {
@@ -546,6 +548,8 @@ export interface InvestigationSummary {
   demo_slug: string | null;
   counts: InvestigationCounts;
   outcome: InvestigationOutcome;
+  /** Where the run's data came from; "mixed" when its datasets disagree. */
+  dataset_origin: DatasetOrigin | "mixed";
   created_at: string;
   updated_at: string;
 }
@@ -637,6 +641,8 @@ export interface CritiqueItem {
   severity: string;
   target_kind: string;
   target_id: string;
+  /** The other claim, when `critique_type` is "contradiction". Both sides of a conflict. */
+  conflicts_with_id: string | null;
   message: string;
   suggested_action: string | null;
   resolved: boolean;
@@ -667,12 +673,18 @@ export interface ConclusionItem {
   key_evidence_ids: string[];
 }
 
+export type DatasetOrigin = "live" | "synthetic" | "user_upload" | "unknown";
+
 export interface DatasetItem {
   id: string | null;
   name: string;
   locator: string | null;
   row_count: number | null;
   content_hash: string | null;
+  /** Human-readable lineage, e.g. "SEC EDGAR companyfacts". */
+  source: string | null;
+  /** Whether these rows are real. Never inferred from the dataset's name — see DatasetOrigin. */
+  origin: DatasetOrigin;
 }
 
 export interface InvestigationEventItem {
