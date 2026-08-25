@@ -8,9 +8,11 @@ It says nothing about the question an agentic system actually has to answer well
 > Given evidence, does the loop draw the right conclusion, revise when contradicted, and
 > decline when the data cannot support a claim?
 
-`suite_agency_v2` measures that. It is the suite the runner executes; `suite_agency_v1` is
-the frozen 13-case **core tier** inside it, kept under its own id because published results
-cite it. `--tier hard` adds the five cases the deterministic baseline is designed to fail.
+`suite_agency_v2` measures that. It is the suite the runner executes. Inside it,
+`suite_agency_v1` is the frozen 13 cases kept under their own id because published results
+cite them; the **core tier** is those plus any regression case added since, so it grows while
+the published measurement does not. `--tier hard` adds the five cases the deterministic
+baseline is designed to fail.
 
 ```bash
 python -m agentic.evaluation
