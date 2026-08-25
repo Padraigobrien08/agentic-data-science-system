@@ -1,147 +1,77 @@
 {
   "adapter_id": "in_memory",
-  "analysis_run_id": "138ecd93-59ad-42ed-818e-3e95f220393e",
-  "conclusion": "Insufficient evidence to resolve the investigation goal.",
+  "analysis_run_id": "33f61356-de85-490c-a911-6a3c605d6086",
+  "conclusion": "This dataset cannot answer the question as asked: the data holds no measure of customer loyalty",
   "conclusion_detail": {
     "caveats": [
-      "termination: insufficient_evidence",
-      "2 open question(s) remain"
+      "termination: unanswerable_premise",
+      "1 open question(s) remain"
     ],
-    "confidence": 0.2,
-    "disposition": "insufficient_evidence",
-    "id": "138ecd93-59ad-42ed-818e-3e95f220393e-concl-0",
+    "confidence": 0.0,
+    "disposition": "unanswerable",
+    "id": "33f61356-de85-490c-a911-6a3c605d6086-concl-0",
     "key_evidence_ids": [],
-    "narrative": "The run did not establish which region has the strongest customer loyalty. The overall result was insufficient evidence, so no region could be confirmed as the leader.\n\nThe single claim it tested stayed unresolved: the data gave some support for the idea that loyalty differs across regions, but not enough to show that one region clearly ranked highest on the loyalty metric. The run used a ranking step, then stopped because the evidence was still too thin.\n\nTwo questions remained open: which region, if any, ranks highest on the available proxy for customer loyalty, and whether any apparent leader is stable or just a short-lived spike.",
-    "statement": "Insufficient evidence to resolve the investigation goal.",
-    "supporting_hypothesis_ids": [
-      "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0"
-    ]
+    "narrative": "This dataset cannot answer which region has the strongest customer loyalty. The run found no claim to test and stopped because the premise was unanswerable: it did not identify which dataset or field measures customer loyalty.\n\nNo experiments were run, so there was no evidence to compare regions. The only open question left was which dataset measures customer loyalty, and that was not settled here.",
+    "statement": "This dataset cannot answer the question as asked: the data holds no measure of customer loyalty",
+    "supporting_hypothesis_ids": []
   },
-  "confidence": 0.2,
+  "confidence": 0.0,
   "constraints": [],
   "counts": {
     "critiques": 0,
-    "decisions": 5,
-    "evidence": 1,
-    "experiments": 1,
-    "hypotheses": 1,
-    "observations": 4,
-    "open_questions": 2
+    "decisions": 2,
+    "evidence": 0,
+    "experiments": 0,
+    "hypotheses": 0,
+    "observations": 0,
+    "open_questions": 1
   },
-  "created_at": "2026-08-24T16:15:52",
+  "created_at": "2026-08-25T20:03:04",
   "critiques": [],
+  "dataset_origin": "synthetic",
   "datasets": [
     {
-      "content_hash": null,
-      "id": "dset_92657d738dfd4794ad952390a1c8721e",
+      "content_hash": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "id": "33f61356-de85-490c-a911-6a3c605d6086-dset-0",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_92657d738dfd4794ad952390a1c8721e",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_92657d738dfd4794ad952390a1c8721e",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
-    },
-    {
-      "content_hash": null,
-      "id": "dset_92657d738dfd4794ad952390a1c8721e",
-      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
-      "name": "operational_delivery",
-      "row_count": null
+      "origin": "synthetic",
+      "row_count": 96,
+      "source": "operational_delivery"
     }
   ],
   "decisions": [
     {
       "alternatives": [],
       "chosen_option": null,
-      "decision_type": "propose_hypothesis",
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-dec-hyp-0",
+      "decision_type": "conclude",
+      "id": "33f61356-de85-490c-a911-6a3c605d6086-dec-unanswerable-0",
       "iteration": 0,
-      "rationale": "The question is a ranking comparison across regions, but no loyalty metric is available in the supplied metrics. This claim is still testable as a difference in regional performance if a loyalty proxy is measured.",
+      "rationale": "declined: the data holds no measure of customer loyalty",
       "sequence": 0,
-      "targets": [
-        {
-          "id": "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0",
-          "kind": "hypothesis"
-        }
-      ]
-    },
-    {
-      "alternatives": [],
-      "chosen_option": "rank_entities",
-      "decision_type": "select_experiment",
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-dec-sel-1",
-      "iteration": 0,
-      "rationale": "This directly advances the ranking goal by producing the entity order needed for the analysis.",
-      "sequence": 1,
-      "targets": [
-        {
-          "id": "138ecd93-59ad-42ed-818e-3e95f220393e-exp-0",
-          "kind": "experiment_request"
-        }
-      ]
-    },
-    {
-      "alternatives": [],
-      "chosen_option": null,
-      "decision_type": "update_evidence",
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-dec-evd-2",
-      "iteration": 0,
-      "rationale": "recorded 1 evidence item(s) for rank_entities",
-      "sequence": 2,
-      "targets": [
-        {
-          "id": "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0",
-          "kind": "hypothesis"
-        }
-      ]
-    },
-    {
-      "alternatives": [],
-      "chosen_option": null,
-      "decision_type": "revise_confidence",
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-dec-rev-3",
-      "iteration": 0,
-      "rationale": "active (support=0, refute=0)",
-      "sequence": 3,
-      "targets": [
-        {
-          "id": "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0",
-          "kind": "hypothesis"
-        }
-      ]
+      "targets": []
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-dec-concl-4",
-      "iteration": 1,
-      "rationale": "insufficient_evidence (insufficient_evidence)",
-      "sequence": 4,
+      "id": "33f61356-de85-490c-a911-6a3c605d6086-dec-concl-1",
+      "iteration": 0,
+      "rationale": "unanswerable (unanswerable_premise)",
+      "sequence": 1,
       "targets": [
         {
-          "id": "138ecd93-59ad-42ed-818e-3e95f220393e-concl-0",
+          "id": "33f61356-de85-490c-a911-6a3c605d6086-concl-0",
           "kind": "conclusion"
         }
       ]
     }
   ],
   "demo_slug": "csv-unanswerable-moat",
-  "domain_id": "138ecd93-59ad-42ed-818e-3e95f220393e",
+  "domain_id": "33f61356-de85-490c-a911-6a3c605d6086",
   "events": [
     {
-      "created_at": "2026-08-24T16:15:52",
+      "created_at": "2026-08-25T20:03:04",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -151,170 +81,29 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-24T16:15:56",
-      "entity_id": null,
-      "entity_kind": null,
-      "event_type": "checkpoint_saved",
-      "payload": {
-        "status": "running"
-      },
-      "sequence": 1
-    },
-    {
-      "created_at": "2026-08-24T16:15:57",
-      "entity_id": null,
-      "entity_kind": null,
-      "event_type": "checkpoint_saved",
-      "payload": {
-        "status": "running"
-      },
-      "sequence": 2
-    },
-    {
-      "created_at": "2026-08-24T16:15:59",
+      "created_at": "2026-08-25T20:03:07",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
       "payload": {
         "status": "exhausted"
       },
-      "sequence": 3
+      "sequence": 1
     }
   ],
-  "evidence": [
-    {
-      "claim": "Top entity by mean(avg_delivery_days) is 'west'.",
-      "coverage": 1.0,
-      "direction": "neutral",
-      "evidence_type": "descriptive_stat",
-      "experiment_result_id": null,
-      "hypothesis_ids": [
-        "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0"
-      ],
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-evd-0",
-      "reliability": 0.11764705882352941,
-      "statistics": {
-        "assumptions": [],
-        "coverage": 1.0,
-        "diagnostics": {
-          "entities": 4.0
-        },
-        "effect_size": null,
-        "effect_size_kind": null,
-        "p_value": null,
-        "sample_size": 4,
-        "schema_version": "1",
-        "uncertainty": null,
-        "warnings": []
-      },
-      "strength": 0.5
-    }
-  ],
-  "experiments": [
-    {
-      "artifacts": [
-        {
-          "byte_size": 80,
-          "id": "8616f46f-b3a7-461d-ba92-6c72511920a3",
-          "kind": "tabular",
-          "mime_type": "text/csv",
-          "name": "ranking"
-        },
-        {
-          "byte_size": 94,
-          "id": "b43dbee5-fe77-4205-b68a-86c8f7591d9a",
-          "kind": "json",
-          "mime_type": "application/vnd.chart+json",
-          "name": "ranking"
-        }
-      ],
-      "created_at": "2026-08-24T16:15:57",
-      "error": null,
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-res-0",
-      "metrics": {
-        "entities_ranked": 4.0,
-        "top_value": 3.430417
-      },
-      "request_domain_id": "138ecd93-59ad-42ed-818e-3e95f220393e-exp-0",
-      "status": "succeeded",
-      "summary": "Ranked 4 entities by mean(avg_delivery_days).",
-      "target_hypothesis_ids": [
-        "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0"
-      ],
-      "tool_name": "rank_entities"
-    }
-  ],
-  "hypotheses": [
-    {
-      "confidence": 0.5,
-      "entity_refs": [],
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0",
-      "metric_refs": [],
-      "prior_confidence": 0.5,
-      "rationale": "The question is a ranking comparison across regions, but no loyalty metric is available in the supplied metrics. This claim is still testable as a difference in regional performance if a loyalty proxy is measured.",
-      "statement": "Customer loyalty differs across regions, so one region will rank highest on the loyalty metric once regions are compared.",
-      "status": "unresolved"
-    }
-  ],
-  "id": "a1323f12-f8fe-406b-92dc-104f5ba610bd",
+  "evidence": [],
+  "experiments": [],
+  "hypotheses": [],
+  "id": "0c405d62-3580-4f2c-a15d-2490953b4790",
   "objective": "Which region has the strongest customer loyalty?",
-  "observations": [
-    {
-      "entity_ref": "west",
-      "experiment_result_id": null,
-      "id": "obs_e43047e07b784acda4eda7dd021a2427",
-      "magnitude": 3.4304166666666664,
-      "metric_ref": "avg_delivery_days",
-      "observation_type": "comparison",
-      "statement": "#1 west: avg_delivery_days=3.43"
-    },
-    {
-      "entity_ref": "south",
-      "experiment_result_id": null,
-      "id": "obs_93fa922d8c904fbaba0985bfcdc40b18",
-      "magnitude": 3.095,
-      "metric_ref": "avg_delivery_days",
-      "observation_type": "comparison",
-      "statement": "#2 south: avg_delivery_days=3.095"
-    },
-    {
-      "entity_ref": "north",
-      "experiment_result_id": null,
-      "id": "obs_10037e1b5ed24c01961f9570741b53a6",
-      "magnitude": 3.0087499999999996,
-      "metric_ref": "avg_delivery_days",
-      "observation_type": "comparison",
-      "statement": "#3 north: avg_delivery_days=3.009"
-    },
-    {
-      "entity_ref": "east",
-      "experiment_result_id": null,
-      "id": "obs_2c60898ab4234446922a3d524ba72f7e",
-      "magnitude": 2.5854166666666667,
-      "metric_ref": "avg_delivery_days",
-      "observation_type": "comparison",
-      "statement": "#4 east: avg_delivery_days=2.585"
-    }
-  ],
+  "observations": [],
   "open_questions": [
     {
       "answer": null,
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-q-0",
+      "id": "33f61356-de85-490c-a911-6a3c605d6086-q-unanswerable-0",
       "priority": 0,
-      "question": "Which region ranks highest on the available proxy for customer loyalty, if any?",
-      "related_hypothesis_ids": [
-        "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0"
-      ],
-      "status": "open"
-    },
-    {
-      "answer": null,
-      "id": "138ecd93-59ad-42ed-818e-3e95f220393e-q-1",
-      "priority": 0,
-      "question": "Is the apparent leader stable across the observation window or driven by a short-lived spike?",
-      "related_hypothesis_ids": [
-        "138ecd93-59ad-42ed-818e-3e95f220393e-hyp-0"
-      ],
+      "question": "Which dataset measures customer loyalty?",
+      "related_hypothesis_ids": [],
       "status": "open"
     }
   ],
@@ -322,19 +111,19 @@
   "outcome": {
     "claims_rejected": 0,
     "claims_supported": 0,
-    "claims_unresolved": 1,
+    "claims_unresolved": 0,
     "claims_weakened": 0,
     "contradiction_found": false,
-    "kind": "declined",
-    "termination_reason": "insufficient_evidence"
+    "kind": "unanswerable",
+    "termination_reason": "unanswerable_premise"
   },
-  "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+  "project_id": "b12f872d-c96c-4b4c-997a-6f9c841ded96",
   "status": "exhausted",
   "success_criteria": [],
   "termination": {
-    "at_iteration": 1,
-    "rationale": "terminated: insufficient_evidence",
-    "reason": "insufficient_evidence"
+    "at_iteration": 0,
+    "rationale": "terminated: unanswerable_premise",
+    "reason": "unanswerable_premise"
   },
-  "updated_at": "2026-08-25T11:44:43"
+  "updated_at": "2026-08-25T20:07:07"
 }

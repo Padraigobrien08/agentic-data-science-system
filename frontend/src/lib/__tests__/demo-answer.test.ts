@@ -15,6 +15,7 @@ function detail(over: Partial<InvestigationDetail> = {}): InvestigationDetail {
     analysis_run_id: "run-1",
     project_id: null,
     origin: "native",
+    dataset_origin: "synthetic",
     status: "exhausted",
     confidence: 0.4,
     objective: "does staffing or volume drive service?",

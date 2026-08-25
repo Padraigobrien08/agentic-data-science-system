@@ -17,6 +17,8 @@ from uuid import UUID
 from pydantic import BaseModel, Field, model_validator
 
 from backend.models.investigation import Investigation as InvestigationRow
+from backend.models.investigation import InvestigationDataset
+from backend.models.investigation_entities import CritiqueRow
 
 #: Each ticker is a separate SEC fetch before the loop can start, so the panel build is linear
 #: in this number and a large list turns one request into a very long one.
@@ -131,7 +133,7 @@ class InvestigationOutcome(BaseModel):
     stays with the caller; this is only the classification and the counts behind it.
     """
 
-    #: unanswerable | contradicted | mixed | supported | declined | stopped
+    #: unanswerable | contradicted | mixed | supported | refuted | declined | stopped
     kind: str
     termination_reason: str | None = None
     claims_supported: int = 0
@@ -146,7 +148,7 @@ class InvestigationOutcome(BaseModel):
 _STOPPED_EARLY = {"budget_exhausted", "safety_constraint", "repeated_failure", "user_stop"}
 
 
-def _dataset_item(row: object) -> "DatasetItem":
+def _dataset_item(row: InvestigationDataset) -> "DatasetItem":
     """
     One dataset as the API serves it, including where its rows came from.
 
@@ -169,7 +171,15 @@ def _dataset_item(row: object) -> "DatasetItem":
     )
 
 
-def _pair_was_separated(statuses: dict[str, str], critique: object) -> bool:
+def _summary_origin(row: InvestigationRow) -> str:
+    """One origin for the whole run, for the listing. ``mixed`` when its datasets disagree."""
+    origins = {_dataset_item(d).origin for d in row.datasets}
+    if not origins:
+        return "unknown"
+    return origins.pop() if len(origins) == 1 else "mixed"
+
+
+def _pair_was_separated(statuses: dict[str, str], critique: CritiqueRow) -> bool:
     """
     True when evidence left exactly one side of a contradiction standing.
 
@@ -227,6 +237,13 @@ def _build_outcome(row: InvestigationRow) -> InvestigationOutcome:
         kind = "mixed"
     elif supported:
         kind = "supported"
+    elif rejected and not (weakened or unresolved):
+        # Every claim was actively overturned by the run's own evidence. Distinct from
+        # `declined`, which says the evidence did not settle the matter: this run settled it,
+        # and the answer was no. Collapsing the two reported "no claim survived the evidence"
+        # for a run that had in fact disproved its own hypotheses — the strongest thing an
+        # investigation can do, described as a failure to conclude.
+        kind = "refuted"
     else:
         kind = "declined"
 
@@ -258,6 +275,11 @@ class InvestigationSummary(BaseModel):
     counts: InvestigationCounts
     #: How the run ended, classified from persisted state — see :class:`InvestigationOutcome`.
     outcome: InvestigationOutcome
+    #: Where this run's data came from — ``live``, ``synthetic``, ``user_upload`` or
+    #: ``unknown``. On the *summary* because the listing is where a reader decides what a set
+    #: of runs is worth, and a set that mixes real filings with generated rows has to say so
+    #: there rather than one detail page down. ``mixed`` when a run spans several sources.
+    dataset_origin: str = "unknown"
     created_at: datetime
     updated_at: datetime
 
@@ -457,6 +479,7 @@ def build_summary(row: InvestigationRow) -> InvestigationSummary:
             open_questions=len(row.open_questions),
         ),
         outcome=_build_outcome(row),
+        dataset_origin=_summary_origin(row),
         created_at=row.created_at,
         updated_at=row.updated_at,
     )

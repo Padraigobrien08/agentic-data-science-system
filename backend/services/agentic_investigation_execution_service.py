@@ -379,7 +379,7 @@ class AgenticInvestigationExecutionService:
             # Declared by whoever commissioned the run; EDGAR is live by construction.
             # Unknown when nobody said, which is the honest default — a client showing
             # provenance must never report data as real because the field was left blank.
-            origin=_dataset_origin(dict(dataset), adapter_id=adapter_id),
+            origin=_dataset_origin(dataset, adapter_id=adapter_id),
         )
         return _ResolvedDataset(manifest=manifest, frame=materialized.frame, adapter_id=adapter_id)
 

@@ -41,6 +41,7 @@ OUTCOME_GLOSS = {
     "supported": "every claim stood",
     "mixed": "one claim stood, one did not",
     "contradicted": "two claims could not both be true",
+    "refuted": "the run disproved its own claims",
     "declined": "no claim survived the evidence",
     "unanswerable": "the data cannot answer this",
     "stopped": "cut off before deciding",

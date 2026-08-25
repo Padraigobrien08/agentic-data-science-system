@@ -76,6 +76,28 @@ def test_nothing_standing_is_declined() -> None:
     assert out.claims_supported == 0
 
 
+def test_every_claim_overturned_is_refuted_not_declined() -> None:
+    """
+    edgar-margin-vs-growth: the run's own evidence rejected both explanations it raised.
+
+    Distinct from `declined`, and the distinction is not pedantic. "No claim survived the
+    evidence" describes a run that could not settle the matter; this run settled it, and the
+    answer was no to both. Reporting the strongest thing an investigation can do — disproving
+    its own hypotheses — as a failure to conclude gets the result exactly backwards.
+    """
+    out = _build_outcome(_row(claims=["rejected", "rejected"], reason="insufficient_evidence"))
+
+    assert out.kind == "refuted"
+    assert out.claims_rejected == 2
+
+
+def test_a_rejected_claim_beside_an_unsettled_one_is_still_declined() -> None:
+    """`refuted` means *every* claim was overturned; a leftover unresolved claim is not that."""
+    out = _build_outcome(_row(claims=["rejected", "unresolved"], reason="insufficient_evidence"))
+
+    assert out.kind == "declined"
+
+
 def test_an_untested_claim_still_counts_as_declined() -> None:
     """csv-regional-ranking: one unresolved, one weakened."""
     out = _build_outcome(_row(claims=["unresolved", "weakened"], reason="insufficient_evidence"))

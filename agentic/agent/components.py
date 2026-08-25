@@ -140,8 +140,19 @@ class GoalInterpreter:
         self._policy = policy
 
     def interpret(self, goal_text: str, manifest: DatasetManifest, tracker: BudgetTracker) -> GoalInterpretation:
-        summary = {"metrics": manifest.metric_names(),
-                   "dimensions": [c.name for c in manifest.columns if c.role.value == "dimension"]}
+        entity_column = manifest.entity_id_column()
+        summary = {
+            "metrics": manifest.metric_names(),
+            "dimensions": [c.name for c in manifest.columns if c.role.value == "dimension"],
+            # Entities were missing entirely, and their absence reads as *evidence of absence*
+            # to anything deciding whether a goal is answerable. An EDGAR panel has no
+            # `dimension` columns at all — the units of analysis are tickers in an `entity_id`
+            # column — so a goal comparing NVDA to AAPL and MSFT looked like a question about
+            # groups the dataset did not have. A model asked to judge answerability declined
+            # it, correctly, on the summary it was given.
+            "entity_column": entity_column.name if entity_column is not None else None,
+            "entities": list(manifest.entities),
+        }
         return _invoke_policy(
             tracker, self._policy,
             lambda: self._policy.interpret_goal(goal_text, capability_summary=summary))

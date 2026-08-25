@@ -143,7 +143,7 @@ class CostTrackingResponder:
 #: and the run still reported `sufficient_evidence`. The critic is the only component that
 #: sees the supported set together. Only the critic file changed; the other three are copies
 #: of 1.0.2, since one constant versions all four.
-AGENTIC_PROMPT_VERSION = "1.0.3"
+AGENTIC_PROMPT_VERSION = "1.0.5"
 
 
 class CostAwareModelPolicy(ModelAgentPolicy):

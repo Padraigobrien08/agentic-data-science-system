@@ -20,23 +20,38 @@ This is a real run against live SEC filings for AAPL, MSFT and NVDA.
 > revenue growth the explanation?
 
 The loop raised both explanations as separate, falsifiable claims and measured each on its own
-metric:
+metric. Its own evidence went against both:
 
 | Hypothesis | Outcome | Confidence |
 |---|---|---|
-| Net margin has deteriorated over the recent periods | **rejected** | 0.05 |
-| Revenue growth is the explanation for the observed margin change | **supported** | 0.95 |
+| Net margin has deteriorated over recent periods | **rejected** | 0.05 |
+| Revenue growth is the explanation for the observed deterioration | **rejected** | 0.05 |
 
-**It rejected the premise the question assumed.** Asked to choose between two explanations, it
-found against the one the phrasing took for granted. It terminated `sufficient_evidence` with
-the conclusion marked `mixed` — because one claim landed and one did not, and rounding that to
-the supported half would be a lie.
+**It rejected the premise the question assumed, and then the explanation offered for it.**
+Asked to choose between two accounts of a decline, it found the decline itself unsupported —
+so neither account had anything to explain. Seven experiments, seven evidence records, and the
+answer is that the question was built on something that is not there.
 
-Then it argued against its own finding. The critic challenged the **supported** claim — not the
-rejected one — asking whether the support was an artefact of skew or outliers rather than a
-stable pattern, and nominated `summarize_distribution` to test it. **The loop ran that tool.** A
-critique the loop never acts on is a note, not a challenge, so the distinction is enforced in
-the [agency suite](docs/agent/agency-evaluation.md) rather than left to good intentions.
+That outcome is reported as `refuted`, not as "inconclusive". A run that disproved its own
+hypotheses has settled the matter; describing that as a failure to conclude gets the strongest
+thing an investigation can do exactly backwards.
+
+### It catches itself holding two claims that cannot both be true
+
+A second SEC run asks whether NVDA's margin advantage is durable profitability **or** faster
+revenue growth. Both reached `supported` independently — each scored honestly against its own
+evidence, because nothing in the loop compares claims to each other. So the goal's own phrasing
+does: a question shaped "is it X, or is it Y?" marks its two claims mutually exclusive before
+either is scored, and when both stood the loop recorded the conflict itself:
+
+> The goal asked which of these holds, and both are currently supported […] They cannot both
+> be the explanation.
+
+Deterministic code then weakened **both** — the conflict establishes that one of them is wrong,
+not which — and the run reports `contradicted` at 0.5 rather than a confident answer at 0.95.
+This used to depend on a model noticing the clash at critique time, and
+[a published run got through without it](tests/agentic/test_mutual_exclusivity.py): both
+branches of an either/or affirmed at 0.95, rendered as the most confident card in the showcase.
 
 Each claim traces down without a gap: conclusion → evidence → the experiment that produced it →
 its typed tool envelope → the artifact → the rows. That chain is
@@ -54,14 +69,28 @@ are audited on the same footing — prompt, response, tokens, cost and latency p
 Four of the runs below analyse an operational delivery dataset — regions, months, delivery
 times, order volume. Same loop, same evidence model, same trace surfaces.
 
-They end differently, and that is the point. One holds two claims that cannot both be true and
-refuses to pick a winner. Two decline outright. That dataset is **generated**, deliberately and
-with a genuine confound (service times degrade while volume climbs over the same window), and
-the table says so in the `Data` column rather than leaving you to guess — the two EDGAR runs are
-live SEC filings and are marked `live`.
+That dataset is **generated**, deliberately and with a genuine confound (service times degrade
+while volume climbs over the same window). The table says so in the `Data` column rather than
+leaving you to guess, and the two EDGAR runs are marked `live` because they are real filings.
+A showcase about reporting what you can and cannot support does not get to be vague about its
+own inputs.
 
-A run that stops at "I cannot separate these" is a *correct* outcome here, not a failed one.
-Nearly every AI product on the market will confidently answer a question it cannot answer.
+One of those four is worth its own line. Asked **"which region has the strongest customer
+loyalty?"** over a dataset that measures delivery days, order volume, on-time rate and staff
+count, the loop stops before running anything:
+
+> This dataset cannot answer the question as asked: the data holds no measure of customer
+> loyalty.
+
+Zero experiments, zero claims, `unanswerable_premise`. That is a different answer from "the
+evidence was inconclusive", and the distinction is the useful part: one says run more analysis,
+the other says bring different data. It used to rank regions by *average delivery days* under a
+claim about loyalty and then hedge — the right outcome for the wrong reason, and only because
+that proxy happened to be weak.
+
+A run that stops at "I cannot separate these", or at "this is not in here", is a *correct*
+outcome. Nearly every AI product on the market will confidently answer a question it cannot
+answer.
 
 ### Every published run, as recorded
 
@@ -73,15 +102,15 @@ from the runs they described.
 
 | Run | Outcome | Stopped because | Experiments | Evidence | Artifacts | Model calls | Cost | Data |
 |---|---|---|---|---|---|---|---|---|
-| [`csv-delivery-delays`](frontend/src/lib/demo-static/csv-delivery-delays.json) | **mixed** — one claim stood, one did not | `sufficient_evidence` | 3 | 9 (0 linked) | 5 | 9 | $0.0111 | unknown |
-| [`csv-staffing-vs-service`](frontend/src/lib/demo-static/csv-staffing-vs-service.json) | **contradicted** — two claims could not both be true | `insufficient_evidence` | 3 | 13 (0 linked) | 6 | 9 | $0.0114 | unknown |
-| [`csv-distribution-honesty`](frontend/src/lib/demo-static/csv-distribution-honesty.json) | **declined** — no claim survived the evidence | `insufficient_evidence` | 3 | 6 (0 linked) | 6 | 6 | $0.0068 | unknown |
-| [`edgar-margin-vs-growth`](frontend/src/lib/demo-static/edgar-margin-vs-growth.json) | **mixed** — one claim stood, one did not | `sufficient_evidence` | 7 | 7 (0 linked) | 10 | 12 | $0.0131 | unknown |
-| [`edgar-peer-separation`](frontend/src/lib/demo-static/edgar-peer-separation.json) | **supported** — every claim stood | `sufficient_evidence` | 3 | 73 (0 linked) | 6 | 9 | $0.0112 | unknown |
-| [`csv-unanswerable-moat`](frontend/src/lib/demo-static/csv-unanswerable-moat.json) | **declined** — no claim survived the evidence | `insufficient_evidence` | 1 | 1 (0 linked) | 2 | 4 | $0.0047 | unknown |
+| [`csv-delivery-delays`](frontend/src/lib/demo-static/csv-delivery-delays.json) | **mixed** — one claim stood, one did not | `sufficient_evidence` | 3 | 9 | 5 | 9 | $0.0122 | synthetic |
+| [`csv-staffing-vs-service`](frontend/src/lib/demo-static/csv-staffing-vs-service.json) | **contradicted** — two claims could not both be true | `insufficient_evidence` | 1 | 12 | 2 | 4 | $0.0061 | synthetic |
+| [`csv-distribution-honesty`](frontend/src/lib/demo-static/csv-distribution-honesty.json) | **declined** — no claim survived the evidence | `insufficient_evidence` | 3 | 6 | 6 | 6 | $0.0078 | synthetic |
+| [`edgar-peer-separation`](frontend/src/lib/demo-static/edgar-peer-separation.json) | **contradicted** — two claims could not both be true | `insufficient_evidence` | 3 | 73 | 6 | 8 | $0.0111 | live |
+| [`csv-unanswerable-moat`](frontend/src/lib/demo-static/csv-unanswerable-moat.json) | **unanswerable** — the data cannot answer this | `unanswerable_premise` | 0 | 0 | 0 | 2 | $0.0035 | synthetic |
+| [`edgar-margin-vs-growth`](frontend/src/lib/demo-static/edgar-margin-vs-growth.json) | **refuted** — the run disproved its own claims | `insufficient_evidence` | 7 | 7 | 10 | 10 | $0.0112 | live |
 
-6 runs, $0.0582 of model spend, 0 of 109 evidence records linked to the experiment that produced them.
-1,431 backend tests · 236 frontend tests.
+6 runs, $0.0519 of model spend, 107 of 107 evidence records linked to the experiment that produced them.
+1,438 backend tests · 236 frontend tests.
 
 <!-- END GENERATED: published-runs -->
 
@@ -221,18 +250,29 @@ can be hosted safely.
 Stated plainly, because a system that reports uncertainty honestly should do the same about
 itself.
 
-- **The model is the weak link, not the loop.** On a benchmark case where the honest answer is
-  "this data cannot answer that", `gpt-5.4-mini` substitutes the nearest available metric and
-  reports confidence 0.95 — indistinguishable from the rule-engine baseline.
+- **Declining an unanswerable question is still a model judgement.** `answerable: false` is
+  reported by the goal interpreter, and everything after it is deterministic — the loop stops,
+  claims nothing, runs nothing. But a premise the model does not notice is broken is not
+  caught, and the failure is quiet: the loop measures a proxy and reports it honestly, which
+  looks identical to an answer. Both directions cost something. Over-declining a question the
+  data *can* address is equally bad, and it happened during development — an EDGAR panel has
+  no `dimension` columns, so a goal comparing three tickers looked unanswerable until the
+  interpreter was shown the entity column it had never been given.
 - **Two of the loop's four model-backed decisions are covered by the agency suite.** A fair case
   for `select_experiment` is not constructible, because `expected_information_gain` is fixed by
   the planner's tool ordering —
   [documented here](docs/agent/agency-evaluation.md#what-the-tier-does-not-cover).
-- **The contradiction check depends on the model noticing.** Deciding that two statements are
-  mutually exclusive is a judgement, so the critic makes it; what follows is deterministic, but
-  a conflict the model misses is not caught. The rule-engine baseline never reports one at all —
-  a policy guessing at semantic exclusivity would invent conflicts, which is worse than missing
-  them. So this catches the obvious cases, not all of them.
+- **Mutual exclusivity is detected from the goal's phrasing, not from meaning.** A question
+  shaped "is it X, or is it Y?" marks its claims as rivals deterministically, before either is
+  scored — so the common case no longer depends on a model noticing. Two claims that are
+  genuinely incompatible but *not* posed as alternatives still fall to the critic, which is
+  best-effort: it catches the obvious cases, not all of them. The detector is deliberately
+  conservative, because inventing a conflict would suppress a legitimate "both are true".
+- **The narrative check trades readability for safety, and the trade is real.** Prose stating a
+  figure the run did not record is discarded whole, and a figure with nothing naming what it
+  counts is treated as unrecorded. Tightening it too far discarded four of six real narratives
+  during development; the corpus of every narrative this loop has written is now a test, in
+  both directions.
 - **The agentic engine is off by default** (`EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED`); the
   deterministic EDGAR chain is the default execution path. The hosted demo enables it for
   invite-code accounts only, because the loop costs real money per question.

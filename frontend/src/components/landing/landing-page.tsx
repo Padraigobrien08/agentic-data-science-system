@@ -76,8 +76,9 @@ const SURFACES = [
  * uncertainty cannot soften these without undermining itself.
  */
 const LIMITS = [
-  "The model is the weak link here, not the loop. On the hardest benchmark case it substitutes the nearest available metric and reports confidence 0.95 anyway.",
+  "Declining an unanswerable question is still a model judgement. What follows is deterministic — the loop stops, claims nothing, runs nothing — but a broken premise it does not notice is not caught.",
   "Two of the loop's four model-backed decisions are covered by the agency suite. A fair case for select_experiment is not constructible, and that is documented.",
+  "Mutual exclusivity is read from the goal's phrasing, not its meaning. Claims that are incompatible but not posed as alternatives still fall to the critic, which is best-effort.",
   "Single replica. Auth rate limiting is in-process, so a second API replica would enforce it independently.",
 ] as const;
 

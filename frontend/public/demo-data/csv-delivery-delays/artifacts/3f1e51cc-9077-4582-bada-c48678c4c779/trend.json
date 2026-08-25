@@ -1,0 +1,1 @@
+{"chart_type":"line","fits":[{"entity":"east","n":24,"r2":0.023988,"slope":0.001778},{"entity":"north","n":24,"r2":0.541081,"slope":0.039604},{"entity":"south","n":24,"r2":0.085127,"slope":0.002704},{"entity":"west","n":24,"r2":0.000132,"slope":-0.000178}],"time":"month","value":"avg_delivery_days"}

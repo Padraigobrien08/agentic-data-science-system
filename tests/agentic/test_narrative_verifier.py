@@ -52,6 +52,9 @@ def allowed() -> AllowedFigures:
     )
     for value in (0, 1, 2, 3, 4, 5):
         figures.add("supporting_evidence", value).add("refuting_evidence", value)
+    # The EDGAR panel this run analysed. `row_count` is the only measurement the writer is
+    # given, and the only row figure it may state.
+    figures.add("rows", 49)
     return figures.add_metric_terms(_METRICS)
 
 
@@ -112,10 +115,41 @@ def test_ratios_stated_without_a_numeral_are_refused(prose: str, allowed: Allowe
         # Ordinal and qualitative comparisons describe orderings the run genuinely holds.
         "The margin claim was rejected, with more refuting evidence than supporting evidence.",
         "Overall the evidence points toward revenue growth as the stronger explanation.",
+        # Verbatim shapes from real recorded output. Each labels its figure with the very next
+        # word and then goes on to mention a metric in the following sentence — which is how
+        # ordinary prose reads, and which an over-eager metric veto rejected outright.
+        "The claim was rejected, with 1 supporting evidence item and 2 refuting evidence "
+        "items. The revenue-growth explanation was supported.",
+        "It tested the question with 7 experiments, including repeated trend-break analysis "
+        "on net margin.",
+        "The dataset was the EDGAR panel with 49 rows. Three questions remained open about "
+        "revenue growth.",
     ],
 )
 def test_honest_prose_is_kept(prose: str, allowed: AllowedFigures) -> None:
     assert verify_narrative(prose, allowed) == prose
+
+
+def test_a_labelled_figure_survives_a_metric_named_in_the_next_sentence(
+    allowed: AllowedFigures,
+) -> None:
+    """
+    The regression that cost four of six narratives.
+
+    A figure whose role noun is the very next word is unambiguous — "2 refuting evidence
+    items" counts evidence, full stop. The metric veto scanned a window wide enough to reach
+    into the following sentence, found `revenue` there, and threw the whole narrative away.
+    The veto is for figures with *no* clear role; a labelled one is not its business.
+    """
+    prose = "It had 2 refuting evidence items. The revenue-growth claim was supported."
+
+    assert verify_narrative(prose, allowed) == prose
+
+
+def test_the_metric_veto_still_fires_on_an_unlabelled_figure(allowed: AllowedFigures) -> None:
+    """The other half: loosening the veto must not reopen the hole it was added to close."""
+    assert verify_narrative("Net margin deteriorated by 5% over the period.", allowed) is None
+    assert verify_narrative("Revenue grew 7% while margin fell 3%.", allowed) is None
 
 
 # -- the regression corpus ---------------------------------------------------
@@ -154,6 +188,11 @@ def _allowed_for(detail: dict) -> AllowedFigures:
     for role, per_claim in (("supporting_evidence", supporting), ("refuting_evidence", refuting)):
         for value in per_claim.values():
             figures.add(role, value)
+    # The dataset's row count — the only measured quantity the writer is handed, and one the
+    # real narratives use ("The dataset had 96 rows"). Omitting it here made this corpus
+    # stricter than the synthesizer, which is the wrong direction for a regression guard.
+    if detail.get("datasets"):
+        figures.add("rows", detail["datasets"][0].get("row_count"))
     return figures
 
 

@@ -493,10 +493,10 @@ class SqlAlchemyInvestigationRepository:
                 # settled by a later experiment — so skipping the row wholesale left every
                 # persisted critique frozen as unresolved no matter what the run went on to
                 # establish. Same shape as the hypothesis-status update above.
-                r = self._s.scalar(select(CritiqueRow).where(
+                crit_row = self._s.scalar(select(CritiqueRow).where(
                     CritiqueRow.investigation_id == inv_id, CritiqueRow.domain_id == c.id))
-                if r is not None:
-                    r.resolved = c.resolved
+                if crit_row is not None:
+                    crit_row.resolved = c.resolved
                 continue
             self._s.add(CritiqueRow(
                 investigation_id=inv_id, domain_id=c.id, critique_type=c.critique_type.value,

@@ -1,24 +1,24 @@
 {
-  "analysis_run_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+  "analysis_run_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c",
   "chat": [
     {
-      "created_at": "2026-08-24T16:14:30",
-      "id": "14ca8276-37b0-47ab-8aaf-bad8aec53653",
+      "created_at": "2026-08-25T20:02:32",
+      "id": "f21e3f7a-dff0-4d83-b325-a81faeb9fb2a",
       "messages": [
         {
           "analysis_run_id": null,
           "content": "Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?",
-          "created_at": "2026-08-24T16:14:30.155019",
-          "id": "367afdf7-47cf-482b-893a-e6bad1cfa4e0",
+          "created_at": "2026-08-25T20:02:32.799773",
+          "id": "d56fb29a-d676-43ce-8d40-0f9ce131ad48",
           "role": "user",
           "sequence": 0,
           "status": "complete"
         },
         {
-          "analysis_run_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+          "analysis_run_id": "fc4a2dd6-2264-4226-8e06-dd6dbc0ce99c",
           "content": "Insufficient evidence to resolve the investigation goal.",
-          "created_at": "2026-08-24T16:14:30.155599",
-          "id": "67db1248-9951-4970-a527-97c8783ff29e",
+          "created_at": "2026-08-25T20:02:32.800315",
+          "id": "cbd5208b-9127-4798-9223-8cf3672b34e9",
           "role": "assistant",
           "sequence": 1,
           "status": "complete"
@@ -28,19 +28,19 @@
     }
   ],
   "demo_slug": "csv-distribution-honesty",
-  "investigation_id": "580343ee-959d-46c4-a7b0-b5c632678ddf",
+  "investigation_id": "9c95df64-663a-442f-b094-5c8b183e0e9b",
   "model_calls": [
     {
-      "completion_tokens": 60,
+      "completion_tokens": 78,
       "error_detail": null,
-      "est_cost_usd": 0.00101175,
-      "finished_at": "2026-08-24T16:14:21.587398",
-      "id": "b5048580-9f7b-4733-abc9-b6ce80d68b61",
-      "latency_ms": 3828,
+      "est_cost_usd": 0.00175275,
+      "finished_at": "2026-08-25T20:02:26.412684",
+      "id": "a06d0536-982f-4aba-a876-2ae6d9aaf64d",
+      "latency_ms": 1230,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 989,
-      "prompt_version": "1.0.3",
+      "prompt_tokens": 1869,
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -49,11 +49,11 @@
         },
         "messages": [
           {
-            "content": "**Goal interpreter** for an adaptive data investigation loop. You receive an analytical goal in plain language plus the capabilities of the dataset that will answer it. You decide what kind of question is being asked. Everything downstream — which experiments become candidates, which hypotheses get generated — follows from this one call, so a wrong intent wastes the whole run.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question>\",\n \"capabilities\": {\"metrics\": [\"<numeric column>\", ...], \"dimensions\": [\"<categorical column>\", ...]}}\n```\n\n`metrics` and `dimensions` are the *only* column names that exist. A name not in those lists is not available, whatever the goal calls it.\n\n## Output\n\nReply with `GoalInterpretation` JSON and nothing else:\n\n```json\n{\"intent\": \"<one of the intents below>\",\n \"metric_hint\": \"<a name from capabilities.metrics, or null>\",\n \"group_hint\": \"<a name from capabilities.dimensions, or null>\",\n \"direction\": \"up\" | \"down\" | null,\n \"rationale\": \"<one sentence>\"}\n```\n\n### `intent` — choose exactly one\n\n| Intent | The goal is asking |\n|---|---|\n| `trend` | whether a metric moves over time |\n| `comparison` | whether a metric differs between groups |\n| `correlation` | whether two metrics move together |\n| `anomaly` | whether specific values are unusual |\n| `distribution` | what the shape or spread of a metric is |\n| `ranking` | which entities are highest or lowest |\n| `association` | whether two categorical fields are related |\n| `profile` | a broad description of the dataset |\n| `general` | none of the above fits |\n\nPrefer the *specific* intent over `general` when the goal supports one. `general` is the honest answer for a vague goal, not a way to avoid committing.\n\n### Reading the intent correctly\n\nThe intent decides which experiments are ever considered, so these three mistakes are the expensive ones:\n\n- **`comparison` means groups, never metrics.** It is for one metric across the values of a *dimension* — delivery time in `north` vs `south`. A goal contrasting two **metrics** (\"delivery time versus order volume\") is `correlation`, not `comparison`. Comparing a metric to \"the other metrics\" is not a question this dataset can answer, and reading it that way strands the run on a single experiment.\n- **A question about change over time is `trend`, even when it offers an explanation.** \"Has quality degraded, or is rising volume the cause?\" is asking whether a metric moved — `trend`, `metric_hint` on the metric whose movement is in question (here quality, not volume). The competing explanation is tested later by the loop; it does not change what is being asked.\n- **\"Does X explain Y?\" is `correlation`.** Set `metric_hint` to the metric being *explained* (the outcome), not the proposed cause.\n\nWhen a goal names both a time movement and a possible cause, `trend` is the better read: establishing that the movement is real comes before explaining it.\n\n### Which fields may be null\n\n**Only `metric_hint`, `group_hint` and `direction` accept `null`.** `intent` and `rationale` are strings — use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **Never invent a column.** `metric_hint` must appear verbatim in `capabilities.metrics`, `group_hint` verbatim in `capabilities.dimensions`. If the goal names something not present, use `null` — a null hint lets the loop pick, a hallucinated name breaks the experiment.\n- **`direction` is only meaningful for `trend`.** Set it when the goal asserts or asks about a specific movement (\"is revenue falling?\" → `down`). Use `null` when the goal asks about change without naming a direction (\"how has revenue moved?\").\n- **Do not smuggle a conclusion into `direction`.** It records what the goal asked about, not what you expect the data to show. The evidence decides that later.\n- Keep `rationale` to one sentence naming the signal in the goal you read the intent from.",
+            "content": "**Goal interpreter** for an adaptive data investigation loop. You receive an analytical goal in plain language plus the capabilities of the dataset that will answer it. You decide what kind of question is being asked. Everything downstream — which experiments become candidates, which hypotheses get generated — follows from this one call, so a wrong intent wastes the whole run.\n\n## Input\n\n```json\n{\"goal\": \"<the user's question>\",\n \"capabilities\": {\"metrics\": [\"<numeric column>\", ...],\n                  \"dimensions\": [\"<categorical column>\", ...],\n                  \"entity_column\": \"<column identifying the unit of analysis, or null>\",\n                  \"entities\": [\"<entity in scope>\", ...]}}\n```\n\n`metrics` and `dimensions` are the *only* column names that exist. A name not in those lists is not available, whatever the goal calls it.\n\n`entities` are the units the rows are about — tickers, regions, services. **They are comparable even when `dimensions` is empty**, because they live in `entity_column` rather than in a categorical column. An EDGAR panel is the normal case: no dimensions at all, and every comparison between companies runs off `entity_column`.\n\n## Output\n\nReply with `GoalInterpretation` JSON and nothing else:\n\n```json\n{\"intent\": \"<one of the intents below>\",\n \"metric_hint\": \"<a name from capabilities.metrics, or null>\",\n \"group_hint\": \"<a name from capabilities.dimensions, or null>\",\n \"direction\": \"up\" | \"down\" | null,\n \"answerable\": true | false,\n \"unsupported_concept\": \"<what the data does not measure, or null>\",\n \"rationale\": \"<one sentence>\"}\n```\n\n### `intent` — choose exactly one\n\n| Intent | The goal is asking |\n|---|---|\n| `trend` | whether a metric moves over time |\n| `comparison` | whether a metric differs between groups |\n| `correlation` | whether two metrics move together |\n| `anomaly` | whether specific values are unusual |\n| `distribution` | what the shape or spread of a metric is |\n| `ranking` | which entities are highest or lowest |\n| `association` | whether two categorical fields are related |\n| `profile` | a broad description of the dataset |\n| `general` | none of the above fits |\n\nPrefer the *specific* intent over `general` when the goal supports one. `general` is the honest answer for a vague goal, not a way to avoid committing.\n\n### Reading the intent correctly\n\nThe intent decides which experiments are ever considered, so these three mistakes are the expensive ones:\n\n- **`comparison` means groups, never metrics.** It is for one metric across the values of a *dimension* — delivery time in `north` vs `south`. A goal contrasting two **metrics** (\"delivery time versus order volume\") is `correlation`, not `comparison`. Comparing a metric to \"the other metrics\" is not a question this dataset can answer, and reading it that way strands the run on a single experiment.\n- **A question about change over time is `trend`, even when it offers an explanation.** \"Has quality degraded, or is rising volume the cause?\" is asking whether a metric moved — `trend`, `metric_hint` on the metric whose movement is in question (here quality, not volume). The competing explanation is tested later by the loop; it does not change what is being asked.\n- **\"Does X explain Y?\" is `correlation`.** Set `metric_hint` to the metric being *explained* (the outcome), not the proposed cause.\n\nWhen a goal names both a time movement and a possible cause, `trend` is the better read: establishing that the movement is real comes before explaining it.\n\n### `answerable` — the one call nothing downstream can undo\n\nSet `answerable: false` when the goal asks about **something none of these columns measure**,\nand name the missing thing in `unsupported_concept` (\"customer loyalty\", \"complaint volume\",\n\"churn\"). The loop then stops and says so. Nothing is run, nothing is claimed, and the user\nlearns they need different data.\n\nThe failure this exists to prevent is subtle and it has happened. Asked \"which region has the\nstrongest customer loyalty?\" over a dataset of delivery days, order volume and on-time rate,\nthe honest answer is that loyalty is not in here. What came back instead was a ranking of\nregions by *average delivery days*, presented as a finding about loyalty. The run then hedged,\nwhich made it look careful — but only because that proxy's signal happened to be weak. A\nstronger proxy would have produced a confident, well-evidenced answer to a question nobody\nasked, and there is no way for a reader to tell those two apart.\n\nSo the test is not \"can I find something to measure?\". It is **\"is the thing being asked about\nin this list?\"**. A column that correlates with the concept, or stands in for it, or is the\nclosest available — those are all `answerable: false`. Adjacent is not the same.\n\n### Computed is not missing\n\nThe opposite error is just as costly, and it is easier to make. **A quantity the loop would\n*derive* from these columns is answerable.** The loop compares, ranks, correlates, fits and\ndetects change points — that is what it is for. Almost nothing worth asking is a column you\ncan read off directly.\n\n- \"NVDA's margin advantage over AAPL and MSFT\" → `net_margin` compared across `entities`. **Answerable.** No column is named \"margin advantage\" and none needs to be.\n- \"Is the north region worse?\" → a metric compared across `entities` or a dimension. **Answerable.**\n- \"Did performance break in particular months?\" → a metric over time. **Answerable.**\n- \"Which region has the strongest customer loyalty?\" → nothing here measures loyalty at all. **Not answerable.**\n\nThe difference is whether any column *bears on* the concept. A comparison, a trend or a ratio\nbetween columns you were given is arithmetic the loop performs. A concept no column touches is\nmissing data. Only the second is `answerable: false`.\n\n**An empty `dimensions` list is never itself a reason to decline.** Check `entities` before\nconcluding that a comparison has nothing to run on.\n\n`answerable: true` is the ordinary case and the default. A goal that names a real column, or\nthat asks something the listed columns genuinely cover even if it words them differently\n(\"delivery speed\" for `avg_delivery_days`), is answerable. Declining a question the data *can*\naddress is its own failure, and the loop has no way to recover from it either.\n\n### Which fields may be null\n\n**Only `metric_hint`, `group_hint` and `direction` accept `null`.** `intent` and `rationale` are strings — use `\"\"` for a rationale you have nothing to add to, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **Never invent a column.** `metric_hint` must appear verbatim in `capabilities.metrics`, `group_hint` verbatim in `capabilities.dimensions`. If the goal names something not present, use `null` — a null hint lets the loop pick, a hallucinated name breaks the experiment.\n- **Never substitute a metric for a concept the data lacks.** If you find yourself reaching for the *closest* column rather than the right one, that is `answerable: false`, not a `metric_hint`.\n- **`unsupported_concept` is prose for a person**, not a column name: what the goal asked about that this dataset does not contain. Leave it `null` when `answerable` is `true`.\n- **`direction` is only meaningful for `trend`.** Set it when the goal asserts or asks about a specific movement (\"is revenue falling?\" → `down`). Use `null` when the goal asks about change without naming a direction (\"how has revenue moved?\").\n- **Do not smuggle a conclusion into `direction`.** It records what the goal asked about, not what you expect the data to show. The evidence decides that later.\n- Keep `rationale` to one sentence naming the signal in the goal you read the intent from.",
             "role": "system"
           },
           {
-            "content": "{\"goal\": \"Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?\", \"capabilities\": {\"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}}",
+            "content": "{\"goal\": \"Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?\", \"capabilities\": {\"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": [], \"entity_column\": \"region\", \"entities\": [\"east\", \"north\", \"south\", \"west\"]}}",
             "role": "user"
           }
         ],
@@ -64,12 +64,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"intent\":\"distribution\",\"metric_hint\":\"avg_delivery_days\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The question asks whether the rise in average delivery time is due to the overall shape or spread of delivery times versus a small tail of late orders.\"}",
-        "completion_tokens": 60,
+        "assistant_text": "{\"intent\":\"distribution\",\"metric_hint\":\"avg_delivery_days\",\"group_hint\":null,\"direction\":null,\"answerable\":true,\"unsupported_concept\":null,\"rationale\":\"The question is about whether the rise in average delivery time reflects a broad shift or a small tail, which asks about the shape/spread of delivery times rather than just the trend.\"}",
+        "completion_tokens": 78,
         "finish_reason": "stop",
-        "latency_ms": 3828,
+        "latency_ms": 1230,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 989,
+        "prompt_tokens": 1869,
         "raw_response": {
           "choices": [
             {
@@ -79,7 +79,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"intent\":\"distribution\",\"metric_hint\":\"avg_delivery_days\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The question asks whether the rise in average delivery time is due to the overall shape or spread of delivery times versus a small tail of late orders.\"}",
+                "content": "{\"intent\":\"distribution\",\"metric_hint\":\"avg_delivery_days\",\"group_hint\":null,\"direction\":null,\"answerable\":true,\"unsupported_concept\":null,\"rationale\":\"The question is about whether the rise in average delivery time reflects a broad shift or a small tail, which asks about the shape/spread of delivery times rather than just the trend.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -87,46 +87,46 @@
               }
             }
           ],
-          "created": 1787588058,
-          "id": "chatcmpl-EGRbOw8Gjv4cjaQSfv4Nt9OqlFX57",
+          "created": 1787688145,
+          "id": "chatcmpl-EGrdhrhmm2F6Y0e0LIcTurg40nO2j",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 60,
+            "completion_tokens": 78,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 989,
+            "prompt_tokens": 1869,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
-              "cached_tokens": 0
+              "cached_tokens": 1280
             },
-            "total_tokens": 1049
+            "total_tokens": 1947
           }
         }
       },
       "sequence": 0,
-      "started_at": "2026-08-24T16:14:17.758840",
+      "started_at": "2026-08-25T20:02:25.181520",
       "status": "success"
     },
     {
-      "completion_tokens": 182,
+      "completion_tokens": 166,
       "error_detail": null,
-      "est_cost_usd": 0.001578,
-      "finished_at": "2026-08-24T16:14:23.743444",
-      "id": "959d4406-7987-4e9a-b954-d91441ea79b0",
-      "latency_ms": 2154,
+      "est_cost_usd": 0.00152025,
+      "finished_at": "2026-08-25T20:02:28.037522",
+      "id": "5dec4230-d714-4d6f-b723-2aad1827c3fa",
+      "latency_ms": 1619,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1012,
-      "prompt_version": "1.0.3",
+      "prompt_tokens": 1031,
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -139,7 +139,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": \"Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?\", \"interpretation\": {\"intent\": \"distribution\", \"metric_hint\": \"avg_delivery_days\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The question asks whether the rise in average delivery time is due to the overall shape or spread of delivery times versus a small tail of late orders.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
+            "content": "{\"goal\": \"Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?\", \"interpretation\": {\"intent\": \"distribution\", \"metric_hint\": \"avg_delivery_days\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The question is about whether the rise in average delivery time reflects a broad shift or a small tail, which asks about the shape/spread of delivery times rather than just the trend.\", \"answerable\": true, \"unsupported_concept\": null}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
             "role": "user"
           }
         ],
@@ -150,12 +150,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"The rise in average delivery time reflects a broad shift: delivery times are higher for most orders, not just a small tail of late orders.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This tests the broad-shift explanation directly against the observed increase in the mean.\"},{\"statement\":\"The rise in average delivery time is primarily caused by a small tail of very late orders, while most orders have not materially changed.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This tests the alternative explanation that the mean is being pulled up by outliers rather than a general slowdown.\"}],\"questions\":[\"Has the increase in average delivery time been sustained over time, or is it a one-off spike?\",\"How much of the change in the mean is explained by the upper tail versus the central bulk of orders?\"]}",
-        "completion_tokens": 182,
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"The rise in average delivery time is driven by a broad shift affecting most orders, not just a small tail of very late orders.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This is the main distributional explanation to test against the observed increase in the mean.\"},{\"statement\":\"A small tail of very late orders is responsible for the higher average delivery time.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This competing explanation can be contradicted if the increase is widespread rather than concentrated in a few extreme orders.\"}],\"questions\":[\"Is the increase in delivery time sustained across the distribution, or concentrated in a small number of extreme delays?\",\"Has the median or typical delivery time moved, or only the upper tail?\"]}",
+        "completion_tokens": 166,
         "finish_reason": "stop",
-        "latency_ms": 2154,
+        "latency_ms": 1619,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1012,
+        "prompt_tokens": 1031,
         "raw_response": {
           "choices": [
             {
@@ -165,7 +165,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"The rise in average delivery time reflects a broad shift: delivery times are higher for most orders, not just a small tail of late orders.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This tests the broad-shift explanation directly against the observed increase in the mean.\"},{\"statement\":\"The rise in average delivery time is primarily caused by a small tail of very late orders, while most orders have not materially changed.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This tests the alternative explanation that the mean is being pulled up by outliers rather than a general slowdown.\"}],\"questions\":[\"Has the increase in average delivery time been sustained over time, or is it a one-off spike?\",\"How much of the change in the mean is explained by the upper tail versus the central bulk of orders?\"]}",
+                "content": "{\"hypotheses\":[{\"statement\":\"The rise in average delivery time is driven by a broad shift affecting most orders, not just a small tail of very late orders.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This is the main distributional explanation to test against the observed increase in the mean.\"},{\"statement\":\"A small tail of very late orders is responsible for the higher average delivery time.\",\"metric\":\"avg_delivery_days\",\"direction\":\"none\",\"rationale\":\"This competing explanation can be contradicted if the increase is widespread rather than concentrated in a few extreme orders.\"}],\"questions\":[\"Is the increase in delivery time sustained across the distribution, or concentrated in a small number of extreme delays?\",\"Has the median or typical delivery time moved, or only the upper tail?\"]}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -173,46 +173,46 @@
               }
             }
           ],
-          "created": 1787588062,
-          "id": "chatcmpl-EGRbSZ7FQqYXR7lUoj46Fo105jwxm",
+          "created": 1787688146,
+          "id": "chatcmpl-EGrdiH3yLwRuZg5jAn8yT3beLVXm7",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 182,
+            "completion_tokens": 166,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1012,
+            "prompt_tokens": 1031,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1194
+            "total_tokens": 1197
           }
         }
       },
       "sequence": 1,
-      "started_at": "2026-08-24T16:14:21.588482",
+      "started_at": "2026-08-25T20:02:26.415641",
       "status": "success"
     },
     {
-      "completion_tokens": 34,
+      "completion_tokens": 37,
       "error_detail": null,
-      "est_cost_usd": 0.0007245,
-      "finished_at": "2026-08-24T16:14:24.906778",
-      "id": "0214b836-395e-415d-82d8-e15f782611dc",
-      "latency_ms": 1140,
+      "est_cost_usd": 0.000738,
+      "finished_at": "2026-08-25T20:02:29.086387",
+      "id": "2b71b000-42db-4a41-a08f-630963dc2674",
+      "latency_ms": 1027,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 762,
-      "prompt_version": "1.0.3",
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -236,10 +236,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution.\"}",
-        "completion_tokens": 34,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution shape and spread.\"}",
+        "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 1140,
+        "latency_ms": 1027,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 762,
         "raw_response": {
@@ -251,7 +251,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution shape and spread.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -259,15 +259,15 @@
               }
             }
           ],
-          "created": 1787588064,
-          "id": "chatcmpl-EGRbUE29th0ynxEffUn0mvOlnq5di",
+          "created": 1787688148,
+          "id": "chatcmpl-EGrdkVH8KSD9jKeEKaQcMYbq0jnYv",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 34,
+            "completion_tokens": 37,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -280,25 +280,25 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 796
+            "total_tokens": 799
           }
         }
       },
       "sequence": 2,
-      "started_at": "2026-08-24T16:14:23.765212",
+      "started_at": "2026-08-25T20:02:28.057538",
       "status": "success"
     },
     {
-      "completion_tokens": 33,
+      "completion_tokens": 31,
       "error_detail": null,
-      "est_cost_usd": 0.00068775,
-      "finished_at": "2026-08-24T16:14:26.147726",
-      "id": "8a67e85d-5599-40f4-8492-a067db3d0be2",
-      "latency_ms": 1212,
+      "est_cost_usd": 0.00067875,
+      "finished_at": "2026-08-25T20:02:30.069916",
+      "id": "63ae0347-b543-4d09-879d-fd52dd3102ac",
+      "latency_ms": 949,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 719,
-      "prompt_version": "1.0.3",
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -322,10 +322,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"profile_dataset is the highest-information experiment for establishing the overall distribution shape and summary characteristics.\"}",
-        "completion_tokens": 33,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"profile_dataset is the highest-information next step for establishing the dataset’s distribution.\"}",
+        "completion_tokens": 31,
         "finish_reason": "stop",
-        "latency_ms": 1212,
+        "latency_ms": 949,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 719,
         "raw_response": {
@@ -337,7 +337,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"profile_dataset is the highest-information experiment for establishing the overall distribution shape and summary characteristics.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"profile_dataset is the highest-information next step for establishing the dataset’s distribution.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -345,15 +345,15 @@
               }
             }
           ],
-          "created": 1787588065,
-          "id": "chatcmpl-EGRbVgw5nNMgGuHbKsksDMQONUH5N",
+          "created": 1787688149,
+          "id": "chatcmpl-EGrdlQBn1slW7iyMJZ7XLg7EhZExG",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 33,
+            "completion_tokens": 31,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -366,25 +366,25 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 752
+            "total_tokens": 750
           }
         }
       },
       "sequence": 3,
-      "started_at": "2026-08-24T16:14:24.934068",
+      "started_at": "2026-08-25T20:02:29.119283",
       "status": "success"
     },
     {
-      "completion_tokens": 36,
+      "completion_tokens": 37,
       "error_detail": null,
-      "est_cost_usd": 0.0006705,
-      "finished_at": "2026-08-24T16:14:27.317686",
-      "id": "491a52c2-99b7-40b9-a781-34b4ee765aac",
-      "latency_ms": 1138,
+      "est_cost_usd": 0.000675,
+      "finished_at": "2026-08-25T20:02:30.980851",
+      "id": "5676e468-c71b-4b91-85a5-6f6d2e52a039",
+      "latency_ms": 882,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 678,
-      "prompt_version": "1.0.3",
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -408,10 +408,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"Detecting outliers would establish whether the distribution has extreme values or anomalies that materially affect its shape.\"}",
-        "completion_tokens": 36,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"Detecting outliers would establish whether the distribution has extreme values or heavy tails that materially affect its shape.\"}",
+        "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 1138,
+        "latency_ms": 882,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 678,
         "raw_response": {
@@ -423,7 +423,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"Detecting outliers would establish whether the distribution has extreme values or anomalies that materially affect its shape.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"Detecting outliers would establish whether the distribution has extreme values or heavy tails that materially affect its shape.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -431,15 +431,15 @@
               }
             }
           ],
-          "created": 1787588066,
-          "id": "chatcmpl-EGRbW2ErBaKzIVU8Z4oLbbxEER0VS",
+          "created": 1787688150,
+          "id": "chatcmpl-EGrdm27SjIyzyEIAutUkNRb01j0yb",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 36,
+            "completion_tokens": 37,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -452,25 +452,25 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 714
+            "total_tokens": 715
           }
         }
       },
       "sequence": 4,
-      "started_at": "2026-08-24T16:14:26.177859",
+      "started_at": "2026-08-25T20:02:30.097672",
       "status": "success"
     },
     {
-      "completion_tokens": 181,
+      "completion_tokens": 179,
       "error_detail": null,
-      "est_cost_usd": 0.00212625,
-      "finished_at": "2026-08-24T16:14:30.116704",
-      "id": "d48ba829-0343-4eea-9394-b7c0d06d6519",
-      "latency_ms": 2767,
+      "est_cost_usd": 0.0023985,
+      "finished_at": "2026-08-25T20:02:32.762062",
+      "id": "a32c2458-464b-4a4d-b51b-2e85cebd1cb3",
+      "latency_ms": 1721,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1749,
-      "prompt_version": "1.0.3",
+      "prompt_tokens": 2124,
+      "prompt_version": "1.0.5",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -479,11 +479,11 @@
         },
         "messages": [
           {
-            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
+            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\" | \"unanswerable\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- **Say what each figure counts, in the same clause.** \"7 experiments\", \"9 evidence items\", \"95% confidence\", \"3 open questions\". A bare number is rejected even when the value is right, because nothing in the sentence identifies which quantity it is — and a checker that cannot tell has to assume the worst.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- **Never attach a figure to a metric or column.** You are given no measured values at all — not one. You may say a claim *about* revenue was supported; you may not say what revenue was, which way it moved, or by how much. \"Net margin fell 5%\" is invented even if `0.05` appears in `findings` as somebody's confidence.\n- **Ratios are figures without digits.** \"Twice as fast\", \"roughly doubled\", \"an order of magnitude\", \"by a factor of three\", \"fell by half\" — the run computed none of these, so none of them may be written. Comparing things the run *did* record is fine: \"more refuting evidence than supporting evidence\", \"the stronger of the two claims\".\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## When the question could not be asked of this data\n\n`unanswerable` is different from every outcome above, and the difference is the whole point.\nThe others mean the analysis ran and did not settle the matter — which invites more evidence\nof the same kind. `unanswerable` means the dataset holds nothing that bears on the question,\nso no amount of the available data would help.\n\nWrite it as exactly that. Name what is missing, say plainly that this data cannot answer it,\nand **do not offer the nearest available metric as a consolation** — not even as a suggestion.\nThe run declined precisely so that a confident answer about something else did not get made;\nreintroducing it in prose gives back the thing that was refused.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
             "role": "system"
           },
           {
-            "content": "{\"question\": \"Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?\", \"findings\": {\"disposition\": \"insufficient_evidence\", \"confidence\": 0.2, \"claims\": [{\"statement\": \"The rise in average delivery time reflects a broad shift: delivery times are higher for most orders, not just a small tail of late orders.\", \"status\": \"unresolved\", \"confidence\": 0.5, \"supporting_evidence\": 3, \"refuting_evidence\": 0}, {\"statement\": \"The rise in average delivery time is primarily caused by a small tail of very late orders, while most orders have not materially changed.\", \"status\": \"unresolved\", \"confidence\": 0.5, \"supporting_evidence\": 3, \"refuting_evidence\": 0}], \"counts\": {\"hypotheses\": 2, \"evidence\": 6, \"experiments\": 3, \"supported\": 0, \"open_questions\": 2}, \"experiments_run\": [\"summarize_distribution\", \"profile_dataset\", \"detect_outliers\"], \"stopped_because\": \"insufficient_evidence\", \"open_questions\": [\"Has the increase in average delivery time been sustained over time, or is it a one-off spike?\", \"How much of the change in the mean is explained by the upper tail versus the central bulk of orders?\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": null}}}",
+            "content": "{\"question\": \"Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?\", \"findings\": {\"disposition\": \"insufficient_evidence\", \"confidence\": 0.2, \"claims\": [{\"statement\": \"The rise in average delivery time is driven by a broad shift affecting most orders, not just a small tail of very late orders.\", \"status\": \"unresolved\", \"confidence\": 0.5, \"supporting_evidence\": 3, \"refuting_evidence\": 0}, {\"statement\": \"A small tail of very late orders is responsible for the higher average delivery time.\", \"status\": \"unresolved\", \"confidence\": 0.5, \"supporting_evidence\": 3, \"refuting_evidence\": 0}], \"counts\": {\"hypotheses\": 2, \"evidence\": 6, \"experiments\": 3, \"supported\": 0, \"open_questions\": 2}, \"experiments_run\": [\"summarize_distribution\", \"profile_dataset\", \"detect_outliers\"], \"stopped_because\": \"insufficient_evidence\", \"open_questions\": [\"Is the increase in delivery time sustained across the distribution, or concentrated in a small number of extreme delays?\", \"Has the median or typical delivery time moved, or only the upper tail?\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": 96}}}",
             "role": "user"
           }
         ],
@@ -494,12 +494,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"answer\":\"The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift affecting most orders or from a small tail of very late orders pulling the mean up.\\n\\nBoth tested claims stayed unresolved. The broad-shift explanation had some supporting evidence, but so did the tail-driven explanation, and neither was strong enough to stand on its own. In other words, the run found signs pointing in both directions rather than a clear winner.\\n\\nIt tested the distribution summary, then a dataset profile, then outlier detection. The loop stopped because it ran out of evidence, not because the question was settled. What remains open is whether the increase has been sustained or was a one-off spike, and how much of the change in the mean comes from the upper tail versus the central bulk of orders.\"}",
-        "completion_tokens": 181,
+        "assistant_text": "{\"answer\":\"The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift across most orders or from a small tail of very late orders.\\n\\nBoth tested claims stayed unresolved. The broad-shift explanation had 3 supporting evidence items and no refuting evidence, and the tail-of-late-orders explanation also had 3 supporting evidence items and no refuting evidence. Neither claim was supported strongly enough to stand on its own.\\n\\nThe run used a distribution summary, a dataset profile, and an outlier check on the 96-row operational_delivery dataset, then stopped because there was insufficient evidence. What remained open was whether the increase was spread across the distribution or concentrated in a few extreme delays, and whether the median or typical delivery time had moved rather than only the upper tail.\"}",
+        "completion_tokens": 179,
         "finish_reason": "stop",
-        "latency_ms": 2767,
+        "latency_ms": 1721,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1749,
+        "prompt_tokens": 2124,
         "raw_response": {
           "choices": [
             {
@@ -509,7 +509,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"answer\":\"The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift affecting most orders or from a small tail of very late orders pulling the mean up.\\n\\nBoth tested claims stayed unresolved. The broad-shift explanation had some supporting evidence, but so did the tail-driven explanation, and neither was strong enough to stand on its own. In other words, the run found signs pointing in both directions rather than a clear winner.\\n\\nIt tested the distribution summary, then a dataset profile, then outlier detection. The loop stopped because it ran out of evidence, not because the question was settled. What remains open is whether the increase has been sustained or was a one-off spike, and how much of the change in the mean comes from the upper tail versus the central bulk of orders.\"}",
+                "content": "{\"answer\":\"The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift across most orders or from a small tail of very late orders.\\n\\nBoth tested claims stayed unresolved. The broad-shift explanation had 3 supporting evidence items and no refuting evidence, and the tail-of-late-orders explanation also had 3 supporting evidence items and no refuting evidence. Neither claim was supported strongly enough to stand on its own.\\n\\nThe run used a distribution summary, a dataset profile, and an outlier check on the 96-row operational_delivery dataset, then stopped because there was insufficient evidence. What remained open was whether the increase was spread across the distribution or concentrated in a few extreme delays, and whether the median or typical delivery time had moved rather than only the upper tail.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -517,43 +517,43 @@
               }
             }
           ],
-          "created": 1787588068,
-          "id": "chatcmpl-EGRbYhmaAqaVkovwPpX9d6ycSebHu",
+          "created": 1787688151,
+          "id": "chatcmpl-EGrdnKKjRkg2AaW9NA6YWwCGAvHXT",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 181,
+            "completion_tokens": 179,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1749,
+            "prompt_tokens": 2124,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
-              "cached_tokens": 1280
+              "cached_tokens": 0
             },
-            "total_tokens": 1930
+            "total_tokens": 2303
           }
         }
       },
       "sequence": 5,
-      "started_at": "2026-08-24T16:14:27.348085",
+      "started_at": "2026-08-25T20:02:31.039726",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 526,
-    "est_cost_usd": 0.006799,
-    "latency_ms": 12239,
+    "completion_tokens": 528,
+    "est_cost_usd": 0.007763,
+    "latency_ms": 7428,
     "model_calls": 6,
     "priced": true,
-    "prompt_tokens": 5909,
-    "total_tokens": 6435
+    "prompt_tokens": 7183,
+    "total_tokens": 7711
   }
 }

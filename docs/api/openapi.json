@@ -3444,6 +3444,11 @@
             "title": "Critiques",
             "type": "array"
           },
+          "dataset_origin": {
+            "default": "unknown",
+            "title": "Dataset Origin",
+            "type": "string"
+          },
           "datasets": {
             "default": [],
             "items": {
@@ -3708,6 +3713,11 @@
           "created_at": {
             "format": "date-time",
             "title": "Created At",
+            "type": "string"
+          },
+          "dataset_origin": {
+            "default": "unknown",
+            "title": "Dataset Origin",
             "type": "string"
           },
           "demo_slug": {

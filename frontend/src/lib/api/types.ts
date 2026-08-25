@@ -548,6 +548,8 @@ export interface InvestigationSummary {
   demo_slug: string | null;
   counts: InvestigationCounts;
   outcome: InvestigationOutcome;
+  /** Where the run's data came from; "mixed" when its datasets disagree. */
+  dataset_origin: DatasetOrigin | "mixed";
   created_at: string;
   updated_at: string;
 }

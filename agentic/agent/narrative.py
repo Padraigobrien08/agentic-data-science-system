@@ -112,6 +112,17 @@ _CONFIDENCE_WORD = re.compile(r"confiden|certainty", re.IGNORECASE)
 #: clause does not launder an unrelated number.
 _WINDOW = 34
 
+#: The tighter window in which a role word *names* the figure rather than merely sitting near
+#: it: "2 refuting evidence items" — the noun is the next word, and there is nothing ambiguous
+#: about what the 2 counts.
+#:
+#: This distinction is what stops the metric veto from firing on honest prose. Real recorded
+#: output reads "...and 2 refuting evidence items. The revenue-growth claim was supported",
+#: where `revenue` lands 33 characters after the `2` — inside `_WINDOW`, in the *next
+#: sentence*, describing something else entirely. Vetoing on that discarded four of six
+#: narratives, each of which had labelled every figure exactly as asked.
+_TIGHT_WINDOW = 22
+
 #: Quantitative relations stated without a numeral. Each asserts a ratio the run never
 #: computed, so each is a fabricated figure wearing words. Scoped tightly on purpose:
 #: "half of" is a ratio, "the first half of the period" is a time span, and only the former
@@ -223,7 +234,10 @@ def _parse(token: str) -> list[float]:
     return [value, value / 100] if percent else [value]
 
 
-def _roles_in_context(text: str, start: int, end: int, *, token: str = "") -> set[str]:
+def _roles_in_context(
+    text: str, start: int, end: int, *, token: str = "", window: int = _WINDOW,
+    implied: bool = True,
+) -> set[str]:
     """
     The roles named close enough to ``text[start:end]`` to be describing it.
 
@@ -232,13 +246,17 @@ def _roles_in_context(text: str, start: int, end: int, *, token: str = "") -> se
     held at 95%" is ordinary phrasing that no nearby word labels. The value is still checked
     against the recorded confidences — this admits the *role*, never the number.
     """
-    window = text[max(0, start - _WINDOW):min(len(text), end + _WINDOW)].lower()
+    near = _window_around(text, start, end, window)
     roles = {
         role
         for role, labels in _ROLE_LABELS.items()
-        if any(label in window for label in labels)
+        if any(label in near for label in labels)
     }
-    if token.endswith("%"):
+    # An *implied* role, which is why it can be switched off. It is enough to say what an
+    # otherwise-unlabelled figure must be, but not enough to prove a figure is labelled —
+    # "net margin deteriorated by 5%" would otherwise claim to name its own role and skip
+    # the metric veto entirely.
+    if implied and token.endswith("%"):
         roles.add("confidence")
     return roles
 
@@ -250,8 +268,8 @@ def extract_numbers(text: str) -> list[str]:
     ]
 
 
-def _window_around(text: str, start: int, end: int) -> str:
-    return text[max(0, start - _WINDOW):min(len(text), end + _WINDOW)].lower()
+def _window_around(text: str, start: int, end: int, window: int = _WINDOW) -> str:
+    return text[max(0, start - window):min(len(text), end + window)].lower()
 
 
 def _digit_checks_out(text: str, match: re.Match[str], allowed: AllowedFigures) -> bool:
@@ -261,6 +279,18 @@ def _digit_checks_out(text: str, match: re.Match[str], allowed: AllowedFigures) 
     readings = _parse(match.group(0))
     if not readings:
         return False
+
+    # A figure whose role noun is the very next thing said is not ambiguous — "2 refuting
+    # evidence items" counts evidence, whatever else the sentence goes on to mention. Checked
+    # first, and on its own terms: the metric veto exists to catch figures with *no* clear
+    # role, and applying it here rejects the exact phrasing the writer was asked for.
+    named = _roles_in_context(
+        text, match.start(), match.end(), token=match.group(0), window=_TIGHT_WINDOW,
+        implied=False,
+    )
+    if named and any(allowed.roles_for(r) & named for r in readings):
+        return True
+
     context = _roles_in_context(text, match.start(), match.end(), token=match.group(0))
     if not context:
         return False
