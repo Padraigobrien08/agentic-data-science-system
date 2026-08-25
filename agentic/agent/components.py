@@ -42,12 +42,14 @@ from agentic.experiments.record import ExperimentExecutionRecord
 from .budget import BudgetTracker
 from .direction import direction_sign
 from .ids import DeterministicIds
+from .narrative import AllowedNumbers, verify_narrative
 from .policy import (
     AgentPolicy,
     AnalysisIntent,
     CritiqueProposal,
     GoalInterpretation,
     drain_policy_cost,
+    narrate_answer,
 )
 
 # Intent -> ordered candidate tools (general layer). Order encodes priority.
@@ -57,8 +59,17 @@ INTENT_TOOLS: dict[AnalysisIntent, list[str]] = {
     AnalysisIntent.correlation: ["analyze_correlation", "fit_simple_regression"],
     AnalysisIntent.anomaly: ["detect_outliers", "summarize_distribution"],
     AnalysisIntent.ranking: ["rank_entities", "compare_groups"],
-    AnalysisIntent.association: ["test_association"],
-    AnalysisIntent.distribution: ["summarize_distribution", "profile_dataset"],
+    # Second tool for the same reason as `distribution` above: with only `test_association`
+    # available, a goal resolving here could state a rival explanation and never run anything
+    # against it. `compare_groups` answers the usual one — that the association is really a
+    # difference between the groups themselves.
+    AnalysisIntent.association: ["test_association", "compare_groups"],
+    # `detect_outliers` belongs here, not only under `anomaly`. "Is a small tail dragging the
+    # mean up?" is a distribution question whose rival explanation is literally outliers, and
+    # without the tool the planner had nothing to raise against that claim — a real run left
+    # it at `proposed` after exhausting both other tools, and the loop correctly refused to
+    # conclude while an untested alternative stood.
+    AnalysisIntent.distribution: ["summarize_distribution", "profile_dataset", "detect_outliers"],
     AnalysisIntent.profile: ["profile_dataset", "summarize_distribution"],
     AnalysisIntent.general: ["profile_dataset", "summarize_distribution"],
 }
@@ -291,25 +302,44 @@ class InvestigationPlanner:
         # function of state, never set or dict iteration order, so ids, batching, replay and
         # diff stay deterministic. With a single open hypothesis this yields exactly the list
         # it produced before, in the same order.
-        open_hypotheses = state.open_hypotheses() or [None]
-        for hypothesis in open_hypotheses:
-            hyp_target = hypothesis.id if hypothesis is not None else target
+        # Claims are grouped by the metric their experiments would measure, because the
+        # dedupe key is `(tool, metric)` and two claims about the same metric would otherwise
+        # collide: the first took the key, and every later claim silently got nothing and sat
+        # at `proposed` forever. That is the normal case, not an edge one — a goal phrased as
+        # two competing explanations is two claims about one metric.
+        #
+        # Grouping rather than duplicating is deliberate. The same tool over the same metric
+        # returns the same numbers, so running it twice would buy nothing and double-count
+        # the evidence; it runs once and names every claim it bears on, and the evidence
+        # updater scores it separately against each.
+        #
+        # Dict insertion order follows `open_hypotheses()`, so ordering stays a pure function
+        # of state — ids, batching, replay and diff remain deterministic.
+        grouped: dict[str | None, list[Hypothesis | None]] = {}
+        for hypothesis in state.open_hypotheses() or [None]:
+            grouped.setdefault(
+                self._metric_for(hypothesis, interpretation, manifest), []
+            ).append(hypothesis)
+
+        for group_metric, group in grouped.items():
+            hyp_targets = [h.id for h in group if h is not None] or ([target] if target else [])
+            representative = group[0]
             for prio, tool in enumerate(tools):
                 if tracker.tool_at_limit(tool):
                     continue
-                key = (tool, self._metric_for(hypothesis, interpretation, manifest))
+                key = (tool, group_metric)
                 if key in done or key in seen:
                     continue
                 if not self._registry.has(tool):
                     continue
-                params = self._params_for(tool, interpretation, manifest, hypothesis)
+                params = self._params_for(tool, interpretation, manifest, representative)
                 if not self._registry.get(tool).validate(params=params, manifest=manifest).ok:
                     continue
                 gain = round(max(0.3, 0.85 - 0.1 * prio), 4)
                 out.append(ExperimentRequest(
                     id=idgen.make("exp", n + len(out)), tool_name=tool, parameters=params,
                     purpose=f"{interpretation.intent.value} analysis via {tool}",
-                    target_hypothesis_ids=[hyp_target] if hyp_target else [],
+                    target_hypothesis_ids=list(hyp_targets),
                     expected_information_gain=gain,
                     provenance=_prov("investigation_planner")))
                 seen.add(key)
@@ -488,13 +518,23 @@ class EvidenceUpdater:
         self, state: InvestigationState, record: ExperimentExecutionRecord, request: ExperimentRequest,
         idgen: DeterministicIds,
     ) -> list[Evidence]:
-        target = request.target_hypothesis_ids[0] if request.target_hypothesis_ids else None
-        hyp = state.find_hypothesis(target) if target else None
-        expected = expectation_direction(hyp) if hyp is not None else None
+        # Every claim the experiment was raised to test, not just the first.
+        #
+        # One measurement can bear on two rival explanations at once, and it does not bear on
+        # them the same way: `expectation_direction` is a property of the hypothesis, so the
+        # slope that supports "this is a sustained change" is the slope that refutes "this is
+        # a few extreme quarters". Reading only `target_hypothesis_ids[0]` scored the first
+        # claim and left the second with no evidence at all — which is how a rival stayed at
+        # `proposed` while every tool in its intent had already run.
+        targets: list[str | None] = [
+            t for t in request.target_hypothesis_ids if state.find_hypothesis(t) is not None
+        ] or [None]
         record_signal = self._signal_sign(record)
 
         produced: list[Evidence] = []
-        for i, e in enumerate(record.evidence):
+        for e, target in [(e, t) for e in record.evidence for t in targets]:
+            hyp = state.find_hypothesis(target) if target else None
+            expected = expectation_direction(hyp) if hyp is not None else None
             if expected is not None:
                 # Prefer the evidence item's own directional statistic (e.g. per-entity
                 # slope), so opposing signals in one experiment yield contradictory evidence.
@@ -517,11 +557,15 @@ class EvidenceUpdater:
                 statistics=e.statistics, provenance=_prov("evidence_updater"))
             state.add_evidence(ev)
             produced.append(ev)
-        if produced and target:
+        named = [t for t in targets if t]
+        if produced and named:
+            # One decision naming every claim the evidence was filed against, so the trace
+            # shows a shared experiment as the single act it was rather than one act per claim.
             state.record_decision(AgentDecision(
                 id=idgen.make("dec-evd", len(state.decisions)), decision_type=DecisionType.update_evidence,
                 rationale=f"recorded {len(produced)} evidence item(s) for {request.tool_name}",
-                targets=[EntityRef(kind=EntityKind.hypothesis, id=target)], provenance=_prov("evidence_updater")))
+                targets=[EntityRef(kind=EntityKind.hypothesis, id=t) for t in named],
+                provenance=_prov("evidence_updater")))
         return produced
 
     @staticmethod
@@ -553,8 +597,18 @@ class HypothesisUpdater:
     SUPPORT_THRESHOLD = 0.5
 
     def update(self, state: InvestigationState, request: ExperimentRequest, idgen: DeterministicIds) -> None:
-        target = request.target_hypothesis_ids[0] if request.target_hypothesis_ids else None
-        h = state.find_hypothesis(target) if target else None
+        # Score every claim the experiment was raised to test. Reading only the first was the
+        # last of three places that did so: the planner then named both claims and the
+        # evidence updater filed against both, but the rival was still never scored, so it
+        # sat at `proposed` and the loop kept declining with an untested alternative standing.
+        for target in request.target_hypothesis_ids or []:
+            self._score(state, target, request, idgen)
+
+    def _score(
+        self, state: InvestigationState, target: str, request: ExperimentRequest,
+        idgen: DeterministicIds,
+    ) -> None:
+        h = state.find_hypothesis(target)
         if h is None or h.is_terminal():
             return
         if h.status is HypothesisStatus.proposed:
@@ -863,7 +917,14 @@ class TerminationPolicy:
 
 class ConclusionSynthesizer:
     def synthesize(
-        self, state: InvestigationState, reason: TerminationReason, idgen: DeterministicIds,
+        self,
+        state: InvestigationState,
+        reason: TerminationReason,
+        idgen: DeterministicIds,
+        *,
+        policy: object | None = None,
+        question: str = "",
+        tracker: BudgetTracker | None = None,
     ) -> Conclusion:
         supported = [h for h in state.hypotheses if h.status is HypothesisStatus.supported]
         rejected = [h for h in state.hypotheses if h.status is HypothesisStatus.rejected]
@@ -927,6 +988,7 @@ class ConclusionSynthesizer:
 
         conclusion = Conclusion(
             id=idgen.make("concl", 0), statement=statement, disposition=disposition, confidence=conf,
+            narrative=self._narrate(state, policy, question, disposition, conf, reason, tracker),
             supporting_hypothesis_ids=hyp_ids, key_evidence_ids=key_ev, caveats=caveats,
             open_question_ids=[q.id for q in state.open_questions], provenance=_prov("conclusion_synthesizer"))
         state.set_conclusion(conclusion)
@@ -935,6 +997,96 @@ class ConclusionSynthesizer:
             rationale=f"{disposition.value} ({reason.value})",
             targets=[EntityRef(kind=EntityKind.conclusion, id=conclusion.id)], provenance=_prov("conclusion_synthesizer")))
         return conclusion
+
+    @staticmethod
+    def _narrate(
+        state: InvestigationState,
+        policy: object | None,
+        question: str,
+        disposition: ConclusionDisposition,
+        confidence: float,
+        reason: TerminationReason,
+        tracker: BudgetTracker | None,
+    ) -> str | None:
+        """
+        The finding as prose, when a policy can write one that survives verification.
+
+        The findings handed over are already-computed values, and the check on the way back
+        is what matters: a figure the run never recorded discards the whole narrative and
+        the caller keeps its deterministic statement. Returning ``None`` is an ordinary
+        outcome here, not a failure.
+        """
+        if policy is None:
+            return None
+
+        # Per-claim evidence, split by direction. A writer asked for more than a couple of
+        # sentences needs something true to say in them; without this the only material is
+        # the claim statements, and the extra length turns into padding or into figures the
+        # run never produced.
+        # Seeded at zero for every claim, not just the ones with evidence. A claim with
+        # nothing against it genuinely has *zero* refuting items, and that is a fact the run
+        # holds — leaving it out of the allowed set made "no refuting evidence" unsayable.
+        supporting: dict[str, int] = {h.id: 0 for h in state.hypotheses}
+        refuting: dict[str, int] = {h.id: 0 for h in state.hypotheses}
+        for e in state.evidence:
+            bucket = refuting if e.direction is EvidenceDirection.refutes else supporting
+            for hid in e.hypothesis_ids:
+                if hid in bucket:
+                    bucket[hid] += 1
+
+        claims = [
+            {
+                "statement": h.statement,
+                "status": h.status.value,
+                "confidence": h.confidence,
+                "supporting_evidence": supporting.get(h.id, 0),
+                "refuting_evidence": refuting.get(h.id, 0),
+            }
+            for h in state.hypotheses
+        ]
+        counts = {
+            "hypotheses": len(state.hypotheses),
+            "evidence": len(state.evidence),
+            "experiments": len(state.completed_experiments),
+            "supported": sum(1 for h in state.hypotheses if h.status is HypothesisStatus.supported),
+            "open_questions": len(state.open_questions),
+        }
+        dataset = state.datasets[0] if state.datasets else None
+        findings = {
+            "disposition": disposition.value,
+            "confidence": confidence,
+            "claims": claims,
+            "counts": counts,
+            # What was actually run, and what the run refused to settle. Both are things a
+            # reader wants and neither can be inferred from the claims alone.
+            "experiments_run": [x.tool_name for x in state.completed_experiments],
+            "stopped_because": reason.value,
+            "open_questions": [q.question for q in state.open_questions],
+            "dataset": (
+                {"name": dataset.name, "row_count": dataset.row_count} if dataset else None
+            ),
+        }
+
+        # Counted like every other policy call. Writing the answer is a real model call that
+        # costs real money, and a budget that cannot see it reports a run as cheaper than it
+        # was. It is recorded, never gated: the run is already over by the time this happens,
+        # so refusing it here would only cost the answer, not save the spend.
+        if tracker is not None:
+            written = _invoke_policy(tracker, policy, lambda: narrate_answer(  # type: ignore[arg-type]
+                policy, question=question, findings=findings))
+        else:
+            written = narrate_answer(policy, question=question, findings=findings)
+        if written is None:
+            return None
+
+        # Every figure handed over is a figure the prose may state, and nothing else is.
+        allowed = AllowedNumbers().add_many_counts(counts).add_confidence(confidence)
+        for h in state.hypotheses:
+            allowed.add_confidence(h.confidence)
+        allowed.add_many_counts(supporting).add_many_counts(refuting)
+        if dataset is not None:
+            allowed.add_count(dataset.row_count)
+        return verify_narrative(written, allowed)
 
 
 def make_termination(reason: TerminationReason, state: InvestigationState, idgen: DeterministicIds) -> TerminationDecision:

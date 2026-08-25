@@ -21,15 +21,22 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import type { CurrentUser } from "@/lib/api/types";
+import { cn } from "@/lib/utils";
 import type { ChatThreadSummary } from "./types";
 
 type Props = {
   conversationId: string;
   user?: CurrentUser | null;
   scopeTickers: string[];
-  newConversationAction: (payload: FormData) => void;
-  deleteConversationAction: (payload: FormData) => void;
+  newConversationAction?: (payload: FormData) => void;
+  deleteConversationAction?: (payload: FormData) => void;
   chatThreads: ChatThreadSummary[];
+  /**
+   * Replay tier: the threads are recorded runs, and nothing here can be created, deleted or
+   * signed out of. Every mutating affordance is *absent* rather than disabled — a control
+   * that cannot work should not be on screen offering to.
+   */
+  readOnly?: boolean;
 };
 
 /**
@@ -42,6 +49,7 @@ export function ChatSidebar({
   newConversationAction,
   deleteConversationAction,
   chatThreads,
+  readOnly = false,
 }: Props) {
   const { open } = useSidebar();
   const [confirmingId, setConfirmingId] = useState<string | null>(null);
@@ -52,29 +60,41 @@ export function ChatSidebar({
   const accountInitial = (accountName[0] || "G").toUpperCase();
 
   return (
-    <Sidebar collapsible="icon" className="group relative bg-[hsl(var(--sidebar-background))]">
+    <Sidebar
+      collapsible="icon"
+      className={cn(
+        "group relative bg-[hsl(var(--sidebar-background))]",
+        // Below `md` the shell stacks the sidebar full-width above the conversation, and
+        // collapsing only narrows it from `md` up. A reader arriving at a recorded run would
+        // meet a list of five other runs before the answer — so on the replay tier the
+        // switcher is desktop-only, and the header's "All runs" carries it on small screens.
+        readOnly && "hidden md:flex",
+      )}
+    >
       <SidebarHeader className="space-y-3 p-2.5">
         <div className="flex items-center justify-between gap-2">
           <SidebarTrigger className="h-8 w-8 rounded-control border border-[hsl(var(--sidebar-border))] bg-[var(--chat-raise)] text-[hsl(var(--sidebar-foreground)/0.75)] transition-colors hover:border-[var(--accent)]" />
-          <form action={newConversationAction}>
-            <input type="hidden" name="tickers" value={scopeTickers.join(",")} />
-            <SidebarMenuButton
-              type="submit"
-              className="h-8 w-8 items-center justify-center rounded-control border border-[hsl(var(--sidebar-border))] bg-[var(--chat-raise)] p-0 text-[hsl(var(--sidebar-foreground))] transition-colors hover:border-[var(--accent)]"
-              disabled={scopeTickers.length === 0}
-              title="New chat"
-              aria-label="New chat"
-            >
-              <MessageSquarePlus className="h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.7)]" />
-            </SidebarMenuButton>
-          </form>
+          {newConversationAction ? (
+            <form action={newConversationAction}>
+              <input type="hidden" name="tickers" value={scopeTickers.join(",")} />
+              <SidebarMenuButton
+                type="submit"
+                className="h-8 w-8 items-center justify-center rounded-control border border-[hsl(var(--sidebar-border))] bg-[var(--chat-raise)] p-0 text-[hsl(var(--sidebar-foreground))] transition-colors hover:border-[var(--accent)]"
+                disabled={scopeTickers.length === 0}
+                title="New chat"
+                aria-label="New chat"
+              >
+                <MessageSquarePlus className="h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.7)]" />
+              </SidebarMenuButton>
+            </form>
+          ) : null}
         </div>
       </SidebarHeader>
       <SidebarContent aria-label="Chat history" className="px-1 pb-2">
         <SidebarGroup className="pt-2">
           <SidebarGroupLabel className="flex items-center gap-2 px-3">
             <History className="h-3.5 w-3.5" />
-            <span>History</span>
+            <span>{readOnly ? "Recorded runs" : "History"}</span>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu className="px-1">
@@ -82,7 +102,7 @@ export function ChatSidebar({
                 <SidebarMenuItem>
                   {open ? (
                     <div className="rounded-control border border-dashed border-[hsl(var(--sidebar-border))] px-3 py-3 text-xs leading-5 text-[hsl(var(--sidebar-foreground)/0.6)]">
-                      Earlier chats will appear here.
+                      {readOnly ? "No runs published yet." : "Earlier chats will appear here."}
                     </div>
                   ) : (
                     <div className="flex justify-center px-1 py-2 text-[hsl(var(--sidebar-foreground)/0.45)]">
@@ -101,17 +121,27 @@ export function ChatSidebar({
                       title={thread.title}
                     >
                       <Link href={thread.href}>
-                        <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                        {thread.recorded ? (
+                          <History className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                        ) : (
+                          <MessagesSquare className="mt-0.5 h-4 w-4 shrink-0 text-[hsl(var(--sidebar-foreground)/0.62)]" />
+                        )}
                         {open ? (
                           <div className="min-w-0 flex-1">
                             <span className="line-clamp-2 block text-[13px] font-medium leading-5 text-[hsl(var(--sidebar-foreground))]">
                               {thread.title}
                             </span>
+                            {thread.recorded ? (
+                              <span className="mt-1 inline-flex rounded-chip border border-[hsl(var(--sidebar-border))] px-1.5 py-0.5 font-mono text-[10px] uppercase tracking-[0.08em] text-[hsl(var(--sidebar-foreground)/0.6)]">
+                                recorded
+                              </span>
+                            ) : null}
                           </div>
                         ) : null}
                       </Link>
                     </SidebarMenuButton>
-                    {open ? (
+                    {/* A published run is not this reader's to delete. */}
+                    {open && deleteConversationAction && !thread.recorded ? (
                       <form
                         action={deleteConversationAction}
                         onSubmit={() => setConfirmingId(null)}
@@ -160,27 +190,38 @@ export function ChatSidebar({
       <SidebarFooter className="p-2">
         <div className="flex items-center gap-2 rounded-control px-1.5 py-1">
           <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[var(--chat-primary)] text-[11px] font-semibold text-[var(--chat-primary-ink)]">
-            {accountInitial}
+            {readOnly ? "R" : accountInitial}
           </span>
           {open ? (
-            <>
+            readOnly ? (
               <div className="min-w-0 flex-1 leading-tight">
                 <p className="truncate text-[13px] font-medium text-[hsl(var(--sidebar-foreground))]">
-                  {accountName}
+                  Replay tier
                 </p>
-                <p className="truncate text-[11px] text-[hsl(var(--sidebar-foreground)/0.6)]">{accountSub}</p>
+                <p className="truncate text-[11px] text-[hsl(var(--sidebar-foreground)/0.6)]">
+                  Published runs, read-only
+                </p>
               </div>
-              <form action={logoutAction}>
-                <button
-                  type="submit"
-                  title="Sign out"
-                  aria-label="Sign out"
-                  className="flex h-8 w-8 items-center justify-center rounded-control text-[hsl(var(--sidebar-foreground)/0.55)] transition hover:bg-[var(--chat-hover)] hover:text-[hsl(var(--sidebar-foreground))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
-                >
-                  <LogOut className="h-4 w-4" />
-                </button>
-              </form>
-            </>
+            ) : (
+              <>
+                <div className="min-w-0 flex-1 leading-tight">
+                  <p className="truncate text-[13px] font-medium text-[hsl(var(--sidebar-foreground))]">
+                    {accountName}
+                  </p>
+                  <p className="truncate text-[11px] text-[hsl(var(--sidebar-foreground)/0.6)]">{accountSub}</p>
+                </div>
+                <form action={logoutAction}>
+                  <button
+                    type="submit"
+                    title="Sign out"
+                    aria-label="Sign out"
+                    className="flex h-8 w-8 items-center justify-center rounded-control text-[hsl(var(--sidebar-foreground)/0.55)] transition hover:bg-[var(--chat-hover)] hover:text-[hsl(var(--sidebar-foreground))] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                  >
+                    <LogOut className="h-4 w-4" />
+                  </button>
+                </form>
+              </>
+            )
           ) : null}
         </div>
       </SidebarFooter>

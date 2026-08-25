@@ -22,6 +22,10 @@ class Conclusion(DomainModel):
 
     id: str = Field(default_factory=lambda: new_id("concl"))
     statement: str = Field(..., min_length=1)
+    #: The same finding written as prose, when a policy wrote one and every figure in it
+    #: checked out against recorded state. ``None`` is normal and always safe: ``statement``
+    #: is the deterministic answer and never depends on this.
+    narrative: str | None = None
     disposition: ConclusionDisposition
     confidence: float = Field(default=0.5, ge=0.0, le=1.0)
     supporting_hypothesis_ids: list[str] = Field(default_factory=list)

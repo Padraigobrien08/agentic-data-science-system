@@ -1,24 +1,24 @@
 {
-  "analysis_run_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
+  "analysis_run_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee",
   "chat": [
     {
-      "created_at": "2026-08-20T19:02:30",
-      "id": "f92fd75f-6570-4bd2-a146-523147cb3ca1",
+      "created_at": "2026-08-24T16:14:04",
+      "id": "39977f1b-c832-4ceb-9558-5cb904ebda2e",
       "messages": [
         {
           "analysis_run_id": null,
           "content": "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?",
-          "created_at": "2026-08-20T19:02:30.404145",
-          "id": "a50c65b7-db67-4673-8c19-f3df7e946835",
+          "created_at": "2026-08-24T16:14:04.851908",
+          "id": "b805ab88-813b-4436-adb3-d1b9d197e434",
           "role": "user",
           "sequence": 0,
           "status": "complete"
         },
         {
-          "analysis_run_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
-          "content": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with staffing level than with on-time rate.",
-          "created_at": "2026-08-20T19:02:30.406082",
-          "id": "c8dc42c2-7b90-40c9-b911-22cb53c64d3b",
+          "analysis_run_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee",
+          "content": "Mixed evidence for: On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.; Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.",
+          "created_at": "2026-08-24T16:14:04.852178",
+          "id": "463a2a35-ac2b-473b-9b9f-cdb594c5db5d",
           "role": "assistant",
           "sequence": 1,
           "status": "complete"
@@ -28,15 +28,15 @@
     }
   ],
   "demo_slug": "csv-staffing-vs-service",
-  "investigation_id": "2026414b-3de7-4578-a6da-f312ec15ef5f",
+  "investigation_id": "095f38d5-7243-4a09-bfbe-f95ebe9ebb8f",
   "model_calls": [
     {
-      "completion_tokens": 53,
+      "completion_tokens": 55,
       "error_detail": null,
-      "est_cost_usd": 0.000972,
-      "finished_at": "2026-08-20T19:02:20.252081",
-      "id": "84fb5c02-6411-415c-a107-4ccec8c08944",
-      "latency_ms": 1978,
+      "est_cost_usd": 0.000981,
+      "finished_at": "2026-08-24T16:13:50.835043",
+      "id": "eb721341-d116-498b-a016-01f867ca0e8e",
+      "latency_ms": 1836,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 978,
@@ -64,10 +64,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether staffing level and order volume explain on-time rate, which is a relationship between metrics.\"}",
-        "completion_tokens": 53,
+        "assistant_text": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether staffing level and order volume explain changes in on-time rate, which is a relationship between metrics.\"}",
+        "completion_tokens": 55,
         "finish_reason": "stop",
-        "latency_ms": 1978,
+        "latency_ms": 1836,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 978,
         "raw_response": {
@@ -79,7 +79,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether staffing level and order volume explain on-time rate, which is a relationship between metrics.\"}",
+                "content": "{\"intent\":\"correlation\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":null,\"rationale\":\"The goal asks whether staffing level and order volume explain changes in on-time rate, which is a relationship between metrics.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -87,15 +87,15 @@
               }
             }
           ],
-          "created": 1787252539,
-          "id": "chatcmpl-EF2JnSNAwyh3bZxc0BHvOL9gjlM9T",
+          "created": 1787588029,
+          "id": "chatcmpl-EGRavbt4d1gv2IEtzfBGa4QhrbUQ4",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 53,
+            "completion_tokens": 55,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -108,24 +108,24 @@
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1031
+            "total_tokens": 1033
           }
         }
       },
       "sequence": 0,
-      "started_at": "2026-08-20T19:02:18.270616",
+      "started_at": "2026-08-24T16:13:48.998458",
       "status": "success"
     },
     {
-      "completion_tokens": 127,
+      "completion_tokens": 168,
       "error_detail": null,
-      "est_cost_usd": 0.001317,
-      "finished_at": "2026-08-20T19:02:21.507992",
-      "id": "894c8231-4f31-4897-a600-dcfa5a894f07",
-      "latency_ms": 1249,
+      "est_cost_usd": 0.001503,
+      "finished_at": "2026-08-24T16:13:53.102771",
+      "id": "149c5331-7480-4b6c-b2bf-5259b5566462",
+      "latency_ms": 2263,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 994,
+      "prompt_tokens": 996,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -139,7 +139,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": \"Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?\", \"interpretation\": {\"intent\": \"correlation\", \"metric_hint\": \"on_time_rate\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks whether staffing level and order volume explain on-time rate, which is a relationship between metrics.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
+            "content": "{\"goal\": \"Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?\", \"interpretation\": {\"intent\": \"correlation\", \"metric_hint\": \"on_time_rate\", \"group_hint\": null, \"direction\": null, \"rationale\": \"The goal asks whether staffing level and order volume explain changes in on-time rate, which is a relationship between metrics.\"}, \"metrics\": [\"avg_delivery_days\", \"order_volume\", \"on_time_rate\", \"staff_count\"], \"dimensions\": []}",
             "role": "user"
           }
         ],
@@ -150,12 +150,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"On-time rate is more strongly associated with staffing level than with order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This directly tests the stated question about which factor better explains service quality.\"},{\"statement\":\"Order volume is more strongly associated with staffing level than with on-time rate.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This captures the competing explanation that volume, not staffing, is the stronger driver.\"}],\"questions\":[\"Is any observed relationship stable across the available time window, or driven by a short-lived spike?\"]}",
-        "completion_tokens": 127,
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"Tests whether staffing level is a plausible explanatory factor for service quality.\"},{\"statement\":\"Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"The goal explicitly asks whether volume is the stronger driver, so this competing explanation must be tested separately.\"}],\"questions\":[\"Which factor explains more of the variation in on-time rate: staffing level or order volume?\",\"Is any observed relationship stable across the full period, or driven by a few outlier intervals?\"]}",
+        "completion_tokens": 168,
         "finish_reason": "stop",
-        "latency_ms": 1249,
+        "latency_ms": 2263,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 994,
+        "prompt_tokens": 996,
         "raw_response": {
           "choices": [
             {
@@ -165,7 +165,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"On-time rate is more strongly associated with staffing level than with order volume.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"This directly tests the stated question about which factor better explains service quality.\"},{\"statement\":\"Order volume is more strongly associated with staffing level than with on-time rate.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"This captures the competing explanation that volume, not staffing, is the stronger driver.\"}],\"questions\":[\"Is any observed relationship stable across the available time window, or driven by a short-lived spike?\"]}",
+                "content": "{\"hypotheses\":[{\"statement\":\"On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.\",\"metric\":\"on_time_rate\",\"direction\":\"none\",\"rationale\":\"Tests whether staffing level is a plausible explanatory factor for service quality.\"},{\"statement\":\"Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.\",\"metric\":\"order_volume\",\"direction\":\"none\",\"rationale\":\"The goal explicitly asks whether volume is the stronger driver, so this competing explanation must be tested separately.\"}],\"questions\":[\"Which factor explains more of the variation in on-time rate: staffing level or order volume?\",\"Is any observed relationship stable across the full period, or driven by a few outlier intervals?\"]}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -173,42 +173,42 @@
               }
             }
           ],
-          "created": 1787252540,
-          "id": "chatcmpl-EF2JoymlAD133F79XlxEEI0zJzylX",
+          "created": 1787588031,
+          "id": "chatcmpl-EGRaxalSfQtoqyj3eamXNVaB9fz06",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 127,
+            "completion_tokens": 168,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 994,
+            "prompt_tokens": 996,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1121
+            "total_tokens": 1164
           }
         }
       },
       "sequence": 1,
-      "started_at": "2026-08-20T19:02:20.257040",
+      "started_at": "2026-08-24T16:13:50.837472",
       "status": "success"
     },
     {
-      "completion_tokens": 31,
+      "completion_tokens": 33,
       "error_detail": null,
-      "est_cost_usd": 0.000753,
-      "finished_at": "2026-08-20T19:02:22.461237",
-      "id": "0982f68e-e968-4d68-98d9-e5d68ef9f917",
-      "latency_ms": 916,
+      "est_cost_usd": 0.000762,
+      "finished_at": "2026-08-24T16:13:54.296234",
+      "id": "1444d0f9-3c4c-4dd3-9279-e2a869ae1a07",
+      "latency_ms": 1168,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 818,
@@ -236,10 +236,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
-        "completion_tokens": 31,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"Analyze correlation directly, since it has the highest expected information gain for the stated goal.\"}",
+        "completion_tokens": 33,
         "finish_reason": "stop",
-        "latency_ms": 916,
+        "latency_ms": 1168,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 818,
         "raw_response": {
@@ -251,7 +251,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"analyze_correlation is the highest-information direct test of the correlation goal.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"Analyze correlation directly, since it has the highest expected information gain for the stated goal.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -259,180 +259,8 @@
               }
             }
           ],
-          "created": 1787252542,
-          "id": "chatcmpl-EF2JqaJ5uavAyazd3hytp5B4XDfd9",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "moderation": null,
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 31,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 818,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cache_write_tokens": null,
-              "cached_tokens": 0
-            },
-            "total_tokens": 849
-          }
-        }
-      },
-      "sequence": 2,
-      "started_at": "2026-08-20T19:02:21.543139",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 152,
-      "error_detail": null,
-      "est_cost_usd": 0.001638,
-      "finished_at": "2026-08-20T19:02:26.042348",
-      "id": "489409bb-b12a-43b1-9591-99de17e852e6",
-      "latency_ms": 3562,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 1272,
-      "prompt_version": "1.0.3",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
-            "role": "system"
-          },
-          {
-            "content": "{\"claim\": {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"fit_simple_regression\"], \"supported_claims\": [{\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}]}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge the association claim with a simpler regression that can test whether the apparent staffing effect persists once order volume is modeled directly; the current support could reflect confounding or model specification rather than a stronger relationship with staffing.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so it should be challenged before the loop concludes.\"}",
-        "completion_tokens": 152,
-        "finish_reason": "stop",
-        "latency_ms": 3562,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1272,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge the association claim with a simpler regression that can test whether the apparent staffing effect persists once order volume is modeled directly; the current support could reflect confounding or model specification rather than a stronger relationship with staffing.\",\"rationale\":\"The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so it should be challenged before the loop concludes.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1787252544,
-          "id": "chatcmpl-EF2JsQEMPQUx2hd72xl1vUSGYPu7h",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "moderation": null,
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 152,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 1272,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cache_write_tokens": null,
-              "cached_tokens": 0
-            },
-            "total_tokens": 1424
-          }
-        }
-      },
-      "sequence": 3,
-      "started_at": "2026-08-20T19:02:22.477923",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 33,
-      "error_detail": null,
-      "est_cost_usd": 0.000747,
-      "finished_at": "2026-08-20T19:02:26.832308",
-      "id": "21efb0d8-f916-43bb-852c-b5c5e775cd45",
-      "latency_ms": 756,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 798,
-      "prompt_version": "1.0.3",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
-            "role": "system"
-          },
-          {
-            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"falsify hypothesis 755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the preferred falsification step and would directly challenge the currently supported correlation hypothesis.\"}",
-        "completion_tokens": 33,
-        "finish_reason": "stop",
-        "latency_ms": 756,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 798,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This is the preferred falsification step and would directly challenge the currently supported correlation hypothesis.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1787252546,
-          "id": "chatcmpl-EF2JuJpGkZzlVfcLa17Dw5CxAO89z",
+          "created": 1787588033,
+          "id": "chatcmpl-EGRazqeE1KhSfEX0lzOtuBM4pW6t1",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -446,30 +274,30 @@
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 798,
+            "prompt_tokens": 818,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 831
+            "total_tokens": 851
           }
         }
       },
-      "sequence": 4,
-      "started_at": "2026-08-20T19:02:26.075413",
+      "sequence": 2,
+      "started_at": "2026-08-24T16:13:53.126294",
       "status": "success"
     },
     {
-      "completion_tokens": 74,
+      "completion_tokens": 143,
       "error_detail": null,
-      "est_cost_usd": 0.00128325,
-      "finished_at": "2026-08-20T19:02:27.764219",
-      "id": "8a4bda22-fe78-41c9-a47f-a90e6f8d0890",
-      "latency_ms": 922,
+      "est_cost_usd": 0.0016065,
+      "finished_at": "2026-08-24T16:13:56.173948",
+      "id": "1a711354-2ceb-465a-9c5a-c5b1fd1dc823",
+      "latency_ms": 1859,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1267,
+      "prompt_tokens": 1284,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -483,7 +311,7 @@
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}]}",
+            "content": "{\"claim\": {\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"fit_simple_regression\"], \"supported_claims\": [{\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"statement\": \"On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -494,12 +322,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The claim has already been critiqued, and there are no unused tools available for a further challenge. No contradiction with another supported claim is present.\"}",
-        "completion_tokens": 74,
+        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge the association with a simple regression check: the observed same-direction relationship could be an artefact of trend, seasonality, or a few influential points rather than a robust staffing effect.\",\"rationale\":\"The claim is newly supported, has not yet been critiqued, and there is an unused experiment available that can test whether the association survives a simpler alternative model.\"}",
+        "completion_tokens": 143,
         "finish_reason": "stop",
-        "latency_ms": 922,
+        "latency_ms": 1859,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1267,
+        "prompt_tokens": 1284,
         "raw_response": {
           "choices": [
             {
@@ -509,7 +337,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\": false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The claim has already been critiqued, and there are no unused tools available for a further challenge. No contradiction with another supported claim is present.\"}",
+                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\",\"falsification_tool\":\"fit_simple_regression\",\"contradicts_hypothesis_id\":null,\"message\":\"Challenge the association with a simple regression check: the observed same-direction relationship could be an artefact of trend, seasonality, or a few influential points rather than a robust staffing effect.\",\"rationale\":\"The claim is newly supported, has not yet been critiqued, and there is an unused experiment available that can test whether the association survives a simpler alternative model.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -517,8 +345,180 @@
               }
             }
           ],
-          "created": 1787252547,
-          "id": "chatcmpl-EF2JvTObd8lVv99830DV4jja2baWR",
+          "created": 1787588034,
+          "id": "chatcmpl-EGRb0kWdR5c9kTHfiIfu0zX2kH5vd",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 143,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1284,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 1427
+          }
+        }
+      },
+      "sequence": 3,
+      "started_at": "2026-08-24T16:13:54.312216",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 38,
+      "error_detail": null,
+      "est_cost_usd": 0.00076875,
+      "finished_at": "2026-08-24T16:13:58.027941",
+      "id": "c9a1a73e-e8ee-4f94-a5cc-72c8792a0861",
+      "latency_ms": 1790,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 797,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "role": "system"
+          },
+          {
+            "content": "{\"goal\": {\"intent\": \"correlation\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"falsify hypothesis 1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"analyze_correlation\", \"purpose\": \"correlation analysis via analyze_correlation\", \"expected_information_gain\": 0.85, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"fit_simple_regression\", \"purpose\": \"correlation analysis via fit_simple_regression\", \"expected_information_gain\": 0.75, \"falsification\": false}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the offered falsification test, so it best challenges the currently supported correlation hypothesis before settling on it.\"}",
+        "completion_tokens": 38,
+        "finish_reason": "stop",
+        "latency_ms": 1790,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 797,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"request_index\":0,\"rationale\":\"This is the offered falsification test, so it best challenges the currently supported correlation hypothesis before settling on it.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787588037,
+          "id": "chatcmpl-EGRb3KWwBEyq0iwrbLzj3eD7Kw6XD",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 38,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 797,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 0
+            },
+            "total_tokens": 835
+          }
+        }
+      },
+      "sequence": 4,
+      "started_at": "2026-08-24T16:13:56.236268",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 74,
+      "error_detail": null,
+      "est_cost_usd": 0.00129225,
+      "finished_at": "2026-08-24T16:13:59.825429",
+      "id": "a4ac8e13-0377-46f1-bf81-ce31343336bf",
+      "latency_ms": 1786,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1279,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "role": "system"
+          },
+          {
+            "content": "{\"claim\": {\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"statement\": \"On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.\", \"confidence\": 0.95}]}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"contradicts_hypothesis_id\": null,\"message\":\"\",\"rationale\":\"The current claim is already critiqued, and there are no unused tools available to run a further challenge. No contradiction among supported claims is present.\"}",
+        "completion_tokens": 74,
+        "finish_reason": "stop",
+        "latency_ms": 1786,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1279,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"contradicts_hypothesis_id\": null,\"message\":\"\",\"rationale\":\"The current claim is already critiqued, and there are no unused tools available to run a further challenge. No contradiction among supported claims is present.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787588038,
+          "id": "chatcmpl-EGRb4IHsvf6VdYUl1BMcMG06Bey7e",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -532,27 +532,27 @@
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1267,
+            "prompt_tokens": 1279,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1341
+            "total_tokens": 1353
           }
         }
       },
       "sequence": 5,
-      "started_at": "2026-08-20T19:02:26.839891",
+      "started_at": "2026-08-24T16:13:58.037215",
       "status": "success"
     },
     {
       "completion_tokens": 29,
       "error_detail": null,
       "est_cost_usd": 0.00067575,
-      "finished_at": "2026-08-20T19:02:28.814177",
-      "id": "53de7ec1-3275-4932-b108-0dad56bd1194",
-      "latency_ms": 1028,
+      "finished_at": "2026-08-24T16:14:01.018600",
+      "id": "03c65d3d-5525-4d33-b9bc-a64ce5cade06",
+      "latency_ms": 1167,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 727,
@@ -583,7 +583,7 @@
         "assistant_text": "{\"request_index\":0,\"rationale\":\"This directly establishes the correlation estimate with the highest expected information gain.\"}",
         "completion_tokens": 29,
         "finish_reason": "stop",
-        "latency_ms": 1028,
+        "latency_ms": 1167,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 727,
         "raw_response": {
@@ -603,8 +603,8 @@
               }
             }
           ],
-          "created": 1787252548,
-          "id": "chatcmpl-EF2Jwv0ZE7h63Z0H0MIIyjuWpi727",
+          "created": 1787588040,
+          "id": "chatcmpl-EGRb6DcHMqDFUQZPTtOAc0SSlSsGo",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
@@ -629,19 +629,19 @@
         }
       },
       "sequence": 6,
-      "started_at": "2026-08-20T19:02:27.784504",
+      "started_at": "2026-08-24T16:13:59.849360",
       "status": "success"
     },
     {
-      "completion_tokens": 147,
+      "completion_tokens": 151,
       "error_detail": null,
-      "est_cost_usd": 0.00165675,
-      "finished_at": "2026-08-20T19:02:30.341358",
-      "id": "65e8ac77-b06f-4555-9b5c-ed958f3c6ad8",
-      "latency_ms": 1512,
+      "est_cost_usd": 0.00168675,
+      "finished_at": "2026-08-24T16:14:02.860045",
+      "id": "88fed70e-8517-4c5f-9498-f48ded327716",
+      "latency_ms": 1820,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 1327,
+      "prompt_tokens": 1343,
       "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
@@ -655,7 +655,7 @@
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0\", \"statement\": \"On-time rate is more strongly associated with staffing level than with order volume.\", \"confidence\": 0.95}, {\"id\": \"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1\", \"statement\": \"Order volume is more strongly associated with staffing level than with on-time rate.\", \"confidence\": 0.95}]}",
+            "content": "{\"claim\": {\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [], \"supported_claims\": [{\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0\", \"statement\": \"On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.\", \"confidence\": 0.95}, {\"id\": \"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1\", \"statement\": \"Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -666,12 +666,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1\",\"message\":\"The two supported claims are mutually incompatible: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with staffing level than with on-time rate. Both cannot be true at the same time.\",\"rationale\":\"A contradiction between supported claims outranks an ordinary challenge, and there are no unused tools available to discriminate between them.\"}",
-        "completion_tokens": 147,
+        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1\",\"message\":\"The supported claims conflict: one says on-time rate is associated with staffing level, while the other says order volume is a stronger driver of service quality than staffing level. These can both be true as stated, so this is not a direct contradiction.\",\"rationale\":\"No challenge is allowed because the current claim has already been critiqued and there are no unused tools. The supported claims do not force rejection of one another.\"}",
+        "completion_tokens": 151,
         "finish_reason": "stop",
-        "latency_ms": 1512,
+        "latency_ms": 1820,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 1327,
+        "prompt_tokens": 1343,
         "raw_response": {
           "choices": [
             {
@@ -681,7 +681,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1\",\"message\":\"The two supported claims are mutually incompatible: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with staffing level than with on-time rate. Both cannot be true at the same time.\",\"rationale\":\"A contradiction between supported claims outranks an ordinary challenge, and there are no unused tools available to discriminate between them.\"}",
+                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":\"1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1\",\"message\":\"The supported claims conflict: one says on-time rate is associated with staffing level, while the other says order volume is a stronger driver of service quality than staffing level. These can both be true as stated, so this is not a direct contradiction.\",\"rationale\":\"No challenge is allowed because the current claim has already been critiqued and there are no unused tools. The supported claims do not force rejection of one another.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -689,43 +689,129 @@
               }
             }
           ],
-          "created": 1787252549,
-          "id": "chatcmpl-EF2JxVp3L34JP0L6g7CUuSIiDJ2Ql",
+          "created": 1787588041,
+          "id": "chatcmpl-EGRb7wvQkD9Q3mIX7uBiCYOGWxyup",
           "model": "gpt-5.4-mini-2026-03-17",
           "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 147,
+            "completion_tokens": 151,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 1327,
+            "prompt_tokens": 1343,
             "prompt_tokens_details": {
               "audio_tokens": 0,
               "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1474
+            "total_tokens": 1494
           }
         }
       },
       "sequence": 7,
-      "started_at": "2026-08-20T19:02:28.827931",
+      "started_at": "2026-08-24T16:14:01.038080",
+      "status": "success"
+    },
+    {
+      "completion_tokens": 163,
+      "error_detail": null,
+      "est_cost_usd": 0.00207975,
+      "finished_at": "2026-08-24T16:14:04.818691",
+      "id": "4186d8fe-0c6e-4178-95b7-5f64be9bc77d",
+      "latency_ms": 1848,
+      "model_name": "gpt-5.4-mini-2026-03-17",
+      "prompt_id": "agentic.policy",
+      "prompt_tokens": 1795,
+      "prompt_version": "1.0.3",
+      "provider": "openai",
+      "request_payload_json": {
+        "agent": {
+          "phase": "agentic",
+          "role": "agentic_policy"
+        },
+        "messages": [
+          {
+            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
+            "role": "system"
+          },
+          {
+            "content": "{\"question\": \"Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?\", \"findings\": {\"disposition\": \"inconclusive\", \"confidence\": 0.4, \"claims\": [{\"statement\": \"On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.\", \"status\": \"weakened\", \"confidence\": 0.5, \"supporting_evidence\": 7, \"refuting_evidence\": 0}, {\"statement\": \"Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.\", \"status\": \"weakened\", \"confidence\": 0.5, \"supporting_evidence\": 6, \"refuting_evidence\": 0}], \"counts\": {\"hypotheses\": 2, \"evidence\": 13, \"experiments\": 3, \"supported\": 0, \"open_questions\": 3}, \"experiments_run\": [\"analyze_correlation\", \"fit_simple_regression\", \"analyze_correlation\"], \"stopped_because\": \"insufficient_evidence\", \"open_questions\": [\"Which factor explains more of the variation in on-time rate: staffing level or order volume?\", \"Is any observed relationship stable across the full period, or driven by a few outlier intervals?\", \"Which of these holds, if either: 'On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.' or 'Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.'?\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": null}}}",
+            "role": "user"
+          }
+        ],
+        "model": "gpt-5.4-mini",
+        "response_format": {
+          "type": "json_object"
+        },
+        "temperature": 0.0
+      },
+      "response_payload_json": {
+        "assistant_text": "{\"answer\":\"The evidence did not settle whether staffing level explains on-time rate or whether order volume is the stronger driver of service quality. The overall result was inconclusive, with moderate confidence.\\n\\nBoth tested claims were weakened rather than supported. The staffing claim had some evidence behind it, but not enough to stand cleanly. The order-volume claim also had some evidence, but it did not clearly beat staffing level.\\n\\nThe run used a correlation analysis, then a simple regression, then another correlation analysis. It stopped because there was insufficient evidence, and three questions remained open: which factor explains more variation in on-time rate, whether the relationship is stable across the full period or driven by a few outliers, and which of the two competing claims holds, if either.\"}",
+        "completion_tokens": 163,
+        "finish_reason": "stop",
+        "latency_ms": 1848,
+        "model": "gpt-5.4-mini-2026-03-17",
+        "prompt_tokens": 1795,
+        "raw_response": {
+          "choices": [
+            {
+              "finish_reason": "stop",
+              "index": 0,
+              "logprobs": null,
+              "message": {
+                "annotations": [],
+                "audio": null,
+                "content": "{\"answer\":\"The evidence did not settle whether staffing level explains on-time rate or whether order volume is the stronger driver of service quality. The overall result was inconclusive, with moderate confidence.\\n\\nBoth tested claims were weakened rather than supported. The staffing claim had some evidence behind it, but not enough to stand cleanly. The order-volume claim also had some evidence, but it did not clearly beat staffing level.\\n\\nThe run used a correlation analysis, then a simple regression, then another correlation analysis. It stopped because there was insufficient evidence, and three questions remained open: which factor explains more variation in on-time rate, whether the relationship is stable across the full period or driven by a few outliers, and which of the two competing claims holds, if either.\"}",
+                "function_call": null,
+                "refusal": null,
+                "role": "assistant",
+                "tool_calls": null
+              }
+            }
+          ],
+          "created": 1787588043,
+          "id": "chatcmpl-EGRb9JLSVvW7IWsXySWzo8froKKgj",
+          "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
+          "object": "chat.completion",
+          "service_tier": "default",
+          "system_fingerprint": null,
+          "usage": {
+            "completion_tokens": 163,
+            "completion_tokens_details": {
+              "accepted_prediction_tokens": 0,
+              "audio_tokens": 0,
+              "reasoning_tokens": 0,
+              "rejected_prediction_tokens": 0
+            },
+            "prompt_tokens": 1795,
+            "prompt_tokens_details": {
+              "audio_tokens": 0,
+              "cache_write_tokens": null,
+              "cached_tokens": 1280
+            },
+            "total_tokens": 1958
+          }
+        }
+      },
+      "sequence": 8,
+      "started_at": "2026-08-24T16:14:02.969903",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 646,
-    "est_cost_usd": 0.009043,
-    "latency_ms": 11923,
-    "model_calls": 8,
+    "completion_tokens": 854,
+    "est_cost_usd": 0.011356,
+    "latency_ms": 15537,
+    "model_calls": 9,
     "priced": true,
-    "prompt_tokens": 8181,
-    "total_tokens": 8827
+    "prompt_tokens": 10017,
+    "total_tokens": 10871
   }
 }

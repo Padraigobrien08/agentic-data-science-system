@@ -1,12 +1,14 @@
 import Link from "next/link";
 
 import { RunTraceCollectionPanel, type RunTraceCollectionPanelProps } from "@/components/trace/run-trace-collection-panel";
+import { TraceTimeline } from "@/components/trace/trace-timeline";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import type { RunTraceRawDetail, RunTraceShell, TraceCollectionKey } from "@/lib/api/types";
 import { formatDate } from "@/lib/format";
+import { runTimeline } from "@/lib/trace-timeline";
 
 type Props = {
   projectId: string;
@@ -95,20 +97,16 @@ export function RunTraceSummaryView({
               Steps stay primary here. Artifacts and model calls link back to them instead of flattening the run into a second answer page.
             </CardDescription>
           </CardHeader>
-          <CardContent className="space-y-3">
-            {shell.timeline_preview.map((step) => (
-              <div key={step.id} className="rounded-[18px] border border-[var(--border)] bg-[var(--surface)] px-4 py-3">
-                <div className="flex flex-wrap items-center gap-2">
-                  <Badge variant="muted">Step {step.step_index + 1}</Badge>
-                  <Badge variant={step.status === "success" ? "success" : "default"}>{step.status}</Badge>
-                  {step.transparency?.trace ? <Badge variant="muted">{step.transparency.trace}</Badge> : null}
-                </div>
-                <p className="mt-2 text-sm font-semibold text-[var(--foreground)]">
-                  {step.label ?? step.planned_tool_name ?? "Unnamed step"}
-                </p>
-                {step.detail ? <p className="mt-1 text-sm leading-6 text-[var(--muted)]">{step.detail}</p> : null}
-              </div>
-            ))}
+          <CardContent>
+            {/* The same timeline the chat docks and the replay tier draws for a recorded
+                investigation. It was a flat list of cards, which said nothing about where a
+                run stopped succeeding — the grouping does, and it is now the one trace
+                vocabulary in the product rather than a second one to learn here. */}
+            <TraceTimeline
+              groups={runTimeline(shell.timeline_preview)}
+              density="comfortable"
+              emptyLabel="This run recorded no steps."
+            />
           </CardContent>
         </Card>
       </section>

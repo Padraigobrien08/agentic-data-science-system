@@ -17,11 +17,24 @@ export interface Tone {
   className: string;
 }
 
-const NEUTRAL = "bg-neutral-100 text-neutral-700 dark:bg-neutral-800 dark:text-neutral-300";
-const GREEN = "bg-emerald-100 text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300";
-const AMBER = "bg-amber-100 text-amber-800 dark:bg-amber-900/40 dark:text-amber-300";
-const RED = "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300";
-const BLUE = "bg-sky-100 text-sky-800 dark:bg-sky-900/40 dark:text-sky-300";
+/**
+ * Tones are CSS-variable tokens, not Tailwind colour utilities.
+ *
+ * `darkMode` is `class` and no `.dark` element is ever rendered, so every `dark:` variant in
+ * this app is dead: a pill written as `bg-emerald-100 dark:bg-emerald-900/40` stays light
+ * forever. The surfaces themselves invert through `prefers-color-scheme` on these tokens, so
+ * a pill that used utilities stayed pale while the page around it went dark.
+ */
+const NEUTRAL =
+  "bg-[var(--chat-hover)] text-[var(--muted)] border border-[var(--border)]";
+const GREEN =
+  "bg-[var(--status-success-bg)] text-[var(--status-success-ink)] border border-[var(--status-success-border)]";
+const AMBER =
+  "bg-[var(--status-warning-bg)] text-[var(--status-warning-ink)] border border-[var(--status-warning-border)]";
+const RED =
+  "bg-[var(--status-danger-bg)] text-[var(--status-danger-ink)] border border-[var(--status-danger-border)]";
+const BLUE =
+  "bg-[var(--status-info-bg)] text-[var(--status-info-ink)] border border-[var(--status-info-border)]";
 
 export function investigationStatusTone(status: string): Tone {
   switch (status) {
@@ -40,7 +53,14 @@ export function investigationStatusTone(status: string): Tone {
   }
 }
 
-const INDIGO = "bg-indigo-100 text-indigo-800 dark:bg-indigo-900/40 dark:text-indigo-300";
+/**
+ * The contradiction outcome, given its own weight rather than reusing `info`.
+ *
+ * It is neither a success nor a warning: the loop working exactly as intended, and refusing
+ * to answer. Built from the accent token so it inverts like the rest.
+ */
+const INDIGO =
+  "bg-[var(--chat-accent-soft)] text-[var(--status-info-ink)] border border-[var(--status-info-border)]";
 
 /**
  * How a run ended, phrased for a reader rather than for the database.

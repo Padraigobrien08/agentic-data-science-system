@@ -590,6 +590,12 @@ export interface ExperimentItem {
   metrics: Record<string, unknown> | null;
   error: Record<string, unknown> | null;
   request_domain_id: string | null;
+  /**
+   * The claims this experiment was raised to test, in the same id space as
+   * `HypothesisItem.id`. Empty on every run recorded before experiment requests were
+   * persisted — read it as unknown, never as "tested nothing".
+   */
+  target_hypothesis_ids: string[];
   created_at: string;
   artifacts: InvestigationArtifactRef[];
 }
@@ -604,6 +610,11 @@ export interface ObservationItem {
   experiment_result_id: string | null;
 }
 
+export interface EntityRefItem {
+  kind: string;
+  id: string;
+}
+
 export interface DecisionItem {
   id: string;
   sequence: number;
@@ -612,6 +623,12 @@ export interface DecisionItem {
   iteration: number;
   chosen_option: string | null;
   alternatives: string[];
+  /**
+   * What the decision acted on. A contradiction weakens two hypotheses in one act and carries
+   * both here, which is what lets the trace render it as one event rather than two rows.
+   * Empty on runs recorded before the ids were structured.
+   */
+  targets: EntityRefItem[];
 }
 
 export interface CritiqueItem {
@@ -637,6 +654,12 @@ export interface OpenQuestionItem {
 export interface ConclusionItem {
   id: string;
   statement: string;
+  /**
+   * The finding written as prose by the run itself, when it wrote one and every figure in
+   * it was verified against recorded state. Null is ordinary — `statement` is the
+   * deterministic answer of record and is always present.
+   */
+  narrative: string | null;
   disposition: string;
   confidence: number;
   caveats: string[];

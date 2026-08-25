@@ -116,28 +116,29 @@ function getCta(
   projectId: string | null,
   staticShowcase: boolean,
   demoCount: number,
+  demoHref: string,
 ): Cta {
   const runs = recordedRuns(demoCount);
   if (staticShowcase && !isAuthenticated) {
     return {
-      primaryHref: "/demos",
+      primaryHref: demoHref,
       primaryLabel: "Explore recorded runs",
       primaryIsForm: false,
       showInterest: false,
       navLabel: "recorded runs →",
-      navHref: "/demos",
+      navHref: demoHref,
       closingNote:
         `${sentenceCase(runs)}, published exactly as they ended. Not all of them reached an answer.`,
     };
   }
   if (!isAuthenticated) {
     return {
-      primaryHref: "/demos",
+      primaryHref: demoHref,
       primaryLabel: "Enter the live demo",
       primaryIsForm: true,
       showInterest: true,
       navLabel: "live demo →",
-      navHref: "/demos",
+      navHref: demoHref,
       closingNote:
         `Run it yourself, or read the ${runs} published exactly as they ended. Not all of them reached an answer.`,
     };
@@ -570,6 +571,8 @@ type Props = {
   userEmail?: string | null;
   /** How many investigations are published, counted rather than written down. */
   demoCount?: number;
+  /** Where "Explore recorded runs" goes — a conversation, not the index. */
+  demoHref?: string;
 };
 
 export function LandingPage({
@@ -578,8 +581,9 @@ export function LandingPage({
   staticShowcase = false,
   userEmail = null,
   demoCount = 0,
+  demoHref = "/demos",
 }: Props) {
-  const cta = getCta(isAuthenticated, projectId, staticShowcase, demoCount);
+  const cta = getCta(isAuthenticated, projectId, staticShowcase, demoCount, demoHref);
 
   return (
     <div className="landing-dark min-h-screen w-full">

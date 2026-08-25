@@ -1,7 +1,7 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-import { ChatShell } from "@/components/chat-shell/chat-shell";
+import { ChatShell, type ReplayComposer } from "@/components/chat-shell/chat-shell";
 import type { ChatMessage, ChatThreadSummary } from "@/components/chat-shell/types";
 
 // The command palette navigates between chats via the app router, which is not
@@ -256,5 +256,215 @@ describe("ChatShell", () => {
     expect(
       screen.getByText("Open trace to inspect what failed, then retry with narrower wording or refreshed SEC data."),
     ).toBeTruthy();
+  });
+
+  describe("read-only (replay tier)", () => {
+    const recorded: ChatMessage[] = [
+      {
+        id: "demo-user-inv-1",
+        role: "user",
+        content: "Does staffing or volume drive service times?",
+        createdAt: "2026-08-20T19:02:18Z",
+      },
+      {
+        id: "demo-assistant-inv-1",
+        role: "assistant",
+        content: "Two claims could not both be true, so neither was allowed to stand.",
+        recordedAnswer: {
+          narrative: null,
+          headline: "Two claims could not both be true, so neither was allowed to stand.",
+          conclusion: null,
+          claims: [{ id: "h-a", statement: "staffing drives it", status: "weakened", confidence: 0.5 }],
+          openQuestions: ["which of the two holds?"],
+          footnote: "15 decisions, 3 experiments, 13 evidence items.",
+        },
+        createdAt: "2026-08-20T19:02:30Z",
+      },
+    ];
+    const threads: ChatThreadSummary[] = [
+      {
+        id: "a-demo",
+        title: "Does staffing or volume drive service times?",
+        href: "/demos/a-demo",
+        hasMessages: true,
+        updatedAt: "2026-08-20T19:02:30Z",
+      },
+    ];
+
+    const LOCK = {
+      short: "Recorded run — this build has no backend attached",
+      detail: "Clone the repo and point it at your own backend.",
+    };
+
+    function renderReplay(composer: ReplayComposer = { state: "locked", lock: LOCK }) {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          header={<header>recorded · declined</header>}
+          rail={<aside>The trace</aside>}
+          composer={composer}
+        />,
+      );
+    }
+
+    it("renders no affordance that would need a backend", () => {
+      renderReplay();
+
+      expect(screen.queryByRole("button", { name: "New chat" })).toBeNull();
+      expect(
+        screen.queryByRole("button", { name: "Delete Does staffing or volume drive service times?" }),
+      ).toBeNull();
+      expect(screen.queryByRole("button", { name: "Sign out" })).toBeNull();
+      expect(screen.queryByText("Edit scope")).toBeNull();
+      expect(screen.queryByLabelText(/Open command palette/)).toBeNull();
+      expect(screen.queryByText("Scope")).toBeNull();
+    });
+
+    it("shows the recorded answer and the supplied header", () => {
+      renderReplay();
+
+      expect(screen.getByText("recorded · declined")).toBeTruthy();
+      // Twice: the question in the transcript, and the run's row in the sidebar.
+      expect(screen.getAllByText("Does staffing or volume drive service times?")).toHaveLength(2);
+      expect(
+        screen.getByText("Two claims could not both be true, so neither was allowed to stand."),
+      ).toBeTruthy();
+      expect(screen.getByText("staffing drives it")).toBeTruthy();
+      expect(screen.getByText("which of the two holds?")).toBeTruthy();
+      expect(screen.getByText("15 decisions, 3 experiments, 13 evidence items.")).toBeTruthy();
+    });
+
+    // The answer is what the reader came for; the trace is what lets them disbelieve it.
+    // Offered on the answer, not imposed beside it.
+    it("keeps the trace collapsed until the answer's control asks for it", () => {
+      renderReplay();
+
+      expect(screen.queryByText("The trace")).toBeNull();
+
+      fireEvent.click(screen.getByRole("button", { name: "inspect trace" }));
+
+      expect(screen.getByText("The trace")).toBeTruthy();
+    });
+
+    it("collapses it again from the same control", () => {
+      renderReplay();
+
+      fireEvent.click(screen.getByRole("button", { name: "inspect trace" }));
+      fireEvent.click(screen.getByRole("button", { name: "hide trace" }));
+
+      expect(screen.queryByText("The trace")).toBeNull();
+    });
+
+    // The demo pages exist to show the trace beside the answer, so they open on it. The
+    // control still reflects reality: it offers to hide, not to open what is already open.
+    it("opens on the trace when the surface asks for it, and still collapses", () => {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          rail={<aside>The trace</aside>}
+          composer={{ state: "locked", lock: LOCK }}
+          defaultRailOpen
+        />,
+      );
+
+      expect(screen.getByText("The trace")).toBeTruthy();
+
+      fireEvent.click(screen.getByRole("button", { name: "hide trace" }));
+
+      expect(screen.queryByText("The trace")).toBeNull();
+    });
+
+    it("stays closed when asked to open but given no rail to open", () => {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          composer={{ state: "locked", lock: LOCK }}
+          defaultRailOpen
+        />,
+      );
+
+      expect(screen.queryByRole("button", { name: "hide trace" })).toBeNull();
+    });
+
+    it("offers no trace control when the surface supplies no rail", () => {
+      render(
+        <ChatShell
+          readOnly
+          conversationId="a-demo"
+          initialMessages={recorded}
+          chatThreads={threads}
+          composer={{ state: "locked", lock: LOCK }}
+        />,
+      );
+
+      expect(screen.queryByRole("button", { name: "inspect trace" })).toBeNull();
+    });
+
+    it("keeps the sidebar as the run switcher, named for what it lists", () => {
+      renderReplay();
+
+      expect(screen.getAllByText("Recorded runs").length).toBeGreaterThan(0);
+      expect(screen.queryByText("History")).toBeNull();
+      expect(screen.getByRole("link", { name: /Does staffing or volume drive service times/ })).toBeTruthy();
+    });
+
+    it("leaves the command palette shortcut inert", () => {
+      renderReplay();
+
+      fireEvent.keyDown(window, { key: "k", metaKey: true });
+
+      expect(screen.queryByPlaceholderText(/Search/i)).toBeNull();
+    });
+
+    // The composer stays on screen and says why it cannot send. Removing it would make the
+    // page read as a surface that has no composer, which is not what is true here.
+    it("shows a locked composer carrying its own reason", () => {
+      renderReplay();
+
+      const input = screen.getByLabelText("Message input");
+      expect((input as HTMLTextAreaElement).disabled).toBe(true);
+      expect((input as HTMLTextAreaElement).placeholder).toBe(LOCK.short);
+      expect(screen.getByRole("button", { name: "Sending is unavailable" })).toBeTruthy();
+      expect(screen.queryByRole("button", { name: "Send" })).toBeNull();
+    });
+
+    it("reveals the full reason on hover, and keeps it reachable without one", () => {
+      renderReplay();
+
+      const input = screen.getByLabelText("Message input");
+      // Described-by is set whether or not the tooltip is open, so the reason is announced
+      // to a screen reader that never hovers.
+      expect(input.getAttribute("aria-describedby")).toBeTruthy();
+      expect(screen.queryByRole("tooltip")).toBeNull();
+
+      fireEvent.mouseEnter(input.closest("div.relative")!);
+
+      expect(screen.getByRole("tooltip").textContent).toBe(LOCK.detail);
+    });
+
+    it("sends into the reader's own workspace once the deployment can run", async () => {
+      const start = vi.fn().mockResolvedValue(undefined);
+      renderReplay({ state: "ready", placeholder: "Ask your own question…", start });
+
+      const input = screen.getByLabelText("Message input") as HTMLTextAreaElement;
+      expect(input.disabled).toBe(false);
+      expect(input.placeholder).toBe("Ask your own question…");
+
+      fireEvent.change(input, { target: { value: "Is churn seasonal?" } });
+      fireEvent.keyDown(input, { key: "Enter", shiftKey: false });
+
+      expect(start).toHaveBeenCalledWith("Is churn seasonal?");
+      // The recording is immutable: the question must not be appended to this transcript.
+      expect(screen.queryByText("Is churn seasonal?")).toBeNull();
+    });
   });
 });

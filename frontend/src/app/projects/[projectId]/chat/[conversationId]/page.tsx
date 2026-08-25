@@ -3,10 +3,12 @@ import { redirect } from "next/navigation";
 import { SignInHint } from "@/components/auth/sign-in-hint";
 import { ChatShell } from "@/components/chat-shell/chat-shell";
 import { ApiError } from "@/lib/api/errors";
+import { listDemos } from "@/lib/api/demos";
 import { getProject } from "@/lib/api/projects";
 import { getBackgroundDeliveryHealth } from "@/lib/api/runs";
 import { getCurrentUser } from "@/lib/auth/session";
 import { buildConversationHistory } from "@/lib/chat-run-history";
+import { mergedThreads } from "@/lib/demo-chat";
 import type { BackgroundDeliveryHealth } from "@/lib/api/types";
 
 export const dynamic = "force-dynamic";
@@ -14,10 +16,15 @@ export const dynamic = "force-dynamic";
 /** One durable conversation thread — the conversation-first primary product surface. */
 export default async function ConversationPage({
   params,
+  searchParams,
 }: Readonly<{
   params: Promise<{ projectId: string; conversationId: string }>;
+  searchParams?: Promise<{ goal?: string }>;
 }>) {
   const { projectId, conversationId } = await params;
+  // Carried in from a recorded run: the question is loaded but not sent, so the reader sees
+  // it beside their own scope before anything runs against it.
+  const goal = (await searchParams)?.goal;
 
   let project;
   let backgroundDelivery: BackgroundDeliveryHealth = {
@@ -57,6 +64,10 @@ export default async function ConversationPage({
     throw e;
   }
 
+  // Published runs sit in the same history list as the reader's own chats. A failure here
+  // costs the showcase rows, not the conversation — the chat must still open without them.
+  const demos = await listDemos().catch(() => []);
+
   return (
     <div className="fixed inset-0 overflow-hidden">
       <ChatShell
@@ -73,7 +84,8 @@ export default async function ConversationPage({
         tickers={project.tickers ?? []}
         backgroundDelivery={backgroundDelivery}
         initialMessages={history.messages}
-        chatThreads={history.chatThreads}
+        chatThreads={mergedThreads(history.chatThreads, demos)}
+        initialDraft={goal}
         className="h-full min-h-0"
       />
     </div>

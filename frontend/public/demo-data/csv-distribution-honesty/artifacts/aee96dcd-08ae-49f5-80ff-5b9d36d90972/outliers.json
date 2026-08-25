@@ -1,0 +1,1 @@
+{"chart_type":"scatter","column":"avg_delivery_days","flagged_rows":[],"method":"zscore","threshold":3.0}

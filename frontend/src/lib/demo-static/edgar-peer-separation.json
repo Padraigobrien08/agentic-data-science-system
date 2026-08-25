@@ -1,7 +1,7 @@
 {
   "adapter_id": "edgar",
-  "analysis_run_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
-  "conclusion": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+  "analysis_run_id": "6b8055df-daf4-4d64-9715-456610f5d84b",
+  "conclusion": "NVDA's net margin advantage over AAPL and MSFT reflects a durable difference in profitability across the same periods.; NVDA's margin advantage over AAPL and MSFT is explained by faster revenue growth over the same periods.",
   "conclusion_detail": {
     "caveats": [
       "termination: sufficient_evidence",
@@ -9,86 +9,87 @@
     ],
     "confidence": 0.95,
     "disposition": "supported",
-    "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-concl-0",
+    "id": "6b8055df-daf4-4d64-9715-456610f5d84b-concl-0",
     "key_evidence_ids": [
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72"
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-0",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-1",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-2",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-3",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-4",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-5",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-6",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-7",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-8",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-9",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-10",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-11",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-12",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-13",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-14",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-15",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-16",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-17",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-18",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-19",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-20",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-21",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-22",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-23",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-24",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-25",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-26",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-27",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-28",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-29",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-30",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-31",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-32",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-33",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-34",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-35",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-36",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-37",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-38",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-39",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-40",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-41",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-42",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-43",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-44",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-45",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-46",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-47",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-48",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-49",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-50",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-51",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-52",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-53",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-54",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-55",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-56",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-57",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-58",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-59",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-60",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-61",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-62",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-63",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-64",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-65",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-66",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-67",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-68",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-69",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-70",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-71",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-evd-72"
     ],
-    "statement": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.; NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+    "narrative": "The run supported both explanations: NVDA’s margin advantage over AAPL and MSFT reflected a durable difference in profitability, and it was also explained by faster revenue growth over the same periods. Overall, the evidence pointed strongly in both directions rather than choosing one over the other.\n\nBoth claims were supported, each with high confidence and no refuting evidence. The first claim held that NVDA’s net margin advantage was a durable difference across the same periods. The second claim also held that the advantage was explained by faster revenue growth over the same periods.\n\nThe loop ran a correlation analysis, then a simple regression, then another correlation analysis, and it stopped because it had sufficient evidence. What remains open is whether the margin gap stays persistent across periods or narrows or reverses over time, and whether controlling for revenue growth removes most of the observed margin advantage.",
+    "statement": "NVDA's net margin advantage over AAPL and MSFT reflects a durable difference in profitability across the same periods.; NVDA's margin advantage over AAPL and MSFT is explained by faster revenue growth over the same periods.",
     "supporting_hypothesis_ids": [
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
-      "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+      "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+      "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
     ]
   },
   "confidence": 0.95,
@@ -102,58 +103,58 @@
     "observations": 73,
     "open_questions": 2
   },
-  "created_at": "2026-08-19T22:11:27",
+  "created_at": "2026-08-24T16:15:00",
   "critiques": [
     {
       "critique_type": "competing_explanation",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-crit-0",
-      "message": "Test whether the apparent margin advantage persists after controlling for revenue growth with a simple regression; if the effect disappears, the claim may be an artefact of faster growth rather than durable profitability.",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-crit-0",
+      "message": "Test whether NVDA's apparent net margin advantage persists after controlling for period effects and trend; a simple regression can reveal whether the gap is just a time-window artifact rather than a durable profitability difference.",
       "resolved": false,
       "severity": "major",
       "suggested_action": "fit_simple_regression",
-      "target_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "target_id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
       "target_kind": "hypothesis"
     }
   ],
   "datasets": [
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_7237e75d459f4b4a9bffa2fe4887b6cd",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_7237e75d459f4b4a9bffa2fe4887b6cd",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_7237e75d459f4b4a9bffa2fe4887b6cd",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_7237e75d459f4b4a9bffa2fe4887b6cd",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_7237e75d459f4b4a9bffa2fe4887b6cd",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_392128f2a9f140e4b67705b1c2df8f17",
+      "id": "dset_7237e75d459f4b4a9bffa2fe4887b6cd",
       "locator": "sha256:7aeb4e8f3d3d9a2ef67efc140525f8df0c748c572eade01045a0048fb35de1e2",
       "name": "EDGAR panel (features.csv)",
       "row_count": null
@@ -164,125 +165,203 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-0",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-hyp-0",
       "iteration": 0,
-      "rationale": "This directly tests the stated profitability explanation using the margin metric.",
-      "sequence": 0
+      "rationale": "This directly tests the observed margin gap as a profitability difference rather than a transient effect.",
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-hyp-1",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-hyp-1",
       "iteration": 0,
-      "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
-      "sequence": 1
+      "rationale": "This tests the proposed alternative explanation using the growth metric named in the goal.",
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "analyze_correlation",
       "decision_type": "select_experiment",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-2",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-sel-2",
       "iteration": 0,
-      "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
-      "sequence": 2
+      "rationale": "analyze_correlation directly establishes the correlation relationship with the highest expected information gain.",
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-3",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 36 evidence item(s) for analyze_correlation",
-      "sequence": 3
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-4",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-rev-4",
       "iteration": 0,
       "rationale": "supported (support=36, refute=0)",
-      "sequence": 4
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "fit_simple_regression",
       "decision_type": "request_critique",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-crit-5",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-crit-5",
       "iteration": 0,
-      "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused tool available that can probe an alternative explanation before the loop concludes.",
-      "sequence": 5
+      "rationale": "The claim is supported and has not yet been critiqued, and there is an unused experiment available that could disconfirm a spurious period-driven association.",
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "fit_simple_regression",
       "decision_type": "select_experiment",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-6",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-sel-6",
       "iteration": 1,
-      "rationale": "This is the offered falsification test, so it best checks whether the current correlation hypothesis survives an independent challenge.",
-      "sequence": 6
+      "rationale": "This is the offered falsification test, and it would directly challenge the currently supported correlation hypothesis.",
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-exp-1",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-7",
-      "iteration": 0,
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-evd-7",
+      "iteration": 1,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
-      "sequence": 7
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-8",
-      "iteration": 0,
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-rev-8",
+      "iteration": 1,
       "rationale": "supported (support=37, refute=0)",
-      "sequence": 8
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "analyze_correlation",
       "decision_type": "select_experiment",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-sel-9",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-sel-9",
       "iteration": 2,
-      "rationale": "This directly establishes the correlation and has the highest expected information gain among the available candidates.",
-      "sequence": 9
+      "rationale": "analyze_correlation directly establishes the strength and direction of the correlation with the highest expected information gain.",
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-evd-10",
-      "iteration": 0,
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-evd-10",
+      "iteration": 2,
       "rationale": "recorded 36 evidence item(s) for analyze_correlation",
-      "sequence": 10
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-rev-11",
-      "iteration": 0,
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-rev-11",
+      "iteration": 2,
       "rationale": "supported (support=36, refute=0)",
-      "sequence": 11
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-dec-concl-12",
-      "iteration": 0,
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-dec-concl-12",
+      "iteration": 3,
       "rationale": "supported (sufficient_evidence)",
-      "sequence": 12
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "6b8055df-daf4-4d64-9715-456610f5d84b-concl-0",
+          "kind": "conclusion"
+        }
+      ]
     }
   ],
   "demo_slug": "edgar-peer-separation",
-  "domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7",
+  "domain_id": "6b8055df-daf4-4d64-9715-456610f5d84b",
   "events": [
     {
-      "created_at": "2026-08-19T22:11:27",
+      "created_at": "2026-08-24T16:15:00",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -292,7 +371,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-19T22:11:30",
+      "created_at": "2026-08-24T16:15:04",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -302,7 +381,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-19T22:11:35",
+      "created_at": "2026-08-24T16:15:07",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -312,7 +391,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-19T22:11:37",
+      "created_at": "2026-08-24T16:15:10",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -322,7 +401,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-19T22:11:39",
+      "created_at": "2026-08-24T16:15:13",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -332,7 +411,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-19T22:11:39",
+      "created_at": "2026-08-24T16:15:15",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -350,9 +429,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-0",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-0",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -383,9 +462,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-1",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-1",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -416,9 +495,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-2",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-2",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -449,9 +528,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-3",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-3",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -482,9 +561,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-4",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-4",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -515,9 +594,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-5",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-5",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -548,9 +627,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-6",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-6",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -581,9 +660,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-7",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-7",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -614,9 +693,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-8",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-8",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -647,9 +726,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-9",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-9",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -680,9 +759,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-10",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-10",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -713,9 +792,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-11",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-11",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -746,9 +825,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-12",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-12",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -779,9 +858,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-13",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-13",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -812,9 +891,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-14",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-14",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -845,9 +924,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-15",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-15",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -878,9 +957,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-16",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-16",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -911,9 +990,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-17",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-17",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -944,9 +1023,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-18",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-18",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -977,9 +1056,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-19",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-19",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1010,9 +1089,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-20",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-20",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1043,9 +1122,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-21",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-21",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1076,9 +1155,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-22",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-22",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1109,9 +1188,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-23",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-23",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1142,9 +1221,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-24",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-24",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1175,9 +1254,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-25",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-25",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1208,9 +1287,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-26",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-26",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1241,9 +1320,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-27",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-27",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1274,9 +1353,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-28",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-28",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1307,9 +1386,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-29",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-29",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1340,9 +1419,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-30",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-30",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1373,9 +1452,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-31",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-31",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1406,9 +1485,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-32",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-32",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1439,9 +1518,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-33",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-33",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1472,9 +1551,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-34",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-34",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1505,9 +1584,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-35",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-35",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1538,9 +1617,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "69551368-9c67-4e7b-9a11-3f59c3603589"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-36",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-36",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1577,9 +1656,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-37",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-37",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1610,9 +1689,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-38",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-38",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1643,9 +1722,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-39",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-39",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1676,9 +1755,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-40",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-40",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1709,9 +1788,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-41",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-41",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1742,9 +1821,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-42",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-42",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1775,9 +1854,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-43",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-43",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1808,9 +1887,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-44",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-44",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1841,9 +1920,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-45",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-45",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1874,9 +1953,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-46",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-46",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1907,9 +1986,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-47",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-47",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1940,9 +2019,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-48",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-48",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -1973,9 +2052,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-49",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-49",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2006,9 +2085,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-50",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-50",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2039,9 +2118,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-51",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-51",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2072,9 +2151,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-52",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-52",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2105,9 +2184,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-53",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-53",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2138,9 +2217,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-54",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-54",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2171,9 +2250,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-55",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-55",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2204,9 +2283,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-56",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-56",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2237,9 +2316,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-57",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-57",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2270,9 +2349,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-58",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-58",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2303,9 +2382,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-59",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-59",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2336,9 +2415,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-60",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-60",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2369,9 +2448,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-61",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-61",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2402,9 +2481,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-62",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-62",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2435,9 +2514,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-63",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-63",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2468,9 +2547,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-64",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-64",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2501,9 +2580,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-65",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-65",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2534,9 +2613,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-66",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-66",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2567,9 +2646,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-67",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-67",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2600,9 +2679,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-68",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-68",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2633,9 +2712,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-69",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-69",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2666,9 +2745,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-70",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-70",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2699,9 +2778,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-71",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-71",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2732,9 +2811,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "824d04aa-4805-4187-89d3-976cfcd7b19e"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-evd-72",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-evd-72",
       "reliability": 0.620253164556962,
       "statistics": {
         "assumptions": [
@@ -2764,89 +2843,98 @@
       "artifacts": [
         {
           "byte_size": 1387,
-          "id": "b0f35ccf-f352-47a1-86c8-40921bc2639e",
+          "id": "59fd88a8-18fa-4645-92c3-d8ed498a6460",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "correlation_matrix"
         },
         {
           "byte_size": 1307,
-          "id": "ca2d675a-fbf8-4580-b5dd-938683c4802d",
+          "id": "8e9a7f10-5cac-4611-af8e-33d2b2ad642a",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "correlation_heatmap"
         }
       ],
-      "created_at": "2026-08-19T22:11:35",
+      "created_at": "2026-08-24T16:15:07",
       "error": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-0",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-res-0",
       "metrics": {
         "columns": 11.0,
         "strong_pairs": 36.0
       },
-      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-0",
+      "request_domain_id": "6b8055df-daf4-4d64-9715-456610f5d84b-exp-0",
       "status": "succeeded",
       "summary": "Correlated 11 columns; 36 strong pair(s).",
+      "target_hypothesis_ids": [
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
+      ],
       "tool_name": "analyze_correlation"
     },
     {
       "artifacts": [
         {
           "byte_size": 79,
-          "id": "b9d44db2-32b5-4991-b93f-142707a7da5d",
+          "id": "f29cc832-bf91-4a5c-8209-5749c4b1a094",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "coefficients"
         },
         {
           "byte_size": 102,
-          "id": "99dd89c6-3428-47ca-929a-cf01e7c3e2d6",
+          "id": "6e56aa87-775a-46fc-a76b-930386a59d36",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "regression_fit"
         }
       ],
-      "created_at": "2026-08-19T22:11:37",
+      "created_at": "2026-08-24T16:15:10",
       "error": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-1",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-res-1",
       "metrics": {
         "intercept": 4842483654.728045,
         "n": 49.0,
         "r2": 0.909498,
         "slope": 0.256593
       },
-      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-1",
+      "request_domain_id": "6b8055df-daf4-4d64-9715-456610f5d84b-exp-1",
       "status": "succeeded",
       "summary": "OLS net_income ~ revenue: R²=0.91.",
+      "target_hypothesis_ids": [
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0"
+      ],
       "tool_name": "fit_simple_regression"
     },
     {
       "artifacts": [
         {
           "byte_size": 1387,
-          "id": "9990a831-3dba-464a-bae1-d6b50700759b",
+          "id": "9d8b7d59-c475-423c-a1cf-b0f01702d2d9",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "correlation_matrix"
         },
         {
           "byte_size": 1307,
-          "id": "6e1c64c0-3c5f-4e05-9f5e-87feeb360f5b",
+          "id": "04236c4a-a2b1-4eb8-b3db-21a2080d9e10",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "correlation_heatmap"
         }
       ],
-      "created_at": "2026-08-19T22:11:39",
+      "created_at": "2026-08-24T16:15:13",
       "error": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-res-2",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-res-2",
       "metrics": {
         "columns": 11.0,
         "strong_pairs": 36.0
       },
-      "request_domain_id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-exp-2",
+      "request_domain_id": "6b8055df-daf4-4d64-9715-456610f5d84b-exp-2",
       "status": "succeeded",
       "summary": "Correlated 11 columns; 36 strong pair(s).",
+      "target_hypothesis_ids": [
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
+      ],
       "tool_name": "analyze_correlation"
     }
   ],
@@ -2854,35 +2942,35 @@
     {
       "confidence": 0.95,
       "entity_refs": [],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
       "metric_refs": [
         "net_margin"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This directly tests the stated profitability explanation using the margin metric.",
-      "statement": "NVDA's margin advantage over AAPL and MSFT reflects a durable difference in profitability, not just a temporary effect of faster revenue growth over the same periods.",
+      "rationale": "This directly tests the observed margin gap as a profitability difference rather than a transient effect.",
+      "statement": "NVDA's net margin advantage over AAPL and MSFT reflects a durable difference in profitability across the same periods.",
       "status": "supported"
     },
     {
       "confidence": 0.95,
       "entity_refs": [],
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1",
       "metric_refs": [
         "revenue_growth_qoq"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This tests the competing explanation by examining whether growth itself is the driver.",
-      "statement": "NVDA's revenue growth over the same periods is not high enough to explain the observed margin advantage over AAPL and MSFT.",
+      "rationale": "This tests the proposed alternative explanation using the growth metric named in the goal.",
+      "statement": "NVDA's margin advantage over AAPL and MSFT is explained by faster revenue growth over the same periods.",
       "status": "supported"
     }
   ],
-  "id": "8f056b0a-8112-40ed-a611-c2dd3d5e2161",
+  "id": "f7132b13-800f-4a23-90d1-41a21d80e821",
   "objective": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
   "observations": [
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8ed21b80d2624713b9190043997293e2",
+      "id": "obs_0af10dc7d2eb464aaaeeea2aad7391fc",
       "magnitude": 0.953676093897126,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2891,7 +2979,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_1279a904c44b46028644362dac293b87",
+      "id": "obs_b972fd86b9834090aaca4a4f46f74462",
       "magnitude": 0.5778382033825593,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2900,7 +2988,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3e6581e0d02443f9bd322fdb1dc72995",
+      "id": "obs_6bc9cee2ebb84dd0b8f9ba352af6df99",
       "magnitude": 0.7809419578276104,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2909,7 +2997,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6b8a36a05cbd46d9bbf8cf6a4aabb9da",
+      "id": "obs_584d739235624f70b6fb1b6bfec25184",
       "magnitude": 0.9649426797093267,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2918,7 +3006,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_7fc7d5ce27c14d97995bc2d4c9f72e23",
+      "id": "obs_13d77afbaa77481fb9472ee54180a117",
       "magnitude": 0.5263787187437607,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2927,7 +3015,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_882b953673a44f96adb285e4f677f832",
+      "id": "obs_2dccd8898ca047c788da6dcfc60684ba",
       "magnitude": 0.7764414247959724,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2936,7 +3024,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6b4005f5846340c8ae01cfe06930e685",
+      "id": "obs_47f3b795c7b54f14a9750cd0789f759b",
       "magnitude": -0.6978784865338288,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2945,7 +3033,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c7173677492d4860add6143e9c50f147",
+      "id": "obs_195abdc371e64756b64e1888710b31f8",
       "magnitude": 0.7575696861491573,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2954,7 +3042,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6d118d5debe3454c81c4530c153904b1",
+      "id": "obs_bef58494dd274324bbecc961da00f524",
       "magnitude": 0.6409576268287619,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2963,7 +3051,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_4465d482c36d40319b2dd964c0a41887",
+      "id": "obs_46188650932d4181b01415c47ce50349",
       "magnitude": 0.7443404643002431,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2972,7 +3060,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6c9941244d19479d8646df0cbcd1d09f",
+      "id": "obs_8e14e51fae014007a332cf9facfbd7ae",
       "magnitude": 0.9881849165985215,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2981,7 +3069,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3d25c75f5c8047b295e30284b8ebc0df",
+      "id": "obs_c9f74e1176f14dc4b467252c24164ac5",
       "magnitude": 0.5995310630240922,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2990,7 +3078,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f05e58c3973d40a1b31edcf65c4c7e8d",
+      "id": "obs_db5bac31aaa2430397a776be1e4adae6",
       "magnitude": 0.7551303575409323,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -2999,7 +3087,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_781d2275a3274a2d9e5ef87388c95db8",
+      "id": "obs_8488b1cebdf84b2a8620b7a3a2772c40",
       "magnitude": -0.6803910223988244,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3008,7 +3096,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d948faf8e5ca49348239a21825075491",
+      "id": "obs_e2ea003cb2974032bed66a661b5d20c3",
       "magnitude": 0.6048700192652681,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3017,7 +3105,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_73977f87583544ad8e6dd8e16104ac98",
+      "id": "obs_534f4d6bd3174d208877eb7b319ebd44",
       "magnitude": 0.8838774380655743,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3026,7 +3114,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_0392a246207d49dda15d3e73d376ef9f",
+      "id": "obs_263e6270cafb485b80be99b4248bdd75",
       "magnitude": 0.6677444094126498,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3035,7 +3123,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d49fb97f93d84dbcadb3cbf37c3d1c43",
+      "id": "obs_cdfc3606c7ac4fc39777494f54e179d2",
       "magnitude": 0.9150815651330793,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3044,7 +3132,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_492a74ccbce04e7796114d939b262d62",
+      "id": "obs_57d67edf9095406ebd554d1d26bc6d2c",
       "magnitude": 0.8736681974727112,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3053,7 +3141,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_851309272b0f4be586f01c5ac46848ed",
+      "id": "obs_5050d639c69244f7a028a1f05e97ac5c",
       "magnitude": -0.8308335201143805,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3062,7 +3150,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_af3fdbc267a641a28dcec69abc6e97fb",
+      "id": "obs_b3166d4da37545fc9fb96559ff35f408",
       "magnitude": 0.7790002874639467,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3071,7 +3159,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_cf4278e79fb54f0ea152d8cafd63da15",
+      "id": "obs_707f79dde8c14297bb0933a66e8d8ef5",
       "magnitude": 0.8314264045065276,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3080,7 +3168,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8bcc16bd5b6f4f598936ef7f0cc4513e",
+      "id": "obs_e0fdce8148334f189229d49af970a41d",
       "magnitude": 0.9824960196470658,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3089,7 +3177,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_a97cd29f0ffc42c4aa3a173e3d683e5d",
+      "id": "obs_e526821d52674be5a6ec67fd16a2cb47",
       "magnitude": -0.9090542980809503,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3098,7 +3186,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_1c0d55a68a3a41dbb83b669577e9c239",
+      "id": "obs_5df3216b233949c2ac24a368bd1a833d",
       "magnitude": 0.838731884730247,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3107,7 +3195,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_5dd24bf8dd4447f5b1c2aee88dfc0572",
+      "id": "obs_7fc17171917b42a6aafb0aa415c67a88",
       "magnitude": 0.6133104366069685,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3116,7 +3204,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f8405eb3acea474d884b3013eca69afa",
+      "id": "obs_05a0d65bc4b54024a970e61150849077",
       "magnitude": 0.7771609910215529,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3125,7 +3213,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f89051deb48e4cf0a6c0114b61a2716d",
+      "id": "obs_575d9ddd9bdd4cf59f48330d792e36fb",
       "magnitude": -0.7082328462686301,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3134,7 +3222,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8f6c66b96ca543a5b70fc4ddf6ecf0cf",
+      "id": "obs_d3e609f47b4e4000b82b9a10945b867b",
       "magnitude": 0.6459614942732606,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3143,7 +3231,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_84d78cc4753745f4a4505d659f17de70",
+      "id": "obs_c801a98542684f94886d9d757ce9de02",
       "magnitude": 0.7979769023551934,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3152,7 +3240,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_9bc90536b145498781f364b890018eeb",
+      "id": "obs_c8302eac859f40dbb8af67913bf6f4a5",
       "magnitude": -0.7926538622160821,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3161,7 +3249,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_dfc86cf8435b4d00a7b02773922867ac",
+      "id": "obs_58e3f02da89a4b33ac210a9440894019",
       "magnitude": 0.5081693874307459,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3170,7 +3258,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f67420e6bea14f7bb9c3178d95dc0925",
+      "id": "obs_7490e45ab71d4e3dab8374190bede652",
       "magnitude": -0.8942738107197148,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3179,7 +3267,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_4d7632168a7f47dca226310bb96d3eae",
+      "id": "obs_3291354ba85b427f9468c10be74c9bbc",
       "magnitude": 0.8043557161262684,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3188,7 +3276,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_33262ee7c79443c5b75186bdcdeda207",
+      "id": "obs_2dcc85554eaa490bbe206ba984d9a11a",
       "magnitude": -0.5044486896952208,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3197,7 +3285,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_2747ce9865364bb58a6327f27649047d",
+      "id": "obs_2f7b0221bb014cbd9cad91ee4a8b8ab2",
       "magnitude": -0.7591266516328758,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3206,7 +3294,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_a4dc97a5fcd544d29ed31160af4744de",
+      "id": "obs_00dc55ef640a42caa8cf419e01029429",
       "magnitude": 0.256592627325654,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3215,7 +3303,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d243e40aed3e43008219fe5e20f3dcc5",
+      "id": "obs_ae366c9d3d5d42aa8f52f4054cca4bcc",
       "magnitude": 0.953676093897126,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3224,7 +3312,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_2eac9020ffe94da19f1d0d6f822104bb",
+      "id": "obs_18166840348447ed9f009580cf0e4d82",
       "magnitude": 0.5778382033825593,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3233,7 +3321,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_7cce95e5a064448b913fbae2c9a16c6a",
+      "id": "obs_d2f62c043b1f4ce3a9fec81063e5bf41",
       "magnitude": 0.7809419578276104,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3242,7 +3330,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_96859ef5db0c49bbbb27a39bcd835f2c",
+      "id": "obs_d80fb3e269b347a293931181ae7af9e8",
       "magnitude": 0.9649426797093267,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3251,7 +3339,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_021535f328584a4abef6524ef444eb12",
+      "id": "obs_af47365946a44bfe8d3e674c429f667e",
       "magnitude": 0.5263787187437607,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3260,7 +3348,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_0f957d44fe35440eafbf67442e86e787",
+      "id": "obs_deaadf2b1d5947de8c54a149f57a1e1c",
       "magnitude": 0.7764414247959724,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3269,7 +3357,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_bce9b0ce9888412abf74e1325bc70882",
+      "id": "obs_8e2c1b44425f46f68ac83763a422f2b6",
       "magnitude": -0.6978784865338288,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3278,7 +3366,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8e8145f0c23c4012abec32ccaadb6bf6",
+      "id": "obs_ec66cd31e3854021a6389ce6b09d49b7",
       "magnitude": 0.7575696861491573,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3287,7 +3375,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_5937024c7d5c4e0fb03c308b84f6edc9",
+      "id": "obs_2e372963b4a44805b2deffc54ea92e12",
       "magnitude": 0.6409576268287619,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3296,7 +3384,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_79e05e6b80a84193bc754898ce224a8e",
+      "id": "obs_03a08c2e065c47e3b2d757a7d52283e0",
       "magnitude": 0.7443404643002431,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3305,7 +3393,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_b53a2847d7fe4b5bab05608cbdec8904",
+      "id": "obs_63add5d3dff6428e96fffaf67713aac1",
       "magnitude": 0.9881849165985215,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3314,7 +3402,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_fa4f5789b9e04b2596a2e7f5a43747ba",
+      "id": "obs_c83ed74aad474d35b4ece4f635d9f41a",
       "magnitude": 0.5995310630240922,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3323,7 +3411,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_7d4672282161494ba1780002c8bcb4d5",
+      "id": "obs_f37f0c04a19647dc957b6d436d180b89",
       "magnitude": 0.7551303575409323,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3332,7 +3420,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6cf8dfa20d1748b9a15a155965f18a52",
+      "id": "obs_928be213e82940ab86d96de3f022d40f",
       "magnitude": -0.6803910223988244,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3341,7 +3429,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_eac7aa6ee97c46b6a4041d32819249e5",
+      "id": "obs_840d20b0f0fb4cbc88839d53ed2d9049",
       "magnitude": 0.6048700192652681,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3350,7 +3438,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_774354237ad44bfbb3f66fdd1ad940f0",
+      "id": "obs_e2059c1ec9624e5fb230bbbd063f5ca6",
       "magnitude": 0.8838774380655743,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3359,7 +3447,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_4a838f7b35f940daa3548ac9766b6feb",
+      "id": "obs_2b5abffac4564fca893dd6d7891eaf08",
       "magnitude": 0.6677444094126498,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3368,7 +3456,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3f363b62b7494dfabef90310392f6ac1",
+      "id": "obs_b7ad5f3c7bed421fb19a192966c11f4a",
       "magnitude": 0.9150815651330793,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3377,7 +3465,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_02b632ff9ec64c6cbbd6a831754dda85",
+      "id": "obs_cbc947eaf3fe46ac9d322474261b9cc6",
       "magnitude": 0.8736681974727112,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3386,7 +3474,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8c42edb6335043eb91c4646f0f562c80",
+      "id": "obs_812e2d3fdc7f4675b25f4817838bf730",
       "magnitude": -0.8308335201143805,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3395,7 +3483,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_a7ab752ab25f40678c8bbba499b43ba6",
+      "id": "obs_a434cc52669e4dcf80fcd92cb34faf6f",
       "magnitude": 0.7790002874639467,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3404,7 +3492,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_e72417a79bcf4e5c83571af5f43b42c3",
+      "id": "obs_cc9a63378ccf493f9d87f7407f92c92f",
       "magnitude": 0.8314264045065276,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3413,7 +3501,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_5dfb882165a440ac8268707377ebc4fc",
+      "id": "obs_7ebecb47a17b43eab9d63089fb9bb432",
       "magnitude": 0.9824960196470658,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3422,7 +3510,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_d2bcf3b2cbd5474792a4b7046c95c1b7",
+      "id": "obs_c90546fc85254bd0b8249ee952a8bf99",
       "magnitude": -0.9090542980809503,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3431,7 +3519,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_178e3c1a049340b5b6f869fa6c82ea35",
+      "id": "obs_40500a14fed14f638bcdffc9fcb77b2c",
       "magnitude": 0.838731884730247,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3440,7 +3528,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f6f9f2521e7048b98d46be096e97dad6",
+      "id": "obs_42f7f1e47a29477395d00b13ee8c2a8e",
       "magnitude": 0.6133104366069685,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3449,7 +3537,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_355199105fca4321a91abe8e539a4d4b",
+      "id": "obs_16bae1b06c4f4bc88c226a30ee4bab60",
       "magnitude": 0.7771609910215529,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3458,7 +3546,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_97b85abf148849f8af85d5170decd952",
+      "id": "obs_29b8ba74e2ab4dec8348fdcdbe519a17",
       "magnitude": -0.7082328462686301,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3467,7 +3555,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_19051ef832d44425a47cbaf0c46e8e5d",
+      "id": "obs_f85f9b76c0c04fed8ca14f5daf772126",
       "magnitude": 0.6459614942732606,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3476,7 +3564,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_262573d31d89495183ee73e683e7c5c3",
+      "id": "obs_3b6bf307d304470aa21cfdd3cc0ef319",
       "magnitude": 0.7979769023551934,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3485,7 +3573,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_74b371bcf56940578d599df1a0328a0c",
+      "id": "obs_12b39eef7b4d4aad8ebee3e65b271969",
       "magnitude": -0.7926538622160821,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3494,7 +3582,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_484894dea57c4a0d81c3ce5c894c3688",
+      "id": "obs_f1853ed536d44c6a8e5d0a99b27ca235",
       "magnitude": 0.5081693874307459,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3503,7 +3591,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c4aa3c0445ec496289510787c46c3226",
+      "id": "obs_cc3411cd3bb149668722ad6a2b526b3f",
       "magnitude": -0.8942738107197148,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3512,7 +3600,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_ef3cfeadfe6c4c65aaec2bb108e57033",
+      "id": "obs_850c0d99742d48a7b169241c2fd798fe",
       "magnitude": 0.8043557161262684,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3521,7 +3609,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c9e8ce32462e4f31afa83529a186b652",
+      "id": "obs_652bd69a299b4b4cb47774a2667f2ad6",
       "magnitude": -0.5044486896952208,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3530,7 +3618,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_c9857986620347f18d32e813862ff436",
+      "id": "obs_06ccc2a99ced4976a5f99f09245cd920",
       "magnitude": -0.7591266516328758,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -3540,23 +3628,23 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-q-0",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-q-0",
       "priority": 0,
-      "question": "Is the margin advantage sustained across the same periods, or does it narrow when revenue growth is accounted for?",
+      "question": "Is the margin gap persistent across periods, or does it narrow or reverse over time?",
       "related_hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-q-1",
+      "id": "6b8055df-daf4-4d64-9715-456610f5d84b-q-1",
       "priority": 0,
-      "question": "Do the observed differences persist after comparing like-for-like periods?",
+      "question": "Does controlling for revenue growth remove most of the observed margin advantage?",
       "related_hypothesis_ids": [
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-0",
-        "ed2b2bf5-b05e-45de-9c8d-615a7adb85b7-hyp-1"
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-0",
+        "6b8055df-daf4-4d64-9715-456610f5d84b-hyp-1"
       ],
       "status": "open"
     }
@@ -3579,5 +3667,5 @@
     "rationale": "terminated: sufficient_evidence",
     "reason": "sufficient_evidence"
   },
-  "updated_at": "2026-08-19T22:26:42"
+  "updated_at": "2026-08-25T11:44:43"
 }

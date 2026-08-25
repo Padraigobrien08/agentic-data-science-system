@@ -81,6 +81,21 @@ class CritiqueProposal(DomainModel):
     contradicts_hypothesis_id: str | None = None
 
 
+class AnswerNarration(DomainModel):
+    """
+    The run's findings, written as prose.
+
+    Interpretation, so it belongs to the policy — a list of joined hypothesis statements is
+    the truth but not an answer. The model supplies wording only: every figure it states is
+    checked against recorded values by :func:`agentic.agent.narrative.verify_narrative`
+    before it is kept, and prose that cites a number the run never produced is discarded
+    whole. That check, not the prompt, is what upholds the rule that no number in a trace
+    originates from a language model.
+    """
+
+    answer: str = Field(default="")
+
+
 # -- errors ------------------------------------------------------------------
 
 
@@ -130,6 +145,40 @@ class CostAwarePolicy(Protocol):
     def drain_cost_usd(self) -> float: ...
 
 
+@runtime_checkable
+class NarratingPolicy(Protocol):
+    """
+    Optional policy extension: write the run's findings as prose.
+
+    Separate from :class:`AgentPolicy` for the same reason as :class:`CostAwarePolicy` — the
+    four-method contract is deliberate, and a policy that cannot write is not a broken
+    policy. The loop asks, and settles for its deterministic statement when the answer is
+    absent, unusable, or cites a figure the run never recorded.
+    """
+
+    def write_answer(self, *, question: str, findings: dict) -> AnswerNarration: ...
+
+
+def narrate_answer(policy: object, *, question: str, findings: dict) -> str | None:
+    """
+    Prose from ``policy``, or ``None`` when it cannot or will not write one.
+
+    Duck-typed like :func:`drain_policy_cost` so :class:`AgentPolicy` stays a four-method
+    contract and existing implementations need no change. Every failure mode collapses to
+    ``None`` — the caller always has a true statement to fall back to, so there is nothing
+    here worth raising over.
+    """
+    write = getattr(policy, "write_answer", None)
+    if not callable(write):
+        return None
+    try:
+        narration = write(question=question, findings=findings)
+    except Exception:  # noqa: BLE001 - a policy that fails to write must not fail the run
+        return None
+    answer = getattr(narration, "answer", None)
+    return answer.strip() if isinstance(answer, str) and answer.strip() else None
+
+
 def drain_policy_cost(policy: object) -> float:
     """
     Cost accrued by ``policy`` since the last drain, or ``0.0`` when it doesn't
@@ -172,6 +221,13 @@ class PolicyPrompts:
         "Challenge the strongest current claim; suggest a falsification tool. If two claims "
         "in supported_claims cannot both be true, report the conflict in "
         "contradicts_hypothesis_id. Reply as CritiqueProposal JSON."
+    )
+    write_answer: str = (
+        "Write the finding as a short, direct answer to the question, in plain prose. "
+        "State only figures present in the findings you are given, copied exactly; if you "
+        "are unsure of a figure, describe the result without it. Do not invent counts, "
+        "percentages or dates. Say plainly when nothing was established. "
+        "Reply as AnswerNarration JSON."
     )
 
 
@@ -250,4 +306,11 @@ class ModelAgentPolicy:
                 "supported_claims": supported_claims or [],
             }),
             CritiqueProposal,
+        )
+
+    def write_answer(self, *, question: str, findings: dict) -> AnswerNarration:
+        return self._call(
+            self._prompts.write_answer,
+            json.dumps({"question": question, "findings": findings}),
+            AnswerNarration,
         )

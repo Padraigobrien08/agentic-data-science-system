@@ -172,6 +172,9 @@ def test_prompt_identity_names_every_role_for_the_scoreboard(monkeypatch) -> Non
         "edgar.agentic.hypothesis_generator",
         "edgar.agentic.experiment_selector",
         "edgar.agentic.critic",
+        # Five, not four: the four decisions plus the optional narration extension. It is
+        # a real model call and belongs on the scoreboard like the rest.
+        "edgar.agentic.answer_writer",
     }
 
 

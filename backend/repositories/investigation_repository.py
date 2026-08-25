@@ -407,7 +407,11 @@ class SqlAlchemyInvestigationRepository:
             self._s.add(self._hypothesis_row(inv_id, h))
 
         existing_req = self._existing_domain_ids(ExperimentRequestRow, inv_id) if not initial else set()
-        for req in [*state.pending_experiments]:
+        # `executed_requests` as well as `pending_experiments`: a request moves out of
+        # pending the moment its result lands, so saving only pending dropped every request
+        # that actually ran — and with it the hypothesis it was raised to test, its purpose
+        # and its expected information gain. The table held 0 rows against 121 results.
+        for req in [*state.pending_experiments, *state.executed_requests]:
             if req.id in existing_req:
                 r = self._s.scalar(select(ExperimentRequestRow).where(
                     ExperimentRequestRow.investigation_id == inv_id, ExperimentRequestRow.domain_id == req.id))
@@ -534,7 +538,8 @@ class SqlAlchemyInvestigationRepository:
 
     def _conclusion_row(self, inv_id: UUID, c: Conclusion) -> ConclusionRow:
         return ConclusionRow(
-            investigation_id=inv_id, domain_id=c.id, statement=c.statement, disposition=c.disposition.value,
+            investigation_id=inv_id, domain_id=c.id, statement=c.statement, narrative=c.narrative,
+            disposition=c.disposition.value,
             confidence=c.confidence, supporting_hypothesis_ids_json=list(c.supporting_hypothesis_ids),
             key_evidence_ids_json=list(c.key_evidence_ids), caveats_json=list(c.caveats),
             open_question_ids_json=list(c.open_question_ids), provenance_json=_json(c.provenance),

@@ -10,6 +10,11 @@ export default defineConfig({
     setupFiles: ["./vitest.setup.ts"],
   },
   resolve: {
-    alias: { "@": path.resolve(__dirname, "./src") },
+    alias: {
+      "@": path.resolve(__dirname, "./src"),
+      // Resolved by the Next compiler rather than installed, so Vitest cannot find it.
+      // Stubbed so server modules are unit-testable; the guard itself is build-time.
+      "server-only": path.resolve(__dirname, "./test/server-only-stub.ts"),
+    },
   },
 });

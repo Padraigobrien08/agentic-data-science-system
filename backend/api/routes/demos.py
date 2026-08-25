@@ -25,6 +25,7 @@ from fastapi.responses import StreamingResponse
 from backend.api.deps import ArtifactServiceDep, DbSession
 from backend.api.routes.artifacts import build_artifact_preview, stream_artifact_content
 from backend.schemas.artifact_content import ArtifactPreviewResponse
+from backend.schemas.demo_capture import DemoChatThread, build_demo_chat
 from backend.schemas.investigation import (
     InvestigationDetail,
     InvestigationSummary,
@@ -35,6 +36,7 @@ from backend.services.demo_publication_service import (
     DemoNotFound,
     get_published,
     get_published_artifact,
+    get_published_conversations,
     list_published,
 )
 
@@ -62,6 +64,25 @@ def get_demo(slug: str, db: DbSession) -> InvestigationDetail:
     except DemoNotFound as exc:
         raise _not_found(slug) from exc
     return build_detail(row)
+
+
+@router.get("/{slug}/chat", response_model=list[DemoChatThread])
+def get_demo_chat(slug: str, db: DbSession) -> list[DemoChatThread]:
+    """
+    The conversation recorded against a published demo. Unauthenticated.
+
+    Only the turns — never the model payloads behind them, which stay admin-gated. The two
+    used to travel together in one bundle, which meant a live deployment could not show the
+    question a run was asked without also exposing raw prompts and responses. They are
+    different things with different audiences, so they are served separately.
+
+    An empty list is a normal answer: runs recorded before chat capture have no thread.
+    """
+    try:
+        conversations = get_published_conversations(db, slug)
+    except DemoNotFound as exc:
+        raise _not_found(slug) from exc
+    return build_demo_chat(conversations)
 
 
 @router.get("/{slug}/artifacts/{artifact_id}/preview", response_model=ArtifactPreviewResponse)

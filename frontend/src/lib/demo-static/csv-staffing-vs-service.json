@@ -1,34 +1,35 @@
 {
   "adapter_id": "in_memory",
-  "analysis_run_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
-  "conclusion": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with staffing level than with on-time rate.",
+  "analysis_run_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee",
+  "conclusion": "Mixed evidence for: On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.; Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.",
   "conclusion_detail": {
     "caveats": [
       "termination: insufficient_evidence",
-      "2 open question(s) remain"
+      "3 open question(s) remain"
     ],
     "confidence": 0.4,
     "disposition": "inconclusive",
-    "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-concl-0",
+    "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-concl-0",
     "key_evidence_ids": [
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-0",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-1",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-2",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-3",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-4",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-5",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-6",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-7",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-8",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-9",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-10",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-11",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-12"
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-0",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-1",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-2",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-3",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-4",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-5",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-6",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-7",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-8",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-9",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-10",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-11",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-12"
     ],
-    "statement": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with staffing level than with on-time rate.",
+    "narrative": "The evidence did not settle whether staffing level explains on-time rate or whether order volume is the stronger driver of service quality. The overall result was inconclusive, with moderate confidence.\n\nBoth tested claims were weakened rather than supported. The staffing claim had some evidence behind it, but not enough to stand cleanly. The order-volume claim also had some evidence, but it did not clearly beat staffing level.\n\nThe run used a correlation analysis, then a simple regression, then another correlation analysis. It stopped because there was insufficient evidence, and three questions remained open: which factor explains more variation in on-time rate, whether the relationship is stable across the full period or driven by a few outliers, and which of the two competing claims holds, if either.",
+    "statement": "Mixed evidence for: On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.; Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.",
     "supporting_hypothesis_ids": [
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
-      "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+      "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
     ]
   },
   "confidence": 0.4,
@@ -40,70 +41,70 @@
     "experiments": 3,
     "hypotheses": 2,
     "observations": 13,
-    "open_questions": 2
+    "open_questions": 3
   },
-  "created_at": "2026-08-20T19:02:18",
+  "created_at": "2026-08-24T16:13:48",
   "critiques": [
     {
       "critique_type": "competing_explanation",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-crit-0",
-      "message": "Challenge the association claim with a simpler regression that can test whether the apparent staffing effect persists once order volume is modeled directly; the current support could reflect confounding or model specification rather than a stronger relationship with staffing.",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-crit-0",
+      "message": "Challenge the association with a simple regression check: the observed same-direction relationship could be an artefact of trend, seasonality, or a few influential points rather than a robust staffing effect.",
       "resolved": false,
       "severity": "major",
       "suggested_action": "fit_simple_regression",
-      "target_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+      "target_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
       "target_kind": "hypothesis"
     },
     {
       "critique_type": "contradiction",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-crit-1",
-      "message": "The two supported claims are mutually incompatible: one says on-time rate is more strongly associated with staffing level than with order volume, while the other says order volume is more strongly associated with staffing level than with on-time rate. Both cannot be true at the same time.",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-crit-1",
+      "message": "The supported claims conflict: one says on-time rate is associated with staffing level, while the other says order volume is a stronger driver of service quality than staffing level. These can both be true as stated, so this is not a direct contradiction.",
       "resolved": false,
       "severity": "major",
       "suggested_action": null,
-      "target_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+      "target_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
       "target_kind": "hypothesis"
     }
   ],
   "datasets": [
     {
       "content_hash": null,
-      "id": "dset_9072f84526294d0994a0efdf394f7ec3",
+      "id": "dset_5c4673c7e4e2451aa24d3edb80e15d66",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_9072f84526294d0994a0efdf394f7ec3",
+      "id": "dset_5c4673c7e4e2451aa24d3edb80e15d66",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_9072f84526294d0994a0efdf394f7ec3",
+      "id": "dset_5c4673c7e4e2451aa24d3edb80e15d66",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_9072f84526294d0994a0efdf394f7ec3",
+      "id": "dset_5c4673c7e4e2451aa24d3edb80e15d66",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_9072f84526294d0994a0efdf394f7ec3",
+      "id": "dset_5c4673c7e4e2451aa24d3edb80e15d66",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_9072f84526294d0994a0efdf394f7ec3",
+      "id": "dset_5c4673c7e4e2451aa24d3edb80e15d66",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
@@ -114,143 +115,241 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-hyp-0",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-hyp-0",
       "iteration": 0,
-      "rationale": "This directly tests the stated question about which factor better explains service quality.",
-      "sequence": 0
+      "rationale": "Tests whether staffing level is a plausible explanatory factor for service quality.",
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-hyp-1",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-hyp-1",
       "iteration": 0,
-      "rationale": "This captures the competing explanation that volume, not staffing, is the stronger driver.",
-      "sequence": 1
+      "rationale": "The goal explicitly asks whether volume is the stronger driver, so this competing explanation must be tested separately.",
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "analyze_correlation",
       "decision_type": "select_experiment",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-sel-2",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-sel-2",
       "iteration": 0,
-      "rationale": "analyze_correlation is the highest-information direct test of the correlation goal.",
-      "sequence": 2
+      "rationale": "Analyze correlation directly, since it has the highest expected information gain for the stated goal.",
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-evd-3",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 6 evidence item(s) for analyze_correlation",
-      "sequence": 3
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-rev-4",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-rev-4",
       "iteration": 0,
       "rationale": "supported (support=6, refute=0)",
-      "sequence": 4
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "fit_simple_regression",
       "decision_type": "request_critique",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-crit-5",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-crit-5",
       "iteration": 0,
-      "rationale": "The claim is supported, has not yet been critiqued, and there is an unused experiment available that could disconfirm it, so it should be challenged before the loop concludes.",
-      "sequence": 5
+      "rationale": "The claim is newly supported, has not yet been critiqued, and there is an unused experiment available that can test whether the association survives a simpler alternative model.",
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "fit_simple_regression",
       "decision_type": "select_experiment",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-sel-6",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-sel-6",
       "iteration": 1,
-      "rationale": "This is the preferred falsification step and would directly challenge the currently supported correlation hypothesis.",
-      "sequence": 6
+      "rationale": "This is the offered falsification test, so it best challenges the currently supported correlation hypothesis before settling on it.",
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-exp-1",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-evd-7",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-evd-7",
       "iteration": 1,
       "rationale": "recorded 1 evidence item(s) for fit_simple_regression",
-      "sequence": 7
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-rev-8",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-rev-8",
       "iteration": 1,
       "rationale": "supported (support=7, refute=0)",
-      "sequence": 8
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": "analyze_correlation",
       "decision_type": "select_experiment",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-sel-9",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-sel-9",
       "iteration": 2,
       "rationale": "This directly establishes the correlation estimate with the highest expected information gain.",
-      "sequence": 9
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-evd-10",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-evd-10",
       "iteration": 2,
       "rationale": "recorded 6 evidence item(s) for analyze_correlation",
-      "sequence": 10
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-rev-11",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-rev-11",
       "iteration": 2,
       "rationale": "supported (support=6, refute=0)",
-      "sequence": 11
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-contra-12",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-contra-12",
       "iteration": 2,
-      "rationale": "weakened: cannot hold at the same time as “Order volume is more strongly associated with staffing level than with on-time rate.”",
-      "sequence": 12
+      "rationale": "weakened: cannot hold at the same time as “Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.”",
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-contra-13",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-contra-13",
       "iteration": 2,
-      "rationale": "weakened: cannot hold at the same time as “On-time rate is more strongly associated with staffing level than with order volume.”",
-      "sequence": 13
+      "rationale": "weakened: cannot hold at the same time as “On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction…”",
+      "sequence": 13,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
     },
     {
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-dec-concl-14",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-dec-concl-14",
       "iteration": 3,
       "rationale": "inconclusive (insufficient_evidence)",
-      "sequence": 14
+      "sequence": 14,
+      "targets": [
+        {
+          "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-concl-0",
+          "kind": "conclusion"
+        }
+      ]
     }
   ],
   "demo_slug": "csv-staffing-vs-service",
-  "domain_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec",
+  "domain_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee",
   "events": [
     {
-      "created_at": "2026-08-20T19:02:18",
+      "created_at": "2026-08-24T16:13:48",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -260,7 +359,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-20T19:02:21",
+      "created_at": "2026-08-24T16:13:53",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -270,7 +369,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-20T19:02:26",
+      "created_at": "2026-08-24T16:13:56",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -280,7 +379,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-20T19:02:27",
+      "created_at": "2026-08-24T16:13:59",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -290,7 +389,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-20T19:02:30",
+      "created_at": "2026-08-24T16:14:02",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -300,7 +399,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-20T19:02:30",
+      "created_at": "2026-08-24T16:14:04",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -318,9 +417,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-0",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-0",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -351,9 +450,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-1",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-1",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -384,9 +483,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-2",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-2",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -417,9 +516,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-3",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-3",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -450,9 +549,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-4",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-4",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -483,9 +582,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-5",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-5",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -516,9 +615,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "b3858134-7728-4fc8-b689-0de609b6f445"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-6",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-6",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -555,9 +654,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-7",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-7",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -588,9 +687,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-8",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-8",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -621,9 +720,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-9",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-9",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -654,9 +753,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-10",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-10",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -687,9 +786,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-11",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-11",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -720,9 +819,9 @@
       "evidence_type": "statistical_test",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "07cbac5c-1e3c-4d0a-85df-edfba339d4dc"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-evd-12",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-evd-12",
       "reliability": 0.7619047619047619,
       "statistics": {
         "assumptions": [
@@ -752,89 +851,98 @@
       "artifacts": [
         {
           "byte_size": 247,
-          "id": "02ab7f5b-1f55-41ea-b814-96e7a4cd0a10",
+          "id": "64e9f776-1172-405b-b3dc-f7da8905b6f8",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "correlation_matrix"
         },
         {
           "byte_size": 247,
-          "id": "03f41115-883f-48c6-a1c8-3122eb88b15d",
+          "id": "ccd39f36-9343-4ec2-bcaa-e263733dbb93",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "correlation_heatmap"
         }
       ],
-      "created_at": "2026-08-20T19:02:26",
+      "created_at": "2026-08-24T16:13:56",
       "error": null,
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-res-0",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-res-0",
       "metrics": {
         "columns": 4.0,
         "strong_pairs": 6.0
       },
-      "request_domain_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-exp-0",
+      "request_domain_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-exp-0",
       "status": "succeeded",
       "summary": "Correlated 4 columns; 6 strong pair(s).",
+      "target_hypothesis_ids": [
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
+      ],
       "tool_name": "analyze_correlation"
     },
     {
       "artifacts": [
         {
           "byte_size": 90,
-          "id": "6da4cb6d-2a42-4a50-951a-6678ae8bce6b",
+          "id": "0044be8b-58ed-4ab1-8d74-8ff1e188770d",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "coefficients"
         },
         {
           "byte_size": 113,
-          "id": "018744e3-3264-4842-8a28-41e110e4a59a",
+          "id": "eff8f8cc-aff3-435b-b26b-0689ce970b45",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "regression_fit"
         }
       ],
-      "created_at": "2026-08-20T19:02:27",
+      "created_at": "2026-08-24T16:13:59",
       "error": null,
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-res-1",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-res-1",
       "metrics": {
         "intercept": 10222.893517,
         "n": 96.0,
         "r2": 0.383321,
         "slope": -2062.972385
       },
-      "request_domain_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-exp-1",
+      "request_domain_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-exp-1",
       "status": "succeeded",
       "summary": "OLS order_volume ~ avg_delivery_days: R²=0.38.",
+      "target_hypothesis_ids": [
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0"
+      ],
       "tool_name": "fit_simple_regression"
     },
     {
       "artifacts": [
         {
           "byte_size": 247,
-          "id": "f3346a4b-187e-4d60-bd1e-54e4b714654a",
+          "id": "a1f8dcfb-35b0-4240-9539-4d19819a19d9",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "correlation_matrix"
         },
         {
           "byte_size": 247,
-          "id": "c0b74c5f-e18d-4091-a302-f6f3c396eb29",
+          "id": "b84d7232-0234-4d4d-9d44-4d742665fe21",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "correlation_heatmap"
         }
       ],
-      "created_at": "2026-08-20T19:02:30",
+      "created_at": "2026-08-24T16:14:02",
       "error": null,
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-res-2",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-res-2",
       "metrics": {
         "columns": 4.0,
         "strong_pairs": 6.0
       },
-      "request_domain_id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-exp-2",
+      "request_domain_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-exp-2",
       "status": "succeeded",
       "summary": "Correlated 4 columns; 6 strong pair(s).",
+      "target_hypothesis_ids": [
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
+      ],
       "tool_name": "analyze_correlation"
     }
   ],
@@ -842,35 +950,35 @@
     {
       "confidence": 0.5,
       "entity_refs": [],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
       "metric_refs": [
         "on_time_rate"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This directly tests the stated question about which factor better explains service quality.",
-      "statement": "On-time rate is more strongly associated with staffing level than with order volume.",
+      "rationale": "Tests whether staffing level is a plausible explanatory factor for service quality.",
+      "statement": "On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.",
       "status": "weakened"
     },
     {
       "confidence": 0.5,
       "entity_refs": [],
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1",
       "metric_refs": [
         "order_volume"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This captures the competing explanation that volume, not staffing, is the stronger driver.",
-      "statement": "Order volume is more strongly associated with staffing level than with on-time rate.",
+      "rationale": "The goal explicitly asks whether volume is the stronger driver, so this competing explanation must be tested separately.",
+      "statement": "Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.",
       "status": "weakened"
     }
   ],
-  "id": "2026414b-3de7-4578-a6da-f312ec15ef5f",
+  "id": "095f38d5-7243-4a09-bfbe-f95ebe9ebb8f",
   "objective": "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?",
   "observations": [
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_188b8b698b5a4e02b4096c904e12aeb2",
+      "id": "obs_cb77cbaf238349a78ecdfc423e83d49f",
       "magnitude": -0.6191290613557787,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -879,7 +987,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_493b85fa6ad14f65a7bf3c24bd060b8c",
+      "id": "obs_c997424b5f9b40539f9cec28b75df9a8",
       "magnitude": -0.964074485209477,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -888,7 +996,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_9d83a82455814dbc8d4a145848243fd5",
+      "id": "obs_6ade28ab98d344869f6f71c0e4c708cf",
       "magnitude": -0.7894390591599819,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -897,7 +1005,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3887c82d34764bc2bcdf995efede8067",
+      "id": "obs_a9847e00d7be4cbe8d82d08e338c9f2b",
       "magnitude": 0.5823712153185924,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -906,7 +1014,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_93400f7fcef24e6396aa2d40ba3e18d0",
+      "id": "obs_01fe1cabef33490ab64ed1f1c423677f",
       "magnitude": 0.9617597599308471,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -915,7 +1023,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_6d61d0b6ea55495282f1f1cec0d4c1d8",
+      "id": "obs_1a3fd73570c941ec932220b6b303085d",
       "magnitude": 0.7509193011707634,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -924,7 +1032,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_fb14d6185f2f4f96ba5f27587a159811",
+      "id": "obs_60a5a41af7964e1181fc948989863e9c",
       "magnitude": -2062.972385181998,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -933,7 +1041,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_e40e55cfe00341f385498fbfd412171b",
+      "id": "obs_c07c4d7e3e894ac9a1d8c28aed90cd9d",
       "magnitude": -0.6191290613557787,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -942,7 +1050,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_634eac5a96aa4bc99491255f062dd053",
+      "id": "obs_01cedba0c3584ed3821db6507e0deba5",
       "magnitude": -0.964074485209477,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -951,7 +1059,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_18930b0da26e48ffaf5ffbfc05d60a59",
+      "id": "obs_27117a4dfde447f3a5003a5e943f2bef",
       "magnitude": -0.7894390591599819,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -960,7 +1068,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_3ab1f37cef22424a9dc7cebf19b4df95",
+      "id": "obs_401435e64a2d4e82b4de4a7822f30a95",
       "magnitude": 0.5823712153185924,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -969,7 +1077,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_03ced603bfca4114b1ce312d8178ad2c",
+      "id": "obs_e53e8d091750422ba8dd55d220f38902",
       "magnitude": 0.9617597599308471,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -978,7 +1086,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_8b7bec4886b14ecaa3dd6b9fb27931ba",
+      "id": "obs_1aba22657a6d45ee95e9388870593f73",
       "magnitude": 0.7509193011707634,
       "metric_ref": null,
       "observation_type": "comparison",
@@ -988,23 +1096,34 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-q-0",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-q-0",
       "priority": 0,
-      "question": "Is any observed relationship stable across the available time window, or driven by a short-lived spike?",
+      "question": "Which factor explains more of the variation in on-time rate: staffing level or order volume?",
       "related_hypothesis_ids": [
-        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
-        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "755a2490-acb8-4c9a-8161-64a00d72d7ec-q-contra-1",
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-q-1",
       "priority": 0,
-      "question": "Which of these holds, if either: 'On-time rate is more strongly associated with staffing level than with order volume.' or 'Order volume is more strongly associated with staffing level than with on-time rate.'?",
+      "question": "Is any observed relationship stable across the full period, or driven by a few outlier intervals?",
       "related_hypothesis_ids": [
-        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-0",
-        "755a2490-acb8-4c9a-8161-64a00d72d7ec-hyp-1"
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
+      ],
+      "status": "open"
+    },
+    {
+      "answer": null,
+      "id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-q-contra-2",
+      "priority": 0,
+      "question": "Which of these holds, if either: 'On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.' or 'Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.'?",
+      "related_hypothesis_ids": [
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-0",
+        "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee-hyp-1"
       ],
       "status": "open"
     }
@@ -1027,5 +1146,5 @@
     "rationale": "terminated: insufficient_evidence",
     "reason": "insufficient_evidence"
   },
-  "updated_at": "2026-08-20T19:02:52"
+  "updated_at": "2026-08-25T11:44:41"
 }

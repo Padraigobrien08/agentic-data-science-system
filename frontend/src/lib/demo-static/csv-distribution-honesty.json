@@ -1,0 +1,743 @@
+{
+  "adapter_id": "in_memory",
+  "analysis_run_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+  "conclusion": "Insufficient evidence to resolve the investigation goal.",
+  "conclusion_detail": {
+    "caveats": [
+      "termination: insufficient_evidence",
+      "2 open question(s) remain"
+    ],
+    "confidence": 0.2,
+    "disposition": "insufficient_evidence",
+    "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-concl-0",
+    "key_evidence_ids": [],
+    "narrative": "The evidence did not separate the two explanations. It was not enough to say whether the higher average delivery time came from a broad shift affecting most orders or from a small tail of very late orders pulling the mean up.\n\nBoth tested claims stayed unresolved. The broad-shift explanation had some supporting evidence, but so did the tail-driven explanation, and neither was strong enough to stand on its own. In other words, the run found signs pointing in both directions rather than a clear winner.\n\nIt tested the distribution summary, then a dataset profile, then outlier detection. The loop stopped because it ran out of evidence, not because the question was settled. What remains open is whether the increase has been sustained or was a one-off spike, and how much of the change in the mean comes from the upper tail versus the central bulk of orders.",
+    "statement": "Insufficient evidence to resolve the investigation goal.",
+    "supporting_hypothesis_ids": [
+      "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+      "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+    ]
+  },
+  "confidence": 0.2,
+  "constraints": [],
+  "counts": {
+    "critiques": 0,
+    "decisions": 15,
+    "evidence": 6,
+    "experiments": 3,
+    "hypotheses": 2,
+    "observations": 1,
+    "open_questions": 2
+  },
+  "created_at": "2026-08-24T16:14:17",
+  "critiques": [],
+  "datasets": [
+    {
+      "content_hash": null,
+      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    },
+    {
+      "content_hash": null,
+      "id": "dset_8306b0a029a04508a2583bbcc34754c0",
+      "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
+      "name": "operational_delivery",
+      "row_count": null
+    }
+  ],
+  "decisions": [
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "propose_hypothesis",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-hyp-0",
+      "iteration": 0,
+      "rationale": "This tests the broad-shift explanation directly against the observed increase in the mean.",
+      "sequence": 0,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "propose_hypothesis",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-hyp-1",
+      "iteration": 0,
+      "rationale": "This tests the alternative explanation that the mean is being pulled up by outliers rather than a general slowdown.",
+      "sequence": 1,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "summarize_distribution",
+      "decision_type": "select_experiment",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-sel-2",
+      "iteration": 0,
+      "rationale": "summarize_distribution is the highest-information next step for establishing the dataset’s overall distribution.",
+      "sequence": 2,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-0",
+          "kind": "experiment_request"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-evd-3",
+      "iteration": 0,
+      "rationale": "recorded 2 evidence item(s) for summarize_distribution",
+      "sequence": 3,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-4",
+      "iteration": 0,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 4,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-5",
+      "iteration": 0,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 5,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "profile_dataset",
+      "decision_type": "select_experiment",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-sel-6",
+      "iteration": 1,
+      "rationale": "profile_dataset is the highest-information experiment for establishing the overall distribution shape and summary characteristics.",
+      "sequence": 6,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-1",
+          "kind": "experiment_request"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-evd-7",
+      "iteration": 1,
+      "rationale": "recorded 2 evidence item(s) for profile_dataset",
+      "sequence": 7,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-8",
+      "iteration": 1,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 8,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-9",
+      "iteration": 1,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 9,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": "detect_outliers",
+      "decision_type": "select_experiment",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-sel-10",
+      "iteration": 2,
+      "rationale": "Detecting outliers would establish whether the distribution has extreme values or anomalies that materially affect its shape.",
+      "sequence": 10,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-2",
+          "kind": "experiment_request"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "update_evidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-evd-11",
+      "iteration": 2,
+      "rationale": "recorded 2 evidence item(s) for detect_outliers",
+      "sequence": 11,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        },
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-12",
+      "iteration": 2,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 12,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "revise_confidence",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-rev-13",
+      "iteration": 2,
+      "rationale": "active (support=0, refute=0)",
+      "sequence": 13,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+          "kind": "hypothesis"
+        }
+      ]
+    },
+    {
+      "alternatives": [],
+      "chosen_option": null,
+      "decision_type": "conclude",
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-dec-concl-14",
+      "iteration": 3,
+      "rationale": "insufficient_evidence (insufficient_evidence)",
+      "sequence": 14,
+      "targets": [
+        {
+          "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-concl-0",
+          "kind": "conclusion"
+        }
+      ]
+    }
+  ],
+  "demo_slug": "csv-distribution-honesty",
+  "domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+  "events": [
+    {
+      "created_at": "2026-08-24T16:14:17",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "created",
+      "payload": {
+        "origin": "native"
+      },
+      "sequence": 0
+    },
+    {
+      "created_at": "2026-08-24T16:14:23",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 1
+    },
+    {
+      "created_at": "2026-08-24T16:14:24",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 2
+    },
+    {
+      "created_at": "2026-08-24T16:14:26",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 3
+    },
+    {
+      "created_at": "2026-08-24T16:14:27",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "running"
+      },
+      "sequence": 4
+    },
+    {
+      "created_at": "2026-08-24T16:14:30",
+      "entity_id": null,
+      "entity_kind": null,
+      "event_type": "checkpoint_saved",
+      "payload": {
+        "status": "exhausted"
+      },
+      "sequence": 5
+    }
+  ],
+  "evidence": [
+    {
+      "claim": "'avg_delivery_days' is centered near 3.045 (n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "descriptive_stat",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0"
+      ],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-0",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Values treated as a single population; no grouping applied."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "skew": 0.255855,
+          "std": 0.363676
+        },
+        "effect_size": null,
+        "effect_size_kind": null,
+        "p_value": null,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": null,
+        "warnings": []
+      },
+      "strength": 0.5
+    },
+    {
+      "claim": "'avg_delivery_days' is centered near 3.045 (n=96).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "descriptive_stat",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-1",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [
+          "Values treated as a single population; no grouping applied."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "skew": 0.255855,
+          "std": 0.363676
+        },
+        "effect_size": null,
+        "effect_size_kind": null,
+        "p_value": null,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": null,
+        "warnings": []
+      },
+      "strength": 0.5
+    },
+    {
+      "claim": "Dataset has 96 rows across 6 columns with 0.0% overall missingness.",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "data_quality",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0"
+      ],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-2",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": null,
+        "effect_size_kind": null,
+        "p_value": null,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": null,
+        "warnings": []
+      },
+      "strength": 0.5
+    },
+    {
+      "claim": "Dataset has 96 rows across 6 columns with 0.0% overall missingness.",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "data_quality",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-3",
+      "reliability": 0.7619047619047619,
+      "statistics": {
+        "assumptions": [],
+        "coverage": 1.0,
+        "diagnostics": {},
+        "effect_size": null,
+        "effect_size_kind": null,
+        "p_value": null,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": null,
+        "warnings": []
+      },
+      "strength": 0.5
+    },
+    {
+      "claim": "0 of 96 values in 'avg_delivery_days' are outliers (0.0%).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "anomaly_flag",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0"
+      ],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-4",
+      "reliability": 0.6095238095238096,
+      "statistics": {
+        "assumptions": [
+          "z-score outlier rule assumes approximate normality."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "max_score": 2.804983,
+          "outlier_count": 0.0
+        },
+        "effect_size": 0.0,
+        "effect_size_kind": "outlier_fraction",
+        "p_value": null,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": null,
+        "warnings": [
+          "No outliers detected."
+        ]
+      },
+      "strength": 0.0
+    },
+    {
+      "claim": "0 of 96 values in 'avg_delivery_days' are outliers (0.0%).",
+      "coverage": 1.0,
+      "direction": "neutral",
+      "evidence_type": "anomaly_flag",
+      "experiment_result_id": null,
+      "hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-evd-5",
+      "reliability": 0.6095238095238096,
+      "statistics": {
+        "assumptions": [
+          "z-score outlier rule assumes approximate normality."
+        ],
+        "coverage": 1.0,
+        "diagnostics": {
+          "max_score": 2.804983,
+          "outlier_count": 0.0
+        },
+        "effect_size": 0.0,
+        "effect_size_kind": "outlier_fraction",
+        "p_value": null,
+        "sample_size": 96,
+        "schema_version": "1",
+        "uncertainty": null,
+        "warnings": [
+          "No outliers detected."
+        ]
+      },
+      "strength": 0.0
+    }
+  ],
+  "experiments": [
+    {
+      "artifacts": [
+        {
+          "byte_size": 165,
+          "id": "511b8229-d578-485f-b45b-3efdba920444",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "distribution"
+        },
+        {
+          "byte_size": 104,
+          "id": "9259c88e-f1d6-4e6e-9f9b-c1bc9dfb889b",
+          "kind": "json",
+          "mime_type": "application/json",
+          "name": "distribution_summary"
+        }
+      ],
+      "created_at": "2026-08-24T16:14:24",
+      "error": null,
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-res-0",
+      "metrics": {
+        "mean": 3.029896,
+        "n": 96.0,
+        "std": 0.363676
+      },
+      "request_domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-0",
+      "status": "succeeded",
+      "summary": "Summarized distribution of 'avg_delivery_days' (n=96).",
+      "target_hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "tool_name": "summarize_distribution"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 401,
+          "id": "5b17a0e8-2783-4218-9d33-2035d92cd4cb",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "column_profile"
+        },
+        {
+          "byte_size": 61,
+          "id": "55fb9697-9c4e-4173-b1eb-9563e2de1792",
+          "kind": "json",
+          "mime_type": "application/json",
+          "name": "dataset_profile"
+        }
+      ],
+      "created_at": "2026-08-24T16:14:26",
+      "error": null,
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-res-1",
+      "metrics": {
+        "column_count": 6.0,
+        "overall_missing_ratio": 0.0,
+        "row_count": 96.0
+      },
+      "request_domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-1",
+      "status": "succeeded",
+      "summary": "Profiled 6 columns over 96 rows.",
+      "target_hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "tool_name": "profile_dataset"
+    },
+    {
+      "artifacts": [
+        {
+          "byte_size": 81,
+          "id": "57cf1177-0491-4a0d-8757-7c91849783a0",
+          "kind": "tabular",
+          "mime_type": "text/csv",
+          "name": "outliers"
+        },
+        {
+          "byte_size": 105,
+          "id": "aee96dcd-08ae-49f5-80ff-5b9d36d90972",
+          "kind": "json",
+          "mime_type": "application/vnd.chart+json",
+          "name": "outliers"
+        }
+      ],
+      "created_at": "2026-08-24T16:14:27",
+      "error": null,
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-res-2",
+      "metrics": {
+        "max_score": 2.804983,
+        "outlier_count": 0.0,
+        "outlier_fraction": 0.0
+      },
+      "request_domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-exp-2",
+      "status": "succeeded",
+      "summary": "0 outlier(s) in 'avg_delivery_days' via zscore.",
+      "target_hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "tool_name": "detect_outliers"
+    }
+  ],
+  "hypotheses": [
+    {
+      "confidence": 0.5,
+      "entity_refs": [],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+      "metric_refs": [
+        "avg_delivery_days"
+      ],
+      "prior_confidence": 0.5,
+      "rationale": "This tests the broad-shift explanation directly against the observed increase in the mean.",
+      "statement": "The rise in average delivery time reflects a broad shift: delivery times are higher for most orders, not just a small tail of late orders.",
+      "status": "unresolved"
+    },
+    {
+      "confidence": 0.5,
+      "entity_refs": [],
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1",
+      "metric_refs": [
+        "avg_delivery_days"
+      ],
+      "prior_confidence": 0.5,
+      "rationale": "This tests the alternative explanation that the mean is being pulled up by outliers rather than a general slowdown.",
+      "statement": "The rise in average delivery time is primarily caused by a small tail of very late orders, while most orders have not materially changed.",
+      "status": "unresolved"
+    }
+  ],
+  "id": "580343ee-959d-46c4-a7b0-b5c632678ddf",
+  "objective": "Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?",
+  "observations": [
+    {
+      "entity_ref": null,
+      "experiment_result_id": null,
+      "id": "obs_7009eb03e7e24e0e98f471277a5887ef",
+      "magnitude": 3.0298958333333332,
+      "metric_ref": "avg_delivery_days",
+      "observation_type": "value",
+      "statement": "'avg_delivery_days' mean=3.03, median=3.045, skew=0.256."
+    }
+  ],
+  "open_questions": [
+    {
+      "answer": null,
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-q-0",
+      "priority": 0,
+      "question": "Has the increase in average delivery time been sustained over time, or is it a one-off spike?",
+      "related_hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "status": "open"
+    },
+    {
+      "answer": null,
+      "id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b-q-1",
+      "priority": 0,
+      "question": "How much of the change in the mean is explained by the upper tail versus the central bulk of orders?",
+      "related_hypothesis_ids": [
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-0",
+        "5a8cb63e-189b-41ec-9739-1dffdb33f00b-hyp-1"
+      ],
+      "status": "open"
+    }
+  ],
+  "origin": "native",
+  "outcome": {
+    "claims_rejected": 0,
+    "claims_supported": 0,
+    "claims_unresolved": 2,
+    "claims_weakened": 0,
+    "contradiction_found": false,
+    "kind": "declined",
+    "termination_reason": "insufficient_evidence"
+  },
+  "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+  "status": "exhausted",
+  "success_criteria": [],
+  "termination": {
+    "at_iteration": 3,
+    "rationale": "terminated: insufficient_evidence",
+    "reason": "insufficient_evidence"
+  },
+  "updated_at": "2026-08-25T11:44:42"
+}

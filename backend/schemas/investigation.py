@@ -244,6 +244,11 @@ class ExperimentItem(BaseModel):
     metrics: dict | None = None
     error: dict | None = None
     request_domain_id: str | None = None
+    #: The claims this experiment was raised to test, in the same domain-id space as
+    #: `hypotheses[].id`. Empty when the request behind it was not recorded — true of every
+    #: run before the request-persistence fix, so a reader must treat empty as "unknown"
+    #: rather than "tested nothing".
+    target_hypothesis_ids: list[str] = []
     created_at: datetime
     artifacts: list[ArtifactRef] = []
 
@@ -258,6 +263,11 @@ class ObservationItem(BaseModel):
     experiment_result_id: str | None = None
 
 
+class EntityRefItem(BaseModel):
+    kind: str
+    id: str
+
+
 class DecisionItem(BaseModel):
     id: str
     sequence: int
@@ -266,6 +276,11 @@ class DecisionItem(BaseModel):
     iteration: int
     chosen_option: str | None = None
     alternatives: list = []
+    #: What the decision acted on. Exposed because it is the only structured link between a
+    #: decision and the claims behind it: a contradiction weakens two hypotheses in one act
+    #: and carries both here, which is what lets a client render it as one event rather than
+    #: two unrelated rows. Without this the ids exist only in prose, if at all.
+    targets: list[EntityRefItem] = []
 
 
 class CritiqueItem(BaseModel):
@@ -291,6 +306,9 @@ class OpenQuestionItem(BaseModel):
 class ConclusionItem(BaseModel):
     id: str
     statement: str
+    #: The finding as prose, when the run recorded one whose every figure was verified
+    #: against its own state. Null is ordinary — `statement` is the answer of record.
+    narrative: str | None = None
     disposition: str
     confidence: float
     caveats: list[str] = []
@@ -384,12 +402,31 @@ def _hypothesis(h) -> HypothesisItem:
     )
 
 
-def _evidence(e) -> EvidenceItem:
-    hyp_ids = [str(link.hypothesis_id) for link in e.hypothesis_links]
+def _evidence(e, hypothesis_domain_ids: dict[str, str], experiment_domain_ids: dict[str, str]) -> EvidenceItem:
+    """
+    One evidence item, with its links expressed in the same id space as everything else.
+
+    Every other item in this contract is keyed by ``domain_id`` — ``HypothesisItem.id``,
+    ``ExperimentItem.id``. These two links used to be emitted as database primary keys, so
+    they could not be joined against the things they point at: ``evidenceForHypothesis`` in
+    the frontend matched zero rows on every published demo, and the trace rendered claims with
+    no supporting evidence rather than failing loudly.
+
+    A link that cannot be resolved is dropped rather than emitted in a foreign id space,
+    because a dangling id invites exactly the silent-empty-join this is fixing.
+    """
+    hyp_ids = [
+        hypothesis_domain_ids[key]
+        for link in e.hypothesis_links
+        if (key := str(link.hypothesis_id)) in hypothesis_domain_ids
+    ]
+    experiment_id = (
+        experiment_domain_ids.get(str(e.experiment_result_id)) if e.experiment_result_id else None
+    )
     return EvidenceItem(
         id=e.domain_id, claim=e.claim, evidence_type=e.evidence_type, direction=e.direction,
         strength=e.strength, reliability=e.reliability, coverage=e.coverage,
-        experiment_result_id=(str(e.experiment_result_id) if e.experiment_result_id else None),
+        experiment_result_id=experiment_id,
         hypothesis_ids=hyp_ids,
         statistics=e.statistics_json if isinstance(e.statistics_json, dict) else None,
     )
@@ -405,12 +442,14 @@ def _artifact_ref(link) -> ArtifactRef:
     )
 
 
-def _experiment(x) -> ExperimentItem:
+def _experiment(x, request_targets: dict[str, list[str]] | None = None) -> ExperimentItem:
+    targets = (request_targets or {}).get(x.request_domain_id or "", [])
     return ExperimentItem(
         id=x.domain_id, tool_name=x.tool_name, status=x.status, summary=x.summary,
         metrics=x.metrics_json if isinstance(x.metrics_json, dict) else None,
         error=x.error_json if isinstance(x.error_json, dict) else None,
-        request_domain_id=x.request_domain_id, created_at=x.created_at,
+        request_domain_id=x.request_domain_id, target_hypothesis_ids=targets,
+        created_at=x.created_at,
         artifacts=[_artifact_ref(link) for link in x.artifact_links],
     )
 
@@ -427,6 +466,11 @@ def _decision(d) -> DecisionItem:
     return DecisionItem(
         id=d.domain_id, sequence=d.sequence, decision_type=d.decision_type, rationale=d.rationale,
         iteration=d.iteration, chosen_option=d.chosen_option, alternatives=_as_list(d.alternatives_json),
+        targets=[
+            EntityRefItem(kind=str(t.get("kind", "")), id=str(t.get("id", "")))
+            for t in _as_list(d.targets_json)
+            if isinstance(t, dict) and t.get("id")
+        ],
     )
 
 
@@ -457,19 +501,33 @@ def build_detail(row: InvestigationRow) -> InvestigationDetail:
     conclusion_detail = None
     if concl is not None:
         conclusion_detail = ConclusionItem(
-            id=concl.domain_id, statement=concl.statement, disposition=concl.disposition,
+            id=concl.domain_id, statement=concl.statement, narrative=concl.narrative,
+            disposition=concl.disposition,
             confidence=concl.confidence, caveats=[str(x) for x in _as_list(concl.caveats_json)],
             supporting_hypothesis_ids=[str(x) for x in _as_list(concl.supporting_hypothesis_ids_json)],
             key_evidence_ids=[str(x) for x in _as_list(concl.key_evidence_ids_json)],
         )
+    # Primary key -> domain id, so evidence links come out in the id space every other item
+    # in this response is keyed by. Built once from rows already loaded.
+    # Which claims each experiment was raised to test, keyed by the request domain id the
+    # result carries. Already domain ids on both sides, so nothing to resolve.
+    request_targets = {
+        r.domain_id: [str(x) for x in _as_list(r.target_hypothesis_ids_json)]
+        for r in row.experiment_requests
+    }
+    hypothesis_domain_ids = {str(h.id): h.domain_id for h in row.hypotheses}
+    experiment_domain_ids = {str(x.id): x.domain_id for x in row.experiment_results}
     return InvestigationDetail(
         **summary.model_dump(),
         success_criteria=[str(x) for x in _as_list(_goal_field(row, "success_criteria"))],
         constraints=[str(x) for x in _as_list(_goal_field(row, "constraints"))],
         termination=_termination(row),
         hypotheses=[_hypothesis(h) for h in row.hypotheses],
-        evidence=[_evidence(e) for e in row.evidence],
-        experiments=[_experiment(x) for x in sorted(row.experiment_results, key=lambda r: r.created_at)],
+        evidence=[_evidence(e, hypothesis_domain_ids, experiment_domain_ids) for e in row.evidence],
+        experiments=[
+            _experiment(x, request_targets)
+            for x in sorted(row.experiment_results, key=lambda r: r.created_at)
+        ],
         observations=[_observation(o) for o in row.observations],
         decisions=[_decision(d) for d in sorted(row.decisions, key=lambda d: d.sequence)],
         critiques=[_critique(c) for c in row.critiques],

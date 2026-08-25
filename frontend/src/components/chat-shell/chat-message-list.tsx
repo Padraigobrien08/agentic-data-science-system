@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { X } from "lucide-react";
 
 import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
+import { ChatRecordedAnswer } from "./chat-recorded-answer";
 import { ChatRunAnswerCard } from "./chat-run-answer-card";
 import { ChatRunProgress } from "./chat-run-progress";
 import type { ChatMessage } from "./types";
@@ -58,6 +59,16 @@ type Props = {
   messages: ChatMessage[];
   onPickPrompt?: (goal: string) => void;
   onStop?: () => void;
+  /**
+   * Docks a trace beside the conversation. The key identifies which one: a live answer is
+   * keyed by its run, a recorded answer by its message — the replay tier has exactly one
+   * trace, so the id only has to be stable, not resolvable.
+   *
+   * Absent = this surface cannot dock, and no control is offered.
+   */
+  onInspectTrace?: (key: string) => void;
+  /** The trace currently docked, so its control reads as pressed. */
+  openTraceKey?: string | null;
 };
 
 function EmptyState({ onPickPrompt }: { onPickPrompt?: (goal: string) => void }) {
@@ -120,7 +131,13 @@ function SystemStrip({ content }: { content: string }) {
 /**
  * Conversation strip: user and assistant chat bubbles.
  */
-export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
+export function ChatMessageList({
+  messages,
+  onPickPrompt,
+  onStop,
+  onInspectTrace,
+  openTraceKey,
+}: Props) {
   return (
     <div
       className="scrollbar-hidden flex min-h-0 flex-1 flex-col gap-5 overflow-y-auto px-4 py-4 md:px-6 md:py-5 lg:px-10"
@@ -149,6 +166,9 @@ export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
             return <SystemStrip key={m.id} content={m.content} />;
           }
           const note = deliveryNote(m);
+          // A live answer is keyed by its run; a recorded one by its message, since the
+          // replay tier holds a single trace and only needs a stable handle for it.
+          const traceKey = onInspectTrace ? (m.runId ?? (m.recordedAnswer ? m.id : null)) : null;
           return (
             <article
               key={m.id}
@@ -158,6 +178,8 @@ export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
               <div className="w-full max-w-[76rem]">
                 {m.pending ? (
                   <ChatRunProgress view={m.phaseView} onStop={onStop} />
+                ) : m.recordedAnswer ? (
+                  <ChatRecordedAnswer answer={m.recordedAnswer} />
                 ) : m.answerCard ? (
                   <div className="mx-auto max-w-[66rem]">
                     <ChatRunAnswerCard
@@ -170,7 +192,10 @@ export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
                     />
                   </div>
                 ) : (
-                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap break-words rounded-card border border-[var(--border)] bg-[var(--surface)] px-5 py-4 text-[15px] leading-7 text-[var(--foreground)]">
+                  // Plain prose, not a card. An assistant reply with nothing structured to
+                  // show is just text, and boxing it made every answer look like a widget.
+                  // `ChatRunAnswerCard` above stays a card — it has charts and evidence in it.
+                  <div className="mx-auto max-w-[52rem] whitespace-pre-wrap break-words text-[15px] leading-7 text-[var(--foreground)]">
                     {m.content}
                   </div>
                 )}
@@ -195,6 +220,22 @@ export function ChatMessageList({ messages, onPickPrompt, onStop }: Props) {
                 ) : null}
                 {note ? (
                   <p className="mx-auto mt-3 max-w-[52rem] text-[11px] leading-5 text-[var(--muted)]">{note}</p>
+                ) : null}
+                {/* Docks the trace rather than navigating: the answer and the reason for it
+                    are worth reading side by side. The card's own nav keeps the full page.
+                    Hidden below `lg`, where there is no room to dock into and the control
+                    would do nothing when pressed. */}
+                {traceKey && !m.pending ? (
+                  <div className="mx-auto mt-3 hidden max-w-[52rem] lg:block">
+                    <button
+                      type="button"
+                      onClick={() => onInspectTrace?.(traceKey)}
+                      aria-pressed={openTraceKey === traceKey}
+                      className="rounded-control border border-[var(--border)] px-2.5 py-1.5 font-mono text-[11px] text-[var(--muted)] transition-colors hover:text-[var(--foreground)] aria-pressed:border-[var(--accent)] aria-pressed:text-[var(--foreground)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--accent)]"
+                    >
+                      {openTraceKey === traceKey ? "hide trace" : "inspect trace"}
+                    </button>
+                  </div>
                 ) : null}
               </div>
             </article>

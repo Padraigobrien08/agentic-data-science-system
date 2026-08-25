@@ -4,6 +4,7 @@
  */
 
 import type { AnalysisRunStatus, BackgroundDeliveryHealth, BackgroundDeliveryMode } from "@/lib/api/types";
+import type { ComposedAnswer } from "@/lib/demo-answer";
 import type { PipelinePhaseView } from "@/lib/run-pipeline-phases";
 import type { ChatAnswerCardView } from "@/lib/run-primary-view";
 
@@ -28,6 +29,11 @@ export type ChatAssistantMessage = {
   rewriteSuggestions?: string[];
   routingReason?: string;
   answerCard?: ChatAnswerCardView;
+  /**
+   * A recorded run's answer, composed from persisted investigation state. Set only on the
+   * replay tier, where there is no run view model to build an `answerCard` from.
+   */
+  recordedAnswer?: ComposedAnswer;
   runId?: string;
   runHref?: string;
   deepDiveHref?: string;
@@ -61,6 +67,12 @@ export type ChatThreadSummary = {
   href: string;
   hasMessages: boolean;
   updatedAt: string;
+  /**
+   * A published run rather than one of this reader's conversations. Sits in the same
+   * chronological list — it is history either way — but badged, because someone scanning
+   * their own chats should never mistake the showcase for something they ran.
+   */
+  recorded?: boolean;
 };
 
 export type ChatBackgroundDelivery = BackgroundDeliveryHealth;

@@ -1,20 +1,46 @@
 {
-  "analysis_run_id": "c37e44c1-8944-4261-839b-a9c5e1d39e65",
-  "chat": [],
+  "analysis_run_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
+  "chat": [
+    {
+      "created_at": "2026-08-24T16:13:48",
+      "id": "0b902cef-78b7-4635-a10f-3470326920ef",
+      "messages": [
+        {
+          "analysis_run_id": null,
+          "content": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?",
+          "created_at": "2026-08-24T16:13:48.845356",
+          "id": "f3f6ee4a-934a-4efd-95da-8be9c025e2e8",
+          "role": "user",
+          "sequence": 0,
+          "status": "complete"
+        },
+        {
+          "analysis_run_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
+          "content": "Supported: Rising order volume in the north region explains the worsening delivery times over the period under study. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
+          "created_at": "2026-08-24T16:13:48.846825",
+          "id": "0e30e60e-2592-4474-ab39-718861f6dd26",
+          "role": "assistant",
+          "sequence": 1,
+          "status": "complete"
+        }
+      ],
+      "title": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the…"
+    }
+  ],
   "demo_slug": "csv-delivery-delays",
-  "investigation_id": "24cb78e3-8383-4501-95ab-8a67fb25e15f",
+  "investigation_id": "b1b602c2-f6f3-458b-b7c2-49e3ac9cb03d",
   "model_calls": [
     {
       "completion_tokens": 51,
       "error_detail": null,
       "est_cost_usd": 0.00096675,
-      "finished_at": "2026-08-11T21:29:59.815681",
-      "id": "e80a0078-a5de-4e73-bba5-a5f7be5451b3",
-      "latency_ms": 925,
+      "finished_at": "2026-08-24T16:13:31.809996",
+      "id": "33af750d-ed79-4e8b-a1ff-a2df6ee3123d",
+      "latency_ms": 6647,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 983,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -41,7 +67,7 @@
         "assistant_text": "{\"intent\":\"trend\",\"metric_hint\":\"on_time_rate\",\"group_hint\":null,\"direction\":\"down\",\"rationale\":\"The goal asks whether service quality is degrading over time, which is a trend in the quality metric.\"}",
         "completion_tokens": 51,
         "finish_reason": "stop",
-        "latency_ms": 925,
+        "latency_ms": 6647,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 983,
         "raw_response": {
@@ -61,9 +87,10 @@
               }
             }
           ],
-          "created": 1786483799,
-          "id": "chatcmpl-EBoKlND40a6wxwyMKO7tpnwq3dPCe",
+          "created": 1787588010,
+          "id": "chatcmpl-EGRacatelo8tDGGj025UbVFrL89BF",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
@@ -78,6 +105,7 @@
             "prompt_tokens": 983,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
             "total_tokens": 1034
@@ -85,20 +113,20 @@
         }
       },
       "sequence": 0,
-      "started_at": "2026-08-11T21:29:58.887693",
+      "started_at": "2026-08-24T16:13:25.160134",
       "status": "success"
     },
     {
-      "completion_tokens": 144,
+      "completion_tokens": 148,
       "error_detail": null,
-      "est_cost_usd": 0.0013965,
-      "finished_at": "2026-08-11T21:30:01.313237",
-      "id": "5441b833-80a5-4c7d-b483-6bd2d8501886",
-      "latency_ms": 1491,
+      "est_cost_usd": 0.0014145,
+      "finished_at": "2026-08-24T16:13:34.847142",
+      "id": "0963386c-cddd-4171-9bad-c6f53af2099a",
+      "latency_ms": 3030,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 998,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -122,10 +150,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"hypotheses\":[{\"statement\":\"In the north region, service quality has degraded, as reflected by a decline in on_time_rate.\",\"metric\":\"on_time_rate\",\"direction\":\"down\",\"rationale\":\"This directly tests the stated concern that delivery performance is worsening.\"},{\"statement\":\"In the north region, rising order volume explains the worsening delivery times.\",\"metric\":\"order_volume\",\"direction\":\"up\",\"rationale\":\"This tests the competing explanation that increased demand, rather than quality degradation, is driving the observed slowdown.\"}],\"questions\":[\"Is the worsening sustained over time or driven by a short-lived spike?\",\"Do delivery delays track changes in order volume more closely than changes in staffing?\"]}",
-        "completion_tokens": 144,
+        "assistant_text": "{\"hypotheses\":[{\"statement\":\"On-time delivery performance in the north region has declined over the period under study.\",\"metric\":\"on_time_rate\",\"direction\":\"down\",\"rationale\":\"This directly tests whether service quality is degrading, as suggested by the goal and interpretation.\"},{\"statement\":\"Rising order volume in the north region explains the worsening delivery times over the period under study.\",\"metric\":\"order_volume\",\"direction\":\"up\",\"rationale\":\"The goal explicitly raises volume growth as an alternative explanation, so it should be tested separately from service quality.\"}],\"questions\":[\"Is the deterioration sustained over time or driven by a short-lived spike?\",\"Does any change in staffing help explain the delivery-time shift?\"]}",
+        "completion_tokens": 148,
         "finish_reason": "stop",
-        "latency_ms": 1491,
+        "latency_ms": 3030,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 998,
         "raw_response": {
@@ -137,7 +165,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"hypotheses\":[{\"statement\":\"In the north region, service quality has degraded, as reflected by a decline in on_time_rate.\",\"metric\":\"on_time_rate\",\"direction\":\"down\",\"rationale\":\"This directly tests the stated concern that delivery performance is worsening.\"},{\"statement\":\"In the north region, rising order volume explains the worsening delivery times.\",\"metric\":\"order_volume\",\"direction\":\"up\",\"rationale\":\"This tests the competing explanation that increased demand, rather than quality degradation, is driving the observed slowdown.\"}],\"questions\":[\"Is the worsening sustained over time or driven by a short-lived spike?\",\"Do delivery delays track changes in order volume more closely than changes in staffing?\"]}",
+                "content": "{\"hypotheses\":[{\"statement\":\"On-time delivery performance in the north region has declined over the period under study.\",\"metric\":\"on_time_rate\",\"direction\":\"down\",\"rationale\":\"This directly tests whether service quality is degrading, as suggested by the goal and interpretation.\"},{\"statement\":\"Rising order volume in the north region explains the worsening delivery times over the period under study.\",\"metric\":\"order_volume\",\"direction\":\"up\",\"rationale\":\"The goal explicitly raises volume growth as an alternative explanation, so it should be tested separately from service quality.\"}],\"questions\":[\"Is the deterioration sustained over time or driven by a short-lived spike?\",\"Does any change in staffing help explain the delivery-time shift?\"]}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -145,14 +173,15 @@
               }
             }
           ],
-          "created": 1786483800,
-          "id": "chatcmpl-EBoKmXsvK9ANDpJEBW9FhPi4fXbpP",
+          "created": 1787588013,
+          "id": "chatcmpl-EGRafqi1tkko6H2RbwHLIgduzcdGL",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 144,
+            "completion_tokens": 148,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -162,27 +191,28 @@
             "prompt_tokens": 998,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 1142
+            "total_tokens": 1146
           }
         }
       },
       "sequence": 1,
-      "started_at": "2026-08-11T21:29:59.819847",
+      "started_at": "2026-08-24T16:13:31.815280",
       "status": "success"
     },
     {
-      "completion_tokens": 34,
+      "completion_tokens": 38,
       "error_detail": null,
-      "est_cost_usd": 0.00083025,
-      "finished_at": "2026-08-11T21:30:02.084739",
-      "id": "3ef0ec73-5cbd-4917-89d3-e501d4cca8d6",
-      "latency_ms": 741,
+      "est_cost_usd": 0.00084825,
+      "finished_at": "2026-08-24T16:13:36.543177",
+      "id": "903de9ec-104a-4ac1-a010-67a471a78ef4",
+      "latency_ms": 1656,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 903,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -206,10 +236,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_time_series_trend is the highest-gain experiment for establishing the overall trend.\"}",
-        "completion_tokens": 34,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"analyze_time_series_trend is the highest-gain experiment for establishing the presence and direction of a trend.\"}",
+        "completion_tokens": 38,
         "finish_reason": "stop",
-        "latency_ms": 741,
+        "latency_ms": 1656,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 903,
         "raw_response": {
@@ -221,7 +251,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"analyze_time_series_trend is the highest-gain experiment for establishing the overall trend.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"analyze_time_series_trend is the highest-gain experiment for establishing the presence and direction of a trend.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -229,14 +259,15 @@
               }
             }
           ],
-          "created": 1786483801,
-          "id": "chatcmpl-EBoKnFecJK8RDKCK2cItUV700gV8m",
+          "created": 1787588015,
+          "id": "chatcmpl-EGRahGfxiOootAjxBBN70dniE4Z5H",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 34,
+            "completion_tokens": 38,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
@@ -246,27 +277,28 @@
             "prompt_tokens": 903,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 937
+            "total_tokens": 941
           }
         }
       },
       "sequence": 2,
-      "started_at": "2026-08-11T21:30:01.342045",
+      "started_at": "2026-08-24T16:13:34.885315",
       "status": "success"
     },
     {
-      "completion_tokens": 55,
+      "completion_tokens": 73,
       "error_detail": null,
-      "est_cost_usd": 0.000819,
-      "finished_at": "2026-08-11T21:30:03.091061",
-      "id": "7fd4b485-6817-4d10-b64a-7b8e425b9592",
-      "latency_ms": 989,
+      "est_cost_usd": 0.001242,
+      "finished_at": "2026-08-24T16:13:38.669982",
+      "id": "834ddbf5-b378-4e40-aba0-26ad214a9795",
+      "latency_ms": 2101,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 762,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 1218,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -275,11 +307,11 @@
         },
         "messages": [
           {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-0\", \"status\": \"weakened\", \"confidence\": 0.6012, \"already_critiqued\": false}, \"tools\": [\"detect_change_points\", \"summarize_distribution\"]}",
+            "content": "{\"claim\": {\"id\": \"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0\", \"status\": \"weakened\", \"confidence\": 0.6012, \"already_critiqued\": false}, \"tools\": [\"detect_change_points\", \"summarize_distribution\"], \"supported_claims\": []}",
             "role": "user"
           }
         ],
@@ -290,12 +322,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"message\":\"\",\"rationale\":\"The claim is not currently supported (status is weakened), so the conditions for a challenge are not met.\"}",
-        "completion_tokens": 55,
+        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The current claim is not in supported status, so it is not eligible for a challenge. There are also no supported claims to compare for contradictions.\"}",
+        "completion_tokens": 73,
         "finish_reason": "stop",
-        "latency_ms": 989,
+        "latency_ms": 2101,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 762,
+        "prompt_tokens": 1218,
         "raw_response": {
           "choices": [
             {
@@ -305,7 +337,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"message\":\"\",\"rationale\":\"The claim is not currently supported (status is weakened), so the conditions for a challenge are not met.\"}",
+                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"contradicts_hypothesis_id\":null,\"message\":\"\",\"rationale\":\"The current claim is not in supported status, so it is not eligible for a challenge. There are also no supported claims to compare for contradictions.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -313,44 +345,46 @@
               }
             }
           ],
-          "created": 1786483802,
-          "id": "chatcmpl-EBoKoNOdQ0Tgo61Ufbf4l9ZTClR0W",
+          "created": 1787588017,
+          "id": "chatcmpl-EGRajz2uRqnOkXPHATRFQo4aNZDJA",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 55,
+            "completion_tokens": 73,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 762,
+            "prompt_tokens": 1218,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 817
+            "total_tokens": 1291
           }
         }
       },
       "sequence": 3,
-      "started_at": "2026-08-11T21:30:02.100465",
+      "started_at": "2026-08-24T16:13:36.566748",
       "status": "success"
     },
     {
       "completion_tokens": 37,
       "error_detail": null,
       "est_cost_usd": 0.00080775,
-      "finished_at": "2026-08-11T21:30:03.771028",
-      "id": "b7c4dc9f-9e52-44f5-8bd2-82148f38fc6d",
-      "latency_ms": 660,
+      "finished_at": "2026-08-24T16:13:40.217546",
+      "id": "fc225915-e7a3-4d5e-9acb-55cdb3f6cc21",
+      "latency_ms": 1505,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
       "prompt_tokens": 855,
-      "prompt_version": "1.0.2",
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -374,10 +408,10 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the presence and direction of a trend.\"}",
+        "assistant_text": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the direction and shape of the trend.\"}",
         "completion_tokens": 37,
         "finish_reason": "stop",
-        "latency_ms": 660,
+        "latency_ms": 1505,
         "model": "gpt-5.4-mini-2026-03-17",
         "prompt_tokens": 855,
         "raw_response": {
@@ -389,7 +423,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the presence and direction of a trend.\"}",
+                "content": "{\"request_index\":2,\"rationale\":\"analyze_time_series_trend is the highest-information experiment for establishing the direction and shape of the trend.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -397,9 +431,10 @@
               }
             }
           ],
-          "created": 1786483803,
-          "id": "chatcmpl-EBoKpp0EReJbf5OpK2KjTgpCxjpNE",
+          "created": 1787588019,
+          "id": "chatcmpl-EGRalcsazkzEcJOOquXt5N87e7NRw",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
@@ -414,6 +449,7 @@
             "prompt_tokens": 855,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
             "total_tokens": 892
@@ -421,20 +457,20 @@
         }
       },
       "sequence": 4,
-      "started_at": "2026-08-11T21:30:03.110433",
+      "started_at": "2026-08-24T16:13:38.711133",
       "status": "success"
     },
     {
-      "completion_tokens": 138,
+      "completion_tokens": 162,
       "error_detail": null,
-      "est_cost_usd": 0.00119025,
-      "finished_at": "2026-08-11T21:30:05.299270",
-      "id": "befd3e64-6f87-4bf3-a5bc-de3f29b415bc",
-      "latency_ms": 1512,
+      "est_cost_usd": 0.00168525,
+      "finished_at": "2026-08-24T16:13:42.779873",
+      "id": "5cf29d2d-a3fc-4e8e-8b7e-13c6a90736b6",
+      "latency_ms": 2538,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 759,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 1275,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -443,11 +479,11 @@
         },
         "messages": [
           {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"detect_change_points\", \"summarize_distribution\"]}",
+            "content": "{\"claim\": {\"id\": \"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": false}, \"tools\": [\"detect_change_points\", \"summarize_distribution\"], \"supported_claims\": [{\"id\": \"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\", \"statement\": \"Rising order volume in the north region explains the worsening delivery times over the period under study.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -458,12 +494,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-1\",\"falsification_tool\":\"detect_change_points\",\"message\":\"Check whether the apparent support is driven by a localized shift or boundary effect rather than a stable pattern across the full data; a genuine hypothesis should remain plausible after probing for abrupt change points.\",\"rationale\":\"The claim is supported and has not yet been critiqued, and an unused disconfirming tool is available, so this is the right moment for one adversarial challenge before concluding.\"}",
-        "completion_tokens": 138,
+        "assistant_text": "{\"should_challenge\":true,\"target_hypothesis_id\":\"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\",\"falsification_tool\":\"detect_change_points\",\"contradicts_hypothesis_id\":null,\"message\":\"Test whether the worsening delivery times and rising order volume actually change together over the same period, or whether delivery times worsened at a different point than volume rose. A timing mismatch would suggest the explanation is an artefact rather than a causal account.\",\"rationale\":\"The claim is supported and has not yet been critiqued, and there are unused tools available. A change-point check can directly challenge the proposed explanation by looking for aligned versus misaligned shifts in the two series.\"}",
+        "completion_tokens": 162,
         "finish_reason": "stop",
-        "latency_ms": 1512,
+        "latency_ms": 2538,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 759,
+        "prompt_tokens": 1275,
         "raw_response": {
           "choices": [
             {
@@ -473,7 +509,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-1\",\"falsification_tool\":\"detect_change_points\",\"message\":\"Check whether the apparent support is driven by a localized shift or boundary effect rather than a stable pattern across the full data; a genuine hypothesis should remain plausible after probing for abrupt change points.\",\"rationale\":\"The claim is supported and has not yet been critiqued, and an unused disconfirming tool is available, so this is the right moment for one adversarial challenge before concluding.\"}",
+                "content": "{\"should_challenge\":true,\"target_hypothesis_id\":\"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\",\"falsification_tool\":\"detect_change_points\",\"contradicts_hypothesis_id\":null,\"message\":\"Test whether the worsening delivery times and rising order volume actually change together over the same period, or whether delivery times worsened at a different point than volume rose. A timing mismatch would suggest the explanation is an artefact rather than a causal account.\",\"rationale\":\"The claim is supported and has not yet been critiqued, and there are unused tools available. A change-point check can directly challenge the proposed explanation by looking for aligned versus misaligned shifts in the two series.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -481,44 +517,46 @@
               }
             }
           ],
-          "created": 1786483804,
-          "id": "chatcmpl-EBoKqcksoVz35OHJzohqOPe36dbNN",
+          "created": 1787588021,
+          "id": "chatcmpl-EGRanS8VCW2CrnsEkQ5JylZmgf02m",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 138,
+            "completion_tokens": 162,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 759,
+            "prompt_tokens": 1275,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 897
+            "total_tokens": 1437
           }
         }
       },
       "sequence": 5,
-      "started_at": "2026-08-11T21:30:03.785641",
+      "started_at": "2026-08-24T16:13:40.239643",
       "status": "success"
     },
     {
-      "completion_tokens": 41,
+      "completion_tokens": 39,
       "error_detail": null,
-      "est_cost_usd": 0.00081,
-      "finished_at": "2026-08-11T21:30:05.972645",
-      "id": "f061185d-6af9-474d-9617-5987d820bb6e",
-      "latency_ms": 648,
+      "est_cost_usd": 0.000798,
+      "finished_at": "2026-08-24T16:13:44.566849",
+      "id": "73ddaef8-7c08-468d-91da-604e49fa8cfd",
+      "latency_ms": 1751,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 834,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 830,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -531,7 +569,7 @@
             "role": "system"
           },
           {
-            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"detect_change_points\", \"purpose\": \"falsify hypothesis c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-1\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"detect_change_points\", \"purpose\": \"trend analysis via detect_change_points\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}, {\"index\": 3, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}]}",
+            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"detect_change_points\", \"purpose\": \"falsify hypothesis fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\", \"expected_information_gain\": 0.95, \"falsification\": true}, {\"index\": 1, \"tool_name\": \"detect_change_points\", \"purpose\": \"trend analysis via detect_change_points\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}, {\"index\": 3, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}]}",
             "role": "user"
           }
         ],
@@ -542,12 +580,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This falsification run can disconfirm the current trend hypothesis by checking for change points, which is the highest-value next step.\"}",
-        "completion_tokens": 41,
+        "assistant_text": "{\"request_index\":0,\"rationale\":\"This is the offered falsification step and would test whether the current trend hypothesis is actually supported or should be rejected.\"}",
+        "completion_tokens": 39,
         "finish_reason": "stop",
-        "latency_ms": 648,
+        "latency_ms": 1751,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 834,
+        "prompt_tokens": 830,
         "raw_response": {
           "choices": [
             {
@@ -557,7 +595,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This falsification run can disconfirm the current trend hypothesis by checking for change points, which is the highest-value next step.\"}",
+                "content": "{\"request_index\":0,\"rationale\":\"This is the offered falsification step and would test whether the current trend hypothesis is actually supported or should be rejected.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -565,44 +603,46 @@
               }
             }
           ],
-          "created": 1786483805,
-          "id": "chatcmpl-EBoKr6fHrEMdV8W1jH7wuNgT90POe",
+          "created": 1787588023,
+          "id": "chatcmpl-EGRapYO7bT0KlZpY0E7VDDEENYwHL",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 41,
+            "completion_tokens": 39,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 834,
+            "prompt_tokens": 830,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 875
+            "total_tokens": 869
           }
         }
       },
       "sequence": 6,
-      "started_at": "2026-08-11T21:30:05.323421",
+      "started_at": "2026-08-24T16:13:42.814104",
       "status": "success"
     },
     {
-      "completion_tokens": 55,
+      "completion_tokens": 75,
       "error_detail": null,
-      "est_cost_usd": 0.00081525,
-      "finished_at": "2026-08-11T21:30:06.778644",
-      "id": "fd177283-d933-41e6-8abd-763f174ae39f",
-      "latency_ms": 793,
+      "est_cost_usd": 0.00129,
+      "finished_at": "2026-08-24T16:13:46.777082",
+      "id": "2f6d9989-46d1-4300-97e5-a3192fb637e4",
+      "latency_ms": 2194,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 757,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 1270,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -611,11 +651,11 @@
         },
         "messages": [
           {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
+            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...],\n \"supported_claims\": [{\"id\": \"<hypothesis id>\",\n                       \"statement\": \"<the claim in plain language>\",\n                       \"confidence\": 0.0}, ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty. `supported_claims` is every claim the loop currently holds as supported, and it is the only place you can see them together.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"contradicts_hypothesis_id\": \"<another supported claim's id, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## Contradiction between supported claims\n\nCheck this first, because it outranks an ordinary challenge.\n\nNothing else in this system compares claims to each other. Each hypothesis is scored against its own evidence, so a claim and its negation can both reach `supported` — each confirmed by a different experiment, neither aware of the other. You are the only component that sees them side by side.\n\nRead `supported_claims`. If two of them **cannot both be true**, set `target_hypothesis_id` and `contradicts_hypothesis_id` to that pair and describe the conflict in `message`. Examples of pairs that cannot both hold:\n\n- \"A is more strongly associated with C than B is\" **and** \"B is a stronger driver of C than A\".\n- \"X increased over the period\" **and** \"X declined over the period\".\n\nNot every pair that feels in tension is a contradiction. Two claims about different metrics, different entities, or different periods can both be true; so can a general claim and a narrower one that qualifies it. Only report a conflict when accepting one forces you to reject the other.\n\nReport the conflict and nothing else — you do not decide which claim survives, and you must not. Both are weakened by deterministic code, the run reports `insufficient_evidence` unless a further experiment settles it, and picking a winner here would put a finding into the record that no evidence supports. If you can name an experiment from `tools` that would discriminate between the two, put it in `falsification_tool`; the loop will run it before concluding.\n\nSet `contradicts_hypothesis_id` to `null` whenever there is no such pair — which is the common case.\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"contradicts_hypothesis_id\": null, \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id`, `falsification_tool` and `contradicts_hypothesis_id` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
             "role": "system"
           },
           {
-            "content": "{\"claim\": {\"id\": \"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-0\", \"status\": \"weakened\", \"confidence\": 0.6012, \"already_critiqued\": false}, \"tools\": [\"summarize_distribution\"]}",
+            "content": "{\"claim\": {\"id\": \"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\", \"status\": \"supported\", \"confidence\": 0.95, \"already_critiqued\": true}, \"tools\": [\"summarize_distribution\"], \"supported_claims\": [{\"id\": \"fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1\", \"statement\": \"Rising order volume in the north region explains the worsening delivery times over the period under study.\", \"confidence\": 0.95}]}",
             "role": "user"
           }
         ],
@@ -626,12 +666,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim is not currently supported (status is weakened), so the conditions for a challenge are not met.\"}",
-        "completion_tokens": 55,
+        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"contradicts_hypothesis_id\": null,\"message\":\"\",\"rationale\":\"The current claim is already critiqued, so it is not eligible for another challenge. No contradiction among supported claims is present, and declining is required.\"}",
+        "completion_tokens": 75,
         "finish_reason": "stop",
-        "latency_ms": 793,
+        "latency_ms": 2194,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 757,
+        "prompt_tokens": 1270,
         "raw_response": {
           "choices": [
             {
@@ -641,7 +681,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim is not currently supported (status is weakened), so the conditions for a challenge are not met.\"}",
+                "content": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"contradicts_hypothesis_id\": null,\"message\":\"\",\"rationale\":\"The current claim is already critiqued, so it is not eligible for another challenge. No contradiction among supported claims is present, and declining is required.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -649,44 +689,46 @@
               }
             }
           ],
-          "created": 1786483806,
-          "id": "chatcmpl-EBoKs4UiGGuxzgC4bSXDcLocPjT8j",
+          "created": 1787588025,
+          "id": "chatcmpl-EGRarf54srMCtrDU2fMFKP446aGL2",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 55,
+            "completion_tokens": 75,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 757,
+            "prompt_tokens": 1270,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 812
+            "total_tokens": 1345
           }
         }
       },
       "sequence": 7,
-      "started_at": "2026-08-11T21:30:05.984342",
+      "started_at": "2026-08-24T16:13:44.580681",
       "status": "success"
     },
     {
-      "completion_tokens": 38,
+      "completion_tokens": 175,
       "error_detail": null,
-      "est_cost_usd": 0.000744,
-      "finished_at": "2026-08-11T21:30:07.789656",
-      "id": "781bb3d0-ba25-484f-8d76-7048020efe19",
-      "latency_ms": 990,
+      "est_cost_usd": 0.002073,
+      "finished_at": "2026-08-24T16:13:48.789875",
+      "id": "dfbbff30-1b0f-4f47-8a99-c00704f6d4c9",
+      "latency_ms": 1984,
       "model_name": "gpt-5.4-mini-2026-03-17",
       "prompt_id": "agentic.policy",
-      "prompt_tokens": 764,
-      "prompt_version": "1.0.2",
+      "prompt_tokens": 1714,
+      "prompt_version": "1.0.3",
       "provider": "openai",
       "request_payload_json": {
         "agent": {
@@ -695,11 +737,11 @@
         },
         "messages": [
           {
-            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
+            "content": "**Answer writer** for an adaptive data investigation loop. The run is over and its findings are settled. You put them into plain English for the person who asked the question. You do not decide what was found — that is already decided, and it is handed to you.\n\n## Input\n\n```json\n{\"question\": \"<what the user actually asked>\",\n \"findings\": {\n   \"disposition\": \"supported\" | \"mixed\" | \"refuted\" | \"inconclusive\" | \"insufficient_evidence\",\n   \"confidence\": 0.0,\n   \"claims\": [{\"statement\": \"<the claim in plain language>\",\n               \"status\": \"supported\" | \"weakened\" | \"rejected\" | \"unresolved\",\n               \"confidence\": 0.0,\n               \"supporting_evidence\": 0,\n               \"refuting_evidence\": 0}, ...],\n   \"counts\": {\"hypotheses\": 0, \"evidence\": 0, \"experiments\": 0,\n              \"supported\": 0, \"open_questions\": 0},\n   \"experiments_run\": [\"<tool name>\", ...],\n   \"stopped_because\": \"<termination reason>\",\n   \"open_questions\": [\"<what the run did not settle>\", ...],\n   \"dataset\": {\"name\": \"<dataset>\", \"row_count\": 0} | null}}\n```\n\n`claims` is every hypothesis the run tested, with where each one landed and how much evidence pointed each way. `disposition` is the run's overall verdict; it already accounts for claims that did not hold. `experiments_run` is what was actually executed, in order. `stopped_because` is why the loop halted — `sufficient_evidence` means it was satisfied, anything else means it ran out of something.\n\n## Output\n\nReply with `AnswerNarration` JSON and nothing else:\n\n```json\n{\"answer\": \"<the finding, in prose>\"}\n```\n\n## Figures\n\n**Every number you write is checked against the run's recorded values. Prose containing a figure the run did not produce is discarded in full — not corrected, discarded — and the user is shown a blunter machine-generated sentence instead.**\n\nSo:\n\n- Copy figures **exactly** from `findings`. `0.95` may be written as `95%` or as `0.95`; both are recognised.\n- Counting words are figures too. \"Both claims held\" asserts that `counts.hypotheses` is 2. \"Neither\" asserts the same. \"No claim survived\" asserts a count of zero.\n- If you are unsure of a figure, **describe the result without it**. \"The claim held\" is always safe. \"The claim held across 40 quarters\" is not, unless 40 is in `findings`.\n- Never state a date, a period count, a p-value, or an effect size. None of those are given to you. `dataset.row_count` is, and is the only row figure you may use.\n- A longer answer is more exposure, not less. Every extra sentence is another chance to reach for a number that is not there, and one such number discards the entire piece — including the parts that were right.\n\nThis is not a style rule. A figure invented in prose is the one kind of error a reader cannot catch, because it reads exactly like a figure that was measured.\n\n## What to write\n\n**Two or three short paragraphs — roughly six to twelve sentences.** Long enough that someone who reads only this understands what was asked, what was found, how hard it was tested, and what remains unsettled. Not a summary that sends them to the trace; the answer itself.\n\nWork through it in this order. Each part earns its length by carrying something the others do not.\n\n1. **The answer, first, in one or two sentences.** If they asked \"is it staffing or volume\", say which, or say the run could not separate them. Never open with methodology or with a restatement of the question.\n\n2. **Each claim, and what happened to it.** Take them one at a time. Say where it landed and what the evidence did to it — `supporting_evidence` and `refuting_evidence` tell you whether a claim was carried by agreement or survived a genuine split. A claim that was weakened or rejected is a finding, not an omission; a run that rejected its own hypothesis found something.\n\n3. **How it was tested, and where it stopped.** Name the experiments from `experiments_run` in plain language — a reader who does not know the tool names still learns something from \"a correlation test, then a regression that could have broken it\". Say what `stopped_because` means: satisfied, or out of budget with the question still open.\n\n4. **What is still open**, when `open_questions` is non-empty. These are the things the run deliberately did not settle, and they are often the most useful sentence on the page.\n\nThroughout:\n\n- **Prefer the run's own words for a claim.** The statements in `claims` were written to be precise; paraphrasing them loosely is how a hedge becomes an assertion.\n- Plain past tense. \"Staffing tracked on-time rate more closely than volume did.\" Not \"Analysis was performed to determine whether…\".\n- Length is not the goal — content is. If a run tested one claim with one experiment, there is less to say, and three padded paragraphs are worse than four honest sentences. Write what happened; do not fill.\n\n## When the run did not establish anything\n\n`inconclusive`, `insufficient_evidence`, and a `refuted` set are **correct outcomes**, and this system treats them as first-class. Say so directly.\n\n- Do not apologise, and do not present a non-answer as a partial answer.\n- Do not reach for the closest thing that did hold and lead with it instead.\n- \"The evidence did not separate the two explanations\" is a complete, useful answer. Write it as one.\n\nA run that caught two of its own claims contradicting each other has done something worth reporting plainly: both were weakened because they could not both be true, and neither was allowed to stand.\n\n## Calibration\n\nThe two failure modes are opposite and both are real.\n\n- **Overclaiming.** Smoothing \"weakened\" into \"suggests\", or reporting a mixed result as a finding. The confidence figures exist precisely so the reader is not misled about strength; prose that talks around them undoes that.\n- **Hedging into uselessness.** \"The analysis explored several factors and the results were varied\" answers nothing. If a claim held at high confidence, say it held.\n\nWrite the answer you would want if you had asked the question and were going to act on it.",
             "role": "system"
           },
           {
-            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"detect_change_points\", \"purpose\": \"trend analysis via detect_change_points\", \"expected_information_gain\": 0.75, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}, {\"index\": 2, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}]}",
+            "content": "{\"question\": \"Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?\", \"findings\": {\"disposition\": \"mixed\", \"confidence\": 0.7756, \"claims\": [{\"statement\": \"On-time delivery performance in the north region has declined over the period under study.\", \"status\": \"weakened\", \"confidence\": 0.6012, \"supporting_evidence\": 2, \"refuting_evidence\": 2}, {\"statement\": \"Rising order volume in the north region explains the worsening delivery times over the period under study.\", \"status\": \"supported\", \"confidence\": 0.95, \"supporting_evidence\": 5, \"refuting_evidence\": 0}], \"counts\": {\"hypotheses\": 2, \"evidence\": 9, \"experiments\": 3, \"supported\": 1, \"open_questions\": 2}, \"experiments_run\": [\"analyze_time_series_trend\", \"analyze_time_series_trend\", \"detect_change_points\"], \"stopped_because\": \"sufficient_evidence\", \"open_questions\": [\"Is the deterioration sustained over time or driven by a short-lived spike?\", \"Does any change in staffing help explain the delivery-time shift?\"], \"dataset\": {\"name\": \"operational_delivery\", \"row_count\": null}}}",
             "role": "user"
           }
         ],
@@ -710,12 +752,12 @@
         "temperature": 0.0
       },
       "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"Detecting change points is the most informative next step for establishing whether the series has trend shifts or regime changes.\"}",
-        "completion_tokens": 38,
+        "assistant_text": "{\"answer\":\"The run found a mixed picture. Delivery performance in the north region did worsen, but that decline was not strong enough to stand on its own as a clean service-quality degradation story. Rising order volume did explain the worsening delivery times, and that was the stronger finding.\\n\\nThe decline in on-time delivery was weakened: there was some evidence for it, but there was also evidence against it. By contrast, the volume explanation was supported with no refuting evidence, so the data pointed more clearly to demand pressure than to a pure drop in service quality.\\n\\nThe run tested this with two time-series trend analyses and a change-point detection step, then stopped because it had sufficient evidence. Two questions remained open: whether the deterioration was sustained or just a short-lived spike, and whether staffing changes also helped explain the shift.\"}",
+        "completion_tokens": 175,
         "finish_reason": "stop",
-        "latency_ms": 990,
+        "latency_ms": 1984,
         "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 764,
+        "prompt_tokens": 1714,
         "raw_response": {
           "choices": [
             {
@@ -725,7 +767,7 @@
               "message": {
                 "annotations": [],
                 "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"Detecting change points is the most informative next step for establishing whether the series has trend shifts or regime changes.\"}",
+                "content": "{\"answer\":\"The run found a mixed picture. Delivery performance in the north region did worsen, but that decline was not strong enough to stand on its own as a clean service-quality degradation story. Rising order volume did explain the worsening delivery times, and that was the stronger finding.\\n\\nThe decline in on-time delivery was weakened: there was some evidence for it, but there was also evidence against it. By contrast, the volume explanation was supported with no refuting evidence, so the data pointed more clearly to demand pressure than to a pure drop in service quality.\\n\\nThe run tested this with two time-series trend analyses and a change-point detection step, then stopped because it had sufficient evidence. Two questions remained open: whether the deterioration was sustained or just a short-lived spike, and whether staffing changes also helped explain the shift.\"}",
                 "function_call": null,
                 "refusal": null,
                 "role": "assistant",
@@ -733,461 +775,43 @@
               }
             }
           ],
-          "created": 1786483807,
-          "id": "chatcmpl-EBoKtY8JotA4jYbhYKKaY4hJIWron",
+          "created": 1787588027,
+          "id": "chatcmpl-EGRatyAt18WKekuui6mB0IKSCe4iV",
           "model": "gpt-5.4-mini-2026-03-17",
+          "moderation": null,
           "object": "chat.completion",
           "service_tier": "default",
           "system_fingerprint": null,
           "usage": {
-            "completion_tokens": 38,
+            "completion_tokens": 175,
             "completion_tokens_details": {
               "accepted_prediction_tokens": 0,
               "audio_tokens": 0,
               "reasoning_tokens": 0,
               "rejected_prediction_tokens": 0
             },
-            "prompt_tokens": 764,
+            "prompt_tokens": 1714,
             "prompt_tokens_details": {
               "audio_tokens": 0,
+              "cache_write_tokens": null,
               "cached_tokens": 0
             },
-            "total_tokens": 802
+            "total_tokens": 1889
           }
         }
       },
       "sequence": 8,
-      "started_at": "2026-08-11T21:30:06.798308",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 55,
-      "error_detail": null,
-      "est_cost_usd": 0.00081525,
-      "finished_at": "2026-08-11T21:30:08.521859",
-      "id": "416c62f4-be55-46be-b627-e45764a5563e",
-      "latency_ms": 720,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 757,
-      "prompt_version": "1.0.2",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
-            "role": "system"
-          },
-          {
-            "content": "{\"claim\": {\"id\": \"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-0\", \"status\": \"weakened\", \"confidence\": 0.6913, \"already_critiqued\": false}, \"tools\": [\"summarize_distribution\"]}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim is not currently supported; it is weakened, so the conditions for a challenge are not met.\"}",
-        "completion_tokens": 55,
-        "finish_reason": "stop",
-        "latency_ms": 720,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 757,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim is not currently supported; it is weakened, so the conditions for a challenge are not met.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1786483808,
-          "id": "chatcmpl-EBoKuUtYq5zxhtbrtG9HvBHVEvMJR",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 55,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 757,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 0
-            },
-            "total_tokens": 812
-          }
-        }
-      },
-      "sequence": 9,
-      "started_at": "2026-08-11T21:30:07.799753",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 28,
-      "error_detail": null,
-      "est_cost_usd": 0.00066675,
-      "finished_at": "2026-08-11T21:30:09.163935",
-      "id": "ba6122fb-6483-408b-b56e-1a93c2a09196",
-      "latency_ms": 631,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 721,
-      "prompt_version": "1.0.2",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
-            "role": "system"
-          },
-          {
-            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}, {\"index\": 1, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}]}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the distribution summary needed to assess the trend.\"}",
-        "completion_tokens": 28,
-        "finish_reason": "stop",
-        "latency_ms": 631,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 721,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This will establish the distribution summary needed to assess the trend.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1786483808,
-          "id": "chatcmpl-EBoKus4eVKPpCR00vOaDPk5lIFZl1",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 28,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 721,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 0
-            },
-            "total_tokens": 749
-          }
-        }
-      },
-      "sequence": 10,
-      "started_at": "2026-08-11T21:30:08.532138",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 55,
-      "error_detail": null,
-      "est_cost_usd": 0.0008115,
-      "finished_at": "2026-08-11T21:30:09.957578",
-      "id": "2e181599-e362-4428-8efd-40355de5a26a",
-      "latency_ms": 787,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 752,
-      "prompt_version": "1.0.2",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
-            "role": "system"
-          },
-          {
-            "content": "{\"claim\": {\"id\": \"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-0\", \"status\": \"weakened\", \"confidence\": 0.6913, \"already_critiqued\": false}, \"tools\": []}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"message\":\"\",\"rationale\":\"The claim is not currently supported, and there are no unused tools available to mount a falsifying challenge.\"}",
-        "completion_tokens": 55,
-        "finish_reason": "stop",
-        "latency_ms": 787,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 752,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"should_challenge\": false,\"target_hypothesis_id\": null,\"falsification_tool\": null,\"message\":\"\",\"rationale\":\"The claim is not currently supported, and there are no unused tools available to mount a falsifying challenge.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1786483809,
-          "id": "chatcmpl-EBoKvQk75r9wl2MiAloqa365YZZb5",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 55,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 752,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 0
-            },
-            "total_tokens": 807
-          }
-        }
-      },
-      "sequence": 11,
-      "started_at": "2026-08-11T21:30:09.168859",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 30,
-      "error_detail": null,
-      "est_cost_usd": 0.0006435,
-      "finished_at": "2026-08-11T21:30:10.735492",
-      "id": "1d25c0b5-0abb-442b-aa81-7000e21d537e",
-      "latency_ms": 757,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 678,
-      "prompt_version": "1.0.2",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Experiment selector** for an adaptive data investigation loop. Each iteration you pick the next experiment to run from a ranked candidate list. This is the decision that makes the loop adaptive rather than a fixed pipeline: the path through the data is whatever you choose, one step at a time, and the budget is small.\n\n## Input\n\n```json\n{\"goal\": {\"intent\": \"<the interpreted intent>\"},\n \"candidates\": [\n   {\"index\": 0,\n    \"tool_name\": \"<deterministic experiment>\",\n    \"purpose\": \"<what running it would establish>\",\n    \"expected_information_gain\": 0.0,\n    \"falsification\": false}]}\n```\n\nCandidates arrive in the planner's priority order. Tools already run for this question have been removed, as have tools that hit their repeated-use cap.\n\n- **`expected_information_gain`** — a comparable score across candidates in this list. Higher means the result is expected to move the investigation further. It is a prior, not a promise.\n- **`falsification: true`** — running this candidate could *disconfirm* the claim currently best supported. It exists because a claim that has only ever been tested by methods that agree with it is not yet established.\n\n## Output\n\nReply with `ExperimentChoice` JSON and nothing else:\n\n```json\n{\"request_index\": <an index present in candidates, or null>,\n \"rationale\": \"<one sentence>\"}\n```\n\n### Which fields may be null\n\n**Only `request_index` accepts `null`.** `rationale` is a string — use `\"\"` if you have nothing to add, **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Rules\n\n- **`request_index` must be an index that appears in the list.** An index outside the range is discarded and read as \"no candidate\", which ends the investigation early with whatever evidence exists. If you genuinely cannot justify any candidate, return `null` deliberately — do not guess an index.\n- **Prefer a `falsification` candidate when one is offered.** The loop will not declare sufficient evidence for a supported claim until it has survived, or exhausted, a challenge. Skipping the falsification candidate delays termination and produces a weaker conclusion.\n- **Otherwise take the highest `expected_information_gain`** that fits the intent.\n- **Do not re-run a tool to confirm what it already showed.** Repetition consumes the experiment budget without adding independent evidence. An independent *method* that bears on the same claim is not repetition — that is exactly what falsification means here.\n- **Choose for the goal, not for coverage.** Running every available tool is not thoroughness; it exhausts the budget before the question is answered. A `comparison` goal is not advanced by a trend tool.\n\nKeep `rationale` to one sentence naming what the chosen experiment would establish or rule out.",
-            "role": "system"
-          },
-          {
-            "content": "{\"goal\": {\"intent\": \"trend\"}, \"candidates\": [{\"index\": 0, \"tool_name\": \"summarize_distribution\", \"purpose\": \"trend analysis via summarize_distribution\", \"expected_information_gain\": 0.65, \"falsification\": false}]}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"request_index\":0,\"rationale\":\"This will establish the overall distributional pattern needed for a trend analysis.\"}",
-        "completion_tokens": 30,
-        "finish_reason": "stop",
-        "latency_ms": 757,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 678,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"request_index\":0,\"rationale\":\"This will establish the overall distributional pattern needed for a trend analysis.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1786483810,
-          "id": "chatcmpl-EBoKwOn9jiqK7XyZmVMlOnKzHZZhq",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 30,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 678,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 0
-            },
-            "total_tokens": 708
-          }
-        }
-      },
-      "sequence": 12,
-      "started_at": "2026-08-11T21:30:09.976981",
-      "status": "success"
-    },
-    {
-      "completion_tokens": 51,
-      "error_detail": null,
-      "est_cost_usd": 0.0007935,
-      "finished_at": "2026-08-11T21:30:11.480756",
-      "id": "ccd4b212-c81b-4cf8-b802-7ea689e1f1e9",
-      "latency_ms": 737,
-      "model_name": "gpt-5.4-mini-2026-03-17",
-      "prompt_id": "agentic.policy",
-      "prompt_tokens": 752,
-      "prompt_version": "1.0.2",
-      "provider": "openai",
-      "request_payload_json": {
-        "agent": {
-          "phase": "agentic",
-          "role": "agentic_policy"
-        },
-        "messages": [
-          {
-            "content": "**Critic** for an adaptive data investigation loop. After evidence has moved a claim to `supported`, you decide whether it should be challenged before the loop is allowed to conclude. You are the reason this system is adversarial toward its own findings rather than a pipeline that stops at the first agreeable result.\n\n## Input\n\n```json\n{\"claim\": {\"id\": \"<hypothesis id>\",\n           \"status\": \"supported\",\n           \"confidence\": 0.0,\n           \"already_critiqued\": false} | null,\n \"tools\": [\"<an unused experiment that could disconfirm it>\", ...]}\n```\n\n`claim` is the currently strongest hypothesis, or `null` when nothing is supported yet. `tools` lists only experiments that fit the goal's intent and have not run — it is frequently empty.\n\n## Output\n\nReply with `CritiqueProposal` JSON and nothing else:\n\n```json\n{\"should_challenge\": true | false,\n \"target_hypothesis_id\": \"<claim.id, or null>\",\n \"falsification_tool\": \"<a name from tools, or null>\",\n \"message\": \"<what the challenge is>\",\n \"rationale\": \"<why now>\"}\n```\n\n## When to challenge\n\nSet `should_challenge: true` only when **all** of these hold:\n\n1. `claim` is not null and its `status` is `supported`.\n2. `claim.already_critiqued` is `false` — a claim gets one challenge, not a loop of them.\n3. `tools` is non-empty.\n\nWhen you challenge, `target_hypothesis_id` **must** be exactly `claim.id`, and `falsification_tool` **must** be a name that appears verbatim in `tools`. A proposal with a missing or unrecognised value for either is discarded and the claim goes unchallenged.\n\nIf any condition fails, decline — that is the correct answer, not a failure to contribute. Decline with exactly this shape:\n\n```json\n{\"should_challenge\": false, \"target_hypothesis_id\": null, \"falsification_tool\": null,\n \"message\": \"\", \"rationale\": \"<why not>\"}\n```\n\n### Which fields may be null\n\n**Only `target_hypothesis_id` and `falsification_tool` accept `null`.** `should_challenge` is a boolean; `message` and `rationale` are strings. Use `\"\"` for a string you have nothing to say in — **never `null`**. A null in a string field fails validation, and a failed response ends the whole investigation with an error rather than a conclusion.\n\n## Calibration\n\nBoth failure modes here are real and they are opposite.\n\n- **Challenging nothing** lets the loop confirm the first thing it sees. A claim supported by a single method has not been established.\n- **Challenging reflexively** — every claim, every iteration, regardless of the conditions above — burns the experiment budget on doubt rather than evidence and pushes runs into budget exhaustion with no conclusion at all.\n\nA good challenge names a *specific alternative account* of the same evidence: a different method that would not agree if the claim were an artefact. Say that in `message`. Do not restate the claim as a doubt.",
-            "role": "system"
-          },
-          {
-            "content": "{\"claim\": {\"id\": \"c37e44c1-8944-4261-839b-a9c5e1d39e65-hyp-0\", \"status\": \"weakened\", \"confidence\": 0.6913, \"already_critiqued\": false}, \"tools\": []}",
-            "role": "user"
-          }
-        ],
-        "model": "gpt-5.4-mini",
-        "response_format": {
-          "type": "json_object"
-        },
-        "temperature": 0.0
-      },
-      "response_payload_json": {
-        "assistant_text": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim is not currently supported, and there are no unused falsification tools available.\"}",
-        "completion_tokens": 51,
-        "finish_reason": "stop",
-        "latency_ms": 737,
-        "model": "gpt-5.4-mini-2026-03-17",
-        "prompt_tokens": 752,
-        "raw_response": {
-          "choices": [
-            {
-              "finish_reason": "stop",
-              "index": 0,
-              "logprobs": null,
-              "message": {
-                "annotations": [],
-                "audio": null,
-                "content": "{\"should_challenge\":false,\"target_hypothesis_id\":null,\"falsification_tool\":null,\"message\":\"\",\"rationale\":\"The claim is not currently supported, and there are no unused falsification tools available.\"}",
-                "function_call": null,
-                "refusal": null,
-                "role": "assistant",
-                "tool_calls": null
-              }
-            }
-          ],
-          "created": 1786483811,
-          "id": "chatcmpl-EBoKxsvwxciKP9kCmM7IN4JjDPVoy",
-          "model": "gpt-5.4-mini-2026-03-17",
-          "object": "chat.completion",
-          "service_tier": "default",
-          "system_fingerprint": null,
-          "usage": {
-            "completion_tokens": 51,
-            "completion_tokens_details": {
-              "accepted_prediction_tokens": 0,
-              "audio_tokens": 0,
-              "reasoning_tokens": 0,
-              "rejected_prediction_tokens": 0
-            },
-            "prompt_tokens": 752,
-            "prompt_tokens_details": {
-              "audio_tokens": 0,
-              "cached_tokens": 0
-            },
-            "total_tokens": 803
-          }
-        }
-      },
-      "sequence": 13,
-      "started_at": "2026-08-11T21:30:10.740662",
+      "started_at": "2026-08-24T16:13:46.803325",
       "status": "success"
     }
   ],
   "totals": {
-    "completion_tokens": 812,
-    "est_cost_usd": 0.01211,
-    "latency_ms": 12381,
-    "model_calls": 14,
+    "completion_tokens": 798,
+    "est_cost_usd": 0.011125,
+    "latency_ms": 23406,
+    "model_calls": 9,
     "priced": true,
-    "prompt_tokens": 11275,
-    "total_tokens": 12087
+    "prompt_tokens": 10046,
+    "total_tokens": 10844
   }
 }

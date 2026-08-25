@@ -1,6 +1,14 @@
 "use client";
 
-import { useActionState, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  useActionState,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+  type ReactNode,
+} from "react";
 import { useRouter } from "next/navigation";
 import { Search } from "lucide-react";
 
@@ -21,9 +29,10 @@ import type { PipelinePhaseView } from "@/lib/run-pipeline-phases";
 import type { CurrentUser } from "@/lib/api/types";
 import { cn } from "@/lib/utils";
 import { ANALYSIS_EXAMPLES } from "@/lib/analysis-examples";
-import { ChatComposer } from "./chat-composer";
+import { ChatComposer, type ComposerLock } from "./chat-composer";
 import { ChatMessageList } from "./chat-message-list";
 import { ChatSidebar } from "./chat-sidebar";
+import { ChatTraceRail } from "./chat-trace-rail";
 import { CommandPalette, type PaletteCommand } from "./command-palette";
 import { HelpHint } from "./help-hint";
 import type {
@@ -38,30 +47,92 @@ function nowIso(): string {
   return new Date().toISOString();
 }
 
-type Props = {
-  projectId: string;
+type BaseProps = {
   conversationId: string;
   user?: CurrentUser | null;
-  tickers: string[];
-  backgroundDelivery: ChatBackgroundDelivery;
   initialMessages: ChatMessage[];
   chatThreads: ChatThreadSummary[];
   className?: string;
 };
 
+type LiveProps = BaseProps & {
+  readOnly?: false;
+  projectId: string;
+  tickers: string[];
+  backgroundDelivery: ChatBackgroundDelivery;
+  /** Prefills the composer — a question carried in from a recorded run. */
+  initialDraft?: string;
+  header?: never;
+  rail?: never;
+  composer?: never;
+};
+
+/**
+ * Replay tier: a recorded run, shown in the product's own chat rather than a lookalike.
+ *
+ * A union rather than a `readOnly` flag on flat props, because read-only is not one
+ * suppression but several, and the type is what stops a caller applying half of them: with
+ * `readOnly: true` there is no project to scope, no delivery health to report, and nothing
+ * to send — so those props are gone, and `header`/`rail` are only available here.
+ */
+type ReadOnlyProps = BaseProps & {
+  readOnly: true;
+  projectId?: never;
+  tickers?: never;
+  backgroundDelivery?: never;
+  /** Replaces the scope header, which has nothing to say about a finished run. */
+  header?: ReactNode;
+  /** Docked beside the conversation on wide viewports — the trace, for demos. */
+  rail?: ReactNode;
+  /**
+   * Open the rail on first render. The demo pages do: the trace beside the answer is the
+   * thing those pages exist to show, so hiding it behind a click buries the point. The live
+   * chat does not — there the answer is the work and the trace is the audit.
+   *
+   * Uncontrolled: this seeds the toggle, it does not hold it open.
+   */
+  defaultRailOpen?: boolean;
+  /** What the composer can do here. See `ReplayComposer`. */
+  composer: ReplayComposer;
+};
+
+/**
+ * The composer is always on screen on the replay tier, and whether it works is a fact about
+ * the deployment rather than a property of the page: no backend, or no account, and it is
+ * locked with the reason on it; a clone with its own backend and keys finds it live, with
+ * nothing to switch on.
+ *
+ * `ready` sends into the reader's own workspace, not into the recording. A recorded run is
+ * immutable, and its scope is not theirs — appending to it would be a fiction.
+ */
+export type ReplayComposer =
+  | { state: "locked"; lock: ComposerLock }
+  | { state: "ready"; placeholder: string; start: (goal: string) => Promise<void> };
+
+/** No queue behind a recording, so the composer's degraded-delivery banner never applies. */
+const REPLAY_DELIVERY: ChatBackgroundDelivery = {
+  delivery_mode: "sync_only",
+  background_available: false,
+  detail: "Recorded run.",
+};
+
+type Props = LiveProps | ReadOnlyProps;
+
 /**
  * One visible conversation thread, hydrated from persisted messages and extended in place.
  */
-export function ChatShell({
-  projectId,
-  conversationId,
-  user,
-  tickers,
-  backgroundDelivery,
-  initialMessages,
-  chatThreads,
-  className,
-}: Props) {
+export function ChatShell(props: Props) {
+  const { conversationId, user, initialMessages, chatThreads, className } = props;
+  // Narrowed once, here, so the render below cannot reach a live-only prop from a read-only
+  // branch (or the reverse) — `readOnly` alone is a boolean and narrows nothing.
+  const replay = props.readOnly === true ? props : null;
+  const live = props.readOnly === true ? null : props;
+  const readOnly = replay !== null;
+  // Both are only reachable through affordances that read-only mode does not render; the
+  // fallbacks exist so the hooks below stay unconditional.
+  const projectId = live?.projectId ?? "";
+  const liveTickers = live?.tickers;
+  const tickers = useMemo(() => liveTickers ?? [], [liveTickers]);
   const router = useRouter();
   const [scopeTickers, setScopeTickers] = useState<string[]>(tickers);
   const [isEditingScope, setIsEditingScope] = useState(false);
@@ -69,9 +140,20 @@ export function ChatShell({
   // Resolved after mount so the shortcut hints never cause a hydration mismatch.
   const [modKey, setModKey] = useState("Ctrl");
   const [messages, setMessages] = useState<ChatMessage[]>(initialMessages);
-  const [draft, setDraft] = useState("");
+  const [draft, setDraft] = useState(live?.initialDraft ?? "");
   const [isRunning, setIsRunning] = useState(false);
   const [sendError, setSendError] = useState<string | undefined>(undefined);
+  // Replay only: the fork-to-workspace action navigates, so the box stays busy until it does.
+  const [isForking, setIsForking] = useState(false);
+  // Which trace is docked beside the conversation, or null for none. Seeded from the
+  // surface: a demo opens on its recorded answer's trace, the live chat opens on nothing.
+  // Keyed the same way the control keys it, so the button reads "hide trace" on arrival
+  // rather than offering to open what is already open.
+  const [openTraceKey, setOpenTraceKey] = useState<string | null>(() =>
+    replay?.defaultRailOpen && replay.rail
+      ? (initialMessages.find((m) => m.role === "assistant" && m.recordedAnswer)?.id ?? null)
+      : null,
+  );
   const composerInputRef = useRef<HTMLTextAreaElement>(null);
   const pollTimer = useRef<ReturnType<typeof setInterval> | null>(null);
   const activeRequestId = useRef<string | null>(null);
@@ -208,6 +290,7 @@ export function ChatShell({
 
   // Accelerators: ⌘K / Ctrl+K opens the palette, ⌘⇧O / Ctrl+Shift+O starts a new chat.
   useEffect(() => {
+    if (readOnly) return;
     const onKey = (e: KeyboardEvent) => {
       const mod = e.metaKey || e.ctrlKey;
       if (!mod) return;
@@ -223,7 +306,7 @@ export function ChatShell({
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [startNewChat]);
+  }, [startNewChat, readOnly]);
 
   const onSend = async (text: string, requestId: string) => {
     setSendError(undefined);
@@ -297,6 +380,30 @@ export function ChatShell({
     }
   };
 
+  const toggleTrace = useCallback((key: string) => {
+    setOpenTraceKey((open) => (open === key ? null : key));
+  }, []);
+
+  const replayComposer = replay?.composer;
+  const onStartFromReplay = useCallback(
+    async (text: string) => {
+      if (replayComposer?.state !== "ready") return;
+      setSendError(undefined);
+      setIsForking(true);
+      try {
+        await replayComposer.start(text);
+      } catch (e) {
+        // A server-action redirect throws by design and is handled by the router; anything
+        // else left the reader stuck with a cleared box and no explanation.
+        if (e instanceof Error && e.message.includes("NEXT_REDIRECT")) throw e;
+        setSendError("Could not open a workspace for that question. Try again.");
+        setDraft(text);
+        setIsForking(false);
+      }
+    },
+    [replayComposer],
+  );
+
   const paletteCommands: PaletteCommand[] = useMemo(() => {
     const actions: PaletteCommand[] = [
       {
@@ -347,17 +454,22 @@ export function ChatShell({
         className,
       )}
     >
-      <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={paletteCommands} />
+      {readOnly ? null : (
+        <CommandPalette open={paletteOpen} onOpenChange={setPaletteOpen} commands={paletteCommands} />
+      )}
       <ChatSidebar
         conversationId={conversationId}
         user={user}
         scopeTickers={scopeTickers}
-        newConversationAction={newConversationAction}
-        deleteConversationAction={boundDeleteConversationAction}
+        newConversationAction={readOnly ? undefined : newConversationAction}
+        deleteConversationAction={readOnly ? undefined : boundDeleteConversationAction}
         chatThreads={chatThreads}
+        readOnly={readOnly}
       />
       <SidebarInset className="bg-[var(--background)]">
-        <header className="border-b border-[var(--border)] px-4 py-2.5">
+        {replay ? replay.header : null}
+        {live ? (
+          <header className="border-b border-[var(--border)] px-4 py-2.5">
           <div className="flex items-center justify-between gap-3">
             <div className="flex min-w-0 flex-wrap items-center gap-1.5">
               <span className="text-[10.5px] font-medium uppercase tracking-[0.1em] text-[var(--muted)]">
@@ -424,17 +536,75 @@ export function ChatShell({
               ) : null}
             </form>
           ) : null}
-        </header>
-        <ChatMessageList messages={messages} onPickPrompt={handlePickPrompt} onStop={handleStop} />
-        <ChatComposer
-          backgroundDelivery={backgroundDelivery}
-          error={sendError}
-          disabled={isRunning}
-          onSend={onSend}
-          value={draft}
-          onValueChange={setDraft}
-          inputRef={composerInputRef}
-        />
+          </header>
+        ) : null}
+        {replay ? (
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <ChatMessageList
+                messages={messages}
+                onInspectTrace={replay.rail ? toggleTrace : undefined}
+                openTraceKey={openTraceKey}
+              />
+              <ChatComposer
+                backgroundDelivery={REPLAY_DELIVERY}
+                lock={replay.composer.state === "locked" ? replay.composer.lock : undefined}
+                placeholder={
+                  replay.composer.state === "ready" ? replay.composer.placeholder : undefined
+                }
+                disabled={isForking}
+                error={sendError}
+                onSend={onStartFromReplay}
+                value={draft}
+                onValueChange={setDraft}
+                inputRef={composerInputRef}
+              />
+            </div>
+            {replay.rail && openTraceKey ? (
+              // Below `lg` the rail would halve an already narrow conversation, so it is
+              // dropped and the header's link to the full record carries the trace instead.
+              <aside className="scrollbar-hidden hidden w-[26rem] shrink-0 overflow-y-auto border-l border-[var(--border)] px-5 py-5 lg:block">
+                {replay.rail}
+              </aside>
+            ) : null}
+          </div>
+        ) : null}
+        {live ? (
+          <div className="flex min-h-0 flex-1 overflow-hidden">
+            <div className="flex min-h-0 flex-1 flex-col">
+              <ChatMessageList
+                messages={messages}
+                onPickPrompt={handlePickPrompt}
+                onStop={handleStop}
+                onInspectTrace={toggleTrace}
+                openTraceKey={openTraceKey}
+              />
+              <ChatComposer
+                backgroundDelivery={live.backgroundDelivery}
+                error={sendError}
+                disabled={isRunning}
+                onSend={onSend}
+                value={draft}
+                onValueChange={setDraft}
+                inputRef={composerInputRef}
+              />
+            </div>
+            {/* Same dock as the replay tier, and dropped below `lg` for the same reason:
+                the conversation column is already narrow there. */}
+            {openTraceKey ? (
+              <aside className="scrollbar-hidden hidden w-[26rem] shrink-0 overflow-y-auto border-l border-[var(--border)] px-5 py-5 lg:block">
+                <ChatTraceRail
+                  // Keyed by run: opening a different trace is a fresh load, not a
+                  // reconciliation that would leave the previous run's steps on screen.
+                  key={openTraceKey}
+                  runId={openTraceKey}
+                  fullTraceHref={`/projects/${projectId}/runs/${openTraceKey}/trace`}
+                  onClose={() => setOpenTraceKey(null)}
+                />
+              </aside>
+            ) : null}
+          </div>
+        ) : null}
       </SidebarInset>
     </SidebarProvider>
   );
