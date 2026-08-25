@@ -1,0 +1,7 @@
+column,role,dtype,missing,missing_ratio,distinct,mean,std,min,max
+month,time_index,str,0,0.0,24,,,,
+region,entity_id,str,0,0.0,4,,,,
+avg_delivery_days,metric,float64,0,0.0,66,3.029896,0.363676,2.44,4.05
+order_volume,metric,int64,0,0.0,92,3972.302083,1211.787493,2364.0,6312.0
+on_time_rate,metric,float64,0,0.0,75,0.668188,0.048031,0.55,0.754
+staff_count,metric,int64,0,0.0,12,32.25,7.133317,22.0,43.0

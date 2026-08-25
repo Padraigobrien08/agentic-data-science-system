@@ -184,15 +184,18 @@ describe("mergedThreads", () => {
 });
 
 describe("demoNote", () => {
-  it("frames the run that is published because it failed", async () => {
+  it("describes the unanswerable run as it actually ran", async () => {
     const { demoNote } = await import("@/lib/demo-notes");
     const note = demoNote("csv-unanswerable-moat");
 
     expect(note).not.toBeNull();
-    // The framing has to say the run is wrong. A neutral "note" beside a confident wrong
-    // answer is worse than none — it reads as a footnote rather than a correction.
-    expect(note!.body).toMatch(/fails|cannot be answered/i);
-    expect(note!.label).toBe("known limit");
+    expect(note!.body).toMatch(/cannot be answered/i);
+    expect(note!.label).toBe("unanswerable");
+    // The framing must not claim the documented failure occurred. It was recorded to
+    // trigger a substituted metric at 0.95 and did the opposite every time, so saying so
+    // would be a false statement about the run sitting directly above the run.
+    expect(note!.body).not.toMatch(/substituted the nearest/i);
+    expect(note!.body).toMatch(/did not reproduce/i);
   });
 
   it("leaves an ordinary run unframed", async () => {

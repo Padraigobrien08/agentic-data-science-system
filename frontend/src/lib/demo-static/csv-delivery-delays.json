@@ -1,7 +1,7 @@
 {
   "adapter_id": "in_memory",
-  "analysis_run_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298",
-  "conclusion": "Supported: Rising order volume in the north region explains the worsening delivery times. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
+  "analysis_run_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
+  "conclusion": "Supported: Rising order volume in the north region explains the worsening delivery times over the period under study. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
   "conclusion_detail": {
     "caveats": [
       "termination: sufficient_evidence",
@@ -10,23 +10,23 @@
     ],
     "confidence": 0.7756,
     "disposition": "mixed",
-    "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-concl-0",
+    "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-concl-0",
     "key_evidence_ids": [
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-0",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-1",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-2",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-3",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-4",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-5",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-6",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-7",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-8"
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-0",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-1",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-2",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-3",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-4",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-5",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-6",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-7",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-8"
     ],
-    "narrative": "The run found a mixed picture: service quality in the north did not cleanly emerge as broadly degrading, but rising order volume did explain the worsening delivery times. So the evidence points more toward volume-driven strain than a simple standalone decline in service quality.\n\nThe claim that on-time delivery performance in the north region had declined was weakened, with evidence split rather than one-sided. The claim that rising order volume explained the worsening delivery times was supported strongly, with no refuting evidence recorded.\n\nThe analysis used two time-series trend checks and then a change-point detection step, and it stopped because there was sufficient evidence for the supported explanation. Two questions remained open: whether the deterioration was sustained or only brief, and whether staffing moved with order volume in a way that would indicate capacity strain.",
-    "statement": "Supported: Rising order volume in the north region explains the worsening delivery times. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
+    "narrative": "The run found a mixed picture. Delivery performance in the north region did worsen, but that decline was not strong enough to stand on its own as a clean service-quality degradation story. Rising order volume did explain the worsening delivery times, and that was the stronger finding.\n\nThe decline in on-time delivery was weakened: there was some evidence for it, but there was also evidence against it. By contrast, the volume explanation was supported with no refuting evidence, so the data pointed more clearly to demand pressure than to a pure drop in service quality.\n\nThe run tested this with two time-series trend analyses and a change-point detection step, then stopped because it had sufficient evidence. Two questions remained open: whether the deterioration was sustained or just a short-lived spike, and whether staffing changes also helped explain the shift.",
+    "statement": "Supported: Rising order volume in the north region explains the worsening delivery times over the period under study. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
     "supporting_hypothesis_ids": [
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
-      "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0"
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
+      "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
     ]
   },
   "confidence": 0.7756,
@@ -40,58 +40,58 @@
     "observations": 9,
     "open_questions": 2
   },
-  "created_at": "2026-08-24T13:36:12",
+  "created_at": "2026-08-24T16:13:25",
   "critiques": [
     {
       "critique_type": "competing_explanation",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-crit-0",
-      "message": "Test whether the apparent worsening delivery times is actually driven by a discrete change point or operational shift rather than rising north-region order volume; if delivery times worsen without a corresponding volume break, the explanation is weakened.",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-crit-0",
+      "message": "Test whether the worsening delivery times and rising order volume actually change together over the same period, or whether delivery times worsened at a different point than volume rose. A timing mismatch would suggest the explanation is an artefact rather than a causal account.",
       "resolved": false,
       "severity": "major",
       "suggested_action": "detect_change_points",
-      "target_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+      "target_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
       "target_kind": "hypothesis"
     }
   ],
   "datasets": [
     {
       "content_hash": null,
-      "id": "dset_e57452571f5d47dd867760bd1086b0e2",
+      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_e57452571f5d47dd867760bd1086b0e2",
+      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_e57452571f5d47dd867760bd1086b0e2",
+      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_e57452571f5d47dd867760bd1086b0e2",
+      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_e57452571f5d47dd867760bd1086b0e2",
+      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
     },
     {
       "content_hash": null,
-      "id": "dset_e57452571f5d47dd867760bd1086b0e2",
+      "id": "dset_e34680e137924f8ea2cd9647c300cb5b",
       "locator": "sha256:59f0d5e2eec904209d8157c9ed6599ee763c45dd041a069b86512d9b1a20250f",
       "name": "operational_delivery",
       "row_count": null
@@ -102,13 +102,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-hyp-0",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-hyp-0",
       "iteration": 0,
-      "rationale": "This directly tests the stated concern that service quality is degrading.",
+      "rationale": "This directly tests whether service quality is degrading, as suggested by the goal and interpretation.",
       "sequence": 0,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -117,13 +117,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "propose_hypothesis",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-hyp-1",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-hyp-1",
       "iteration": 0,
-      "rationale": "This tests the competing explanation that higher demand, rather than lower service quality, is driving the change.",
+      "rationale": "The goal explicitly raises volume growth as an alternative explanation, so it should be tested separately from service quality.",
       "sequence": 1,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -132,13 +132,13 @@
       "alternatives": [],
       "chosen_option": "analyze_time_series_trend",
       "decision_type": "select_experiment",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-sel-2",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-sel-2",
       "iteration": 0,
       "rationale": "analyze_time_series_trend is the highest-gain experiment for establishing the presence and direction of a trend.",
       "sequence": 2,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-exp-0",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-0",
           "kind": "experiment_request"
         }
       ]
@@ -147,13 +147,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-evd-3",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-evd-3",
       "iteration": 0,
       "rationale": "recorded 4 evidence item(s) for analyze_time_series_trend",
       "sequence": 3,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -162,13 +162,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-rev-4",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-rev-4",
       "iteration": 0,
       "rationale": "weakened (support=2, refute=2)",
       "sequence": 4,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
           "kind": "hypothesis"
         }
       ]
@@ -177,13 +177,13 @@
       "alternatives": [],
       "chosen_option": "analyze_time_series_trend",
       "decision_type": "select_experiment",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-sel-5",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-sel-5",
       "iteration": 1,
-      "rationale": "analyze_time_series_trend is the highest-information experiment directly suited to establishing the trend.",
+      "rationale": "analyze_time_series_trend is the highest-information experiment for establishing the direction and shape of the trend.",
       "sequence": 5,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-exp-3",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-3",
           "kind": "experiment_request"
         }
       ]
@@ -192,13 +192,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-evd-6",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-evd-6",
       "iteration": 1,
       "rationale": "recorded 4 evidence item(s) for analyze_time_series_trend",
       "sequence": 6,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -207,13 +207,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-rev-7",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-rev-7",
       "iteration": 1,
       "rationale": "supported (support=4, refute=0)",
       "sequence": 7,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -222,13 +222,13 @@
       "alternatives": [],
       "chosen_option": "detect_change_points",
       "decision_type": "request_critique",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-crit-8",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-crit-8",
       "iteration": 1,
-      "rationale": "The claim is supported and uncritiqued, and there is an unused experiment available that could disconfirm an artefactual causal interpretation before the loop concludes.",
+      "rationale": "The claim is supported and has not yet been critiqued, and there are unused tools available. A change-point check can directly challenge the proposed explanation by looking for aligned versus misaligned shifts in the two series.",
       "sequence": 8,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -237,13 +237,13 @@
       "alternatives": [],
       "chosen_option": "detect_change_points",
       "decision_type": "select_experiment",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-sel-9",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-sel-9",
       "iteration": 2,
-      "rationale": "This falsification test can rule out the current trend hypothesis by checking for change points, which is the highest-value next step.",
+      "rationale": "This is the offered falsification step and would test whether the current trend hypothesis is actually supported or should be rejected.",
       "sequence": 9,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-exp-2",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-2",
           "kind": "experiment_request"
         }
       ]
@@ -252,13 +252,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "update_evidence",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-evd-10",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-evd-10",
       "iteration": 2,
       "rationale": "recorded 1 evidence item(s) for detect_change_points",
       "sequence": 10,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -267,13 +267,13 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "revise_confidence",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-rev-11",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-rev-11",
       "iteration": 2,
       "rationale": "supported (support=5, refute=0)",
       "sequence": 11,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
           "kind": "hypothesis"
         }
       ]
@@ -282,23 +282,23 @@
       "alternatives": [],
       "chosen_option": null,
       "decision_type": "conclude",
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-dec-concl-12",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-dec-concl-12",
       "iteration": 3,
       "rationale": "mixed (sufficient_evidence)",
       "sequence": 12,
       "targets": [
         {
-          "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-concl-0",
+          "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-concl-0",
           "kind": "conclusion"
         }
       ]
     }
   ],
   "demo_slug": "csv-delivery-delays",
-  "domain_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298",
+  "domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
   "events": [
     {
-      "created_at": "2026-08-24T13:36:12",
+      "created_at": "2026-08-24T16:13:25",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "created",
@@ -308,7 +308,7 @@
       "sequence": 0
     },
     {
-      "created_at": "2026-08-24T13:36:17",
+      "created_at": "2026-08-24T16:13:34",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -318,7 +318,7 @@
       "sequence": 1
     },
     {
-      "created_at": "2026-08-24T13:36:19",
+      "created_at": "2026-08-24T16:13:38",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -328,7 +328,7 @@
       "sequence": 2
     },
     {
-      "created_at": "2026-08-24T13:36:23",
+      "created_at": "2026-08-24T16:13:42",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -338,7 +338,7 @@
       "sequence": 3
     },
     {
-      "created_at": "2026-08-24T13:36:25",
+      "created_at": "2026-08-24T16:13:46",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -348,7 +348,7 @@
       "sequence": 4
     },
     {
-      "created_at": "2026-08-24T13:36:27",
+      "created_at": "2026-08-24T16:13:48",
       "entity_id": null,
       "entity_kind": null,
       "event_type": "checkpoint_saved",
@@ -366,9 +366,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-0",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-0",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -402,9 +402,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-1",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-1",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -438,9 +438,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-2",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-2",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -474,9 +474,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-3",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-3",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -510,9 +510,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-4",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-4",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -546,9 +546,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-5",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-5",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -582,9 +582,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-6",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-6",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -618,9 +618,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-7",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-7",
       "reliability": 0.4444444444444444,
       "statistics": {
         "assumptions": [
@@ -654,9 +654,9 @@
       "evidence_type": "trend_break",
       "experiment_result_id": null,
       "hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-evd-8",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-evd-8",
       "reliability": 0.6095238095238096,
       "statistics": {
         "assumptions": [
@@ -685,31 +685,31 @@
       "artifacts": [
         {
           "byte_size": 124,
-          "id": "603138b1-9d5b-4c37-90f4-e672d8739582",
+          "id": "582bc4ed-6999-483a-b8e2-1e289223e642",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_fits"
         },
         {
           "byte_size": 294,
-          "id": "65f31d50-824f-402f-b411-c088f5e9133b",
+          "id": "6f8385ee-112d-41eb-b031-772358393a02",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "trend"
         }
       ],
-      "created_at": "2026-08-24T13:36:19",
+      "created_at": "2026-08-24T16:13:38",
       "error": null,
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-res-0",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-res-0",
       "metrics": {
         "mean_slope": -0.001208,
         "series": 4.0
       },
-      "request_domain_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-exp-0",
+      "request_domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-0",
       "status": "succeeded",
       "summary": "Fitted trend for 4 series of 'on_time_rate'.",
       "target_hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0"
       ],
       "tool_name": "analyze_time_series_trend"
     },
@@ -717,31 +717,31 @@
       "artifacts": [
         {
           "byte_size": 126,
-          "id": "ba0864da-a6ea-47d3-8071-ff6af73d1256",
+          "id": "82e0f2a8-2d12-40c6-9509-ef6db50fa834",
           "kind": "tabular",
           "mime_type": "text/csv",
           "name": "trend_fits"
         },
         {
           "byte_size": 296,
-          "id": "d0761f9d-cbfb-4e91-905d-61710f52f13f",
+          "id": "7f2b2be7-2057-445e-9c52-23a8d77bb178",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "trend"
         }
       ],
-      "created_at": "2026-08-24T13:36:23",
+      "created_at": "2026-08-24T16:13:42",
       "error": null,
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-res-1",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-res-1",
       "metrics": {
         "mean_slope": 29.895109,
         "series": 4.0
       },
-      "request_domain_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-exp-3",
+      "request_domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-3",
       "status": "succeeded",
       "summary": "Fitted trend for 4 series of 'order_volume'.",
       "target_hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
       "tool_name": "analyze_time_series_trend"
     },
@@ -749,25 +749,25 @@
       "artifacts": [
         {
           "byte_size": 118,
-          "id": "b4c36e6d-37b5-4744-81b4-597684bccede",
+          "id": "eb9ca6c1-1767-440c-9bb0-9fd0092d04a0",
           "kind": "json",
           "mime_type": "application/vnd.chart+json",
           "name": "change_point"
         }
       ],
-      "created_at": "2026-08-24T13:36:25",
+      "created_at": "2026-08-24T16:13:46",
       "error": null,
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-res-2",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-res-2",
       "metrics": {
         "shift": 569.684783,
         "shift_score": 0.474709,
         "split_index": 92.0
       },
-      "request_domain_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-exp-2",
+      "request_domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac-exp-2",
       "status": "succeeded",
       "summary": "Change point in 'order_volume' at 2025-12-01.",
       "target_hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
       "tool_name": "detect_change_points"
     }
@@ -776,35 +776,35 @@
     {
       "confidence": 0.6012,
       "entity_refs": [],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
       "metric_refs": [
         "on_time_rate"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This directly tests the stated concern that service quality is degrading.",
+      "rationale": "This directly tests whether service quality is degrading, as suggested by the goal and interpretation.",
       "statement": "On-time delivery performance in the north region has declined over the period under study.",
       "status": "weakened"
     },
     {
       "confidence": 0.95,
       "entity_refs": [],
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1",
       "metric_refs": [
         "order_volume"
       ],
       "prior_confidence": 0.5,
-      "rationale": "This tests the competing explanation that higher demand, rather than lower service quality, is driving the change.",
-      "statement": "Rising order volume in the north region explains the worsening delivery times.",
+      "rationale": "The goal explicitly raises volume growth as an alternative explanation, so it should be tested separately from service quality.",
+      "statement": "Rising order volume in the north region explains the worsening delivery times over the period under study.",
       "status": "supported"
     }
   ],
-  "id": "06b59ef5-4ff8-4f0d-9053-eaf9049dd71f",
+  "id": "b1b602c2-f6f3-458b-b7c2-49e3ac9cb03d",
   "objective": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?",
   "observations": [
     {
       "entity_ref": "east",
       "experiment_result_id": null,
-      "id": "obs_fae986b5f3aa462ea9267384e33f1b2e",
+      "id": "obs_9e646cb0666941faaa72bc5ffe8f915f",
       "magnitude": 0.00047478260869562595,
       "metric_ref": "on_time_rate",
       "observation_type": "trend",
@@ -813,7 +813,7 @@
     {
       "entity_ref": "north",
       "experiment_result_id": null,
-      "id": "obs_9a784b85ac3d4493bf8530de2f5ca291",
+      "id": "obs_6d5f08eb49604da09e8a83c64e9340b0",
       "magnitude": -0.005336521739130447,
       "metric_ref": "on_time_rate",
       "observation_type": "trend",
@@ -822,7 +822,7 @@
     {
       "entity_ref": "south",
       "experiment_result_id": null,
-      "id": "obs_4405b83cda2e404cb3f54714e74135b8",
+      "id": "obs_88c42379ce194f1b8f4d3b26f8ec7e33",
       "magnitude": -0.0002930434782608853,
       "metric_ref": "on_time_rate",
       "observation_type": "trend",
@@ -831,7 +831,7 @@
     {
       "entity_ref": "west",
       "experiment_result_id": null,
-      "id": "obs_ca94647de44a439596ca81a157c58d3e",
+      "id": "obs_ab32772c81a64afaa436746d0fa51669",
       "magnitude": 0.00032260869565216895,
       "metric_ref": "on_time_rate",
       "observation_type": "trend",
@@ -840,7 +840,7 @@
     {
       "entity_ref": "east",
       "experiment_result_id": null,
-      "id": "obs_51d7edca02c34fe89fc357ffe6decb71",
+      "id": "obs_b604a68827dd45d0a103eb620bd11973",
       "magnitude": 21.80347826086952,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -849,7 +849,7 @@
     {
       "entity_ref": "north",
       "experiment_result_id": null,
-      "id": "obs_d6747e807a134be298ac2d45f46931a0",
+      "id": "obs_545d21c189e345858e1f540a08a2b220",
       "magnitude": 76.03826086956515,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -858,7 +858,7 @@
     {
       "entity_ref": "south",
       "experiment_result_id": null,
-      "id": "obs_d4705f2295cb420794214fb26343c9c0",
+      "id": "obs_948ab5726b824db99cc6ac1d54e7f646",
       "magnitude": 12.170869565217327,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -867,7 +867,7 @@
     {
       "entity_ref": "west",
       "experiment_result_id": null,
-      "id": "obs_6e5eab57cdd54cb7b6120021618231ad",
+      "id": "obs_5f41bf2c01c44590ad15200d0f0ec50a",
       "magnitude": 9.5678260869565,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -876,7 +876,7 @@
     {
       "entity_ref": null,
       "experiment_result_id": null,
-      "id": "obs_f06ddbe14cfd4765bf89ce8e284f4479",
+      "id": "obs_59b4cc92e1c74263b3f530f19cc61346",
       "magnitude": 569.6847826086955,
       "metric_ref": "order_volume",
       "observation_type": "trend",
@@ -886,23 +886,23 @@
   "open_questions": [
     {
       "answer": null,
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-q-0",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-q-0",
       "priority": 0,
-      "question": "Is the deterioration sustained over time or confined to a short interval?",
+      "question": "Is the deterioration sustained over time or driven by a short-lived spike?",
       "related_hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0",
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
       "status": "open"
     },
     {
       "answer": null,
-      "id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298-q-1",
+      "id": "fd2d727a-3776-4332-aa7c-41324415e5ac-q-1",
       "priority": 0,
-      "question": "Does staffing change alongside order volume, suggesting capacity strain?",
+      "question": "Does any change in staffing help explain the delivery-time shift?",
       "related_hypothesis_ids": [
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-0",
-        "5c7f34f7-e017-4d2e-8260-d8ead84d8298-hyp-1"
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-0",
+        "fd2d727a-3776-4332-aa7c-41324415e5ac-hyp-1"
       ],
       "status": "open"
     }
@@ -925,5 +925,5 @@
     "rationale": "terminated: sufficient_evidence",
     "reason": "sufficient_evidence"
   },
-  "updated_at": "2026-08-24T13:41:09"
+  "updated_at": "2026-08-25T11:44:41"
 }

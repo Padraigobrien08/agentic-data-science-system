@@ -1,8 +1,8 @@
 [
   {
     "adapter_id": "in_memory",
-    "analysis_run_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298",
-    "conclusion": "Supported: Rising order volume in the north region explains the worsening delivery times. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
+    "analysis_run_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
+    "conclusion": "Supported: Rising order volume in the north region explains the worsening delivery times over the period under study. | Not supported: On-time delivery performance in the north region has declined over the period under study.",
     "confidence": 0.7756,
     "counts": {
       "critiques": 1,
@@ -13,10 +13,10 @@
       "observations": 9,
       "open_questions": 2
     },
-    "created_at": "2026-08-24T13:36:12",
+    "created_at": "2026-08-24T16:13:25",
     "demo_slug": "csv-delivery-delays",
-    "domain_id": "5c7f34f7-e017-4d2e-8260-d8ead84d8298",
-    "id": "06b59ef5-4ff8-4f0d-9053-eaf9049dd71f",
+    "domain_id": "fd2d727a-3776-4332-aa7c-41324415e5ac",
+    "id": "b1b602c2-f6f3-458b-b7c2-49e3ac9cb03d",
     "objective": "Delivery times in the north region have worsened. Is service quality actually degrading, or is rising order volume the explanation?",
     "origin": "native",
     "outcome": {
@@ -30,12 +30,12 @@
     },
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "converged",
-    "updated_at": "2026-08-24T13:41:09"
+    "updated_at": "2026-08-25T11:44:41"
   },
   {
     "adapter_id": "in_memory",
-    "analysis_run_id": "be2a440d-d43c-40e1-b6fb-502fab3bb04a",
-    "conclusion": "Mixed evidence for: On-time rate is more strongly associated with staffing level than with order volume.; Order volume is more strongly associated with on-time rate than staffing level is.",
+    "analysis_run_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee",
+    "conclusion": "Mixed evidence for: On-time rate is associated with staffing level; if staffing level changes, on-time rate changes in the same direction more often than expected by chance.; Order volume is associated with on-time rate and is a stronger driver of service quality than staffing level.",
     "confidence": 0.4,
     "counts": {
       "critiques": 2,
@@ -46,10 +46,10 @@
       "observations": 13,
       "open_questions": 3
     },
-    "created_at": "2026-08-24T13:36:28",
+    "created_at": "2026-08-24T16:13:48",
     "demo_slug": "csv-staffing-vs-service",
-    "domain_id": "be2a440d-d43c-40e1-b6fb-502fab3bb04a",
-    "id": "84795be5-842f-47fd-98ac-10b23457ceff",
+    "domain_id": "1cd4bb73-43ae-4908-8cf4-6526ece8d0ee",
+    "id": "095f38d5-7243-4a09-bfbe-f95ebe9ebb8f",
     "objective": "Does staffing level explain on-time rate, or is order volume the stronger driver of service quality?",
     "origin": "native",
     "outcome": {
@@ -63,45 +63,45 @@
     },
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "exhausted",
-    "updated_at": "2026-08-24T13:41:09"
+    "updated_at": "2026-08-25T11:44:41"
   },
   {
     "adapter_id": "in_memory",
-    "analysis_run_id": "9c231479-7ac7-49f8-becf-faad00a1e1d6",
-    "conclusion": "Mixed evidence for: The weakest region carries higher order volume than other regions, and that higher volume explains its lower on-time delivery.",
-    "confidence": 0.4,
+    "analysis_run_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+    "conclusion": "Insufficient evidence to resolve the investigation goal.",
+    "confidence": 0.2,
     "counts": {
       "critiques": 0,
       "decisions": 15,
-      "evidence": 14,
-      "experiments": 4,
+      "evidence": 6,
+      "experiments": 3,
       "hypotheses": 2,
-      "observations": 14,
-      "open_questions": 3
+      "observations": 1,
+      "open_questions": 2
     },
-    "created_at": "2026-08-24T13:36:40",
-    "demo_slug": "csv-regional-ranking",
-    "domain_id": "9c231479-7ac7-49f8-becf-faad00a1e1d6",
-    "id": "b6c6defe-68dc-49a2-82ab-56ff3c46e1d0",
-    "objective": "The weakest region on on-time delivery: is that a genuine service-quality gap, or is it explained by the order volume that region carries?",
+    "created_at": "2026-08-24T16:14:17",
+    "demo_slug": "csv-distribution-honesty",
+    "domain_id": "5a8cb63e-189b-41ec-9739-1dffdb33f00b",
+    "id": "580343ee-959d-46c4-a7b0-b5c632678ddf",
+    "objective": "Our average delivery time has risen. Is that a broad shift affecting most orders, or is a small tail of very late orders dragging the mean up?",
     "origin": "native",
     "outcome": {
       "claims_rejected": 0,
       "claims_supported": 0,
-      "claims_unresolved": 1,
-      "claims_weakened": 1,
+      "claims_unresolved": 2,
+      "claims_weakened": 0,
       "contradiction_found": false,
       "kind": "declined",
       "termination_reason": "insufficient_evidence"
     },
     "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
     "status": "exhausted",
-    "updated_at": "2026-08-24T13:41:10"
+    "updated_at": "2026-08-25T11:44:42"
   },
   {
     "adapter_id": "edgar",
-    "analysis_run_id": "8dbf555a-cf21-444b-bf39-cc048621c230",
-    "conclusion": "Supported: Revenue growth is the explanation for the observed margin change. | Not supported: Net margin has deteriorated over the recent periods for these companies.",
+    "analysis_run_id": "2444031b-edf4-4595-bfb1-f37d367e8527",
+    "conclusion": "Supported: Revenue growth has increased over recent periods at these companies and could explain the margin change. | Not supported: Net margin has deteriorated over recent periods at these companies.",
     "confidence": 0.5,
     "counts": {
       "critiques": 1,
@@ -110,12 +110,12 @@
       "experiments": 7,
       "hypotheses": 2,
       "observations": 5,
-      "open_questions": 2
+      "open_questions": 3
     },
-    "created_at": "2026-08-24T13:37:09",
+    "created_at": "2026-08-24T16:14:42",
     "demo_slug": "edgar-margin-vs-growth",
-    "domain_id": "8dbf555a-cf21-444b-bf39-cc048621c230",
-    "id": "d0198496-44ff-4259-8b95-2e4f8a46423e",
+    "domain_id": "2444031b-edf4-4595-bfb1-f37d367e8527",
+    "id": "c98693db-f2e2-4d73-bac5-24c9e1bbee58",
     "objective": "Has margin quality deteriorated at these companies over recent periods, or is revenue growth the explanation?",
     "origin": "native",
     "outcome": {
@@ -129,13 +129,13 @@
     },
     "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
     "status": "converged",
-    "updated_at": "2026-08-24T13:41:10"
+    "updated_at": "2026-08-25T11:44:42"
   },
   {
     "adapter_id": "edgar",
-    "analysis_run_id": "d520cd31-8548-460a-b35b-a32cb9db98a6",
-    "conclusion": "Supported: NVDA's net_margin advantage over AAPL and MSFT reflects a durable difference in profitability rather than being fully explained by faster revenue growth over the same periods. | Not supported: NVDA's revenue_growth_qoq is higher than AAPL's and MSFT's over the same periods, and this growth difference explains the margin advantage.",
-    "confidence": 0.725,
+    "analysis_run_id": "6b8055df-daf4-4d64-9715-456610f5d84b",
+    "conclusion": "NVDA's net margin advantage over AAPL and MSFT reflects a durable difference in profitability across the same periods.; NVDA's margin advantage over AAPL and MSFT is explained by faster revenue growth over the same periods.",
+    "confidence": 0.95,
     "counts": {
       "critiques": 1,
       "decisions": 13,
@@ -145,23 +145,56 @@
       "observations": 73,
       "open_questions": 2
     },
-    "created_at": "2026-08-24T13:37:26",
+    "created_at": "2026-08-24T16:15:00",
     "demo_slug": "edgar-peer-separation",
-    "domain_id": "d520cd31-8548-460a-b35b-a32cb9db98a6",
-    "id": "3c23616f-3587-47ec-8365-93f31b0140a4",
+    "domain_id": "6b8055df-daf4-4d64-9715-456610f5d84b",
+    "id": "f7132b13-800f-4a23-90d1-41a21d80e821",
     "objective": "Does NVDA's margin advantage over AAPL and MSFT reflect a durable difference in profitability, or is it explained by revenue growth outpacing theirs over the same periods?",
     "origin": "native",
     "outcome": {
       "claims_rejected": 0,
-      "claims_supported": 1,
-      "claims_unresolved": 1,
+      "claims_supported": 2,
+      "claims_unresolved": 0,
       "claims_weakened": 0,
       "contradiction_found": false,
-      "kind": "mixed",
+      "kind": "supported",
       "termination_reason": "sufficient_evidence"
     },
     "project_id": "dc4d693f-87e7-4ccb-b409-98ba616edfea",
     "status": "converged",
-    "updated_at": "2026-08-24T13:41:11"
+    "updated_at": "2026-08-25T11:44:43"
+  },
+  {
+    "adapter_id": "in_memory",
+    "analysis_run_id": "138ecd93-59ad-42ed-818e-3e95f220393e",
+    "conclusion": "Insufficient evidence to resolve the investigation goal.",
+    "confidence": 0.2,
+    "counts": {
+      "critiques": 0,
+      "decisions": 5,
+      "evidence": 1,
+      "experiments": 1,
+      "hypotheses": 1,
+      "observations": 4,
+      "open_questions": 2
+    },
+    "created_at": "2026-08-24T16:15:52",
+    "demo_slug": "csv-unanswerable-moat",
+    "domain_id": "138ecd93-59ad-42ed-818e-3e95f220393e",
+    "id": "a1323f12-f8fe-406b-92dc-104f5ba610bd",
+    "objective": "Which region has the strongest customer loyalty?",
+    "origin": "native",
+    "outcome": {
+      "claims_rejected": 0,
+      "claims_supported": 0,
+      "claims_unresolved": 1,
+      "claims_weakened": 0,
+      "contradiction_found": false,
+      "kind": "declined",
+      "termination_reason": "insufficient_evidence"
+    },
+    "project_id": "fce826c7-1da6-4cc3-b4ba-ed8160a79dfe",
+    "status": "exhausted",
+    "updated_at": "2026-08-25T11:44:43"
   }
 ]

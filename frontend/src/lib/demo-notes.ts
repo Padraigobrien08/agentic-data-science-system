@@ -26,16 +26,15 @@ export type DemoNote = {
 
 const NOTES: Record<string, DemoNote> = {
   "csv-unanswerable-moat": {
-    label: "known limit",
+    label: "unanswerable",
     body:
-      "This run is published because it fails. Nothing in this dataset measures customer " +
-      "loyalty, so the honest answer is that the question cannot be answered from these " +
-      "columns — and instead the model substituted the nearest available metric and " +
-      "reported high confidence. The deterministic parts held: every number below is real " +
-      "and every step is recorded. What failed is the judgement that the question was " +
-      "answerable at all, and the loop does not currently catch it. It is documented in the " +
-      "README as a known limit, and it is here in the same evidence format as the runs that " +
-      "went well.",
+      "Nothing in this dataset measures loyalty, so the question cannot be answered from it. " +
+      "The run says so: it declined at 20% confidence and named the missing measure, instead " +
+      "of reaching for the nearest column and presenting it as an answer. Knowing when not " +
+      "to answer is the hardest thing to build here and the easiest to fake by never asking " +
+      "a hard question — so the hard question is on the site. For completeness: the README " +
+      "documents a benchmark case where this model does substitute a metric and report 95%. " +
+      "Repeated recordings of this question did not reproduce that.",
   },
 };
 
