@@ -44,6 +44,14 @@ class Hypothesis(DomainModel):
         default=None,
         description="Set when this hypothesis was spawned to refine/compete with another.",
     )
+    mutually_exclusive_with: list[str] = Field(
+        default_factory=list,
+        description=(
+            "Claims that cannot hold at the same time as this one. Set when the goal itself "
+            "poses them as alternatives ('is it X, or is it Y?'), so the rivalry is known "
+            "before any evidence arrives rather than depending on a model noticing it later."
+        ),
+    )
     provenance: Provenance
     created_at: datetime = Field(default_factory=utc_now)
     updated_at: datetime = Field(default_factory=utc_now)

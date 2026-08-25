@@ -215,6 +215,9 @@ class CritiqueRow(Base):
     severity: Mapped[str] = mapped_column(String(32), nullable=False)
     target_kind: Mapped[str] = mapped_column(String(64), nullable=False)
     target_id: Mapped[str] = mapped_column(String(128), nullable=False, index=True)
+    #: The other claim in a contradiction. A conflict has two sides, and without both a
+    #: reader cannot tell whether evidence has since separated them.
+    conflicts_with_id: Mapped[str | None] = mapped_column(String(128), nullable=True, index=True)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     suggested_action: Mapped[str | None] = mapped_column(Text, nullable=True)
     resolved: Mapped[bool] = mapped_column(nullable=False, default=False)

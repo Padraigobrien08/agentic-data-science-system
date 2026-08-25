@@ -15,6 +15,7 @@ from here).
 from __future__ import annotations
 
 from datetime import datetime
+from enum import Enum
 
 from pydantic import Field
 
@@ -67,12 +68,34 @@ class ColumnSpec(DomainModel):
     description: str | None = Field(default=None, max_length=512)
 
 
+class DatasetOrigin(str, Enum):
+    """Where a dataset's rows actually came from.
+
+    Carried so a reader is never left to infer it. A showcase that publishes runs over
+    generated data beside runs over live filings, and labels neither, is asking the reader to
+    take the harder claim on trust — and a system whose whole argument is that it reports what
+    it can and cannot support does not get to be vague about its own inputs.
+    """
+
+    live = "live"
+    """Fetched from a real external source (e.g. SEC EDGAR filings)."""
+    synthetic = "synthetic"
+    """Generated, usually to exhibit a specific structure. Real numbers, invented world."""
+    user_upload = "user_upload"
+    """Supplied by whoever asked the question."""
+    unknown = "unknown"
+
+
 class DatasetProvenance(DomainModel):
     """Lineage of a manifest's data (distinct from agent-decision provenance)."""
 
     adapter_id: str = Field(..., description="Adapter that produced the manifest, e.g. 'edgar'.")
     adapter_version: str = Field(default="1")
     source: str = Field(..., description="Human-readable source label, e.g. 'SEC EDGAR companyfacts'.")
+    origin: DatasetOrigin = Field(
+        default=DatasetOrigin.unknown,
+        description="Live, synthetic, or user-supplied — surfaced to the reader, never inferred.",
+    )
     fetched_at: datetime = Field(default_factory=utc_now)
     parameters: dict[str, str] = Field(
         default_factory=dict,

@@ -26,6 +26,7 @@ from agentic.domain import (
     Evidence,
     EvidenceDirection,
     ExperimentRequest,
+    ExperimentResult,
     Hypothesis,
     HypothesisStatus,
     InvestigationState,
@@ -39,10 +40,11 @@ from agentic.domain.provenance import Provenance
 from agentic.experiments import ArtifactSink, ExperimentContext, ExperimentRegistry, InMemoryArtifactSink
 from agentic.experiments.record import ExperimentExecutionRecord
 
+from .alternatives import poses_alternatives
 from .budget import BudgetTracker
 from .direction import direction_sign
 from .ids import DeterministicIds
-from .narrative import AllowedNumbers, verify_narrative
+from .narrative import AllowedFigures, verify_narrative
 from .policy import (
     AgentPolicy,
     AnalysisIntent,
@@ -164,16 +166,36 @@ class HypothesisGenerator:
             lambda: self._policy.generate_hypotheses(
                 interpretation, metric_names=manifest.metric_names(), dimension_names=dims,
                 goal_text=state.objective.objective))
+        # A claim may only reference a column the dataset actually has. The policy is asked
+        # for a metric name and can return one that merely sounds right ("loyalty_score"),
+        # and an unchecked reference does not fail loudly — it falls through to the planner's
+        # default metric, so the claim gets tested against whatever was nearest to hand. That
+        # is the substitution failure arriving one step later than `answerable=false` catches
+        # it. Dropping the reference keeps the claim and its untestability visible.
+        known_metrics = set(manifest.metric_names())
         for i, p in enumerate(proposals.hypotheses):
+            metric_refs = [p.metric] if p.metric and p.metric in known_metrics else []
             h = Hypothesis(
                 id=idgen.make("hyp", i), statement=p.statement, rationale=p.rationale,
-                metric_refs=[p.metric] if p.metric else [], provenance=_prov("hypothesis_generator"),
+                metric_refs=metric_refs, provenance=_prov("hypothesis_generator"),
             )
             state.add_hypothesis(h)
             state.record_decision(AgentDecision(
                 id=idgen.make("dec-hyp", i), decision_type=DecisionType.propose_hypothesis,
                 rationale=p.rationale or "proposed from goal",
                 targets=[EntityRef(kind=EntityKind.hypothesis, id=h.id)], provenance=_prov("hypothesis_generator")))
+        # A goal phrased as "is it X, or is it Y?" is asking which, and the question's shape
+        # says so without a model reading it. Recording the rivalry now means the loop knows
+        # these two cannot both stand before either has been scored — rather than depending on
+        # the critic to notice afterwards, which is best-effort and has missed.
+        #
+        # Exactly two claims, deliberately. Three or more is not the construction this
+        # recognises, and guessing which pair is the rival would invent a conflict.
+        if poses_alternatives(state.objective.objective) and len(state.hypotheses) == 2:
+            first, second = state.hypotheses
+            first.mutually_exclusive_with = [second.id]
+            second.mutually_exclusive_with = [first.id]
+
         for j, q in enumerate(proposals.questions):
             state.add_open_question(OpenQuestion(
                 id=idgen.make("q", j), question=q,
@@ -343,6 +365,13 @@ class InvestigationPlanner:
                     expected_information_gain=gain,
                     provenance=_prov("investigation_planner")))
                 seen.add(key)
+
+        # A request's reproducibility manifest defaults to a random id, which made every
+        # candidate differ between two runs of the same seed. Derived from the request id
+        # rather than a fresh counter: that id is already deterministic, and tying them
+        # together means they cannot drift apart.
+        for request in out:
+            request.reproducibility.id = f"{request.id}-repro"
         return out
 
 
@@ -466,11 +495,10 @@ class ExperimentExecutor:
     def execute(
         self, request: ExperimentRequest, manifest: DatasetManifest, frame: pd.DataFrame | None,
         idgen: DeterministicIds, state: InvestigationState,
-    ) -> ExperimentExecutionRecord:
+    ) -> tuple[ExperimentExecutionRecord, ExperimentResult]:
         """Run one experiment and fold it into state (the sequential path)."""
         record = self.run(request, manifest, frame)
-        self.record(record, request, idgen, state)
-        return record
+        return record, self.record(record, request, idgen, state)
 
     def run(
         self, request: ExperimentRequest, manifest: DatasetManifest, frame: pd.DataFrame | None,
@@ -494,14 +522,38 @@ class ExperimentExecutor:
     def record(
         self, record: ExperimentExecutionRecord, request: ExperimentRequest,
         idgen: DeterministicIds, state: InvestigationState,
-    ) -> None:
+    ) -> ExperimentResult:
         """Fold one finished experiment into state. Always called in selection order, so
-        result ids stay a pure function of state regardless of completion order."""
+        result ids stay a pure function of state regardless of completion order.
+
+        Returns the folded result because the evidence updater runs next and needs this
+        result's id: evidence is what links a claim back to the computation behind it, and
+        that link can only be written once the result has its deterministic id.
+        """
         result = record.to_domain_result()
         # deterministic ids for the persisted result/observations
-        result.id = idgen.make("res", len(state.completed_experiments) + len(state.failed_experiments))
+        ordinal = len(state.completed_experiments) + len(state.failed_experiments)
+        result.id = idgen.make("res", ordinal)
+        # Everything the tool minted with a random id, re-stamped as part of *this* run. The
+        # tool is standalone and cannot know the investigation it is serving, so it defaults
+        # to uuid4 — correct there, and the reason two runs of the same seed over the same
+        # bytes used to differ in every observation, artifact and reproducibility id.
+        for i, observation in enumerate(result.observations):
+            observation.id = idgen.make(f"obs-{ordinal}", i)
+            observation.experiment_result_id = result.id
+        result.reproducibility.id = idgen.make("repro", ordinal)
+        # Artifact ids are deliberately *not* re-stamped here. They are content-addressed at
+        # emission (see `ArtifactRecord`), which makes them reproducible already, and the
+        # sink keys its bytes by the same value — renaming them here would orphan every
+        # artifact from the content it names.
+        # The tool minted its own evidence ids before the loop ever saw them; the evidence
+        # that reaches state is re-minted under `idgen` by the evidence updater. Carrying the
+        # tool's ids here would publish a list that resolves against nothing, so the link is
+        # left empty and filled in by the updater once the state-side ids exist.
+        result.produced_evidence_ids = []
         request.status = record.status
         state.record_experiment_result(result)
+        return result
 
     @property
     def shared_sink(self) -> ArtifactSink | None:
@@ -516,8 +568,17 @@ class ExperimentExecutor:
 class EvidenceUpdater:
     def update(
         self, state: InvestigationState, record: ExperimentExecutionRecord, request: ExperimentRequest,
-        idgen: DeterministicIds,
+        idgen: DeterministicIds, result: ExperimentResult | None = None,
     ) -> list[Evidence]:
+        """
+        File one experiment's evidence into state, linked to the result that produced it.
+
+        ``result`` is the folded :class:`ExperimentResult` returned by
+        :meth:`ExperimentExecutor.record`. It is what makes a claim traceable: without it an
+        evidence row states a number with no way back to the computation behind it, which is
+        the one thing this system is not allowed to do. It is optional only so a caller
+        holding a bare record can still score evidence in isolation; the loop always passes it.
+        """
         # Every claim the experiment was raised to test, not just the first.
         #
         # One measurement can bear on two rival explanations at once, and it does not bear on
@@ -551,12 +612,20 @@ class EvidenceUpdater:
                 direction = EvidenceDirection.supports if e.direction == EvidenceDirection.supports else EvidenceDirection.neutral
             ev = Evidence(
                 id=idgen.make("evd", len(state.evidence)), evidence_type=e.evidence_type,
-                source_reference=e.source_reference, experiment_result_id=None,
+                source_reference=e.source_reference,
+                experiment_result_id=result.id if result is not None else None,
                 hypothesis_ids=[target] if target else [], claim=e.claim, direction=direction,
                 strength=e.strength, reliability=e.reliability, coverage=e.coverage,
                 statistics=e.statistics, provenance=_prov("evidence_updater"))
             state.add_evidence(ev)
             produced.append(ev)
+        # The link written from both ends, over the same id space. `experiment_result_id`
+        # answers "what computed this?" from a claim; `produced_evidence_ids` answers "what
+        # did this establish?" from a result. A reader arriving from either direction lands
+        # on a row that exists — which is the whole of the traceability guarantee.
+        if result is not None:
+            result.produced_evidence_ids = [e.id for e in produced]
+
         named = [t for t in targets if t]
         if produced and named:
             # One decision naming every claim the evidence was filed against, so the trace
@@ -749,6 +818,7 @@ class Critic:
             critique_type=CritiqueType.contradiction,
             severity=CritiqueSeverity.major,
             target=EntityRef(kind=EntityKind.hypothesis, id=target.id),
+            conflicts_with_id=other.id,
             message=proposal.message or (
                 f"'{target.statement}' and '{other.statement}' cannot both hold; "
                 f"the evidence gathered so far supports each independently."
@@ -883,10 +953,7 @@ class TerminationPolicy:
 
     @staticmethod
     def _unresolved_contradiction(state: InvestigationState) -> Critique | None:
-        for c in state.critiques:
-            if c.critique_type is CritiqueType.contradiction and not c.resolved:
-                return c
-        return None
+        return next(iter(open_contradictions(state)), None)
 
     def finalize_no_candidates(self, state: InvestigationState, ran_any: bool) -> TerminationReason:
         # Checked before `supported`: running out of experiments does not settle a
@@ -973,6 +1040,19 @@ class ConclusionSynthesizer:
             statement = "Mixed evidence for: " + "; ".join(h.statement for h in weakened)
             hyp_ids = [h.id for h in weakened]
             key_ev = [e.id for e in state.evidence]
+        elif reason is TerminationReason.unanswerable_premise:
+            # Checked before the generic `insufficient_evidence` fallback and reported as its
+            # own disposition. "The analysis was inconclusive" invites the user to run more of
+            # it; "this data cannot answer that" tells them to bring different data. Reporting
+            # the second as the first is the substitution failure wearing a hedge.
+            disposition = ConclusionDisposition.unanswerable
+            conf = 0.0
+            statement = (
+                "This dataset cannot answer the question as asked: "
+                f"{_unanswerable_detail(state)}"
+            )
+            hyp_ids = []
+            key_ev = []
         else:
             disposition = ConclusionDisposition.insufficient_evidence
             conf = 0.2
@@ -1079,14 +1159,158 @@ class ConclusionSynthesizer:
         if written is None:
             return None
 
-        # Every figure handed over is a figure the prose may state, and nothing else is.
-        allowed = AllowedNumbers().add_many_counts(counts).add_confidence(confidence)
+        # Every figure handed over is a figure the prose may state — as the *kind of thing*
+        # it actually is, and nothing else. `counts` keys are already the role names, so a
+        # count of experiments is admissible in a clause about experiments and nowhere else.
+        allowed = AllowedFigures().add_counts(counts).add_confidence(confidence)
         for h in state.hypotheses:
             allowed.add_confidence(h.confidence)
-        allowed.add_many_counts(supporting).add_many_counts(refuting)
+        for role, per_claim in (("supporting_evidence", supporting), ("refuting_evidence", refuting)):
+            for value in per_claim.values():
+                allowed.add(role, value)
         if dataset is not None:
-            allowed.add_count(dataset.row_count)
+            allowed.add("rows", dataset.row_count)
+        # The columns this run measured. Nothing in `findings` carries a measured value, so a
+        # figure the prose attaches to one of these names is invented whatever it collides
+        # with — naming them here is what makes that refusable.
+        allowed.add_metric_terms(_metric_vocabulary(state))
         return verify_narrative(written, allowed)
+
+
+def _contradiction_is_settled(state: InvestigationState, critique: Critique) -> bool:
+    """
+    True when evidence has separated the two claims a contradiction was recorded over.
+
+    The conflict says one of the pair is wrong, not which. It is answered when the run can
+    tell them apart — exactly one still standing — and not before: two claims that are both
+    still weakened have had the question put to them and not answered it.
+
+    Derived from the claims rather than read from a flag. The flag existed for a year and was
+    never once set to ``True``, which made ``sufficient_evidence`` unreachable for the rest of
+    any run that recorded a conflict — including one the discriminating experiment had already
+    settled. State cannot drift out of step with itself in the same way.
+    """
+    pair = [state.find_hypothesis(i) for i in (critique.target.id, critique.conflicts_with_id or "")]
+    claims = [h for h in pair if h is not None]
+    if len(claims) < 2:
+        # Only one side is identifiable, so nothing here can establish that it was settled.
+        return False
+    standing = [h for h in claims if h.status is HypothesisStatus.supported]
+    return len(standing) == 1
+
+
+def reconcile_contradictions(state: InvestigationState) -> None:
+    """Mark contradictions the evidence has since settled, so the trace shows what happened."""
+    for critique in state.critiques:
+        if critique.critique_type is CritiqueType.contradiction and not critique.resolved:
+            critique.resolved = _contradiction_is_settled(state, critique)
+
+
+def open_contradictions(state: InvestigationState) -> list[Critique]:
+    """Conflicts the run is still holding, computed from the claims themselves."""
+    return [
+        c
+        for c in state.critiques
+        if c.critique_type is CritiqueType.contradiction and not _contradiction_is_settled(state, c)
+    ]
+
+
+def enforce_mutual_exclusivity(
+    state: InvestigationState, idgen: DeterministicIds,
+) -> list[Critique]:
+    """
+    Record a contradiction for any rival pair the evidence has left both standing.
+
+    The rivalry was established by the goal's own phrasing, so this needs no model and cannot
+    be missed. It is the same consequence the critic applies to a conflict a model reports —
+    both sides weakened, neither picked — because the conflict establishes that they cannot
+    both hold, not which of them is wrong.
+    """
+    recorded: list[Critique] = []
+    seen: set[frozenset[str]] = set()
+    for claim in state.hypotheses:
+        if claim.status is not HypothesisStatus.supported:
+            continue
+        for rival_id in claim.mutually_exclusive_with:
+            rival = state.find_hypothesis(rival_id)
+            if rival is None or rival.status is not HypothesisStatus.supported:
+                continue
+            # Only the symmetric duplicate within this call needs suppressing. Recording
+            # weakens both sides, so the pair cannot qualify again unless fresh evidence
+            # restores both to `supported` — at which point it is a live conflict again and
+            # recording it a second time is the correct behaviour, not a repeat.
+            pair = frozenset({claim.id, rival.id})
+            if pair in seen:
+                continue
+            seen.add(pair)
+            recorded.append(_record_exclusive_conflict(state, claim, rival, idgen))
+    return recorded
+
+
+def _record_exclusive_conflict(
+    state: InvestigationState, claim: Hypothesis, rival: Hypothesis, idgen: DeterministicIds,
+) -> Critique:
+    critique = Critique(
+        id=idgen.make("crit", len(state.critiques)),
+        critique_type=CritiqueType.contradiction,
+        severity=CritiqueSeverity.major,
+        target=EntityRef(kind=EntityKind.hypothesis, id=claim.id),
+        conflicts_with_id=rival.id,
+        message=(
+            f"The goal asked which of these holds, and both are currently supported: "
+            f"{_quote(claim.statement)} and {_quote(rival.statement)}. They cannot both be "
+            f"the explanation."
+        ),
+        provenance=_prov("mutual_exclusivity"),
+    )
+    state.add_critique(critique)
+    for side, conflicting in ((claim, rival), (rival, claim)):
+        side.set_status(HypothesisStatus.weakened)
+        side.set_confidence(round(min(side.confidence, Critic.CONTRADICTION_CONFIDENCE_CAP), 4))
+        state.record_decision(AgentDecision(
+            id=idgen.make("dec-contra", len(state.decisions)),
+            decision_type=DecisionType.revise_confidence,
+            rationale=f"weakened: cannot hold at the same time as {_quote(conflicting.statement)}",
+            targets=[
+                EntityRef(kind=EntityKind.hypothesis, id=side.id),
+                EntityRef(kind=EntityKind.hypothesis, id=conflicting.id),
+            ],
+            provenance=_prov("mutual_exclusivity"),
+        ))
+    state.add_open_question(OpenQuestion(
+        id=idgen.make("q-contra", len(state.open_questions)),
+        question=(
+            "Which of the two competing explanations does the evidence actually favour?"
+        ),
+        related_hypothesis_ids=[claim.id, rival.id],
+        provenance=_prov("mutual_exclusivity"),
+    ))
+    return critique
+
+
+def _unanswerable_detail(state: InvestigationState) -> str:
+    """The reason the loop declined, recovered from the decision it wrote before stopping."""
+    for decision in reversed(state.decisions):
+        if decision.rationale.startswith("declined: "):
+            return decision.rationale[len("declined: "):]
+    return "the data holds no measure of what the goal asks about"
+
+
+def _metric_vocabulary(state: InvestigationState) -> list[str]:
+    """
+    Every column name this run's datasets expose, plus the metrics its claims reference.
+
+    Used only to *refuse* figures, so breadth is the safe direction: a name missing from here
+    is a clause the narrative check will not veto, while an extra name costs at most a
+    readable sentence that falls back to the deterministic statement.
+    """
+    names: list[str] = []
+    for dataset in state.datasets:
+        if dataset.manifest is not None:
+            names.extend(c.name for c in dataset.manifest.columns)
+    for hypothesis in state.hypotheses:
+        names.extend(hypothesis.metric_refs)
+    return names
 
 
 def make_termination(reason: TerminationReason, state: InvestigationState, idgen: DeterministicIds) -> TerminationDecision:

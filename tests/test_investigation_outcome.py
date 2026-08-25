@@ -19,14 +19,35 @@ import pytest
 from backend.schemas.investigation import _build_outcome
 
 
-def _row(*, claims: list[str], reason: str | None, critiques: list[tuple[str, bool]] | None = None):
-    """A stand-in investigation row: only the fields the classifier reads."""
+def _row(
+    *,
+    claims: list[str],
+    reason: str | None,
+    critiques: list[tuple[str, bool]] | None = None,
+    conflict_pair: tuple[str, str] | None = None,
+):
+    """
+    A stand-in investigation row: only the fields the classifier reads.
+
+    Claims are addressable as ``hyp-0``, ``hyp-1``, … so a contradiction can name the two it
+    is between. ``conflict_pair`` attaches that pairing to the first contradiction critique.
+    """
+    critique_rows = []
+    for i, (kind, resolved) in enumerate(critiques or []):
+        other = conflict_pair[1] if (conflict_pair and kind == "contradiction") else None
+        target = conflict_pair[0] if (conflict_pair and kind == "contradiction") else f"hyp-{i}"
+        critique_rows.append(
+            SimpleNamespace(
+                critique_type=kind, resolved=resolved,
+                target_id=target, conflicts_with_id=other,
+            )
+        )
     return SimpleNamespace(
-        hypotheses=[SimpleNamespace(status=s) for s in claims],
-        termination_json={"reason": reason} if reason else {},
-        critiques=[
-            SimpleNamespace(critique_type=t, resolved=r) for t, r in (critiques or [])
+        hypotheses=[
+            SimpleNamespace(domain_id=f"hyp-{i}", status=s) for i, s in enumerate(claims)
         ],
+        termination_json={"reason": reason} if reason else {},
+        critiques=critique_rows,
     )
 
 
@@ -101,6 +122,53 @@ def test_a_resolved_contradiction_no_longer_dominates() -> None:
 
     assert out.kind == "supported"
     assert out.contradiction_found is False
+
+
+def test_a_contradiction_the_evidence_separated_is_read_as_settled() -> None:
+    """
+    Historical rows, written before the loop maintained ``resolved`` itself, carry
+    ``resolved=False`` on conflicts the evidence plainly settled — because nothing ever set
+    the flag. Judging by the claims recovers the truth: exactly one of the pair standing means
+    the run answered the question it was holding open.
+    """
+    out = _build_outcome(_row(
+        claims=["supported", "rejected"],
+        reason="sufficient_evidence",
+        critiques=[("contradiction", False)],
+        conflict_pair=("hyp-0", "hyp-1"),
+    ))
+
+    assert out.contradiction_found is False
+    assert out.kind == "mixed"
+
+
+def test_an_unpaired_contradiction_is_still_treated_as_live() -> None:
+    """Nothing can show a conflict was settled if its second side was never recorded."""
+    out = _build_outcome(_row(
+        claims=["supported", "rejected"],
+        reason="sufficient_evidence",
+        critiques=[("contradiction", False)],
+    ))
+
+    assert out.contradiction_found is True
+    assert out.kind == "contradicted"
+
+
+def test_a_question_the_data_cannot_answer_is_its_own_outcome() -> None:
+    """
+    csv-unanswerable-moat. Distinct from `declined`: that one says the evidence did not settle
+    it, which invites more analysis. This says no analysis of *this* data would help.
+    """
+    out = _build_outcome(_row(claims=[], reason="unanswerable_premise"))
+
+    assert out.kind == "unanswerable"
+    assert out.termination_reason == "unanswerable_premise"
+
+
+def test_unanswerable_outranks_a_stopped_reason() -> None:
+    out = _build_outcome(_row(claims=["unresolved"], reason="unanswerable_premise"))
+
+    assert out.kind == "unanswerable"
 
 
 @pytest.mark.parametrize(

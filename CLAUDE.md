@@ -46,9 +46,14 @@ Postgres-only tests skip silently unless `EDGAR_TEST_POSTGRES_URL` is set.
 
 ## Boundaries that are rules, not layout
 
-- `src/` — deterministic EDGAR computation. Reached only through `edgar_project/mcp/adapters.py` and `tools.py`. Never import `src/*` from `backend/`.
-- `agentic/` — the adaptive investigation loop. Standalone and offline-safe: imports nothing from `backend/` or `edgar_project/`. `agentic/domain` has no SQLAlchemy. `agentic/` emits no logs, metrics or traces directly — instrumentation goes through the `AgentObserver` seam. Single wiring point: `backend/services/agentic_investigation_execution_service.py`.
-- `backend/mcp/` — exposes the platform by calling `/v1` over HTTP. It is a client, not a second implementation; auth and owner scoping are inherited, never reimplemented.
+These are **enforced**, not just asserted: `tests/agentic/test_domain_boundary.py` and
+`tests/test_backend_boundaries.py` parse the imports with `ast` and fail on a violation.
+Add a rule here only with a test that checks it — the one rule that had no test is the one
+that was broken.
+
+- `src/` — deterministic EDGAR computation. Reached only through `edgar_project/mcp/`. Never import `src/*` from `backend/`; add a re-export to `edgar_project/mcp/adapters.py` instead.
+- `agentic/` — the adaptive investigation loop. Standalone and offline-safe: **never** imports `backend/`. It may reach `edgar_project/`+`src/` from the two EDGAR bridge modules only (`agentic/adapters/edgar.py`, `agentic/experiments/tools/edgar_tools.py`), function-locally, so the generic path never pays for them — the allowlist in `test_domain_boundary.py` is the definition. `agentic/domain` has no SQLAlchemy. `agentic/` emits no logs, metrics or traces directly — instrumentation goes through the `AgentObserver` seam. Single wiring point: `backend/services/agentic_investigation_execution_service.py`.
+- `backend/mcp/` — exposes the platform by calling `/v1` over HTTP. It is a client, not a second implementation; auth and owner scoping are inherited, never reimplemented. It may not import `backend/repositories|models|db|services`.
 - `edgar_project/orchestration/` — planner is pure (no `src/*`, no network); only the executor touches tools.
 - `backend/api/` holds HTTP, auth and ownership; it delegates to `backend/services/`, which use `backend/repositories/` and `backend/models/`.
 - Frontend talks to FastAPI **server-side only** (`frontend/src/lib/api/`, `actions/`, `app/api/**/route.ts`). Browser components consume derived view models; JWTs never reach browser JavaScript.

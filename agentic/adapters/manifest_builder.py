@@ -10,7 +10,7 @@ missingness, duplicates, quality warnings, provenance, and adapter version.
 
 from __future__ import annotations
 
-from agentic.domain.manifest import DatasetManifest, DatasetProvenance
+from agentic.domain.manifest import DatasetManifest, DatasetOrigin, DatasetProvenance
 from agentic.domain.profiles import SourceIdentity
 
 from .materialize import MaterializedDataset
@@ -36,6 +36,7 @@ class DatasetManifestBuilder:
         adapter_version: str,
         description: str | None = None,
         extra_provenance: dict[str, str] | None = None,
+        origin: DatasetOrigin = DatasetOrigin.unknown,
     ) -> DatasetManifest:
         columns = self._schema.profile(materialized)
         quality = self._quality.profile(materialized, columns)
@@ -46,6 +47,7 @@ class DatasetManifestBuilder:
             adapter_id=adapter_id,
             adapter_version=adapter_version,
             source=identity.source_name,
+            origin=origin,
             parameters={**materialized.provenance_parameters, **(extra_provenance or {})},
         )
 

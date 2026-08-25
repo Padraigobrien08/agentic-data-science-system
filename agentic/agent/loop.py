@@ -20,14 +20,19 @@ from dataclasses import dataclass, field
 import pandas as pd
 
 from agentic.domain import (
+    AgentDecision,
+    DecisionType,
     ExperimentRequest,
     Investigation,
     InvestigationGoal,
     InvestigationState,
     InvestigationStatus,
+    OpenQuestion,
     TerminationReason,
 )
+from agentic.domain.enums import ProvenanceSource
 from agentic.domain.manifest import DatasetManifest
+from agentic.domain.provenance import Provenance
 from agentic.experiments import ArtifactSink, ExperimentRegistry, build_default_registry
 from agentic.experiments.record import ExperimentExecutionRecord
 
@@ -47,8 +52,10 @@ from .components import (
     InvestigationPlanner,
     LockedArtifactSink,
     TerminationPolicy,
+    enforce_mutual_exclusivity,
     is_edgar_manifest,
     make_termination,
+    reconcile_contradictions,
 )
 from .fixture_policy import FixtureAgentPolicy
 from .ids import DeterministicIds
@@ -66,8 +73,24 @@ from .observer import (
     ModelCallObserved,
     TerminationObserved,
 )
-from .policy import AgentPolicy, AgentPolicyError, AnalysisIntent
+from .policy import AgentPolicy, AgentPolicyError, AnalysisIntent, GoalInterpretation
 from .store import InvestigationStore, NullInvestigationStore
+
+
+def _stamp_run_scoped_ids(inv: Investigation) -> None:
+    """
+    Give the run's goal and datasets ids derived from the investigation id.
+
+    Index-based rather than content-hashed on purpose: two datasets with identical content are
+    still two datasets, and a hash would collapse them into one row at the persistence layer.
+    """
+    idgen = DeterministicIds(inv.id)
+    inv.state.objective.id = idgen.make("goal", 0)
+    for i, dataset in enumerate(inv.state.datasets):
+        dataset.id = idgen.make("dset", i)
+        if dataset.manifest is not None:
+            dataset.manifest.manifest_id = idgen.make("mfst", i)
+
 
 _TERMINAL_STATUS = {
     TerminationReason.sufficient_evidence: InvestigationStatus.converged,
@@ -117,8 +140,25 @@ class InvestigationLoop:
             inv.id = seed
         if manifest.dataset_reference_id is None:
             from agentic.domain import DatasetReference
-            inv.state.datasets.append(DatasetReference(name=manifest.name, locator=manifest.fingerprint or manifest.name,
-                                                       manifest=manifest))
+            # `row_count` and `content_hash` carried through from the manifest, which has both.
+            # Dropping them left every published run asserting a full trace down to "the rows"
+            # while unable to say how many rows there were or which bytes they came from —
+            # the one link in the chain that a reader cannot reconstruct for themselves.
+            inv.state.datasets.append(DatasetReference(
+                name=manifest.name,
+                locator=manifest.fingerprint or manifest.name,
+                content_hash=manifest.fingerprint,
+                row_count=manifest.row_count,
+                manifest=manifest,
+            ))
+        # Re-stamp the entities minted before this investigation had an id. Domain models
+        # default to a random id so they are usable standalone, which is right for them and
+        # wrong for a run that claims to be reproducible: two runs of the same seed over the
+        # same bytes differed in the goal, dataset, manifest, observation, artifact and
+        # reproducibility ids, and the replay diff compared tools and conclusions only, so
+        # nothing noticed. Same treatment the experiment result already got — a deterministic
+        # id assigned at the moment the entity becomes part of *this* run.
+        _stamp_run_scoped_ids(inv)
         store = store or NullInvestigationStore()
         store.create(inv)
         tracker = BudgetTracker(budget=budget or LoopBudget(), safety=safety or SafetyLimits())
@@ -161,6 +201,15 @@ class InvestigationLoop:
                 interpretation = self._interpreter.interpret(goal_text, manifest, tracker)
         except AgentPolicyError:
             return self._fail_safe(inv, state, idgen, store, TerminationReason.error, tracker, started_at)
+
+        # A premise the data cannot support ends the run here, before a claim is proposed or a
+        # tool is chosen. Continuing would mean investigating a substitute: the loop picks the
+        # nearest available metric, measures it honestly, and reports a well-evidenced finding
+        # about a question nobody asked. Stopping costs nothing the user wanted.
+        if not interpretation.answerable and not state.hypotheses:
+            self._record_unanswerable(inv, state, idgen, interpretation)
+            return self._finalize(
+                inv, state, idgen, store, TerminationReason.unanswerable_premise, tracker, started_at)
 
         # initial phase runs once (skipped on resume)
         if not state.hypotheses:
@@ -224,18 +273,26 @@ class InvestigationLoop:
                 experiments_this_call += 1
                 # Folded strictly in selection order, so result ids and evidence remain a pure
                 # function of state regardless of the order the batch finished in.
-                self._executor.record(record, chosen, idgen, state)
+                result = self._executor.record(record, chosen, idgen, state)
 
                 evidence_produced = 0
                 if not failed:
                     any_succeeded = True
                     with self._timed(inv.id, LoopComponent.evidence_updater):
-                        evidence_produced = len(self._evidence.update(state, record, chosen, idgen))
+                        evidence_produced = len(
+                            self._evidence.update(state, record, chosen, idgen, result))
                     # Snapshot before/after so genuine status changes are observable without
                     # the components themselves needing to know about observation.
                     before = {h.id: h.status for h in state.hypotheses}
                     with self._timed(inv.id, LoopComponent.hypothesis_updater):
                         self._hypotheses.update(state, chosen, idgen)
+                        # Rivals the goal named as alternatives are checked the moment their
+                        # statuses change, not left for the critic. Both standing is a
+                        # contradiction the run can prove without asking anyone.
+                        enforce_mutual_exclusivity(state, idgen)
+                        # And a conflict the evidence has since separated stops counting
+                        # against the run, so a settled question can still conclude.
+                        reconcile_contradictions(state)
                     self._emit_hypothesis_transitions(inv.id, before, state)
 
                 self.observer.on_experiment(ExperimentObserved(
@@ -393,6 +450,40 @@ class InvestigationLoop:
             investigation_id=inv.id, reason=reason, iterations=state.budget.iterations_used))
         self._emit_end(inv, state, tracker, started_at)
         return inv
+
+    def _record_unanswerable(
+        self, inv: Investigation, state: InvestigationState, idgen: DeterministicIds,
+        interpretation: GoalInterpretation,
+    ) -> None:
+        """
+        Write down *why* the run is stopping before it stops, and move the status on.
+
+        A decline the trace cannot explain is indistinguishable from a crash, so the missing
+        concept is recorded as a decision the reader can find and as an open question that
+        says what data would answer this. The status still walks the transition graph — the
+        run was planned and started, it just found nothing worth running.
+        """
+        missing = (interpretation.unsupported_concept or "").strip()
+        described = f"the data holds no measure of {missing}" if missing else (
+            "the data holds no measure of what the goal asks about")
+        state.record_decision(AgentDecision(
+            id=idgen.make("dec-unanswerable", len(state.decisions)),
+            decision_type=DecisionType.conclude,
+            rationale=f"declined: {described}",
+            provenance=Provenance(source=ProvenanceSource.deterministic_rule, agent_id="investigation_loop"),
+        ))
+        state.add_open_question(OpenQuestion(
+            id=idgen.make("q-unanswerable", len(state.open_questions)),
+            question=(
+                f"Which dataset measures {missing}?" if missing
+                else "Which dataset measures what this goal asks about?"
+            ),
+            provenance=Provenance(source=ProvenanceSource.deterministic_rule, agent_id="investigation_loop"),
+        ))
+        if inv.status is InvestigationStatus.created:
+            inv.set_status(InvestigationStatus.planning)
+        if inv.status is InvestigationStatus.planning:
+            inv.set_status(InvestigationStatus.running)
 
     def _fail_safe(self, inv: Investigation, state: InvestigationState, idgen: DeterministicIds,
                    store: InvestigationStore, reason: TerminationReason,

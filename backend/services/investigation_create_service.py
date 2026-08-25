@@ -119,13 +119,14 @@ class InvestigationCreateService:
         source: str = "tabular",
         entities: list[str] | None = None,
         refresh: bool = False,
+        dataset_origin: str = "unknown",
     ) -> InvestigationCreateResult:
         """Create and execute synchronously (best for small pasted datasets)."""
         run = self._prepare_run(
             project_id=project_id, user_id=user_id, goal=goal, dataset_format=dataset_format,
             csv_text=csv_text, records=records, name=name, time_field=time_field,
             entity_id_fields=entity_id_fields, source=source, entities=entities or [],
-            refresh=refresh,
+            refresh=refresh, dataset_origin=dataset_origin,
         )
         result = AgenticInvestigationExecutionService(self._session).execute_analysis_run(run.id)
 
@@ -156,6 +157,7 @@ class InvestigationCreateService:
         source: str = "tabular",
         entities: list[str] | None = None,
         refresh: bool = False,
+        dataset_origin: str = "unknown",
         trace_carrier: dict[str, str] | None = None,
     ) -> InvestigationCreateResult:
         """Create and enqueue for background execution by the worker (robust for large datasets)."""
@@ -163,7 +165,7 @@ class InvestigationCreateService:
             project_id=project_id, user_id=user_id, goal=goal, dataset_format=dataset_format,
             csv_text=csv_text, records=records, name=name, time_field=time_field,
             entity_id_fields=entity_id_fields, source=source, entities=entities or [],
-            refresh=refresh,
+            refresh=refresh, dataset_origin=dataset_origin,
         )
         RunQueueService(self._session).enqueue_after_create(run.id, None, trace_carrier=trace_carrier)
         self._session.commit()
@@ -190,6 +192,7 @@ class InvestigationCreateService:
         source: str = "tabular",
         entities: list[str] | None = None,
         refresh: bool = False,
+        dataset_origin: str = "unknown",
     ) -> AnalysisRun:
         """Validate the flag + dataset and create a ``pending`` agentic run (no execution)."""
         if not self._settings.agentic_engine_enabled:
@@ -212,6 +215,7 @@ class InvestigationCreateService:
             entity_id_fields=entity_id_fields,
             entities=entities or [],
             refresh=refresh,
+            dataset_origin=dataset_origin,
         )
         run = AnalysisRunService(self._session).create(
             project_id,
@@ -235,6 +239,7 @@ class InvestigationCreateService:
         entity_id_fields: list[str],
         entities: list[str],
         refresh: bool,
+        dataset_origin: str = "unknown",
     ) -> dict:
         """
         The run payload for one investigation, per dataset source.
@@ -266,6 +271,9 @@ class InvestigationCreateService:
                 "records": resolved,
                 "time_field": (time_field or None),
                 "entity_id_fields": entity_id_fields or [],
+                # Carried through so the published run can say whether these rows are real.
+                # EDGAR does not need it — the branch above is live by construction.
+                "dataset_origin": dataset_origin,
             },
         }
 

@@ -146,6 +146,22 @@ def ensure_sys_path() -> None:
         sys.path.insert(0, root)
 
 
+def sort_period_key(series: pd.Series) -> pd.Series:
+    """
+    Fiscal-period ordering (``2024-Q1`` before ``2024-Q2``), from the deterministic core.
+
+    Re-exported here because this module is the sanctioned seam onto ``src/``: the backend is
+    not permitted to import that package directly, and one module doing so anyway meant a
+    documented boundary was load-bearing in exactly one place and enforced in none. Delegates
+    rather than reimplements — a second copy of period ordering is how a chart axis and the
+    pipeline that fed it start disagreeing.
+    """
+    ensure_sys_path()
+    from src.metric_extraction import sort_period_key as _sort_period_key
+
+    return _sort_period_key(series)
+
+
 def phase1_paths(
     *,
     workspace: RunWorkspace | None = None,

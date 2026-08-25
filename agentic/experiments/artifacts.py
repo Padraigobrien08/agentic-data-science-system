@@ -32,6 +32,22 @@ def canonical_json(obj) -> str:
     return json.dumps(obj, sort_keys=True, separators=(",", ":"), default=str)
 
 
+def artifact_id(name: str, fingerprint: str) -> str:
+    """
+    A content-addressed id: same name over the same bytes is the same artifact.
+
+    Deliberately derived rather than random. An artifact *is* its content, so a run replayed
+    over identical data should name it identically — and with ``uuid4`` it did not, which made
+    every recorded run non-reproducible in its artifact ids while the replay diff, which
+    compared only tools and conclusions, reported the pair as identical.
+
+    Derived rather than counter-stamped because artifacts are emitted during *concurrent*
+    experiment execution into a shared sink. An ordinal would depend on which experiment
+    finished first; a hash of the content does not.
+    """
+    return f"art_{hashlib.sha256(f'{name}:{fingerprint}'.encode()).hexdigest()[:32]}"
+
+
 class ArtifactRecord(DomainModel):
     """Metadata for one emitted artifact (content is addressed by fingerprint)."""
 
@@ -65,11 +81,13 @@ class InMemoryArtifactSink(ArtifactSink):
         self.records: list[ArtifactRecord] = []
 
     def _record(self, name: str, data: bytes, artifact_type: ArtifactType, media_type: str) -> ArtifactRecord:
+        fingerprint = _sha256(data)
         rec = ArtifactRecord(
+            id=artifact_id(name, fingerprint),
             name=name,
             artifact_type=artifact_type,
             media_type=media_type,
-            fingerprint=_sha256(data),
+            fingerprint=fingerprint,
             byte_size=len(data),
         )
         self.contents[rec.id] = data

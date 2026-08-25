@@ -151,9 +151,11 @@ export type EvidenceGroup = {
  *
  * Read flat, thirteen evidence rows say nothing about which claim any of them moved — and
  * "what supports this claim, and what argues against it" is the question a reader arrives
- * with. Grouping by the experiment that computed it would answer a different and currently
- * unanswerable question: the loop never populates `experiment_result_id`, so every item would
- * land in one "unattributed" pile.
+ * with, so it is the one this grouping answers.
+ *
+ * Grouping by the experiment that computed it answers a different question — "what did this
+ * tool establish?" — and is now possible: `experiment_result_id` is populated on every
+ * evidence item. It is a second view rather than a replacement for this one.
  *
  * An item bearing on two claims appears under both. It genuinely is evidence for each, and
  * filing it under whichever came first would misrepresent the second.

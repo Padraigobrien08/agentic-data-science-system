@@ -50,8 +50,15 @@ class Critique(DomainModel):
     critique_type: CritiqueType
     severity: CritiqueSeverity = Field(default=CritiqueSeverity.minor)
     target: EntityRef = Field(..., description="What is being critiqued.")
+    #: The other side of a ``contradiction``. A conflict is between *two* claims, and storing
+    #: only the one being critiqued meant nothing downstream could tell whether the pair had
+    #: since been separated by evidence — which is why ``resolved`` was never once set to True.
+    conflicts_with_id: str | None = Field(default=None)
     message: str = Field(..., min_length=1)
     suggested_action: str | None = Field(default=None, max_length=512)
+    #: Whether the challenge has been answered. For a contradiction this is *derived* from the
+    #: claims themselves — see :func:`agentic.agent.components.reconcile_contradictions` —
+    #: rather than being a flag someone has to remember to set.
     resolved: bool = Field(default=False)
     provenance: Provenance
     created_at: datetime = Field(default_factory=utc_now)
