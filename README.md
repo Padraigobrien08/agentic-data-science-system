@@ -14,7 +14,7 @@ the work. SEC EDGAR is the flagship dataset, but EDGAR is an adapter, not the ar
 
 ## One investigation, followed all the way down
 
-This is a real run against live SEC filings for AAPL, MSFT and NVDA. It cost **$0.0101**.
+This is a real run against live SEC filings for AAPL, MSFT and NVDA.
 
 > **Goal:** Has margin quality deteriorated at these companies over recent periods, or is
 > revenue growth the explanation?
@@ -28,15 +28,9 @@ metric:
 | Revenue growth is the explanation for the observed margin change | **supported** | 0.95 |
 
 **It rejected the premise the question assumed.** Asked to choose between two explanations, it
-found against the one the phrasing took for granted.
-
-What it took to get there: **7 experiments**, 7 evidence records, 10 artifacts, 11 model calls,
-terminating `sufficient_evidence` with the conclusion marked `mixed` — because one claim landed
-and one did not, and rounding that to the supported half would be a lie.
-
-`edgar_trend_break_analysis` led the run. The experiment sequence is a function of intermediate
-results, not a fixed script: had the first result gone the other way, the follow-ups would
-differ.
+found against the one the phrasing took for granted. It terminated `sufficient_evidence` with
+the conclusion marked `mixed` — because one claim landed and one did not, and rounding that to
+the supported half would be a lie.
 
 Then it argued against its own finding. The critic challenged the **supported** claim — not the
 rejected one — asking whether the support was an artefact of skew or outliers rather than a
@@ -44,9 +38,12 @@ stable pattern, and nominated `summarize_distribution` to test it. **The loop ra
 critique the loop never acts on is a note, not a challenge, so the distinction is enforced in
 the [agency suite](docs/agent/agency-evaluation.md) rather than left to good intentions.
 
-Every claim above traces down without a gap: conclusion → evidence → the experiment that
-produced it → its typed tool envelope → the artifact → the rows. The model calls are audited on
-the same footing — prompt, response, tokens, cost and latency per phase, at
+Each claim traces down without a gap: conclusion → evidence → the experiment that produced it →
+its typed tool envelope → the artifact → the rows. That chain is
+[asserted by tests](tests/agentic/test_evidence_provenance_link.py) over a real run and
+[again over the read model](tests/test_investigation_evidence_link_readmodel.py), because it is
+the product's central claim and it was once quietly false in the published data. The model calls
+are audited on the same footing — prompt, response, tokens, cost and latency per phase, at
 `GET /v1/runs/{id}/llm-usage`.
 
 > **The LLM plans and interprets. Deterministic code computes.**
@@ -54,22 +51,48 @@ the same footing — prompt, response, tokens, cost and latency per phase, at
 
 ### The same loop, on data that has nothing to do with finance
 
-A second recorded investigation runs over an operational delivery dataset — regions, months,
-delivery times, order volume. Same loop, same evidence model, same trace surfaces.
+Four of the runs below analyse an operational delivery dataset — regions, months, delivery
+times, order volume. Same loop, same evidence model, same trace surfaces.
 
-It ends differently, and that is the point. Both claims came back **weakened**, terminating
-`insufficient_evidence`: the dataset was built with a genuine confound (service times degrade
-while volume climbs over the same window), and the loop declined to pick a winner it could not
-justify. Twelve evidence records, six experiments, one critique acted on, $0.0121.
+They end differently, and that is the point. One holds two claims that cannot both be true and
+refuses to pick a winner. Two decline outright. That dataset is **generated**, deliberately and
+with a genuine confound (service times degrade while volume climbs over the same window), and
+the table says so in the `Data` column rather than leaving you to guess — the two EDGAR runs are
+live SEC filings and are marked `live`.
 
 A run that stops at "I cannot separate these" is a *correct* outcome here, not a failed one.
 Nearly every AI product on the market will confidently answer a question it cannot answer.
+
+### Every published run, as recorded
+
+Generated from the committed export by [`scripts/sync-readme-facts.py`](scripts/sync-readme-facts.py)
+and checked in CI, because the figures in this file used to be typed by hand and had drifted
+from the runs they described.
+
+<!-- BEGIN GENERATED: published-runs -->
+
+| Run | Outcome | Stopped because | Experiments | Evidence | Artifacts | Model calls | Cost | Data |
+|---|---|---|---|---|---|---|---|---|
+| [`csv-delivery-delays`](frontend/src/lib/demo-static/csv-delivery-delays.json) | **mixed** — one claim stood, one did not | `sufficient_evidence` | 3 | 9 (0 linked) | 5 | 9 | $0.0111 | unknown |
+| [`csv-staffing-vs-service`](frontend/src/lib/demo-static/csv-staffing-vs-service.json) | **contradicted** — two claims could not both be true | `insufficient_evidence` | 3 | 13 (0 linked) | 6 | 9 | $0.0114 | unknown |
+| [`csv-distribution-honesty`](frontend/src/lib/demo-static/csv-distribution-honesty.json) | **declined** — no claim survived the evidence | `insufficient_evidence` | 3 | 6 (0 linked) | 6 | 6 | $0.0068 | unknown |
+| [`edgar-margin-vs-growth`](frontend/src/lib/demo-static/edgar-margin-vs-growth.json) | **mixed** — one claim stood, one did not | `sufficient_evidence` | 7 | 7 (0 linked) | 10 | 12 | $0.0131 | unknown |
+| [`edgar-peer-separation`](frontend/src/lib/demo-static/edgar-peer-separation.json) | **supported** — every claim stood | `sufficient_evidence` | 3 | 73 (0 linked) | 6 | 9 | $0.0112 | unknown |
+| [`csv-unanswerable-moat`](frontend/src/lib/demo-static/csv-unanswerable-moat.json) | **declined** — no claim survived the evidence | `insufficient_evidence` | 1 | 1 (0 linked) | 2 | 4 | $0.0047 | unknown |
+
+6 runs, $0.0582 of model spend, 0 of 109 evidence records linked to the experiment that produced them.
+1,431 backend tests · 236 frontend tests.
+
+<!-- END GENERATED: published-runs -->
+
+Browse any of them at `/demos`, or read the raw export directly — it is
+[the same bytes the API serves](docs/decisions/2026-08-14-static-replay-showcase.md).
 
 ---
 
 ## Try it
 
-**Hosted showcase:** _URL pending first deploy._ Both investigations above are browsable at
+**Hosted showcase:** _URL pending first deploy._ Every run above is browsable at
 `/demos` — the real persisted runs, rendered by the same components an authenticated user
 sees, served from a committed export with **no backend**. Live runs, guest sessions and the
 `/v1` + MCP endpoints need the full stack; see [docs/deploy.md](docs/deploy.md) for both
@@ -107,7 +130,7 @@ PYTHONPATH=. python3 -m edgar_project.cli evaluate --suite-id suite_smoke --allo
 
 To reproduce a recorded investigation yourself, see
 [`scripts/record_demo.py`](scripts/record_demo.py) — it publishes to the replay tier that serves
-the demo above.
+the runs above.
 
 ---
 
@@ -182,8 +205,9 @@ can be hosted safely.
 
 - **HTTP API** — committed OpenAPI contract at [`docs/api/openapi.json`](docs/api/openapi.json),
   enforced in CI → [contract docs](docs/api/README.md)
-- **Platform MCP server** — commission investigations, read hypotheses, evidence and artifacts
-  as MCP tools and resources; stdio or hosted streamable-HTTP with per-caller bearer auth
+- **Platform MCP server** — commission investigations and read hypotheses, evidence and
+  artifacts as MCP tools, with conclusions and artifacts also exposed as MCP *resources*;
+  stdio or hosted streamable-HTTP with per-caller bearer auth
   → [docs](docs/mcp-platform-server.md)
 - **EDGAR MCP server** — the deterministic computation tools
   → [`edgar_project/mcp/`](edgar_project/mcp/)
@@ -235,7 +259,7 @@ itself.
 | [`edgar_project/`](edgar_project/) | orchestration, EDGAR MCP tools, evaluation, CLI |
 | [`frontend/`](frontend/) | Next.js web app |
 | [`ops/`](ops/) | Grafana dashboard, Prometheus alert rules, Caddy config |
-| [`tests/`](tests/) | 1,177 tests: backend, orchestration, agency, regression |
+| [`tests/`](tests/) | backend, orchestration, agency, regression, boundary and contract suites — counts in the table above |
 
 **Docs:** [local stack](docs/local-stack.md) · [deploy](docs/deploy.md) ·
 [performance](docs/performance.md) ·

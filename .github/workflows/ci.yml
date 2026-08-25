@@ -48,6 +48,12 @@ jobs:
       - name: Check docs/api/openapi.json is in step with the app
         run: python3 scripts/export-openapi.py --check
 
+      # Same reasoning applied to the README. Its figures were hand-typed and had drifted from
+      # the runs they described — on the one file whose argument is that its numbers are
+      # traceable. Reads committed files only, so it needs no database and no network.
+      - name: Check README figures match the committed demo export
+        run: python3 scripts/sync-readme-facts.py --check
+
   quality:
     name: Backend (ruff + mypy)
     runs-on: ubuntu-latest
@@ -120,7 +126,7 @@ jobs:
           if-no-files-found: ignore
 
   frontend:
-    name: Frontend (lint + build)
+    name: Frontend (lint + test + build)
     runs-on: ubuntu-latest
     timeout-minutes: 15
     steps:
@@ -139,6 +145,13 @@ jobs:
       - name: Lint
         working-directory: frontend
         run: npm run lint
+
+      # Blocking, and it was not running at all: 224 vitest tests sat in the repo while CI
+      # checked only that the app compiled. A type error fails the build; a component that
+      # renders the wrong outcome does not.
+      - name: Test
+        working-directory: frontend
+        run: npm test
 
       - name: Build
         working-directory: frontend

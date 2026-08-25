@@ -91,6 +91,7 @@ describe("Sprint 3 transparency libs", () => {
         updated_at: "2020-01-01T00:00:00Z",
         request_payload_json: null,
         response_payload_json: null,
+        payloads_redacted_at: null,
       },
     ];
     const m = indexModelCallsById(calls);

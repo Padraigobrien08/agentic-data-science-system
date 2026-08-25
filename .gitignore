@@ -1,5 +1,10 @@
-# Editor (local only; not tracked)
+# Editor / agent scratch (local only; not tracked). Listed explicitly rather than left
+# untracked: `git status` is a review tool, and a permanently dirty one gets ignored.
 .cursor/
+.claude/
+.obsidian/
+.mypy_cache/
+.ruff_cache/
 
 # Python
 .venv/
@@ -31,11 +36,11 @@ coverage.xml
 !.env.example
 !.env.production.example
 
-# Local API database (Alembic / FastAPI dev)
-data/backend.db
-# WAL/SHM sidecars (SQLite runs in WAL mode; see backend/db/session.py) and local backups
-data/backend.db-*
-data/backend.db.*
+# Local API databases (Alembic / FastAPI dev, and the demo recording database).
+# WAL/SHM sidecars (SQLite runs in WAL mode; see backend/db/session.py) and local backups.
+data/*.db
+data/*.db-*
+data/*.db.*
 
 # Managed artifact blobs (local object store)
 data/artifact_storage/
@@ -50,12 +55,11 @@ frontend/.next/
 # Root-level node install (tooling); frontend has its own
 node_modules/
 
-# Impeccable design-skill state. Critique snapshots are tracked design history
-# (they carry the score trend); anything else the skill writes here stays local.
-.impeccable/*
-!.impeccable/critique/
-frontend/.impeccable/*
-!frontend/.impeccable/critique/
+# Impeccable design-skill state — entirely local. The critique snapshots used to be tracked
+# as "design history", which meant five AI-written review files shipped in the repo where a
+# reader looking for the product found tooling output instead.
+.impeccable/
+frontend/.impeccable/
 
 # Database snapshots from scripts/record_demo.py --dump: every row, including
 # password hashes. Never commit these.
