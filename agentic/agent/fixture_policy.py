@@ -12,6 +12,7 @@ from __future__ import annotations
 from .direction import parse_direction, parse_extreme
 from .policy import (
     AnalysisIntent,
+    ChallengeReason,
     CritiqueProposal,
     ExperimentChoice,
     GoalInterpretation,
@@ -110,6 +111,28 @@ class FixtureAgentPolicy:
         best = min(candidates, key=key)
         return ExperimentChoice(request_index=best["index"], rationale="max information gain")
 
+    #: What a rule engine can honestly say for each reason it may be asked. Keyed so the
+    #: policy answers the question it was actually asked rather than checking a status and
+    #: inferring one — the critic now asks about claims that never reach `supported`.
+    _CHALLENGE_MESSAGE: dict[ChallengeReason, tuple[str, str]] = {
+        ChallengeReason.false_confidence: (
+            "Test whether the supported claim survives an independent method.",
+            "falsify strongest supported claim",
+        ),
+        ChallengeReason.conflicting_evidence: (
+            "Evidence points both ways. Test whether an independent method separates them.",
+            "resolve conflicting evidence",
+        ),
+        ChallengeReason.undiscriminating_evidence: (
+            "Every measurement so far was neutral. Test whether another method discriminates.",
+            "measurements are not separating anything",
+        ),
+        ChallengeReason.unexplained_refutation: (
+            "Evidence refutes this claim. Test it by an independent method before dropping it.",
+            "refuted by one method; confirm before it is dropped",
+        ),
+    }
+
     def critique(
         self,
         *,
@@ -123,13 +146,18 @@ class FixtureAgentPolicy:
     ) -> CritiqueProposal:
         if not strongest_claim or not available_tools:
             return CritiqueProposal(should_challenge=False, rationale="nothing to challenge")
-        # Challenge a supported, not-yet-challenged claim with an unused falsification tool.
-        if strongest_claim.get("status") == "supported" and not strongest_claim.get("already_critiqued"):
-            return CritiqueProposal(
-                should_challenge=True,
-                target_hypothesis_id=strongest_claim.get("id"),
-                falsification_tool=available_tools[0],
-                message="Test whether the supported claim survives an independent method.",
-                rationale="falsify strongest supported claim",
-            )
-        return CritiqueProposal(should_challenge=False, rationale="strongest claim not yet supported")
+        # One challenge per claim. The critic runs every iteration, and the widened gate keeps
+        # qualifying the same claim until its evidence changes shape, so without this the rule
+        # engine would raise the same critique repeatedly and burn the budget on it.
+        if strongest_claim.get("already_critiqued"):
+            return CritiqueProposal(should_challenge=False, rationale="already challenged")
+        reason = ChallengeReason(
+            strongest_claim.get("challenge_reason") or ChallengeReason.false_confidence.value)
+        message, rationale = self._CHALLENGE_MESSAGE[reason]
+        return CritiqueProposal(
+            should_challenge=True,
+            target_hypothesis_id=strongest_claim.get("id"),
+            falsification_tool=available_tools[0],
+            message=message,
+            rationale=rationale,
+        )
