@@ -77,14 +77,40 @@ def _rows() -> list[dict]:
     return rows
 
 
-def _test_counts() -> tuple[int, int]:
-    """Backend and frontend test counts, collected rather than remembered."""
+#: How the backend count is written into the block, and how `--check` finds it again.
+_BACKEND_COUNT_RE = re.compile(r"^([\d,]+) backend tests", re.M)
+
+
+def _collect_backend_count() -> int:
+    """Tests pytest can collect right now, or 0 if collection failed."""
     backend = subprocess.run(
         [sys.executable, "-m", "pytest", "tests/", "-q", "--collect-only"],
         cwd=REPO_ROOT, capture_output=True, text=True, check=False,
     )
     match = re.search(r"(\d+) tests? collected", backend.stdout)
-    backend_count = int(match.group(1)) if match else 0
+    return int(match.group(1)) if match else 0
+
+
+def _backend_count_drift(block: str) -> tuple[int, int] | None:
+    """``(stated, actual)`` when the README's backend count is wrong, else ``None``.
+
+    Returns ``None`` when the block states no count, and when collection fails — a broken
+    collection is the pytest job's business to report, and failing here too would just bury
+    the real error under a confusing second one.
+    """
+    stated_match = _BACKEND_COUNT_RE.search(block)
+    if stated_match is None:
+        return None
+    actual = _collect_backend_count()
+    if actual == 0:
+        return None
+    stated = int(stated_match.group(1).replace(",", ""))
+    return None if stated == actual else (stated, actual)
+
+
+def _test_counts() -> tuple[int, int]:
+    """Backend and frontend test counts, collected rather than remembered."""
+    backend_count = _collect_backend_count()
 
     frontend = subprocess.run(
         ["npm", "--prefix", "frontend", "test", "--", "--reporter=json", "--run"],
@@ -153,15 +179,27 @@ def main() -> int:
     args = parser.parse_args()
 
     current = README.read_text()
-    # Test counts need a pytest collection and an npm run; skip them under --check so the CI
-    # job stays cheap, and compare only the run figures, which is where drift actually happens.
+    # Test counts need an npm run, which the README-facts CI job has no Node for; skip them
+    # under --check and compare the run figures, which is where drift actually happens.
     block = render(with_tests=not args.check)
     if args.check:
         existing = re.search(re.escape(BEGIN) + r"(.*?)" + re.escape(END), current, re.S)
         if existing is None:
             print("README.md has no generated published-runs block.", file=sys.stderr)
             return 1
-        # Compare the table rows only; the trailing test counts are refreshed on demand.
+        # The backend count *is* checkable here — `--collect-only` is a ~2s pure-Python step
+        # and needs nothing this job does not already have. It was excluded along with the
+        # frontend count, and promptly drifted by 16 tests: the one figure in this file that
+        # nothing verified was the one that went stale. Checked as a range-free exact match,
+        # because a count that is allowed to be approximately right is not a count.
+        if (drift := _backend_count_drift(existing.group(0))) is not None:
+            stated, actual = drift
+            print(
+                f"README.md states {stated:,} backend tests; pytest collects {actual:,}.\n"
+                f"Run: python3 scripts/sync-readme-facts.py",
+                file=sys.stderr,
+            )
+            return 1
         want = {line for line in block.splitlines() if line.startswith("| [`")}
         have = {line for line in existing.group(0).splitlines() if line.startswith("| [`")}
         if want != have:

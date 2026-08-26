@@ -38,16 +38,20 @@ export async function createProjectAction(
   if (tickers.length === 0) {
     return { error: "Add at least one ticker (comma or newline separated)." };
   }
+  // `redirect()` signals by throwing, so it must sit outside the try: catching it turned a
+  // successful create into a red `NEXT_REDIRECT` on the form while the chat was created anyway
+  // — the first click of the documented local journey reporting failure for a success.
+  let row: Awaited<ReturnType<typeof createProject>>;
   try {
-    const row = await createProject({ name: name || buildConversationName(tickers), tickers });
-    revalidatePath("/projects");
-    redirect(`/projects/${row.id}/chat`);
+    row = await createProject({ name: name || buildConversationName(tickers), tickers });
   } catch (e) {
     if (e instanceof ApiError) {
       return { error: e.body || e.message };
     }
     return { error: e instanceof Error ? e.message : "Request failed." };
   }
+  revalidatePath("/projects");
+  redirect(`/projects/${row.id}/chat`);
 }
 
 export async function updateWorkspaceScopeAction(

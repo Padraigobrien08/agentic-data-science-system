@@ -1,9 +1,0 @@
-ticker,cik,period,metric,extracted_value,expected_value,source_reference,checked_by,checked_date,validation_status,notes
-,5001,2024-Q1,net_income,14.0,,,,,,
-,5001,2024-Q1,revenue,130.0,,,,,,
-,5001,2024-Q2,net_income,13.2,,,,,,
-,5001,2024-Q2,revenue,,,,,,,
-,5002,2024-Q1,net_income,13.8,,,,,,
-,5002,2024-Q1,revenue,127.0,,,,,,
-,5002,2024-Q2,net_income,,,,,,,
-,5002,2024-Q2,revenue,126.5,,,,,,

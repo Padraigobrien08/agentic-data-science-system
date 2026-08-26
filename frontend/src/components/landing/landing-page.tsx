@@ -6,7 +6,7 @@ import { DEMO_DETAILS } from "@/lib/demo-static/generated";
 import { PRODUCT_NAME } from "@/lib/brand";
 import { buildLandingCounts, buildLandingTrace, type TraceLine } from "@/lib/landing-trace";
 
-const REPO_URL = "https://github.com/Padraigobrien08/agentic-data-science-system";
+const REPO_URL = "https://github.com/Padraigobrien08/auditable-agent-loop";
 
 /** The run the hero shows. Live SEC filings, and the one that overturns its own premise. */
 const FLAGSHIP_SLUG = "edgar-margin-vs-growth";
@@ -292,9 +292,13 @@ function Hero({ cta }: { cta: Cta }) {
             No number here was written by a model.
           </h1>
           <p className="mt-6 max-w-[460px] text-pretty text-base leading-[1.65] text-[var(--ld-muted)]">
-            A production-grade agentic loop, with budgets it respects, IDs you can rerun against, a
-            checkpoint on every iteration, and a stated reason for stopping. The trace walks from
-            the conclusion all the way down to the rows, and it never skips a step.
+            {/* Was "production-grade", which the repository's own Known limits contradict:
+                single replica, no backup/restore runbook. Production-*shaped* is the claim the
+                engineering actually supports, and overstating it on the one page a reviewer
+                reads first undercuts everything else. */}
+            A production-shaped agentic loop, with budgets it respects, IDs you can rerun against,
+            a checkpoint on every iteration, and a stated reason for stopping. The trace walks
+            from the conclusion all the way down to the rows, and it never skips a step.
           </p>
           <div className="mt-[30px] flex flex-wrap gap-2.5">
             <PrimaryCta cta={cta} />
