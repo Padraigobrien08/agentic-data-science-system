@@ -189,14 +189,32 @@ Full runbook: [docs/local-stack.md](docs/local-stack.md).
 
 ### With no API key at all
 
-These four are genuinely offline — no network, no provider, safe in a loop:
+All four touch no network and no model provider, and are safe to run in a loop. The agency
+benchmark needs **nothing at all** — `agentic/` imports no `backend/`, so it does not load
+settings:
 
 ```bash
-PYTHONPATH=. python3 -m edgar_project.cli demo --fixtures   # numerical pipeline on fixtures
-PYTHONPATH=. python3 -m edgar_project.cli evaluate          # offline regression suite
-PYTHONPATH=. python3 -m agentic.evaluation                  # agency benchmark, core tier
+PYTHONPATH=. python3 -m agentic.evaluation                  # agency benchmark, core tier: 14/14
 PYTHONPATH=. python3 -m agentic.evaluation --tier hard      # the tier the baseline fails: 0/5
 ```
+
+The two EDGAR commands *do* load `backend.config.settings`, which validates before doing any
+work, so on a fresh clone they need the same three secrets as the stack — a `.env` with them
+set is enough, and so is passing them inline:
+
+```bash
+EDGAR_BACKEND_JWT_SECRET=<32+ chars> \
+EDGAR_BACKEND_BOOTSTRAP_ADMIN_TOKEN=<any> \
+EDGAR_BACKEND_OPS_API_TOKEN=<any> \
+PYTHONPATH=. python3 -m edgar_project.cli demo --fixtures   # numerical pipeline on fixtures
+
+# …same three vars
+PYTHONPATH=. python3 -m edgar_project.cli evaluate          # offline regression suite
+```
+
+Note that `cp .env.example .env` alone is not sufficient: the placeholder `JWT_SECRET` it ships
+is under the 32-character floor, which is deliberate — a shipped secret that works is a shipped
+secret someone deploys.
 
 `evaluate` defaults to the **offline fixture suite**, which is why it is the normal
 **developer fallback** and regression path. Pin one explicitly with `--suite-id suite_fixtures_v1`.
