@@ -1,9 +1,0 @@
-ticker,cik,period,metric,extracted_value,expected_value,source_reference,checked_by,checked_date,validation_status,notes
-,1001,2023-Q1,net_income,12.0,,,,,,
-,1001,2023-Q1,revenue,100.0,,,,,,
-,1001,2023-Q2,net_income,12.2,,,,,,
-,1001,2023-Q2,revenue,101.0,,,,,,
-,1001,2023-Q3,net_income,12.1,,,,,,
-,1001,2023-Q3,revenue,102.0,,,,,,
-,1001,2023-Q4,net_income,2.5,,,,,,
-,1001,2023-Q4,revenue,72.0,,,,,,

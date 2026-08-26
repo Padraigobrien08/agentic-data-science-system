@@ -54,6 +54,7 @@ data/runs/
 # examples live in `examples/evaluation_*.example.json` instead.
 data/evaluation/*_results.json
 data/evaluation/*_summary.json
+data/evaluation/*_report.md
 data/evaluation/suite_*/
 # Published agency measurements are the exception: dated, immutable, and cited by
 # docs/agent/agency-scoreboard.md as the raw result behind each row.
