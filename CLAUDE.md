@@ -1,4 +1,4 @@
-# Agentic Data Science System
+# Auditable agent loop
 
 Auditable agentic analysis over tabular data, with SEC EDGAR as the flagship dataset.
 Python/FastAPI/SQLAlchemy backend + worker, two MCP servers, Next.js frontend, Postgres.

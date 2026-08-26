@@ -19,7 +19,7 @@ export function StaticShowcaseNotice() {
           Explore the recorded investigations
         </Link>
         <a
-          href="https://github.com/Padraigobrien08/agentic-data-science-system"
+          href="https://github.com/Padraigobrien08/auditable-agent-loop"
           className="font-medium underline"
         >
           Run the full stack locally

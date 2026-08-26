@@ -146,7 +146,7 @@ export default async function DemosPage() {
         Recorded with{" "}
         <a
           className="underline"
-          href="https://github.com/Padraigobrien08/agentic-data-science-system/blob/main/scripts/record_demo.py"
+          href="https://github.com/Padraigobrien08/auditable-agent-loop/blob/main/scripts/record_demo.py"
         >
           scripts/record_demo.py
         </a>{" "}

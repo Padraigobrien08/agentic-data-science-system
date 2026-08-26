@@ -372,7 +372,7 @@ body {
 }
 
 /* ============================================================
-   Landing skin — the dark "auditable-loop" marketing surface.
+   Landing skin — the dark marketing surface.
    Scoped tokens only; nothing else in the app mounts `.landing-dark`,
    so the light app shell and the chat skin are untouched. Colours are
    fixed rather than theme-reactive: this surface is authored dark, and

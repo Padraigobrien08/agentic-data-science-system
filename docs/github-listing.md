@@ -1,41 +1,57 @@
 # GitHub Listing Notes
 
-These are the recommended GitHub-facing settings for this repository.
+The GitHub-facing settings for this repository.
 
-## Suggested Repository Name
+## Repository Name
 
-`agentic-data-science-system`
+`auditable-agent-loop`
 
-## Suggested Description
+A descriptor rather than a coined name, deliberately. This is a portfolio project, so the name's
+job is to let someone scanning a list of repositories understand what it is without clicking: it
+is an agent, it runs a loop, and the loop is auditable. The app reads the same name from
+[`frontend/src/lib/brand.ts`](../frontend/src/lib/brand.ts).
 
-Chat-first EDGAR analysis with deterministic financial signals, inline evidence, and inspectable run traces.
+Previously `agentic-data-science-system` — a category rather than this project, leading with the
+one word in it carrying the least information.
+
+## Description
+
+An agent that investigates a dataset adaptively, and traces every claim back to the
+deterministic computation behind it. No number in a trace comes from a language model.
 
 ## Shorter Alternative
 
-Deterministic EDGAR analysis with chat, evidence, charts, and traceable runs.
+Adaptive investigation loop over tabular data, with an audit trail from any claim down to the
+rows it came from.
 
-## Suggested Pinned-Repos Blurb
+## Pinned-Repos Blurb
 
-An evidence-first financial analysis product built on SEC EDGAR data. The UI feels like chat, but every answer sits on top of persisted runs, deterministic metrics, artifacts, and traceable deep dives.
+An adaptive investigation loop that proposes competing explanations, tests each against
+deterministic analysis, and records why it stopped. Every claim links to evidence, every evidence
+record links to the experiment that computed it, and the model calls are audited on the same
+footing — prompt, response, tokens and cost per phase. SEC EDGAR is the flagship dataset, but
+EDGAR is an adapter, not the architecture.
 
-## Suggested Topics
+## Topics
 
+- `agentic-ai`
+- `llm`
+- `mcp`
+- `evaluation`
+- `observability`
+- `data-science`
 - `edgar`
 - `sec`
-- `financial-analysis`
 - `fastapi`
 - `nextjs`
-- `react`
 - `python`
-- `sqlalchemy`
 - `postgres`
-- `agentic-ai`
-- `mcp`
-- `observability`
 
-## Remaining Decision
+`agentic-ai`, `llm`, `evaluation` and `mcp` lead, because the reusable part is the loop; the
+EDGAR topics are there for the dataset, not the architecture. The previous list opened with
+`edgar`/`sec`/`financial-analysis`, which sold this as a fintech product.
 
-Choose a license deliberately before treating the repository as fully public-facing. The most likely candidates are:
+## License
 
-- `MIT` if you want maximum reuse with minimal friction
-- `Apache-2.0` if you want an explicit patent grant and a slightly stronger open-source contract
+MIT — see [`LICENSE`](../LICENSE). Chosen for maximum reuse with minimal friction; the
+alternative considered was Apache-2.0, for its explicit patent grant.
