@@ -1,6 +1,6 @@
-# Agentic Data Science System
+# Auditable agent loop
 
-![CI](https://github.com/Padraigobrien08/agentic-data-science-system/actions/workflows/ci.yml/badge.svg)
+![CI](https://github.com/Padraigobrien08/auditable-agent-loop/actions/workflows/ci.yml/badge.svg)
 ![Python](https://img.shields.io/badge/python-3.12%2B-blue)
 ![License](https://img.shields.io/badge/license-MIT-green)
 
@@ -140,6 +140,13 @@ investigation, and only the third needs an API key.**
 | **Deterministic chain** | Ask a question about SEC filings in the chat. A rule-based planner picks one of four analysis templates, runs the EDGAR pipeline, and returns an evidence-linked answer | The stack. An API key only for the written narrative — without one the answer degrades to a stated limitation rather than guessing |
 | **Adaptive loop** | The investigation loop this README is about: competing hypotheses, evidence-driven revision, typed termination | The stack, **an OpenAI API key**, and the three gates below |
 
+**The middle tier has a no-signup path.** `POST /v1/auth/guest` provisions a throwaway account
+and a demo workspace scoped to AAPL/MSFT/NVDA, and returns a token — one call, no registration.
+Guests are pinned to the deterministic engine whatever a run asks for, capped at
+`guest_max_runs_per_account` (3) and $0 of model spend, so the tier cannot be used to spend
+someone else's budget. It is **off by default** (`EDGAR_BACKEND_ALLOW_GUEST_DEMO`), because
+auto-provisioning accounts is a spam vector; turn it on for a demo deployment.
+
 **The adaptive loop is off by default and needs three independent things**
 ([`select_run_engine`](backend/services/agentic_investigation_execution_service.py)):
 `EDGAR_BACKEND_AGENTIC_ENGINE_ENABLED=true` on the api *and* worker, a run that opts in with
@@ -267,6 +274,36 @@ The loop ([`agentic/`](agentic/)) interprets a goal, proposes hypotheses, select
 each iteration, revises claims when evidence contradicts them, critiques its strongest claim,
 refuses to conclude while two of its own claims disagree, and stops for an explicit typed
 reason. Ten components, each small and deterministic, consuming typed policy decisions.
+
+### What you can ask
+
+The goal interpreter resolves a plain-language question to one of nine intents, and the intent
+decides which of the 16 registered experiment tools become candidates. This is the whole
+vocabulary — a question outside it either resolves to `general` and gets profiled, or is
+declined as `unanswerable_premise`:
+
+| Intent | Reads like | Runs |
+|---|---|---|
+| `trend` | is X getting worse over time? | `analyze_time_series_trend` · `detect_change_points` · `summarize_distribution` |
+| `comparison` | how does A compare with B? | `compare_groups` · `rank_entities` |
+| `ranking` | which entity is weakest? | `rank_entities` · `compare_groups` |
+| `correlation` | does X explain Y? | `analyze_correlation` · `fit_simple_regression` |
+| `association` | are these two categories related? | `test_association` · `compare_groups` |
+| `anomaly` | anything unusual here? | `detect_outliers` · `summarize_distribution` |
+| `distribution` | is this a broad shift or a small tail? | `summarize_distribution` · `profile_dataset` · `detect_outliers` |
+| `profile` / `general` | what is in this data? | `profile_dataset` · `summarize_distribution` |
+
+On an EDGAR panel, four domain tools are prepended to the matching intents —
+`edgar_trend_break_analysis`, `edgar_peer_comparison`, `edgar_revenue_growth_analysis` and
+`edgar_margin_quality_analysis` — which is the only place the loop is not dataset-agnostic.
+
+A question posing two rival explanations ("is it X, **or** is it Y?") is handled specially and
+is the case most of this README is about. A question naming a concept the data does not measure
+is declined before anything runs.
+
+The **deterministic chain** has a coarser vocabulary: four plan templates
+(`trend_deterioration`, `peer_comparison`, `anomaly_unusual_changes`, `mixed_trend_and_anomaly`),
+chosen by rule from the goal text.
 
 ### How adaptive it actually is
 
