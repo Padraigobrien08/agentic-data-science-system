@@ -260,9 +260,14 @@ class InvestigationPlanner:
         if tool == "compare_groups":
             return {"value_column": metric, "group_column": group} if metric and group else {}
         if tool == "rank_entities":
-            p = {"metric_column": metric} if metric else {}
+            p: dict = {"metric_column": metric} if metric else {}
             if entity:
                 p["entity_column"] = entity
+            # Which *end* of the ranking answers the goal. ``_RankParams.ascending`` defaults to
+            # descending, so a goal asking for the weakest entity was answered with the
+            # strongest one until this was plumbed — not a weaker answer, the opposite one.
+            if interpretation.direction == "down":
+                p["ascending"] = True
             return p
         if tool == "fit_simple_regression":
             return {"x_column": metrics[0], "y_column": metrics[1]} if len(metrics) >= 2 else {}

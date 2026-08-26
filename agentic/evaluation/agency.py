@@ -45,7 +45,12 @@ class AgencyProperty(str, Enum):
     """Opposing evidence is retained, not discarded in favour of a tidy story."""
 
     path_adapts_to_goal = "path_adapts_to_goal"
-    """The experiments chosen reflect what was asked."""
+    """The experiments chosen — and the question put to them — reflect what was asked.
+
+    Parameterisation counts, not only tool choice. An experiment aimed at the wrong end of a
+    ranking runs the right tool and returns a correct number, so a tool-name assertion passes
+    while the run answers the opposite question.
+    """
 
     avoids_redundant_experiments = "avoids_redundant_experiments"
     """No tool is run twice for the same question."""
@@ -83,6 +88,11 @@ class AgencyExpectations(DomainModel):
     hypothesis_status_any: list[str] = Field(default_factory=list)
     expect_any_tool: list[str] = Field(default_factory=list)
     forbid_tools: list[str] = Field(default_factory=list)
+    #: The entity a ranking experiment must put first. Running the right tool is not the same
+    #: as asking it the right question: ranked the wrong way round, ``rank_entities`` answers
+    #: "which entity is weakest" with the strongest one — a true sentence about the opposite
+    #: question, which no tool-choice assertion can catch.
+    expect_ranked_first: str | None = None
     require_contradicting_evidence: bool = False
     #: A supported conclusion must have been challenged by a critique whose suggested
     #: falsification tool actually ran. Only meaningful on cases that converge — a case
@@ -115,6 +125,8 @@ class AgencyCaseResult(DomainModel):
     observed_confidence: float = 0.0
     #: Falsification tools that a critique proposed *and* the loop then ran.
     observed_challenge_tools: list[str] = Field(default_factory=list)
+    #: Head of the run's ranking, when it ranked at all.
+    observed_ranked_first: str | None = None
 
     @property
     def failures(self) -> list[PropertyOutcome]:
@@ -229,6 +241,28 @@ def _results(investigation: Investigation):
     return investigation.state.completed_experiments + investigation.state.failed_experiments
 
 
+#: The tool whose ordering ``expect_ranked_first`` reads. Named here rather than inferred from
+#: whichever experiment happened to emit an entity-scoped observation: several tools do, and a
+#: check that silently fell back to one of them would assert something other than the ranking.
+_RANKING_TOOL = "rank_entities"
+
+
+def _ranked_first(investigation: Investigation) -> str | None:
+    """The entity at the head of the run's ranking, or ``None`` if it never ranked.
+
+    ``rank_entities`` emits its ordering as observations, best-first in whichever direction it
+    was asked for, so the first entity-scoped observation of the first successful ranking *is*
+    the answer the run would report.
+    """
+    for result in investigation.state.completed_experiments:
+        if result.tool_name != _RANKING_TOOL:
+            continue
+        entity = next((o.entity_ref for o in result.observations if o.entity_ref), None)
+        if entity is not None:
+            return entity
+    return None
+
+
 def _check(
     prop: AgencyProperty, passed: bool, detail: str = "", outcomes: list[PropertyOutcome] | None = None
 ) -> None:
@@ -250,6 +284,7 @@ def score_case(
     tools = _tools(investigation)
     statuses = _statuses(investigation)
     challenge_tools = _challenge_tools(investigation)
+    ranked_first = _ranked_first(investigation)
 
     if expectations.termination_reason_in:
         _check(
@@ -324,6 +359,16 @@ def score_case(
             outcomes,
         )
 
+    if expectations.expect_ranked_first is not None:
+        _check(
+            AgencyProperty.path_adapts_to_goal,
+            ranked_first == expectations.expect_ranked_first,
+            f"ranking led with {ranked_first!r}, expected {expectations.expect_ranked_first!r}"
+            if ranked_first is not None
+            else f"no ranking experiment ran (ran {tools}), so the goal's question was never asked",
+            outcomes,
+        )
+
     if expectations.no_repeated_tools:
         units = _work_units(investigation)
         repeated = sorted({u for u in units if units.count(u) > 1})
@@ -370,4 +415,5 @@ def score_case(
         observed_hypothesis_statuses=statuses,
         observed_confidence=round(confidence, 6),
         observed_challenge_tools=challenge_tools,
+        observed_ranked_first=ranked_first,
     )

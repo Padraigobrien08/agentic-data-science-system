@@ -8,16 +8,18 @@ It says nothing about the question an agentic system actually has to answer well
 > Given evidence, does the loop draw the right conclusion, revise when contradicted, and
 > decline when the data cannot support a claim?
 
-`suite_agency_v2` measures that. It is the suite the runner executes; `suite_agency_v1` is
-the frozen 13-case **core tier** inside it, kept under its own id because published results
-cite it. `--tier hard` adds the five cases the deterministic baseline is designed to fail.
+`suite_agency_v2` measures that. It is the suite the runner executes. Inside it,
+`suite_agency_v1` is the frozen 13 cases kept under their own id because published results
+cite them; the **core tier** is those plus any regression case added since, so it grows while
+the published measurement does not. `--tier hard` adds the five cases the deterministic
+baseline is designed to fail.
 
 ```bash
 python -m agentic.evaluation
 ```
 
 ```
-suite_agency_v2: 13/13 cases passed (100%)
+suite_agency_v2: 14/14 cases passed (100%)
 
 Per-property pass rate:
    100%  avoids_redundant_experiments
@@ -29,8 +31,12 @@ Per-property pass rate:
 
 Exit code is non-zero when any case fails, so it can gate a change.
 
-This runs the **core** tier. `suite_agency_v1` — the 13 frozen, published cases — is the core
-tier today; `--tier hard` runs the cases the deterministic baseline is designed to fail, and
+This runs the **core** tier: the 13 frozen, published `suite_agency_v1` cases plus any
+regression case added since. A core case is one the deterministic baseline passes, so it
+guards behaviour rather than measuring headroom — `weakest_entity_goal_ranks_from_the_bottom`
+is one, added after a ranking goal was found being answered with the opposite entity.
+`suite_agency_v1` stays frozen at 13 and runnable on its own, because a published measurement
+reports against it. `--tier hard` runs the cases the deterministic baseline is designed to fail, and
 `--tier all` runs both. The default is core precisely so the exit code stays usable as a gate:
 the hard tier is expected to fail for the deterministic policy, and a permanently red command
 signals nothing when a real regression arrives.
@@ -56,7 +62,7 @@ agent, and they are load-bearing rather than filler.
 | `reaches_the_right_disposition` | Concludes supported / refuted / insufficient in line with the data |
 | `revises_under_contradiction` | A hypothesis the evidence opposes does not end up supported |
 | `preserves_contradicting_evidence` | Opposing evidence is retained, not discarded for a tidy story |
-| `path_adapts_to_goal` | The experiments chosen reflect what was asked |
+| `path_adapts_to_goal` | The experiments chosen — and the question put to them — reflect what was asked |
 | `avoids_redundant_experiments` | No tool is run twice for the same question |
 | `respects_budget` | Stays within the resource bounds it was given |
 | `calibrated_confidence` | Confidence is proportional to the strength of the evidence |
@@ -87,6 +93,7 @@ drifted, the case built on it would be silently invalid.
 | `too_short` | Claiming a trend from two points |
 | `opposing_entities` | Cherry-picking the entity that agrees |
 | `separated_groups` | Answering a between-group question with a trend experiment |
+| `regional_revenue_spread` | Ranking the wrong way round — answering "which is weakest" with the strongest |
 
 ## Does the suite actually discriminate?
 
@@ -95,11 +102,11 @@ runs deliberately bad agents and asserts the suite catches them:
 
 | Agent | Result | Caught by |
 |---|---|---|
-| Baseline (deterministic policy) | 13/13 | — |
-| `HedgingPolicy` — never selects an experiment | 6/13 | Both positive controls; `preserves_contradicting_evidence` and `challenges_before_concluding` 0%, `terminates_for_the_right_reason` 20%, `reaches_the_right_disposition` 33% |
-| `AlwaysTrendPolicy` — reads every goal as a trend | 11/13 | `comparison_goal_uses_comparison_tools`, `clear_falling_is_concluded`; `path_adapts_to_goal` 50% |
+| Baseline (deterministic policy) | 14/14 | — |
+| `HedgingPolicy` — never selects an experiment | 6/14 | Both positive controls; `preserves_contradicting_evidence` and `challenges_before_concluding` 0%, `terminates_for_the_right_reason` 20%, `reaches_the_right_disposition` 33% |
+| `AlwaysTrendPolicy` — reads every goal as a trend | 11/14 | `comparison_goal_uses_comparison_tools`, `clear_falling_is_concluded`, `weakest_entity_goal_ranks_from_the_bottom`; `path_adapts_to_goal` 40% |
 
-These discrimination tests are what make the core baseline 13/13 meaningful.
+These discrimination tests are what make the core baseline 14/14 meaningful.
 
 They also mark the limit of that meaning, which is why the hard tier exists.
 

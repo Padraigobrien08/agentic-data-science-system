@@ -9,7 +9,7 @@ gain, so intermediate results steer the loop.
 
 from __future__ import annotations
 
-from .direction import parse_direction
+from .direction import parse_direction, parse_extreme
 from .policy import (
     AnalysisIntent,
     CritiqueProposal,
@@ -24,7 +24,8 @@ _INTENT_KEYWORDS: list[tuple[AnalysisIntent, tuple[str, ...]]] = [
     (AnalysisIntent.comparison, ("compare", "comparison", "between", "versus", " vs ", "difference", "differ", "group")),
     (AnalysisIntent.correlation, ("correlat", "relationship", "predict", "driver", "associated with")),
     (AnalysisIntent.anomaly, ("unusual", "anomal", "outlier", "spike", "abnormal", "irregular")),
-    (AnalysisIntent.ranking, ("rank", "top", "best", "worst", "largest", "highest", "lowest", "leading")),
+    (AnalysisIntent.ranking, ("rank", "top", "best", "worst", "weakest", "strongest", "largest",
+                              "highest", "lowest", "smallest", "leading")),
     (AnalysisIntent.association, ("association", "depend", "contingency", "related to")),
     (AnalysisIntent.distribution, ("distribution", "spread", "describe", "summary", "summarise", "summarize")),
 ]
@@ -43,7 +44,16 @@ class FixtureAgentPolicy:
                 break
         # Word-boundary parsing shared with the evidence updater, so a metric name that
         # embeds a direction word ("rainfall") cannot flip the interpreted direction.
-        direction = parse_direction(text) if intent is AnalysisIntent.trend else None
+        #
+        # A ranking goal reads its *superlative* instead of its movement words: "which region
+        # is weakest" asks for the bottom of the ordering, and `rank_entities` reports the top
+        # unless something says otherwise. Leaving this null answered every such goal with the
+        # strongest entity — a true statement about the opposite question.
+        direction = None
+        if intent is AnalysisIntent.trend:
+            direction = parse_direction(text)
+        elif intent is AnalysisIntent.ranking:
+            direction = parse_extreme(text)
         metrics = capability_summary.get("metrics") or []
         dims = capability_summary.get("dimensions") or []
         metric_hint = next((m for m in metrics if m.lower() in text), metrics[0] if metrics else None)

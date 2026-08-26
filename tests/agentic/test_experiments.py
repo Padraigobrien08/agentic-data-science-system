@@ -191,6 +191,33 @@ def test_deterministic_repeatability(registry, tool, params) -> None:
     assert r1.metrics == r2.metrics
 
 
+# --- rank_entities reads the end of the ranking it was asked for -------------
+
+
+def test_ranking_ascending_reports_the_lowest_entity(registry) -> None:
+    """
+    `ascending` is what a "which entity is weakest?" goal turns into, and it must reach the
+    answer. B's mean y is far above A's, so the two directions must not name the same entity.
+    """
+    top = _run(registry, "rank_entities", {"metric_column": "y"})
+    bottom = _run(registry, "rank_entities", {"metric_column": "y", "ascending": True})
+
+    assert top.observations[0].entity_ref == "B"
+    assert bottom.observations[0].entity_ref == "A"
+
+
+def test_a_ranking_claim_names_the_end_it_actually_read(registry) -> None:
+    """
+    The claim is what the trace and the report quote. Calling the bottom of an ascending
+    ranking "the top entity" states something false about a correctly computed result — the
+    one failure mode the deterministic layer is supposed to make impossible.
+    """
+    bottom = _run(registry, "rank_entities", {"metric_column": "y", "ascending": True})
+
+    claim = bottom.evidence[0].claim
+    assert claim == "Lowest entity by mean(y) is 'A'.", claim
+
+
 def test_different_params_change_input_fingerprint(registry) -> None:
     a = _run(registry, "detect_outliers", {"column": "y", "threshold": 2.0})
     b = _run(registry, "detect_outliers", {"column": "y", "threshold": 3.0})

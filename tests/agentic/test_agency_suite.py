@@ -304,3 +304,58 @@ def test_earliest_direction_wins_when_both_appear() -> None:
 
     assert parse_direction("increasing then decreasing") == "up"
     assert parse_direction("decreasing then increasing") == "down"
+
+
+# -- superlative parsing -----------------------------------------------------
+#
+# A ranking goal asks which *end* of an ordering to report, which is a different question from
+# which way a series moved. `rank_entities` reports the top end unless told otherwise, so a
+# goal whose superlative is not read is answered with the opposite entity.
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("which region has the weakest on-time delivery rate overall?", "down"),
+        ("which region is the worst performer?", "down"),
+        ("which team has the lowest resolution time?", "down"),
+        ("which account is the biggest?", "up"),
+        ("rank the products by revenue, best first", "up"),
+        # an ordering with no end named — the tool's default is the honest answer
+        ("rank the regions by revenue", None),
+        ("which regions differ most in revenue?", None),
+        ("", None),
+    ],
+)
+def test_superlatives_are_parsed_into_a_ranking_direction(text: str, expected) -> None:
+    from agentic.agent.direction import parse_extreme
+
+    assert parse_extreme(text) == expected
+
+
+def test_movement_words_do_not_answer_a_ranking_question() -> None:
+    """
+    The two vocabularies stay separate on purpose. "Which region grew least" is a question
+    about the bottom of a ranking; reading its "grew" as `up` would answer it with the region
+    that grew *most* — the exact inversion this parser exists to prevent.
+    """
+    from agentic.agent.direction import parse_direction, parse_extreme
+
+    assert parse_direction("which region grew the least?") == "up"
+    assert parse_extreme("which region grew the least?") is None
+    assert parse_extreme("which region grew the smallest amount?") == "down"
+
+
+def test_a_weakest_goal_is_interpreted_as_a_ranking_that_points_down() -> None:
+    """End to end through the policy: intent and direction must arrive together, since the
+    planner can only act on `direction` once `intent` has made ranking the candidate."""
+    from agentic.agent.fixture_policy import FixtureAgentPolicy
+    from agentic.agent.policy import AnalysisIntent
+
+    interpretation = FixtureAgentPolicy().interpret_goal(
+        "which region has the weakest revenue?",
+        capability_summary={"metrics": ["revenue"], "dimensions": ["region"]},
+    )
+
+    assert interpretation.intent is AnalysisIntent.ranking
+    assert interpretation.direction == "down"

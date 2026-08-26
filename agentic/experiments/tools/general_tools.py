@@ -948,8 +948,13 @@ class RankEntitiesTool(BaseExperimentTool):
         stat = make_statistics(sample_size=int(series.size),
                                coverage=round(nonnull_coverage(frame, params.metric_column), 6),
                                diagnostics={"entities": float(series.size)})
+        # The claim must name the end of the ranking it actually read. Saying "top" while
+        # ranking ascending states something false about a correctly computed result, and the
+        # claim is what the trace and the report quote.
+        extreme = "Lowest" if params.ascending else "Top"
         ev = make_evidence(evidence_type=EvidenceType.descriptive_stat,
-                           claim=f"Top entity by {params.aggregation}({params.metric_column}) is '{top.index[0]}'.",
+                           claim=f"{extreme} entity by {params.aggregation}({params.metric_column})"
+                                 f" is '{top.index[0]}'.",
                            direction=EvidenceDirection.neutral, provenance=prov, statistics=stat,
                            source_reference=source_ref(context.manifest, column=params.metric_column),
                            artifact_ids=[table.id, chart.id])
