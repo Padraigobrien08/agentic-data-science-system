@@ -48,6 +48,17 @@ data/artifact_storage/
 # Durable per-run workspaces (EDGAR_BACKEND_RUN_WORKSPACE_ROOT)
 data/runs/
 
+# Benchmark *output* — `edgar_project.cli evaluate` and `demo --fixtures` rewrite these on
+# every run, and they embed absolute paths from whichever machine produced them. Committing
+# them meant the README's own offline commands left the working tree dirty. Shape-stable
+# examples live in `examples/evaluation_*.example.json` instead.
+data/evaluation/*_results.json
+data/evaluation/*_summary.json
+data/evaluation/suite_*/
+# Published agency measurements are the exception: dated, immutable, and cited by
+# docs/agent/agency-scoreboard.md as the raw result behind each row.
+!data/evaluation/agency/
+
 # Next.js app (see frontend/.gitignore)
 frontend/node_modules/
 frontend/.next/
