@@ -2,6 +2,21 @@
 
 **Measured:** 2026-08-08 · **Prompts:** `1.0.1` · **Model snapshot:** `gpt-5.4-mini-2026-03-17` · **Trials:** 5 per policy per tier
 
+> **The shipped prompts are now `1.0.6`; the model rows below were measured at `1.0.1` and have
+> not been re-run since.** They no longer describe what the loop does today. `1.0.6` changed the
+> critic materially — it is now consulted about claims that never reach `supported`, a phase
+> these rows never exercised. Treat the model rows as a dated measurement, not a current one.
+>
+> **How far back they can be reproduced.** The four reasoning prompts this suite scores are all
+> still on disk at `1.0.1`, so that configuration can be pinned. The answer writer cannot: its
+> earliest version is `1.0.3`, which is why it is absent from the table below. It writes prose
+> and enters no scored property, so the pass rates are reproducible as recorded — but it does
+> consume tokens, so the cost and latency columns are not exactly reproducible at `1.0.1`.
+>
+> The **fixture** rows are unaffected: the deterministic baseline uses no prompts at all, and
+> the offline half of this suite runs on every pull request, so those numbers are current by
+> construction.
+
 [`suite_agency_v2`](agency-evaluation.md) scores whether the investigation loop *reasons* well —
 concludes when the evidence supports it, revises when contradicted, tests a claim before
 accepting it, declines when the data cannot answer the question, and answers every part of a
@@ -104,7 +119,7 @@ python -m backend.dev.agency_bench \
 | | |
 |---|---|
 | Suite | `suite_agency_v2` — 13 core + 5 hard, 9 properties |
-| Prompts | `edgar.agentic.{goal_interpreter,hypothesis_generator,experiment_selector,critic}` @ `1.0.1` |
+| Prompts | `edgar.agentic.{goal_interpreter,hypothesis_generator,experiment_selector,critic}` @ `1.0.1` — what *this* run used. The command above now resolves `1.0.6`, so it will not reproduce these rows unless the version is pinned back. |
 | Model | `gpt-5.4-mini` → resolved `gpt-5.4-mini-2026-03-17` |
 | Pricing | $0.75 / $4.50 per 1M in/out ([source](https://developers.openai.com/api/docs/models/gpt-5.4-mini)) |
 | Raw result | `data/evaluation/agency/scoreboard-2026-08-08-v3.json` |
