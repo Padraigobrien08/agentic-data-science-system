@@ -48,6 +48,7 @@ from .narrative import AllowedFigures, verify_narrative
 from .policy import (
     AgentPolicy,
     AnalysisIntent,
+    ChallengeReason,
     CritiqueProposal,
     GoalInterpretation,
     drain_policy_cost,
@@ -753,9 +754,10 @@ class Critic:
         self, state: InvestigationState, interpretation: GoalInterpretation, manifest: DatasetManifest,
         executed_tools: set[str], tracker: BudgetTracker, idgen: DeterministicIds,
     ) -> None:
-        h = self._claim_to_challenge(state)
-        if h is None:
+        asked = self._claim_to_challenge(state)
+        if asked is None:
             return
+        h, reason = asked
         already = any(c.target.id == h.id for c in state.critiques)
         tools = list(INTENT_TOOLS.get(interpretation.intent, []))
         if is_edgar_manifest(manifest):
@@ -774,7 +776,12 @@ class Critic:
             tracker, self._policy,
             lambda: self._policy.critique(
                 strongest_claim={"id": h.id, "status": h.status.value, "confidence": h.confidence,
-                                 "already_critiqued": already},
+                                 "already_critiqued": already,
+                                 # Carried inside the claim rather than as a new argument: the
+                                 # caller always passes it, so a new keyword would break every
+                                 # existing `AgentPolicy` implementation rather than defaulting
+                                 # for it. It is a fact about this claim's evidence anyway.
+                                 "challenge_reason": reason.value},
                 available_tools=available,
                 supported_claims=supported_claims))
 
@@ -870,40 +877,78 @@ class Critic:
         return True
 
     @staticmethod
-    def _claim_to_challenge(state: InvestigationState) -> Hypothesis | None:
+    def _claim_to_challenge(
+        state: InvestigationState,
+    ) -> tuple[Hypothesis, ChallengeReason] | None:
         """
-        The claim most worth challenging, or ``None`` when nothing is.
+        The claim most worth challenging and why, or ``None`` when nothing is.
 
-        A ``supported`` claim comes first — guarding against false confidence is the critic's
-        primary job, and this is the behaviour the agency suite's ``require_challenge``
-        property measures.
+        Four tiers, most urgent first, each a shape the run's own evidence has actually taken.
+        The reason is returned rather than inferred downstream because it decides what a useful
+        challenge even is — "you may be overconfident" and "your methods are not separating
+        anything" are different questions with different right answers.
 
-        Failing that, a claim carrying **both** supporting and refuting evidence is challenged
-        too. Mixed evidence is precisely where a competing explanation is informative: the loop
-        has found the outcome moving and something arguing against it, and naming the
-        alternative is what tells them apart. Restricting the critic to supported claims meant
-        no run that ended inconclusive was ever challenged — the runs that most needed a second
-        reading got none.
+        A ``supported`` claim comes first: guarding against false confidence is the critic's
+        oldest job, and it is what the agency suite's ``challenges_before_concluding`` property
+        measures.
 
-        A claim with no evidence, or one-sided evidence, is still left alone: there is nothing
-        to weigh, so a critique would be a note rather than a challenge.
+        The three below it exist because the gate used to stop at supported-or-mixed, and the
+        published corpus shows what that cost. Of five runs that ran any experiment, three
+        never consulted the critic at all — including the flagship, which ran seven experiments,
+        rejected both of its claims and concluded `refuted` without one. The two shapes it could
+        not see are the two where the run has *failed to learn something*:
+
+        - every measurement came back neutral, so the run measured three times and separated
+          nothing, then declined;
+        - evidence refutes the claim and nothing supports it, and it has not been dropped yet.
+
+        Both are worth a second reading, and neither is "false confidence" — which is why the
+        reason has to travel with the ask rather than the critic guessing from a status.
+
+        What this still cannot reach is the flagship's shape: a run whose claims are all
+        *rejected*, where the useful question is "what explanation did you never propose?".
+        A critique produces a falsification experiment aimed at an existing hypothesis, so the
+        loop can only ever test the claims it already holds. Widening the gate further would
+        not fix that; a different mechanism would.
+
+        A claim with **no** evidence is still left alone: nothing has been run against it, so a
+        critique would be a note rather than a challenge. So is one whose evidence only
+        supports it without having reached ``supported`` — the first tier catches that on
+        promotion, and challenging it earlier would fire every iteration of a healthy run.
         """
         supported = [h for h in state.hypotheses if h.status is HypothesisStatus.supported]
         if supported:
-            return max(supported, key=lambda x: x.confidence)
+            return max(supported, key=lambda x: x.confidence), ChallengeReason.false_confidence
 
-        mixed: list[Hypothesis] = []
+        conflicting: list[Hypothesis] = []
+        undiscriminating: list[Hypothesis] = []
+        unexplained: list[Hypothesis] = []
         for h in state.hypotheses:
+            # Terminal claims are excluded on purpose. A critique's suggested tool becomes a
+            # falsification candidate *targeting that claim*, and spending an experiment to
+            # further disconfirm something already rejected buys nothing.
             if h.status in (HypothesisStatus.rejected, HypothesisStatus.unresolved):
                 continue
-            directions = {
-                e.direction for e in state.evidence if h.id in e.hypothesis_ids
-            }
-            if EvidenceDirection.supports in directions and EvidenceDirection.refutes in directions:
-                mixed.append(h)
-        if not mixed:
-            return None
-        return max(mixed, key=lambda x: x.confidence)
+            directions = {e.direction for e in state.evidence if h.id in e.hypothesis_ids}
+            if not directions:
+                continue
+            supports = EvidenceDirection.supports in directions
+            refutes = EvidenceDirection.refutes in directions
+            if supports and refutes:
+                conflicting.append(h)
+            elif not supports and not refutes:
+                undiscriminating.append(h)
+            elif refutes:
+                unexplained.append(h)
+
+        for tier, reason in (
+            (conflicting, ChallengeReason.conflicting_evidence),
+            (undiscriminating, ChallengeReason.undiscriminating_evidence),
+            (unexplained, ChallengeReason.unexplained_refutation),
+        ):
+            if tier:
+                return max(tier, key=lambda x: x.confidence), reason
+        return None
 
     def _registry_ok(self, _tool: str) -> bool:
         return True

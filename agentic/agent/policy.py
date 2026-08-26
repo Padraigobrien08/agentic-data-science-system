@@ -37,6 +37,36 @@ class AnalysisIntent(str, Enum):
     general = "general"
 
 
+class ChallengeReason(str, Enum):
+    """
+    Why the critic is being consulted about a claim.
+
+    The critic used to be asked without being told, and its prompt opened "after evidence has
+    moved a claim to `supported`" — so on the one recorded occasion it was handed a claim that
+    had reached it any other way, it declined, correctly, for want of a mandate. The shape of
+    the evidence decides what a useful challenge even *is*, so the reason travels with the ask.
+    """
+
+    false_confidence = "false_confidence"
+    """The claim reached ``supported``. Guard against stopping at the first agreeable result."""
+
+    conflicting_evidence = "conflicting_evidence"
+    """Both supporting and refuting evidence. Name the alternative that tells them apart."""
+
+    undiscriminating_evidence = "undiscriminating_evidence"
+    """Every measurement came back neutral. The method is not separating anything; ask for one
+    that would, or say the data cannot answer this."""
+
+    unexplained_refutation = "unexplained_refutation"
+    """Evidence refutes the claim and nothing supports it, but it has not been dropped yet.
+    Ask for an independent method before it is — one refuting measurement is a reason to look
+    again, not a verdict.
+
+    Deliberately *not* "propose a different explanation", which is what this shape most wants
+    and what a critique cannot do: the mechanism produces a falsification experiment aimed at
+    an existing hypothesis, so it can only test the claims the run already holds."""
+
+
 # -- typed policy I/O --------------------------------------------------------
 
 
