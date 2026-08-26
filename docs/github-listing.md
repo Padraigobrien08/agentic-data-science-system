@@ -16,8 +16,15 @@ one word in it carrying the least information.
 
 ## Description
 
-An agent that investigates a dataset adaptively, and traces every claim back to the
-deterministic computation behind it. No number in a trace comes from a language model.
+**Applied.** `gh repo view --json description` should match this exactly.
+
+> An agent that investigates a dataset adaptively, and traces every claim back to the
+> deterministic computation behind it. No number in a trace comes from a language model.
+
+Replaces "End-to-end agentic data-science system: LLM planning + MCP tool execution over
+deterministic analytics, with full traceability and evaluation." That version led with the
+architecture rather than what the thing does, and claimed "full traceability" — the kind of
+unbacked superlative this project's README now avoids on principle.
 
 ## Shorter Alternative
 
@@ -34,22 +41,24 @@ EDGAR is an adapter, not the architecture.
 
 ## Topics
 
-- `agentic-ai`
-- `llm`
-- `mcp`
-- `evaluation`
-- `observability`
-- `data-science`
-- `edgar`
-- `sec`
-- `fastapi`
-- `nextjs`
-- `python`
-- `postgres`
+These are **applied**, not suggested — `gh repo view --json repositoryTopics` should match this
+list exactly. GitHub sorts them alphabetically in its own UI.
 
-`agentic-ai`, `llm`, `evaluation` and `mcp` lead, because the reusable part is the loop; the
-EDGAR topics are there for the dataset, not the architecture. The previous list opened with
-`edgar`/`sec`/`financial-analysis`, which sold this as a fintech product.
+What the loop is: `agentic-ai` · `ai-agents` · `llm` · `llm-orchestration` · `mcp` ·
+`evaluation` · `explainable-ai` · `observability` · `data-science`
+
+The stack: `fastapi` · `nextjs` · `python` · `typescript` · `postgresql`
+
+The dataset: `edgar` · `sec`
+
+The reasoning terms lead because the reusable part is the loop; EDGAR is there for the dataset,
+not the architecture. Dropped from the earlier list: `financial-analysis` (sold this as a fintech
+product), `microservices` (it is an API, a worker and a web app — not that), `orchestration`
+(redundant beside `llm-orchestration`), and `artifact-management`, `async-processing`,
+`prompt-engineering`, `benchmarking` as too vague to aid discovery. `mcp` was missing entirely,
+which is the one term a reader looking for this kind of project is most likely to search.
+
+`postgresql`, not `postgres` — GitHub treats the former as canonical and has a topic page for it.
 
 ## License
 
